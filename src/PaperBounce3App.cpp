@@ -15,14 +15,16 @@ const cv::RetrievalModes kContourHierStyle = cv::RETR_CCOMP ;     // is just two
 //const cv::RetrievalModes kContourHierStyle = cv::RETR_EXTERNAL ;
 
 const float kResScale = 1.f ;
-const float kContourMinRadius = 3.f   * kResScale ;
-const float kContourMinArea   = 80.f * kResScale ;
-const float kContourDPEpislon = 5.f   * kResScale ;
+const float kContourMinRadius = 3.f  * kResScale ;
+const float kContourMinArea   = 100.f * kResScale ;
+const float kContourDPEpislon = 5.f  * kResScale ;
+const float kContourMinWidth  = 5.f  * kResScale ;
 
 
 const float kBallDefaultRadius = 8.f ;
 
-const vec2 kCaptureSize = vec2( 640, 480 ) ;
+//const vec2 kCaptureSize = vec2( 640, 480 ) ;
+const vec2 kCaptureSize = vec2( 16.f/9.f * 480.f, 480 ) ;
 
 namespace cinder {
 	
@@ -141,7 +143,11 @@ void PaperBounce3App::update()
 			
 			float		area = cv::contourArea(c) ;
 			
-			if ( radius > kContourMinRadius && area > kContourMinArea )
+			cv::RotatedRect rotatedRect = minAreaRect(c) ;
+			
+			if (	radius > kContourMinRadius &&
+					area > kContourMinArea &&
+					std::min( rotatedRect.size.width, rotatedRect.size.height ) > kContourMinWidth )
 			{
 				auto addContour = [&]( const vector<cv::Point>& c )
 				{
@@ -188,7 +194,27 @@ void PaperBounce3App::draw()
 	
 	// set window transform
 	{
-		gl::setMatricesWindow( kCaptureSize.x, kCaptureSize.y ); // just at origin; doesn't work for scaled windows
+		//
+		const float captureAspectRatio = kCaptureSize.x / kCaptureSize.y ;
+		const float windowAspectRatio  = (float)getWindowSize().x / (float)getWindowSize().y ;
+		
+		if ( captureAspectRatio < windowAspectRatio )
+		{
+			// vertical black bars
+			float w = windowAspectRatio * kCaptureSize.y ;
+			float barsw = w - kCaptureSize.x ;
+			
+			gl::setMatrices( CameraOrtho( -barsw/2, kCaptureSize.x + barsw/2, kCaptureSize.y, 0.f, 0.f, 1.f ) ) ;
+		}
+		else if ( captureAspectRatio > windowAspectRatio )
+		{
+			// horizontal black bars
+			float h = (1.f / windowAspectRatio) * kCaptureSize.x ;
+			float barsh = h - kCaptureSize.y ;
+
+			gl::setMatrices( CameraOrtho( 0.f, kCaptureSize.x, kCaptureSize.y + barsh/2, -barsh/2, 0.f, 1.f ) ) ;
+		}
+		else gl::setMatricesWindow( kCaptureSize.x, kCaptureSize.y ) ;
 		
 		// scale up window
 //		float width = (kCaptureSize.y / getWindowSize().y) * (kCaptureSize.x) ;
@@ -236,4 +262,7 @@ void PaperBounce3App::draw()
 	}
 }
 
-CINDER_APP( PaperBounce3App, RendererGl )
+CINDER_APP( PaperBounce3App, RendererGl, [&]( App::Settings *settings ) {
+	settings->setWindowSize(kCaptureSize);
+	settings->setTitle("See Paper") ;
+})
