@@ -41,8 +41,6 @@ namespace cinder {
 class cBall {
 	
 public:
-//	cBall();
-	
 	vec2 mLoc ;
 	vec2 mVel ;
 	float mRadius ;
@@ -65,16 +63,24 @@ class PaperBounce3App : public App {
 	void mouseDown( MouseEvent event ) override;
 	void update() override;
 	void draw() override;
+	void resize() override;
 
+	void updateVision(); // updates mTexture, mContours
 	void tickBalls() ;
 	
 
-	gl::TextureRef			mTexture;
 	CaptureRef				mCapture;
+	gl::TextureRef			mTexture;
 	
 	vector<cContour>		mContours;
 
 	std::vector<cBall>		mBalls ;
+	
+	
+	vec2 mouseToWorld( vec2 );
+	void updateWindowMapping();
+	
+	float	mOrthoRect[4]; // points for glOrtho
 };
 
 void PaperBounce3App::setup()
@@ -88,13 +94,18 @@ void PaperBounce3App::mouseDown( MouseEvent event )
 	cBall ball ;
 	
 	ball.mColor = ColorAf::hex(0xC62D41);
-	ball.mLoc   = event.getPos() ;
+	ball.mLoc   = mouseToWorld( event.getPos() );
 	ball.mRadius = kBallDefaultRadius ;
 	
 	mBalls.push_back( ball ) ;
 }
 
 void PaperBounce3App::update()
+{
+	updateVision();
+}
+
+void PaperBounce3App::updateVision()
 {
 	if( mCapture->checkNewFrame() )
 	{
@@ -181,16 +192,20 @@ void PaperBounce3App::update()
 	}
 }
 
-void PaperBounce3App::draw()
+void PaperBounce3App::resize()
 {
-	gl::clear();
-	gl::enableAlphaBlending();
-	gl::enable( GL_LINE_SMOOTH );
-	gl::enable( GL_POLYGON_SMOOTH );
-//	gl::enable( gl_point_smooth );
-	glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
-	glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
-//	glHint( GL_POINT_SMOOTH_HINT, GL_NICEST );
+	updateWindowMapping();
+}
+
+void PaperBounce3App::updateWindowMapping()
+{
+	auto ortho = [&]( float a, float b, float c, float d )
+	{
+		mOrthoRect[0] = a ;
+		mOrthoRect[1] = b ;
+		mOrthoRect[2] = c ;
+		mOrthoRect[3] = d ;
+	};
 	
 	// set window transform
 	{
@@ -204,32 +219,41 @@ void PaperBounce3App::draw()
 			float w = windowAspectRatio * kCaptureSize.y ;
 			float barsw = w - kCaptureSize.x ;
 			
-			gl::setMatrices( CameraOrtho( -barsw/2, kCaptureSize.x + barsw/2, kCaptureSize.y, 0.f, 0.f, 1.f ) ) ;
+			ortho( -barsw/2, kCaptureSize.x + barsw/2, kCaptureSize.y, 0.f ) ;
 		}
 		else if ( captureAspectRatio > windowAspectRatio )
 		{
 			// horizontal black bars
 			float h = (1.f / windowAspectRatio) * kCaptureSize.x ;
 			float barsh = h - kCaptureSize.y ;
-
-			gl::setMatrices( CameraOrtho( 0.f, kCaptureSize.x, kCaptureSize.y + barsh/2, -barsh/2, 0.f, 1.f ) ) ;
+			
+			ortho( 0.f, kCaptureSize.x, kCaptureSize.y + barsh/2, -barsh/2 ) ;
 		}
-		else gl::setMatricesWindow( kCaptureSize.x, kCaptureSize.y ) ;
-		
-		// scale up window
-//		float width = (kCaptureSize.y / getWindowSize().y) * (kCaptureSize.x) ;
-//		float centerx = getWindowSize().x / 2.f ;
-//		float left = centerx - width/2 ;
-//		float right = left + width ;
-//
-//		
-//		gl::setMatricesWindow( width, kCaptureSize.y ); // just at origin; doesn't work for scaled windows
-
-		//		left = 0.f ;
-//		right =
-//		gl::setMatrices( CameraOrtho( 0, getWindowSize().x, getWindowSize().y, 0.f, 0.f, 1.f ) ) ;
-			// <- this, but don't deform it.
+		else ortho( 0.f, kCaptureSize.x, kCaptureSize.y, 0.f ) ;
 	}
+}
+
+vec2 PaperBounce3App::mouseToWorld( vec2 p )
+{
+	RectMapping rm( Rectf( 0.f, 0.f, getWindowSize().x, getWindowSize().y ),
+					Rectf( mOrthoRect[0], mOrthoRect[3], mOrthoRect[1], mOrthoRect[2] ) ) ;
+	
+	return rm.map(p) ;
+}
+
+void PaperBounce3App::draw()
+{
+	gl::clear();
+	gl::enableAlphaBlending();
+	gl::enable( GL_LINE_SMOOTH );
+	gl::enable( GL_POLYGON_SMOOTH );
+//	gl::enable( gl_point_smooth );
+	glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
+	glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
+//	glHint( GL_POINT_SMOOTH_HINT, GL_NICEST );
+	
+	// set window transform
+	gl::setMatrices( CameraOrtho( mOrthoRect[0], mOrthoRect[1], mOrthoRect[2], mOrthoRect[3], 0.f, 1.f ) ) ;
 
 	// camera image
 	if ( mTexture )
