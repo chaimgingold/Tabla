@@ -1,1 +1,5 @@
 .DS_Store
+xcode/build/*
+PaperBounce3_dependency_info.dat
+dgph
+PaperBounce3App.o
