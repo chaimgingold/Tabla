@@ -4,3 +4,4 @@ PaperBounce3_dependency_info.dat
 dgph
 PaperBounce3App.o
 /xcode/build/Debug/PaperBounce3.app/Contents/MacOS/PaperBounce3
+/xcode/build/*

@@ -26,6 +26,10 @@ const float kBallDefaultRadius = 8.f ;
 //const vec2 kCaptureSize = vec2( 640, 480 ) ;
 const vec2 kCaptureSize = vec2( 16.f/9.f * 480.f, 480 ) ;
 
+
+const bool kDrawCameraImage = false ;
+
+
 namespace cinder {
 	
 	PolyLine2 fromOcv( vector<cv::Point> pts )
@@ -37,6 +41,11 @@ namespace cinder {
 	}
 
 }
+
+class cWindowData {
+public:
+	bool mIsAux = false ;
+};
 
 class cBall {
 	
@@ -65,18 +74,24 @@ class PaperBounce3App : public App {
 	void draw() override;
 	void resize() override;
 
-	void updateVision(); // updates mTexture, mContours
+	void drawProjectorWindow() ;
+	void drawAuxWindow() ;
+
+	void updateVision(); // updates mCameraTexture, mContours
 	void tickBalls() ;
 	
 
 	CaptureRef				mCapture;
-	gl::TextureRef			mTexture;
+	gl::TextureRef			mCameraTexture;
 	
 	vector<cContour>		mContours;
 
 	std::vector<cBall>		mBalls ;
 	
+	app::WindowRef			mAuxWindow ; // for other debug info, on computer screen
 	
+	
+	// for main window, the projector display
 	vec2 mouseToWorld( vec2 );
 	void updateWindowMapping();
 	
@@ -85,8 +100,41 @@ class PaperBounce3App : public App {
 
 void PaperBounce3App::setup()
 {
+	auto displays = Display::getDisplays() ;
+	std::cout << displays.size() << " Displays" << std::endl ;
+	for ( auto d : displays )
+	{
+		std::cout << "\t" << d->getBounds() << std::endl ;
+	}
+	
 	mCapture = Capture::create( kCaptureSize.x, kCaptureSize.y );
 	mCapture->start();
+
+	// Fullscreen main window in second display
+	if (displays.size()>1)
+	{
+		getWindow()->setPos( displays[1]->getBounds().getUL() );
+		
+		getWindow()->setFullScreen(true) ;
+	}
+
+	// aux display
+	if (0)
+	{
+		// for some reason this seems to create three windows once we fullscreen the main window :P
+		app::WindowRef mAuxWindow = createWindow( Window::Format().size( kCaptureSize.x, kCaptureSize.y ) );
+		
+		cWindowData* data = new cWindowData ;
+		data->mIsAux=true ;
+		mAuxWindow->setUserData(data);
+		
+		if (displays.size()==1)
+		{
+			// move it out of the way on one screen
+			mAuxWindow->setPos( getWindow()->getBounds().getUL() + ivec2(0,getWindow()->getBounds().getHeight() + 16.f) ) ;
+		}
+	}
+	
 }
 
 void PaperBounce3App::mouseDown( MouseEvent event )
@@ -111,7 +159,7 @@ void PaperBounce3App::updateVision()
 	{
 		// Get surface data
 		Surface surface( *mCapture->getSurface() );
-		mTexture = gl::Texture::create( surface );
+		mCameraTexture = gl::Texture::create( surface );
 		
 		// make cv frame
 		cv::Mat input( toOcv( Channel( surface ) ) );
@@ -187,8 +235,8 @@ void PaperBounce3App::updateVision()
 		}
 		
 		// convert to texture
-//		mTexture = gl::Texture::create( fromOcv( output ), gl::Texture::Format().loadTopDown() );
-//		mTexture = gl::Texture::create( fromOcv( input ), gl::Texture::Format().loadTopDown() );
+//		mCameraTexture = gl::Texture::create( fromOcv( output ), gl::Texture::Format().loadTopDown() );
+//		mCameraTexture = gl::Texture::create( fromOcv( input ), gl::Texture::Format().loadTopDown() );
 	}
 }
 
@@ -241,25 +289,23 @@ vec2 PaperBounce3App::mouseToWorld( vec2 p )
 	return rm.map(p) ;
 }
 
-void PaperBounce3App::draw()
+void PaperBounce3App::drawProjectorWindow()
 {
-	gl::clear();
-	gl::enableAlphaBlending();
-	gl::enable( GL_LINE_SMOOTH );
-	gl::enable( GL_POLYGON_SMOOTH );
-//	gl::enable( gl_point_smooth );
-	glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
-	glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
-//	glHint( GL_POINT_SMOOTH_HINT, GL_NICEST );
-	
 	// set window transform
 	gl::setMatrices( CameraOrtho( mOrthoRect[0], mOrthoRect[1], mOrthoRect[2], mOrthoRect[3], 0.f, 1.f ) ) ;
-
+	
 	// camera image
-	if ( mTexture )
+	if ( mCameraTexture && kDrawCameraImage )
 	{
 		gl::color( 1, 1, 1 );
-		gl::draw( mTexture );
+		gl::draw( mCameraTexture );
+	}
+	
+	// draw frame
+	if (1)
+	{
+		gl::color( 1, 1, 1 );
+		gl::drawStrokedRect( Rectf(0,0,kCaptureSize.x,kCaptureSize.y).inflated( vec2(-1,-1) ) ) ;
 	}
 	
 	// draw contours
@@ -270,6 +316,8 @@ void PaperBounce3App::draw()
 			
 			if ( c.mIsInside ) color = ColorAf::hex( 0x43730F ) ;
 			else color = ColorAf::hex( 0xF19878 ) ;
+			
+			color = ColorAf(1,1,1);
 			
 			gl::color(color) ;
 			gl::draw(c.mPolyLine) ;
@@ -283,6 +331,37 @@ void PaperBounce3App::draw()
 			gl::color(b.mColor) ;
 			gl::drawSolidCircle( b.mLoc, b.mRadius ) ;
 		}
+	}
+}
+
+void PaperBounce3App::drawAuxWindow()
+{
+	gl::setMatricesWindow( kCaptureSize.x, kCaptureSize.y );
+	gl::color( 1, 1, 1 );
+	gl::draw( mCameraTexture );
+}
+
+void PaperBounce3App::draw()
+{
+	gl::clear();
+	gl::enableAlphaBlending();
+	gl::enable( GL_LINE_SMOOTH );
+	gl::enable( GL_POLYGON_SMOOTH );
+	//	gl::enable( gl_point_smooth );
+	glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
+	glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
+	//	glHint( GL_POINT_SMOOTH_HINT, GL_NICEST );
+	
+
+	cWindowData* winData = getWindow()->getUserData<cWindowData>() ;
+	
+	if ( winData && winData->mIsAux )
+	{
+		drawAuxWindow();
+	}
+	else
+	{
+		drawProjectorWindow();
 	}
 }
 
