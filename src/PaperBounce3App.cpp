@@ -33,9 +33,10 @@ const float kBallDefaultRadius = 8.f ;
 const vec2 kCaptureSize = vec2( 16.f/9.f * 480.f, 480 ) ;
 
 
-const bool kAutoFullScreenProjector	= false ; // default: true
+const bool kAutoFullScreenProjector	= true ; // default: true
 const bool kDrawCameraImage			= false ; // default: false
-const bool kDrawContoursFilled		= true  ;  // default: false
+const bool kDrawContoursFilled		= false ;  // default: false
+const bool kDrawMouseDebugInfo		= false ;
 
 namespace cinder {
 	
@@ -63,6 +64,12 @@ public:
 	ColorAf mColor ;
 };
 
+enum class ContourKind {
+	Any,
+	Holes,
+	NonHoles
+} ;
+
 class cContour {
 public:
 	PolyLine2	mPolyLine ;
@@ -72,6 +79,18 @@ public:
 	float		mArea ;
 	
 	bool		mIsHole = false ;
+	
+	bool		IsKind ( ContourKind kind ) const
+	{
+		switch(kind)
+		{
+			case ContourKind::NonHoles:	return !mIsHole ;
+			case ContourKind::Holes:	return  mIsHole ;
+			case ContourKind::Any:
+			default:					return  true ;
+		}
+	}
+
 };
 
 class PaperBounce3App : public App {
@@ -105,12 +124,14 @@ class PaperBounce3App : public App {
 	
 	// physics/geometry helpers
 	const cContour* pickContour ( vec2 point ) const ;
-	const cContour* findClosestContour ( vec2 point, vec2* closestPoint ) const ; // assumes pickContour failed
+	
+	const cContour* findClosestContour ( vec2 point, vec2* closestPoint=0, float* closestDist=0, ContourKind kind = ContourKind::Any ) const ; // assumes pickContour failed
 	
 	vec2 resolveCollisionWithContours	( vec2 p, float r ) const ; // returns pinned version of point
-	vec2 resolveCollisionWithBalls		( vec2 p, float r, cBall* ignore=0 ) const ;
+	vec2 resolveCollisionWithBalls		( vec2 p, float r, cBall* ignore=0, float correctionFraction=1.f ) const ;
 		// simple pushes p out of overlapping balls.
 		// but might take multiple iterations to respond to all of them
+		// fraction is (0,1], how much of the collision correction to do.
 	
 	// for main window, the projector display
 	vec2 mouseToWorld( vec2 );
@@ -272,7 +293,7 @@ void PaperBounce3App::updateBalls()
 	for( auto &b : mBalls )
 	{
 		b.mLoc = resolveCollisionWithContours( b.mLoc, b.mRadius ) ;
-		b.mLoc = resolveCollisionWithBalls   ( b.mLoc, b.mRadius, &b ) ;
+		b.mLoc = resolveCollisionWithBalls   ( b.mLoc, b.mRadius, &b, .5f ) ;
 	}
 }
 
@@ -354,7 +375,7 @@ const cContour* PaperBounce3App::pickContour ( vec2 point ) const
 	return pick ;
 }
 
-const cContour* PaperBounce3App::findClosestContour ( vec2 point, vec2* closestPoint ) const
+const cContour* PaperBounce3App::findClosestContour ( vec2 point, vec2* closestPoint, float* closestDist, ContourKind kind ) const
 {
 	float best = MAXFLOAT ;
 	const cContour* result = 0 ;
@@ -362,15 +383,19 @@ const cContour* PaperBounce3App::findClosestContour ( vec2 point, vec2* closestP
 	// can optimize this by using bounding boxes as heuristic, but whatev for now.
 	for ( const auto &c : mContours )
 	{
-		float dist ;
-		
-		vec2 x = closestPointOnPoly( point, c.mPolyLine, 0, 0, &dist ) ;
-		
-		if ( dist < best )
+		if ( c.IsKind(kind) )
 		{
-			best = dist ;
-			result = &c ;
-			if (closestPoint) *closestPoint = x ;
+			float dist ;
+			
+			vec2 x = closestPointOnPoly( point, c.mPolyLine, 0, 0, &dist ) ;
+			
+			if ( dist < best )
+			{
+				best = dist ;
+				result = &c ;
+				if (closestPoint) *closestPoint = x ;
+				if (closestDist ) *closestDist  = dist ;
+			}
 		}
 	}
 	
@@ -419,17 +444,42 @@ vec2 PaperBounce3App::resolveCollisionWithContours ( vec2 point, float radius ) 
 	// ok, find closest
 	if (inPoly)
 	{
-		// in paper, make sure we aren't overlapping the edge
-		float dist ;
-		vec2 x = closestPointOnPoly(point, inPoly->mPolyLine, 0, 0, &dist );
+		// in paper
 
+		// 1. make sure we aren't overlapping the edge
+		auto unlapEdge = []( vec2 p, float r, const cContour& poly ) -> vec2
+		{
+			float dist ;
+
+			vec2 x = closestPointOnPoly( p, poly.mPolyLine, 0, 0, &dist );
+
+			if ( dist < r ) return glm::normalize( p - x ) * r + x ;
+			else return p ;
+		} ;
+		
+		// 2. make sure we aren't overlapping a hole
+		auto unlapHole = [this]( vec2 p, float r ) -> vec2
+		{
+			float dist ;
+			vec2 x ;
+			
+			const cContour * nearestHole = findClosestContour( p, &x, &dist, ContourKind::Holes ) ;
+			
+			if ( nearestHole && dist < r && !nearestHole->mPolyLine.contains(p) )
+				// ensure we aren't actually in this hole or that would be bad...
+			{
+				return glm::normalize( p - x ) * r + x ;
+			}
+			else return p ;
+		} ;
+		
+		// combine
 		vec2 p = point ;
 		
-		if ( dist < radius )
-		{
-			p = glm::normalize( point - x ) * radius + x ;
-		}
-			
+		p = unlapEdge( p, radius, *inPoly ) ;
+		p = unlapHole( p, radius ) ;
+		
+		// done
 		return p ;
 	}
 	else if ( inHole )
@@ -443,13 +493,13 @@ vec2 PaperBounce3App::resolveCollisionWithContours ( vec2 point, float radius ) 
 	{
 		// push us into nearest paper
 		vec2 x ;
-		findClosestContour( point, &x ) ;
+		findClosestContour( point, &x, 0, ContourKind::NonHoles ) ;
 		
 		return glm::normalize( x - point ) * radius + x ;
 	}
 }
 
-vec2 PaperBounce3App::resolveCollisionWithBalls ( vec2 p, float r, cBall* ignore ) const
+vec2 PaperBounce3App::resolveCollisionWithBalls ( vec2 p, float r, cBall* ignore, float correctionFraction ) const
 {
 	for ( const auto &b : mBalls )
 	{
@@ -462,7 +512,12 @@ vec2 PaperBounce3App::resolveCollisionWithBalls ( vec2 p, float r, cBall* ignore
 		if ( d < rs )
 		{
 			// just update p
-			p = glm::normalize( p - b.mLoc ) * rs + b.mLoc ;
+			vec2 correctionVec ;
+			
+			if (d==0.f) correctionVec = Rand::randVec2() ; // oops on top of one another; pick random direction
+			else correctionVec = glm::normalize( p - b.mLoc ) ;
+			
+			p = correctionVec * lerp( d, rs, correctionFraction ) + b.mLoc ;
 		}
 	}
 	
@@ -612,6 +667,7 @@ void PaperBounce3App::drawProjectorWindow()
 	}
 	
 	// test collision logic
+	if (kDrawMouseDebugInfo)
 	{
 		vec2 pt = mouseToWorld( mMousePos ) ;
 		
@@ -664,6 +720,21 @@ void PaperBounce3App::keyDown( KeyEvent event )
 	{
 		case KeyEvent::KEY_f:
 			std::cout << "Frame rate: " << getFrameRate() << std::endl ;
+			break ;
+
+		case KeyEvent::KEY_b:
+			// make a random ball
+			{
+				cBall ball ;
+				
+				ball.mColor = ColorAf::hex(0xC62D41);
+				ball.mLoc   = randVec2() * kCaptureSize ; // UH using as proxy for world.
+				ball.mRadius = kBallDefaultRadius ;
+				
+				ball.mRadius += Rand::randFloat(0.f,kBallDefaultRadius);
+				
+				mBalls.push_back( ball ) ;
+			}
 			break ;
 	}
 }
