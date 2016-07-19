@@ -1,6 +1,7 @@
 #include "cinder/app/App.h"
 #include "cinder/app/RendererGl.h"
 #include "cinder/gl/gl.h"
+#include "cinder/Rand.h"
 
 #include "cinder/Capture.h"
 #include "CinderOpenCV.h"
@@ -105,7 +106,11 @@ class PaperBounce3App : public App {
 	// physics/geometry helpers
 	const cContour* pickContour ( vec2 point ) const ;
 	const cContour* findClosestContour ( vec2 point, vec2* closestPoint ) const ; // assumes pickContour failed
-	vec2 resolveCollision ( vec2 point, float radius ) const ; // returns pinned version of point
+	
+	vec2 resolveCollisionWithContours	( vec2 p, float r ) const ; // returns pinned version of point
+	vec2 resolveCollisionWithBalls		( vec2 p, float r, cBall* ignore=0 ) const ;
+		// simple pushes p out of overlapping balls.
+		// but might take multiple iterations to respond to all of them
 	
 	// for main window, the projector display
 	vec2 mouseToWorld( vec2 );
@@ -162,6 +167,8 @@ void PaperBounce3App::mouseDown( MouseEvent event )
 	ball.mColor = ColorAf::hex(0xC62D41);
 	ball.mLoc   = mouseToWorld( event.getPos() );
 	ball.mRadius = kBallDefaultRadius ;
+	
+	ball.mRadius += Rand::randFloat(0.f,kBallDefaultRadius);
 	
 	mBalls.push_back( ball ) ;
 }
@@ -264,7 +271,8 @@ void PaperBounce3App::updateBalls()
 {
 	for( auto &b : mBalls )
 	{
-		b.mLoc = resolveCollision( b.mLoc, b.mRadius ) ;
+		b.mLoc = resolveCollisionWithContours( b.mLoc, b.mRadius ) ;
+		b.mLoc = resolveCollisionWithBalls   ( b.mLoc, b.mRadius, &b ) ;
 	}
 }
 
@@ -369,7 +377,7 @@ const cContour* PaperBounce3App::findClosestContour ( vec2 point, vec2* closestP
 	return result ;
 }
 
-vec2 PaperBounce3App::resolveCollision ( vec2 point, float radius ) const
+vec2 PaperBounce3App::resolveCollisionWithContours ( vec2 point, float radius ) const
 {
 	const cContour* inHole=0 ;
 	const cContour* inPoly=0 ;
@@ -439,6 +447,26 @@ vec2 PaperBounce3App::resolveCollision ( vec2 point, float radius ) const
 		
 		return glm::normalize( x - point ) * radius + x ;
 	}
+}
+
+vec2 PaperBounce3App::resolveCollisionWithBalls ( vec2 p, float r, cBall* ignore ) const
+{
+	for ( const auto &b : mBalls )
+	{
+		if ( &b==ignore ) continue ;
+		
+		float d = glm::distance(p,b.mLoc) ;
+		
+		float rs = r + b.mRadius ;
+		
+		if ( d < rs )
+		{
+			// just update p
+			p = glm::normalize( p - b.mLoc ) * rs + b.mLoc ;
+		}
+	}
+	
+	return p ;
 }
 
 void PaperBounce3App::resize()
@@ -589,10 +617,10 @@ void PaperBounce3App::drawProjectorWindow()
 		
 		float r = kBallDefaultRadius ;
 		
-		vec2 fixed = resolveCollision(pt,r);
+		vec2 fixed = resolveCollisionWithContours(pt,r);
 		
 		gl::color( ColorAf(0.f,0.f,1.f) ) ;
-		gl::drawStrokedCircle(pt,r);
+		gl::drawStrokedCircle(fixed,r);
 		
 		gl::color( ColorAf(0.f,1.f,0.f) ) ;
 		gl::drawLine(pt, fixed);
