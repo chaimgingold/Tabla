@@ -371,8 +371,8 @@ const cContour* PaperBounce3App::findClosestContour ( vec2 point, vec2* closestP
 
 vec2 PaperBounce3App::resolveCollision ( vec2 point, float radius ) const
 {
-	bool isInside = false ;
 	const cContour* inHole=0 ;
+	const cContour* inPoly=0 ;
 	// being inside a poly means we're OK (inside a piece of paper)
 	// BUT we then should still test against holes to make sure...
 
@@ -381,7 +381,8 @@ vec2 PaperBounce3App::resolveCollision ( vec2 point, float radius ) const
 	for( const auto &c : mContours )
 	{
 		// optimization: skip non-holes if we are already in something
-		if ( isInside && !c.mIsHole ) continue ;
+		// (BUG this might not be quite right in complex topologies)
+		if ( inPoly && !c.mIsHole ) continue ;
 		
 		// inside this poly?
 		bool isInC = c.mBoundingRect.contains(point) && c.mPolyLine.contains(point) ;
@@ -390,11 +391,8 @@ vec2 PaperBounce3App::resolveCollision ( vec2 point, float radius ) const
 		{
 			if ( c.mIsHole )
 			{
-				isInside = false ;
-				inHole=&c;
-
-//				size_t a,b ;
-//				return closestPointOnPoly(point,c.mPolyLine,a,b);
+				inPoly = 0 ;
+				inHole = &c;
 
 				// BUG
 				// this toplogical assumption is buggy in that it precludes paper inside of a hole.
@@ -403,11 +401,7 @@ vec2 PaperBounce3App::resolveCollision ( vec2 point, float radius ) const
 			}
 			else
 			{
-				isInside = true ;
-
-//				size_t a,b ;
-//				return closestPointOnPoly(point,c.mPolyLine,a,b);
-//
+				inPoly = &c ;
 				// don't break, because we still need to look for holes
 				// future optimization (unnecessary) could be to remember which holes are in which shapes and only test those.
 			}
@@ -415,7 +409,21 @@ vec2 PaperBounce3App::resolveCollision ( vec2 point, float radius ) const
 	}
 	
 	// ok, find closest
-	if (isInside) return point ;
+	if (inPoly)
+	{
+		// in paper, make sure we aren't overlapping the edge
+		float dist ;
+		vec2 x = closestPointOnPoly(point, inPoly->mPolyLine, 0, 0, &dist );
+
+		vec2 p = point ;
+		
+		if ( dist < radius )
+		{
+			p = glm::normalize( point - x ) * radius + x ;
+		}
+			
+		return p ;
+	}
 	else if ( inHole )
 	{
 		// push us out of this hole
