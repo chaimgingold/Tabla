@@ -10,6 +10,11 @@ using namespace ci::app;
 using namespace std;
 
 
+/*
+ BUGS:
+ - Need to remember what's a hole for what so that we can fix resolveCollision and pickContour; we won't get complex topologies right.
+ */
+
 //const cv::RetrievalModes kContourHierStyle = cv::RETR_TREE ;      // whole enchilada
 const cv::RetrievalModes kContourHierStyle = cv::RETR_CCOMP ;     // is just two level, what we want
 //const cv::RetrievalModes kContourHierStyle = cv::RETR_EXTERNAL ;
@@ -89,7 +94,6 @@ class PaperBounce3App : public App {
 	gl::TextureRef			mCameraTexture;
 	
 	vector<cContour>		mContours;
-//	PolyLine2				m
 	
 	std::vector<cBall>		mBalls ;
 	
@@ -99,7 +103,9 @@ class PaperBounce3App : public App {
 	vec2					mMousePos ;
 	
 	// physics/geometry helpers
-	vec2 resolveCollision ( vec2 point, float radius ); // returns pinned version of point
+	const cContour* pickContour ( vec2 point ) const ;
+	const cContour* findClosestContour ( vec2 point, vec2* closestPoint ) const ; // assumes pickContour failed
+	vec2 resolveCollision ( vec2 point, float radius ) const ; // returns pinned version of point
 	
 	// for main window, the projector display
 	vec2 mouseToWorld( vec2 );
@@ -256,9 +262,9 @@ void PaperBounce3App::updateVision()
 
 void PaperBounce3App::updateBalls()
 {
-	for( auto b : mBalls )
+	for( auto &b : mBalls )
 	{
-		
+		b.mLoc = resolveCollision( b.mLoc, b.mRadius ) ;
 	}
 }
 
@@ -278,17 +284,15 @@ vec2 closestPointOnLineSeg ( vec2 p, vec2 a, vec2 b )
 	return x ;
 }
 
-vec2 closestPointOnPoly( vec2 pt, const PolyLine2& poly, size_t &ai, size_t &bi )
+vec2 closestPointOnPoly( vec2 pt, const PolyLine2& poly, size_t *ai=0, size_t *bi=0, float* dist=0 )
 {
 	float best = MAXFLOAT ;
 	vec2 result = pt ;
 	
-//	return closestPointOnLineSeg(pt, vec2(0,0), kCaptureSize);
-	
 	// assume poly is closed
 	for( size_t i=0; i<poly.size(); ++i )
 	{
-		size_t j = i+1 % poly.size() ;
+		size_t j = (i+1) % poly.size() ;
 		
 		vec2 a = poly.getPoints()[i];
 		vec2 b = poly.getPoints()[j];
@@ -301,17 +305,72 @@ vec2 closestPointOnPoly( vec2 pt, const PolyLine2& poly, size_t &ai, size_t &bi 
 		{
 			best = dist ;
 			result = x ;
+			if (ai) *ai = i ;
+			if (bi) *bi = j ;
+		}
+	}
+	
+	if (dist) *dist = best ;
+	return result ;
+}
+
+const cContour* PaperBounce3App::pickContour ( vec2 point ) const
+{
+	const cContour* pick=0 ;
+	
+	// inside a poly?
+	for( const auto &c : mContours )
+	{
+		// optimization: skip non-holes if we are already in something
+		if ( pick && !c.mIsHole ) continue ;
+		
+		// inside this poly?
+		bool isInC = c.mBoundingRect.contains(point) && c.mPolyLine.contains(point) ;
+		
+		if ( isInC )
+		{
+			if ( c.mIsHole )
+			{
+				pick = 0 ;
+				break ;
+				// done, because of topological assumptions
+				// BUG. actually this isn't true. if you have a thing in a hole. hmm.
+			}
+			else
+			{
+				pick = &c ;
+			}
+		}
+	}
+	
+	return pick ;
+}
+
+const cContour* PaperBounce3App::findClosestContour ( vec2 point, vec2* closestPoint ) const
+{
+	float best = MAXFLOAT ;
+	const cContour* result = 0 ;
+	
+	// can optimize this by using bounding boxes as heuristic, but whatev for now.
+	for ( const auto &c : mContours )
+	{
+		float dist ;
+		
+		vec2 x = closestPointOnPoly( point, c.mPolyLine, 0, 0, &dist ) ;
+		
+		if ( dist < best )
+		{
+			best = dist ;
+			result = &c ;
+			if (closestPoint) *closestPoint = x ;
 		}
 	}
 	
 	return result ;
 }
 
-
-vec2 PaperBounce3App::resolveCollision ( vec2 point, float radius )
+vec2 PaperBounce3App::resolveCollision ( vec2 point, float radius ) const
 {
-//	return point + vec2(radius,radius)*2.f ;
-	
 	bool isInside = false ;
 	const cContour* inHole=0 ;
 	// being inside a poly means we're OK (inside a piece of paper)
@@ -334,18 +393,21 @@ vec2 PaperBounce3App::resolveCollision ( vec2 point, float radius )
 				isInside = false ;
 				inHole=&c;
 
-				size_t a,b ;
-				return closestPointOnPoly(point,c.mPolyLine,a,b);
+//				size_t a,b ;
+//				return closestPointOnPoly(point,c.mPolyLine,a,b);
 
+				// BUG
+				// this toplogical assumption is buggy in that it precludes paper inside of a hole.
+				// we'll return to this issue later.
 				break ;
 			}
 			else
 			{
 				isInside = true ;
 
-				size_t a,b ;
-				return closestPointOnPoly(point,c.mPolyLine,a,b);
-
+//				size_t a,b ;
+//				return closestPointOnPoly(point,c.mPolyLine,a,b);
+//
 				// don't break, because we still need to look for holes
 				// future optimization (unnecessary) could be to remember which holes are in which shapes and only test those.
 			}
@@ -354,14 +416,20 @@ vec2 PaperBounce3App::resolveCollision ( vec2 point, float radius )
 	
 	// ok, find closest
 	if (isInside) return point ;
+	else if ( inHole )
+	{
+		// push us out of this hole
+		vec2 x = closestPointOnPoly(point, inHole->mPolyLine );
+
+		return glm::normalize( x - point ) * radius + x ;
+	}
 	else
 	{
-		//
-//		size_t a,b ;
-//		if ( inHole )
-//			return closestPointOnPoly(point,inHole->mPolyLine,a,b);
-//		else
-		return vec2(0,0);
+		// push us into nearest paper
+		vec2 x ;
+		findClosestContour( point, &x ) ;
+		
+		return glm::normalize( x - point ) * radius + x ;
 	}
 }
 
@@ -446,16 +514,44 @@ void PaperBounce3App::drawProjectorWindow()
 
 	// draw contours
 	{
-		for( auto c : mContours )
+		// filled
+		if ( kDrawContoursFilled )
 		{
-			if ( kDrawContoursFilled )
+			// solids
+			for( auto c : mContours )
 			{
-				if ( c.mIsHole ) gl::color(.0f,.0f,.0f,.8f);
-				else gl::color(.2f,.2f,.4f,.5f);
+				if ( !c.mIsHole ) gl::color(.2f,.2f,.4f,.5f);
 				
 				gl::drawSolid(c.mPolyLine);
 			}
-			else
+
+			// holes
+			for( auto c : mContours )
+			{
+				if ( c.mIsHole ) gl::color(.0f,.0f,.0f,.8f);
+				
+				gl::drawSolid(c.mPolyLine);
+			}
+			
+			// picked highlight
+			vec2 mousePos = mouseToWorld(mMousePos) ;
+			
+			const cContour* picked = pickContour( mousePos ) ;
+			
+			if (picked)
+			{
+				gl::color(.2f,.6f,.4f,.8f);
+				gl::draw(picked->mPolyLine);
+				
+				vec2 x = closestPointOnPoly(mousePos,picked->mPolyLine);
+				gl::color(.5f,.1f,.3f,.9f);
+				gl::drawSolidCircle(x, 5.f);
+			}
+		}
+		// outlines
+		else
+		{
+			for( auto c : mContours )
 			{
 				ColorAf color ;
 				
