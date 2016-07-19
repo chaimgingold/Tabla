@@ -27,8 +27,9 @@ const float kBallDefaultRadius = 8.f ;
 const vec2 kCaptureSize = vec2( 16.f/9.f * 480.f, 480 ) ;
 
 
-const bool kDrawCameraImage = false ;
-
+const bool kAutoFullScreenProjector	= false ; // default: true
+const bool kDrawCameraImage			= false ; // default: false
+const bool kDrawContoursFilled		= true  ;  // default: false
 
 namespace cinder {
 	
@@ -60,36 +61,45 @@ class cContour {
 public:
 	PolyLine2	mPolyLine ;
 	vec2		mCenter ;
+	Rectf		mBoundingRect ;
 	float		mRadius ;
 	float		mArea ;
 	
-	bool		mIsInside = false ;
+	bool		mIsHole = false ;
 };
 
 class PaperBounce3App : public App {
   public:
 	void setup() override;
 	void mouseDown( MouseEvent event ) override;
+	void mouseMove( MouseEvent event ) override { mMousePos = event.getPos(); }
 	void update() override;
 	void draw() override;
 	void resize() override;
-
+	void keyDown( KeyEvent event ) override;
+	
 	void drawProjectorWindow() ;
 	void drawAuxWindow() ;
 
 	void updateVision(); // updates mCameraTexture, mContours
-	void tickBalls() ;
+	void updateBalls() ;
 	
 
 	CaptureRef				mCapture;
 	gl::TextureRef			mCameraTexture;
 	
 	vector<cContour>		mContours;
-
+//	PolyLine2				m
+	
 	std::vector<cBall>		mBalls ;
 	
 	app::WindowRef			mAuxWindow ; // for other debug info, on computer screen
 	
+	double					mLastFrameTime = 0. ;
+	vec2					mMousePos ;
+	
+	// physics/geometry helpers
+	vec2 resolveCollision ( vec2 point, float radius ); // returns pinned version of point
 	
 	// for main window, the projector display
 	vec2 mouseToWorld( vec2 );
@@ -100,6 +110,8 @@ class PaperBounce3App : public App {
 
 void PaperBounce3App::setup()
 {
+	mLastFrameTime = getElapsedSeconds() ;
+	
 	auto displays = Display::getDisplays() ;
 	std::cout << displays.size() << " Displays" << std::endl ;
 	for ( auto d : displays )
@@ -111,7 +123,7 @@ void PaperBounce3App::setup()
 	mCapture->start();
 
 	// Fullscreen main window in second display
-	if (displays.size()>1)
+	if ( displays.size()>1 && kAutoFullScreenProjector )
 	{
 		getWindow()->setPos( displays[1]->getBounds().getUL() );
 		
@@ -151,6 +163,7 @@ void PaperBounce3App::mouseDown( MouseEvent event )
 void PaperBounce3App::update()
 {
 	updateVision();
+	updateBalls();
 }
 
 void PaperBounce3App::updateVision()
@@ -216,7 +229,8 @@ void PaperBounce3App::updateVision()
 					myc.mRadius = radius ;
 					myc.mCenter = fromOcv(center) ;
 					myc.mArea   = area ;
-					myc.mIsInside = hierarchy[i][3] != -1 ;
+					myc.mIsHole = hierarchy[i][3] != -1 ;
+					myc.mBoundingRect = Rectf( myc.mPolyLine.getPoints() );
 					
 					mContours.push_back( myc );
 				} ;
@@ -237,6 +251,117 @@ void PaperBounce3App::updateVision()
 		// convert to texture
 //		mCameraTexture = gl::Texture::create( fromOcv( output ), gl::Texture::Format().loadTopDown() );
 //		mCameraTexture = gl::Texture::create( fromOcv( input ), gl::Texture::Format().loadTopDown() );
+	}
+}
+
+void PaperBounce3App::updateBalls()
+{
+	for( auto b : mBalls )
+	{
+		
+	}
+}
+
+vec2 closestPointOnLineSeg ( vec2 p, vec2 a, vec2 b )
+{
+	vec2 ap = p - a ;
+	vec2 ab = b - a ;
+	
+	float ab2 = ab.x*ab.x + ab.y*ab.y;
+	float ap_ab = ap.x*ab.x + ap.y*ab.y;
+	float t = ap_ab / ab2;
+	
+	if (t < 0.0f) t = 0.0f;
+	else if (t > 1.0f) t = 1.0f;
+	
+	vec2 x = a + ab * t;
+	return x ;
+}
+
+vec2 closestPointOnPoly( vec2 pt, const PolyLine2& poly, size_t &ai, size_t &bi )
+{
+	float best = MAXFLOAT ;
+	vec2 result = pt ;
+	
+//	return closestPointOnLineSeg(pt, vec2(0,0), kCaptureSize);
+	
+	// assume poly is closed
+	for( size_t i=0; i<poly.size(); ++i )
+	{
+		size_t j = i+1 % poly.size() ;
+		
+		vec2 a = poly.getPoints()[i];
+		vec2 b = poly.getPoints()[j];
+
+		vec2 x = closestPointOnLineSeg(pt, a, b);
+		
+		float dist = glm::distance(pt,x) ; // could eliminate sqrt
+
+		if ( dist < best )
+		{
+			best = dist ;
+			result = x ;
+		}
+	}
+	
+	return result ;
+}
+
+
+vec2 PaperBounce3App::resolveCollision ( vec2 point, float radius )
+{
+//	return point + vec2(radius,radius)*2.f ;
+	
+	bool isInside = false ;
+	const cContour* inHole=0 ;
+	// being inside a poly means we're OK (inside a piece of paper)
+	// BUT we then should still test against holes to make sure...
+
+	
+	// inside a poly?
+	for( const auto &c : mContours )
+	{
+		// optimization: skip non-holes if we are already in something
+		if ( isInside && !c.mIsHole ) continue ;
+		
+		// inside this poly?
+		bool isInC = c.mBoundingRect.contains(point) && c.mPolyLine.contains(point) ;
+		
+		if ( isInC )
+		{
+			if ( c.mIsHole )
+			{
+				isInside = false ;
+				inHole=&c;
+
+				size_t a,b ;
+				return closestPointOnPoly(point,c.mPolyLine,a,b);
+
+				break ;
+			}
+			else
+			{
+				isInside = true ;
+
+				size_t a,b ;
+				return closestPointOnPoly(point,c.mPolyLine,a,b);
+
+				// don't break, because we still need to look for holes
+				// future optimization (unnecessary) could be to remember which holes are in which shapes and only test those.
+			}
+		}
+	}
+	
+	// ok, find closest
+	if (isInside) return point ;
+	else
+	{
+		//
+//		size_t a,b ;
+//		if ( inHole )
+//			return closestPointOnPoly(point,inHole->mPolyLine,a,b);
+//		else
+		return vec2(0,0);
 	}
 }
 
@@ -307,20 +432,41 @@ void PaperBounce3App::drawProjectorWindow()
 		gl::color( 1, 1, 1 );
 		gl::drawStrokedRect( Rectf(0,0,kCaptureSize.x,kCaptureSize.y).inflated( vec2(-1,-1) ) ) ;
 	}
-	
+
+	// draw contour bounding boxes, etc...
+	{
+		for( auto c : mContours )
+		{
+			if ( !c.mIsHole ) gl::color( 1.f, 1.f, 1.f, .2f ) ;
+			else gl::color( 1.f, 0.f, .3f, .3f ) ;
+
+			gl::drawStrokedRect(c.mBoundingRect);
+		}
+	}
+
 	// draw contours
 	{
 		for( auto c : mContours )
 		{
-			ColorAf color ;
-			
-			if ( c.mIsInside ) color = ColorAf::hex( 0x43730F ) ;
-			else color = ColorAf::hex( 0xF19878 ) ;
-			
-			color = ColorAf(1,1,1);
-			
-			gl::color(color) ;
-			gl::draw(c.mPolyLine) ;
+			if ( kDrawContoursFilled )
+			{
+				if ( c.mIsHole ) gl::color(.0f,.0f,.0f,.8f);
+				else gl::color(.2f,.2f,.4f,.5f);
+				
+				gl::drawSolid(c.mPolyLine);
+			}
+			else
+			{
+				ColorAf color ;
+				
+				if ( !c.mIsHole ) color = ColorAf(1,1,1); //color = ColorAf::hex( 0x43730F ) ;
+				else color = ColorAf::hex( 0xF19878 ) ;
+				
+	//			color = ColorAf(1,1,1);
+				
+				gl::color(color) ;
+				gl::draw(c.mPolyLine) ;
+			}
 		}
 	}
 	
@@ -331,6 +477,21 @@ void PaperBounce3App::drawProjectorWindow()
 			gl::color(b.mColor) ;
 			gl::drawSolidCircle( b.mLoc, b.mRadius ) ;
 		}
+	}
+	
+	// test collision logic
+	{
+		vec2 pt = mouseToWorld( mMousePos ) ;
+		
+		float r = kBallDefaultRadius ;
+		
+		vec2 fixed = resolveCollision(pt,r);
+		
+		gl::color( ColorAf(0.f,0.f,1.f) ) ;
+		gl::drawStrokedCircle(pt,r);
+		
+		gl::color( ColorAf(0.f,1.f,0.f) ) ;
+		gl::drawLine(pt, fixed);
 	}
 }
 
@@ -365,7 +526,19 @@ void PaperBounce3App::draw()
 	}
 }
 
+void PaperBounce3App::keyDown( KeyEvent event )
+{
+	switch ( event.getCode() )
+	{
+		case KeyEvent::KEY_f:
+			std::cout << "Frame rate: " << getFrameRate() << std::endl ;
+			break ;
+	}
+}
+
+
 CINDER_APP( PaperBounce3App, RendererGl, [&]( App::Settings *settings ) {
+	settings->setFrameRate(120.f);
 	settings->setWindowSize(kCaptureSize);
 	settings->setTitle("See Paper") ;
 })
