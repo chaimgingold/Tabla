@@ -37,6 +37,7 @@ const bool kAutoFullScreenProjector	= true ; // default: true
 const bool kDrawCameraImage			= false ; // default: false
 const bool kDrawContoursFilled		= false ;  // default: false
 const bool kDrawMouseDebugInfo		= false ;
+const bool kDrawPolyBoundingRect	= false ;
 
 namespace cinder {
 	
@@ -593,6 +594,7 @@ void PaperBounce3App::drawProjectorWindow()
 	}
 
 	// draw contour bounding boxes, etc...
+	if (kDrawPolyBoundingRect)
 	{
 		for( auto c : mContours )
 		{
@@ -728,6 +730,8 @@ void PaperBounce3App::keyDown( KeyEvent event )
 				cBall ball ;
 				
 				ball.mColor = ColorAf::hex(0xC62D41);
+//				ball.mColor = ColorAf( Rand::randFloat(), Rand::randFloat(), Rand::randFloat() ) ;
+					// they recognize themselves, confusing openCV. -- it's kind of awesome on its own.
 				ball.mLoc   = randVec2() * kCaptureSize ; // UH using as proxy for world.
 				ball.mRadius = kBallDefaultRadius ;
 				
@@ -735,6 +739,10 @@ void PaperBounce3App::keyDown( KeyEvent event )
 				
 				mBalls.push_back( ball ) ;
 			}
+			break ;
+			
+		case KeyEvent::KEY_c:
+			mBalls.clear() ;
 			break ;
 	}
 }
