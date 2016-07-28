@@ -1,0 +1,15 @@
+Simulation
+- Better topology handling (boxes in boxes)
+- Balls have velocity
+
+New features
+- Recognize colorful marker objects (lego bricks, eg)
+	- Let me remove keyboard controls
+
+Technical
+- Better registration
+	- Automatic video-projector calibration (gray coding, or variant).
+	- Will let me swap out, improve physical gear.
+- Lower latency
+	- new capture method?
+	- multi-threaded? (measure latencies first)

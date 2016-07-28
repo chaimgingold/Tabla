@@ -3,22 +3,18 @@
 #include "cinder/gl/gl.h"
 #include "cinder/Rand.h"
 
+#include "cinder/Text.h"
+#include "cinder/gl/TextureFont.h"
+
 #include "cinder/Capture.h"
 #include "CinderOpenCV.h"
+
+#include <map>
 
 using namespace ci;
 using namespace ci::app;
 using namespace std;
 
-
-/*
- BUGS:
- - Need to remember what's a hole for what so that we can fix resolveCollision and pickContour; we won't get complex topologies right.
- */
-
-//const cv::RetrievalModes kContourHierStyle = cv::RETR_TREE ;      // whole enchilada
-const cv::RetrievalModes kContourHierStyle = cv::RETR_CCOMP ;     // is just two level, what we want
-//const cv::RetrievalModes kContourHierStyle = cv::RETR_EXTERNAL ;
 
 const float kResScale = 1.f ;
 const float kContourMinRadius = 3.f  * kResScale ;
@@ -33,11 +29,14 @@ const float kBallDefaultRadius = 8.f ;
 const vec2 kCaptureSize = vec2( 16.f/9.f * 480.f, 480 ) ;
 
 
-const bool kAutoFullScreenProjector	= true ; // default: true
-const bool kDrawCameraImage			= false ; // default: false
-const bool kDrawContoursFilled		= false ;  // default: false
-const bool kDrawMouseDebugInfo		= false ;
-const bool kDrawPolyBoundingRect	= false ;
+const bool kDebug = false ;
+
+const bool kAutoFullScreenProjector	= !kDebug ; // default: true
+const bool kDrawCameraImage			= false  ; // default: false
+const bool kDrawContoursFilled		= kDebug ;  // default: false
+const bool kDrawMouseDebugInfo		= kDebug ;
+const bool kDrawPolyBoundingRect	= kDebug ;
+const bool kDrawContourTree			= kDebug ;
 
 namespace cinder {
 	
@@ -80,8 +79,14 @@ public:
 	float		mArea ;
 	
 	bool		mIsHole = false ;
+	bool		mIsLeaf = true ;
+	int			mParent = -1 ; // index into the contour we in
+	vector<int> mChild ; // indices into mContour of contours which are in me
+	int			mTreeDepth = 0 ;
 	
-	bool		IsKind ( ContourKind kind ) const
+	int			mOcvContourIndex = -1 ;
+	
+	bool		isKind ( ContourKind kind ) const
 	{
 		switch(kind)
 		{
@@ -91,7 +96,12 @@ public:
 			default:					return  true ;
 		}
 	}
-
+	
+	bool		contains( vec2 point ) const
+	{
+		return mBoundingRect.contains(point) && mPolyLine.contains(point) ;
+	}
+	
 };
 
 class PaperBounce3App : public App {
@@ -110,23 +120,26 @@ class PaperBounce3App : public App {
 	void updateVision(); // updates mCameraTexture, mContours
 	void updateBalls() ;
 	
-
-	CaptureRef				mCapture;
-	gl::TextureRef			mCameraTexture;
+	Font				mFont;
+	gl::TextureFontRef	mTextureFont;
 	
-	vector<cContour>		mContours;
 	
-	std::vector<cBall>		mBalls ;
+	CaptureRef			mCapture;
+	gl::TextureRef		mCameraTexture;
 	
-	app::WindowRef			mAuxWindow ; // for other debug info, on computer screen
+	vector<cContour>	mContours;
 	
-	double					mLastFrameTime = 0. ;
-	vec2					mMousePos ;
+	vector<cBall>		mBalls ;
+	
+	app::WindowRef		mAuxWindow ; // for other debug info, on computer screen
+	
+	double				mLastFrameTime = 0. ;
+	vec2				mMousePos ;
 	
 	// physics/geometry helpers
-	const cContour* pickContour ( vec2 point ) const ;
+	const cContour* findClosestContour ( vec2 point, vec2* closestPoint=0, float* closestDist=0, ContourKind kind = ContourKind::Any ) const ; // assumes findLeafContourContainingPoint failed
 	
-	const cContour* findClosestContour ( vec2 point, vec2* closestPoint=0, float* closestDist=0, ContourKind kind = ContourKind::Any ) const ; // assumes pickContour failed
+	const cContour* findLeafContourContainingPoint( vec2 point ) const ;
 	
 	vec2 resolveCollisionWithContours	( vec2 p, float r ) const ; // returns pinned version of point
 	vec2 resolveCollisionWithBalls		( vec2 p, float r, cBall* ignore=0, float correctionFraction=1.f ) const ;
@@ -146,10 +159,10 @@ void PaperBounce3App::setup()
 	mLastFrameTime = getElapsedSeconds() ;
 	
 	auto displays = Display::getDisplays() ;
-	std::cout << displays.size() << " Displays" << std::endl ;
+	cout << displays.size() << " Displays" << endl ;
 	for ( auto d : displays )
 	{
-		std::cout << "\t" << d->getBounds() << std::endl ;
+		cout << "\t" << d->getBounds() << endl ;
 	}
 	
 	mCapture = Capture::create( kCaptureSize.x, kCaptureSize.y );
@@ -180,6 +193,8 @@ void PaperBounce3App::setup()
 		}
 	}
 	
+	// text
+	mTextureFont = gl::TextureFont::create( Font("Avenir",12) );
 }
 
 void PaperBounce3App::mouseDown( MouseEvent event )
@@ -235,10 +250,13 @@ void PaperBounce3App::updateVision()
 		vector<vector<cv::Point> > contours;
 		vector<cv::Vec4i> hierarchy;
 		
-		cv::findContours( thresholded, contours, hierarchy, kContourHierStyle, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+		cv::findContours( thresholded, contours, hierarchy, cv::RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
 		
 		// filter and process contours into our format
 		mContours.clear() ;
+		
+		map<int,int> ocvContourIdxToMyContourIdx ;
+		
 		for( int i=0; i<contours.size(); ++i )
 		{
 			const auto &c = contours[i] ;
@@ -254,7 +272,7 @@ void PaperBounce3App::updateVision()
 			
 			if (	radius > kContourMinRadius &&
 					area > kContourMinArea &&
-					std::min( rotatedRect.size.width, rotatedRect.size.height ) > kContourMinWidth )
+					min( rotatedRect.size.width, rotatedRect.size.height ) > kContourMinWidth )
 			{
 				auto addContour = [&]( const vector<cv::Point>& c )
 				{
@@ -264,10 +282,25 @@ void PaperBounce3App::updateVision()
 					myc.mRadius = radius ;
 					myc.mCenter = fromOcv(center) ;
 					myc.mArea   = area ;
-					myc.mIsHole = hierarchy[i][3] != -1 ;
+//					myc.mIsHole = hierarchy[i][3] != -1 ;
 					myc.mBoundingRect = Rectf( myc.mPolyLine.getPoints() );
+					myc.mOcvContourIndex = i ;
+					
+					myc.mTreeDepth = 0 ;
+					{
+						int n = i ;
+						while ( (n = hierarchy[n][3]) > 0 )
+						{
+							myc.mTreeDepth++ ;
+						}
+					}
+					myc.mIsHole = ( myc.mTreeDepth % 2 ) ; // odd depth # children are holes
+					myc.mIsLeaf = hierarchy[i][2] < 0 ;
 					
 					mContours.push_back( myc );
+					
+					// store my index mapping
+					ocvContourIdxToMyContourIdx[i] = mContours.size()-1 ;
 				} ;
 				
 				if (1)
@@ -283,8 +316,29 @@ void PaperBounce3App::updateVision()
 			}
 		}
 		
+		// add contour topology metadata
+		// (this might be screwed up because of how we cull contours;
+		// a simple fix might be to find orphaned contours--those with parents that don't exist anymore--
+		// and strip them, too. but this will, in turn, force us to rebuild indices.
+		// it might be simplest to just "hide" rejected contours, ignore them, but keep them around.
+		for ( size_t i=0; i<mContours.size(); ++i )
+		{
+			cContour &c = mContours[i] ;
+			
+			if ( hierarchy[c.mOcvContourIndex][3] >= 0 )
+			{
+				c.mParent = ocvContourIdxToMyContourIdx[ hierarchy[c.mOcvContourIndex][3] ] ;
+				
+//				assert( myc.mParent is valid ) ;
+				
+				assert( c.mParent >= 0 && c.mParent < mContours.size() ) ;
+				
+				mContours[c.mParent].mChild.push_back( i ) ;
+			}
+		}
+		
 		// convert to texture
-//		mCameraTexture = gl::Texture::create( fromOcv( output ), gl::Texture::Format().loadTopDown() );
+		mCameraTexture = gl::Texture::create( fromOcv( thresholded ), gl::Texture::Format().loadTopDown() );
 //		mCameraTexture = gl::Texture::create( fromOcv( input ), gl::Texture::Format().loadTopDown() );
 	}
 }
@@ -344,38 +398,6 @@ vec2 closestPointOnPoly( vec2 pt, const PolyLine2& poly, size_t *ai=0, size_t *b
 	return result ;
 }
 
-const cContour* PaperBounce3App::pickContour ( vec2 point ) const
-{
-	const cContour* pick=0 ;
-	
-	// inside a poly?
-	for( const auto &c : mContours )
-	{
-		// optimization: skip non-holes if we are already in something
-		if ( pick && !c.mIsHole ) continue ;
-		
-		// inside this poly?
-		bool isInC = c.mBoundingRect.contains(point) && c.mPolyLine.contains(point) ;
-		
-		if ( isInC )
-		{
-			if ( c.mIsHole )
-			{
-				pick = 0 ;
-				break ;
-				// done, because of topological assumptions
-				// BUG. actually this isn't true. if you have a thing in a hole. hmm.
-			}
-			else
-			{
-				pick = &c ;
-			}
-		}
-	}
-	
-	return pick ;
-}
-
 const cContour* PaperBounce3App::findClosestContour ( vec2 point, vec2* closestPoint, float* closestDist, ContourKind kind ) const
 {
 	float best = MAXFLOAT ;
@@ -384,7 +406,7 @@ const cContour* PaperBounce3App::findClosestContour ( vec2 point, vec2* closestP
 	// can optimize this by using bounding boxes as heuristic, but whatev for now.
 	for ( const auto &c : mContours )
 	{
-		if ( c.IsKind(kind) )
+		if ( c.isKind(kind) )
 		{
 			float dist ;
 			
@@ -403,6 +425,38 @@ const cContour* PaperBounce3App::findClosestContour ( vec2 point, vec2* closestP
 	return result ;
 }
 
+const cContour* PaperBounce3App::findLeafContourContainingPoint( vec2 point ) const
+{
+	function<const cContour*(const cContour&)> search = [&]( const cContour& at ) -> const cContour*
+	{
+		if ( at.contains(point) )
+		{
+			for( auto childIndex : at.mChild )
+			{
+				const cContour* x = search( mContours[childIndex] ) ;
+				
+				if (x) return x ;
+			}
+			
+			return &at ;
+		}
+		
+		return 0 ;
+	} ;
+
+	for( const auto &c : mContours )
+	{
+		if ( c.mTreeDepth == 0 )
+		{
+			const cContour* x = search(c) ;
+			
+			if (x) return x ;
+		}
+	}
+	
+	return 0 ;
+}
+
 vec2 PaperBounce3App::resolveCollisionWithContours ( vec2 point, float radius ) const
 {
 	const cContour* inHole=0 ;
@@ -412,34 +466,12 @@ vec2 PaperBounce3App::resolveCollisionWithContours ( vec2 point, float radius ) 
 
 	
 	// inside a poly?
-	for( const auto &c : mContours )
+	const cContour* in = findLeafContourContainingPoint(point) ;
+	
+	if (in)
 	{
-		// optimization: skip non-holes if we are already in something
-		// (BUG this might not be quite right in complex topologies)
-		if ( inPoly && !c.mIsHole ) continue ;
-		
-		// inside this poly?
-		bool isInC = c.mBoundingRect.contains(point) && c.mPolyLine.contains(point) ;
-		
-		if ( isInC )
-		{
-			if ( c.mIsHole )
-			{
-				inPoly = 0 ;
-				inHole = &c;
-
-				// BUG
-				// this toplogical assumption is buggy in that it precludes paper inside of a hole.
-				// we'll return to this issue later.
-				break ;
-			}
-			else
-			{
-				inPoly = &c ;
-				// don't break, because we still need to look for holes
-				// future optimization (unnecessary) could be to remember which holes are in which shapes and only test those.
-			}
-		}
+		if ( in->mIsHole )	inHole = in ;
+		else				inPoly = in ;
 	}
 	
 	// ok, find closest
@@ -492,6 +524,8 @@ vec2 PaperBounce3App::resolveCollisionWithContours ( vec2 point, float radius ) 
 	}
 	else
 	{
+		// inside of no contour
+		
 		// push us into nearest paper
 		vec2 x ;
 		findClosestContour( point, &x, 0, ContourKind::NonHoles ) ;
@@ -610,35 +644,72 @@ void PaperBounce3App::drawProjectorWindow()
 		// filled
 		if ( kDrawContoursFilled )
 		{
-			// solids
-			for( auto c : mContours )
+			// recursive tree
+			if (1)
 			{
-				if ( !c.mIsHole ) gl::color(.2f,.2f,.4f,.5f);
+				function<void(const cContour&)> drawOne = [&]( const cContour& c )
+				{
+					if ( c.mIsHole ) gl::color(.0f,.0f,.0f,.8f);
+					else gl::color(.2f,.2f,.4f,.5f);
+					
+					gl::drawSolid(c.mPolyLine);
+					
+					for( auto childIndex : c.mChild )
+					{
+						drawOne( mContours[childIndex] ) ;
+					}
+				};
 				
-				gl::drawSolid(c.mPolyLine);
+				for( auto const &c : mContours )
+				{
+					if ( c.mTreeDepth==0 )
+					{
+						drawOne(c) ;
+					}
+				}
 			}
-
-			// holes
-			for( auto c : mContours )
+			else
+			// flat... (should work just the same, hmm)
 			{
-				if ( c.mIsHole ) gl::color(.0f,.0f,.0f,.8f);
-				
-				gl::drawSolid(c.mPolyLine);
+				// solids
+				for( auto c : mContours )
+				{
+					if ( !c.mIsHole )
+					{
+						gl::color(.2f,.2f,.4f,.5f);
+						gl::drawSolid(c.mPolyLine);
+					}
+				}
+	
+				// holes
+				for( auto c : mContours )
+				{
+					if ( c.mIsHole )
+					{
+						gl::color(.0f,.0f,.0f,.8f);
+						gl::drawSolid(c.mPolyLine);
+					}
+				}
 			}
 			
 			// picked highlight
 			vec2 mousePos = mouseToWorld(mMousePos) ;
-			
-			const cContour* picked = pickContour( mousePos ) ;
+
+			const cContour* picked = findLeafContourContainingPoint( mousePos ) ;
 			
 			if (picked)
 			{
-				gl::color(.2f,.6f,.4f,.8f);
+				if (picked->mIsHole) gl::color(6.f,.4f,.2f);
+				else gl::color(.2f,.6f,.4f,.8f);
+				
 				gl::draw(picked->mPolyLine);
 				
-				vec2 x = closestPointOnPoly(mousePos,picked->mPolyLine);
-				gl::color(.5f,.1f,.3f,.9f);
-				gl::drawSolidCircle(x, 5.f);
+				if (0)
+				{
+					vec2 x = closestPointOnPoly(mousePos,picked->mPolyLine);
+					gl::color(.5f,.1f,.3f,.9f);
+					gl::drawSolidCircle(x, 5.f);
+				}
 			}
 		}
 		// outlines
@@ -669,7 +740,7 @@ void PaperBounce3App::drawProjectorWindow()
 	}
 	
 	// test collision logic
-	if (kDrawMouseDebugInfo)
+	if ( kDrawMouseDebugInfo && getWindowBounds().contains(mMousePos) )
 	{
 		vec2 pt = mouseToWorld( mMousePos ) ;
 		
@@ -682,6 +753,31 @@ void PaperBounce3App::drawProjectorWindow()
 		
 		gl::color( ColorAf(0.f,1.f,0.f) ) ;
 		gl::drawLine(pt, fixed);
+	}
+	
+	// draw contour debug info
+	if (kDrawContourTree)
+	{
+		const float k = 16.f ;
+		
+		for ( size_t i=0; i<mContours.size(); ++i )
+		{
+			const auto& c = mContours[i] ;
+			
+			Rectf r = c.mBoundingRect ;
+			
+			r.y1 = ( c.mTreeDepth + 1 ) * k ;
+			r.y2 = r.y1 + k ;
+			
+			if (c.mIsHole) gl::color(0,0,.3);
+			else gl::color(0,.3,.4);
+			
+			gl::drawSolidRect(r) ;
+			
+			gl::color(.8,.8,.7);
+			mTextureFont->drawString( to_string(i) + " (" + to_string(c.mParent) + ")",
+				r.getLowerLeft() + vec2(2,-mTextureFont->getDescent()) ) ;
+		}
 	}
 }
 
@@ -721,7 +817,7 @@ void PaperBounce3App::keyDown( KeyEvent event )
 	switch ( event.getCode() )
 	{
 		case KeyEvent::KEY_f:
-			std::cout << "Frame rate: " << getFrameRate() << std::endl ;
+			cout << "Frame rate: " << getFrameRate() << endl ;
 			break ;
 
 		case KeyEvent::KEY_b:
