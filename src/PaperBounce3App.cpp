@@ -358,6 +358,8 @@ void PaperBounce3App::updateVision()
 
 void PaperBounce3App::updateBalls()
 {
+	const float kMaxBallVel = kBallDefaultRadius ;
+	
 	int   steps = 1 ;
 	float delta = 1.f / (float)steps ;
 	
@@ -389,9 +391,9 @@ void PaperBounce3App::updateBalls()
 					b.setVel(
 						  glm::reflect( oldVel, surfaceNormal ) // transfer old velocity, but reflected
 //						+ normalize(newLoc - oldLoc) * max( distance(newLoc,oldLoc), b.mRadius * .1f )
-//						+ normalize(newLoc - oldLoc) * .1f
+						+ normalize(newLoc - oldLoc) * .1f
 							// accumulate energy from impact
-							// would be cool to use optic flow for this...
+							// would be cool to use optic flow for this, and each contour can have a velocity
 						) ;
 				}
 			}
@@ -399,6 +401,17 @@ void PaperBounce3App::updateBalls()
 			
 			{
 				b.mLoc = resolveCollisionWithBalls   ( b.mLoc, b.mRadius, &b, .5f ) ;
+			}
+		}
+		
+		// cap velocity
+		for( auto &b : mBalls )
+		{
+			vec2 v = b.getVel() ;
+			
+			if ( length(v) > kMaxBallVel )
+			{
+				b.setVel( normalize(v) * kMaxBallVel ) ;
 			}
 		}
 		
