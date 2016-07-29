@@ -59,9 +59,17 @@ class cBall {
 	
 public:
 	vec2 mLoc ;
-	vec2 mVel ;
+	vec2 mLastLoc ;
+	vec2 mAccel ;
+	
+//	vec2 mVel ;
+	
 	float mRadius ;
 	ColorAf mColor ;
+	
+	void setLoc( vec2 l ) { mLoc=mLastLoc=l; }
+	void setVel( vec2 v ) { mLastLoc = mLoc - v ; }
+	vec2 getVel() const { return mLoc - mLastLoc ; }
 };
 
 enum class ContourKind {
@@ -147,6 +155,9 @@ class PaperBounce3App : public App {
 		// but might take multiple iterations to respond to all of them
 		// fraction is (0,1], how much of the collision correction to do.
 	
+	vec2 resolveBallCollisions			() ;
+	
+	
 	// for main window, the projector display
 	vec2 mouseToWorld( vec2 );
 	void updateWindowMapping();
@@ -202,10 +213,12 @@ void PaperBounce3App::mouseDown( MouseEvent event )
 	cBall ball ;
 	
 	ball.mColor = ColorAf::hex(0xC62D41);
-	ball.mLoc   = mouseToWorld( event.getPos() );
+	ball.setLoc( mouseToWorld( event.getPos() ) ) ;
 	ball.mRadius = kBallDefaultRadius ;
 	
 	ball.mRadius += Rand::randFloat(0.f,kBallDefaultRadius);
+	
+	ball.setVel( Rand::randVec2() * 2.f ) ;
 	
 	mBalls.push_back( ball ) ;
 }
@@ -345,10 +358,57 @@ void PaperBounce3App::updateVision()
 
 void PaperBounce3App::updateBalls()
 {
-	for( auto &b : mBalls )
+	int   steps = 1 ;
+	float delta = 1.f / (float)steps ;
+	
+	for( int step=0; step<steps; ++step )
 	{
-		b.mLoc = resolveCollisionWithContours( b.mLoc, b.mRadius ) ;
-		b.mLoc = resolveCollisionWithBalls   ( b.mLoc, b.mRadius, &b, .5f ) ;
+		// accelerate
+		for( auto &b : mBalls )
+		{
+			b.mLoc += b.mAccel * delta*delta ;
+			b.mAccel = vec2(0,0) ;
+		}
+
+		// collisions
+		for( auto &b : mBalls )
+		{
+			{
+				vec2 oldVel = b.getVel() ;
+				vec2 oldLoc = b.mLoc ;
+				vec2 newLoc = resolveCollisionWithContours( b.mLoc, b.mRadius ) ;
+				
+				// update loc
+				b.mLoc = newLoc ;
+
+				// update vel
+				if ( newLoc != oldLoc )
+				{
+					vec2 surfaceNormal = glm::normalize( newLoc - oldLoc ) ;
+					
+					b.setVel(
+						  glm::reflect( oldVel, surfaceNormal ) // transfer old velocity, but reflected
+//						+ normalize(newLoc - oldLoc) * max( distance(newLoc,oldLoc), b.mRadius * .1f )
+//						+ normalize(newLoc - oldLoc) * .1f
+							// accumulate energy from impact
+							// would be cool to use optic flow for this...
+						) ;
+				}
+			}
+			
+			
+			{
+				b.mLoc = resolveCollisionWithBalls   ( b.mLoc, b.mRadius, &b, .5f ) ;
+			}
+		}
+		
+		// inertia
+		for( auto &b : mBalls )
+		{
+			vec2 vel = b.getVel() ; // rewriting mLastLoc will stomp vel, so get it first
+			b.mLastLoc = b.mLoc ;
+			b.mLoc += vel ;
+		}
 	}
 }
 
@@ -459,11 +519,29 @@ const cContour* PaperBounce3App::findLeafContourContainingPoint( vec2 point ) co
 
 vec2 PaperBounce3App::resolveCollisionWithContours ( vec2 point, float radius ) const
 {
+//	size_t ai=-1, bi=-1 ; // line segment indices we collide with
+	
 	const cContour* inHole=0 ;
 	const cContour* inPoly=0 ;
 	// being inside a poly means we're OK (inside a piece of paper)
 	// BUT we then should still test against holes to make sure...
 
+	/*
+	auto doNormal = [&]( const cContour& c, size_t ai, size_t bi )
+	{
+		if (surfaceNormal)
+		{
+			if (ai==-1) *surfaceNormal = vec2(0,0) ;
+			else
+			{
+				vec2 a2b = c.mPolyLine.getPoints()[ai] - c.mPolyLine.getPoints()[bi] ;
+				
+				vec3 cross = glm::cross( vec3(a2b,0), vec3(0,0,1) ) ;
+				
+				*surfaceNormal = glm::normalize( vec2(cross.x,cross.y) ) ;
+			}
+		}
+	};*/
 	
 	// inside a poly?
 	const cContour* in = findLeafContourContainingPoint(point) ;
@@ -518,8 +596,8 @@ vec2 PaperBounce3App::resolveCollisionWithContours ( vec2 point, float radius ) 
 	else if ( inHole )
 	{
 		// push us out of this hole
-		vec2 x = closestPointOnPoly(point, inHole->mPolyLine );
-
+		vec2 x = closestPointOnPoly(point, inHole->mPolyLine) ;
+		
 		return glm::normalize( x - point ) * radius + x ;
 	}
 	else
@@ -557,6 +635,32 @@ vec2 PaperBounce3App::resolveCollisionWithBalls ( vec2 p, float r, cBall* ignore
 	}
 	
 	return p ;
+}
+
+vec2 PaperBounce3App::resolveBallCollisions()
+{
+/*	for ( const auto &b1 : mBalls )
+	{
+		for ( const auto &b2 : mBalls )
+		{
+			if ( &b1==&b2 ) continue ;
+			
+			float d = glm::distance(p,b.mLoc) ;
+			
+			float rs = r + b.mRadius ;
+			
+			if ( d < rs )
+			{
+				// just update p
+				vec2 correctionVec ;
+				
+				if (d==0.f) correctionVec = Rand::randVec2() ; // oops on top of one another; pick random direction
+				else correctionVec = glm::normalize( p - b.mLoc ) ;
+				
+				p = correctionVec * lerp( d, rs, correctionFraction ) + b.mLoc ;
+			}
+		}
+	}*/
 }
 
 void PaperBounce3App::resize()
@@ -746,6 +850,8 @@ void PaperBounce3App::drawProjectorWindow()
 		
 		float r = kBallDefaultRadius ;
 		
+//		vec2 surfaceNormal ;
+		
 		vec2 fixed = resolveCollisionWithContours(pt,r);
 		
 		gl::color( ColorAf(0.f,0.f,1.f) ) ;
@@ -753,6 +859,9 @@ void PaperBounce3App::drawProjectorWindow()
 		
 		gl::color( ColorAf(0.f,1.f,0.f) ) ;
 		gl::drawLine(pt, fixed);
+		
+//		gl::color( ColorAf(.8f,.2f,.3f,.5f) ) ;
+//		gl::drawLine( fixed, fixed + surfaceNormal * r * 2.f ) ;
 	}
 	
 	// draw contour debug info
@@ -828,7 +937,7 @@ void PaperBounce3App::keyDown( KeyEvent event )
 				ball.mColor = ColorAf::hex(0xC62D41);
 //				ball.mColor = ColorAf( Rand::randFloat(), Rand::randFloat(), Rand::randFloat() ) ;
 					// they recognize themselves, confusing openCV. -- it's kind of awesome on its own.
-				ball.mLoc   = randVec2() * kCaptureSize ; // UH using as proxy for world.
+				ball.setLoc( randVec2() * kCaptureSize ) ; // UH using as proxy for world.
 				ball.mRadius = kBallDefaultRadius ;
 				
 				ball.mRadius += Rand::randFloat(0.f,kBallDefaultRadius);
