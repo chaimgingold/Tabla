@@ -29,7 +29,7 @@ const float kBallDefaultRadius = 8.f ;
 const vec2 kCaptureSize = vec2( 16.f/9.f * 480.f, 480 ) ;
 
 
-const bool kDebug = false ;
+const bool kDebug = true ;
 
 const bool kAutoFullScreenProjector	= !kDebug ; // default: true
 const bool kDrawCameraImage			= false  ; // default: false
@@ -155,7 +155,7 @@ class PaperBounce3App : public App {
 		// but might take multiple iterations to respond to all of them
 		// fraction is (0,1], how much of the collision correction to do.
 	
-	vec2 resolveBallCollisions			() ;
+	void resolveBallCollisions() ;
 	
 	
 	// for main window, the projector display
@@ -372,39 +372,37 @@ void PaperBounce3App::updateBalls()
 			b.mAccel = vec2(0,0) ;
 		}
 
-		// collisions
+		// ball <> contour collisions
 		for( auto &b : mBalls )
 		{
-			{
-				vec2 oldVel = b.getVel() ;
-				vec2 oldLoc = b.mLoc ;
-				vec2 newLoc = resolveCollisionWithContours( b.mLoc, b.mRadius ) ;
-				
-				// update loc
-				b.mLoc = newLoc ;
+			vec2 oldVel = b.getVel() ;
+			vec2 oldLoc = b.mLoc ;
+			vec2 newLoc = resolveCollisionWithContours( b.mLoc, b.mRadius ) ;
+			
+			// update loc
+			b.mLoc = newLoc ;
 
-				// update vel
-				if ( newLoc != oldLoc )
-				{
-					vec2 surfaceNormal = glm::normalize( newLoc - oldLoc ) ;
-					
-					b.setVel(
-						  glm::reflect( oldVel, surfaceNormal ) // transfer old velocity, but reflected
-//						+ normalize(newLoc - oldLoc) * max( distance(newLoc,oldLoc), b.mRadius * .1f )
-						+ normalize(newLoc - oldLoc) * .1f
-							// accumulate energy from impact
-							// would be cool to use optic flow for this, and each contour can have a velocity
-						) ;
-				}
-			}
-			
-			
+			// update vel
+			if ( newLoc != oldLoc )
 			{
-				b.mLoc = resolveCollisionWithBalls   ( b.mLoc, b.mRadius, &b, .5f ) ;
+				vec2 surfaceNormal = glm::normalize( newLoc - oldLoc ) ;
+				
+				b.setVel(
+					  glm::reflect( oldVel, surfaceNormal ) // transfer old velocity, but reflected
+//						+ normalize(newLoc - oldLoc) * max( distance(newLoc,oldLoc), b.mRadius * .1f )
+					+ normalize(newLoc - oldLoc) * .1f
+						// accumulate energy from impact
+						// would be cool to use optic flow for this, and each contour can have a velocity
+					) ;
 			}
 		}
+
+		// ball <> ball collisions
+		resolveBallCollisions() ;
 		
 		// cap velocity
+		// (this is mostly to compensate for aggressive contour<>ball collisions in which balls get pushed in super fast;
+		// alternative would be to cap impulse there)
 		for( auto &b : mBalls )
 		{
 			vec2 v = b.getVel() ;
@@ -650,30 +648,46 @@ vec2 PaperBounce3App::resolveCollisionWithBalls ( vec2 p, float r, cBall* ignore
 	return p ;
 }
 
-vec2 PaperBounce3App::resolveBallCollisions()
+void PaperBounce3App::resolveBallCollisions()
 {
-/*	for ( const auto &b1 : mBalls )
+	if ( mBalls.size()==0 ) return ; // wtf, i have some stupid logic error below...
+	
+	for( size_t i=0  ; i<mBalls.size()-1; i++ )
+	for( size_t j=i+1; j<mBalls.size()  ; j++ )
 	{
-		for ( const auto &b2 : mBalls )
+		auto &a = mBalls[i] ;
+		auto &b = mBalls[j] ;
+		
+		float d  = glm::distance(a.mLoc,b.mLoc) ;
+		float rs = a.mRadius + b.mRadius ;
+		
+		if ( d < rs )
 		{
-			if ( &b1==&b2 ) continue ;
+			vec2 a2b ;
 			
-			float d = glm::distance(p,b.mLoc) ;
+			if (d==0.f) a2b = Rand::randVec2() ; // oops on top of one another; pick random direction
+			else a2b = glm::normalize( b.mLoc - a.mLoc ) ;
 			
-			float rs = r + b.mRadius ;
+			float overlap = rs - d ;
 			
-			if ( d < rs )
-			{
-				// just update p
-				vec2 correctionVec ;
-				
-				if (d==0.f) correctionVec = Rand::randVec2() ; // oops on top of one another; pick random direction
-				else correctionVec = glm::normalize( p - b.mLoc ) ;
-				
-				p = correctionVec * lerp( d, rs, correctionFraction ) + b.mLoc ;
-			}
+			vec2 avel = a.getVel() ;
+			vec2 bvel = b.getVel() ;
+			
+			// correct position
+			b.mLoc +=  a2b * overlap/2.f ;
+			a.mLoc += -a2b * overlap/2.f ;
+			
+			// do velocities (inelastic collisions)
+			float avelp = dot( avel, a2b ) ;
+			float bvelp = dot( bvel, a2b ) ;
+			
+			avel += a2b * ( bvelp - avelp ) ;
+			bvel += a2b * ( avelp - bvelp ) ;
+			
+			a.setVel(avel) ;
+			b.setVel(bvel) ;
 		}
-	}*/
+	}
 }
 
 void PaperBounce3App::resize()
