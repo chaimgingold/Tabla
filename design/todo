@@ -10,7 +10,9 @@ New features
 - Sound effects
 	- Clacking balls
 - Visual effects
-	- Squash and stretch balls
+	√ Squash and stretch balls
+		- Normalize ball squashing effect? Just always shove in a normal vector, and have a tick counter... (and if multiple collisions, then average them, don't use biggest.)
+		- Ball<>Ball collision squishing effect is relative to ball sizes/masses.
 	- Environment mapping on chrome balls
 - Paper velocity/transformation
 	- Use OCV Optical flow?

@@ -39,6 +39,12 @@ const bool kDrawMouseDebugInfo		= kDebug ;
 const bool kDrawPolyBoundingRect	= kDebug ;
 const bool kDrawContourTree			= kDebug ;
 
+vec2 perp( vec2 p )
+{
+	vec3 cross = glm::cross( vec3(p,0), vec3(0,0,1) ) ;
+	return vec2( cross.x, cross.y ) ;
+}
+
 namespace cinder {
 	
 	PolyLine2 fromOcv( vector<cv::Point> pts )
@@ -63,8 +69,6 @@ public:
 	vec2 mLastLoc ;
 	vec2 mAccel ;
 	
-	float mMass = 1.f ;
-	
 	float mRadius ;
 	ColorAf mColor ;
 	
@@ -75,6 +79,17 @@ public:
 	void  setMass( float m ) { mMass = m ; }
 	float getMass() const { return mMass ; }
 	float getInvMass() const { return 1.f / getMass() ; }
+	
+	void noteSquashImpact( vec2 directionAndMagnitude )
+	{
+		if ( length(directionAndMagnitude) > length(mSquash) ) mSquash = directionAndMagnitude ;
+	}
+
+	vec2  mSquash ; // direction and magnitude
+	
+private:
+	float mMass = 1.f ; // let's start by doing the right thing.
+
 };
 
 enum class ContourKind {
@@ -355,7 +370,7 @@ void PaperBounce3App::updateVision()
 
 void PaperBounce3App::updateBalls()
 {
-	const float kMaxBallVel = kBallDefaultRadius ;
+	const float kMaxBallVel = kBallDefaultRadius * 2.f ;
 	
 	int   steps = 1 ;
 	float delta = 1.f / (float)steps ;
@@ -376,12 +391,16 @@ void PaperBounce3App::updateBalls()
 			vec2 oldLoc = b.mLoc ;
 			vec2 newLoc = resolveCollisionWithContours( b.mLoc, b.mRadius ) ;
 			
-			// update loc
-			b.mLoc = newLoc ;
-
-			// update vel
+			// update?
 			if ( newLoc != oldLoc )
 			{
+				// update loc
+				b.mLoc = newLoc ;
+				
+				// squash?
+				b.noteSquashImpact( newLoc - oldLoc ) ;
+
+				// update vel
 				vec2 surfaceNormal = glm::normalize( newLoc - oldLoc ) ;
 				
 				b.setVel(
@@ -398,16 +417,25 @@ void PaperBounce3App::updateBalls()
 		resolveBallCollisions() ;
 		
 		// cap velocity
-		// (this is mostly to compensate for aggressive contour<>ball collisions in which balls get pushed in super fast;
+		// (i think this is mostly to compensate for aggressive contour<>ball collisions in which balls get pushed in super fast;
 		// alternative would be to cap impulse there)
+		if (1)
+		{
+			for( auto &b : mBalls )
+			{
+				vec2 v = b.getVel() ;
+				
+				if ( length(v) > kMaxBallVel )
+				{
+					b.setVel( normalize(v) * kMaxBallVel ) ;
+				}
+			}
+		}
+		
+		// squash
 		for( auto &b : mBalls )
 		{
-			vec2 v = b.getVel() ;
-			
-			if ( length(v) > kMaxBallVel )
-			{
-				b.setVel( normalize(v) * kMaxBallVel ) ;
-			}
+			b.mSquash *= .8f ;
 		}
 		
 		// inertia
@@ -427,7 +455,7 @@ void PaperBounce3App::newRandomBall ( vec2 loc )
 	ball.mColor = ColorAf::hex(0xC62D41);
 	ball.setLoc( loc ) ;
 	ball.mRadius = Rand::randFloat(kBallDefaultRadius,kBallDefaultMaxRadius) ;
-	ball.mMass   = M_PI * powf(ball.mRadius,3.f) ;
+	ball.setMass( M_PI * powf(ball.mRadius,3.f) ) ;
 	
 	ball.setVel( Rand::randVec2() * 2.f ) ;
 	
@@ -688,6 +716,9 @@ void PaperBounce3App::resolveBallCollisions()
 			b.mLoc +=  a2b * overlap/2.f ;
 			a.mLoc += -a2b * overlap/2.f ;
 			
+			a.noteSquashImpact( -a2b * overlap * .5f ) ;
+			b.noteSquashImpact(  a2b * overlap * .5f ) ;
+			
 			// do velocities (inelastic collisions)
 			float avelp = dot( avel, a2b ) ;
 			float bvelp = dot( bvel, a2b ) ;
@@ -911,7 +942,39 @@ void PaperBounce3App::drawProjectorWindow()
 		for( auto b : mBalls )
 		{
 			gl::color(b.mColor) ;
-			gl::drawSolidCircle( b.mLoc, b.mRadius ) ;
+			
+			if (0)
+			{
+				// just a circle
+				gl::drawSolidCircle( b.mLoc, b.mRadius ) ;
+			}
+			else
+			{
+				// squash + stretch
+				gl::pushModelView() ;
+				gl::translate( b.mLoc ) ;
+				
+				vec2  vel = b.getVel() ;
+				
+				float squashLen = min( length(b.mSquash) * 10.f, b.mRadius * 1.f ) ;
+				float velLen    = length(vel) ;
+				
+				vec2 stretch ;
+				float l ;
+				
+				if ( squashLen > velLen ) stretch = perp(b.mSquash), l=squashLen ;
+				else stretch = vel, l = velLen ;
+				
+//				vec2  vel = perp(b.mSquash) * 10.f ; // b.getVel() ;
+//				float l   = length(vel) ;
+				
+				float f = .25f * (l / b.mRadius) ;
+				
+				gl::rotate( glm::atan( stretch.y, stretch.x ) ) ;
+				gl::drawSolidEllipse( vec2(0,0), b.mRadius*(1.f+f), b.mRadius*(1.f-f) ) ;
+				
+				gl::popModelView() ;
+			}
 		}
 	}
 	
