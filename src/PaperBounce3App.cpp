@@ -30,7 +30,7 @@ const float kBallDefaultMaxRadius	= 8.f * 4.f ;
 const vec2 kCaptureSize = vec2( 16.f/9.f * 480.f, 480 ) ;
 
 
-const bool kDebug = true ;
+const bool kDebug = false ;
 
 const bool kAutoFullScreenProjector	= !kDebug ; // default: true
 const bool kDrawCameraImage			= false  ; // default: false
@@ -709,21 +709,26 @@ void PaperBounce3App::resolveBallCollisions()
 			
 			float overlap = rs - d ;
 			
-			vec2 avel = a.getVel() ;
-			vec2 bvel = b.getVel() ;
+			// get velocities
+			const vec2 avel = a.getVel() ;
+			const vec2 bvel = b.getVel() ;
 			
-			// correct position
-			b.mLoc +=  a2b * overlap/2.f ;
-			a.mLoc += -a2b * overlap/2.f ;
+			// get masses
+			const float ma = a.getMass() ;
+			const float mb = b.getMass() ;
+
+			const float amass_frac = ma / (ma+mb) ; // a's % of total mass
+			const float bmass_frac = 1.f - amass_frac ; // b's % of total mass
 			
-			a.noteSquashImpact( -a2b * overlap * .5f ) ;
-			b.noteSquashImpact(  a2b * overlap * .5f ) ;
+			// correct position (proportional to masses)
+			b.mLoc +=  a2b * overlap * amass_frac ;
+			a.mLoc += -a2b * overlap * bmass_frac ;
 			
-			// do velocities (inelastic collisions)
-			float avelp = dot( avel, a2b ) ;
-			float bvelp = dot( bvel, a2b ) ;
+			// get velocities along collision axis (a2b)
+			const float avelp = dot( avel, a2b ) ;
+			const float bvelp = dot( bvel, a2b ) ;
 			
-			//
+			// ...computations for new velocities
 			float avelp_new ;
 			float bvelp_new ;
 			
@@ -740,9 +745,6 @@ void PaperBounce3App::resolveBallCollisions()
 				// - do relative mass interactions
 				// - can dial elasticity
 				
-				float ma = a.getMass() ;
-				float mb = b.getMass() ;
-
 				float cr = 1.f ; // 0..1
 					// coefficient of restitution:
 					// 0 is elastic
@@ -756,12 +758,22 @@ void PaperBounce3App::resolveBallCollisions()
 					// uh... i'm blanking on the algebra for this. whatev.)
 			}
 			
-			avel += a2b * ( avelp_new - avelp ) ;
-			bvel += a2b * ( bvelp_new - bvelp ) ;
+			// compute new velocities
+			const vec2 avel_new = avel + a2b * ( avelp_new - avelp ) ;
+			const vec2 bvel_new = bvel + a2b * ( bvelp_new - bvelp ) ;
 			
-			//
-			a.setVel(avel) ;
-			b.setVel(bvel) ;
+			// set velocities
+			a.setVel(avel_new) ;
+			b.setVel(bvel_new) ;
+
+			// squash it
+//			a.noteSquashImpact( -a2b * overlap * bmass_frac ) ;
+//			b.noteSquashImpact(  a2b * overlap * amass_frac ) ;
+
+			a.noteSquashImpact( avel_new - avel ) ;
+			b.noteSquashImpact( bvel_new - bvel ) ;
+				// *cough* just undoing some of the comptuation i did earlier. compiler can figure this out,
+				// but the point is that we just want the velocities along the axis of collision.
 		}
 	}
 }
@@ -956,7 +968,7 @@ void PaperBounce3App::drawProjectorWindow()
 				
 				vec2  vel = b.getVel() ;
 				
-				float squashLen = min( length(b.mSquash) * 10.f, b.mRadius * 1.f ) ;
+				float squashLen = min( length(b.mSquash) * 10.f, b.mRadius * .5f ) ;
 				float velLen    = length(vel) ;
 				
 				vec2 stretch ;
@@ -964,9 +976,6 @@ void PaperBounce3App::drawProjectorWindow()
 				
 				if ( squashLen > velLen ) stretch = perp(b.mSquash), l=squashLen ;
 				else stretch = vel, l = velLen ;
-				
-//				vec2  vel = perp(b.mSquash) * 10.f ; // b.getVel() ;
-//				float l   = length(vel) ;
 				
 				float f = .25f * (l / b.mRadius) ;
 				

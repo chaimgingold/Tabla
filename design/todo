@@ -3,6 +3,7 @@ Simulation
 - √ Balls have velocity
 - √ Proper ball-ball collisions
 - √ Ball masses/relative sizes matter.
+- √ Ball <> Ball collision position correction is now relative to masses.
 
 New features
 - Recognize colorful marker objects (lego bricks, eg)
@@ -12,7 +13,7 @@ New features
 - Visual effects
 	√ Squash and stretch balls
 		- Normalize ball squashing effect? Just always shove in a normal vector, and have a tick counter... (and if multiple collisions, then average them, don't use biggest.)
-		- Ball<>Ball collision squishing effect is relative to ball sizes/masses.
+		√ Ball<>Ball collision squishing effect is relative to ball sizes/masses.
 	- Environment mapping on chrome balls
 - Paper velocity/transformation
 	- Use OCV Optical flow?
@@ -30,3 +31,8 @@ Technical
 - Lower latency
 	- new capture method?
 	- multi-threaded? (measure latencies first)
+- Use a Kinect.
+	- Probably lower latency
+	- Has IR for cleaner paper detection
+	- Depth for hand rejection
+	- Can do balls rolling off paper with z-height
