@@ -973,11 +973,15 @@ void PaperBounce3App::draw()
 {
 	gl::clear();
 	gl::enableAlphaBlending();
-	gl::enable( GL_LINE_SMOOTH );
-	gl::enable( GL_POLYGON_SMOOTH );
+
+	// I turned on MSAA=8, so these aren't needed.
+	// They didn't work on polygons anyways.
+	
+//	gl::enable( GL_LINE_SMOOTH );
+//	gl::enable( GL_POLYGON_SMOOTH );
 	//	gl::enable( gl_point_smooth );
-	glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
-	glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
+//	glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
+//	glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
 	//	glHint( GL_POINT_SMOOTH_HINT, GL_NICEST );
 	
 
@@ -1010,24 +1014,13 @@ void PaperBounce3App::keyDown( KeyEvent event )
 				if ( findClosestContour(loc,&closestOnPaper) )
 				{
 //					loc = closestOnPaper ;
+					// This didn't work anyways.
+					// I wonder if being on the line exactly messed things up.
 				}
 				
 				newRandomBall( loc ) ;
 				// we could traverse paper hierarchy and pick a random point on paper...
 				// might be a useful function, randomPointOnPaper()
-				
-/*
-				cBall ball ;
-				
-				ball.mColor = ColorAf::hex(0xC62D41);
-//				ball.mColor = ColorAf( Rand::randFloat(), Rand::randFloat(), Rand::randFloat() ) ;
-					// they recognize themselves, confusing openCV. -- it's kind of awesome on its own.
-				ball.setLoc( randVec2() * kCaptureSize ) ; // UH using as proxy for world.
-				ball.mRadius = kBallDefaultRadius ;
-				
-				ball.mRadius += Rand::randFloat(0.f,kBallDefaultRadius);
-				
-				mBalls.push_back( ball ) ;*/
 			}
 			break ;
 			
@@ -1038,7 +1031,7 @@ void PaperBounce3App::keyDown( KeyEvent event )
 }
 
 
-CINDER_APP( PaperBounce3App, RendererGl, [&]( App::Settings *settings ) {
+CINDER_APP( PaperBounce3App, RendererGl(RendererGl::Options().msaa(8)), [&]( App::Settings *settings ) {
 	settings->setFrameRate(120.f);
 	settings->setWindowSize(kCaptureSize);
 	settings->setTitle("See Paper") ;
