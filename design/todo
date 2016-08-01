@@ -1,7 +1,8 @@
 Simulation
 - √ Better topology handling (boxes in boxes)
 - √ Balls have velocity
-- Proper ball-ball collisions
+- √ Proper ball-ball collisions
+- √ Ball masses/relative sizes matter.
 
 New features
 - Recognize colorful marker objects (lego bricks, eg)

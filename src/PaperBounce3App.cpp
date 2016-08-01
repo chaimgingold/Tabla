@@ -23,7 +23,8 @@ const float kContourDPEpislon = 5.f  * kResScale ;
 const float kContourMinWidth  = 5.f  * kResScale ;
 
 
-const float kBallDefaultRadius = 8.f ;
+const float kBallDefaultRadius		= 8.f *  .5f ;
+const float kBallDefaultMaxRadius	= 8.f * 4.f ;
 
 //const vec2 kCaptureSize = vec2( 640, 480 ) ;
 const vec2 kCaptureSize = vec2( 16.f/9.f * 480.f, 480 ) ;
@@ -62,7 +63,7 @@ public:
 	vec2 mLastLoc ;
 	vec2 mAccel ;
 	
-//	vec2 mVel ;
+	float mMass = 1.f ;
 	
 	float mRadius ;
 	ColorAf mColor ;
@@ -70,6 +71,10 @@ public:
 	void setLoc( vec2 l ) { mLoc=mLastLoc=l; }
 	void setVel( vec2 v ) { mLastLoc = mLoc - v ; }
 	vec2 getVel() const { return mLoc - mLastLoc ; }
+	
+	void  setMass( float m ) { mMass = m ; }
+	float getMass() const { return mMass ; }
+	float getInvMass() const { return 1.f / getMass() ; }
 };
 
 enum class ContourKind {
@@ -127,6 +132,8 @@ class PaperBounce3App : public App {
 
 	void updateVision(); // updates mCameraTexture, mContours
 	void updateBalls() ;
+	
+	void newRandomBall( vec2 loc ) ;
 	
 	Font				mFont;
 	gl::TextureFontRef	mTextureFont;
@@ -210,17 +217,7 @@ void PaperBounce3App::setup()
 
 void PaperBounce3App::mouseDown( MouseEvent event )
 {
-	cBall ball ;
-	
-	ball.mColor = ColorAf::hex(0xC62D41);
-	ball.setLoc( mouseToWorld( event.getPos() ) ) ;
-	ball.mRadius = kBallDefaultRadius ;
-	
-	ball.mRadius += Rand::randFloat(0.f,kBallDefaultRadius);
-	
-	ball.setVel( Rand::randVec2() * 2.f ) ;
-	
-	mBalls.push_back( ball ) ;
+	newRandomBall( mouseToWorld( event.getPos() ) ) ;
 }
 
 void PaperBounce3App::update()
@@ -421,6 +418,20 @@ void PaperBounce3App::updateBalls()
 			b.mLoc += vel ;
 		}
 	}
+}
+
+void PaperBounce3App::newRandomBall ( vec2 loc )
+{
+	cBall ball ;
+	
+	ball.mColor = ColorAf::hex(0xC62D41);
+	ball.setLoc( loc ) ;
+	ball.mRadius = Rand::randFloat(kBallDefaultRadius,kBallDefaultMaxRadius) ;
+	ball.mMass   = M_PI * powf(ball.mRadius,3.f) ;
+	
+	ball.setVel( Rand::randVec2() * 2.f ) ;
+	
+	mBalls.push_back( ball ) ;
 }
 
 vec2 closestPointOnLineSeg ( vec2 p, vec2 a, vec2 b )
@@ -681,9 +692,43 @@ void PaperBounce3App::resolveBallCollisions()
 			float avelp = dot( avel, a2b ) ;
 			float bvelp = dot( bvel, a2b ) ;
 			
-			avel += a2b * ( bvelp - avelp ) ;
-			bvel += a2b * ( avelp - bvelp ) ;
+			//
+			float avelp_new ;
+			float bvelp_new ;
 			
+			if (0)
+			{
+				// swap velocities along axis of collision
+				// (old way)
+				avelp_new = bvelp ;
+				bvelp_new = avelp ;
+			}
+			else
+			{
+				// new way:
+				// - do relative mass interactions
+				// - can dial elasticity
+				
+				float ma = a.getMass() ;
+				float mb = b.getMass() ;
+
+				float cr = 1.f ; // 0..1
+					// coefficient of restitution:
+					// 0 is elastic
+					// 1 is inelastic
+					// https://en.wikipedia.org/wiki/Inelastic_collision
+				
+				avelp_new = (cr * mb * (bvelp - avelp) + ma*avelp + mb*bvelp) / (ma+mb) ;
+				bvelp_new = (cr * ma * (avelp - bvelp) + ma*avelp + mb*bvelp) / (ma+mb) ;
+					// we'll let the compiler simplify that
+					// (though if we cache inverse mass we can plug that in directly;
+					// uh... i'm blanking on the algebra for this. whatev.)
+			}
+			
+			avel += a2b * ( avelp_new - avelp ) ;
+			bvel += a2b * ( bvelp_new - bvelp ) ;
+			
+			//
 			a.setVel(avel) ;
 			b.setVel(bvel) ;
 		}
@@ -959,6 +1004,19 @@ void PaperBounce3App::keyDown( KeyEvent event )
 		case KeyEvent::KEY_b:
 			// make a random ball
 			{
+				vec2 loc = randVec2() * kCaptureSize ;
+				vec2 closestOnPaper ;
+				
+				if ( findClosestContour(loc,&closestOnPaper) )
+				{
+//					loc = closestOnPaper ;
+				}
+				
+				newRandomBall( loc ) ;
+				// we could traverse paper hierarchy and pick a random point on paper...
+				// might be a useful function, randomPointOnPaper()
+				
+/*
 				cBall ball ;
 				
 				ball.mColor = ColorAf::hex(0xC62D41);
@@ -969,7 +1027,7 @@ void PaperBounce3App::keyDown( KeyEvent event )
 				
 				ball.mRadius += Rand::randFloat(0.f,kBallDefaultRadius);
 				
-				mBalls.push_back( ball ) ;
+				mBalls.push_back( ball ) ;*/
 			}
 			break ;
 			
