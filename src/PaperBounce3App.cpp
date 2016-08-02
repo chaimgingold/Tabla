@@ -34,10 +34,21 @@ const bool kDebug = false ;
 
 const bool kAutoFullScreenProjector	= !kDebug ; // default: true
 const bool kDrawCameraImage			= false  ; // default: false
+const bool kDrawContours			= true ;
 const bool kDrawContoursFilled		= kDebug ;  // default: false
 const bool kDrawMouseDebugInfo		= kDebug ;
 const bool kDrawPolyBoundingRect	= kDebug ;
 const bool kDrawContourTree			= kDebug ;
+
+//const bool kDebug = true ;
+//
+//const bool kAutoFullScreenProjector	= !kDebug ; // default: true
+//const bool kDrawCameraImage			= true ; // default: false
+//const bool kDrawContours			= false ;
+//const bool kDrawContoursFilled		= false ;  // default: false
+//const bool kDrawMouseDebugInfo		= true ;
+//const bool kDrawPolyBoundingRect	= false ;
+//const bool kDrawContourTree			= false ;
 
 vec2 perp( vec2 p )
 {
@@ -247,7 +258,7 @@ void PaperBounce3App::updateVision()
 	{
 		// Get surface data
 		Surface surface( *mCapture->getSurface() );
-		mCameraTexture = gl::Texture::create( surface );
+//		mCameraTexture = gl::Texture::create( surface );
 		
 		// make cv frame
 		cv::Mat input( toOcv( Channel( surface ) ) );
@@ -269,6 +280,8 @@ void PaperBounce3App::updateVision()
 			cv::GaussianBlur( input, gray, cv::Size(5,5), 0 );
 
 			cv::threshold( gray, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
+
+			mCameraTexture = gl::Texture::create( fromOcv( thresholded ), gl::Texture::Format().loadTopDown() );
 		}
 		
 		// contours
@@ -363,7 +376,7 @@ void PaperBounce3App::updateVision()
 		}
 		
 		// convert to texture
-		mCameraTexture = gl::Texture::create( fromOcv( thresholded ), gl::Texture::Format().loadTopDown() );
+//		mCameraTexture = gl::Texture::create( fromOcv( thresholded ), gl::Texture::Format().loadTopDown() );
 //		mCameraTexture = gl::Texture::create( fromOcv( input ), gl::Texture::Format().loadTopDown() );
 	}
 }
@@ -397,9 +410,6 @@ void PaperBounce3App::updateBalls()
 				// update loc
 				b.mLoc = newLoc ;
 				
-				// squash?
-				b.noteSquashImpact( newLoc - oldLoc ) ;
-
 				// update vel
 				vec2 surfaceNormal = glm::normalize( newLoc - oldLoc ) ;
 				
@@ -410,6 +420,9 @@ void PaperBounce3App::updateBalls()
 						// accumulate energy from impact
 						// would be cool to use optic flow for this, and each contour can have a velocity
 					) ;
+
+				// squash?
+				b.noteSquashImpact( surfaceNormal * length(b.getVel()) ) ; //newLoc - oldLoc ) ;
 			}
 		}
 
@@ -435,7 +448,7 @@ void PaperBounce3App::updateBalls()
 		// squash
 		for( auto &b : mBalls )
 		{
-			b.mSquash *= .8f ;
+			b.mSquash *= .7f ;
 		}
 		
 		// inertia
@@ -859,6 +872,7 @@ void PaperBounce3App::drawProjectorWindow()
 	}
 
 	// draw contours
+	if ( kDrawContours )
 	{
 		// filled
 		if ( kDrawContoursFilled )
