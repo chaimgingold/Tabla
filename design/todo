@@ -49,10 +49,10 @@ New features
 
 Technical
 - Refactoring
-	- Ball <> contour simulation logic in its own independent class. (world simulation)
+	√ Ball <> contour simulation logic in its own independent class. (world simulation)
 		- This leaves room for another "simulation", the gray-code auto-registration that would calibrate registrations
 	- Camera-projector registration in its own class (simply the camera-projector-world mapping)
-	- OCV pipeline and outputs in its own class (image -> semantic actionable world data)
+	√ OCV pipeline and outputs in its own class (image -> semantic actionable world data)
 	- Shove stuff into xml (make all this stuff tunable)
 	- The App that holds and manages all this stuff
 		- Can swap between 'modes': calibration vs simulation

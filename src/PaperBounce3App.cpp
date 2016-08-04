@@ -9,8 +9,10 @@
 #include "cinder/Capture.h"
 #include "CinderOpenCV.h"
 
+#include "Vision.h"
 #include "Contour.h"
 #include "BallWorld.h"
+
 #include "geom.h"
 
 #include <map>
@@ -20,12 +22,6 @@ using namespace ci;
 using namespace ci::app;
 using namespace std;
 
-
-const float kResScale = .2f ;
-const float kContourMinRadius = 3.f  * kResScale ;
-const float kContourMinArea   = 100.f * kResScale ;
-const float kContourDPEpislon = 5.f  * kResScale ;
-const float kContourMinWidth  = 5.f  * kResScale ;
 
 
 const vec2 kCaptureSize = vec2( 640, 480 ) ;
@@ -53,55 +49,12 @@ const bool kDrawContourTree			= kDebug ;
 //const bool kDrawPolyBoundingRect	= false ;
 //const bool kDrawContourTree			= false ;
 
-namespace cinder {
-	
-	PolyLine2 fromOcv( vector<cv::Point> pts )
-	{
-		PolyLine2 pl;
-		for( auto p : pts ) pl.push_back(vec2(p.x,p.y));
-		pl.setClosed(true);
-		return pl;
-	}
-
-}
 
 class cWindowData {
 public:
 	bool mIsAux = false ;
 };
 
-
-class Pipeline
-{
-public:
-	void setQuery( string q ) { mQuery=q; } ;
-
-	void then( Surface &img, string name )
-	{
-		if (name==mQuery)
-		{
-			mFrame = gl::Texture::create( img );
-		}
-	}
-	
-	void then( cv::Mat &img, string name )
-	{
-		if (name==mQuery)
-		{
-			mFrame = gl::Texture::create( fromOcv(img), gl::Texture::Format().loadTopDown() );
-		}
-	}
-	
-	// add types:
-	// - contour
-	
-	gl::TextureRef getQueryFrame() const { return mFrame ; }
-	
-private:
-	string		   mQuery ;
-	gl::TextureRef mFrame ;
-	
-} ;
 
 class PaperBounce3App : public App {
   public:
@@ -115,36 +68,33 @@ class PaperBounce3App : public App {
 	
 	void drawProjectorWindow() ;
 	void drawAuxWindow() ;
-
-	void updateVision(); // updates mCameraTexture, mContours
 	
-	Pipeline			mOCVPipelineTrace ;
-	
-	Font				mFont;
-	gl::TextureFontRef	mTextureFont;
-	
-	
-	CaptureRef			mCapture;
-	
-	ContourVector		mContours;
-	
-	app::WindowRef		mAuxWindow ; // for other debug info, on computer screen
-	
-	double				mLastFrameTime = 0. ;
-	vec2				mMousePos ;
+	CaptureRef			mCapture;	// input device		->
+	Vision				mVision ;	// edge detection	->
+	ContourVector		mContours;	// edges output		->
+	BallWorld			mBallWorld ;// world simulation
 	
 	// world info
 	vec2 getWorldSize() const { return kCaptureSize ; }
 		// units are um... pixels in camera space right now
 		// but should switch to meters or something like that
 	
-	BallWorld mBallWorld ;
 	
-	// for main window, the projector display
-	vec2 mouseToWorld( vec2 );
-	void updateWindowMapping();
+	// ui
+	Font				mFont;
+	gl::TextureFontRef	mTextureFont;
 	
-	float	mOrthoRect[4]; // points for glOrtho
+	app::WindowRef		mAuxWindow ; // for other debug info, on computer screen
+	
+	double				mLastFrameTime = 0. ;
+	vec2				mMousePos ;
+	
+	
+	// for main window,
+	vec2 mouseToWorld( vec2 ); // maps mouse to world coordinates
+	void updateWindowMapping(); // maps world coordinates to the projector display (and back)
+	
+	float	mOrthoRect[4]; // points for glOrtho; set by updateWindowMapping()
 };
 
 void PaperBounce3App::setup()
@@ -206,153 +156,18 @@ void PaperBounce3App::mouseDown( MouseEvent event )
 
 void PaperBounce3App::update()
 {
-	updateVision();
-	mBallWorld.update();
-}
-
-gl::Texture getImageSubarea( gl::Texture from, vec2 fromCoords[4], vec2 toSize )
-{
-	// from is the input camera image
-	// fromCoords are the topleft, topright, b-r, b-l area we are going to cut out
-	//	- specified in from's coordinate space
-	// return value:
-	//  - is the resulting image,
-	//  - whose size is toSize
-	
-	// fbo (which we'll want to cache between frames :P)
-	// etc
-}
-
-void PaperBounce3App::updateVision()
-{
-	if( mCapture->checkNewFrame() )
+	if ( mCapture->checkNewFrame() )
 	{
-		mOCVPipelineTrace = Pipeline() ;
-		mOCVPipelineTrace.setQuery("input");
+		Surface frame( *mCapture->getSurface() ) ;
 		
-		// Get surface data
-		Surface surface( *mCapture->getSurface() );
+		mVision.processFrame(frame) ;
 		
-		// make cv frame
-		cv::Mat input( toOcv( Channel( surface ) ) );
-		cv::Mat output, gray, thresholded ;
-
-		mOCVPipelineTrace.then( input, "input" );
+		mContours = mVision.mContourOutput ;
 		
-//		cv::Sobel( input, output, CV_8U, 1, 0 );
-		
-		//		cv::threshold( input, output, 128, 255, CV_8U );
-		//		cv::Laplacian( input, output, CV_8U );
-		//		cv::circle( output, toOcv( Vec2f(200, 200) ), 300, toOcv( Color( 0, 0.5f, 1 ) ), -1 );
-		//		cv::line( output, cv::Point( 1, 1 ), cv::Point( 30, 30 ), toOcv( Color( 1, 0.5f, 0 ) ) );
-
-		
-		// gray image
-		if (1)
-		{
-//			cv::cvtColor( input, gray, cv::COLOR_BGR2GRAY ); // already grayscale
-			
-			cv::GaussianBlur( input, gray, cv::Size(5,5), 0 );
-			mOCVPipelineTrace.then( gray, "gray" );
-
-			cv::threshold( gray, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
-			mOCVPipelineTrace.then( thresholded, "thresholded" );
-		}
-		
-		// contours
-		vector<vector<cv::Point> > contours;
-		vector<cv::Vec4i> hierarchy;
-		
-		cv::findContours( thresholded, contours, hierarchy, cv::RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
-		
-		// filter and process contours into our format
-		mContours.clear() ;
-		
-		map<int,int> ocvContourIdxToMyContourIdx ;
-		
-		for( int i=0; i<contours.size(); ++i )
-		{
-			const auto &c = contours[i] ;
-			
-			cv::Point2f center ;
-			float		radius ;
-			
-			cv::minEnclosingCircle( c, center, radius ) ;
-			
-			float		area = cv::contourArea(c) ;
-			
-			cv::RotatedRect rotatedRect = minAreaRect(c) ;
-			
-			if (	radius > kContourMinRadius &&
-					area > kContourMinArea &&
-					min( rotatedRect.size.width, rotatedRect.size.height ) > kContourMinWidth )
-			{
-				auto addContour = [&]( const vector<cv::Point>& c )
-				{
-					Contour myc ;
-					
-					myc.mPolyLine = fromOcv(c) ;
-					myc.mRadius = radius ;
-					myc.mCenter = fromOcv(center) ;
-					myc.mArea   = area ;
-//					myc.mIsHole = hierarchy[i][3] != -1 ;
-					myc.mBoundingRect = Rectf( myc.mPolyLine.getPoints() );
-					myc.mOcvContourIndex = i ;
-					
-					myc.mTreeDepth = 0 ;
-					{
-						int n = i ;
-						while ( (n = hierarchy[n][3]) > 0 )
-						{
-							myc.mTreeDepth++ ;
-						}
-					}
-					myc.mIsHole = ( myc.mTreeDepth % 2 ) ; // odd depth # children are holes
-					myc.mIsLeaf = hierarchy[i][2] < 0 ;
-					
-					mContours.push_back( myc );
-					
-					// store my index mapping
-					ocvContourIdxToMyContourIdx[i] = mContours.size()-1 ;
-				} ;
-				
-				if (1)
-				{
-					// simplify
-					vector<cv::Point> approx ;
-					
-					cv::approxPolyDP( c, approx, kContourDPEpislon, true ) ;
-					
-					addContour(approx);
-				}
-				else addContour(c) ;
-			}
-		}
-		
-		// add contour topology metadata
-		// (this might be screwed up because of how we cull contours;
-		// a simple fix might be to find orphaned contours--those with parents that don't exist anymore--
-		// and strip them, too. but this will, in turn, force us to rebuild indices.
-		// it might be simplest to just "hide" rejected contours, ignore them, but keep them around.
-		for ( size_t i=0; i<mContours.size(); ++i )
-		{
-			Contour &c = mContours[i] ;
-			
-			if ( hierarchy[c.mOcvContourIndex][3] >= 0 )
-			{
-				c.mParent = ocvContourIdxToMyContourIdx[ hierarchy[c.mOcvContourIndex][3] ] ;
-				
-//				assert( myc.mParent is valid ) ;
-				
-				assert( c.mParent >= 0 && c.mParent < mContours.size() ) ;
-				
-				mContours[c.mParent].mChild.push_back( i ) ;
-			}
-		}
-		
-		// notify clients -> push changes
-		mBallWorld.updateContours(mContours);
+		mBallWorld.updateContours( mContours );
 	}
+	
+	mBallWorld.update();
 }
 
 void PaperBounce3App::resize()
@@ -406,11 +221,11 @@ void PaperBounce3App::drawProjectorWindow()
 	// set window transform
 	gl::setMatrices( CameraOrtho( mOrthoRect[0], mOrthoRect[1], mOrthoRect[2], mOrthoRect[3], 0.f, 1.f ) ) ;
 	
-	// camera image
-	if ( mOCVPipelineTrace.getQueryFrame() && kDrawCameraImage )
+	// vision pipeline image
+	if ( mVision.mOCVPipelineTrace.getQueryFrame() && kDrawCameraImage )
 	{
 		gl::color( 1, 1, 1 );
-		gl::draw( mOCVPipelineTrace.getQueryFrame() );
+		gl::draw( mVision.mOCVPipelineTrace.getQueryFrame() );
 	}
 	
 	// draw frame
@@ -576,11 +391,11 @@ void PaperBounce3App::drawProjectorWindow()
 
 void PaperBounce3App::drawAuxWindow()
 {
-	if ( mOCVPipelineTrace.getQueryFrame() )
+	if ( mVision.mOCVPipelineTrace.getQueryFrame() )
 	{
 		gl::setMatricesWindow( kCaptureSize.x, kCaptureSize.y );
 		gl::color( 1, 1, 1 );
-		gl::draw( mOCVPipelineTrace.getQueryFrame() );
+		gl::draw( mVision.mOCVPipelineTrace.getQueryFrame() );
 	}
 }
 
