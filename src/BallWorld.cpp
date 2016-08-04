@@ -1,0 +1,354 @@
+//
+//  Balls.cpp
+//  PaperBounce3
+//
+//  Created by Chaim Gingold on 8/4/16.
+//
+//
+
+#include "BallWorld.h"
+#include "geom.h"
+#include "cinder/Rand.h"
+
+void BallWorld::draw()
+{
+	for( auto b : mBalls )
+	{
+		gl::color(b.mColor) ;
+		
+		if (0)
+		{
+			// just a circle
+			gl::drawSolidCircle( b.mLoc, b.mRadius ) ;
+		}
+		else
+		{
+			// squash + stretch
+			gl::pushModelView() ;
+			gl::translate( b.mLoc ) ;
+			
+			vec2  vel = b.getVel() ;
+			
+			float squashLen = min( length(b.mSquash) * 10.f, b.mRadius * .5f ) ;
+			float velLen    = length(vel) ;
+			
+			vec2 stretch ;
+			float l ;
+			
+			if ( squashLen > velLen ) stretch = perp(b.mSquash), l=squashLen ;
+			else stretch = vel, l = velLen ;
+			
+			float f = .25f * (l / b.mRadius) ;
+			
+			gl::rotate( glm::atan( stretch.y, stretch.x ) ) ;
+			gl::drawSolidEllipse( vec2(0,0), b.mRadius*(1.f+f), b.mRadius*(1.f-f) ) ;
+			
+			gl::popModelView() ;
+		}
+	}
+}
+
+void BallWorld::update()
+{
+	const float kMaxBallVel = kBallDefaultRadius * 2.f ;
+	
+	int   steps = 1 ;
+	float delta = 1.f / (float)steps ;
+	
+	for( int step=0; step<steps; ++step )
+	{
+		// accelerate
+		for( auto &b : mBalls )
+		{
+			b.mLoc += b.mAccel * delta*delta ;
+			b.mAccel = vec2(0,0) ;
+		}
+
+		// ball <> contour collisions
+		for( auto &b : mBalls )
+		{
+			vec2 oldVel = b.getVel() ;
+			vec2 oldLoc = b.mLoc ;
+			vec2 newLoc = resolveCollisionWithContours( b.mLoc, b.mRadius ) ;
+			
+			// update?
+			if ( newLoc != oldLoc )
+			{
+				// update loc
+				b.mLoc = newLoc ;
+				
+				// update vel
+				vec2 surfaceNormal = glm::normalize( newLoc - oldLoc ) ;
+				
+				b.setVel(
+					  glm::reflect( oldVel, surfaceNormal ) // transfer old velocity, but reflected
+//						+ normalize(newLoc - oldLoc) * max( distance(newLoc,oldLoc), b.mRadius * .1f )
+					+ normalize(newLoc - oldLoc) * .1f
+						// accumulate energy from impact
+						// would be cool to use optic flow for this, and each contour can have a velocity
+					) ;
+
+				// squash?
+				b.noteSquashImpact( surfaceNormal * length(b.getVel()) ) ; //newLoc - oldLoc ) ;
+			}
+		}
+
+		// ball <> ball collisions
+		resolveBallCollisions() ;
+		
+		// cap velocity
+		// (i think this is mostly to compensate for aggressive contour<>ball collisions in which balls get pushed in super fast;
+		// alternative would be to cap impulse there)
+		if (1)
+		{
+			for( auto &b : mBalls )
+			{
+				vec2 v = b.getVel() ;
+				
+				if ( length(v) > kMaxBallVel )
+				{
+					b.setVel( normalize(v) * kMaxBallVel ) ;
+				}
+			}
+		}
+		
+		// squash
+		for( auto &b : mBalls )
+		{
+			b.mSquash *= .7f ;
+		}
+		
+		// inertia
+		for( auto &b : mBalls )
+		{
+			vec2 vel = b.getVel() ; // rewriting mLastLoc will stomp vel, so get it first
+			b.mLastLoc = b.mLoc ;
+			b.mLoc += vel ;
+		}
+	}
+}
+
+void BallWorld::newRandomBall ( vec2 loc )
+{
+	Ball ball ;
+	
+	ball.mColor = ColorAf::hex(0xC62D41);
+	ball.setLoc( loc ) ;
+	ball.mRadius = Rand::randFloat(kBallDefaultRadius,kBallDefaultMaxRadius) ;
+	ball.setMass( M_PI * powf(ball.mRadius,3.f) ) ;
+	
+	ball.setVel( Rand::randVec2() * 2.f ) ;
+	
+	mBalls.push_back( ball ) ;
+}
+
+vec2 BallWorld::resolveCollisionWithBalls ( vec2 p, float r, Ball* ignore, float correctionFraction ) const
+{
+	for ( const auto &b : mBalls )
+	{
+		if ( &b==ignore ) continue ;
+		
+		float d = glm::distance(p,b.mLoc) ;
+		
+		float rs = r + b.mRadius ;
+		
+		if ( d < rs )
+		{
+			// just update p
+			vec2 correctionVec ;
+			
+			if (d==0.f) correctionVec = Rand::randVec2() ; // oops on top of one another; pick random direction
+			else correctionVec = glm::normalize( p - b.mLoc ) ;
+			
+			p = correctionVec * lerp( d, rs, correctionFraction ) + b.mLoc ;
+		}
+	}
+	
+	return p ;
+}
+
+void BallWorld::resolveBallCollisions()
+{
+	if ( mBalls.size()==0 ) return ; // wtf, i have some stupid logic error below...
+	
+	for( size_t i=0  ; i<mBalls.size()-1; i++ )
+	for( size_t j=i+1; j<mBalls.size()  ; j++ )
+	{
+		auto &a = mBalls[i] ;
+		auto &b = mBalls[j] ;
+		
+		float d  = glm::distance(a.mLoc,b.mLoc) ;
+		float rs = a.mRadius + b.mRadius ;
+		
+		if ( d < rs )
+		{
+			vec2 a2b ;
+			
+			if (d==0.f) a2b = Rand::randVec2() ; // oops on top of one another; pick random direction
+			else a2b = glm::normalize( b.mLoc - a.mLoc ) ;
+			
+			float overlap = rs - d ;
+			
+			// get velocities
+			const vec2 avel = a.getVel() ;
+			const vec2 bvel = b.getVel() ;
+			
+			// get masses
+			const float ma = a.getMass() ;
+			const float mb = b.getMass() ;
+
+			const float amass_frac = ma / (ma+mb) ; // a's % of total mass
+			const float bmass_frac = 1.f - amass_frac ; // b's % of total mass
+			
+			// correct position (proportional to masses)
+			b.mLoc +=  a2b * overlap * amass_frac ;
+			a.mLoc += -a2b * overlap * bmass_frac ;
+			
+			// get velocities along collision axis (a2b)
+			const float avelp = dot( avel, a2b ) ;
+			const float bvelp = dot( bvel, a2b ) ;
+			
+			// ...computations for new velocities
+			float avelp_new ;
+			float bvelp_new ;
+			
+			if (0)
+			{
+				// swap velocities along axis of collision
+				// (old way)
+				avelp_new = bvelp ;
+				bvelp_new = avelp ;
+			}
+			else
+			{
+				// new way:
+				// - do relative mass interactions
+				// - can dial elasticity
+				
+				float cr = 1.f ; // 0..1
+					// coefficient of restitution:
+					// 0 is elastic
+					// 1 is inelastic
+					// https://en.wikipedia.org/wiki/Inelastic_collision
+				
+				avelp_new = (cr * mb * (bvelp - avelp) + ma*avelp + mb*bvelp) / (ma+mb) ;
+				bvelp_new = (cr * ma * (avelp - bvelp) + ma*avelp + mb*bvelp) / (ma+mb) ;
+					// we'll let the compiler simplify that
+					// (though if we cache inverse mass we can plug that in directly;
+					// uh... i'm blanking on the algebra for this. whatev.)
+			}
+			
+			// compute new velocities
+			const vec2 avel_new = avel + a2b * ( avelp_new - avelp ) ;
+			const vec2 bvel_new = bvel + a2b * ( bvelp_new - bvelp ) ;
+			
+			// set velocities
+			a.setVel(avel_new) ;
+			b.setVel(bvel_new) ;
+
+			// squash it
+//			a.noteSquashImpact( -a2b * overlap * bmass_frac ) ;
+//			b.noteSquashImpact(  a2b * overlap * amass_frac ) ;
+
+			a.noteSquashImpact( avel_new - avel ) ;
+			b.noteSquashImpact( bvel_new - bvel ) ;
+				// *cough* just undoing some of the comptuation i did earlier. compiler can figure this out,
+				// but the point is that we just want the velocities along the axis of collision.
+		}
+	}
+}
+
+vec2 BallWorld::resolveCollisionWithContours ( vec2 point, float radius ) const
+{
+//	size_t ai=-1, bi=-1 ; // line segment indices we collide with
+	
+	const Contour* inHole=0 ;
+	const Contour* inPoly=0 ;
+	// being inside a poly means we're OK (inside a piece of paper)
+	// BUT we then should still test against holes to make sure...
+
+	/*
+	auto doNormal = [&]( const Contour& c, size_t ai, size_t bi )
+	{
+		if (surfaceNormal)
+		{
+			if (ai==-1) *surfaceNormal = vec2(0,0) ;
+			else
+			{
+				vec2 a2b = c.mPolyLine.getPoints()[ai] - c.mPolyLine.getPoints()[bi] ;
+				
+				vec3 cross = glm::cross( vec3(a2b,0), vec3(0,0,1) ) ;
+				
+				*surfaceNormal = glm::normalize( vec2(cross.x,cross.y) ) ;
+			}
+		}
+	};*/
+	
+	// inside a poly?
+	const Contour* in = mContours.findLeafContourContainingPoint(point) ;
+	
+	if (in)
+	{
+		if ( in->mIsHole )	inHole = in ;
+		else				inPoly = in ;
+	}
+	
+	// ok, find closest
+	if (inPoly)
+	{
+		// in paper
+
+		// 1. make sure we aren't overlapping the edge
+		auto unlapEdge = []( vec2 p, float r, const Contour& poly ) -> vec2
+		{
+			float dist ;
+
+			vec2 x = closestPointOnPoly( p, poly.mPolyLine, 0, 0, &dist );
+
+			if ( dist < r ) return glm::normalize( p - x ) * r + x ;
+			else return p ;
+		} ;
+		
+		// 2. make sure we aren't overlapping a hole
+		auto unlapHole = [this]( vec2 p, float r ) -> vec2
+		{
+			float dist ;
+			vec2 x ;
+			
+			const Contour * nearestHole = mContours.findClosestContour( p, &x, &dist, ContourKind::Holes ) ;
+			
+			if ( nearestHole && dist < r && !nearestHole->mPolyLine.contains(p) )
+				// ensure we aren't actually in this hole or that would be bad...
+			{
+				return glm::normalize( p - x ) * r + x ;
+			}
+			else return p ;
+		} ;
+		
+		// combine
+		vec2 p = point ;
+		
+		p = unlapEdge( p, radius, *inPoly ) ;
+		p = unlapHole( p, radius ) ;
+		
+		// done
+		return p ;
+	}
+	else if ( inHole )
+	{
+		// push us out of this hole
+		vec2 x = closestPointOnPoly(point, inHole->mPolyLine) ;
+		
+		return glm::normalize( x - point ) * radius + x ;
+	}
+	else
+	{
+		// inside of no contour
+		
+		// push us into nearest paper
+		vec2 x ;
+		mContours.findClosestContour( point, &x, 0, ContourKind::NonHoles ) ;
+		
+		return glm::normalize( x - point ) * radius + x ;
+	}
+}

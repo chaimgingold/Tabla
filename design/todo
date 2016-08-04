@@ -32,7 +32,7 @@ New features
 - Recognize colorful marker objects (lego bricks, eg)
 	- Let me remove keyboard controls
 - Sound effects
-	- Clacking balls
+	- Clacking balls; use ping-pong sounds from Dave.
 - Visual effects
 	√ Squash and stretch balls
 		- Normalize ball squashing effect? Just always shove in a normal vector, and have a tick counter... (and if multiple collisions, then average them, don't use biggest.)
@@ -48,10 +48,23 @@ New features
 		(Maybe don't even project there).
 
 Technical
+- Refactoring
+	- Ball <> contour simulation logic in its own independent class. (world simulation)
+		- This leaves room for another "simulation", the gray-code auto-registration that would calibrate registrations
+	- Camera-projector registration in its own class (simply the camera-projector-world mapping)
+	- OCV pipeline and outputs in its own class (image -> semantic actionable world data)
+	- Shove stuff into xml (make all this stuff tunable)
+	- The App that holds and manages all this stuff
+		- Can swap between 'modes': calibration vs simulation
+		- Can save/load mappings, and undertake to create them
+		- Can show us debug visualizations
 - Better registration
 	- Automatic video-projector calibration (gray coding, or variant).
 	- Will let me swap out, improve physical gear.
 - Lower latency
+	- Think we got this down: pick proper resolutions.
+		- Just need to parameterize this for different installs and easy experimentation.
+		- Also, maybe dip into OSX camera api and get the resolutions.
 	- new capture method?
 	- multi-threaded? (measure latencies first)
 - Use a Kinect.

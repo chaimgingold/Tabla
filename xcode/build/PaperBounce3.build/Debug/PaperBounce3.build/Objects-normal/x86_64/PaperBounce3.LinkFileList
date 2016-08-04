@@ -4,6 +4,7 @@
 /Users/chaim/Documents/PaperBounce3/xcode/build/PaperBounce3.build/Debug/PaperBounce3.build/Objects-normal/x86_64/b2CollideEdge.o
 /Users/chaim/Documents/PaperBounce3/xcode/build/PaperBounce3.build/Debug/PaperBounce3.build/Objects-normal/x86_64/b2CollidePolygon.o
 /Users/chaim/Documents/PaperBounce3/xcode/build/PaperBounce3.build/Debug/PaperBounce3.build/Objects-normal/x86_64/b2Collision.o
+/Users/chaim/Documents/PaperBounce3/xcode/build/PaperBounce3.build/Debug/PaperBounce3.build/Objects-normal/x86_64/BallWorld.o
 /Users/chaim/Documents/PaperBounce3/xcode/build/PaperBounce3.build/Debug/PaperBounce3.build/Objects-normal/x86_64/b2Distance.o
 /Users/chaim/Documents/PaperBounce3/xcode/build/PaperBounce3.build/Debug/PaperBounce3.build/Objects-normal/x86_64/b2DynamicTree.o
 /Users/chaim/Documents/PaperBounce3/xcode/build/PaperBounce3.build/Debug/PaperBounce3.build/Objects-normal/x86_64/b2TimeOfImpact.o
@@ -35,6 +36,7 @@
 /Users/chaim/Documents/PaperBounce3/xcode/build/PaperBounce3.build/Debug/PaperBounce3.build/Objects-normal/x86_64/b2DistanceJoint.o
 /Users/chaim/Documents/PaperBounce3/xcode/build/PaperBounce3.build/Debug/PaperBounce3.build/Objects-normal/x86_64/b2FrictionJoint.o
 /Users/chaim/Documents/PaperBounce3/xcode/build/PaperBounce3.build/Debug/PaperBounce3.build/Objects-normal/x86_64/b2GearJoint.o
+/Users/chaim/Documents/PaperBounce3/xcode/build/PaperBounce3.build/Debug/PaperBounce3.build/Objects-normal/x86_64/Contour.o
 /Users/chaim/Documents/PaperBounce3/xcode/build/PaperBounce3.build/Debug/PaperBounce3.build/Objects-normal/x86_64/b2Joint.o
 /Users/chaim/Documents/PaperBounce3/xcode/build/PaperBounce3.build/Debug/PaperBounce3.build/Objects-normal/x86_64/b2MouseJoint.o
 /Users/chaim/Documents/PaperBounce3/xcode/build/PaperBounce3.build/Debug/PaperBounce3.build/Objects-normal/x86_64/b2PrismaticJoint.o

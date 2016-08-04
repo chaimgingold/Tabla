@@ -9,6 +9,10 @@
 #include "cinder/Capture.h"
 #include "CinderOpenCV.h"
 
+#include "Contour.h"
+#include "BallWorld.h"
+#include "geom.h"
+
 #include <map>
 #include <string>
 
@@ -23,9 +27,6 @@ const float kContourMinArea   = 100.f * kResScale ;
 const float kContourDPEpislon = 5.f  * kResScale ;
 const float kContourMinWidth  = 5.f  * kResScale ;
 
-
-const float kBallDefaultRadius		= 8.f *  .5f ;
-const float kBallDefaultMaxRadius	= 8.f * 4.f ;
 
 const vec2 kCaptureSize = vec2( 640, 480 ) ;
 //const vec2 kCaptureSize = vec2( 16.f/9.f * 480.f, 480 ) ;
@@ -52,12 +53,6 @@ const bool kDrawContourTree			= kDebug ;
 //const bool kDrawPolyBoundingRect	= false ;
 //const bool kDrawContourTree			= false ;
 
-vec2 perp( vec2 p )
-{
-	vec3 cross = glm::cross( vec3(p,0), vec3(0,0,1) ) ;
-	return vec2( cross.x, cross.y ) ;
-}
-
 namespace cinder {
 	
 	PolyLine2 fromOcv( vector<cv::Point> pts )
@@ -75,75 +70,6 @@ public:
 	bool mIsAux = false ;
 };
 
-class cBall {
-	
-public:
-	vec2 mLoc ;
-	vec2 mLastLoc ;
-	vec2 mAccel ;
-	
-	float mRadius ;
-	ColorAf mColor ;
-	
-	void setLoc( vec2 l ) { mLoc=mLastLoc=l; }
-	void setVel( vec2 v ) { mLastLoc = mLoc - v ; }
-	vec2 getVel() const { return mLoc - mLastLoc ; }
-	
-	void  setMass( float m ) { mMass = m ; }
-	float getMass() const { return mMass ; }
-	float getInvMass() const { return 1.f / getMass() ; }
-	
-	void noteSquashImpact( vec2 directionAndMagnitude )
-	{
-		if ( length(directionAndMagnitude) > length(mSquash) ) mSquash = directionAndMagnitude ;
-	}
-
-	vec2  mSquash ; // direction and magnitude
-	
-private:
-	float mMass = 1.f ; // let's start by doing the right thing.
-
-};
-
-enum class ContourKind {
-	Any,
-	Holes,
-	NonHoles
-} ;
-
-class cContour {
-public:
-	PolyLine2	mPolyLine ;
-	vec2		mCenter ;
-	Rectf		mBoundingRect ;
-	float		mRadius ;
-	float		mArea ;
-	
-	bool		mIsHole = false ;
-	bool		mIsLeaf = true ;
-	int			mParent = -1 ; // index into the contour we in
-	vector<int> mChild ; // indices into mContour of contours which are in me
-	int			mTreeDepth = 0 ;
-	
-	int			mOcvContourIndex = -1 ;
-	
-	bool		isKind ( ContourKind kind ) const
-	{
-		switch(kind)
-		{
-			case ContourKind::NonHoles:	return !mIsHole ;
-			case ContourKind::Holes:	return  mIsHole ;
-			case ContourKind::Any:
-			default:					return  true ;
-		}
-	}
-	
-	bool		contains( vec2 point ) const
-	{
-		return mBoundingRect.contains(point) && mPolyLine.contains(point) ;
-	}
-	
-};
 
 class Pipeline
 {
@@ -191,9 +117,6 @@ class PaperBounce3App : public App {
 	void drawAuxWindow() ;
 
 	void updateVision(); // updates mCameraTexture, mContours
-	void updateBalls() ;
-	
-	void newRandomBall( vec2 loc ) ;
 	
 	Pipeline			mOCVPipelineTrace ;
 	
@@ -202,11 +125,8 @@ class PaperBounce3App : public App {
 	
 	
 	CaptureRef			mCapture;
-//	gl::TextureRef		mCameraTexture;
 	
-	vector<cContour>	mContours;
-	
-	vector<cBall>		mBalls ;
+	ContourVector		mContours;
 	
 	app::WindowRef		mAuxWindow ; // for other debug info, on computer screen
 	
@@ -218,18 +138,7 @@ class PaperBounce3App : public App {
 		// units are um... pixels in camera space right now
 		// but should switch to meters or something like that
 	
-	// physics/geometry helpers
-	const cContour* findClosestContour ( vec2 point, vec2* closestPoint=0, float* closestDist=0, ContourKind kind = ContourKind::Any ) const ; // assumes findLeafContourContainingPoint failed
-	
-	const cContour* findLeafContourContainingPoint( vec2 point ) const ;
-	
-	vec2 resolveCollisionWithContours	( vec2 p, float r ) const ; // returns pinned version of point
-	vec2 resolveCollisionWithBalls		( vec2 p, float r, cBall* ignore=0, float correctionFraction=1.f ) const ;
-		// simple pushes p out of overlapping balls.
-		// but might take multiple iterations to respond to all of them
-		// fraction is (0,1], how much of the collision correction to do.
-	
-	void resolveBallCollisions() ;
+	BallWorld mBallWorld ;
 	
 	// for main window, the projector display
 	vec2 mouseToWorld( vec2 );
@@ -292,13 +201,13 @@ void PaperBounce3App::setup()
 
 void PaperBounce3App::mouseDown( MouseEvent event )
 {
-	newRandomBall( mouseToWorld( event.getPos() ) ) ;
+	mBallWorld.newRandomBall( mouseToWorld( event.getPos() ) ) ;
 }
 
 void PaperBounce3App::update()
 {
 	updateVision();
-	updateBalls();
+	mBallWorld.update();
 }
 
 gl::Texture getImageSubarea( gl::Texture from, vec2 fromCoords[4], vec2 toSize )
@@ -380,7 +289,7 @@ void PaperBounce3App::updateVision()
 			{
 				auto addContour = [&]( const vector<cv::Point>& c )
 				{
-					cContour myc ;
+					Contour myc ;
 					
 					myc.mPolyLine = fromOcv(c) ;
 					myc.mRadius = radius ;
@@ -427,7 +336,7 @@ void PaperBounce3App::updateVision()
 		// it might be simplest to just "hide" rejected contours, ignore them, but keep them around.
 		for ( size_t i=0; i<mContours.size(); ++i )
 		{
-			cContour &c = mContours[i] ;
+			Contour &c = mContours[i] ;
 			
 			if ( hierarchy[c.mOcvContourIndex][3] >= 0 )
 			{
@@ -440,416 +349,9 @@ void PaperBounce3App::updateVision()
 				mContours[c.mParent].mChild.push_back( i ) ;
 			}
 		}
-	}
-}
-
-void PaperBounce3App::updateBalls()
-{
-	const float kMaxBallVel = kBallDefaultRadius * 2.f ;
-	
-	int   steps = 1 ;
-	float delta = 1.f / (float)steps ;
-	
-	for( int step=0; step<steps; ++step )
-	{
-		// accelerate
-		for( auto &b : mBalls )
-		{
-			b.mLoc += b.mAccel * delta*delta ;
-			b.mAccel = vec2(0,0) ;
-		}
-
-		// ball <> contour collisions
-		for( auto &b : mBalls )
-		{
-			vec2 oldVel = b.getVel() ;
-			vec2 oldLoc = b.mLoc ;
-			vec2 newLoc = resolveCollisionWithContours( b.mLoc, b.mRadius ) ;
-			
-			// update?
-			if ( newLoc != oldLoc )
-			{
-				// update loc
-				b.mLoc = newLoc ;
-				
-				// update vel
-				vec2 surfaceNormal = glm::normalize( newLoc - oldLoc ) ;
-				
-				b.setVel(
-					  glm::reflect( oldVel, surfaceNormal ) // transfer old velocity, but reflected
-//						+ normalize(newLoc - oldLoc) * max( distance(newLoc,oldLoc), b.mRadius * .1f )
-					+ normalize(newLoc - oldLoc) * .1f
-						// accumulate energy from impact
-						// would be cool to use optic flow for this, and each contour can have a velocity
-					) ;
-
-				// squash?
-				b.noteSquashImpact( surfaceNormal * length(b.getVel()) ) ; //newLoc - oldLoc ) ;
-			}
-		}
-
-		// ball <> ball collisions
-		resolveBallCollisions() ;
 		
-		// cap velocity
-		// (i think this is mostly to compensate for aggressive contour<>ball collisions in which balls get pushed in super fast;
-		// alternative would be to cap impulse there)
-		if (1)
-		{
-			for( auto &b : mBalls )
-			{
-				vec2 v = b.getVel() ;
-				
-				if ( length(v) > kMaxBallVel )
-				{
-					b.setVel( normalize(v) * kMaxBallVel ) ;
-				}
-			}
-		}
-		
-		// squash
-		for( auto &b : mBalls )
-		{
-			b.mSquash *= .7f ;
-		}
-		
-		// inertia
-		for( auto &b : mBalls )
-		{
-			vec2 vel = b.getVel() ; // rewriting mLastLoc will stomp vel, so get it first
-			b.mLastLoc = b.mLoc ;
-			b.mLoc += vel ;
-		}
-	}
-}
-
-void PaperBounce3App::newRandomBall ( vec2 loc )
-{
-	cBall ball ;
-	
-	ball.mColor = ColorAf::hex(0xC62D41);
-	ball.setLoc( loc ) ;
-	ball.mRadius = Rand::randFloat(kBallDefaultRadius,kBallDefaultMaxRadius) ;
-	ball.setMass( M_PI * powf(ball.mRadius,3.f) ) ;
-	
-	ball.setVel( Rand::randVec2() * 2.f ) ;
-	
-	mBalls.push_back( ball ) ;
-}
-
-vec2 closestPointOnLineSeg ( vec2 p, vec2 a, vec2 b )
-{
-	vec2 ap = p - a ;
-	vec2 ab = b - a ;
-	
-	float ab2 = ab.x*ab.x + ab.y*ab.y;
-	float ap_ab = ap.x*ab.x + ap.y*ab.y;
-	float t = ap_ab / ab2;
-	
-	if (t < 0.0f) t = 0.0f;
-	else if (t > 1.0f) t = 1.0f;
-	
-	vec2 x = a + ab * t;
-	return x ;
-}
-
-vec2 closestPointOnPoly( vec2 pt, const PolyLine2& poly, size_t *ai=0, size_t *bi=0, float* dist=0 )
-{
-	float best = MAXFLOAT ;
-	vec2 result = pt ;
-	
-	// assume poly is closed
-	for( size_t i=0; i<poly.size(); ++i )
-	{
-		size_t j = (i+1) % poly.size() ;
-		
-		vec2 a = poly.getPoints()[i];
-		vec2 b = poly.getPoints()[j];
-
-		vec2 x = closestPointOnLineSeg(pt, a, b);
-		
-		float dist = glm::distance(pt,x) ; // could eliminate sqrt
-
-		if ( dist < best )
-		{
-			best = dist ;
-			result = x ;
-			if (ai) *ai = i ;
-			if (bi) *bi = j ;
-		}
-	}
-	
-	if (dist) *dist = best ;
-	return result ;
-}
-
-const cContour* PaperBounce3App::findClosestContour ( vec2 point, vec2* closestPoint, float* closestDist, ContourKind kind ) const
-{
-	float best = MAXFLOAT ;
-	const cContour* result = 0 ;
-	
-	// can optimize this by using bounding boxes as heuristic, but whatev for now.
-	for ( const auto &c : mContours )
-	{
-		if ( c.isKind(kind) )
-		{
-			float dist ;
-			
-			vec2 x = closestPointOnPoly( point, c.mPolyLine, 0, 0, &dist ) ;
-			
-			if ( dist < best )
-			{
-				best = dist ;
-				result = &c ;
-				if (closestPoint) *closestPoint = x ;
-				if (closestDist ) *closestDist  = dist ;
-			}
-		}
-	}
-	
-	return result ;
-}
-
-const cContour* PaperBounce3App::findLeafContourContainingPoint( vec2 point ) const
-{
-	function<const cContour*(const cContour&)> search = [&]( const cContour& at ) -> const cContour*
-	{
-		if ( at.contains(point) )
-		{
-			for( auto childIndex : at.mChild )
-			{
-				const cContour* x = search( mContours[childIndex] ) ;
-				
-				if (x) return x ;
-			}
-			
-			return &at ;
-		}
-		
-		return 0 ;
-	} ;
-
-	for( const auto &c : mContours )
-	{
-		if ( c.mTreeDepth == 0 )
-		{
-			const cContour* x = search(c) ;
-			
-			if (x) return x ;
-		}
-	}
-	
-	return 0 ;
-}
-
-vec2 PaperBounce3App::resolveCollisionWithContours ( vec2 point, float radius ) const
-{
-//	size_t ai=-1, bi=-1 ; // line segment indices we collide with
-	
-	const cContour* inHole=0 ;
-	const cContour* inPoly=0 ;
-	// being inside a poly means we're OK (inside a piece of paper)
-	// BUT we then should still test against holes to make sure...
-
-	/*
-	auto doNormal = [&]( const cContour& c, size_t ai, size_t bi )
-	{
-		if (surfaceNormal)
-		{
-			if (ai==-1) *surfaceNormal = vec2(0,0) ;
-			else
-			{
-				vec2 a2b = c.mPolyLine.getPoints()[ai] - c.mPolyLine.getPoints()[bi] ;
-				
-				vec3 cross = glm::cross( vec3(a2b,0), vec3(0,0,1) ) ;
-				
-				*surfaceNormal = glm::normalize( vec2(cross.x,cross.y) ) ;
-			}
-		}
-	};*/
-	
-	// inside a poly?
-	const cContour* in = findLeafContourContainingPoint(point) ;
-	
-	if (in)
-	{
-		if ( in->mIsHole )	inHole = in ;
-		else				inPoly = in ;
-	}
-	
-	// ok, find closest
-	if (inPoly)
-	{
-		// in paper
-
-		// 1. make sure we aren't overlapping the edge
-		auto unlapEdge = []( vec2 p, float r, const cContour& poly ) -> vec2
-		{
-			float dist ;
-
-			vec2 x = closestPointOnPoly( p, poly.mPolyLine, 0, 0, &dist );
-
-			if ( dist < r ) return glm::normalize( p - x ) * r + x ;
-			else return p ;
-		} ;
-		
-		// 2. make sure we aren't overlapping a hole
-		auto unlapHole = [this]( vec2 p, float r ) -> vec2
-		{
-			float dist ;
-			vec2 x ;
-			
-			const cContour * nearestHole = findClosestContour( p, &x, &dist, ContourKind::Holes ) ;
-			
-			if ( nearestHole && dist < r && !nearestHole->mPolyLine.contains(p) )
-				// ensure we aren't actually in this hole or that would be bad...
-			{
-				return glm::normalize( p - x ) * r + x ;
-			}
-			else return p ;
-		} ;
-		
-		// combine
-		vec2 p = point ;
-		
-		p = unlapEdge( p, radius, *inPoly ) ;
-		p = unlapHole( p, radius ) ;
-		
-		// done
-		return p ;
-	}
-	else if ( inHole )
-	{
-		// push us out of this hole
-		vec2 x = closestPointOnPoly(point, inHole->mPolyLine) ;
-		
-		return glm::normalize( x - point ) * radius + x ;
-	}
-	else
-	{
-		// inside of no contour
-		
-		// push us into nearest paper
-		vec2 x ;
-		findClosestContour( point, &x, 0, ContourKind::NonHoles ) ;
-		
-		return glm::normalize( x - point ) * radius + x ;
-	}
-}
-
-vec2 PaperBounce3App::resolveCollisionWithBalls ( vec2 p, float r, cBall* ignore, float correctionFraction ) const
-{
-	for ( const auto &b : mBalls )
-	{
-		if ( &b==ignore ) continue ;
-		
-		float d = glm::distance(p,b.mLoc) ;
-		
-		float rs = r + b.mRadius ;
-		
-		if ( d < rs )
-		{
-			// just update p
-			vec2 correctionVec ;
-			
-			if (d==0.f) correctionVec = Rand::randVec2() ; // oops on top of one another; pick random direction
-			else correctionVec = glm::normalize( p - b.mLoc ) ;
-			
-			p = correctionVec * lerp( d, rs, correctionFraction ) + b.mLoc ;
-		}
-	}
-	
-	return p ;
-}
-
-void PaperBounce3App::resolveBallCollisions()
-{
-	if ( mBalls.size()==0 ) return ; // wtf, i have some stupid logic error below...
-	
-	for( size_t i=0  ; i<mBalls.size()-1; i++ )
-	for( size_t j=i+1; j<mBalls.size()  ; j++ )
-	{
-		auto &a = mBalls[i] ;
-		auto &b = mBalls[j] ;
-		
-		float d  = glm::distance(a.mLoc,b.mLoc) ;
-		float rs = a.mRadius + b.mRadius ;
-		
-		if ( d < rs )
-		{
-			vec2 a2b ;
-			
-			if (d==0.f) a2b = Rand::randVec2() ; // oops on top of one another; pick random direction
-			else a2b = glm::normalize( b.mLoc - a.mLoc ) ;
-			
-			float overlap = rs - d ;
-			
-			// get velocities
-			const vec2 avel = a.getVel() ;
-			const vec2 bvel = b.getVel() ;
-			
-			// get masses
-			const float ma = a.getMass() ;
-			const float mb = b.getMass() ;
-
-			const float amass_frac = ma / (ma+mb) ; // a's % of total mass
-			const float bmass_frac = 1.f - amass_frac ; // b's % of total mass
-			
-			// correct position (proportional to masses)
-			b.mLoc +=  a2b * overlap * amass_frac ;
-			a.mLoc += -a2b * overlap * bmass_frac ;
-			
-			// get velocities along collision axis (a2b)
-			const float avelp = dot( avel, a2b ) ;
-			const float bvelp = dot( bvel, a2b ) ;
-			
-			// ...computations for new velocities
-			float avelp_new ;
-			float bvelp_new ;
-			
-			if (0)
-			{
-				// swap velocities along axis of collision
-				// (old way)
-				avelp_new = bvelp ;
-				bvelp_new = avelp ;
-			}
-			else
-			{
-				// new way:
-				// - do relative mass interactions
-				// - can dial elasticity
-				
-				float cr = 1.f ; // 0..1
-					// coefficient of restitution:
-					// 0 is elastic
-					// 1 is inelastic
-					// https://en.wikipedia.org/wiki/Inelastic_collision
-				
-				avelp_new = (cr * mb * (bvelp - avelp) + ma*avelp + mb*bvelp) / (ma+mb) ;
-				bvelp_new = (cr * ma * (avelp - bvelp) + ma*avelp + mb*bvelp) / (ma+mb) ;
-					// we'll let the compiler simplify that
-					// (though if we cache inverse mass we can plug that in directly;
-					// uh... i'm blanking on the algebra for this. whatev.)
-			}
-			
-			// compute new velocities
-			const vec2 avel_new = avel + a2b * ( avelp_new - avelp ) ;
-			const vec2 bvel_new = bvel + a2b * ( bvelp_new - bvelp ) ;
-			
-			// set velocities
-			a.setVel(avel_new) ;
-			b.setVel(bvel_new) ;
-
-			// squash it
-//			a.noteSquashImpact( -a2b * overlap * bmass_frac ) ;
-//			b.noteSquashImpact(  a2b * overlap * amass_frac ) ;
-
-			a.noteSquashImpact( avel_new - avel ) ;
-			b.noteSquashImpact( bvel_new - bvel ) ;
-				// *cough* just undoing some of the comptuation i did earlier. compiler can figure this out,
-				// but the point is that we just want the velocities along the axis of collision.
-		}
+		// notify clients -> push changes
+		mBallWorld.updateContours(mContours);
 	}
 }
 
@@ -939,7 +441,7 @@ void PaperBounce3App::drawProjectorWindow()
 			// recursive tree
 			if (1)
 			{
-				function<void(const cContour&)> drawOne = [&]( const cContour& c )
+				function<void(const Contour&)> drawOne = [&]( const Contour& c )
 				{
 					if ( c.mIsHole ) gl::color(.0f,.0f,.0f,.8f);
 					else gl::color(.2f,.2f,.4f,.5f);
@@ -987,7 +489,7 @@ void PaperBounce3App::drawProjectorWindow()
 			// picked highlight
 			vec2 mousePos = mouseToWorld(mMousePos) ;
 
-			const cContour* picked = findLeafContourContainingPoint( mousePos ) ;
+			const Contour* picked = mContours.findLeafContourContainingPoint( mousePos ) ;
 			
 			if (picked)
 			{
@@ -1023,42 +525,7 @@ void PaperBounce3App::drawProjectorWindow()
 	}
 	
 	// draw balls
-	{
-		for( auto b : mBalls )
-		{
-			gl::color(b.mColor) ;
-			
-			if (0)
-			{
-				// just a circle
-				gl::drawSolidCircle( b.mLoc, b.mRadius ) ;
-			}
-			else
-			{
-				// squash + stretch
-				gl::pushModelView() ;
-				gl::translate( b.mLoc ) ;
-				
-				vec2  vel = b.getVel() ;
-				
-				float squashLen = min( length(b.mSquash) * 10.f, b.mRadius * .5f ) ;
-				float velLen    = length(vel) ;
-				
-				vec2 stretch ;
-				float l ;
-				
-				if ( squashLen > velLen ) stretch = perp(b.mSquash), l=squashLen ;
-				else stretch = vel, l = velLen ;
-				
-				float f = .25f * (l / b.mRadius) ;
-				
-				gl::rotate( glm::atan( stretch.y, stretch.x ) ) ;
-				gl::drawSolidEllipse( vec2(0,0), b.mRadius*(1.f+f), b.mRadius*(1.f-f) ) ;
-				
-				gl::popModelView() ;
-			}
-		}
-	}
+	mBallWorld.draw();
 	
 	// test collision logic
 	if ( kDrawMouseDebugInfo && getWindowBounds().contains(mMousePos) )
@@ -1069,7 +536,7 @@ void PaperBounce3App::drawProjectorWindow()
 		
 //		vec2 surfaceNormal ;
 		
-		vec2 fixed = resolveCollisionWithContours(pt,r);
+		vec2 fixed = mBallWorld.resolveCollisionWithContours(pt,r);
 		
 		gl::color( ColorAf(0.f,0.f,1.f) ) ;
 		gl::drawStrokedCircle(fixed,r);
@@ -1155,25 +622,13 @@ void PaperBounce3App::keyDown( KeyEvent event )
 
 		case KeyEvent::KEY_b:
 			// make a random ball
-			{
-				vec2 loc = randVec2() * getWorldSize() ;
-				vec2 closestOnPaper ;
-				
-				if ( findClosestContour(loc,&closestOnPaper) )
-				{
-//					loc = closestOnPaper ;
-					// This didn't work anyways.
-					// I wonder if being on the line exactly messed things up.
-				}
-				
-				newRandomBall( loc ) ;
-				// we could traverse paper hierarchy and pick a random point on paper...
-				// might be a useful function, randomPointOnPaper()
-			}
+			mBallWorld.newRandomBall( randVec2() * getWorldSize() ) ;
+			// we could traverse paper hierarchy and pick a random point on paper...
+			// might be a useful function, randomPointOnPaper()
 			break ;
 			
 		case KeyEvent::KEY_c:
-			mBalls.clear() ;
+			mBallWorld.clearBalls() ;
 			break ;
 	}
 }
