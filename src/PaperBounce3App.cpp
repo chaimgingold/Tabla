@@ -10,13 +10,14 @@
 #include "CinderOpenCV.h"
 
 #include <map>
+#include <string>
 
 using namespace ci;
 using namespace ci::app;
 using namespace std;
 
 
-const float kResScale = 1.f ;
+const float kResScale = .2f ;
 const float kContourMinRadius = 3.f  * kResScale ;
 const float kContourMinArea   = 100.f * kResScale ;
 const float kContourDPEpislon = 5.f  * kResScale ;
@@ -26,14 +27,15 @@ const float kContourMinWidth  = 5.f  * kResScale ;
 const float kBallDefaultRadius		= 8.f *  .5f ;
 const float kBallDefaultMaxRadius	= 8.f * 4.f ;
 
-//const vec2 kCaptureSize = vec2( 640, 480 ) ;
-const vec2 kCaptureSize = vec2( 16.f/9.f * 480.f, 480 ) ;
+const vec2 kCaptureSize = vec2( 640, 480 ) ;
+//const vec2 kCaptureSize = vec2( 16.f/9.f * 480.f, 480 ) ;
+	// Very important lesson: if you aren't getting the native resolution (or something like it...)
 
 
 const bool kDebug = false ;
 
 const bool kAutoFullScreenProjector	= !kDebug ; // default: true
-const bool kDrawCameraImage			= false  ; // default: false
+const bool kDrawCameraImage			= true  ; // default: false
 const bool kDrawContours			= true ;
 const bool kDrawContoursFilled		= kDebug ;  // default: false
 const bool kDrawMouseDebugInfo		= kDebug ;
@@ -143,6 +145,38 @@ public:
 	
 };
 
+class Pipeline
+{
+public:
+	void setQuery( string q ) { mQuery=q; } ;
+
+	void then( Surface &img, string name )
+	{
+		if (name==mQuery)
+		{
+			mFrame = gl::Texture::create( img );
+		}
+	}
+	
+	void then( cv::Mat &img, string name )
+	{
+		if (name==mQuery)
+		{
+			mFrame = gl::Texture::create( fromOcv(img), gl::Texture::Format().loadTopDown() );
+		}
+	}
+	
+	// add types:
+	// - contour
+	
+	gl::TextureRef getQueryFrame() const { return mFrame ; }
+	
+private:
+	string		   mQuery ;
+	gl::TextureRef mFrame ;
+	
+} ;
+
 class PaperBounce3App : public App {
   public:
 	void setup() override;
@@ -161,12 +195,14 @@ class PaperBounce3App : public App {
 	
 	void newRandomBall( vec2 loc ) ;
 	
+	Pipeline			mOCVPipelineTrace ;
+	
 	Font				mFont;
 	gl::TextureFontRef	mTextureFont;
 	
 	
 	CaptureRef			mCapture;
-	gl::TextureRef		mCameraTexture;
+//	gl::TextureRef		mCameraTexture;
 	
 	vector<cContour>	mContours;
 	
@@ -176,6 +212,11 @@ class PaperBounce3App : public App {
 	
 	double				mLastFrameTime = 0. ;
 	vec2				mMousePos ;
+	
+	// world info
+	vec2 getWorldSize() const { return kCaptureSize ; }
+		// units are um... pixels in camera space right now
+		// but should switch to meters or something like that
 	
 	// physics/geometry helpers
 	const cContour* findClosestContour ( vec2 point, vec2* closestPoint=0, float* closestDist=0, ContourKind kind = ContourKind::Any ) const ; // assumes findLeafContourContainingPoint failed
@@ -190,7 +231,6 @@ class PaperBounce3App : public App {
 	
 	void resolveBallCollisions() ;
 	
-	
 	// for main window, the projector display
 	vec2 mouseToWorld( vec2 );
 	void updateWindowMapping();
@@ -202,17 +242,26 @@ void PaperBounce3App::setup()
 {
 	mLastFrameTime = getElapsedSeconds() ;
 	
+	// enumerate hardware
 	auto displays = Display::getDisplays() ;
 	cout << displays.size() << " Displays" << endl ;
 	for ( auto d : displays )
 	{
-		cout << "\t" << d->getBounds() << endl ;
+		cout << "\t" << d->getName() << " " << d->getBounds() << endl ;
+	}
+
+	auto cameras = Capture::getDevices() ;
+	cout << cameras.size() << " Cameras" << endl ;
+	for ( auto c : cameras )
+	{
+		cout << "\t" << c->getName() << endl ;
 	}
 	
-	mCapture = Capture::create( kCaptureSize.x, kCaptureSize.y );
+	// get camera
+	mCapture = Capture::create( kCaptureSize.x, kCaptureSize.y, cameras.back() ) ; // get last camera
 	mCapture->start();
 
-	// Fullscreen main window in second display
+	// Fullscreen main window in secondary display
 	if ( displays.size()>1 && kAutoFullScreenProjector )
 	{
 		getWindow()->setPos( displays[1]->getBounds().getUL() );
@@ -252,17 +301,34 @@ void PaperBounce3App::update()
 	updateBalls();
 }
 
+gl::Texture getImageSubarea( gl::Texture from, vec2 fromCoords[4], vec2 toSize )
+{
+	// from is the input camera image
+	// fromCoords are the topleft, topright, b-r, b-l area we are going to cut out
+	//	- specified in from's coordinate space
+	// return value:
+	//  - is the resulting image,
+	//  - whose size is toSize
+	
+	// fbo (which we'll want to cache between frames :P)
+	// etc
+}
+
 void PaperBounce3App::updateVision()
 {
 	if( mCapture->checkNewFrame() )
 	{
+		mOCVPipelineTrace = Pipeline() ;
+		mOCVPipelineTrace.setQuery("input");
+		
 		// Get surface data
 		Surface surface( *mCapture->getSurface() );
-//		mCameraTexture = gl::Texture::create( surface );
 		
 		// make cv frame
 		cv::Mat input( toOcv( Channel( surface ) ) );
 		cv::Mat output, gray, thresholded ;
+
+		mOCVPipelineTrace.then( input, "input" );
 		
 //		cv::Sobel( input, output, CV_8U, 1, 0 );
 		
@@ -278,10 +344,10 @@ void PaperBounce3App::updateVision()
 //			cv::cvtColor( input, gray, cv::COLOR_BGR2GRAY ); // already grayscale
 			
 			cv::GaussianBlur( input, gray, cv::Size(5,5), 0 );
+			mOCVPipelineTrace.then( gray, "gray" );
 
 			cv::threshold( gray, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
-
-			mCameraTexture = gl::Texture::create( fromOcv( thresholded ), gl::Texture::Format().loadTopDown() );
+			mOCVPipelineTrace.then( thresholded, "thresholded" );
 		}
 		
 		// contours
@@ -374,10 +440,6 @@ void PaperBounce3App::updateVision()
 				mContours[c.mParent].mChild.push_back( i ) ;
 			}
 		}
-		
-		// convert to texture
-//		mCameraTexture = gl::Texture::create( fromOcv( thresholded ), gl::Texture::Format().loadTopDown() );
-//		mCameraTexture = gl::Texture::create( fromOcv( input ), gl::Texture::Format().loadTopDown() );
 	}
 }
 
@@ -807,29 +869,26 @@ void PaperBounce3App::updateWindowMapping()
 	};
 	
 	// set window transform
+	const float worldAspectRatio = getWorldSize().x / getWorldSize().y ;
+	const float windowAspectRatio  = (float)getWindowSize().x / (float)getWindowSize().y ;
+	
+	if ( worldAspectRatio < windowAspectRatio )
 	{
-		//
-		const float captureAspectRatio = kCaptureSize.x / kCaptureSize.y ;
-		const float windowAspectRatio  = (float)getWindowSize().x / (float)getWindowSize().y ;
+		// vertical black bars
+		float w = windowAspectRatio * getWorldSize().y ;
+		float barsw = w - getWorldSize().x ;
 		
-		if ( captureAspectRatio < windowAspectRatio )
-		{
-			// vertical black bars
-			float w = windowAspectRatio * kCaptureSize.y ;
-			float barsw = w - kCaptureSize.x ;
-			
-			ortho( -barsw/2, kCaptureSize.x + barsw/2, kCaptureSize.y, 0.f ) ;
-		}
-		else if ( captureAspectRatio > windowAspectRatio )
-		{
-			// horizontal black bars
-			float h = (1.f / windowAspectRatio) * kCaptureSize.x ;
-			float barsh = h - kCaptureSize.y ;
-			
-			ortho( 0.f, kCaptureSize.x, kCaptureSize.y + barsh/2, -barsh/2 ) ;
-		}
-		else ortho( 0.f, kCaptureSize.x, kCaptureSize.y, 0.f ) ;
+		ortho( -barsw/2, getWorldSize().x + barsw/2, getWorldSize().y, 0.f ) ;
 	}
+	else if ( worldAspectRatio > windowAspectRatio )
+	{
+		// horizontal black bars
+		float h = (1.f / windowAspectRatio) * getWorldSize().x ;
+		float barsh = h - getWorldSize().y ;
+		
+		ortho( 0.f, getWorldSize().x, getWorldSize().y + barsh/2, -barsh/2 ) ;
+	}
+	else ortho( 0.f, getWorldSize().x, getWorldSize().y, 0.f ) ;
 }
 
 vec2 PaperBounce3App::mouseToWorld( vec2 p )
@@ -846,17 +905,17 @@ void PaperBounce3App::drawProjectorWindow()
 	gl::setMatrices( CameraOrtho( mOrthoRect[0], mOrthoRect[1], mOrthoRect[2], mOrthoRect[3], 0.f, 1.f ) ) ;
 	
 	// camera image
-	if ( mCameraTexture && kDrawCameraImage )
+	if ( mOCVPipelineTrace.getQueryFrame() && kDrawCameraImage )
 	{
 		gl::color( 1, 1, 1 );
-		gl::draw( mCameraTexture );
+		gl::draw( mOCVPipelineTrace.getQueryFrame() );
 	}
 	
 	// draw frame
 	if (1)
 	{
 		gl::color( 1, 1, 1 );
-		gl::drawStrokedRect( Rectf(0,0,kCaptureSize.x,kCaptureSize.y).inflated( vec2(-1,-1) ) ) ;
+		gl::drawStrokedRect( Rectf(0,0,getWorldSize().x,getWorldSize().y).inflated( vec2(-1,-1) ) ) ;
 	}
 
 	// draw contour bounding boxes, etc...
@@ -1050,9 +1109,12 @@ void PaperBounce3App::drawProjectorWindow()
 
 void PaperBounce3App::drawAuxWindow()
 {
-	gl::setMatricesWindow( kCaptureSize.x, kCaptureSize.y );
-	gl::color( 1, 1, 1 );
-	gl::draw( mCameraTexture );
+	if ( mOCVPipelineTrace.getQueryFrame() )
+	{
+		gl::setMatricesWindow( kCaptureSize.x, kCaptureSize.y );
+		gl::color( 1, 1, 1 );
+		gl::draw( mOCVPipelineTrace.getQueryFrame() );
+	}
 }
 
 void PaperBounce3App::draw()
@@ -1094,7 +1156,7 @@ void PaperBounce3App::keyDown( KeyEvent event )
 		case KeyEvent::KEY_b:
 			// make a random ball
 			{
-				vec2 loc = randVec2() * kCaptureSize ;
+				vec2 loc = randVec2() * getWorldSize() ;
 				vec2 closestOnPaper ;
 				
 				if ( findClosestContour(loc,&closestOnPaper) )

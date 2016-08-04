@@ -1,0 +1,12 @@
+- Camera Profile Information
+
+	USB ELP we have:
+		320X240  QVGA  MJPEG @120fps/  352X288 CIF  MJPEG @120fps
+		640X480  VGA  MJPEG@120fps/   800X600 SVGA  MJPEG@60fps
+		1024X768  XGA  MJPEG@30fps/  1280X720  HD   MJPEG@60fps
+		1280X1024  SXGA MJPEG@30fps/  1920X1080 FHD  MJPEG@30fps
+
+		We could go to 320 x 240 and potentially go even faster.
+		Might need to dip into OSX API to get these native parameters to choose from.
+
+		http://www.elpcctv.com/1080p-mini-usb-camera-full-hd-usb20-ov2710-color-sensor-mjpeg-format-and-36mm-lens-p-207.html

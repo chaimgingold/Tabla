@@ -1,3 +1,26 @@
+Basic
+- XML parameter loading/saving
+	- Settings > Debug, etc..
+	- Screen/Camera >
+		- Which to use
+		- Mapping coordinates
+			- From where in camera frame?
+			- To where in projector frame?
+			- Scaling: In world units, what does this map to? (let's think in terms of inches or mm)
+		- Contour resolution thresholds
+	- Behaviors
+	- Implement as nested callbacks.
+		- getfile( path, getxmldatalambda() ) .. so does hot-loading, etc...
+		- getxmlsubtree( xml, path, xmlsubtreehandler() .. could then call this for parts of it
+- Better data visualization.
+	- Construct a pipeline, log images and data flow edges to it;
+		+ contour data, too
+		+ transformation functions
+			- with parameters
+		+ this could be output as text, automatically generated graph, or linked to a diagram
+			- the parameters could become live ui elements
+			- this could become an intermediate language for specifying pipelines, so read back in; turn the tables on it.
+
 Simulation
 - √ Better topology handling (boxes in boxes)
 - √ Balls have velocity
