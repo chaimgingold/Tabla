@@ -31,6 +31,8 @@
 		26FA36461D53C31A00C64A00 /* BallWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA36441D53C31A00C64A00 /* BallWorld.cpp */; };
 		26FA36491D53C5D300C64A00 /* Contour.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA36471D53C5D300C64A00 /* Contour.cpp */; };
 		26FA364D1D53CBDA00C64A00 /* Vision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA364B1D53CBDA00C64A00 /* Vision.cpp */; };
+		26FA36501D5519DA00C64A00 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 26FA364F1D5519DA00C64A00 /* assets */; };
+		26FA36541D55365800C64A00 /* LightLink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA36531D55365800C64A00 /* LightLink.cpp */; };
 		27FB686FA380493A8438C8BB /* b2Joint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D8E21292E75443F0B3FD59BF /* b2Joint.cpp */; };
 		307B0C3825A3481599FFE3BD /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9366F177495484A87934087 /* OpenCL.framework */; };
 		364054B04EB14DC0944BC464 /* b2Draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DA8A3392B64949EDA055E180 /* b2Draw.cpp */; };
@@ -101,6 +103,10 @@
 		26FA364A1D53C78D00C64A00 /* geom.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = geom.h; path = ../src/geom.h; sourceTree = "<group>"; };
 		26FA364B1D53CBDA00C64A00 /* Vision.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vision.cpp; path = ../src/Vision.cpp; sourceTree = "<group>"; };
 		26FA364C1D53CBDA00C64A00 /* Vision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vision.h; path = ../src/Vision.h; sourceTree = "<group>"; };
+		26FA364F1D5519DA00C64A00 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = assets; path = ../assets; sourceTree = "<group>"; };
+		26FA36511D551F8900C64A00 /* xml.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = xml.h; path = ../src/xml.h; sourceTree = "<group>"; };
+		26FA36521D55351400C64A00 /* LightLink.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = LightLink.h; path = ../src/LightLink.h; sourceTree = "<group>"; };
+		26FA36531D55365800C64A00 /* LightLink.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LightLink.cpp; path = ../src/LightLink.cpp; sourceTree = "<group>"; };
 		297736FC91944CE996B6A2A1 /* b2Fixture.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = b2Fixture.h; path = ../blocks/Box2D/src/Box2D/Dynamics/b2Fixture.h; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
@@ -239,6 +245,8 @@
 				26FA364C1D53CBDA00C64A00 /* Vision.h */,
 				26FA364B1D53CBDA00C64A00 /* Vision.cpp */,
 				D873CF0CF96D4D8E8D1A7A87 /* PaperBounce3App.cpp */,
+				26FA36521D55351400C64A00 /* LightLink.h */,
+				26FA36531D55365800C64A00 /* LightLink.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -355,6 +363,7 @@
 				19C28FACFE9D520D11CA2CBB /* Products */,
 				26FA36401D4A7D5300C64A00 /* todo */,
 				26FA36421D53C05700C64A00 /* research */,
+				26FA364F1D5519DA00C64A00 /* assets */,
 			);
 			name = PaperBounce3;
 			sourceTree = "<group>";
@@ -365,6 +374,7 @@
 				A1507E8BA18B4101B17D8A1F /* Resources.h */,
 				CCFADC6832594B6BA4171652 /* PaperBounce3_Prefix.pch */,
 				26FA364A1D53C78D00C64A00 /* geom.h */,
+				26FA36511D551F8900C64A00 /* xml.h */,
 			);
 			name = Headers;
 			sourceTree = "<group>";
@@ -561,6 +571,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				26FA36431D53C05700C64A00 /* research in Resources */,
+				26FA36501D5519DA00C64A00 /* assets in Resources */,
 				26FA36411D4A7D5300C64A00 /* todo in Resources */,
 				75B53A468D1D4FD8A68DD3D9 /* CinderApp.icns in Resources */,
 			);
@@ -601,6 +612,7 @@
 				592BF86CF6B441DD954AA794 /* b2WorldCallbacks.cpp in Sources */,
 				985F9999D6EC4BAE8A3E317B /* b2ChainAndCircleContact.cpp in Sources */,
 				E5E02FC84C1B4061A672D169 /* b2ChainAndPolygonContact.cpp in Sources */,
+				26FA36541D55365800C64A00 /* LightLink.cpp in Sources */,
 				065D029E5180471999C3E354 /* b2CircleContact.cpp in Sources */,
 				BF8EA3BC1AE14D83A5112094 /* b2Contact.cpp in Sources */,
 				9E53F22939EC46629ECD511A /* b2ContactSolver.cpp in Sources */,

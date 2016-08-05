@@ -12,6 +12,7 @@
 #include <string>
 
 #include "cinder/Surface.h"
+#include "cinder/Xml.h"
 #include "CinderOpenCV.h"
 
 #include "Vision.h"
@@ -61,20 +62,19 @@ private:
 } ;
 
 
-
-const float kResScale = .2f ;
-const float kContourMinRadius = 3.f  * kResScale ;
-const float kContourMinArea   = 100.f * kResScale ;
-const float kContourDPEpislon = 5.f  * kResScale ;
-const float kContourMinWidth  = 5.f  * kResScale ;
-	// these will migrate into variable settings in Vision
-
 class Vision
 {
 public:
 
 	// settings
-	
+	void setParams( XmlTree );
+
+	float mResScale			=   .2;
+	float mContourMinRadius	=	3;
+	float mContourMinArea	=	100;
+	float mContourDPEpsilon	=	5;
+	float mContourMinWidth	=	5;
+
 	// push input through
 	void processFrame( const Surface &surface );
 	

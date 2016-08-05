@@ -7,6 +7,7 @@
 //
 
 #include "Vision.h"
+#include "xml.h"
 
 namespace cinder {
 	
@@ -31,6 +32,20 @@ gl::Texture getImageSubarea( gl::Texture from, vec2 fromCoords[4], vec2 toSize )
 	
 	// fbo (which we'll want to cache between frames :P)
 	// etc
+}
+
+void Vision::setParams( XmlTree xml )
+{
+	getXml(xml,"ResScale",mResScale);
+	getXml(xml,"ContourMinRadius",mContourMinRadius);
+	getXml(xml,"ContourMinArea",mContourMinArea);
+	getXml(xml,"ContourDPEpsilon",mContourDPEpsilon);
+	getXml(xml,"ContourMinWidth",mContourMinWidth);
+
+	mContourMinRadius	*= mResScale;
+	mContourMinArea		*= mResScale;
+	mContourDPEpsilon	*= mResScale;
+	mContourMinWidth	*= mResScale;
 }
 
 void Vision::processFrame( const Surface &surface )
@@ -77,9 +92,9 @@ void Vision::processFrame( const Surface &surface )
 		
 		cv::RotatedRect rotatedRect = minAreaRect(c) ;
 		
-		if (	radius > kContourMinRadius &&
-				area > kContourMinArea &&
-				min( rotatedRect.size.width, rotatedRect.size.height ) > kContourMinWidth )
+		if (	radius > mContourMinRadius &&
+				area > mContourMinArea &&
+				min( rotatedRect.size.width, rotatedRect.size.height ) > mContourMinWidth )
 		{
 			auto addContour = [&]( const vector<cv::Point>& c )
 			{
@@ -114,7 +129,7 @@ void Vision::processFrame( const Surface &surface )
 				// simplify
 				vector<cv::Point> approx ;
 				
-				cv::approxPolyDP( c, approx, kContourDPEpislon, true ) ;
+				cv::approxPolyDP( c, approx, mContourDPEpsilon, true ) ;
 				
 				addContour(approx);
 			}

@@ -5,15 +5,18 @@
 
 #include "cinder/Text.h"
 #include "cinder/gl/TextureFont.h"
+#include "cinder/Xml.h"
 
 #include "cinder/Capture.h"
 #include "CinderOpenCV.h"
 
+#include "LightLink.h"
 #include "Vision.h"
 #include "Contour.h"
 #include "BallWorld.h"
 
 #include "geom.h"
+#include "xml.h"
 
 #include <map>
 #include <string>
@@ -23,31 +26,9 @@ using namespace ci::app;
 using namespace std;
 
 
+const int  kRequestFrameRate = 60 ; // was 120, don't think it matters/we got there
+const vec2 kDefaultWindowSize( 640, 480 );
 
-const vec2 kCaptureSize = vec2( 640, 480 ) ;
-//const vec2 kCaptureSize = vec2( 16.f/9.f * 480.f, 480 ) ;
-	// Very important lesson: if you aren't getting the native resolution (or something like it...)
-
-
-const bool kDebug = false ;
-
-const bool kAutoFullScreenProjector	= !kDebug ; // default: true
-const bool kDrawCameraImage			= true  ; // default: false
-const bool kDrawContours			= true ;
-const bool kDrawContoursFilled		= kDebug ;  // default: false
-const bool kDrawMouseDebugInfo		= kDebug ;
-const bool kDrawPolyBoundingRect	= kDebug ;
-const bool kDrawContourTree			= kDebug ;
-
-//const bool kDebug = true ;
-//
-//const bool kAutoFullScreenProjector	= !kDebug ; // default: true
-//const bool kDrawCameraImage			= true ; // default: false
-//const bool kDrawContours			= false ;
-//const bool kDrawContoursFilled		= false ;  // default: false
-//const bool kDrawMouseDebugInfo		= true ;
-//const bool kDrawPolyBoundingRect	= false ;
-//const bool kDrawContourTree			= false ;
 
 
 class cWindowData {
@@ -69,13 +50,16 @@ class PaperBounce3App : public App {
 	void drawProjectorWindow() ;
 	void drawAuxWindow() ;
 	
+	void loadXml( string path, function<void(XmlTree)> );
+	
+	LightLink			mLightLink; // calibration for camera <> world <> projector
 	CaptureRef			mCapture;	// input device		->
 	Vision				mVision ;	// edge detection	->
 	ContourVector		mContours;	// edges output		->
 	BallWorld			mBallWorld ;// world simulation
 	
 	// world info
-	vec2 getWorldSize() const { return kCaptureSize ; }
+	vec2 getWorldSize() const { return mLightLink.getCaptureSize() ; }
 		// units are um... pixels in camera space right now
 		// but should switch to meters or something like that
 	
@@ -95,11 +79,57 @@ class PaperBounce3App : public App {
 	void updateWindowMapping(); // maps world coordinates to the projector display (and back)
 	
 	float	mOrthoRect[4]; // points for glOrtho; set by updateWindowMapping()
+	
+	
+	// settings
+	bool mAutoFullScreenProjector = false ;
+	bool mDrawCameraImage = false ;
+	bool mDrawContours = false ;
+	bool mDrawContoursFilled = false ;
+	bool mDrawMouseDebugInfo = false ;
+	bool mDrawPolyBoundingRect = false ;
+	bool mDrawContourTree = false ;
+
 };
 
 void PaperBounce3App::setup()
 {
 	mLastFrameTime = getElapsedSeconds() ;
+	
+	// configuration
+	loadXml("config.xml", [this]( XmlTree xml )
+	{
+		if (xml.hasChild("PaperBounce3/BallWorld"))
+		{
+			mBallWorld.setParams(xml.getChild("PaperBounce3/BallWorld"));
+		}
+		
+		if (xml.hasChild("PaperBounce3/Vision"))
+		{
+			mVision.setParams(xml.getChild("PaperBounce3/Vision"));
+		}
+
+		if (xml.hasChild("PaperBounce3/LightLink"))
+		{
+			mLightLink.setParams(xml.getChild("PaperBounce3/LightLink"));
+		}
+		
+		if (xml.hasChild("PaperBounce3/App"))
+		{
+			XmlTree app = xml.getChild("PaperBounce3/App");
+			
+			getXml(app,"AutoFullScreenProjector",mAutoFullScreenProjector);
+			getXml(app,"DrawCameraImage",mDrawCameraImage);
+			getXml(app,"DrawContours",mDrawContours);
+			getXml(app,"DrawContoursFilled",mDrawContoursFilled);
+			getXml(app,"DrawMouseDebugInfo",mDrawMouseDebugInfo);
+			getXml(app,"DrawPolyBoundingRect",mDrawPolyBoundingRect);
+			getXml(app,"DrawContourTree",mDrawContourTree);
+		}
+	});
+	
+	// resize window
+	setWindowSize( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y ) ;
 	
 	// enumerate hardware
 	auto displays = Display::getDisplays() ;
@@ -117,11 +147,11 @@ void PaperBounce3App::setup()
 	}
 	
 	// get camera
-	mCapture = Capture::create( kCaptureSize.x, kCaptureSize.y, cameras.back() ) ; // get last camera
+	mCapture = Capture::create( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y, cameras.back() ) ; // get last camera
 	mCapture->start();
 
 	// Fullscreen main window in secondary display
-	if ( displays.size()>1 && kAutoFullScreenProjector )
+	if ( displays.size()>1 && mAutoFullScreenProjector )
 	{
 		getWindow()->setPos( displays[1]->getBounds().getUL() );
 		
@@ -132,7 +162,7 @@ void PaperBounce3App::setup()
 	if (0)
 	{
 		// for some reason this seems to create three windows once we fullscreen the main window :P
-		app::WindowRef mAuxWindow = createWindow( Window::Format().size( kCaptureSize.x, kCaptureSize.y ) );
+		app::WindowRef mAuxWindow = createWindow( Window::Format().size( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y ) );
 		
 		cWindowData* data = new cWindowData ;
 		data->mIsAux=true ;
@@ -147,6 +177,23 @@ void PaperBounce3App::setup()
 	
 	// text
 	mTextureFont = gl::TextureFont::create( Font("Avenir",12) );
+}
+
+void PaperBounce3App::loadXml( string path, function<void(XmlTree)> func )
+{
+	// eventually we will handle hotloading in here.
+	// just store a map path -> func and periodically check it
+	
+	try
+	{
+		XmlTree xml( loadAsset(path) );
+		
+		func(xml);
+	}
+	catch( XmlTree::Exception e )
+	{
+		cout << "loadXml, failed to load " << path << ", "<< e.what() << endl ;
+	}
 }
 
 void PaperBounce3App::mouseDown( MouseEvent event )
@@ -222,7 +269,7 @@ void PaperBounce3App::drawProjectorWindow()
 	gl::setMatrices( CameraOrtho( mOrthoRect[0], mOrthoRect[1], mOrthoRect[2], mOrthoRect[3], 0.f, 1.f ) ) ;
 	
 	// vision pipeline image
-	if ( mVision.mOCVPipelineTrace.getQueryFrame() && kDrawCameraImage )
+	if ( mVision.mOCVPipelineTrace.getQueryFrame() && mDrawCameraImage )
 	{
 		gl::color( 1, 1, 1 );
 		gl::draw( mVision.mOCVPipelineTrace.getQueryFrame() );
@@ -236,7 +283,7 @@ void PaperBounce3App::drawProjectorWindow()
 	}
 
 	// draw contour bounding boxes, etc...
-	if (kDrawPolyBoundingRect)
+	if (mDrawPolyBoundingRect)
 	{
 		for( auto c : mContours )
 		{
@@ -248,10 +295,10 @@ void PaperBounce3App::drawProjectorWindow()
 	}
 
 	// draw contours
-	if ( kDrawContours )
+	if ( mDrawContours )
 	{
 		// filled
-		if ( kDrawContoursFilled )
+		if ( mDrawContoursFilled )
 		{
 			// recursive tree
 			if (1)
@@ -343,7 +390,7 @@ void PaperBounce3App::drawProjectorWindow()
 	mBallWorld.draw();
 	
 	// test collision logic
-	if ( kDrawMouseDebugInfo && getWindowBounds().contains(mMousePos) )
+	if ( mDrawMouseDebugInfo && getWindowBounds().contains(mMousePos) )
 	{
 		vec2 pt = mouseToWorld( mMousePos ) ;
 		
@@ -364,7 +411,7 @@ void PaperBounce3App::drawProjectorWindow()
 	}
 	
 	// draw contour debug info
-	if (kDrawContourTree)
+	if (mDrawContourTree)
 	{
 		const float k = 16.f ;
 		
@@ -393,7 +440,7 @@ void PaperBounce3App::drawAuxWindow()
 {
 	if ( mVision.mOCVPipelineTrace.getQueryFrame() )
 	{
-		gl::setMatricesWindow( kCaptureSize.x, kCaptureSize.y );
+		gl::setMatricesWindow( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y );
 		gl::color( 1, 1, 1 );
 		gl::draw( mVision.mOCVPipelineTrace.getQueryFrame() );
 	}
@@ -450,7 +497,7 @@ void PaperBounce3App::keyDown( KeyEvent event )
 
 
 CINDER_APP( PaperBounce3App, RendererGl(RendererGl::Options().msaa(8)), [&]( App::Settings *settings ) {
-	settings->setFrameRate(120.f);
-	settings->setWindowSize(kCaptureSize);
+	settings->setFrameRate(kRequestFrameRate);
+	settings->setWindowSize(kDefaultWindowSize);
 	settings->setTitle("See Paper") ;
 })

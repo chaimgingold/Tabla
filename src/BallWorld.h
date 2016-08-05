@@ -11,6 +11,7 @@
 
 #include <vector>
 #include "cinder/gl/gl.h"
+#include "cinder/Xml.h"
 
 #include "Contour.h"
 
@@ -58,6 +59,8 @@ private:
 class BallWorld
 {
 public:
+	
+	void setParams( XmlTree );
 	void updateContours( const ContourVector &c ) { mContours = c; }
 	
 	void update();

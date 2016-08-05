@@ -1,0 +1,31 @@
+<PaperBounce3>
+
+	<App>
+		<AutoFullScreenProjector>	1 </AutoFullScreenProjector>
+		<DrawCameraImage>			1 </DrawCameraImage>
+		<DrawContours>				1 </DrawContours>
+		<DrawContoursFilled>		0 </DrawContoursFilled>
+		<DrawMouseDebugInfo>		1 </DrawMouseDebugInfo>
+		<DrawPolyBoundingRect>		0 </DrawPolyBoundingRect>
+		<DrawContourTree>			0 </DrawContourTree>
+	</App>
+
+	<BallWorld>
+	</BallWorld>
+	
+	<LightLink>
+		<CaptureSize> 640 480 </CaptureSize>
+			<!-- 16.f/9.f * 480.f, 480  -->
+			<!-- The old size we used for the 16:9 logitech camera, but it was SLOW. -->
+
+	</LightLink>
+	
+	<Vision>
+		<ResScale>					.2	</ResScale>
+		<ContourMinRadius>			3	</ContourMinRadius>
+		<ContourMinArea>			100	</ContourMinArea>
+		<ContourDPEpsilon>			5	</ContourDPEpsilon>
+		<ContourMinWidth>			5	</ContourMinWidth>
+	</Vision>
+
+</PaperBounce3>

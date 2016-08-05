@@ -10,6 +10,11 @@
 #include "geom.h"
 #include "cinder/Rand.h"
 
+void BallWorld::setParams( XmlTree xml )
+{
+	
+}
+
 void BallWorld::draw()
 {
 	for( auto b : mBalls )
