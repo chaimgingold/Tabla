@@ -16,7 +16,6 @@
 #include <cctype>
 #include <locale>
 
-
 //// http://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
 //// trim from start
 //static inline std::string &ltrim(std::string &s) {
@@ -48,7 +47,7 @@ inline bool getXml( XmlTree &xml, string name, bool& var )
 			var = stoi(n->getValue());
 			return true;
 		}
-		catch( exception ){}
+		catch( std::exception ){}
 	}
 	
 	return false;
@@ -64,7 +63,7 @@ inline bool getXml( XmlTree &xml, string name, float& var )
 			var = stof( n->getValue() ) ;
 			return true;
 		}
-		catch( exception ){}
+		catch( std::exception ){}
 	}
 	
 	return false;
@@ -86,7 +85,7 @@ inline bool getXml( XmlTree &xml, string name, vec2& var )
 				return true;
 			}
 		}
-		catch( exception ){}
+		catch( std::exception ){}
 	}
 	
 	return false;
@@ -111,7 +110,7 @@ inline bool getXml( XmlTree &xml, string name, ColorAf& var )
 				return true;
 			}
 		}
-		catch( exception ){}
+		catch( std::exception ){}
 	}
 	
 	return false;
@@ -134,7 +133,7 @@ bool getXml( XmlTree &xml, string name, T& var )
 				return true;
 			}
 		}
-		catch( exception ){}
+		catch( std::exception ){}
 	}
 	
 	return false;

@@ -14,6 +14,7 @@
 #include "Vision.h"
 #include "Contour.h"
 #include "BallWorld.h"
+#include "XmlFileWatch.h"
 
 #include "geom.h"
 #include "xml.h"
@@ -49,8 +50,6 @@ class PaperBounce3App : public App {
 	
 	void drawProjectorWindow() ;
 	void drawAuxWindow() ;
-	
-	void loadXml( string path, function<void(XmlTree)> );
 	
 	LightLink			mLightLink; // calibration for camera <> world <> projector
 	CaptureRef			mCapture;	// input device		->
@@ -90,15 +89,47 @@ class PaperBounce3App : public App {
 	bool mDrawPolyBoundingRect = false ;
 	bool mDrawContourTree = false ;
 
+	fs::path myGetAssetPath( fs::path ) const ; // prepends the appropriate thing...
+	string mOverloadedAssetPath;
+	
+	XmlFileWatch mXmlFileWatch;
 };
 
 void PaperBounce3App::setup()
 {
+	// command line args
+	auto args = getCommandLineArgs();
+	
+	for( size_t a=0; a<args.size(); ++a )
+	{
+		if ( args[a]=="-assets" && args.size()>a )
+		{
+			mOverloadedAssetPath = args[a+1];
+		}
+	}
+	
+	//
 	mLastFrameTime = getElapsedSeconds() ;
+
+	// enumerate hardware
+	auto displays = Display::getDisplays() ;
+	cout << displays.size() << " Displays" << endl ;
+	for ( auto d : displays )
+	{
+		cout << "\t" << d->getName() << " " << d->getBounds() << endl ;
+	}
+
+	auto cameras = Capture::getDevices() ;
+	cout << cameras.size() << " Cameras" << endl ;
+	for ( auto c : cameras )
+	{
+		cout << "\t" << c->getName() << endl ;
+	}
 	
 	// configuration
-	loadXml("config.xml", [this]( XmlTree xml )
+	mXmlFileWatch.load( myGetAssetPath("config.xml"), [this]( XmlTree xml )
 	{
+		// 1. get params
 		if (xml.hasChild("PaperBounce3/BallWorld"))
 		{
 			mBallWorld.setParams(xml.getChild("PaperBounce3/BallWorld"));
@@ -126,25 +157,18 @@ void PaperBounce3App::setup()
 			getXml(app,"DrawPolyBoundingRect",mDrawPolyBoundingRect);
 			getXml(app,"DrawContourTree",mDrawContourTree);
 		}
-	});
-	
-	// resize window
-	setWindowSize( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y ) ;
-	
-	// enumerate hardware
-	auto displays = Display::getDisplays() ;
-	cout << displays.size() << " Displays" << endl ;
-	for ( auto d : displays )
-	{
-		cout << "\t" << d->getName() << " " << d->getBounds() << endl ;
-	}
 
-	auto cameras = Capture::getDevices() ;
-	cout << cameras.size() << " Cameras" << endl ;
-	for ( auto c : cameras )
-	{
-		cout << "\t" << c->getName() << endl ;
-	}
+		// 2. respond
+		
+		// resize window
+		setWindowSize( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y ) ;
+		
+		// TODO:
+		// - get a new camera capture object so that resolution can change live
+		// - respond to fullscreen projector flag
+		// - aux display config
+	});
+
 	
 	// get camera
 	mCapture = Capture::create( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y, cameras.back() ) ; // get last camera
@@ -179,21 +203,11 @@ void PaperBounce3App::setup()
 	mTextureFont = gl::TextureFont::create( Font("Avenir",12) );
 }
 
-void PaperBounce3App::loadXml( string path, function<void(XmlTree)> func )
+fs::path
+PaperBounce3App::myGetAssetPath( fs::path p ) const
 {
-	// eventually we will handle hotloading in here.
-	// just store a map path -> func and periodically check it
-	
-	try
-	{
-		XmlTree xml( loadAsset(path) );
-		
-		func(xml);
-	}
-	catch( XmlTree::Exception e )
-	{
-		cout << "loadXml, failed to load " << path << ", "<< e.what() << endl ;
-	}
+	if ( mOverloadedAssetPath.empty() ) return getAssetPath(p);
+	else return fs::path(mOverloadedAssetPath) / p ;
 }
 
 void PaperBounce3App::mouseDown( MouseEvent event )
@@ -203,6 +217,8 @@ void PaperBounce3App::mouseDown( MouseEvent event )
 
 void PaperBounce3App::update()
 {
+	mXmlFileWatch.update();
+	
 	if ( mCapture->checkNewFrame() )
 	{
 		Surface frame( *mCapture->getSurface() ) ;

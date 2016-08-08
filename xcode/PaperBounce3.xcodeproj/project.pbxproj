@@ -33,6 +33,7 @@
 		26FA364D1D53CBDA00C64A00 /* Vision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA364B1D53CBDA00C64A00 /* Vision.cpp */; };
 		26FA36501D5519DA00C64A00 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 26FA364F1D5519DA00C64A00 /* assets */; };
 		26FA36541D55365800C64A00 /* LightLink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA36531D55365800C64A00 /* LightLink.cpp */; };
+		26FA36571D592CE700C64A00 /* XmlFileWatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA36551D592CE700C64A00 /* XmlFileWatch.cpp */; };
 		27FB686FA380493A8438C8BB /* b2Joint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D8E21292E75443F0B3FD59BF /* b2Joint.cpp */; };
 		307B0C3825A3481599FFE3BD /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9366F177495484A87934087 /* OpenCL.framework */; };
 		364054B04EB14DC0944BC464 /* b2Draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DA8A3392B64949EDA055E180 /* b2Draw.cpp */; };
@@ -107,6 +108,8 @@
 		26FA36511D551F8900C64A00 /* xml.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = xml.h; path = ../src/xml.h; sourceTree = "<group>"; };
 		26FA36521D55351400C64A00 /* LightLink.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = LightLink.h; path = ../src/LightLink.h; sourceTree = "<group>"; };
 		26FA36531D55365800C64A00 /* LightLink.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LightLink.cpp; path = ../src/LightLink.cpp; sourceTree = "<group>"; };
+		26FA36551D592CE700C64A00 /* XmlFileWatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XmlFileWatch.cpp; path = ../src/XmlFileWatch.cpp; sourceTree = "<group>"; };
+		26FA36561D592CE700C64A00 /* XmlFileWatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XmlFileWatch.h; path = ../src/XmlFileWatch.h; sourceTree = "<group>"; };
 		297736FC91944CE996B6A2A1 /* b2Fixture.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = b2Fixture.h; path = ../blocks/Box2D/src/Box2D/Dynamics/b2Fixture.h; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
@@ -247,6 +250,8 @@
 				D873CF0CF96D4D8E8D1A7A87 /* PaperBounce3App.cpp */,
 				26FA36521D55351400C64A00 /* LightLink.h */,
 				26FA36531D55365800C64A00 /* LightLink.cpp */,
+				26FA36561D592CE700C64A00 /* XmlFileWatch.h */,
+				26FA36551D592CE700C64A00 /* XmlFileWatch.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -590,6 +595,7 @@
 				C84DC4502D0A4C2384BE60F8 /* b2CollideEdge.cpp in Sources */,
 				741A16EB71BE4A308C86D708 /* b2CollidePolygon.cpp in Sources */,
 				509D1EB4420C46A3BB6D751D /* b2Collision.cpp in Sources */,
+				26FA36571D592CE700C64A00 /* XmlFileWatch.cpp in Sources */,
 				26FA36461D53C31A00C64A00 /* BallWorld.cpp in Sources */,
 				58F3F572E622458BA5EA9B45 /* b2Distance.cpp in Sources */,
 				FE95B791332E4B49916DF787 /* b2DynamicTree.cpp in Sources */,

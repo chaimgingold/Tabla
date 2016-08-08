@@ -57,13 +57,14 @@ Technical
 		- Projector coordinates
 		- 1:1
 	√ OCV pipeline and outputs in its own class (image -> semantic actionable world data)
-	- Shove stuff into xml (make all this stuff tunable)
+	√ Shove stuff into xml (make all this stuff tunable)
 		- Ball World simulation parameters
 		- Vision pipeline settings
 		- Registration
 			- Camera/world/projector coordinates
 			- Which camera, which projector to use (we are assuming last right now, it seems OK.)
 		- Debug settings
+	- Hot-load xml
 	- The App that holds and manages all this stuff
 		- Can swap between 'modes': calibration vs simulation
 		- Can save/load mappings, and undertake to create them
@@ -82,3 +83,7 @@ Technical
 	- Has IR for cleaner paper detection
 	- Depth for hand rejection
 	- Can do balls rolling off paper with z-height
+
+
+Bugs
+- XML loader will explode if file doesn't exist.
