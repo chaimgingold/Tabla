@@ -9,10 +9,13 @@
 #include "BallWorld.h"
 #include "geom.h"
 #include "cinder/Rand.h"
+#include "xml.h"
 
 void BallWorld::setParams( XmlTree xml )
 {
-	
+	getXml(xml,"BallDefaultRadius",mBallDefaultRadius);
+	getXml(xml,"BallDefaultMaxRadius",mBallDefaultMaxRadius);
+	getXml(xml,"BallDefaultColor",mBallDefaultColor);
 }
 
 void BallWorld::draw()
@@ -55,7 +58,7 @@ void BallWorld::draw()
 
 void BallWorld::update()
 {
-	const float kMaxBallVel = kBallDefaultRadius * 2.f ;
+	const float kMaxBallVel = mBallDefaultRadius * 2.f ;
 	
 	int   steps = 1 ;
 	float delta = 1.f / (float)steps ;
@@ -137,9 +140,9 @@ void BallWorld::newRandomBall ( vec2 loc )
 {
 	Ball ball ;
 	
-	ball.mColor = ColorAf::hex(0xC62D41);
+	ball.mColor = mBallDefaultColor;
 	ball.setLoc( loc ) ;
-	ball.mRadius = Rand::randFloat(kBallDefaultRadius,kBallDefaultMaxRadius) ;
+	ball.mRadius = Rand::randFloat(mBallDefaultRadius,mBallDefaultMaxRadius) ;
 	ball.setMass( M_PI * powf(ball.mRadius,3.f) ) ;
 	
 	ball.setVel( Rand::randVec2() * 2.f ) ;

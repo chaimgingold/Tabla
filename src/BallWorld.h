@@ -12,18 +12,13 @@
 #include <vector>
 #include "cinder/gl/gl.h"
 #include "cinder/Xml.h"
+#include "cinder/Color.h"
 
 #include "Contour.h"
 
 using namespace ci;
 using namespace ci::app;
 using namespace std;
-
-
-const float kBallDefaultRadius		= 8.f *  .5f ;
-const float kBallDefaultMaxRadius	= 8.f * 4.f ;
-
-
 
 class Ball {
 	
@@ -69,11 +64,19 @@ public:
 	void newRandomBall( vec2 loc );
 	void clearBalls() { mBalls.clear(); }
 	
-
+	float getBallDefaultRadius() const { return mBallDefaultRadius ; }
+	
 	vec2 resolveCollisionWithContours	( vec2 p, float r ) const ; // returns pinned version of point
 		// public so we can show it with the mouse...
 	
 private:
+
+	// params
+	float	mBallDefaultRadius		= 8.f *  .5f ;
+	float	mBallDefaultMaxRadius	= 8.f * 4.f ;
+	ColorAf mBallDefaultColor		= ColorAf::hex(0xC62D41);
+	
+	//
 	vec2 resolveCollisionWithBalls		( vec2 p, float r, Ball* ignore=0, float correctionFraction=1.f ) const ;
 		// simple pushes p out of overlapping balls.
 		// but might take multiple iterations to respond to all of them

@@ -375,10 +375,8 @@ void PaperBounce3App::drawProjectorWindow()
 			{
 				ColorAf color ;
 				
-				if ( !c.mIsHole ) color = ColorAf(1,1,1); //color = ColorAf::hex( 0x43730F ) ;
+				if ( !c.mIsHole ) color = ColorAf(1,1,1);
 				else color = ColorAf::hex( 0xF19878 ) ;
-				
-	//			color = ColorAf(1,1,1);
 				
 				gl::color(color) ;
 				gl::draw(c.mPolyLine) ;
@@ -394,9 +392,7 @@ void PaperBounce3App::drawProjectorWindow()
 	{
 		vec2 pt = mouseToWorld( mMousePos ) ;
 		
-		float r = kBallDefaultRadius ;
-		
-//		vec2 surfaceNormal ;
+		const float r = mBallWorld.getBallDefaultRadius() ;
 		
 		vec2 fixed = mBallWorld.resolveCollisionWithContours(pt,r);
 		
@@ -405,9 +401,6 @@ void PaperBounce3App::drawProjectorWindow()
 		
 		gl::color( ColorAf(0.f,1.f,0.f) ) ;
 		gl::drawLine(pt, fixed);
-		
-//		gl::color( ColorAf(.8f,.2f,.3f,.5f) ) ;
-//		gl::drawLine( fixed, fixed + surfaceNormal * r * 2.f ) ;
 	}
 	
 	// draw contour debug info

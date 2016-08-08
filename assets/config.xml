@@ -11,6 +11,9 @@
 	</App>
 
 	<BallWorld>
+		<BallDefaultRadius>			4 </BallDefaultRadius>
+		<BallDefaultMaxRadius>		32 </BallDefaultMaxRadius>
+		<BallDefaultColor>			C62D41 </BallDefaultColor> 
 	</BallWorld>
 	
 	<LightLink>

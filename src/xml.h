@@ -92,5 +92,52 @@ inline bool getXml( XmlTree &xml, string name, vec2& var )
 	return false;
 } ;
 
+inline bool getXml( XmlTree &xml, string name, ColorAf& var )
+{
+	auto n = xml.begin(name);
+	
+	if (n!=xml.end())
+	{
+		try {
+			stringstream s( n->getValue() );
+
+			unsigned int value;
+			s >> hex >> value;
+			// TODO: Take 0xRGBA as well as 1 1 1 format; test for "0x" at start
+			
+			if (s.good())
+			{
+				var = ColorA::hex(value) ;
+				return true;
+			}
+		}
+		catch( exception ){}
+	}
+	
+	return false;
+} ;
+
+template<class T>
+bool getXml( XmlTree &xml, string name, T& var )
+{
+	auto n = xml.begin(name);
+	
+	if (n!=xml.end())
+	{
+		try {
+			stringstream s( n->getValue() );
+			T t ;
+			s >> t ;
+			if (s.good())
+			{
+				var=t ;
+				return true;
+			}
+		}
+		catch( exception ){}
+	}
+	
+	return false;
+} ;
 
 #endif /* xml_h */
