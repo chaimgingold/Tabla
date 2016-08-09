@@ -21,17 +21,40 @@ namespace cinder {
 
 }
 
-gl::Texture getImageSubarea( gl::Texture from, vec2 fromCoords[4], vec2 toSize )
+string  Pipeline::getFirstStageName() const
 {
-	// from is the input camera image
-	// fromCoords are the topleft, topright, b-r, b-l area we are going to cut out
-	//	- specified in from's coordinate space
-	// return value:
-	//  - is the resulting image,
-	//  - whose size is toSize
+	if ( mStageNames.empty() ) return "" ;
+	else return mStageNames.front();
+}
+
+string  Pipeline::getLastStageName () const
+{
+	if ( mStageNames.empty() ) return "" ;
+	else return mStageNames.back();
+}
+
+string Pipeline::getAdjStageName( string name, int adj ) const
+{
+	for ( size_t i=0; i<mStageNames.size(); ++i )
+	{
+		if ( mStageNames[i]==name )
+		{
+			int k = (int)i + adj ;
+			
+			k = min( k, (int)mStageNames.size()-1 );
+			k = max( k, 0 );
+			
+			return mStageNames[k];
+		}
+	}
 	
-	// fbo (which we'll want to cache between frames :P)
-	// etc
+	return getFirstStageName();
+}
+
+void Pipeline::start()
+{
+	mStageNames.clear();
+	mFrame = gl::TextureRef();
 }
 
 void Vision::setParams( XmlTree xml )
@@ -50,18 +73,62 @@ void Vision::setParams( XmlTree xml )
 
 void Vision::processFrame( const Surface &surface )
 {
-	mOCVPipelineTrace = Pipeline() ;
-	mOCVPipelineTrace.setQuery("input");
+//	mOCVPipelineTrace = Pipeline() ;
+//	mOCVPipelineTrace.setQuery("input");
+	mOCVPipelineTrace.start();
+	if ( mOCVPipelineTrace.getQuery() == "" ) mOCVPipelineTrace.setQuery("input");
 	
 	// make cv frame
 	cv::Mat input( toOcv( Channel( surface ) ) );
-	cv::Mat output, gray, thresholded ;
+	cv::Mat clipped, output, gray, thresholded ;
 
 	mOCVPipelineTrace.then( input, "input" );
 
 	
+	// clip
+	{
+		// gather transform parameters
+		cv::Mat xform( 2, 4, CV_32FC1 );
+		
+		cv::Point2f srcpt[4], dstpt[4];
+		
+		cv::Size outputSize;
+		
+		for( int i=0; i<4; ++i )
+		{
+			srcpt[i] = toOcv( mLightLink.mCaptureCoords[i] );
+			dstpt[i] = toOcv( mLightLink.mCaptureWorldSpaceCoords[i] );
+
+			outputSize.width  = max( outputSize.width,  (int)dstpt[i].x );
+			outputSize.height = max( outputSize.height, (int)dstpt[i].y );
+		}
+
+		// compute output size
+//		if (0)
+//		{
+//			// This doesn't work BECAUSE our dstpt[] coords are still in world space
+//			// so this code just doesn't do what we want at all. but it is still an important clue...
+//			
+//			ivec2 minsrc = fromOcv(srcpt[0]), maxsrc = fromOcv(srcpt[0]);
+//			
+//			for( int i=1; i<4; ++i )
+//			{
+//				minsrc = glm::min( ivec2(fromOcv(srcpt[i])), minsrc ) ;
+//				maxsrc = glm::max( ivec2(fromOcv(srcpt[i])), maxsrc ) ;
+//			}
+//
+//			outputSize = cv::Size( maxsrc.x - minsrc.x, maxsrc.y - minsrc.y );
+//		}
+
+		// do it
+		xform = cv::getPerspectiveTransform( srcpt, dstpt ) ;
+		cv::warpPerspective(input, clipped, xform, outputSize );
+		
+		mOCVPipelineTrace.then( clipped, "clipped" );
+	}
+	
 	// blur
-	cv::GaussianBlur( input, gray, cv::Size(5,5), 0 );
+	cv::GaussianBlur( clipped, gray, cv::Size(5,5), 0 );
 	mOCVPipelineTrace.then( gray, "gray" );
 
 	// threshold

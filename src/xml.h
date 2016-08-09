@@ -15,6 +15,7 @@
 #include <functional> 
 #include <cctype>
 #include <locale>
+#include <vector>
 
 //// http://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
 //// trim from start
@@ -90,6 +91,47 @@ inline bool getXml( XmlTree &xml, string name, vec2& var )
 	
 	return false;
 } ;
+
+inline bool getXml( XmlTree &xml, string name, vector<vec2> &var )
+{
+	auto n = xml.begin(name);
+	bool ok=false;
+	
+	if (n!=xml.end())
+	{
+		try {
+			stringstream s( n->getValue() );
+			vec2 t ;
+
+			while(1)
+			{
+				s >> t.x >> t.y ;
+				
+				if (s.good()) var.push_back(t) ;
+				else break;
+				
+			}
+		}
+		catch( std::exception ){}
+	}
+	
+	return ok;
+} ;
+
+inline bool getXml( XmlTree &xml, string name, vec2 var[], int len )
+{
+	vector<vec2> v ;
+	
+	getXml(xml, name, v);
+	
+	if (v.size()==len)
+	{
+		for( size_t i=0; i<v.size(); ++i ) var[i]=v[i];
+		
+		return true ;
+	}
+	else return false ;
+}
 
 inline bool getXml( XmlTree &xml, string name, ColorAf& var )
 {

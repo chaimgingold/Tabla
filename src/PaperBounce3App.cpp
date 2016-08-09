@@ -74,11 +74,33 @@ class PaperBounce3App : public App {
 	
 	
 	// for main window,
-	vec2 mouseToWorld( vec2 ); // maps mouse to world coordinates
+	vec2 mouseToWorld( vec2 ); // maps mouse (screen) to world coordinates
 	void updateWindowMapping(); // maps world coordinates to the projector display (and back)
 	
 	float	mOrthoRect[4]; // points for glOrtho; set by updateWindowMapping()
 	
+	/* Coordinates spaces, there are a few:
+	
+	- Camera coordinate space		(capture size),			eg. pixel location in capture image
+	- Window coordinate space		(window size),			eg. mouse coordinate
+	- Projector coordinate space	(screen size),			eg. pixel location on a screen
+	- World coordinate space,		(sim size, unbounded)	eg. location of a bouncing ball
+	- Graphics coordinate space		(varies...)
+		Modes:
+		- Camera
+		- Projector
+		- World
+			- What world coordinates do we want to show? Union of camera and projector bounds.
+		
+		When set to these native coord modes, can draw in native coords and get mouse cursor
+		in those coords.
+	
+	Mappings:
+	- World <> Window : mOrthoRect
+	
+		Right now, World = Projector
+		
+	*/
 	
 	// settings
 	bool mAutoFullScreenProjector = false ;
@@ -160,6 +182,8 @@ void PaperBounce3App::setup()
 
 		// 2. respond
 		
+		mVision.setLightLink(mLightLink);
+		
 		// resize window
 		setWindowSize( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y ) ;
 		
@@ -228,6 +252,12 @@ void PaperBounce3App::update()
 		mContours = mVision.mContourOutput ;
 		
 		mBallWorld.updateContours( mContours );
+		
+		// simulate query changing; respond to query
+		// ideally we would only do this when changing the query,
+		// BUT the problem with that is that we don't have the query output
+		// until running the vision system, so we will just do it here. ah well.
+		updateWindowMapping();
 	}
 	
 	mBallWorld.update();
@@ -249,26 +279,33 @@ void PaperBounce3App::updateWindowMapping()
 	};
 	
 	// set window transform
-	const float worldAspectRatio = getWorldSize().x / getWorldSize().y ;
+	vec2 drawSize = getWorldSize(); // world by default
+	
+	if ( mVision.mOCVPipelineTrace.getQueryFrame() ) // or query frame
+	{
+		drawSize = mVision.mOCVPipelineTrace.getQueryFrame()->getSize();
+	}
+	
+	const float drawAspectRatio    = drawSize.x / drawSize.y ;
 	const float windowAspectRatio  = (float)getWindowSize().x / (float)getWindowSize().y ;
 	
-	if ( worldAspectRatio < windowAspectRatio )
+	if ( drawAspectRatio < windowAspectRatio )
 	{
 		// vertical black bars
-		float w = windowAspectRatio * getWorldSize().y ;
-		float barsw = w - getWorldSize().x ;
+		float w = windowAspectRatio * drawSize.y ;
+		float barsw = w - drawSize.x ;
 		
-		ortho( -barsw/2, getWorldSize().x + barsw/2, getWorldSize().y, 0.f ) ;
+		ortho( -barsw/2, drawSize.x + barsw/2, drawSize.y, 0.f ) ;
 	}
-	else if ( worldAspectRatio > windowAspectRatio )
+	else if ( drawAspectRatio > windowAspectRatio )
 	{
 		// horizontal black bars
-		float h = (1.f / windowAspectRatio) * getWorldSize().x ;
-		float barsh = h - getWorldSize().y ;
+		float h = (1.f / windowAspectRatio) * drawSize.x ;
+		float barsh = h - drawSize.y ;
 		
-		ortho( 0.f, getWorldSize().x, getWorldSize().y + barsh/2, -barsh/2 ) ;
+		ortho( 0.f, drawSize.x, drawSize.y + barsh/2, -barsh/2 ) ;
 	}
-	else ortho( 0.f, getWorldSize().x, getWorldSize().y, 0.f ) ;
+	else ortho( 0.f, drawSize.x, drawSize.y, 0.f ) ;
 }
 
 vec2 PaperBounce3App::mouseToWorld( vec2 p )
@@ -403,9 +440,10 @@ void PaperBounce3App::drawProjectorWindow()
 	// draw balls
 	mBallWorld.draw();
 	
-	// test collision logic
+	// mouse debug info
 	if ( mDrawMouseDebugInfo && getWindowBounds().contains(mMousePos) )
 	{
+		// test collision logic
 		vec2 pt = mouseToWorld( mMousePos ) ;
 		
 		const float r = mBallWorld.getBallDefaultRadius() ;
@@ -417,6 +455,14 @@ void PaperBounce3App::drawProjectorWindow()
 		
 		gl::color( ColorAf(0.f,1.f,0.f) ) ;
 		gl::drawLine(pt, fixed);
+		
+		// coordinates
+		gl::color( ColorA(1,1,1) );
+		mTextureFont->drawString(
+			"Camera: " + toString(pt) +
+			"\tWorld: " + toString(pt) +
+			"\tProjector: " + toString(pt),
+			vec2( 8.f, getWorldSize().y - mTextureFont->getAscent()+mTextureFont->getDescent()) ) ;
 	}
 	
 	// draw contour debug info
@@ -501,6 +547,15 @@ void PaperBounce3App::keyDown( KeyEvent event )
 		case KeyEvent::KEY_c:
 			mBallWorld.clearBalls() ;
 			break ;
+			
+		case KeyEvent::KEY_UP:
+			mVision.mOCVPipelineTrace.setQuery( mVision.mOCVPipelineTrace.getPrevStageName(mVision.mOCVPipelineTrace.getQuery() ) );
+			break;
+			
+		case KeyEvent::KEY_DOWN:
+			mVision.mOCVPipelineTrace.setQuery( mVision.mOCVPipelineTrace.getNextStageName(mVision.mOCVPipelineTrace.getQuery() ) );
+			break;
+
 	}
 }
 

@@ -1,3 +1,10 @@
+Camera transform
+- Need to perspective transform image without losing pixels
+	So need to decouple world coordinates from pixel coordinates :P
+- Enable everyone to draw to the window's coordinate system in world coordinates (contours, balls, etc...)
+- Draw UI text elements/etc in window space.
+	So a second pass while drawing in window coordinate space for current and future UI elements.
+
 Basic
 - XML parameter loading/saving
 	- Settings > Debug, etc..
@@ -29,6 +36,9 @@ Simulation
 - √ Ball <> Ball collision position correction is now relative to masses.
 
 New features
+- Generalized calibration of camera and projector.
+	- Hard coded
+	- Dynamic auto-detect
 - Recognize colorful marker objects (lego bricks, eg)
 	- Let me remove keyboard controls
 - Sound effects
@@ -48,6 +58,9 @@ New features
 		(Maybe don't even project there).
 
 Technical
+- Pipeline is not just a trace;
+	- Vision code can pull parameters from it.
+	- These parameters can specify (in vision code or elsewhere, by name) UI and value ranges.
 - Refactoring
 	√ Ball <> contour simulation logic in its own independent class. (world simulation)
 		- This leaves room for another "simulation", the gray-code auto-registration that would calibrate registrations
@@ -64,7 +77,7 @@ Technical
 			- Camera/world/projector coordinates
 			- Which camera, which projector to use (we are assuming last right now, it seems OK.)
 		- Debug settings
-	- Hot-load xml
+	√ Hot-load xml
 	- The App that holds and manages all this stuff
 		- Can swap between 'modes': calibration vs simulation
 		- Can save/load mappings, and undertake to create them

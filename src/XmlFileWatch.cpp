@@ -60,9 +60,9 @@ time_t XmlFileWatch::doLoad( fs::path path, tXmlCallback func )
 			return boost::filesystem::last_write_time(path);
 		}
 	}
-	catch( XmlTree::Exception e )
+	catch( ... )
 	{
-		cout << "loadXml, failed to load " << path << ", "<< e.what() << endl ;
+		cout << "loadXml, failed to load " << path << endl ;
 	}
 
 	return (time_t)0 ; // epoch

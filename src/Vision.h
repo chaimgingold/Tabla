@@ -10,10 +10,12 @@
 #define Vision_hpp
 
 #include <string>
+#include <vector>
 
 #include "cinder/Surface.h"
 #include "cinder/Xml.h"
 #include "CinderOpenCV.h"
+#include "LightLink.h"
 
 #include "Vision.h"
 #include "Contour.h"
@@ -32,10 +34,24 @@ class Pipeline
 	*/
 	
 public:
-	void setQuery( string q ) { mQuery=q; } ;
 
+	bool empty() const { return mStageNames.empty(); }
+	
+	void	setQuery( string q ) { mQuery=q; } ;
+	string	getQuery() const { return mQuery; }
+	
+	string  getFirstStageName() const;
+	string  getLastStageName () const;
+	
+	string	getNextStageName( string s ) const { return getAdjStageName(s, 1); }
+	string	getPrevStageName( string s ) const { return getAdjStageName(s,-1); }
+	
+	void start();
+	
 	void then( Surface &img, string name )
 	{
+		mStageNames.push_back(name);
+		
 		if (name==mQuery)
 		{
 			mFrame = gl::Texture::create( img );
@@ -44,6 +60,8 @@ public:
 	
 	void then( cv::Mat &img, string name )
 	{
+		mStageNames.push_back(name);
+
 		if (name==mQuery)
 		{
 			mFrame = gl::Texture::create( fromOcv(img), gl::Texture::Format().loadTopDown() );
@@ -56,6 +74,11 @@ public:
 	gl::TextureRef getQueryFrame() const { return mFrame ; }
 	
 private:
+
+	string getAdjStageName( string, int adj ) const;
+	
+	vector<string> mStageNames;
+	
 	string		   mQuery ;
 	gl::TextureRef mFrame ;
 	
@@ -75,6 +98,8 @@ public:
 	float mContourDPEpsilon	=	5;
 	float mContourMinWidth	=	5;
 
+	void setLightLink( const LightLink &ll ) { mLightLink=ll; }
+	
 	// push input through
 	void processFrame( const Surface &surface );
 	
@@ -83,6 +108,9 @@ public:
 	
 	// tracing output
 	Pipeline	  mOCVPipelineTrace ;
+	
+private:
+	LightLink mLightLink;
 
 };
 

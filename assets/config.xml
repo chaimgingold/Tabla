@@ -18,6 +18,21 @@
 	
 	<LightLink>
 		<CaptureSize> 640 480 </CaptureSize>
+		
+		<CaptureCoords>
+			138 83
+			452 74
+			465 402
+			125 397
+		</CaptureCoords>
+		
+		<CaptureWorldSpaceCoords>
+			0 0
+			100 0
+			100 100
+			0 100
+		</CaptureWorldSpaceCoords>
+		
 			<!-- 16.f/9.f * 480.f, 480  -->
 			<!-- The old size we used for the 16:9 logitech camera, but it was SLOW. -->
 
