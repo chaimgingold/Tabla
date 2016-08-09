@@ -71,10 +71,25 @@ void Vision::setParams( XmlTree xml )
 	mContourMinWidth	*= mResScale;
 }
 
+template<class T>
+vector<T> asVector( const T &d, int len )
+{
+	vector<T> v;
+	
+	for( int i=0; i<len; ++i ) v.push_back(d[i]);
+	
+	return v;
+}
+
+Rectf asBoundingRect( vec2 pts[4] )
+{
+	vector<vec2> v;
+	for( int i=0; i<4; ++i ) v.push_back(pts[i]);
+	return Rectf(v);
+}
+
 void Vision::processFrame( const Surface &surface )
 {
-//	mOCVPipelineTrace = Pipeline() ;
-//	mOCVPipelineTrace.setQuery("input");
 	mOCVPipelineTrace.start();
 	if ( mOCVPipelineTrace.getQuery() == "" ) mOCVPipelineTrace.setQuery("input");
 	
@@ -86,6 +101,8 @@ void Vision::processFrame( const Surface &surface )
 
 	
 	// clip
+	Rectf outputWorldRect ;
+	
 	{
 		// gather transform parameters
 		cv::Mat xform( 2, 4, CV_32FC1 );
@@ -98,34 +115,31 @@ void Vision::processFrame( const Surface &surface )
 		{
 			srcpt[i] = toOcv( mLightLink.mCaptureCoords[i] );
 			dstpt[i] = toOcv( mLightLink.mCaptureWorldSpaceCoords[i] );
-
-			outputSize.width  = max( outputSize.width,  (int)dstpt[i].x );
-			outputSize.height = max( outputSize.height, (int)dstpt[i].y );
 		}
 
-		// compute output size
-//		if (0)
-//		{
-//			// This doesn't work BECAUSE our dstpt[] coords are still in world space
-//			// so this code just doesn't do what we want at all. but it is still an important clue...
-//			
-//			ivec2 minsrc = fromOcv(srcpt[0]), maxsrc = fromOcv(srcpt[0]);
-//			
-//			for( int i=1; i<4; ++i )
-//			{
-//				minsrc = glm::min( ivec2(fromOcv(srcpt[i])), minsrc ) ;
-//				maxsrc = glm::max( ivec2(fromOcv(srcpt[i])), maxsrc ) ;
-//			}
-//
-//			outputSize = cv::Size( maxsrc.x - minsrc.x, maxsrc.y - minsrc.y );
-//		}
+		// compute output size pixel scaling
+		const Rectf inputBounds  = asBoundingRect( mLightLink.mCaptureCoords );
+		const Rectf outputBounds = asBoundingRect( mLightLink.mCaptureWorldSpaceCoords );
 
+		const float pixelScale
+			= max( inputBounds .getWidth(), inputBounds .getHeight() )
+			/ max( outputBounds.getWidth(), outputBounds.getHeight() ) ;
+
+		outputSize.width  = outputBounds.getWidth()  * pixelScale ;
+		outputSize.height = outputBounds.getHeight() * pixelScale ;
+		
+		for( auto &p : dstpt ) p *= pixelScale ;
+		
 		// do it
 		xform = cv::getPerspectiveTransform( srcpt, dstpt ) ;
 		cv::warpPerspective(input, clipped, xform, outputSize );
-		
-		mOCVPipelineTrace.then( clipped, "clipped" );
+		outputWorldRect = outputBounds;
 	}
+		
+	// log to pipeline
+	mOCVPipelineTrace.then( clipped, "clipped" );
+//	mOCVPipelineTrace.worldBounds(outputBounds);
+
 	
 	// blur
 	cv::GaussianBlur( clipped, gray, cv::Size(5,5), 0 );

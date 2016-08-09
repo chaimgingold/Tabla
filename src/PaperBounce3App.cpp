@@ -455,14 +455,6 @@ void PaperBounce3App::drawProjectorWindow()
 		
 		gl::color( ColorAf(0.f,1.f,0.f) ) ;
 		gl::drawLine(pt, fixed);
-		
-		// coordinates
-		gl::color( ColorA(1,1,1) );
-		mTextureFont->drawString(
-			"Camera: " + toString(pt) +
-			"\tWorld: " + toString(pt) +
-			"\tProjector: " + toString(pt),
-			vec2( 8.f, getWorldSize().y - mTextureFont->getAscent()+mTextureFont->getDescent()) ) ;
 	}
 	
 	// draw contour debug info
@@ -488,6 +480,21 @@ void PaperBounce3App::drawProjectorWindow()
 			mTextureFont->drawString( to_string(i) + " (" + to_string(c.mParent) + ")",
 				r.getLowerLeft() + vec2(2,-mTextureFont->getDescent()) ) ;
 		}
+	}
+	
+	// ---- UI -----
+	gl::setMatrices( CameraOrtho( 0, getWindowSize().x, getWindowSize().y, 0, 0.f, 1.f ) ) ;
+
+	if ( mDrawMouseDebugInfo && getWindowBounds().contains(mMousePos) )
+	{
+		vec2 pt = mMousePos;
+		
+		// coordinates
+		gl::color( ColorA(1,1,1) );
+		mTextureFont->drawString(
+			"Window: " + toString(pt) +
+			"\tWorld: " + toString( mouseToWorld(pt) )
+			, vec2( 8.f, getWindowSize().y - mTextureFont->getAscent()+mTextureFont->getDescent()) ) ;
 	}
 }
 
