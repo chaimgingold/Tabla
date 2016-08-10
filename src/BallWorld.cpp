@@ -16,6 +16,7 @@ void BallWorld::setParams( XmlTree xml )
 	getXml(xml,"BallDefaultRadius",mBallDefaultRadius);
 	getXml(xml,"BallDefaultMaxRadius",mBallDefaultMaxRadius);
 	getXml(xml,"BallDefaultColor",mBallDefaultColor);
+	getXml(xml,"BallMaxVel",mBallMaxVel);
 }
 
 void BallWorld::draw()
@@ -58,8 +59,6 @@ void BallWorld::draw()
 
 void BallWorld::update()
 {
-	const float kMaxBallVel = mBallDefaultRadius * 2.f ;
-	
 	int   steps = 1 ;
 	float delta = 1.f / (float)steps ;
 	
@@ -113,9 +112,9 @@ void BallWorld::update()
 			{
 				vec2 v = b.getVel() ;
 				
-				if ( length(v) > kMaxBallVel )
+				if ( length(v) > mBallMaxVel )
 				{
-					b.setVel( normalize(v) * kMaxBallVel ) ;
+					b.setVel( normalize(v) * mBallMaxVel ) ;
 				}
 			}
 		}

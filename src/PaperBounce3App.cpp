@@ -544,12 +544,18 @@ void PaperBounce3App::drawUI()
 		vec2 pt = mMousePos;
 		
 		// coordinates
-		gl::color( ColorA(1,1,1) );
-		mTextureFont->drawString(
-			"Window: " + toString(pt) +
-			"\tImage: "  + toString( mouseToImage(pt) ) +
-			"\tWorld: " + toString( mouseToWorld(pt) )
-			, vec2( 8.f, getWindowSize().y - mTextureFont->getAscent()+mTextureFont->getDescent()) ) ;
+		vec2   o[2] = { vec2(.5,1.5), vec2(0,0) };
+		ColorA c[2] = { ColorA(0,0,0), ColorA(1,1,1) };
+		
+		for( int i=0; i<2; ++i )
+		{
+			gl::color( c[i] );
+			mTextureFont->drawString(
+				"Window: " + toString(pt) +
+				"\tImage: "  + toString( mouseToImage(pt) ) +
+				"\tWorld: " + toString( mouseToWorld(pt) )
+				, o[i]+vec2( 8.f, getWindowSize().y - mTextureFont->getAscent()+mTextureFont->getDescent()) ) ;
+		}
 	}
 }
 

@@ -288,14 +288,16 @@ void Vision::processFrame( const Surface &surface )
 				Contour myc ;
 				
 				myc.mPolyLine = fromOcv(c) ;
-				myc.mRadius = radius ;
-				myc.mCenter = fromOcv(center) ;
-				myc.mArea   = area ;
-				myc.mBoundingRect = Rectf( myc.mPolyLine.getPoints() );
-				myc.mOcvContourIndex = i ;
 
 				// scale polyline to world space (from pixel space)
 				for( auto &p : myc.mPolyLine.getPoints() ) p *= contourPixelToWorld ;
+
+				myc.mRadius = radius ;
+				myc.mCenter = fromOcv(center) ;
+				myc.mArea   = area ;
+				myc.mBoundingRect = Rectf( myc.mPolyLine.getPoints() ); // after scaling points!
+				myc.mOcvContourIndex = i ;
+
 				
 				myc.mTreeDepth = 0 ;
 				{

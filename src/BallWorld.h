@@ -74,6 +74,7 @@ private:
 	// params
 	float	mBallDefaultRadius		= 8.f *  .5f ;
 	float	mBallDefaultMaxRadius	= 8.f * 4.f ;
+	float	mBallMaxVel				= 8.f ;
 	ColorAf mBallDefaultColor		= ColorAf::hex(0xC62D41);
 	
 	//
