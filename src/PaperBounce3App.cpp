@@ -194,15 +194,14 @@ void PaperBounce3App::setup()
 		
 		mVision.setLightLink(mLightLink);
 		
-		// resize window
-		setWindowSize( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y ) ;
-		
 		// TODO:
 		// - get a new camera capture object so that resolution can change live
 		// - respond to fullscreen projector flag
 		// - aux display config
 	});
 
+	// resize window
+	setWindowSize( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y ) ;
 	
 	// get camera
 	mCapture = Capture::create( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y, cameras.back() ) ; // get last camera
@@ -294,15 +293,6 @@ void PaperBounce3App::updateWindowMapping()
 	if ( mVision.mOCVPipelineTrace.getQueryStage() && mVision.mOCVPipelineTrace.getQueryStage()->mFrame )
 	{
 		drawSize = mVision.mOCVPipelineTrace.getQueryStage()->mFrame->getSize();
-		
-		// get the size, in world space, of the texture to draw
-//		auto stage = mVision.mOCVPipelineTrace.getQueryStage() ;
-//		
-//		Rectf drawInWorldBounds = stage->getBoundsInWorld();
-//		
-//		drawSize = drawInWorldBounds.getSize();
-
-//		cout << drawSize << endl;
 	}
 	
 	const float drawAspectRatio    = drawSize.x / drawSize.y ;
@@ -329,6 +319,7 @@ void PaperBounce3App::updateWindowMapping()
 
 vec2 PaperBounce3App::mouseToWorld( vec2 p )
 {
+	// convert screen/window coordinates to drawn texture (image) coords
 	RectMapping rm( Rectf( 0.f, 0.f, getWindowSize().x, getWindowSize().y ),
 					Rectf( mOrthoRect[0], mOrthoRect[3], mOrthoRect[1], mOrthoRect[2] ) ) ;
 	
@@ -336,7 +327,7 @@ vec2 PaperBounce3App::mouseToWorld( vec2 p )
 	
 	if (mVision.mOCVPipelineTrace.getQueryStage())
 	{
-		// convert world coordinates to drawn texture coords
+		// convert image coordinates to world coords
 		p2 = vec2( mVision.mOCVPipelineTrace.getQueryStage()->mImageToWorld * vec3(p2,1) ) ;
 	}
 	

@@ -11,14 +11,20 @@
 	</App>
 
 	<BallWorld>
-		<BallDefaultRadius>			4 </BallDefaultRadius>
-		<BallDefaultMaxRadius>		32 </BallDefaultMaxRadius>
+		<!-- cm -->
+		<BallDefaultRadius>			1 </BallDefaultRadius>
+		<BallDefaultMaxRadius>		6 </BallDefaultMaxRadius>
 		<BallDefaultColor>			C62D41 </BallDefaultColor>
 	</BallWorld>
 	
 	<LightLink>
+
+		<!-- px -->
 		<CaptureSize> 640 480 </CaptureSize>
-		
+
+			<!-- 16.f/9.f * 480.f, 480  -->
+			<!-- The old size we used for the 16:9 logitech camera, but it was SLOW. -->
+
 		<CaptureCoords>
 			138 83
 			452 74
@@ -26,23 +32,23 @@
 			125 397
 		</CaptureCoords>
 		
+		
+		<!-- cm -->
 		<CaptureWorldSpaceCoords>
 			0 0
-			1000 0
-			1000 1000
-			0 1000
+			69 0
+			69 69
+			0 69
 		</CaptureWorldSpaceCoords>
-		
-			<!-- 16.f/9.f * 480.f, 480  -->
-			<!-- The old size we used for the 16:9 logitech camera, but it was SLOW. -->
 
 	</LightLink>
 	
+	<!-- px, but probably should be cm -->
 	<Vision>
-		<ResScale>					.2	</ResScale>
+		<ResScale>					.1	</ResScale> <!-- Scales the other factors -->
 		<ContourMinRadius>			3	</ContourMinRadius>
 		<ContourMinArea>			100	</ContourMinArea>
-		<ContourDPEpsilon>			5	</ContourDPEpsilon>
+		<ContourDPEpsilon>			8	</ContourDPEpsilon>
 		<ContourMinWidth>			5	</ContourMinWidth>
 	</Vision>
 

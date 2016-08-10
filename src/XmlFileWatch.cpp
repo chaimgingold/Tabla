@@ -24,7 +24,7 @@ XmlFileWatch::update()
 
 void XmlFileWatch::scanFiles()
 {
-	for( auto i : mXmlFileWatch )
+	for( auto &i : mXmlFileWatch )
 	{
 		if ( boost::filesystem::exists(i.first) )
 		{

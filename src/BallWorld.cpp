@@ -145,7 +145,7 @@ void BallWorld::newRandomBall ( vec2 loc )
 	ball.mRadius = Rand::randFloat(mBallDefaultRadius,mBallDefaultMaxRadius) ;
 	ball.setMass( M_PI * powf(ball.mRadius,3.f) ) ;
 	
-	ball.setVel( Rand::randVec2() * 2.f ) ;
+	ball.setVel( Rand::randVec2() * mBallDefaultRadius/2.f ) ;
 	
 	mBalls.push_back( ball ) ;
 }

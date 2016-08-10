@@ -1,6 +1,6 @@
 Camera transform
 √ Need to perspective transform image without losing pixels
-- Decouple world coordinates from pixel coordinates
+√ Decouple world coordinates from pixel coordinates
 	- Add more metadata to pipeline
 		- every stage has world coordinates, by default set to image (if first), or prior stage
 		- so every stage except first will be the same, the world coordinates of clipped subregion
@@ -17,7 +17,7 @@ Camera transform
 	So a second pass while drawing in window coordinate space for current and future UI elements.
 
 Basic
-- XML parameter loading/saving
+√ XML parameter loading/saving
 	- Settings > Debug, etc..
 	- Screen/Camera >
 		- Which to use
@@ -69,6 +69,7 @@ New features
 		(Maybe don't even project there).
 
 Technical
+- Draw circles with more polys
 - Decouple drawing from pipeline a bit
 	- Dont' be checking query stage all the time. Have one place where we pull values from
 	the pipeline and set our various matrices up. (I think.)
@@ -99,7 +100,7 @@ Technical
 - Better registration
 	- Automatic video-projector calibration (gray coding, or variant).
 	- Will let me swap out, improve physical gear.
-- Lower latency
+√ Lower latency
 	- Think we got this down: pick proper resolutions.
 		- Just need to parameterize this for different installs and easy experimentation.
 		- Also, maybe dip into OSX camera api and get the resolutions.

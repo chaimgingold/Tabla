@@ -180,7 +180,7 @@ Rectf asBoundingRect( vec2 pts[4] )
 void Vision::processFrame( const Surface &surface )
 {
 	mOCVPipelineTrace.start();
-	if ( mOCVPipelineTrace.getQuery() == "" ) mOCVPipelineTrace.setQuery("input");
+	if ( mOCVPipelineTrace.getQuery() == "" ) mOCVPipelineTrace.setQuery("clipped");
 	
 	// make cv frame
 	cv::Mat input( toOcv( Channel( surface ) ) );
@@ -206,9 +206,10 @@ void Vision::processFrame( const Surface &surface )
 
 		// store this transformation
 		cv::Mat inputImageToWorld = cv::getPerspectiveTransform( srcpt, dstpt ) ;
-		cout << inputImageToWorld << endl ;
+//		cout << inputImageToWorld << endl;
 		mOCVPipelineTrace.setImageToWorldTransform( inputImageToWorld );
-
+			// this isn't coming out quite right; looks like we are missing translation somehow.
+		
 		// compute output size pixel scaling factor
 		const Rectf inputBounds  = asBoundingRect( mLightLink.mCaptureCoords );
 		const Rectf outputBounds = asBoundingRect( mLightLink.mCaptureWorldSpaceCoords );
