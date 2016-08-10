@@ -50,10 +50,11 @@ public:
 	// -- Projector --
 	
 	// • Map from World Space
-	// vec2 mProjectorWorldSpaceCoords[4];
+	vec2 mProjectorWorldSpaceCoords[4];
 	
 	// • Map into Camera Space
-	// vec2 mProjectorCoords[4];
+	vec2 mProjectorCoords[4];
+	vec2 mProjectorSize = vec2(1280,800) ;
 	
 	// • Barrel distortion correct
 	

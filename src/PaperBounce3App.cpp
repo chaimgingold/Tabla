@@ -15,6 +15,7 @@
 #include "Contour.h"
 #include "BallWorld.h"
 #include "XmlFileWatch.h"
+#include "Pipeline.h"
 
 #include "geom.h"
 #include "xml.h"
@@ -60,6 +61,8 @@ class PaperBounce3App : public App {
 	ContourVector		mContours;	// edges output		->
 	BallWorld			mBallWorld ;// world simulation
 	
+	Pipeline			mPipeline; // traces processing
+	
 	// world info
 	vec2 getWorldSize() const ;
 		// world rect might be more appropriate...
@@ -100,6 +103,9 @@ class PaperBounce3App : public App {
 
 	*/
 	
+	// to help us visualize
+	void addProjectorPipelineStages();
+	
 	// settings
 	bool mAutoFullScreenProjector = false ;
 	bool mDrawCameraImage = false ;
@@ -122,7 +128,7 @@ vec2 PaperBounce3App::getWorldSize() const
 	for( int i=1; i<4; ++i )
 	{
 		lo = min( lo, mLightLink.mCaptureWorldSpaceCoords[i] );
-		hi = min( hi, mLightLink.mCaptureWorldSpaceCoords[i] );
+		hi = max( hi, mLightLink.mCaptureWorldSpaceCoords[i] );
 	}
 	
 	return hi - lo ;
@@ -249,24 +255,58 @@ void PaperBounce3App::mouseDown( MouseEvent event )
 	mBallWorld.newRandomBall( mouseToWorld( event.getPos() ) ) ;
 }
 
+void PaperBounce3App::addProjectorPipelineStages()
+{
+	// set that image
+	mPipeline.then( mLightLink.mProjectorSize, "projector" ) ;
+	
+	// get the transform
+	cv::Point2f srcpt[4], dstpt[4];
+	
+	for( int i=0; i<4; ++i )
+	{
+		srcpt[i] = toOcv( mLightLink.mProjectorCoords[i] );
+		dstpt[i] = toOcv( mLightLink.mProjectorWorldSpaceCoords[i] );
+	}
+
+	cv::Mat xform = cv::getPerspectiveTransform( srcpt, dstpt ) ;
+	
+	mPipeline.setImageToWorldTransform(xform);
+}
+
 void PaperBounce3App::update()
 {
 	mXmlFileWatch.update();
 	
 	if ( mCapture->checkNewFrame() )
 	{
+		// start pipeline
+		mPipeline.start();
+		if ( mPipeline.getQuery() == "" )
+		{
+			// default image to query
+			// (we query before making the pipeline because we only store the image requested :P!)
+			if (mAutoFullScreenProjector) mPipeline.setQuery("projector");
+			else mPipeline.setQuery("clipped");
+		}
+
+		// get image
 		Surface frame( *mCapture->getSurface() ) ;
 		
-		mVision.processFrame(frame) ;
+		// vision it
+		mVision.processFrame(frame,mPipeline) ;
 		
+		// finish off the pipeline with draw stage
+		addProjectorPipelineStages();
+		
+		// pass contours to ballworld (probably don't need to store here)
 		mContours = mVision.mContourOutput ;
 		
 		mBallWorld.updateContours( mContours );
 		
-		// simulate query changing; respond to query
-		// ideally we would only do this when changing the query,
-		// BUT the problem with that is that we don't have the query output
-		// until running the vision system, so we will just do it here. ah well.
+		// since the pipeline stage we are drawing might have changed... (or come into existence)
+		// update the window mapping
+		// this is a little weird to put here, but ah well
 		updateWindowMapping();
 	}
 	
@@ -291,9 +331,9 @@ void PaperBounce3App::updateWindowMapping()
 	// set window transform
 	vec2 drawSize = getWorldSize(); // world by default
 	
-	if ( mVision.mOCVPipelineTrace.getQueryStage() && mVision.mOCVPipelineTrace.getQueryStage()->mFrame )
+	if ( mPipeline.getQueryStage() )
 	{
-		drawSize = mVision.mOCVPipelineTrace.getQueryStage()->mFrame->getSize();
+		drawSize = mPipeline.getQueryStage()->mImageSize;
 	}
 	
 	const float drawAspectRatio    = drawSize.x / drawSize.y ;
@@ -332,9 +372,9 @@ vec2 PaperBounce3App::mouseToWorld( vec2 p )
 	// convert image coordinates to world coords
 	vec2 p2 = mouseToImage(p);
 	
-	if (mVision.mOCVPipelineTrace.getQueryStage())
+	if (mPipeline.getQueryStage())
 	{
-		p2 = vec2( mVision.mOCVPipelineTrace.getQueryStage()->mImageToWorld * vec3(p2,1) ) ;
+		p2 = vec2( mPipeline.getQueryStage()->mImageToWorld * vec3(p2,1) ) ;
 	}
 	
 	return p2;
@@ -350,13 +390,13 @@ void PaperBounce3App::drawProjectorWindow()
 	
 	// vision pipeline image
 	//
-	if ( mVision.mOCVPipelineTrace.getQueryStage() &&
-		 mVision.mOCVPipelineTrace.getQueryStage()->mFrame &&
+	if ( mPipeline.getQueryStage() &&
+		 mPipeline.getQueryStage()->mImage &&
 		 mDrawCameraImage )
 	{
 		gl::color( 1, 1, 1 );
 		
-		gl::draw( mVision.mOCVPipelineTrace.getQueryStage()->mFrame );
+		gl::draw( mPipeline.getQueryStage()->mImage );
 	}
 	
 	// draw frame
@@ -370,10 +410,10 @@ void PaperBounce3App::drawProjectorWindow()
 	// ===== World space =====
 	gl::pushViewMatrix();
 	
-	if (mVision.mOCVPipelineTrace.getQueryStage())
+	if (mPipeline.getQueryStage())
 	{
 		// convert world coordinates to drawn texture coords
-		gl::multViewMatrix( glm::mat4x4( mVision.mOCVPipelineTrace.getQueryStage()->mWorldToImage ) );
+		gl::multViewMatrix( glm::mat4x4( mPipeline.getQueryStage()->mWorldToImage ) );
 	}
 	
 	drawWorld();
@@ -561,11 +601,11 @@ void PaperBounce3App::drawUI()
 
 void PaperBounce3App::drawAuxWindow()
 {
-//	if ( mVision.mOCVPipelineTrace.getQueryFrame() )
+//	if ( mPipeline.getQueryFrame() )
 //	{
 //		gl::setMatricesWindow( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y );
 //		gl::color( 1, 1, 1 );
-//		gl::draw( mVision.mOCVPipelineTrace.getQueryFrame() );
+//		gl::draw( mPipeline.getQueryFrame() );
 //	}
 }
 
@@ -617,11 +657,13 @@ void PaperBounce3App::keyDown( KeyEvent event )
 			break ;
 			
 		case KeyEvent::KEY_UP:
-			mVision.mOCVPipelineTrace.setQuery( mVision.mOCVPipelineTrace.getPrevStageName(mVision.mOCVPipelineTrace.getQuery() ) );
+			if (event.isMetaDown()) mPipeline.setQuery( mPipeline.getFirstStageName() );
+			else mPipeline.setQuery( mPipeline.getPrevStageName(mPipeline.getQuery() ) );
 			break;
 			
 		case KeyEvent::KEY_DOWN:
-			mVision.mOCVPipelineTrace.setQuery( mVision.mOCVPipelineTrace.getNextStageName(mVision.mOCVPipelineTrace.getQuery() ) );
+			if (event.isMetaDown()) mPipeline.setQuery( mPipeline.getLastStageName() );
+			else mPipeline.setQuery( mPipeline.getNextStageName(mPipeline.getQuery() ) );
 			break;
 
 	}

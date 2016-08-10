@@ -34,6 +34,7 @@
 		26FA36501D5519DA00C64A00 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 26FA364F1D5519DA00C64A00 /* assets */; };
 		26FA36541D55365800C64A00 /* LightLink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA36531D55365800C64A00 /* LightLink.cpp */; };
 		26FA36571D592CE700C64A00 /* XmlFileWatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA36551D592CE700C64A00 /* XmlFileWatch.cpp */; };
+		26FA365A1D5BDBC300C64A00 /* Pipeline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA36581D5BDBC300C64A00 /* Pipeline.cpp */; };
 		27FB686FA380493A8438C8BB /* b2Joint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D8E21292E75443F0B3FD59BF /* b2Joint.cpp */; };
 		307B0C3825A3481599FFE3BD /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9366F177495484A87934087 /* OpenCL.framework */; };
 		364054B04EB14DC0944BC464 /* b2Draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DA8A3392B64949EDA055E180 /* b2Draw.cpp */; };
@@ -110,6 +111,9 @@
 		26FA36531D55365800C64A00 /* LightLink.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LightLink.cpp; path = ../src/LightLink.cpp; sourceTree = "<group>"; };
 		26FA36551D592CE700C64A00 /* XmlFileWatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XmlFileWatch.cpp; path = ../src/XmlFileWatch.cpp; sourceTree = "<group>"; };
 		26FA36561D592CE700C64A00 /* XmlFileWatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XmlFileWatch.h; path = ../src/XmlFileWatch.h; sourceTree = "<group>"; };
+		26FA36581D5BDBC300C64A00 /* Pipeline.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Pipeline.cpp; path = ../src/Pipeline.cpp; sourceTree = "<group>"; };
+		26FA36591D5BDBC300C64A00 /* Pipeline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Pipeline.h; path = ../src/Pipeline.h; sourceTree = "<group>"; };
+		26FA365B1D5BDC8000C64A00 /* ocv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ocv.h; path = ../src/ocv.h; sourceTree = "<group>"; };
 		297736FC91944CE996B6A2A1 /* b2Fixture.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = b2Fixture.h; path = ../blocks/Box2D/src/Box2D/Dynamics/b2Fixture.h; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
@@ -252,6 +256,8 @@
 				26FA36531D55365800C64A00 /* LightLink.cpp */,
 				26FA36561D592CE700C64A00 /* XmlFileWatch.h */,
 				26FA36551D592CE700C64A00 /* XmlFileWatch.cpp */,
+				26FA36591D5BDBC300C64A00 /* Pipeline.h */,
+				26FA36581D5BDBC300C64A00 /* Pipeline.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -380,6 +386,7 @@
 				CCFADC6832594B6BA4171652 /* PaperBounce3_Prefix.pch */,
 				26FA364A1D53C78D00C64A00 /* geom.h */,
 				26FA36511D551F8900C64A00 /* xml.h */,
+				26FA365B1D5BDC8000C64A00 /* ocv.h */,
 			);
 			name = Headers;
 			sourceTree = "<group>";
@@ -592,6 +599,7 @@
 				5BA876CF7D3E422AA6E36FBF /* PaperBounce3App.cpp in Sources */,
 				CB13ED488BF746B1BE951350 /* b2BroadPhase.cpp in Sources */,
 				3A09A46A8AF949E89CBDD5B5 /* b2CollideCircle.cpp in Sources */,
+				26FA365A1D5BDBC300C64A00 /* Pipeline.cpp in Sources */,
 				C84DC4502D0A4C2384BE60F8 /* b2CollideEdge.cpp in Sources */,
 				741A16EB71BE4A308C86D708 /* b2CollidePolygon.cpp in Sources */,
 				509D1EB4420C46A3BB6D751D /* b2Collision.cpp in Sources */,

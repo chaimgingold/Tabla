@@ -1,3 +1,21 @@
+Projector Transform
+- Load Projector coords (world space, pixel space)
+- Draw into that transform
+	- Add this to the pipeline, so we can toggle to it.
+		- Maybe add another world-space pipeline frame so we can see things rendered in the 70x70 world...
+			(so image space = world space)
+	- Try loading that transformation matrix directly, so we let opengl handle the perspective transform for us
+		- Backup: use an fbo, draw in world space pixels, then draw in framebuffer transformed (lame)
+- How to set those coords?
+	- First pass: eyeball it and enter something manually
+	- If we are rendering projector output (16:9, 1024 x 768 or whatever it is--which might need to be hard coded--OH NO--we can detect it on startup when we choose the full-screen device we will draw to) then
+		We will have an image space whose coordinates are in projector space.
+		SO: We can put up a UI in that pipeline stage, four points for us to manipulate.
+		Or even more simply, like before, mouse cursor will just show us the points and we can enter them.
+		EXCEPT we have no idea where they are, so a GUI will be nice.
+		Especially if we can fullscreen it and do it--and optically align it in the world/see the mouse cursor in the world.
+
+
 Camera transform
 √ Need to perspective transform image without losing pixels
 √ Decouple world coordinates from pixel coordinates
