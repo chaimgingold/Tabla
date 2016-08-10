@@ -33,7 +33,7 @@
 		</CaptureCoords>
 		
 		
-		<!-- cm -->
+		<!-- cm (i measured my table) -->
 		<CaptureWorldSpaceCoords>
 			0 0
 			69 0
@@ -43,13 +43,12 @@
 
 	</LightLink>
 	
-	<!-- px, but probably should be cm -->
+	<!-- cm -->
 	<Vision>
-		<ResScale>					.1	</ResScale> <!-- Scales the other factors -->
-		<ContourMinRadius>			3	</ContourMinRadius>
-		<ContourMinArea>			100	</ContourMinArea>
-		<ContourDPEpsilon>			8	</ContourDPEpsilon>
-		<ContourMinWidth>			5	</ContourMinWidth>
+		<ContourMinRadius>			2	</ContourMinRadius>
+		<ContourMinArea>			10	</ContourMinArea>
+		<ContourDPEpsilon>			2	</ContourDPEpsilon>
+		<ContourMinWidth>			2	</ContourMinWidth>
 	</Vision>
 
 </PaperBounce3>

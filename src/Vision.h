@@ -97,7 +97,6 @@ public:
 	// settings
 	void setParams( XmlTree );
 
-	float mResScale			=   .2;
 	float mContourMinRadius	=	3;
 	float mContourMinArea	=	100;
 	float mContourDPEpsilon	=	5;

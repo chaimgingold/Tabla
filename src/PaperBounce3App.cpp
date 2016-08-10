@@ -76,6 +76,7 @@ class PaperBounce3App : public App {
 	
 	
 	// for main window,
+	vec2 mouseToImage( vec2 ); // maps mouse (screen) to drawn image coords
 	vec2 mouseToWorld( vec2 ); // maps mouse (screen) to world coordinates
 	void updateWindowMapping(); // maps world coordinates to the projector display (and back)
 	
@@ -317,17 +318,22 @@ void PaperBounce3App::updateWindowMapping()
 	else ortho( 0.f, drawSize.x, drawSize.y, 0.f ) ;
 }
 
-vec2 PaperBounce3App::mouseToWorld( vec2 p )
+vec2 PaperBounce3App::mouseToImage( vec2 p )
 {
 	// convert screen/window coordinates to drawn texture (image) coords
 	RectMapping rm( Rectf( 0.f, 0.f, getWindowSize().x, getWindowSize().y ),
 					Rectf( mOrthoRect[0], mOrthoRect[3], mOrthoRect[1], mOrthoRect[2] ) ) ;
 	
-	vec2 p2 = rm.map(p) ;
+	return rm.map(p) ;
+}
+
+vec2 PaperBounce3App::mouseToWorld( vec2 p )
+{
+	// convert image coordinates to world coords
+	vec2 p2 = mouseToImage(p);
 	
 	if (mVision.mOCVPipelineTrace.getQueryStage())
 	{
-		// convert image coordinates to world coords
 		p2 = vec2( mVision.mOCVPipelineTrace.getQueryStage()->mImageToWorld * vec3(p2,1) ) ;
 	}
 	
@@ -541,6 +547,7 @@ void PaperBounce3App::drawUI()
 		gl::color( ColorA(1,1,1) );
 		mTextureFont->drawString(
 			"Window: " + toString(pt) +
+			"\tImage: "  + toString( mouseToImage(pt) ) +
 			"\tWorld: " + toString( mouseToWorld(pt) )
 			, vec2( 8.f, getWindowSize().y - mTextureFont->getAscent()+mTextureFont->getDescent()) ) ;
 	}

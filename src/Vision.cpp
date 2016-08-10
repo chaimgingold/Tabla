@@ -148,16 +148,10 @@ string Pipeline::getAdjStageName( string name, int adj ) const
 
 void Vision::setParams( XmlTree xml )
 {
-	getXml(xml,"ResScale",mResScale);
 	getXml(xml,"ContourMinRadius",mContourMinRadius);
 	getXml(xml,"ContourMinArea",mContourMinArea);
 	getXml(xml,"ContourDPEpsilon",mContourDPEpsilon);
 	getXml(xml,"ContourMinWidth",mContourMinWidth);
-
-	mContourMinRadius	*= mResScale;
-	mContourMinArea		*= mResScale;
-	mContourDPEpsilon	*= mResScale;
-	mContourMinWidth	*= mResScale;
 }
 
 template<class T>
@@ -190,7 +184,7 @@ void Vision::processFrame( const Surface &surface )
 
 	
 	// clip
-//	Rectf outputWorldRect ;
+	float contourPixelToWorld = 1.f;
 	
 	{
 		// gather transform parameters
@@ -216,8 +210,11 @@ void Vision::processFrame( const Surface &surface )
 
 		const float pixelScale
 			= max( inputBounds .getWidth(), inputBounds .getHeight() )
-			/ max( outputBounds.getWidth(), outputBounds.getHeight() ) ;
-
+			/ max( outputBounds.getWidth(), outputBounds.getHeight() )
+			* 1 ; // bump it up
+		
+		contourPixelToWorld = 1.f / pixelScale ;
+		
 		outputSize.width  = outputBounds.getWidth()  * pixelScale ;
 		outputSize.height = outputBounds.getHeight() * pixelScale ;
 
@@ -230,7 +227,7 @@ void Vision::processFrame( const Surface &surface )
 		// do it
 		cv::Mat xform = cv::getPerspectiveTransform( srcpt, dstpt_pixelspace ) ;
 		cv::warpPerspective(input, clipped, xform, outputSize );
-
+		
 		// log to pipeline
 		mOCVPipelineTrace.then( clipped, "clipped" );
 		
@@ -254,22 +251,12 @@ void Vision::processFrame( const Surface &surface )
 	
 	cv::findContours( thresholded, contours, hierarchy, cv::RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
 	
-	// transform contours to world space
-	// (might have been smarter to store the ocv matrix in this function and then
-	// apply the righ tocv function to a list of points. oh well, it works.)
-	for( int i=0; i<contours.size(); ++i )
-	{
-		auto &c = contours[i] ;
-		
-		for( int j=0; j<c.size(); ++j )
-		{
-			vec2 p = fromOcv(c[j]);
-			
-			p = vec2( mOCVPipelineTrace.getStages().back().mImageToWorld * vec3(p,1) ) ;
-			
-			c[j] = toOcv(p);
-		}
-	}
+	// transform contours to world space...
+	// ideally we'd transform them in place, BUT since they are stored as integers
+	// we can't do this without aliasing along world unit boundaries.
+	// SO we need to keep the scaling ratio in mind as we go...
+	// also IDEALLY we'd use the transform matrix above and not just a single scaling factor,
+	// but this works.
 	
 	// filter and process contours into our format
 	mContourOutput.clear() ;
@@ -285,7 +272,10 @@ void Vision::processFrame( const Surface &surface )
 		
 		cv::minEnclosingCircle( c, center, radius ) ;
 		
-		float		area = cv::contourArea(c) ;
+		radius *= contourPixelToWorld ;
+		center *= contourPixelToWorld ;
+		
+		float		area = cv::contourArea(c) * contourPixelToWorld ;
 		
 		cv::RotatedRect rotatedRect = minAreaRect(c) ;
 		
@@ -303,6 +293,9 @@ void Vision::processFrame( const Surface &surface )
 				myc.mArea   = area ;
 				myc.mBoundingRect = Rectf( myc.mPolyLine.getPoints() );
 				myc.mOcvContourIndex = i ;
+
+				// scale polyline to world space (from pixel space)
+				for( auto &p : myc.mPolyLine.getPoints() ) p *= contourPixelToWorld ;
 				
 				myc.mTreeDepth = 0 ;
 				{
@@ -321,7 +314,7 @@ void Vision::processFrame( const Surface &surface )
 				ocvContourIdxToMyContourIdx[i] = mContourOutput.size()-1 ;
 			} ;
 			
-			if (1)
+			if ( mContourDPEpsilon > 0 )
 			{
 				// simplify
 				vector<cv::Point> approx ;
