@@ -35,7 +35,7 @@ class Pipeline
 	
 public:
 
-	bool empty() const { return mStageNames.empty(); }
+	bool empty() const { return mStages.empty(); }
 	
 	void	setQuery( string q ) { mQuery=q; } ;
 	string	getQuery() const { return mQuery; }
@@ -48,39 +48,44 @@ public:
 	
 	void start();
 	
-	void then( Surface &img, string name )
-	{
-		mStageNames.push_back(name);
-		
-		if (name==mQuery)
-		{
-			mFrame = gl::Texture::create( img );
-		}
-	}
+	void then( Surface &img, string name );
+	void then( cv::Mat &img, string name );
+	void then( gl::Texture2dRef ref, string name );
 	
-	void then( cv::Mat &img, string name )
-	{
-		mStageNames.push_back(name);
-
-		if (name==mQuery)
-		{
-			mFrame = gl::Texture::create( fromOcv(img), gl::Texture::Format().loadTopDown() );
-		}
-	}
+	void setImageToWorldTransform( const cv::Mat& ); // 3x3
+	void setImageToWorldTransform( const glm::mat3x3& ); // 3x3
 	
 	// add types:
 	// - contour
 	
-	gl::TextureRef getQueryFrame() const { return mFrame ; }
+//	gl::TextureRef getQueryFrame() const { return mQueryFrame ; }
+
+	class Stage
+	{
+	public:
+		string			mName;
+		glm::mat3x3		mImageToWorld;
+		glm::mat3x3		mWorldToImage;
+		gl::TextureRef	mFrame ;
+		
+//		Rectf getBoundsInWorld() const;
+	};
+	
+	const Stage* getQueryStage() const { return (mQueryIndex==-1) ? 0 : &mStages[mQueryIndex] ; }
+	const vector<Stage>& getStages() const { return mStages ; }
 	
 private:
 
-	string getAdjStageName( string, int adj ) const;
+	void then( function<gl::Texture2dRef()>, string name );
+		// so that we only fabricate the texture if it matches the query.
+		// this might be a silly optimization, and we should just cache them all.
 	
-	vector<string> mStageNames;
+	string getAdjStageName( string, int adj ) const;
+
+	vector<Stage> mStages;
 	
 	string		   mQuery ;
-	gl::TextureRef mFrame ;
+	int			   mQueryIndex=-1 ;
 	
 } ;
 

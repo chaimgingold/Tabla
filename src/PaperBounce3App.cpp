@@ -51,6 +51,9 @@ class PaperBounce3App : public App {
 	void drawProjectorWindow() ;
 	void drawAuxWindow() ;
 	
+	void drawWorld();
+	void drawUI();
+	
 	LightLink			mLightLink; // calibration for camera <> world <> projector
 	CaptureRef			mCapture;	// input device		->
 	Vision				mVision ;	// edge detection	->
@@ -58,9 +61,8 @@ class PaperBounce3App : public App {
 	BallWorld			mBallWorld ;// world simulation
 	
 	// world info
-	vec2 getWorldSize() const { return mLightLink.getCaptureSize() ; }
-		// units are um... pixels in camera space right now
-		// but should switch to meters or something like that
+	vec2 getWorldSize() const ;
+		// world rect might be more appropriate...
 	
 	
 	// ui
@@ -81,25 +83,20 @@ class PaperBounce3App : public App {
 	
 	/* Coordinates spaces, there are a few:
 	
-	- Camera coordinate space		(capture size),			eg. pixel location in capture image
 	- Window coordinate space		(window size),			eg. mouse coordinate
-	- Projector coordinate space	(screen size),			eg. pixel location on a screen
+	
+		^^ ortho transform (Texture <> Window : mOrthoRect)
+		||
+		
+	- Texture coordinate space			(texture size),			eg. location of a pixel on a shown image
+		- Camera coordinate space		(capture size),			eg. pixel location in capture image
+		- Projector coordinate space	(screen size),			eg. pixel location on a screen
+		
+		^^ world to image transform
+		||
+		
 	- World coordinate space,		(sim size, unbounded)	eg. location of a bouncing ball
-	- Graphics coordinate space		(varies...)
-		Modes:
-		- Camera
-		- Projector
-		- World
-			- What world coordinates do we want to show? Union of camera and projector bounds.
-		
-		When set to these native coord modes, can draw in native coords and get mouse cursor
-		in those coords.
-	
-	Mappings:
-	- World <> Window : mOrthoRect
-	
-		Right now, World = Projector
-		
+
 	*/
 	
 	// settings
@@ -116,6 +113,19 @@ class PaperBounce3App : public App {
 	
 	XmlFileWatch mXmlFileWatch;
 };
+
+vec2 PaperBounce3App::getWorldSize() const
+{
+	vec2 lo=mLightLink.mCaptureWorldSpaceCoords[0], hi=mLightLink.mCaptureWorldSpaceCoords[0];
+	
+	for( int i=1; i<4; ++i )
+	{
+		lo = min( lo, mLightLink.mCaptureWorldSpaceCoords[i] );
+		hi = min( hi, mLightLink.mCaptureWorldSpaceCoords[i] );
+	}
+	
+	return hi - lo ;
+}
 
 void PaperBounce3App::setup()
 {
@@ -281,9 +291,18 @@ void PaperBounce3App::updateWindowMapping()
 	// set window transform
 	vec2 drawSize = getWorldSize(); // world by default
 	
-	if ( mVision.mOCVPipelineTrace.getQueryFrame() ) // or query frame
+	if ( mVision.mOCVPipelineTrace.getQueryStage() && mVision.mOCVPipelineTrace.getQueryStage()->mFrame )
 	{
-		drawSize = mVision.mOCVPipelineTrace.getQueryFrame()->getSize();
+		drawSize = mVision.mOCVPipelineTrace.getQueryStage()->mFrame->getSize();
+		
+		// get the size, in world space, of the texture to draw
+//		auto stage = mVision.mOCVPipelineTrace.getQueryStage() ;
+//		
+//		Rectf drawInWorldBounds = stage->getBoundsInWorld();
+//		
+//		drawSize = drawInWorldBounds.getSize();
+
+//		cout << drawSize << endl;
 	}
 	
 	const float drawAspectRatio    = drawSize.x / drawSize.y ;
@@ -313,19 +332,34 @@ vec2 PaperBounce3App::mouseToWorld( vec2 p )
 	RectMapping rm( Rectf( 0.f, 0.f, getWindowSize().x, getWindowSize().y ),
 					Rectf( mOrthoRect[0], mOrthoRect[3], mOrthoRect[1], mOrthoRect[2] ) ) ;
 	
-	return rm.map(p) ;
+	vec2 p2 = rm.map(p) ;
+	
+	if (mVision.mOCVPipelineTrace.getQueryStage())
+	{
+		// convert world coordinates to drawn texture coords
+		p2 = vec2( mVision.mOCVPipelineTrace.getQueryStage()->mImageToWorld * vec3(p2,1) ) ;
+	}
+	
+	return p2;
 }
 
 void PaperBounce3App::drawProjectorWindow()
 {
+	// ===== Texture Space of Visualized Pipeline Stage =====
+	
 	// set window transform
+	//	coord space is in texture space of the pipeline stage we are drawing
 	gl::setMatrices( CameraOrtho( mOrthoRect[0], mOrthoRect[1], mOrthoRect[2], mOrthoRect[3], 0.f, 1.f ) ) ;
 	
 	// vision pipeline image
-	if ( mVision.mOCVPipelineTrace.getQueryFrame() && mDrawCameraImage )
+	//
+	if ( mVision.mOCVPipelineTrace.getQueryStage() &&
+		 mVision.mOCVPipelineTrace.getQueryStage()->mFrame &&
+		 mDrawCameraImage )
 	{
 		gl::color( 1, 1, 1 );
-		gl::draw( mVision.mOCVPipelineTrace.getQueryFrame() );
+		
+		gl::draw( mVision.mOCVPipelineTrace.getQueryStage()->mFrame );
 	}
 	
 	// draw frame
@@ -335,6 +369,29 @@ void PaperBounce3App::drawProjectorWindow()
 		gl::drawStrokedRect( Rectf(0,0,getWorldSize().x,getWorldSize().y).inflated( vec2(-1,-1) ) ) ;
 	}
 
+	
+	// ===== World space =====
+	gl::pushViewMatrix();
+	
+	if (mVision.mOCVPipelineTrace.getQueryStage())
+	{
+		// convert world coordinates to drawn texture coords
+		gl::multViewMatrix( glm::mat4x4( mVision.mOCVPipelineTrace.getQueryStage()->mWorldToImage ) );
+	}
+	
+	drawWorld();
+	
+	
+	// ====== Window Space (UI)
+	
+	gl::popViewMatrix();
+	gl::setMatrices( CameraOrtho( 0, getWindowSize().x, getWindowSize().y, 0, 0.f, 1.f ) ) ;
+
+	drawUI();
+}
+
+void PaperBounce3App::drawWorld()
+{
 	// draw contour bounding boxes, etc...
 	if (mDrawPolyBoundingRect)
 	{
@@ -481,10 +538,10 @@ void PaperBounce3App::drawProjectorWindow()
 				r.getLowerLeft() + vec2(2,-mTextureFont->getDescent()) ) ;
 		}
 	}
-	
-	// ---- UI -----
-	gl::setMatrices( CameraOrtho( 0, getWindowSize().x, getWindowSize().y, 0, 0.f, 1.f ) ) ;
+}
 
+void PaperBounce3App::drawUI()
+{
 	if ( mDrawMouseDebugInfo && getWindowBounds().contains(mMousePos) )
 	{
 		vec2 pt = mMousePos;
@@ -500,12 +557,12 @@ void PaperBounce3App::drawProjectorWindow()
 
 void PaperBounce3App::drawAuxWindow()
 {
-	if ( mVision.mOCVPipelineTrace.getQueryFrame() )
-	{
-		gl::setMatricesWindow( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y );
-		gl::color( 1, 1, 1 );
-		gl::draw( mVision.mOCVPipelineTrace.getQueryFrame() );
-	}
+//	if ( mVision.mOCVPipelineTrace.getQueryFrame() )
+//	{
+//		gl::setMatricesWindow( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y );
+//		gl::color( 1, 1, 1 );
+//		gl::draw( mVision.mOCVPipelineTrace.getQueryFrame() );
+//	}
 }
 
 void PaperBounce3App::draw()

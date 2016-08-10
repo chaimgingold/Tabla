@@ -19,43 +19,132 @@ namespace cinder {
 		return pl;
 	}
 
+	glm::mat3x3 fromOcvMat3x3( const cv::Mat& m )
+	{
+		glm::mat3x3 r;
+		
+		for( int i=0; i<3; ++i )
+		{
+			for( int j=0; j<3; ++j )
+			{
+				r[j][i] = m.at<double>(i,j);
+				// opencv: (row,column)
+				// glm:    (column,row)
+			}
+		}
+		
+		return r;
+	}
+}
+
+void Pipeline::start()
+{
+	mStages.clear();
+//	mQueryFrame = gl::TextureRef();
+	mQueryIndex = -1;
+}
+
+void Pipeline::then( Surface &img, string name )
+{
+	then( [&](){
+			return gl::Texture::create( img );
+		}, name ) ;
+}
+
+void Pipeline::then( cv::Mat &img, string name )
+{
+	then( [&](){
+			return gl::Texture::create( fromOcv(img), gl::Texture::Format().loadTopDown() );
+		}, name ) ;
+}
+
+void Pipeline::then( gl::Texture2dRef ref, string name )
+{
+	then( [&](){
+			return ref;
+		}, name ) ;
+}
+
+void Pipeline::then( function<gl::Texture2dRef()> func, string name )
+{
+	Stage s;
+	s.mName = name ;
+	
+	if ( !mStages.empty() ) //s.mImageToWorld = glm::mat3x3(); // identity
+//	else
+	{
+		// inherit from last
+		s.mImageToWorld = mStages.back().mImageToWorld;
+		s.mWorldToImage = mStages.back().mWorldToImage;
+		
+		// (by default it will be the identity matrix, i think)
+	}
+	
+	mStages.push_back(s);
+	
+	if ( name==mQuery )
+	{
+		mStages.back().mFrame = func();
+		mQueryIndex = mStages.size()-1;
+	}
+}
+
+void Pipeline::setImageToWorldTransform( const cv::Mat& m )
+{
+	setImageToWorldTransform( fromOcvMat3x3(m) );
+}
+
+void Pipeline::setImageToWorldTransform( const glm::mat3x3& m )
+{
+	assert( !empty() );
+	mStages.back().mImageToWorld = m;
+	mStages.back().mWorldToImage = inverse(m);
 }
 
 string  Pipeline::getFirstStageName() const
 {
-	if ( mStageNames.empty() ) return "" ;
-	else return mStageNames.front();
+	if ( empty() ) return "" ;
+	else return mStages.front().mName;
 }
 
 string  Pipeline::getLastStageName () const
 {
-	if ( mStageNames.empty() ) return "" ;
-	else return mStageNames.back();
+	if ( empty() ) return "" ;
+	else return mStages.back().mName;
 }
 
 string Pipeline::getAdjStageName( string name, int adj ) const
 {
-	for ( size_t i=0; i<mStageNames.size(); ++i )
+	for ( size_t i=0; i<mStages.size(); ++i )
 	{
-		if ( mStageNames[i]==name )
+		if ( mStages[i].mName==name )
 		{
 			int k = (int)i + adj ;
 			
-			k = min( k, (int)mStageNames.size()-1 );
+			k = min( k, (int)mStages.size()-1 );
 			k = max( k, 0 );
 			
-			return mStageNames[k];
+			return mStages[k].mName;
 		}
 	}
 	
 	return getFirstStageName();
 }
 
-void Pipeline::start()
-{
-	mStageNames.clear();
-	mFrame = gl::TextureRef();
-}
+//Rectf Pipeline::Stage::getBoundsInWorld() const
+//{
+//	if (mFrame)
+//	{
+//		ivec2 frameSize = mFrame->getSize();
+//		
+//		vec2 tl = vec2( mImageToWorld * vec3(0,0,1) ) ;
+//		vec2 br = vec2( mImageToWorld * vec3(frameSize.x,frameSize.y,1) ) ;
+//		
+//		return Rectf(tl,br);
+//	}
+//	else return Rectf(0,0,0,0);
+//}
+
 
 void Vision::setParams( XmlTree xml )
 {
@@ -101,13 +190,11 @@ void Vision::processFrame( const Surface &surface )
 
 	
 	// clip
-	Rectf outputWorldRect ;
+//	Rectf outputWorldRect ;
 	
 	{
 		// gather transform parameters
-		cv::Mat xform( 2, 4, CV_32FC1 );
-		
-		cv::Point2f srcpt[4], dstpt[4];
+		cv::Point2f srcpt[4], dstpt[4], dstpt_pixelspace[4];
 		
 		cv::Size outputSize;
 		
@@ -117,7 +204,12 @@ void Vision::processFrame( const Surface &surface )
 			dstpt[i] = toOcv( mLightLink.mCaptureWorldSpaceCoords[i] );
 		}
 
-		// compute output size pixel scaling
+		// store this transformation
+		cv::Mat inputImageToWorld = cv::getPerspectiveTransform( srcpt, dstpt ) ;
+		cout << inputImageToWorld << endl ;
+		mOCVPipelineTrace.setImageToWorldTransform( inputImageToWorld );
+
+		// compute output size pixel scaling factor
 		const Rectf inputBounds  = asBoundingRect( mLightLink.mCaptureCoords );
 		const Rectf outputBounds = asBoundingRect( mLightLink.mCaptureWorldSpaceCoords );
 
@@ -127,19 +219,25 @@ void Vision::processFrame( const Surface &surface )
 
 		outputSize.width  = outputBounds.getWidth()  * pixelScale ;
 		outputSize.height = outputBounds.getHeight() * pixelScale ;
-		
-		for( auto &p : dstpt ) p *= pixelScale ;
+
+		// compute dstpts in desired destination pixel space
+		for( int i=0; i<4; ++i )
+		{
+			dstpt_pixelspace[i] = dstpt[i] * pixelScale ;
+		}
 		
 		// do it
-		xform = cv::getPerspectiveTransform( srcpt, dstpt ) ;
+		cv::Mat xform = cv::getPerspectiveTransform( srcpt, dstpt_pixelspace ) ;
 		cv::warpPerspective(input, clipped, xform, outputSize );
-		outputWorldRect = outputBounds;
-	}
-		
-	// log to pipeline
-	mOCVPipelineTrace.then( clipped, "clipped" );
-//	mOCVPipelineTrace.worldBounds(outputBounds);
 
+		// log to pipeline
+		mOCVPipelineTrace.then( clipped, "clipped" );
+		
+		glm::mat3x3 imageToWorld = glm::mat3x3();
+		imageToWorld /= pixelScale;
+		
+		mOCVPipelineTrace.setImageToWorldTransform( imageToWorld );
+	}
 	
 	// blur
 	cv::GaussianBlur( clipped, gray, cv::Size(5,5), 0 );
@@ -154,6 +252,23 @@ void Vision::processFrame( const Surface &surface )
 	vector<cv::Vec4i> hierarchy;
 	
 	cv::findContours( thresholded, contours, hierarchy, cv::RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+	
+	// transform contours to world space
+	// (might have been smarter to store the ocv matrix in this function and then
+	// apply the righ tocv function to a list of points. oh well, it works.)
+	for( int i=0; i<contours.size(); ++i )
+	{
+		auto &c = contours[i] ;
+		
+		for( int j=0; j<c.size(); ++j )
+		{
+			vec2 p = fromOcv(c[j]);
+			
+			p = vec2( mOCVPipelineTrace.getStages().back().mImageToWorld * vec3(p,1) ) ;
+			
+			c[j] = toOcv(p);
+		}
+	}
 	
 	// filter and process contours into our format
 	mContourOutput.clear() ;

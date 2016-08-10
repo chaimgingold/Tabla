@@ -28,9 +28,9 @@
 		
 		<CaptureWorldSpaceCoords>
 			0 0
-			100 0
-			100 100
-			0 100
+			1000 0
+			1000 1000
+			0 1000
 		</CaptureWorldSpaceCoords>
 		
 			<!-- 16.f/9.f * 480.f, 480  -->

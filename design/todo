@@ -1,8 +1,19 @@
 Camera transform
-- Need to perspective transform image without losing pixels
-	So need to decouple world coordinates from pixel coordinates :P
-- Enable everyone to draw to the window's coordinate system in world coordinates (contours, balls, etc...)
-- Draw UI text elements/etc in window space.
+√ Need to perspective transform image without losing pixels
+- Decouple world coordinates from pixel coordinates
+	- Add more metadata to pipeline
+		- every stage has world coordinates, by default set to image (if first), or prior stage
+		- so every stage except first will be the same, the world coordinates of clipped subregion
+		- first stage will be bigger than the table world. i think the mapping should be straightforward:
+			output_world_bound_rect_pts :mapped-through: clip_output_rect -> clip_input_rect
+			(or stuff will draw in it wrong)
+	- Draw output in world space
+		- Draw pipeline textures in world space
+			Ortho Transform is for pipeline image's world coordinates
+			Then draw the image in world coordinates
+		- Draw balls, contours in world space
+	- Transform contour output points to world space
+√ Draw UI text elements/etc in window space.
 	So a second pass while drawing in window coordinate space for current and future UI elements.
 
 Basic
@@ -58,6 +69,9 @@ New features
 		(Maybe don't even project there).
 
 Technical
+- Decouple drawing from pipeline a bit
+	- Dont' be checking query stage all the time. Have one place where we pull values from
+	the pipeline and set our various matrices up. (I think.)
 - Pipeline is not just a trace;
 	- Vision code can pull parameters from it.
 	- These parameters can specify (in vision code or elsewhere, by name) UI and value ranges.
