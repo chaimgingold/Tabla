@@ -1,7 +1,10 @@
 <PaperBounce3>
 
+	<!-- I guess the use of cm is arbitrary, and it could be inches or whatever, but you 
+	have to be consistent across all these parameters. -->
+
 	<App>
-		<AutoFullScreenProjector>	0 </AutoFullScreenProjector>
+		<AutoFullScreenProjector>	1 </AutoFullScreenProjector>
 		<DrawCameraImage>			1 </DrawCameraImage>
 		<DrawContours>				1 </DrawContours>
 		<DrawContoursFilled>		0 </DrawContoursFilled>
@@ -22,9 +25,6 @@
 
 		<!-- px -->
 		<CaptureSize> 640 480 </CaptureSize>
-
-			<!-- 16.f/9.f * 480.f, 480  -->
-			<!-- The old size we used for the 16:9 logitech camera, but it was SLOW. -->
 
 		<CaptureCoords>
 			138 83
@@ -52,10 +52,10 @@
 
 		<!-- px -->
 		<ProjectorCoords>
-			0 0
-			1200 0
-			1200 1150
-			0 1150
+			-400 0
+			800 0
+			800 1150
+			-400 1150
 		</ProjectorCoords>
 
 		<ProjectorSize>
@@ -66,8 +66,8 @@
 	
 	<!-- cm -->
 	<Vision>
-		<ContourMinRadius>			2	</ContourMinRadius>
-		<ContourMinArea>			10	</ContourMinArea>
+		<ContourMinRadius>			1	</ContourMinRadius>
+		<ContourMinArea>			1	</ContourMinArea>
 		<ContourDPEpsilon>			2	</ContourDPEpsilon>
 		<ContourMinWidth>			2	</ContourMinWidth>
 	</Vision>

@@ -66,6 +66,15 @@ class PaperBounce3App : public App {
 	// world info
 	vec2 getWorldSize() const ;
 		// world rect might be more appropriate...
+		// this is kind of a deprecated concept; it is used to:
+		// - draw a frame
+		// - spawn random balls
+		// What are we talking about? Replace with these concepts:
+		// - contour boundaries?
+		// - camera world bounds?
+		// - projector world bounds?
+		// - union of camera + projector bounds?
+		// - some other arbitrary thing?
 	
 	
 	// ui
@@ -399,14 +408,6 @@ void PaperBounce3App::drawProjectorWindow()
 		gl::draw( mPipeline.getQueryStage()->mImage );
 	}
 	
-	// draw frame
-	if (1)
-	{
-		gl::color( 1, 1, 1 );
-		gl::drawStrokedRect( Rectf(0,0,getWorldSize().x,getWorldSize().y).inflated( vec2(-1,-1) ) ) ;
-	}
-
-	
 	// ===== World space =====
 	gl::pushViewMatrix();
 	
@@ -429,6 +430,13 @@ void PaperBounce3App::drawProjectorWindow()
 
 void PaperBounce3App::drawWorld()
 {
+	// draw frame
+	if (0)
+	{
+		gl::color( 1, 1, 1 );
+		gl::drawStrokedRect( Rectf(0,0,getWorldSize().x,getWorldSize().y).inflated( vec2(-1,-1) ) ) ;
+	}
+
 	// draw contour bounding boxes, etc...
 	if (mDrawPolyBoundingRect)
 	{
