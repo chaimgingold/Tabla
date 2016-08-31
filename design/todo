@@ -87,6 +87,7 @@ New features
 		(Maybe don't even project there).
 
 Technical
+- Fix barrel transform
 - Draw circles with more polys
 - Decouple drawing from pipeline a bit
 	- Dont' be checking query stage all the time. Have one place where we pull values from

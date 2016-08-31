@@ -27,9 +27,9 @@
 		<CaptureSize> 640 480 </CaptureSize>
 
 		<CaptureCoords>
-			138 83
-			452 74
-			465 402
+			136 78
+			459 71
+			468 403
 			125 397
 		</CaptureCoords>
 		
@@ -52,10 +52,10 @@
 
 		<!-- px -->
 		<ProjectorCoords>
-			-400 0
-			800 0
-			800 1150
-			-400 1150
+			60 20
+			1170 20
+			1170 1150
+			60 1150
 		</ProjectorCoords>
 
 		<ProjectorSize>

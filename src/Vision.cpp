@@ -57,12 +57,14 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 		{
 			srcpt[i] = toOcv( mLightLink.mCaptureCoords[i] );
 			dstpt[i] = toOcv( mLightLink.mCaptureWorldSpaceCoords[i] );
+			
+//			std::cout << srcpt[i] << " -> " << dstpt[i] << endl;
 		}
 
 		// store this transformation
 		cv::Mat inputImageToWorld = cv::getPerspectiveTransform( srcpt, dstpt ) ;
 //		cout << inputImageToWorld << endl;
-		pipeline.setImageToWorldTransform( inputImageToWorld );
+		pipeline.setImageToWorldTransform( mat3to4(fromOcvMat3x3(inputImageToWorld)) );
 			// this isn't coming out quite right; looks like we are missing translation somehow.
 		
 		// compute output size pixel scaling factor
@@ -91,8 +93,9 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 		// log to pipeline
 		pipeline.then( clipped, "clipped" );
 		
-		glm::mat3x3 imageToWorld = glm::mat3x3();
-		imageToWorld /= pixelScale;
+		glm::mat4 imageToWorld = glm::scale( vec3( 1.f / pixelScale, 1.f / pixelScale, 1.f ) );
+//		glm::mat3x3();
+//		imageToWorld /= pixelScale;
 		
 		pipeline.setImageToWorldTransform( imageToWorld );
 	}

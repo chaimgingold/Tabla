@@ -46,8 +46,8 @@ public:
 	void then( gl::Texture2dRef ref, string name );
 	void then( vec2 frameSize, string name );
 	
-	void setImageToWorldTransform( const cv::Mat& ); // 3x3
-	void setImageToWorldTransform( const glm::mat3x3& ); // 3x3
+//	void setImageToWorldTransform( const cv::Mat& ); // 3x3
+	void setImageToWorldTransform( const glm::mat4& );
 	
 	// add types:
 	// - contour
@@ -57,8 +57,8 @@ public:
 	{
 	public:
 		string			mName;
-		glm::mat3x3		mImageToWorld;
-		glm::mat3x3		mWorldToImage;
+		mat4			mImageToWorld;
+		mat4			mWorldToImage;
 		vec2			mImageSize;
 		gl::TextureRef	mImage;
 	};

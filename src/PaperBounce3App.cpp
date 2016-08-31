@@ -19,6 +19,8 @@
 
 #include "geom.h"
 #include "xml.h"
+#include "View.h"
+#include "ocv.h"
 
 #include <map>
 #include <string>
@@ -250,6 +252,12 @@ void PaperBounce3App::setup()
 	
 	// text
 	mTextureFont = gl::TextureFont::create( Font("Avenir",12) );
+
+	// default pipeline image to query
+	// (after loading xml)
+	// (we query before making the pipeline because we only store the image requested :P!)
+	if (mAutoFullScreenProjector) mPipeline.setQuery("projector");
+	else mPipeline.setQuery("clipped");
 }
 
 fs::path
@@ -270,6 +278,7 @@ void PaperBounce3App::addProjectorPipelineStages()
 	mPipeline.then( mLightLink.mProjectorSize, "projector" ) ;
 	
 	// get the transform
+	/*
 	cv::Point2f srcpt[4], dstpt[4];
 	
 	for( int i=0; i<4; ++i )
@@ -280,7 +289,12 @@ void PaperBounce3App::addProjectorPipelineStages()
 
 	cv::Mat xform = cv::getPerspectiveTransform( srcpt, dstpt ) ;
 	
-	mPipeline.setImageToWorldTransform(xform);
+	mPipeline.setImageToWorldTransform( mat3to4( fromOcvMat3x3(xform) ) );*/
+	
+	mPipeline.setImageToWorldTransform(
+		getOcvPerspectiveTransform(
+			mLightLink.mProjectorCoords,
+			mLightLink.mProjectorWorldSpaceCoords ));
 }
 
 void PaperBounce3App::update()
@@ -291,13 +305,6 @@ void PaperBounce3App::update()
 	{
 		// start pipeline
 		mPipeline.start();
-		if ( mPipeline.getQuery() == "" )
-		{
-			// default image to query
-			// (we query before making the pipeline because we only store the image requested :P!)
-			if (mAutoFullScreenProjector) mPipeline.setQuery("projector");
-			else mPipeline.setQuery("clipped");
-		}
 
 		// get image
 		Surface frame( *mCapture->getSurface() ) ;
@@ -383,7 +390,7 @@ vec2 PaperBounce3App::mouseToWorld( vec2 p )
 	
 	if (mPipeline.getQueryStage())
 	{
-		p2 = vec2( mPipeline.getQueryStage()->mImageToWorld * vec3(p2,1) ) ;
+		p2 = vec2( mPipeline.getQueryStage()->mImageToWorld * vec4(p2,0,1) ) ;
 	}
 	
 	return p2;
@@ -414,7 +421,7 @@ void PaperBounce3App::drawProjectorWindow()
 	if (mPipeline.getQueryStage())
 	{
 		// convert world coordinates to drawn texture coords
-		gl::multViewMatrix( glm::mat4x4( mPipeline.getQueryStage()->mWorldToImage ) );
+		gl::multViewMatrix( mPipeline.getQueryStage()->mWorldToImage );
 	}
 	
 	drawWorld();
@@ -426,6 +433,25 @@ void PaperBounce3App::drawProjectorWindow()
 	gl::setMatrices( CameraOrtho( 0, getWindowSize().x, getWindowSize().y, 0, 0.f, 1.f ) ) ;
 
 	drawUI();
+	
+	//
+	if (0)
+	{
+		View v;
+		
+		v.mFrame  = Rectf(0,0,320,240) + vec2(100,100);
+		v.mBounds = Rectf(0,0,640,480);
+		
+		gl::pushViewMatrix();
+		gl::multViewMatrix( v.getChildToParentMatrix() );
+		
+	//	cout << v.getChildToParentMatrix() << endl;
+	//	cout << glm::translate( vec3(100, 100, 0.f) ) << endl;
+		
+		v.draw();
+		
+		gl::popViewMatrix();
+	}
 }
 
 void PaperBounce3App::drawWorld()

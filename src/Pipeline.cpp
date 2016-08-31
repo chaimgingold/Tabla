@@ -69,12 +69,12 @@ void Pipeline::then( function<gl::Texture2dRef()> func, string name, vec2 size )
 	}
 }
 
-void Pipeline::setImageToWorldTransform( const cv::Mat& m )
-{
-	setImageToWorldTransform( fromOcvMat3x3(m) );
-}
-
-void Pipeline::setImageToWorldTransform( const glm::mat3x3& m )
+//void Pipeline::setImageToWorldTransform( const cv::Mat& m )
+//{
+//	setImageToWorldTransform( fromOcvMat3x3(m) );
+//}
+//
+void Pipeline::setImageToWorldTransform( const glm::mat4& m )
 {
 	assert( !empty() );
 	mStages.back().mImageToWorld = m;
