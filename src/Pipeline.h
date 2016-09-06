@@ -46,7 +46,6 @@ public:
 	void then( gl::Texture2dRef ref, string name );
 	void then( vec2 frameSize, string name );
 	
-//	void setImageToWorldTransform( const cv::Mat& ); // 3x3
 	void setImageToWorldTransform( const glm::mat4& );
 	
 	// add types:

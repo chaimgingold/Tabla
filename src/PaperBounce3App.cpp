@@ -98,23 +98,28 @@ class PaperBounce3App : public App {
 	View mMainImageView; // main view, with image in it.
 		// eventually we might nest this inside of a root view that also contains some UI views.
 	
-//	float	mOrthoRect[4]; // points for glOrtho; set by updateWindowMapping()
-	
 	/* Coordinates spaces, there are a few:
-	
-	- Window coordinate space		(window size),			eg. mouse coordinate
-	
-		^^ ortho transform (Texture <> Window : mOrthoRect)
-		||
 		
-	- Texture coordinate space			(texture size),			eg. location of a pixel on a shown image
-		- Camera coordinate space		(capture size),			eg. pixel location in capture image
-		- Projector coordinate space	(screen size),			eg. pixel location on a screen
+		UI (window coordinates, in points, not pixels)
+			- pixels
+			- points
+			
+		Image
+			- Camera
+				e.g. pixel location in capture image
+			- Projector
+				e.g. pixel location on a screen
+			- Arbitrary
+				e.g. supersampled camera image subset
+				e.g. location of a pixel on a shown image
 		
-		^^ world to image transform
-		||
-		
-	- World coordinate space,		(sim size, unbounded)	eg. location of a bouncing ball
+		World
+			(sim size, unbounded)	eg. location of a bouncing ball
+	 
+	 
+	Transforms
+		UI    <> Image -- handled by View objects
+		Image <> World -- currently handled by Pipeline::Stage transforms
 
 	*/
 	
@@ -357,30 +362,12 @@ void PaperBounce3App::updateMainImageTransform()
 	const Rectf windowRect = Rectf(0,0,getWindowSize().x,getWindowSize().y);
 	const Rectf frame      = bounds.getCenteredFit( windowRect, true );
 	
-	cout << "bounds: " << bounds << endl;
-	cout << "frame:  " << frame  << endl;
-	
-	cout << "frame-ul:  " << mMainImageView.getFrame().getUpperLeft() << endl;
-	cout << "bounds-ul: " << mMainImageView.getBounds().getUpperLeft() << endl;
-	
-//	cout << "mouse:  " << mMousePos << endl;
-//	cout << "mouse-image:  " << mouseToImage(mMousePos) << endl;
-//	cout << "mouse-world:  " << mouseToWorld(mMousePos) << endl;
-	
 	mMainImageView.setFrame( frame );
 }
 
 vec2 PaperBounce3App::mouseToImage( vec2 p )
 {
-	// convert screen/window coordinates to drawn texture (image) coords
-//	RectMapping rm( Rectf( 0.f, 0.f, getWindowSize().x, getWindowSize().y ),
-//					Rectf( mOrthoRect[0], mOrthoRect[3], mOrthoRect[1], mOrthoRect[2] ) ) ;
-
-//	RectMapping rm( mMainImageView.getFrame() ,
-//					mMainImageView.getBounds() ) ;
-	
-//	return rm.map(p) ;
-
+	// convert screen/window coordinates to image coords
 	return mMainImageView.parentToChild(p);
 }
 
@@ -418,6 +405,7 @@ void PaperBounce3App::drawProjectorWindow()
 		}
 
 //		mMainImageView.draw();
+		if (0)
 		{
 			vec2 p = mouseToImage(mMousePos);
 			gl::color( 0., .5, .1 );
@@ -448,7 +436,7 @@ void PaperBounce3App::drawProjectorWindow()
 	drawUI();
 	
 	// test view code
-	if (1)
+	if (0)
 	{
 		View v;
 		
@@ -458,10 +446,7 @@ void PaperBounce3App::drawProjectorWindow()
 		gl::pushViewMatrix();
 		gl::multViewMatrix( v.getChildToParentMatrix() );
 		
-	//	cout << v.getChildToParentMatrix() << endl;
-	//	cout << glm::translate( vec3(100, 100, 0.f) ) << endl;
-		
-//		v.draw();
+		v.draw();
 		
 		gl::popViewMatrix();
 	}
