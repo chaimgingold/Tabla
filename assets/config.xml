@@ -4,7 +4,7 @@
 	have to be consistent across all these parameters. -->
 
 	<App>
-		<AutoFullScreenProjector>	1 </AutoFullScreenProjector>
+		<AutoFullScreenProjector>	0 </AutoFullScreenProjector>
 		<DrawCameraImage>			1 </DrawCameraImage>
 		<DrawContours>				1 </DrawContours>
 		<DrawContoursFilled>		0 </DrawContoursFilled>
@@ -54,8 +54,8 @@
 		<ProjectorCoords>
 			60 20
 			1170 20
-			1170 1150
-			60 1150
+			1170 1130
+			60 1130
 		</ProjectorCoords>
 
 		<ProjectorSize>

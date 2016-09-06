@@ -57,15 +57,12 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 		{
 			srcpt[i] = toOcv( mLightLink.mCaptureCoords[i] );
 			dstpt[i] = toOcv( mLightLink.mCaptureWorldSpaceCoords[i] );
-			
-//			std::cout << srcpt[i] << " -> " << dstpt[i] << endl;
 		}
 
 		// store this transformation
-		cv::Mat inputImageToWorld = cv::getPerspectiveTransform( srcpt, dstpt ) ;
-//		cout << inputImageToWorld << endl;
-		pipeline.setImageToWorldTransform( mat3to4(fromOcvMat3x3(inputImageToWorld)) );
-			// this isn't coming out quite right; looks like we are missing translation somehow.
+		pipeline.setImageToWorldTransform( getOcvPerspectiveTransform(
+			mLightLink.mCaptureCoords,
+			mLightLink.mCaptureWorldSpaceCoords ) );
 		
 		// compute output size pixel scaling factor
 		const Rectf inputBounds  = asBoundingRect( mLightLink.mCaptureCoords );

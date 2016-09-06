@@ -19,6 +19,7 @@ namespace cinder {
 		return pl;
 	}
 
+	// stuff below doesn't really belong in cinder namespace, but whatever.
 	inline glm::mat3x3 fromOcvMat3x3( const cv::Mat& m )
 	{
 		glm::mat3x3 r;
