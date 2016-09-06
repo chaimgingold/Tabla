@@ -92,9 +92,13 @@ class PaperBounce3App : public App {
 	// for main window,
 	vec2 mouseToImage( vec2 ); // maps mouse (screen) to drawn image coords
 	vec2 mouseToWorld( vec2 ); // maps mouse (screen) to world coordinates
-	void updateWindowMapping(); // maps world coordinates to the projector display (and back)
 	
-	float	mOrthoRect[4]; // points for glOrtho; set by updateWindowMapping()
+	void updateMainImageTransform(); // configure mMainImageView
+	
+	View mMainImageView; // main view, with image in it.
+		// eventually we might nest this inside of a root view that also contains some UI views.
+	
+//	float	mOrthoRect[4]; // points for glOrtho; set by updateWindowMapping()
 	
 	/* Coordinates spaces, there are a few:
 	
@@ -277,20 +281,6 @@ void PaperBounce3App::addProjectorPipelineStages()
 	// set that image
 	mPipeline.then( mLightLink.mProjectorSize, "projector" ) ;
 	
-	// get the transform
-	/*
-	cv::Point2f srcpt[4], dstpt[4];
-	
-	for( int i=0; i<4; ++i )
-	{
-		srcpt[i] = toOcv( mLightLink.mProjectorCoords[i] );
-		dstpt[i] = toOcv( mLightLink.mProjectorWorldSpaceCoords[i] );
-	}
-
-	cv::Mat xform = cv::getPerspectiveTransform( srcpt, dstpt ) ;
-	
-	mPipeline.setImageToWorldTransform( mat3to4( fromOcvMat3x3(xform) ) );*/
-	
 	mPipeline.setImageToWorldTransform(
 		getOcvPerspectiveTransform(
 			mLightLink.mProjectorCoords,
@@ -323,7 +313,7 @@ void PaperBounce3App::update()
 		// since the pipeline stage we are drawing might have changed... (or come into existence)
 		// update the window mapping
 		// this is a little weird to put here, but ah well
-		updateWindowMapping();
+		updateMainImageTransform();
 	}
 	
 	mBallWorld.update();
@@ -331,56 +321,67 @@ void PaperBounce3App::update()
 
 void PaperBounce3App::resize()
 {
-	updateWindowMapping();
+	updateMainImageTransform();
 }
 
-void PaperBounce3App::updateWindowMapping()
+void PaperBounce3App::updateMainImageTransform()
 {
-	auto ortho = [&]( float a, float b, float c, float d )
+	// get content bounds
+	Rectf bounds;
+
 	{
-		mOrthoRect[0] = a ;
-		mOrthoRect[1] = b ;
-		mOrthoRect[2] = c ;
-		mOrthoRect[3] = d ;
-	};
-	
-	// set window transform
-	vec2 drawSize = getWorldSize(); // world by default
-	
-	if ( mPipeline.getQueryStage() )
-	{
-		drawSize = mPipeline.getQueryStage()->mImageSize;
-	}
-	
-	const float drawAspectRatio    = drawSize.x / drawSize.y ;
-	const float windowAspectRatio  = (float)getWindowSize().x / (float)getWindowSize().y ;
-	
-	if ( drawAspectRatio < windowAspectRatio )
-	{
-		// vertical black bars
-		float w = windowAspectRatio * drawSize.y ;
-		float barsw = w - drawSize.x ;
+		// in terms of size...
+		// this is a little weird, but it's basically historical code that needs to be
+		// refactored.
+		vec2 drawSize;
 		
-		ortho( -barsw/2, drawSize.x + barsw/2, drawSize.y, 0.f ) ;
-	}
-	else if ( drawAspectRatio > windowAspectRatio )
-	{
-		// horizontal black bars
-		float h = (1.f / windowAspectRatio) * drawSize.x ;
-		float barsh = h - drawSize.y ;
+		if ( mPipeline.getQueryStage() )
+		{
+			// should always be the case
+			drawSize = mPipeline.getQueryStage()->mImageSize;
+		}
+		else
+		{
+			// world by default.
+			// (deprecated; not really sure what this even means anymore.)
+			drawSize = getWorldSize();
+		}
 		
-		ortho( 0.f, drawSize.x, drawSize.y + barsh/2, -barsh/2 ) ;
+		bounds = Rectf( 0, 0, drawSize.x, drawSize.y );
 	}
-	else ortho( 0.f, drawSize.x, drawSize.y, 0.f ) ;
+	
+	mMainImageView.setBounds( bounds );
+
+	
+	// it fills the window
+	const Rectf windowRect = Rectf(0,0,getWindowSize().x,getWindowSize().y);
+	const Rectf frame      = bounds.getCenteredFit( windowRect, true );
+	
+	cout << "bounds: " << bounds << endl;
+	cout << "frame:  " << frame  << endl;
+	
+	cout << "frame-ul:  " << mMainImageView.getFrame().getUpperLeft() << endl;
+	cout << "bounds-ul: " << mMainImageView.getBounds().getUpperLeft() << endl;
+	
+//	cout << "mouse:  " << mMousePos << endl;
+//	cout << "mouse-image:  " << mouseToImage(mMousePos) << endl;
+//	cout << "mouse-world:  " << mouseToWorld(mMousePos) << endl;
+	
+	mMainImageView.setFrame( frame );
 }
 
 vec2 PaperBounce3App::mouseToImage( vec2 p )
 {
 	// convert screen/window coordinates to drawn texture (image) coords
-	RectMapping rm( Rectf( 0.f, 0.f, getWindowSize().x, getWindowSize().y ),
-					Rectf( mOrthoRect[0], mOrthoRect[3], mOrthoRect[1], mOrthoRect[2] ) ) ;
+//	RectMapping rm( Rectf( 0.f, 0.f, getWindowSize().x, getWindowSize().y ),
+//					Rectf( mOrthoRect[0], mOrthoRect[3], mOrthoRect[1], mOrthoRect[2] ) ) ;
+
+//	RectMapping rm( mMainImageView.getFrame() ,
+//					mMainImageView.getBounds() ) ;
 	
-	return rm.map(p) ;
+//	return rm.map(p) ;
+
+	return mMainImageView.parentToChild(p);
 }
 
 vec2 PaperBounce3App::mouseToWorld( vec2 p )
@@ -398,49 +399,61 @@ vec2 PaperBounce3App::mouseToWorld( vec2 p )
 
 void PaperBounce3App::drawProjectorWindow()
 {
-	// ===== Texture Space of Visualized Pipeline Stage =====
+	// ====== Window Space (UI) =====
+	// baseline coordinate space
+	gl::setMatricesWindow( getWindowSize() );
 	
-	// set window transform
-	//	coord space is in texture space of the pipeline stage we are drawing
-	gl::setMatrices( CameraOrtho( mOrthoRect[0], mOrthoRect[1], mOrthoRect[2], mOrthoRect[3], 0.f, 1.f ) ) ;
-	
-	// vision pipeline image
-	//
-	if ( mPipeline.getQueryStage() &&
-		 mPipeline.getQueryStage()->mImage &&
-		 mDrawCameraImage )
-	{
-		gl::color( 1, 1, 1 );
-		
-		gl::draw( mPipeline.getQueryStage()->mImage );
-	}
-	
-	// ===== World space =====
+	// ===== Image Space =====
 	gl::pushViewMatrix();
-	
-	if (mPipeline.getQueryStage())
+	gl::multViewMatrix( mMainImageView.getChildToParentMatrix() );
 	{
-		// convert world coordinates to drawn texture coords
-		gl::multViewMatrix( mPipeline.getQueryStage()->mWorldToImage );
-	}
-	
-	drawWorld();
-	
-	
-	// ====== Window Space (UI)
-	
-	gl::popViewMatrix();
-	gl::setMatrices( CameraOrtho( 0, getWindowSize().x, getWindowSize().y, 0, 0.f, 1.f ) ) ;
+		// vision pipeline image
+		if ( mPipeline.getQueryStage() &&
+			 mPipeline.getQueryStage()->mImage &&
+			 mDrawCameraImage )
+		{
+			gl::color( 1, 1, 1 );
+			
+			gl::draw( mPipeline.getQueryStage()->mImage );
+		}
 
+//		mMainImageView.draw();
+		{
+			vec2 p = mouseToImage(mMousePos);
+			gl::color( 0., .5, .1 );
+			gl::drawSolidRect( Rectf(p,p+vec2(100,100)) );
+			gl::color( 1., .8, .1 );
+			gl::drawSolidRect( Rectf(p,p+vec2(10,10)) );
+			gl::color( .9, .8, .1 );
+			gl::drawSolidRect( Rectf(p,p+vec2(1,1)) );
+		}
+
+		// ===== World space =====
+		gl::pushViewMatrix();
+		{
+			if (mPipeline.getQueryStage())
+			{
+				// convert world coordinates to drawn texture coords
+				gl::multViewMatrix( mPipeline.getQueryStage()->mWorldToImage );
+			}
+			
+			drawWorld();
+		}
+		gl::popViewMatrix();
+	}
+	gl::popViewMatrix(); // pop back to UI space
+	
+	
+	// ====== Window Space (UI) =====
 	drawUI();
 	
-	//
-	if (0)
+	// test view code
+	if (1)
 	{
 		View v;
 		
-		v.mFrame  = Rectf(0,0,320,240) + vec2(100,100);
-		v.mBounds = Rectf(0,0,640,480);
+		v.setFrame ( Rectf(0,0,320,240) + vec2(100,100) );
+		v.setBounds( Rectf(0,0,640,480) );
 		
 		gl::pushViewMatrix();
 		gl::multViewMatrix( v.getChildToParentMatrix() );
@@ -448,7 +461,7 @@ void PaperBounce3App::drawProjectorWindow()
 	//	cout << v.getChildToParentMatrix() << endl;
 	//	cout << glm::translate( vec3(100, 100, 0.f) ) << endl;
 		
-		v.draw();
+//		v.draw();
 		
 		gl::popViewMatrix();
 	}

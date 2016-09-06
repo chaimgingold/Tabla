@@ -16,7 +16,12 @@
 	http://opencvexamples.blogspot.com/2014/01/perspective-transform.html
 
 
-- Matrix problem; 3x3 -> 4x4
+- Barrel distortion
+
+	http://stackoverflow.com/questions/26602981/correct-barrel-distortion-in-opencv-manually-without-chessboard-image
+
+
+- √ Matrix problem; 3x3 -> 4x4
 
 	[[    4.928,   -0.000,    0.000]
 	 [   -0.000,    4.928,   -0.000]
@@ -41,4 +46,4 @@
 
 	 oops.
 
-
+	Josh helped me fix this.
