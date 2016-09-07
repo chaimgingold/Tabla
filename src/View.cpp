@@ -42,3 +42,17 @@ ViewRef ViewCollection::getViewByName( string name )
 	
 	return nullptr;
 }
+
+bool ViewCollection::removeView( ViewRef v )
+{
+	for ( auto i = mViews.begin(); i != mViews.end(); ++i )
+	{
+		if ( *i==v )
+		{
+			mViews.erase(i);
+			return true ;
+		}
+	}
+	
+	return false;
+}

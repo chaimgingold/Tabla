@@ -11,6 +11,7 @@
 		<DrawMouseDebugInfo>		1 </DrawMouseDebugInfo>
 		<DrawPolyBoundingRect>		0 </DrawPolyBoundingRect>
 		<DrawContourTree>			0 </DrawContourTree>
+		<DrawPipeline>				1 </DrawPipeline>
 	</App>
 
 	<BallWorld>

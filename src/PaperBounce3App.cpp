@@ -123,7 +123,7 @@ class PaperBounce3App : public App {
 	
 	// to help us visualize
 	void addProjectorPipelineStages();
-	void updatePipelineViews();
+	void updatePipelineViews( bool areViewsVisible );
 	
 	ViewCollection mViews;
 	
@@ -141,6 +141,7 @@ class PaperBounce3App : public App {
 	bool mDrawMouseDebugInfo = false ;
 	bool mDrawPolyBoundingRect = false ;
 	bool mDrawContourTree = false ;
+	bool mDrawPipeline = false;
 
 	fs::path myGetAssetPath( fs::path ) const ; // prepends the appropriate thing...
 	string mOverloadedAssetPath;
@@ -222,6 +223,7 @@ void PaperBounce3App::setup()
 			getXml(app,"DrawMouseDebugInfo",mDrawMouseDebugInfo);
 			getXml(app,"DrawPolyBoundingRect",mDrawPolyBoundingRect);
 			getXml(app,"DrawContourTree",mDrawContourTree);
+			getXml(app,"DrawPipeline",mDrawPipeline);
 		}
 
 		// 2. respond
@@ -311,17 +313,34 @@ public:
 
 	void draw() override
 	{
+		const Pipeline::Stage* stage = mPipeline.getStage(mStageName);		
+
+		// image
 		gl::color(1,1,1);
 		
-		const Pipeline::Stage* s = mPipeline.getStage(mStageName);
-		
-		if ( s && s->mImage )
+		if ( stage && stage->mImage )
 		{
-			gl::draw( s->mImage, getBounds() );
+			gl::draw( stage->mImage, getBounds() );
 		}
 		else
 		{
 			gl::drawSolidRect( getBounds() );
+		}
+		
+		// world
+		if ( mWorldDrawFunc )
+		{
+			if (stage)
+			{
+				gl::pushViewMatrix();
+				gl::multViewMatrix( stage->mWorldToImage );
+				// we need a pipeline stage so we know what transform to use
+				// otherwise we'll just use existing matrix
+			}
+			
+			mWorldDrawFunc();
+
+			if (stage) gl::popViewMatrix();
 		}
 	}
 	
@@ -332,14 +351,19 @@ public:
 		
 		gl::drawStrokedRect( getFrame(), 2.f );
 	}
+
+	typedef function<void(void)> fDraw;
+	
+	void setWorldDrawFunc( fDraw f ) { mWorldDrawFunc=f; }
 	
 private:
+	fDraw			mWorldDrawFunc;
 	const Pipeline& mPipeline;
 	string			mStageName;
 	
 };
 
-void PaperBounce3App::updatePipelineViews()
+void PaperBounce3App::updatePipelineViews( bool areViewsVisible )
 {
 	const float kUIGutter = 8.f ;
 	const float kUIWidth  = 64.f ;
@@ -353,26 +377,40 @@ void PaperBounce3App::updatePipelineViews()
 		// view exists?
 		ViewRef view = mViews.getViewByName(s.mName);
 		
-		// make a new one?
-		if (!view)
+		// erase it?
+		if ( view && !areViewsVisible )
 		{
-			view = make_shared<PipelineStageView>( mPipeline, s.mName );
+			mViews.removeView(view);
+			view=0;
+		}
+		
+		// make a new one?
+		if ( !view && areViewsVisible )
+		{
+			PipelineStageView psv( mPipeline, s.mName );
+			psv.setWorldDrawFunc( [&](){ drawWorld(); } );
+			
+			view = make_shared<PipelineStageView>(psv);
 			
 			view->setName(s.mName);
 			
 			mViews.addView(view);
 		}
 		
-		// update its location
-		vec2 size = s.mImageSize;
-		
-		size *= kUIWidth / size.x ;
-		
-		view->setFrame ( Rectf(pos, pos + size) );
-		view->setBounds( Rectf(vec2(0,0), s.mImageSize) );
-		
-		// next pos
-		pos = view->getFrame().getLowerLeft() + vec2(0,kUIGutter);
+		// configure it
+		if (view)
+		{
+			// update its location
+			vec2 size = s.mImageSize;
+			
+			size *= kUIWidth / size.x ;
+			
+			view->setFrame ( Rectf(pos, pos + size) );
+			view->setBounds( Rectf(vec2(0,0), s.mImageSize) );
+			
+			// next pos
+			pos = view->getFrame().getLowerLeft() + vec2(0,kUIGutter);
+		}
 	}
 }
 
@@ -400,7 +438,7 @@ void PaperBounce3App::update()
 		mBallWorld.updateContours( mContours );
 		
 		// update pipeline visualization
-		updatePipelineViews();
+		updatePipelineViews( mDrawPipeline );
 		
 		// since the pipeline stage we are drawing might have changed... (or come into existence)
 		// update the window mapping

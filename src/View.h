@@ -89,7 +89,8 @@ public:
 	ViewRef	pickView( vec2 ); // tests in reverse order added
 	ViewRef getViewByName( string );
 	
-	void addView( ViewRef v ) { mViews.push_back(v); }
+	void addView   ( ViewRef v ) { mViews.push_back(v); }
+	bool removeView( ViewRef v ); // returns whether found
 	
 private:
 	vector< ViewRef > mViews;
