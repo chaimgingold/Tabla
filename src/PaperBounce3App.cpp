@@ -24,6 +24,7 @@
 
 #include <map>
 #include <string>
+#include <stdlib.h> // system()
 
 using namespace ci;
 using namespace ci::app;
@@ -95,9 +96,6 @@ class PaperBounce3App : public App {
 	
 	void updateMainImageTransform(); // configure mMainImageView
 	
-	View mMainImageView; // main view, with image in it.
-		// eventually we might nest this inside of a root view that also contains some UI views.
-	
 	/* Coordinates spaces, there are a few:
 		
 		UI (window coordinates, in points, not pixels)
@@ -125,6 +123,15 @@ class PaperBounce3App : public App {
 	
 	// to help us visualize
 	void addProjectorPipelineStages();
+	void updatePipelineViews();
+	
+	ViewCollection mViews;
+	
+	View mMainImageView;
+		// main view, with image in it.
+		// TODO: nest this inside of a root view that also contains some UI views. I think.
+		// but it's so nice to have this statically allocated and addressable object here. :P
+	
 	
 	// settings
 	bool mAutoFullScreenProjector = false ;
@@ -292,6 +299,83 @@ void PaperBounce3App::addProjectorPipelineStages()
 			mLightLink.mProjectorWorldSpaceCoords ));
 }
 
+class PipelineStageView : public View
+{
+public:
+
+	PipelineStageView( const Pipeline& p, string stageName )
+		: mPipeline(p)
+		, mStageName(stageName)
+	{
+	}
+
+	void draw() override
+	{
+		gl::color(1,1,1);
+		
+		const Pipeline::Stage* s = mPipeline.getStage(mStageName);
+		
+		if ( s && s->mImage )
+		{
+			gl::draw( s->mImage, getBounds() );
+		}
+		else
+		{
+			gl::drawSolidRect( getBounds() );
+		}
+	}
+	
+	void drawFrame() override
+	{
+		if ( mStageName == mPipeline.getQuery() ) gl::color(.7f,.3f,.5f);
+		else gl::color(1,1,1,.5f);
+		
+		gl::drawStrokedRect( getFrame(), 2.f );
+	}
+	
+private:
+	const Pipeline& mPipeline;
+	string			mStageName;
+	
+};
+
+void PaperBounce3App::updatePipelineViews()
+{
+	const float kUIGutter = 8.f ;
+	const float kUIWidth  = 64.f ;
+	
+	const auto stages = mPipeline.getStages();
+	
+	vec2 pos(kUIGutter,kUIGutter);
+	
+	for( const auto &s : stages )
+	{
+		// view exists?
+		ViewRef view = mViews.getViewByName(s.mName);
+		
+		// make a new one?
+		if (!view)
+		{
+			view = make_shared<PipelineStageView>( mPipeline, s.mName );
+			
+			view->setName(s.mName);
+			
+			mViews.addView(view);
+		}
+		
+		// update its location
+		vec2 size = s.mImageSize;
+		
+		size *= kUIWidth / size.x ;
+		
+		view->setFrame ( Rectf(pos, pos + size) );
+		view->setBounds( Rectf(vec2(0,0), s.mImageSize) );
+		
+		// next pos
+		pos = view->getFrame().getLowerLeft() + vec2(0,kUIGutter);
+	}
+}
+
 void PaperBounce3App::update()
 {
 	mXmlFileWatch.update();
@@ -314,6 +398,9 @@ void PaperBounce3App::update()
 		mContours = mVision.mContourOutput ;
 		
 		mBallWorld.updateContours( mContours );
+		
+		// update pipeline visualization
+		updatePipelineViews();
 		
 		// since the pipeline stage we are drawing might have changed... (or come into existence)
 		// update the window mapping
@@ -611,6 +698,8 @@ void PaperBounce3App::drawWorld()
 
 void PaperBounce3App::drawUI()
 {
+	mViews.draw();
+	
 	if ( mDrawMouseDebugInfo && getWindowBounds().contains(mMousePos) )
 	{
 		vec2 pt = mMousePos;
@@ -686,6 +775,10 @@ void PaperBounce3App::keyDown( KeyEvent event )
 			
 		case KeyEvent::KEY_c:
 			mBallWorld.clearBalls() ;
+			break ;
+
+		case KeyEvent::KEY_x:
+			::system( (string("open \"") + myGetAssetPath("config.xml").string() + "\"").c_str() );
 			break ;
 			
 		case KeyEvent::KEY_UP:

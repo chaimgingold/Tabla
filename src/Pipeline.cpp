@@ -9,10 +9,11 @@
 #include "Pipeline.h"
 #include "ocv.h"
 
+const bool kCacheAllImages = true ; // false is faster; time this. put it in tuning; make this show/hide the view ui.
+
 void Pipeline::start()
 {
 	mStages.clear();
-//	mQueryFrame = gl::TextureRef();
 	mQueryIndex = -1;
 }
 
@@ -50,8 +51,7 @@ void Pipeline::then( function<gl::Texture2dRef()> func, string name, vec2 size )
 	s.mName = name ;
 	s.mImageSize = size;
 	
-	if ( !mStages.empty() ) //s.mImageToWorld = glm::mat3x3(); // identity
-//	else
+	if ( !mStages.empty() )
 	{
 		// inherit from last
 		s.mImageToWorld = mStages.back().mImageToWorld;
@@ -62,18 +62,13 @@ void Pipeline::then( function<gl::Texture2dRef()> func, string name, vec2 size )
 	
 	mStages.push_back(s);
 	
-	if ( name==mQuery )
-	{
-		mStages.back().mImage = func();
-		mQueryIndex = mStages.size()-1;
-	}
+	bool isQuery = ( name==mQuery );
+	
+	if (isQuery) mQueryIndex = mStages.size()-1;
+	
+	if (isQuery || kCacheAllImages) mStages.back().mImage = func();
 }
 
-//void Pipeline::setImageToWorldTransform( const cv::Mat& m )
-//{
-//	setImageToWorldTransform( fromOcvMat3x3(m) );
-//}
-//
 void Pipeline::setImageToWorldTransform( const glm::mat4& m )
 {
 	assert( !empty() );
@@ -109,4 +104,14 @@ string Pipeline::getAdjStageName( string name, int adj ) const
 	}
 	
 	return getFirstStageName();
+}
+
+const Pipeline::Stage* Pipeline::getStage( string name ) const
+{
+	for ( size_t i=0; i<mStages.size(); ++i )
+	{
+		if ( mStages[i].mName==name ) return &mStages[i];
+	}
+	
+	return 0;
 }

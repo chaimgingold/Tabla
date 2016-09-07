@@ -64,6 +64,7 @@ public:
 	
 	const Stage* getQueryStage() const { return (mQueryIndex==-1) ? 0 : &mStages[mQueryIndex] ; }
 	const vector<Stage>& getStages() const { return mStages ; }
+	const Stage* getStage( string name ) const;
 	
 private:
 

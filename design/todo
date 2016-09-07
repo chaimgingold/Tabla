@@ -16,6 +16,21 @@ Projector Transform
 		Especially if we can fullscreen it and do it--and optically align it in the world/see the mouse cursor in the world.
 
 
+Pipeline viz
+• Must-have
+	- Draw world inside of each pipeline stage view
+	- Polygon editor for configuration
+		- Will probably require fixing a known UI mapping bug.
+	- Hide when in projector full-screen mode
+		(Or put in secondary UI window)
+• Nice
+	- Scale to fill available vertical space.
+		- And/Or: (Put gutter and horizontal scaling amount in xml)
+	- Put pipeline stage view caching logic on an xml switch
+		- Time the performance impact of this.
+		- Allow each stage to store its content in its own native format.
+	- Mouse click to select stage to view large
+
 Camera transform
 √ Need to perspective transform image without losing pixels
 √ Decouple world coordinates from pixel coordinates
@@ -134,3 +149,4 @@ Technical
 
 Bugs
 - XML loader will explode if file doesn't exist.
+- UI transform mapping on first pipeline stage is busted.
