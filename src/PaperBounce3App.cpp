@@ -17,6 +17,8 @@
 #include "XmlFileWatch.h"
 #include "Pipeline.h"
 
+#include "PipelineStageView.h"
+
 #include "geom.h"
 #include "xml.h"
 #include "View.h"
@@ -25,6 +27,7 @@
 #include <map>
 #include <string>
 #include <stdlib.h> // system()
+#include <memory>
 
 using namespace ci;
 using namespace ci::app;
@@ -46,6 +49,7 @@ class PaperBounce3App : public App {
   public:
 	void setup() override;
 	void mouseDown( MouseEvent event ) override;
+	void mouseUp( MouseEvent event ) override;
 	void mouseMove( MouseEvent event ) override { mMousePos = event.getPos(); }
 	void update() override;
 	void draw() override;
@@ -127,10 +131,7 @@ class PaperBounce3App : public App {
 	
 	ViewCollection mViews;
 	
-	View mMainImageView;
-		// main view, with image in it.
-		// TODO: nest this inside of a root view that also contains some UI views. I think.
-		// but it's so nice to have this statically allocated and addressable object here. :P
+	std::shared_ptr<MainImageView> mMainImageView; // main view, with image in it.
 	
 	
 	// settings
@@ -276,6 +277,12 @@ void PaperBounce3App::setup()
 	// (we query before making the pipeline because we only store the image requested :P!)
 	if (mAutoFullScreenProjector) mPipeline.setQuery("projector");
 	else mPipeline.setQuery("clipped");
+	
+	// make main image view
+	MainImageView mainImageView( mPipeline ) ;
+	mMainImageView = make_shared<MainImageView>( MainImageView(mPipeline) );
+	mMainImageView->setWorldDrawFunc( [&](){ drawWorld(); } );
+	mViews.addView(mMainImageView);
 }
 
 fs::path
@@ -287,7 +294,16 @@ PaperBounce3App::myGetAssetPath( fs::path p ) const
 
 void PaperBounce3App::mouseDown( MouseEvent event )
 {
-	mBallWorld.newRandomBall( mouseToWorld( event.getPos() ) ) ;
+	ViewRef view = mViews.pickView( event.getPos() );
+	
+	if (view) view->mouseDown(event);
+	else mBallWorld.newRandomBall( mouseToWorld( event.getPos() ) ) ;
+	// TODO: Move this random ball logic into the main view
+}
+
+void PaperBounce3App::mouseUp( MouseEvent event )
+{
+	// not worrying about doing this right for the time being
 }
 
 void PaperBounce3App::addProjectorPipelineStages()
@@ -301,67 +317,6 @@ void PaperBounce3App::addProjectorPipelineStages()
 			mLightLink.mProjectorWorldSpaceCoords ));
 }
 
-class PipelineStageView : public View
-{
-public:
-
-	PipelineStageView( const Pipeline& p, string stageName )
-		: mPipeline(p)
-		, mStageName(stageName)
-	{
-	}
-
-	void draw() override
-	{
-		const Pipeline::Stage* stage = mPipeline.getStage(mStageName);		
-
-		// image
-		gl::color(1,1,1);
-		
-		if ( stage && stage->mImage )
-		{
-			gl::draw( stage->mImage, getBounds() );
-		}
-		else
-		{
-			gl::drawSolidRect( getBounds() );
-		}
-		
-		// world
-		if ( mWorldDrawFunc )
-		{
-			if (stage)
-			{
-				gl::pushViewMatrix();
-				gl::multViewMatrix( stage->mWorldToImage );
-				// we need a pipeline stage so we know what transform to use
-				// otherwise we'll just use existing matrix
-			}
-			
-			mWorldDrawFunc();
-
-			if (stage) gl::popViewMatrix();
-		}
-	}
-	
-	void drawFrame() override
-	{
-		if ( mStageName == mPipeline.getQuery() ) gl::color(.7f,.3f,.5f);
-		else gl::color(1,1,1,.5f);
-		
-		gl::drawStrokedRect( getFrame(), 2.f );
-	}
-
-	typedef function<void(void)> fDraw;
-	
-	void setWorldDrawFunc( fDraw f ) { mWorldDrawFunc=f; }
-	
-private:
-	fDraw			mWorldDrawFunc;
-	const Pipeline& mPipeline;
-	string			mStageName;
-	
-};
 
 void PaperBounce3App::updatePipelineViews( bool areViewsVisible )
 {
@@ -480,20 +435,20 @@ void PaperBounce3App::updateMainImageTransform()
 		bounds = Rectf( 0, 0, drawSize.x, drawSize.y );
 	}
 	
-	mMainImageView.setBounds( bounds );
+	mMainImageView->setBounds( bounds );
 
 	
 	// it fills the window
 	const Rectf windowRect = Rectf(0,0,getWindowSize().x,getWindowSize().y);
 	const Rectf frame      = bounds.getCenteredFit( windowRect, true );
 	
-	mMainImageView.setFrame( frame );
+	mMainImageView->setFrame( frame );
 }
 
 vec2 PaperBounce3App::mouseToImage( vec2 p )
 {
 	// convert screen/window coordinates to image coords
-	return mMainImageView.parentToChild(p);
+	return mMainImageView->parentToChild(p);
 }
 
 vec2 PaperBounce3App::mouseToWorld( vec2 p )
@@ -514,48 +469,6 @@ void PaperBounce3App::drawProjectorWindow()
 	// ====== Window Space (UI) =====
 	// baseline coordinate space
 	gl::setMatricesWindow( getWindowSize() );
-	
-	// ===== Image Space =====
-	gl::pushViewMatrix();
-	gl::multViewMatrix( mMainImageView.getChildToParentMatrix() );
-	{
-		// vision pipeline image
-		if ( mPipeline.getQueryStage() &&
-			 mPipeline.getQueryStage()->mImage &&
-			 mDrawCameraImage )
-		{
-			gl::color( 1, 1, 1 );
-			
-			gl::draw( mPipeline.getQueryStage()->mImage );
-		}
-
-//		mMainImageView.draw();
-		if (0)
-		{
-			vec2 p = mouseToImage(mMousePos);
-			gl::color( 0., .5, .1 );
-			gl::drawSolidRect( Rectf(p,p+vec2(100,100)) );
-			gl::color( 1., .8, .1 );
-			gl::drawSolidRect( Rectf(p,p+vec2(10,10)) );
-			gl::color( .9, .8, .1 );
-			gl::drawSolidRect( Rectf(p,p+vec2(1,1)) );
-		}
-
-		// ===== World space =====
-		gl::pushViewMatrix();
-		{
-			if (mPipeline.getQueryStage())
-			{
-				// convert world coordinates to drawn texture coords
-				gl::multViewMatrix( mPipeline.getQueryStage()->mWorldToImage );
-			}
-			
-			drawWorld();
-		}
-		gl::popViewMatrix();
-	}
-	gl::popViewMatrix(); // pop back to UI space
-	
 	
 	// ====== Window Space (UI) =====
 	drawUI();

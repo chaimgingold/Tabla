@@ -17,6 +17,7 @@
 #include "cinder/gl/gl.h"
 
 using namespace ci;
+using namespace ci::app;
 using namespace std;
 
 inline mat4 getRectMappingAsMatrix( Rectf from, Rectf to )
@@ -70,6 +71,10 @@ public:
 	
 	// interaction
 	virtual bool pick( vec2 p ) { return mFrame.contains(p); }
+
+	virtual void mouseDown( MouseEvent ){}
+	virtual void mouseUp  ( MouseEvent ){}
+	virtual void mouseMove( MouseEvent ){}
 	
 private:
 	string	mName;
@@ -92,7 +97,12 @@ public:
 	void addView   ( ViewRef v ) { mViews.push_back(v); }
 	bool removeView( ViewRef v ); // returns whether found
 	
+	void mouseDown( MouseEvent );
+	void mouseUp  ( MouseEvent );
+	void mouseMove( MouseEvent );
+	
 private:
+	ViewRef mMouseDownView;
 	vector< ViewRef > mViews;
 	
 };

@@ -26,6 +26,7 @@
 		22088F63A8874EB4BAA43888 /* b2BlockAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 591FA7613BF840AF83A5482A /* b2BlockAllocator.cpp */; };
 		23756771BB404A04991A26CB /* b2PolygonAndCircleContact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6B648D73A5D453781A11E34 /* b2PolygonAndCircleContact.cpp */; };
 		24F2003E479C4BC49D1F7374 /* b2WheelJoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 627E59F1B82E4F36ABF0DE48 /* b2WheelJoint.cpp */; };
+		26BC84B31D80DF89006001DC /* PipelineStageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26BC84B11D80DF89006001DC /* PipelineStageView.cpp */; };
 		26FA36411D4A7D5300C64A00 /* todo in Resources */ = {isa = PBXBuildFile; fileRef = 26FA36401D4A7D5300C64A00 /* todo */; };
 		26FA36431D53C05700C64A00 /* research in Resources */ = {isa = PBXBuildFile; fileRef = 26FA36421D53C05700C64A00 /* research */; };
 		26FA36461D53C31A00C64A00 /* BallWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA36441D53C31A00C64A00 /* BallWorld.cpp */; };
@@ -97,6 +98,8 @@
 		1329BFF5C8084A8E9BB37921 /* b2Collision.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2Collision.cpp; path = ../blocks/Box2D/src/Box2D/Collision/b2Collision.cpp; sourceTree = "<group>"; };
 		1967F5787DB34245B2B91CBA /* b2EdgeAndCircleContact.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = b2EdgeAndCircleContact.h; path = ../blocks/Box2D/src/Box2D/Dynamics/Contacts/b2EdgeAndCircleContact.h; sourceTree = "<group>"; };
 		1DCA2C3FD6C84A6DAB24027E /* b2DistanceJoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2DistanceJoint.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Joints/b2DistanceJoint.cpp; sourceTree = "<group>"; };
+		26BC84B11D80DF89006001DC /* PipelineStageView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PipelineStageView.cpp; path = ../src/PipelineStageView.cpp; sourceTree = "<group>"; };
+		26BC84B21D80DF89006001DC /* PipelineStageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PipelineStageView.h; path = ../src/PipelineStageView.h; sourceTree = "<group>"; };
 		26FA36401D4A7D5300C64A00 /* todo */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = todo; path = ../design/todo; sourceTree = "<group>"; };
 		26FA36421D53C05700C64A00 /* research */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = research; path = ../design/research; sourceTree = "<group>"; };
 		26FA36441D53C31A00C64A00 /* BallWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BallWorld.cpp; path = ../src/BallWorld.cpp; sourceTree = "<group>"; };
@@ -263,6 +266,8 @@
 				26FA36581D5BDBC300C64A00 /* Pipeline.cpp */,
 				26FA365D1D77673500C64A00 /* View.h */,
 				26FA365C1D77673500C64A00 /* View.cpp */,
+				26BC84B11D80DF89006001DC /* PipelineStageView.cpp */,
+				26BC84B21D80DF89006001DC /* PipelineStageView.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -634,6 +639,7 @@
 				E5E02FC84C1B4061A672D169 /* b2ChainAndPolygonContact.cpp in Sources */,
 				26FA36541D55365800C64A00 /* LightLink.cpp in Sources */,
 				065D029E5180471999C3E354 /* b2CircleContact.cpp in Sources */,
+				26BC84B31D80DF89006001DC /* PipelineStageView.cpp in Sources */,
 				BF8EA3BC1AE14D83A5112094 /* b2Contact.cpp in Sources */,
 				9E53F22939EC46629ECD511A /* b2ContactSolver.cpp in Sources */,
 				3F51BFBD57064C0FBBDC06D5 /* b2EdgeAndCircleContact.cpp in Sources */,
