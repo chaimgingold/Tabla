@@ -56,3 +56,35 @@ bool ViewCollection::removeView( ViewRef v )
 	
 	return false;
 }
+
+void ViewCollection::mouseDown( MouseEvent event )
+{
+	// mouse down event
+	mMouseDownView = pickView( event.getPos() );
+	
+	if (mMouseDownView) mMouseDownView->mouseDown(event);
+	
+	// nuke rollover
+	mRolloverView=0;
+}
+
+void ViewCollection::mouseUp( MouseEvent event )
+{
+	if (mMouseDownView)
+	{
+		mMouseDownView->mouseUp(event);
+		mMouseDownView=0;
+	}
+}
+
+void ViewCollection::mouseMove( MouseEvent event )
+{
+	if (mMouseDownView)
+	{
+		mMouseDownView->mouseMove(event);
+	}
+	else
+	{
+		mRolloverView = pickView( event.getPos() );
+	}
+}

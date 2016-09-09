@@ -66,8 +66,12 @@ public:
 	const vector<Stage>& getStages() const { return mStages ; }
 	const Stage* getStage( string name ) const;
 	
+	bool setCaptureAllStageImages( bool v ) { mCaptureAllStageImages=v; }
+	
 private:
 
+	bool mCaptureAllStageImages = false; // if false, then only extract query stage. true: capture all.
+	
 	void then( function<gl::Texture2dRef()>, string name, vec2 size );
 		// so that we only fabricate the texture if it matches the query.
 		// this might be a silly optimization, and we should just cache them all.

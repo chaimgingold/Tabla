@@ -9,8 +9,6 @@
 #include "Pipeline.h"
 #include "ocv.h"
 
-const bool kCacheAllImages = true ; // false is faster; time this. put it in tuning; make this show/hide the view ui.
-
 void Pipeline::start()
 {
 	mStages.clear();
@@ -66,7 +64,7 @@ void Pipeline::then( function<gl::Texture2dRef()> func, string name, vec2 size )
 	
 	if (isQuery) mQueryIndex = mStages.size()-1;
 	
-	if (isQuery || kCacheAllImages) mStages.back().mImage = func();
+	if (isQuery || mCaptureAllStageImages) mStages.back().mImage = func();
 }
 
 void Pipeline::setImageToWorldTransform( const glm::mat4& m )

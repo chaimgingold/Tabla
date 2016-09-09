@@ -101,8 +101,12 @@ public:
 	void mouseUp  ( MouseEvent );
 	void mouseMove( MouseEvent );
 	
+	ViewRef getMouseDownView() const { return mMouseDownView; }
+	ViewRef getRolloverView()  const { return mRolloverView; }
+	
 private:
 	ViewRef mMouseDownView;
+	ViewRef mRolloverView;
 	vector< ViewRef > mViews;
 	
 };

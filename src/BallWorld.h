@@ -14,6 +14,7 @@
 #include "cinder/Xml.h"
 #include "cinder/Color.h"
 
+#include "GameWorld.h"
 #include "Contour.h"
 
 using namespace ci;
@@ -51,15 +52,15 @@ private:
 };
 
 
-class BallWorld
+class BallWorld : public GameWorld
 {
 public:
 	
-	void setParams( XmlTree );
-	void updateContours( const ContourVector &c ) { mContours = c; }
+	void setParams( XmlTree ) override;
+	void updateContours( const ContourVector &c ) override { mContours = c; }
 	
-	void update();
-	void draw();
+	void update() override;
+	void draw() override;
 	
 	void newRandomBall( vec2 loc );
 	void clearBalls() { mBalls.clear(); }
@@ -68,6 +69,8 @@ public:
 	
 	vec2 resolveCollisionWithContours	( vec2 p, float r ) const ; // returns pinned version of point
 		// public so we can show it with the mouse...
+	
+	void mouseClick( vec2 p ) override { newRandomBall(p) ; }
 	
 private:
 

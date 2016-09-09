@@ -50,7 +50,7 @@ class PaperBounce3App : public App {
 	void setup() override;
 	void mouseDown( MouseEvent event ) override;
 	void mouseUp( MouseEvent event ) override;
-	void mouseMove( MouseEvent event ) override { mMousePos = event.getPos(); }
+	void mouseMove( MouseEvent event ) override { mMousePos = event.getPos(); mViews.mouseMove(event); }
 	void update() override;
 	void draw() override;
 	void resize() override;
@@ -95,9 +95,6 @@ class PaperBounce3App : public App {
 	
 	
 	// for main window,
-	vec2 mouseToImage( vec2 ); // maps mouse (screen) to drawn image coords
-	vec2 mouseToWorld( vec2 ); // maps mouse (screen) to world coordinates
-	
 	void updateMainImageTransform(); // configure mMainImageView
 	
 	/* Coordinates spaces, there are a few:
@@ -275,13 +272,17 @@ void PaperBounce3App::setup()
 	// default pipeline image to query
 	// (after loading xml)
 	// (we query before making the pipeline because we only store the image requested :P!)
-	if (mAutoFullScreenProjector) mPipeline.setQuery("projector");
-	else mPipeline.setQuery("clipped");
+	if ( mPipeline.getQuery().empty() )
+	{
+		if (mAutoFullScreenProjector) mPipeline.setQuery("projector");
+		else mPipeline.setQuery("clipped");
+	}
+	mPipeline.setCaptureAllStageImages(mDrawPipeline);
 	
 	// make main image view
-	MainImageView mainImageView( mPipeline ) ;
-	mMainImageView = make_shared<MainImageView>( MainImageView(mPipeline) );
-	mMainImageView->setWorldDrawFunc( [&](){ drawWorld(); } );
+	mMainImageView = make_shared<MainImageView>( MainImageView( mPipeline, mBallWorld ) );
+	mMainImageView->mWorldDrawFunc = [&](){drawWorld();};
+		// draw all the contours, etc... as well as the game world itself.
 	mViews.addView(mMainImageView);
 }
 
@@ -294,16 +295,13 @@ PaperBounce3App::myGetAssetPath( fs::path p ) const
 
 void PaperBounce3App::mouseDown( MouseEvent event )
 {
-	ViewRef view = mViews.pickView( event.getPos() );
-	
-	if (view) view->mouseDown(event);
-	else mBallWorld.newRandomBall( mouseToWorld( event.getPos() ) ) ;
-	// TODO: Move this random ball logic into the main view
+	mViews.mouseDown(event);
 }
 
 void PaperBounce3App::mouseUp( MouseEvent event )
 {
-	// not worrying about doing this right for the time being
+	mViews.mouseUp(event);
+	// not worrying about proper mousedown+mouseup for the time being
 }
 
 void PaperBounce3App::addProjectorPipelineStages()
@@ -445,25 +443,6 @@ void PaperBounce3App::updateMainImageTransform()
 	mMainImageView->setFrame( frame );
 }
 
-vec2 PaperBounce3App::mouseToImage( vec2 p )
-{
-	// convert screen/window coordinates to image coords
-	return mMainImageView->parentToChild(p);
-}
-
-vec2 PaperBounce3App::mouseToWorld( vec2 p )
-{
-	// convert image coordinates to world coords
-	vec2 p2 = mouseToImage(p);
-	
-	if (mPipeline.getQueryStage())
-	{
-		p2 = vec2( mPipeline.getQueryStage()->mImageToWorld * vec4(p2,0,1) ) ;
-	}
-	
-	return p2;
-}
-
 void PaperBounce3App::drawProjectorWindow()
 {
 	// ====== Window Space (UI) =====
@@ -566,7 +545,7 @@ void PaperBounce3App::drawWorld()
 			}
 			
 			// picked highlight
-			vec2 mousePos = mouseToWorld(mMousePos) ;
+			vec2 mousePos = mMainImageView->mouseToWorld(mMousePos) ;
 
 			const Contour* picked = mContours.findLeafContourContainingPoint( mousePos ) ;
 			
@@ -608,7 +587,7 @@ void PaperBounce3App::drawWorld()
 	if ( mDrawMouseDebugInfo && getWindowBounds().contains(mMousePos) )
 	{
 		// test collision logic
-		vec2 pt = mouseToWorld( mMousePos ) ;
+		vec2 pt = mMainImageView->mouseToWorld( mMousePos ) ;
 		
 		const float r = mBallWorld.getBallDefaultRadius() ;
 		
@@ -651,6 +630,8 @@ void PaperBounce3App::drawUI()
 {
 	mViews.draw();
 	
+	// this, below, could become its own view
+	// it would need a shared_ptr to MainImageView (no biggie)
 	if ( mDrawMouseDebugInfo && getWindowBounds().contains(mMousePos) )
 	{
 		vec2 pt = mMousePos;
@@ -664,8 +645,8 @@ void PaperBounce3App::drawUI()
 			gl::color( c[i] );
 			mTextureFont->drawString(
 				"Window: " + toString(pt) +
-				"\tImage: "  + toString( mouseToImage(pt) ) +
-				"\tWorld: " + toString( mouseToWorld(pt) )
+				"\tImage: "  + toString( mMainImageView->mouseToImage(pt) ) +
+				"\tWorld: " + toString( mMainImageView->mouseToWorld(pt) )
 				, o[i]+vec2( 8.f, getWindowSize().y - mTextureFont->getAscent()+mTextureFont->getDescent()) ) ;
 		}
 	}

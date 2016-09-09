@@ -10,6 +10,7 @@
 #define PipelineStageView_hpp
 
 #include "Pipeline.h"
+#include "GameWorld.h"
 #include "View.h"
 #include <string>
 
@@ -26,51 +27,11 @@ public:
 	{
 	}
 
-	void draw() override
-	{
-		const Pipeline::Stage* stage = mPipeline.getStage(mStageName);		
-
-		// image
-		gl::color(1,1,1);
-		
-		if ( stage && stage->mImage )
-		{
-			gl::draw( stage->mImage, getBounds() );
-		}
-		else
-		{
-			gl::drawSolidRect( getBounds() );
-		}
-		
-		// world
-		if ( mWorldDrawFunc )
-		{
-			if (stage)
-			{
-				gl::pushViewMatrix();
-				gl::multViewMatrix( stage->mWorldToImage );
-				// we need a pipeline stage so we know what transform to use
-				// otherwise we'll just use existing matrix
-			}
-			
-			mWorldDrawFunc();
-
-			if (stage) gl::popViewMatrix();
-		}
-	}
+	void draw() override;
 	
-	void mouseDown( MouseEvent ) override
-	{
-		mPipeline.setQuery(mStageName);
-	}
+	void mouseDown( MouseEvent ) override;
 	
-	void drawFrame() override
-	{
-		if ( mStageName == mPipeline.getQuery() ) gl::color(.7f,.3f,.5f);
-		else gl::color(1,1,1,.5f);
-		
-		gl::drawStrokedRect( getFrame(), 2.f );
-	}
+	void drawFrame() override;
 
 	typedef function<void(void)> fDraw;
 	
@@ -87,20 +48,26 @@ private:
 class MainImageView : public View
 {
 public:
-	MainImageView( Pipeline& p )
+	MainImageView( Pipeline& p, GameWorld& w )
 		: mPipeline(p)
+		, mGameWorld(w)
 	{
-		printf("yar");
 	}
 
 	void draw() override;
+
+	vec2 mouseToImage( vec2 ); // maps mouse (screen) to drawn image coords
+	vec2 mouseToWorld( vec2 ); // maps mouse (screen) to world coordinates
+
+	void mouseDown( MouseEvent ) override;
 	
-	typedef function<void(void)> fDraw;
-	
-	void setWorldDrawFunc( fDraw  f ) { mWorldDrawFunc=f; }
+	function<void(void)> mWorldDrawFunc; // this overloads use of mGameWorld.draw()
+	// :P kinda lame.
+	// this clunkiness is b/c app::drawWorld() handles all the contour drawing, debug info, etc...
+	// for the time being.
 	
 private:
-	fDraw			mWorldDrawFunc;
+	GameWorld&		mGameWorld;
 	Pipeline&		mPipeline;
 	
 };
