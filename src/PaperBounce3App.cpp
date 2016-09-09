@@ -93,6 +93,8 @@ class PaperBounce3App : public App {
 	
 	double				mLastFrameTime = 0. ;
 	
+	vec2				getMousePosInWindow() const { return mMousePosInWindow; }
+	vec2				mMousePosInWindow;
 	
 	// to help us visualize
 	void addProjectorPipelineStages();
@@ -139,6 +141,7 @@ class PaperBounce3App : public App {
 	bool mDrawPolyBoundingRect = false ;
 	bool mDrawContourTree = false ;
 	bool mDrawPipeline = false;
+	bool mDrawContourMousePick = false;
 
 	fs::path myGetAssetPath( fs::path ) const ; // prepends the appropriate thing...
 	string mOverloadedAssetPath;
@@ -221,6 +224,7 @@ void PaperBounce3App::setup()
 			getXml(app,"DrawPolyBoundingRect",mDrawPolyBoundingRect);
 			getXml(app,"DrawContourTree",mDrawContourTree);
 			getXml(app,"DrawPipeline",mDrawPipeline);
+			getXml(app,"DrawContourMousePick",mDrawContourMousePick);
 		}
 
 		// 2. respond
@@ -309,21 +313,25 @@ PaperBounce3App::myGetAssetPath( fs::path p ) const
 
 void PaperBounce3App::mouseDown( MouseEvent event )
 {
+	mMousePosInWindow = event.getPos();
 	mViews.mouseDown(event);
 }
 
 void PaperBounce3App::mouseUp( MouseEvent event )
 {
+	mMousePosInWindow = event.getPos();
 	mViews.mouseUp(event);
 }
 
 void PaperBounce3App::mouseMove( MouseEvent event )
 {
+	mMousePosInWindow = event.getPos();
 	mViews.mouseMove(event);
 }
 
 void PaperBounce3App::mouseDrag( MouseEvent event )
 {
+	mMousePosInWindow = event.getPos();
 	mViews.mouseDrag(event);
 }
 
@@ -478,6 +486,11 @@ void PaperBounce3App::drawProjectorWindow()
 
 void PaperBounce3App::drawWorld()
 {
+	const vec2 mouseInWindow   = getMousePosInWindow();
+	const vec2 mouseInWorld    = mMainImageView->mouseToWorld(mouseInWindow);
+	const bool isMouseInWindow = getWindowBounds().contains(getMousePosInWindow());
+	
+	
 	// draw frame
 	if (0)
 	{
@@ -550,26 +563,6 @@ void PaperBounce3App::drawWorld()
 					}
 				}
 			}
-			
-			// picked highlight
-			vec2 mousePos = mMainImageView->mouseToWorld(getMousePos()) ;
-
-			const Contour* picked = mContours.findLeafContourContainingPoint( mousePos ) ;
-			
-			if (picked)
-			{
-				if (picked->mIsHole) gl::color(6.f,.4f,.2f);
-				else gl::color(.2f,.6f,.4f,.8f);
-				
-				gl::draw(picked->mPolyLine);
-				
-				if (0)
-				{
-					vec2 x = closestPointOnPoly(mousePos,picked->mPolyLine);
-					gl::color(.5f,.1f,.3f,.9f);
-					gl::drawSolidCircle(x, 5.f);
-				}
-			}
 		}
 		// outlines
 		else
@@ -585,26 +578,45 @@ void PaperBounce3App::drawWorld()
 				gl::draw(c.mPolyLine) ;
 			}
 		}
+
+		if ( mDrawContourMousePick )
+		{
+			// picked highlight
+			const Contour* picked = mContours.findLeafContourContainingPoint( mouseInWorld ) ;
+			
+			if (picked)
+			{
+				if (picked->mIsHole) gl::color(6.f,.4f,.2f);
+				else gl::color(.2f,.6f,.4f,.8f);
+				
+				gl::draw(picked->mPolyLine);
+				
+				if (0)
+				{
+					vec2 x = closestPointOnPoly(mouseInWorld,picked->mPolyLine);
+					gl::color(.5f,.1f,.3f,.9f);
+					gl::drawSolidCircle(x, 5.f);
+				}
+			}
+		}
 	}
 	
 	// draw balls
 	mBallWorld.draw();
 	
 	// mouse debug info
-	if ( mDrawMouseDebugInfo && getWindowBounds().contains(getMousePos()) )
+	if ( mDrawMouseDebugInfo && isMouseInWindow )
 	{
 		// test collision logic
-		vec2 pt = mMainImageView->mouseToWorld( getMousePos() ) ;
-		
 		const float r = mBallWorld.getBallDefaultRadius() ;
 		
-		vec2 fixed = mBallWorld.resolveCollisionWithContours(pt,r);
+		vec2 fixed = mBallWorld.resolveCollisionWithContours(mouseInWorld,r);
 		
 		gl::color( ColorAf(0.f,0.f,1.f) ) ;
 		gl::drawStrokedCircle(fixed,r);
 		
 		gl::color( ColorAf(0.f,1.f,0.f) ) ;
-		gl::drawLine(pt, fixed);
+		gl::drawLine(mouseInWorld, fixed);
 	}
 	
 	// draw contour debug info
@@ -639,9 +651,9 @@ void PaperBounce3App::drawUI()
 	
 	// this, below, could become its own view
 	// it would need a shared_ptr to MainImageView (no biggie)
-	if ( mDrawMouseDebugInfo && getWindowBounds().contains(getMousePos()) )
+	if ( mDrawMouseDebugInfo )//&& getWindowBounds().contains(getMousePosInWindow()) )
 	{
-		vec2 pt = getMousePos();
+		const vec2 pt = getMousePosInWindow();
 		
 		// coordinates
 		vec2   o[2] = { vec2(.5,1.5), vec2(0,0) };

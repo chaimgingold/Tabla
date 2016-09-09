@@ -101,7 +101,7 @@ void MainImageView::mouseDown( MouseEvent event )
 vec2 MainImageView::mouseToImage( vec2 p )
 {
 	// convert screen/window coordinates to image coords
-	return parentToChild(p);
+	return rootToChild(p);
 }
 
 vec2 MainImageView::mouseToWorld( vec2 p )
