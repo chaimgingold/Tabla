@@ -66,7 +66,7 @@ public:
 	const vector<Stage>& getStages() const { return mStages ; }
 	const Stage* getStage( string name ) const;
 	
-	bool setCaptureAllStageImages( bool v ) { mCaptureAllStageImages=v; }
+	void setCaptureAllStageImages( bool v ) { mCaptureAllStageImages=v; }
 	
 private:
 

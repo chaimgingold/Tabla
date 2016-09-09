@@ -50,7 +50,7 @@ class PaperBounce3App : public App {
 	void setup() override;
 	void mouseDown( MouseEvent event ) override;
 	void mouseUp( MouseEvent event ) override;
-	void mouseMove( MouseEvent event ) override { mMousePos = event.getPos(); mViews.mouseMove(event); }
+	void mouseMove( MouseEvent event ) override;
 	void update() override;
 	void draw() override;
 	void resize() override;
@@ -91,11 +91,16 @@ class PaperBounce3App : public App {
 	app::WindowRef		mAuxWindow ; // for other debug info, on computer screen
 	
 	double				mLastFrameTime = 0. ;
-	vec2				mMousePos ;
 	
 	
-	// for main window,
-	void updateMainImageTransform(); // configure mMainImageView
+	// to help us visualize
+	void addProjectorPipelineStages();
+	void updatePipelineViews( bool areViewsVisible );
+	
+	ViewCollection mViews;
+	
+	std::shared_ptr<MainImageView> mMainImageView; // main view, with image in it.
+	void updateMainImageTransform(); // configure mMainImageView's transform
 	
 	/* Coordinates spaces, there are a few:
 		
@@ -122,14 +127,7 @@ class PaperBounce3App : public App {
 
 	*/
 	
-	// to help us visualize
-	void addProjectorPipelineStages();
-	void updatePipelineViews( bool areViewsVisible );
-	
-	ViewCollection mViews;
-	
-	std::shared_ptr<MainImageView> mMainImageView; // main view, with image in it.
-	
+
 	
 	// settings
 	bool mAutoFullScreenProjector = false ;
@@ -301,7 +299,11 @@ void PaperBounce3App::mouseDown( MouseEvent event )
 void PaperBounce3App::mouseUp( MouseEvent event )
 {
 	mViews.mouseUp(event);
-	// not worrying about proper mousedown+mouseup for the time being
+}
+
+void PaperBounce3App::mouseMove( MouseEvent event )
+{
+	mViews.mouseMove(event);
 }
 
 void PaperBounce3App::addProjectorPipelineStages()
@@ -545,7 +547,7 @@ void PaperBounce3App::drawWorld()
 			}
 			
 			// picked highlight
-			vec2 mousePos = mMainImageView->mouseToWorld(mMousePos) ;
+			vec2 mousePos = mMainImageView->mouseToWorld(getMousePos()) ;
 
 			const Contour* picked = mContours.findLeafContourContainingPoint( mousePos ) ;
 			
@@ -584,10 +586,10 @@ void PaperBounce3App::drawWorld()
 	mBallWorld.draw();
 	
 	// mouse debug info
-	if ( mDrawMouseDebugInfo && getWindowBounds().contains(mMousePos) )
+	if ( mDrawMouseDebugInfo && getWindowBounds().contains(getMousePos()) )
 	{
 		// test collision logic
-		vec2 pt = mMainImageView->mouseToWorld( mMousePos ) ;
+		vec2 pt = mMainImageView->mouseToWorld( getMousePos() ) ;
 		
 		const float r = mBallWorld.getBallDefaultRadius() ;
 		
@@ -632,9 +634,9 @@ void PaperBounce3App::drawUI()
 	
 	// this, below, could become its own view
 	// it would need a shared_ptr to MainImageView (no biggie)
-	if ( mDrawMouseDebugInfo && getWindowBounds().contains(mMousePos) )
+	if ( mDrawMouseDebugInfo && getWindowBounds().contains(getMousePos()) )
 	{
-		vec2 pt = mMousePos;
+		vec2 pt = getMousePos();
 		
 		// coordinates
 		vec2   o[2] = { vec2(.5,1.5), vec2(0,0) };
@@ -703,6 +705,9 @@ void PaperBounce3App::keyDown( KeyEvent event )
 			mBallWorld.newRandomBall( randVec2() * getWorldSize() ) ;
 			// we could traverse paper hierarchy and pick a random point on paper...
 			// might be a useful function, randomPointOnPaper()
+			//
+			// how to generalize this?
+			// pass unhandled key events into GameWorld?
 			break ;
 			
 		case KeyEvent::KEY_c:
