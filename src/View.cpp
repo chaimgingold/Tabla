@@ -8,12 +8,24 @@
 
 #include "View.h"
 
+mat4 View::getRootToChildMatrix() const
+{
+	if (mParent) return mParent->getRootToChildMatrix() * getParentToChildMatrix();
+	else return getParentToChildMatrix();
+}
+
+mat4 View::getChildToRootMatrix() const
+{
+	if (mParent) return getChildToParentMatrix() * mParent->getChildToRootMatrix();
+	else return getChildToParentMatrix();
+}
+
 void ViewCollection::draw()
 {
 	for( const auto &v : mViews )
 	{
 		gl::pushViewMatrix();
-		gl::multViewMatrix( v->getChildToParentMatrix() );
+		gl::multViewMatrix( v->getChildToRootMatrix() );
 		
 		v->draw();
 		
@@ -65,6 +77,7 @@ void ViewCollection::mouseDown( MouseEvent event )
 	if (mMouseDownView) mMouseDownView->mouseDown(event);
 	
 	// nuke rollover
+	if (mRolloverView) mRolloverView->setHasRollover(false);
 	mRolloverView=0;
 }
 
@@ -85,6 +98,15 @@ void ViewCollection::mouseMove( MouseEvent event )
 	}
 	else
 	{
+		if (mRolloverView) mRolloverView->setHasRollover(false);
+		
 		mRolloverView = pickView( event.getPos() );
+		
+		if (mRolloverView) mRolloverView->setHasRollover(true);
 	}
+}
+
+void ViewCollection::mouseDrag( MouseEvent event )
+{
+	if (mMouseDownView) mMouseDownView->mouseDrag(event);
 }

@@ -51,6 +51,7 @@ class PaperBounce3App : public App {
 	void mouseDown( MouseEvent event ) override;
 	void mouseUp( MouseEvent event ) override;
 	void mouseMove( MouseEvent event ) override;
+	void mouseDrag( MouseEvent event ) override;
 	void update() override;
 	void draw() override;
 	void resize() override;
@@ -282,6 +283,21 @@ void PaperBounce3App::setup()
 	mMainImageView->mWorldDrawFunc = [&](){drawWorld();};
 		// draw all the contours, etc... as well as the game world itself.
 	mViews.addView(mMainImageView);
+	
+	// poly editors
+	std::shared_ptr<PolyEditView> polyEditView = make_shared<PolyEditView>(
+		PolyEditView( mPipeline, PolyLine2(
+			vector<vec2>(mLightLink.mCaptureCoords,mLightLink.mCaptureCoords+4)
+			))
+		);
+	
+	polyEditView->setParent( mMainImageView );
+	
+	mViews.addView( polyEditView );
+		// TODO:
+		// - colors per poly
+		// - set data after editing (lambda?)
+		// - specify native coordinate system
 }
 
 fs::path
@@ -304,6 +320,11 @@ void PaperBounce3App::mouseUp( MouseEvent event )
 void PaperBounce3App::mouseMove( MouseEvent event )
 {
 	mViews.mouseMove(event);
+}
+
+void PaperBounce3App::mouseDrag( MouseEvent event )
+{
+	mViews.mouseDrag(event);
 }
 
 void PaperBounce3App::addProjectorPipelineStages()
@@ -453,22 +474,6 @@ void PaperBounce3App::drawProjectorWindow()
 	
 	// ====== Window Space (UI) =====
 	drawUI();
-	
-	// test view code
-	if (0)
-	{
-		View v;
-		
-		v.setFrame ( Rectf(0,0,320,240) + vec2(100,100) );
-		v.setBounds( Rectf(0,0,640,480) );
-		
-		gl::pushViewMatrix();
-		gl::multViewMatrix( v.getChildToParentMatrix() );
-		
-		v.draw();
-		
-		gl::popViewMatrix();
-	}
 }
 
 void PaperBounce3App::drawWorld()

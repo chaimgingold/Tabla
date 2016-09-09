@@ -33,6 +33,9 @@ inline mat4 getRectMappingAsMatrix( Rectf from, Rectf to )
 	return m;
 }
 
+class View;
+typedef std::shared_ptr<View> ViewRef;
+
 class View
 {
 public:
@@ -53,6 +56,15 @@ public:
 	
 	vec2 parentToChild( vec2 p ) const { return vec2( getParentToChildMatrix() * vec4(p,0,1) ); }
 	vec2 childToParent( vec2 p ) const { return vec2( getChildToParentMatrix() * vec4(p,0,1) ); }
+	
+	// hierarchy
+	void setParent( ViewRef v ) { mParent=v; }
+	
+	mat4 getRootToChildMatrix() const;
+	mat4 getChildToRootMatrix() const;
+
+	vec2 rootToChild( vec2 p ) const { return vec2( getRootToChildMatrix() * vec4(p,0,1) ); }
+	vec2 childToRoot( vec2 p ) const { return vec2( getChildToRootMatrix() * vec4(p,0,1) ); }
 	
 	// drawing
 	virtual void draw()
@@ -75,15 +87,21 @@ public:
 	virtual void mouseDown( MouseEvent ){}
 	virtual void mouseUp  ( MouseEvent ){}
 	virtual void mouseMove( MouseEvent ){}
+	virtual void mouseDrag( MouseEvent ){}
+	
+	void setHasRollover( bool v ) { mHasRollover=v; }
+	bool getHasRollover() const { return mHasRollover; }
 	
 private:
-	string	mName;
-	Rectf	mFrame;  // where it is in parent coordinate space
-	Rectf	mBounds; // what that coordinate space is mapped to (eg 0,0 .. 640,480)
+	bool	mHasRollover=false;
 	
+	string	mName;
+	Rectf	mFrame = Rectf(0,0,1,1); // where it is in parent coordinate space
+	Rectf	mBounds= Rectf(0,0,1,1); // what that coordinate space is mapped to (eg 0,0 .. 640,480)
+		// initing to unit rect so that by default it does a valid no transform (no divide by zero)
+	
+	ViewRef mParent;
 };
-
-typedef std::shared_ptr<View> ViewRef;
 
 
 class ViewCollection
@@ -100,6 +118,7 @@ public:
 	void mouseDown( MouseEvent );
 	void mouseUp  ( MouseEvent );
 	void mouseMove( MouseEvent );
+	void mouseDrag( MouseEvent );
 	
 	ViewRef getMouseDownView() const { return mMouseDownView; }
 	ViewRef getRolloverView()  const { return mRolloverView; }

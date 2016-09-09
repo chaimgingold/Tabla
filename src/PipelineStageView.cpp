@@ -50,6 +50,7 @@ void PipelineStageView::mouseDown( MouseEvent )
 void PipelineStageView::drawFrame()
 {
 	if ( mStageName == mPipeline.getQuery() ) gl::color(.7f,.3f,.5f);
+	else if ( getHasRollover() ) gl::color(1,1,1,1.f);
 	else gl::color(1,1,1,.5f);
 	
 	gl::drawStrokedRect( getFrame(), 2.f );
@@ -114,4 +115,76 @@ vec2 MainImageView::mouseToWorld( vec2 p )
 	}
 	
 	return p2;
+}
+
+const float kRadius = 8.f;
+
+PolyEditView::PolyEditView( Pipeline& pipeline, PolyLine2 poly )
+	: mPipeline(pipeline)
+	, mPoly(poly)
+{
+//	mPoly.push_back( vec2(0,0) );
+//	mPoly.push_back( vec2(100,0) );
+//	mPoly.push_back( vec2(100,100) );
+//	mPoly.push_back( vec2(0,100) );
+	mPoly.setClosed();
+}
+
+void PolyEditView::draw()
+{
+	gl::color(.7,.3,.4);
+	gl::draw( mPoly );
+
+	if ( getHasRollover() ) gl::color(1,0,0);
+	else gl::color(.8,.2,1);
+	
+	for( vec2 p : mPoly.getPoints() )
+	{
+		gl::drawStrokedRect( getPointControlRect(p), 2.f );
+	}
+}
+
+bool PolyEditView::pick( vec2 p )
+{
+	return pickPoint( rootToChild(p) ) != -1 ;
+}
+
+void PolyEditView::mouseDown( MouseEvent event )
+{
+	vec2 pos = rootToChild(event.getPos());
+	
+	mDragPointIndex = pickPoint( pos );
+	
+	mDragStartMousePos = pos;
+	
+	if ( mDragPointIndex != -1 ) mDragStartPoint=mPoly.getPoints()[mDragPointIndex];
+}
+
+void PolyEditView::mouseUp  ( MouseEvent event )
+{
+	mDragPointIndex = -1;
+}
+
+void PolyEditView::mouseDrag( MouseEvent event )
+{
+	vec2 pos = rootToChild(event.getPos());
+	
+	if ( mDragPointIndex >= 0 && mDragPointIndex < mPoly.size() )
+	{
+		mPoly.getPoints()[mDragPointIndex] = mDragStartPoint + (pos - mDragStartMousePos);
+	}
+}
+
+int PolyEditView::pickPoint( vec2 p ) const
+{
+	for( size_t i=0; i<mPoly.getPoints().size(); ++i )
+	{
+		if ( getPointControlRect(mPoly.getPoints()[i]).contains(p) ) return i;
+	}
+	return -1;
+}
+
+Rectf PolyEditView::getPointControlRect( vec2 p ) const
+{
+	return Rectf(p,p).inflated( vec2(1,1)*kRadius );
 }

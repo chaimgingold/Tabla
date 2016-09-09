@@ -72,5 +72,30 @@ private:
 	
 };
 
+class PolyEditView : public View
+{
+public:
+
+	PolyEditView( Pipeline&, PolyLine2 );
+	
+	void draw() override;
+	bool pick( vec2 ) override;
+
+	void mouseDown( MouseEvent ) override;
+	void mouseUp  ( MouseEvent ) override;
+	void mouseDrag( MouseEvent ) override;
+
+private:
+	
+	int pickPoint( vec2 ) const;
+	Rectf getPointControlRect( vec2 ) const;
+	
+	Pipeline& mPipeline;
+
+	PolyLine2 mPoly;
+	int mDragPointIndex=-1;
+	vec2 mDragStartMousePos; // should really be in view manager; put it there when we do backlinks
+	vec2 mDragStartPoint;
+};
 
 #endif /* PipelineStageView_hpp */
