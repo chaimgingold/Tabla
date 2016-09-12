@@ -26,6 +26,7 @@
 		22088F63A8874EB4BAA43888 /* b2BlockAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 591FA7613BF840AF83A5482A /* b2BlockAllocator.cpp */; };
 		23756771BB404A04991A26CB /* b2PolygonAndCircleContact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6B648D73A5D453781A11E34 /* b2PolygonAndCircleContact.cpp */; };
 		24F2003E479C4BC49D1F7374 /* b2WheelJoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 627E59F1B82E4F36ABF0DE48 /* b2WheelJoint.cpp */; };
+		2635C8D01D8768C900DF30BE /* WindowData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2635C8CE1D8768C900DF30BE /* WindowData.cpp */; };
 		26BC84B31D80DF89006001DC /* PipelineStageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26BC84B11D80DF89006001DC /* PipelineStageView.cpp */; };
 		26FA36411D4A7D5300C64A00 /* todo in Resources */ = {isa = PBXBuildFile; fileRef = 26FA36401D4A7D5300C64A00 /* todo */; };
 		26FA36431D53C05700C64A00 /* research in Resources */ = {isa = PBXBuildFile; fileRef = 26FA36421D53C05700C64A00 /* research */; };
@@ -99,6 +100,9 @@
 		1967F5787DB34245B2B91CBA /* b2EdgeAndCircleContact.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = b2EdgeAndCircleContact.h; path = ../blocks/Box2D/src/Box2D/Dynamics/Contacts/b2EdgeAndCircleContact.h; sourceTree = "<group>"; };
 		1DCA2C3FD6C84A6DAB24027E /* b2DistanceJoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2DistanceJoint.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Joints/b2DistanceJoint.cpp; sourceTree = "<group>"; };
 		2635C8CD1D83245400DF30BE /* GameWorld.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GameWorld.h; path = ../src/GameWorld.h; sourceTree = "<group>"; };
+		2635C8CE1D8768C900DF30BE /* WindowData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WindowData.cpp; path = ../src/WindowData.cpp; sourceTree = "<group>"; };
+		2635C8CF1D8768C900DF30BE /* WindowData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WindowData.h; path = ../src/WindowData.h; sourceTree = "<group>"; };
+		2635C8D11D87695000DF30BE /* PaperBounce3App.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PaperBounce3App.h; path = ../src/PaperBounce3App.h; sourceTree = "<group>"; };
 		26BC84B11D80DF89006001DC /* PipelineStageView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PipelineStageView.cpp; path = ../src/PipelineStageView.cpp; sourceTree = "<group>"; };
 		26BC84B21D80DF89006001DC /* PipelineStageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PipelineStageView.h; path = ../src/PipelineStageView.h; sourceTree = "<group>"; };
 		26FA36401D4A7D5300C64A00 /* todo */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = todo; path = ../design/todo; sourceTree = "<group>"; };
@@ -259,7 +263,6 @@
 				26FA36471D53C5D300C64A00 /* Contour.cpp */,
 				26FA364C1D53CBDA00C64A00 /* Vision.h */,
 				26FA364B1D53CBDA00C64A00 /* Vision.cpp */,
-				D873CF0CF96D4D8E8D1A7A87 /* PaperBounce3App.cpp */,
 				26FA36521D55351400C64A00 /* LightLink.h */,
 				26FA36531D55365800C64A00 /* LightLink.cpp */,
 				26FA36561D592CE700C64A00 /* XmlFileWatch.h */,
@@ -270,6 +273,10 @@
 				26FA365C1D77673500C64A00 /* View.cpp */,
 				26BC84B21D80DF89006001DC /* PipelineStageView.h */,
 				26BC84B11D80DF89006001DC /* PipelineStageView.cpp */,
+				2635C8D11D87695000DF30BE /* PaperBounce3App.h */,
+				D873CF0CF96D4D8E8D1A7A87 /* PaperBounce3App.cpp */,
+				2635C8CF1D8768C900DF30BE /* WindowData.h */,
+				2635C8CE1D8768C900DF30BE /* WindowData.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -616,6 +623,7 @@
 				741A16EB71BE4A308C86D708 /* b2CollidePolygon.cpp in Sources */,
 				509D1EB4420C46A3BB6D751D /* b2Collision.cpp in Sources */,
 				26FA36571D592CE700C64A00 /* XmlFileWatch.cpp in Sources */,
+				2635C8D01D8768C900DF30BE /* WindowData.cpp in Sources */,
 				26FA36461D53C31A00C64A00 /* BallWorld.cpp in Sources */,
 				58F3F572E622458BA5EA9B45 /* b2Distance.cpp in Sources */,
 				FE95B791332E4B49916DF787 /* b2DynamicTree.cpp in Sources */,

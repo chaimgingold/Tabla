@@ -1,23 +1,4 @@
-#include "cinder/app/App.h"
-#include "cinder/app/RendererGl.h"
-#include "cinder/gl/gl.h"
-#include "cinder/Rand.h"
-
-#include "cinder/Text.h"
-#include "cinder/gl/TextureFont.h"
-#include "cinder/Xml.h"
-
-#include "cinder/Capture.h"
-#include "CinderOpenCV.h"
-
-#include "LightLink.h"
-#include "Vision.h"
-#include "Contour.h"
-#include "BallWorld.h"
-#include "XmlFileWatch.h"
-#include "Pipeline.h"
-
-#include "PipelineStageView.h"
+#include "PaperBounce3App.h"
 
 #include "geom.h"
 #include "xml.h"
@@ -26,127 +7,13 @@
 
 #include <map>
 #include <string>
-#include <stdlib.h> // system()
 #include <memory>
 
-using namespace ci;
-using namespace ci::app;
-using namespace std;
-
+#include <stdlib.h> // system()
 
 const int  kRequestFrameRate = 60 ; // was 120, don't think it matters/we got there
 const vec2 kDefaultWindowSize( 640, 480 );
 
-
-
-class cWindowData {
-public:
-	bool mIsAux = false ;
-};
-
-
-class PaperBounce3App : public App {
-  public:
-	void setup() override;
-	void mouseDown( MouseEvent event ) override;
-	void mouseUp( MouseEvent event ) override;
-	void mouseMove( MouseEvent event ) override;
-	void mouseDrag( MouseEvent event ) override;
-	void update() override;
-	void draw() override;
-	void resize() override;
-	void keyDown( KeyEvent event ) override;
-	
-	void drawProjectorWindow() ;
-	void drawAuxWindow() ;
-	
-	void drawWorld();
-	void drawUI();
-	
-	LightLink			mLightLink; // calibration for camera <> world <> projector
-	CaptureRef			mCapture;	// input device		->
-	Vision				mVision ;	// edge detection	->
-	ContourVector		mContours;	// edges output		->
-	BallWorld			mBallWorld ;// world simulation
-	
-	Pipeline			mPipeline; // traces processing
-	
-	// world info
-	vec2 getWorldSize() const ;
-		// world rect might be more appropriate...
-		// this is kind of a deprecated concept; it is used to:
-		// - draw a frame
-		// - spawn random balls
-		// What are we talking about? Replace with these concepts:
-		// - contour boundaries?
-		// - camera world bounds?
-		// - projector world bounds?
-		// - union of camera + projector bounds?
-		// - some other arbitrary thing?
-	
-	
-	// ui
-	Font				mFont;
-	gl::TextureFontRef	mTextureFont;
-	
-	WindowRef			mMainWindow;// projector
-	WindowRef			mAuxWindow; // for other debug info, on computer screen
-	
-	double				mLastFrameTime = 0. ;
-	
-	vec2				getMousePosInWindow() const { return mMousePosInWindow; }
-	vec2				mMousePosInWindow;
-	
-	// to help us visualize
-	void addProjectorPipelineStages();
-	void updatePipelineViews( bool areViewsVisible );
-	
-	ViewCollection mViews;
-	
-	std::shared_ptr<MainImageView> mMainImageView; // main view, with image in it.
-	void updateMainImageTransform(); // configure mMainImageView's transform
-	
-	/* Coordinates spaces, there are a few:
-		
-		UI (window coordinates, in points, not pixels)
-			- pixels
-			- points
-			
-		Image
-			- Camera
-				e.g. pixel location in capture image
-			- Projector
-				e.g. pixel location on a screen
-			- Arbitrary
-				e.g. supersampled camera image subset
-				e.g. location of a pixel on a shown image
-		
-		World
-			(sim size, unbounded)	eg. location of a bouncing ball
-	 
-	 
-	Transforms
-		UI    <> Image -- handled by View objects
-		Image <> World -- currently handled by Pipeline::Stage transforms
-
-	*/
-	
-	// settings
-	bool mAutoFullScreenProjector = false ;
-	bool mDrawCameraImage = false ;
-	bool mDrawContours = false ;
-	bool mDrawContoursFilled = false ;
-	bool mDrawMouseDebugInfo = false ;
-	bool mDrawPolyBoundingRect = false ;
-	bool mDrawContourTree = false ;
-	bool mDrawPipeline = false;
-	bool mDrawContourMousePick = false;
-
-	fs::path myGetAssetPath( fs::path ) const ; // prepends the appropriate thing...
-	string mOverloadedAssetPath;
-	
-	XmlFileWatch mXmlFileWatch;
-};
 
 vec2 PaperBounce3App::getWorldSize() const
 {
@@ -235,16 +102,19 @@ void PaperBounce3App::setup()
 		// - aux display config
 	});
 
-	// resize window
-	setWindowSize( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y ) ;
-	
 	// get camera
 	mCapture = Capture::create( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y, cameras.back() ) ; // get last camera
 	mCapture->start();
 
-	// Fullscreen main window in secondary display
+	// setup main window
 	mMainWindow = getWindow();
+	mMainWindow->setTitle("Projector");
+	mMainWindow->setUserData( new WindowData(false,*this) );
 
+	// resize window
+	setWindowSize( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y ) ;
+
+	// Fullscreen main window in secondary display
 	if ( displays.size()>1 && mAutoFullScreenProjector )
 	{
 		// move to 2nd display
@@ -257,16 +127,15 @@ void PaperBounce3App::setup()
 	if (1)
 	{
 		// for some reason this seems to create three windows once we fullscreen the main window :P
-		app::WindowRef mAuxWindow = createWindow( Window::Format().size( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y ) );
+		mUIWindow = createWindow( Window::Format().size( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y ) );
 		
-		cWindowData* data = new cWindowData ;
-		data->mIsAux=true ;
-		mAuxWindow->setUserData(data);
+		mUIWindow->setTitle("Configuration");
+		mUIWindow->setUserData( new WindowData(true,*this) );
 		
-		if ( mMainWindow->getDisplay() == mAuxWindow->getDisplay() )
+		// move it out of the way on one screen
+		if ( mMainWindow->getDisplay() == mUIWindow->getDisplay() )
 		{
-			// move it out of the way on one screen
-			mAuxWindow->setPos( mMainWindow->getPos() + ivec2( -mMainWindow->getWidth()-16,0) ) ;
+			mUIWindow->setPos( mMainWindow->getPos() + ivec2( -mMainWindow->getWidth()-16,0) ) ;
 		}
 	}
 	
@@ -282,66 +151,6 @@ void PaperBounce3App::setup()
 		else mPipeline.setQuery("clipped");
 	}
 	mPipeline.setCaptureAllStageImages(mDrawPipeline);
-	
-	// make main image view
-	mMainImageView = make_shared<MainImageView>( MainImageView( mPipeline, mBallWorld ) );
-	mMainImageView->mWorldDrawFunc = [&](){drawWorld();};
-		// draw all the contours, etc... as well as the game world itself.
-	mViews.addView(mMainImageView);
-	
-	// poly editors
-	// - camera capture coords
-	{
-		std::shared_ptr<PolyEditView> cameraPolyEditView = make_shared<PolyEditView>(
-			PolyEditView(
-				mPipeline,
-				PolyLine2(vector<vec2>(mLightLink.mCaptureCoords,mLightLink.mCaptureCoords+4)),
-				"input"
-				)
-			);
-		
-		cameraPolyEditView->setPolyFunc( [&]( const PolyLine2& poly ){
-			assert( poly.getPoints().size()==4 );
-			for( int i=0; i<4; ++i ) mLightLink.mCaptureCoords[i] = poly.getPoints()[i];
-			mVision.setLightLink(mLightLink);
-		});
-		
-		cameraPolyEditView->setMainImageView( mMainImageView );
-		cameraPolyEditView->getEditableInStages().push_back("input");
-		
-		mViews.addView( cameraPolyEditView );
-	}
-
-	// - projector mapping
-	if (1)
-	{
-		PolyLine2 poly(vector<vec2>(mLightLink.mProjectorCoords,mLightLink.mProjectorCoords+4));
-		
-		// convert to input coords
-		std::shared_ptr<PolyEditView> projPolyEditView = make_shared<PolyEditView>(
-			PolyEditView(
-				mPipeline,
-				PolyLine2(vector<vec2>(mLightLink.mProjectorCoords,mLightLink.mProjectorCoords+4)),
-				"projector"
-				)
-		);
-		
-		projPolyEditView->setPolyFunc( [&]( const PolyLine2& poly ){
-			assert( poly.getPoints().size()==4 );
-			for( int i=0; i<4; ++i ) mLightLink.mProjectorCoords[i] = poly.getPoints()[i];
-			mVision.setLightLink(mLightLink);
-		});
-		
-		projPolyEditView->setMainImageView( mMainImageView );
-		projPolyEditView->getEditableInStages().push_back("projector");
-		
-		mViews.addView( projPolyEditView );
-	}
-
-	// TODO:
-	// - colors per poly
-	// - √ set data after editing (lambda?)
-	// - √ specify native coordinate system
 }
 
 fs::path
@@ -353,26 +162,22 @@ PaperBounce3App::myGetAssetPath( fs::path p ) const
 
 void PaperBounce3App::mouseDown( MouseEvent event )
 {
-	mMousePosInWindow = event.getPos();
-	mViews.mouseDown(event);
+	getWindow()->getUserData<WindowData>()->mouseDown(event);
 }
 
 void PaperBounce3App::mouseUp( MouseEvent event )
 {
-	mMousePosInWindow = event.getPos();
-	mViews.mouseUp(event);
+	getWindow()->getUserData<WindowData>()->mouseUp(event);
 }
 
 void PaperBounce3App::mouseMove( MouseEvent event )
 {
-	mMousePosInWindow = event.getPos();
-	mViews.mouseMove(event);
+	getWindow()->getUserData<WindowData>()->mouseMove(event);
 }
 
 void PaperBounce3App::mouseDrag( MouseEvent event )
 {
-	mMousePosInWindow = event.getPos();
-	mViews.mouseDrag(event);
+	getWindow()->getUserData<WindowData>()->mouseDrag(event);
 }
 
 void PaperBounce3App::addProjectorPipelineStages()
@@ -389,6 +194,11 @@ void PaperBounce3App::addProjectorPipelineStages()
 
 void PaperBounce3App::updatePipelineViews( bool areViewsVisible )
 {
+	if (!mUIWindow) return;
+	WindowData *win = mUIWindow->getUserData<WindowData>();
+	if (!win) return;
+	ViewCollection& views = win->getViews();
+	
 	const float kUIGutter = 8.f ;
 	const float kUIWidth  = 64.f ;
 	
@@ -399,12 +209,12 @@ void PaperBounce3App::updatePipelineViews( bool areViewsVisible )
 	for( const auto &s : stages )
 	{
 		// view exists?
-		ViewRef view = mViews.getViewByName(s.mName);
+		ViewRef view = views.getViewByName(s.mName);
 		
 		// erase it?
 		if ( view && !areViewsVisible )
 		{
-			mViews.removeView(view);
+			views.removeView(view);
 			view=0;
 		}
 		
@@ -418,7 +228,7 @@ void PaperBounce3App::updatePipelineViews( bool areViewsVisible )
 			
 			view->setName(s.mName);
 			
-			mViews.addView(view);
+			views.addView(view);
 		}
 		
 		// configure it
@@ -467,71 +277,36 @@ void PaperBounce3App::update()
 		// since the pipeline stage we are drawing might have changed... (or come into existence)
 		// update the window mapping
 		// this is a little weird to put here, but ah well
-		updateMainImageTransform();
+		updateMainImageTransform(mUIWindow);
+		updateMainImageTransform(mMainWindow);
 	}
 	
 	mBallWorld.update();
 }
 
+void PaperBounce3App::updateMainImageTransform( WindowRef w )
+{
+	if (w)
+	{
+		WindowData *win = w->getUserData<WindowData>();
+		
+		// might not have been created yet (e.g., in setup)
+		if (win) win->updateMainImageTransform();
+	}
+}
+
 void PaperBounce3App::resize()
 {
-	updateMainImageTransform();
-}
-
-void PaperBounce3App::updateMainImageTransform()
-{
-	// get content bounds
-	Rectf bounds;
-
-	{
-		// in terms of size...
-		// this is a little weird, but it's basically historical code that needs to be
-		// refactored.
-		vec2 drawSize;
-		
-		if ( mPipeline.getQueryStage() )
-		{
-			// should always be the case
-			drawSize = mPipeline.getQueryStage()->mImageSize;
-		}
-		else
-		{
-			// world by default.
-			// (deprecated; not really sure what this even means anymore.)
-			drawSize = getWorldSize();
-		}
-		
-		bounds = Rectf( 0, 0, drawSize.x, drawSize.y );
-	}
-	
-	// what if it hasn't been made yet?
-	if (mMainImageView)
-	{
-		mMainImageView->setBounds( bounds );
-		
-		// it fills the window
-		const Rectf windowRect = Rectf(0,0,getWindowSize().x,getWindowSize().y);
-		const Rectf frame      = bounds.getCenteredFit( windowRect, true );
-		
-		mMainImageView->setFrame( frame );
-	}
-}
-
-void PaperBounce3App::drawProjectorWindow()
-{
-	// ====== Window Space (UI) =====
-	// baseline coordinate space
-	gl::setMatricesWindow( getWindowSize() );
-	
-	// ====== Window Space (UI) =====
-	drawUI();
+	updateMainImageTransform(getWindow());
 }
 
 void PaperBounce3App::drawWorld()
 {
-	const vec2 mouseInWindow   = getMousePosInWindow();
-	const vec2 mouseInWorld    = mMainImageView->mouseToWorld(mouseInWindow);
-	const bool isMouseInWindow = getWindowBounds().contains(getMousePosInWindow());
+	WindowData *win = getWindow()->getUserData<WindowData>();
+	
+	const vec2 mouseInWindow   = win->getMousePosInWindow();
+	const vec2 mouseInWorld    = win->getMainImageView()->mouseToWorld(mouseInWindow);
+	const bool isMouseInWindow = getWindowBounds().contains(win->getMousePosInWindow());
 	
 	
 	// draw frame
@@ -688,68 +463,11 @@ void PaperBounce3App::drawWorld()
 	}
 }
 
-void PaperBounce3App::drawUI()
-{
-	mViews.draw();
-	
-	// this, below, could become its own view
-	// it would need a shared_ptr to MainImageView (no biggie)
-	if ( mDrawMouseDebugInfo )//&& getWindowBounds().contains(getMousePosInWindow()) )
-	{
-		const vec2 pt = getMousePosInWindow();
-		
-		// coordinates
-		vec2   o[2] = { vec2(.5,1.5), vec2(0,0) };
-		ColorA c[2] = { ColorA(0,0,0), ColorA(1,1,1) };
-		
-		for( int i=0; i<2; ++i )
-		{
-			gl::color( c[i] );
-			mTextureFont->drawString(
-				"Window: " + toString(pt) +
-				"\tImage: "  + toString( mMainImageView->mouseToImage(pt) ) +
-				"\tWorld: " + toString( mMainImageView->mouseToWorld(pt) )
-				, o[i]+vec2( 8.f, getWindowSize().y - mTextureFont->getAscent()+mTextureFont->getDescent()) ) ;
-		}
-	}
-}
-
-void PaperBounce3App::drawAuxWindow()
-{
-//	if ( mPipeline.getQueryFrame() )
-//	{
-//		gl::setMatricesWindow( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y );
-//		gl::color( 1, 1, 1 );
-//		gl::draw( mPipeline.getQueryFrame() );
-//	}
-}
-
 void PaperBounce3App::draw()
 {
-	gl::clear();
-	gl::enableAlphaBlending();
-
-	// I turned on MSAA=8, so these aren't needed.
-	// They didn't work on polygons anyways.
+	WindowData* win = getWindow()->getUserData<WindowData>() ;
 	
-//	gl::enable( GL_LINE_SMOOTH );
-//	gl::enable( GL_POLYGON_SMOOTH );
-	//	gl::enable( gl_point_smooth );
-//	glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
-//	glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
-	//	glHint( GL_POINT_SMOOTH_HINT, GL_NICEST );
-	
-
-	cWindowData* winData = getWindow()->getUserData<cWindowData>() ;
-	
-	if ( winData && winData->mIsAux )
-	{
-		drawAuxWindow();
-	}
-	else
-	{
-		drawProjectorWindow();
-	}
+	if (win) win->draw();
 }
 
 void PaperBounce3App::keyDown( KeyEvent event )
