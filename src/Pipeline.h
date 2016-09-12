@@ -68,6 +68,10 @@ public:
 	
 	void setCaptureAllStageImages( bool v ) { mCaptureAllStageImages=v; }
 	
+	mat4 getCoordSpaceTransform( string from, string to ) const;
+		// from/to is name of coordinate space.
+		// these can refer to a Stage::mName, or "world"
+	
 private:
 
 	bool mCaptureAllStageImages = false; // if false, then only extract query stage. true: capture all.

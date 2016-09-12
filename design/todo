@@ -4,6 +4,10 @@ Pipeline viz
 		- On a switch.
 	- Polygon editor for configuration
 		- Will probably require fixing a known UI mapping bug.
+		- √ Camera selection
+		- √ Projector world coordinates
+		- World units/measurement.
+		- Save user LightLink settings.
 	- Hide when in projector full-screen mode
 		(Or put in secondary UI window)
 • Maybe
@@ -157,3 +161,4 @@ Technical
 Bugs
 - XML loader will explode if file doesn't exist.
 - UI transform mapping on first pipeline stage is busted.
+- Poly editor for camera world area only works in camera view (because of feedback loop in other stages)

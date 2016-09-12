@@ -289,19 +289,58 @@ void PaperBounce3App::setup()
 	mViews.addView(mMainImageView);
 	
 	// poly editors
-	std::shared_ptr<PolyEditView> polyEditView = make_shared<PolyEditView>(
-		PolyEditView( mPipeline, PolyLine2(
-			vector<vec2>(mLightLink.mCaptureCoords,mLightLink.mCaptureCoords+4)
-			))
+	// - camera capture coords
+	{
+		std::shared_ptr<PolyEditView> cameraPolyEditView = make_shared<PolyEditView>(
+			PolyEditView(
+				mPipeline,
+				PolyLine2(vector<vec2>(mLightLink.mCaptureCoords,mLightLink.mCaptureCoords+4)),
+				"input"
+				)
+			);
+		
+		cameraPolyEditView->setPolyFunc( [&]( const PolyLine2& poly ){
+			assert( poly.getPoints().size()==4 );
+			for( int i=0; i<4; ++i ) mLightLink.mCaptureCoords[i] = poly.getPoints()[i];
+			mVision.setLightLink(mLightLink);
+		});
+		
+		cameraPolyEditView->setMainImageView( mMainImageView );
+		cameraPolyEditView->getEditableInStages().push_back("input");
+		
+		mViews.addView( cameraPolyEditView );
+	}
+
+	// - projector mapping
+	if (1)
+	{
+		PolyLine2 poly(vector<vec2>(mLightLink.mProjectorCoords,mLightLink.mProjectorCoords+4));
+		
+		// convert to input coords
+		std::shared_ptr<PolyEditView> projPolyEditView = make_shared<PolyEditView>(
+			PolyEditView(
+				mPipeline,
+				PolyLine2(vector<vec2>(mLightLink.mProjectorCoords,mLightLink.mProjectorCoords+4)),
+				"projector"
+				)
 		);
-	
-	polyEditView->setParent( mMainImageView );
-	
-	mViews.addView( polyEditView );
-		// TODO:
-		// - colors per poly
-		// - set data after editing (lambda?)
-		// - specify native coordinate system
+		
+		projPolyEditView->setPolyFunc( [&]( const PolyLine2& poly ){
+			assert( poly.getPoints().size()==4 );
+			for( int i=0; i<4; ++i ) mLightLink.mProjectorCoords[i] = poly.getPoints()[i];
+			mVision.setLightLink(mLightLink);
+		});
+		
+		projPolyEditView->setMainImageView( mMainImageView );
+		projPolyEditView->getEditableInStages().push_back("projector");
+		
+		mViews.addView( projPolyEditView );
+	}
+
+	// TODO:
+	// - colors per poly
+	// - √ set data after editing (lambda?)
+	// - √ specify native coordinate system
 }
 
 fs::path

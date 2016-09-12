@@ -61,6 +61,8 @@ public:
 
 	void mouseDown( MouseEvent ) override;
 	
+	string getPipelineStageName() const { return mPipeline.getQuery(); }
+	
 	function<void(void)> mWorldDrawFunc; // this overloads use of mGameWorld.draw()
 	// :P kinda lame.
 	// this clunkiness is b/c app::drawWorld() handles all the contour drawing, debug info, etc...
@@ -76,7 +78,7 @@ class PolyEditView : public View
 {
 public:
 
-	PolyEditView( Pipeline&, PolyLine2 );
+	PolyEditView( Pipeline&, PolyLine2, string polyCoordSpace );
 	
 	void draw() override;
 	bool pick( vec2 ) override;
@@ -85,17 +87,47 @@ public:
 	void mouseUp  ( MouseEvent ) override;
 	void mouseDrag( MouseEvent ) override;
 
+	void setMainImageView( std::shared_ptr<MainImageView> ); // becomes the parent
+	
+	void setPolyFunc( function<void(const PolyLine2&)> f ) {mPolyFunc=f;}
+
+	void setDoLiveUpdate( bool v ) { mDoLiveUpdate=v; }
+	bool getDoLiveUpdate() const { return true; }
+
+	// what stages are we editable in?
+	// by default (if empty), then all
+	vector<string>& getEditableInStages() { return mEditableInStages; }
+	const vector<string>& getEditableInStages() const { return mEditableInStages; }
+	
+	bool isEditable() const ;
+	
 private:
 	
-	int pickPoint( vec2 ) const;
-	Rectf getPointControlRect( vec2 ) const;
+	std::shared_ptr<MainImageView> mMainImageView;
+	
+	int pickPoint( vec2 ) const; // image coord space
+	Rectf getPointControlRect( vec2 ) const; // image coord space
+
+	mat4 getPolyToImageTransform() const;
+	mat4 getImagetoPolyTransform() const;
 	
 	Pipeline& mPipeline;
 
-	PolyLine2 mPoly;
+	string mPolyCoordSpace;
+	
+	function<void(const PolyLine2&)> mPolyFunc;
+	
+	PolyLine2 mPoly; // poly coord space
+	PolyLine2 getPolyInImageSpace() const;
+	PolyLine2 getPolyInPolySpace() const { return mPoly; }
+	
 	int mDragPointIndex=-1;
 	vec2 mDragStartMousePos; // should really be in view manager; put it there when we do backlinks
 	vec2 mDragStartPoint;
+	
+	bool mDoLiveUpdate=true;
+	
+	vector<string> mEditableInStages;
 };
 
 #endif /* PipelineStageView_hpp */

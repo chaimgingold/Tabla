@@ -268,8 +268,8 @@
 				26FA36581D5BDBC300C64A00 /* Pipeline.cpp */,
 				26FA365D1D77673500C64A00 /* View.h */,
 				26FA365C1D77673500C64A00 /* View.cpp */,
-				26BC84B11D80DF89006001DC /* PipelineStageView.cpp */,
 				26BC84B21D80DF89006001DC /* PipelineStageView.h */,
+				26BC84B11D80DF89006001DC /* PipelineStageView.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";

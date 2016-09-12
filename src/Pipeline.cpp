@@ -113,3 +113,44 @@ const Pipeline::Stage* Pipeline::getStage( string name ) const
 	
 	return 0;
 }
+
+mat4 Pipeline::getCoordSpaceTransform( string from, string to ) const
+{
+	if (0) cout << from << " => " << to << endl;
+	
+	mat4 t;
+
+	// identity?
+	if (from!=to)
+	{
+		auto warn = []( string msg )
+		{
+			cout << "getCoordSpaceTransform warning: " << msg << endl;
+		};
+		
+		const Stage* fromStage = getStage(from);
+		const Stage* toStage   = getStage(to);
+		
+		// warnings
+		{
+			if (( from=="world" && fromStage ) ||
+				( to  =="world" && toStage   )) warn("There is a stage with reserved named 'world'.") ;
+		}
+		
+		// world -> to
+		if ( to!="world" )
+		{
+			if ( toStage ) t *= toStage->mWorldToImage;
+			else warn( string("No '") + to + "' stage." );
+		}
+
+		// from -> world
+		if ( from!="world" )
+		{
+			if ( fromStage ) t *= fromStage->mImageToWorld;
+			else warn( string("No '") + from + "' stage." );
+		}
+	}
+	
+	return t;
+}

@@ -67,7 +67,7 @@ void MainImageView::draw()
 		gl::draw( mPipeline.getQueryStage()->mImage );
 	}
 
-//	if (0)
+//	if (1)
 //	{
 //		vec2 p = mouseToImage(mMousePos);
 //		gl::color( 0., .5, .1 );
@@ -119,34 +119,43 @@ vec2 MainImageView::mouseToWorld( vec2 p )
 
 const float kRadius = 8.f;
 
-PolyEditView::PolyEditView( Pipeline& pipeline, PolyLine2 poly )
+PolyEditView::PolyEditView( Pipeline& pipeline, PolyLine2 poly, string polyCoordSpace )
 	: mPipeline(pipeline)
 	, mPoly(poly)
+	, mPolyCoordSpace(polyCoordSpace)
 {
-//	mPoly.push_back( vec2(0,0) );
-//	mPoly.push_back( vec2(100,0) );
-//	mPoly.push_back( vec2(100,100) );
-//	mPoly.push_back( vec2(0,100) );
 	mPoly.setClosed();
+}
+
+void PolyEditView::setMainImageView( shared_ptr<MainImageView> miv )
+{
+	mMainImageView=miv;
+	setParent(miv);
 }
 
 void PolyEditView::draw()
 {
-	gl::color(.7,.3,.4);
-	gl::draw( mPoly );
+	const PolyLine2 poly = getPolyInImageSpace();
 
-	if ( getHasRollover() ) gl::color(1,0,0);
-	else gl::color(.8,.2,1);
-	
-	for( vec2 p : mPoly.getPoints() )
+	if ( isEditable() ) gl::color(.7,.3,.4);
+	else gl::color(.5,.5,.5,1);
+	gl::draw( poly );
+
+	if ( isEditable() )
 	{
-		gl::drawStrokedRect( getPointControlRect(p), 2.f );
+		if ( getHasRollover() ) gl::color(1,0,0);
+		else gl::color(.8,.2,1);
+
+		for( vec2 p : poly )
+		{
+			gl::drawStrokedRect( getPointControlRect(p), 2.f );
+		}
 	}
 }
 
 bool PolyEditView::pick( vec2 p )
 {
-	return pickPoint( rootToChild(p) ) != -1 ;
+	return isEditable() && pickPoint( rootToChild(p) ) != -1 ;
 }
 
 void PolyEditView::mouseDown( MouseEvent event )
@@ -157,11 +166,13 @@ void PolyEditView::mouseDown( MouseEvent event )
 	
 	mDragStartMousePos = pos;
 	
-	if ( mDragPointIndex != -1 ) mDragStartPoint=mPoly.getPoints()[mDragPointIndex];
+	if ( mDragPointIndex != -1 ) mDragStartPoint=getPolyInImageSpace().getPoints()[mDragPointIndex];
 }
 
 void PolyEditView::mouseUp  ( MouseEvent event )
 {
+	if ( mDragPointIndex!=-1 && !getDoLiveUpdate() && mPolyFunc) mPolyFunc( mPoly );
+
 	mDragPointIndex = -1;
 }
 
@@ -171,15 +182,22 @@ void PolyEditView::mouseDrag( MouseEvent event )
 	
 	if ( mDragPointIndex >= 0 && mDragPointIndex < mPoly.size() )
 	{
-		mPoly.getPoints()[mDragPointIndex] = mDragStartPoint + (pos - mDragStartMousePos);
+		mPoly.getPoints()[mDragPointIndex] = vec2(
+			getImagetoPolyTransform()
+			* vec4( mDragStartPoint + (pos - mDragStartMousePos), 0, 1 )
+			);
 	}
+	
+	if ( getDoLiveUpdate() && mPolyFunc) mPolyFunc( mPoly );
 }
 
 int PolyEditView::pickPoint( vec2 p ) const
 {
-	for( size_t i=0; i<mPoly.getPoints().size(); ++i )
+	const PolyLine2 poly = getPolyInImageSpace();
+	
+	for( size_t i=0; i<poly.getPoints().size(); ++i )
 	{
-		if ( getPointControlRect(mPoly.getPoints()[i]).contains(p) ) return i;
+		if ( getPointControlRect(poly.getPoints()[i]).contains(p) ) return i;
 	}
 	return -1;
 }
@@ -187,4 +205,42 @@ int PolyEditView::pickPoint( vec2 p ) const
 Rectf PolyEditView::getPointControlRect( vec2 p ) const
 {
 	return Rectf(p,p).inflated( vec2(1,1)*kRadius );
+}
+
+mat4 PolyEditView::getPolyToImageTransform() const
+{
+	return mPipeline.getCoordSpaceTransform(
+		mPolyCoordSpace,
+		mMainImageView ? mMainImageView->getPipelineStageName() : "world"
+		);
+}
+
+mat4 PolyEditView::getImagetoPolyTransform() const
+{
+	return mPipeline.getCoordSpaceTransform(
+		mMainImageView ? mMainImageView->getPipelineStageName() : "world",
+		mPolyCoordSpace
+		);
+	// should be inverse of getPolyToImageTransform()
+}
+
+PolyLine2 PolyEditView::getPolyInImageSpace() const
+{
+	const mat4 transform = getPolyToImageTransform();
+	
+	PolyLine2 poly = mPoly;
+	
+	for ( vec2 &pt : poly.getPoints() )
+	{
+		pt = vec2( transform * vec4(pt,0,1) );
+	}
+	
+	return poly;
+}
+
+bool PolyEditView::isEditable() const
+{
+	return mMainImageView && ( mEditableInStages.empty()
+		|| std::find( mEditableInStages.begin(), mEditableInStages.end(), mMainImageView->getPipelineStageName() ) != mEditableInStages.end()
+		);
 }
