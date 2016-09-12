@@ -18,7 +18,7 @@ class PaperBounce3App;
 class WindowData {
 public:
 
-	WindowData( bool isUIWindow, PaperBounce3App& ) ;
+	WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& ) ;
 	
 	void draw();
 	void mouseDown( MouseEvent event );
@@ -35,6 +35,8 @@ public:
 	
 private:
 
+	WindowRef mWindow;
+	
 	ViewCollection mViews;
 
 	bool mIsUIWindow = false ; // as opposed to projector

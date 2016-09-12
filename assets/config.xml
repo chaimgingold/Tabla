@@ -4,7 +4,7 @@
 	have to be consistent across all these parameters. -->
 
 	<App>
-		<AutoFullScreenProjector>	0 </AutoFullScreenProjector>
+		<AutoFullScreenProjector>	1 </AutoFullScreenProjector>
 		<DrawCameraImage>			1 </DrawCameraImage>
 		<DrawContours>				1 </DrawContours>
 		<DrawContoursFilled>		0 </DrawContoursFilled>

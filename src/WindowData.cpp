@@ -9,8 +9,9 @@
 #include "WindowData.h"
 #include "PaperBounce3App.h"
 
-WindowData::WindowData( bool isUIWindow, PaperBounce3App& app )
+WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app )
 	: mApp(app)
+	, mWindow(window)
 	, mIsUIWindow(isUIWindow)
 {
 	mMainImageView = make_shared<MainImageView>( MainImageView( mApp.mPipeline, mApp.mBallWorld ) );
@@ -172,15 +173,12 @@ void WindowData::updateMainImageTransform()
 	}
 	
 	// what if it hasn't been made yet?
-	if (mMainImageView)
-	{
-		mMainImageView->setBounds( bounds );
-		
-		// it fills the window
-		const Rectf windowRect = Rectf(0,0,getWindowSize().x,getWindowSize().y);
-		const Rectf frame      = bounds.getCenteredFit( windowRect, true );
-		
-		mMainImageView->setFrame( frame );
-	}
+	mMainImageView->setBounds( bounds );
+	
+	// it fills the window
+	const Rectf windowRect = Rectf(0,0,mWindow->getSize().x,mWindow->getSize().y);
+	const Rectf frame      = bounds.getCenteredFit( windowRect, true );
+	
+	mMainImageView->setFrame( frame );
 }
 

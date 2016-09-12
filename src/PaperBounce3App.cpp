@@ -109,7 +109,7 @@ void PaperBounce3App::setup()
 	// setup main window
 	mMainWindow = getWindow();
 	mMainWindow->setTitle("Projector");
-	mMainWindow->setUserData( new WindowData(false,*this) );
+	mMainWindow->setUserData( new WindowData(mMainWindow,false,*this) );
 
 	// resize window
 	setWindowSize( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y ) ;
@@ -130,7 +130,7 @@ void PaperBounce3App::setup()
 		mUIWindow = createWindow( Window::Format().size( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y ) );
 		
 		mUIWindow->setTitle("Configuration");
-		mUIWindow->setUserData( new WindowData(true,*this) );
+		mUIWindow->setUserData( new WindowData(mUIWindow,true,*this) );
 		
 		// move it out of the way on one screen
 		if ( mMainWindow->getDisplay() == mUIWindow->getDisplay() )
