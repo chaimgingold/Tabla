@@ -89,7 +89,8 @@ class PaperBounce3App : public App {
 	Font				mFont;
 	gl::TextureFontRef	mTextureFont;
 	
-	app::WindowRef		mAuxWindow ; // for other debug info, on computer screen
+	WindowRef			mMainWindow;// projector
+	WindowRef			mAuxWindow; // for other debug info, on computer screen
 	
 	double				mLastFrameTime = 0. ;
 	
@@ -129,8 +130,6 @@ class PaperBounce3App : public App {
 		Image <> World -- currently handled by Pipeline::Stage transforms
 
 	*/
-	
-
 	
 	// settings
 	bool mAutoFullScreenProjector = false ;
@@ -228,7 +227,6 @@ void PaperBounce3App::setup()
 		}
 
 		// 2. respond
-		
 		mVision.setLightLink(mLightLink);
 		
 		// TODO:
@@ -245,15 +243,18 @@ void PaperBounce3App::setup()
 	mCapture->start();
 
 	// Fullscreen main window in secondary display
+	mMainWindow = getWindow();
+
 	if ( displays.size()>1 && mAutoFullScreenProjector )
 	{
-		getWindow()->setPos( displays[1]->getBounds().getUL() );
+		// move to 2nd display
+		mMainWindow->setPos( displays[1]->getBounds().getUL() );
 		
-		getWindow()->setFullScreen(true) ;
+		mMainWindow->setFullScreen(true) ;
 	}
 
-	// aux display
-	if (0)
+	// aux UI display
+	if (1)
 	{
 		// for some reason this seems to create three windows once we fullscreen the main window :P
 		app::WindowRef mAuxWindow = createWindow( Window::Format().size( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y ) );
@@ -262,10 +263,10 @@ void PaperBounce3App::setup()
 		data->mIsAux=true ;
 		mAuxWindow->setUserData(data);
 		
-		if (displays.size()==1)
+		if ( mMainWindow->getDisplay() == mAuxWindow->getDisplay() )
 		{
 			// move it out of the way on one screen
-			mAuxWindow->setPos( getWindow()->getBounds().getUL() + ivec2(0,getWindow()->getBounds().getHeight() + 16.f) ) ;
+			mAuxWindow->setPos( mMainWindow->getPos() + ivec2( -mMainWindow->getWidth()-16,0) ) ;
 		}
 	}
 	
@@ -503,14 +504,17 @@ void PaperBounce3App::updateMainImageTransform()
 		bounds = Rectf( 0, 0, drawSize.x, drawSize.y );
 	}
 	
-	mMainImageView->setBounds( bounds );
-
-	
-	// it fills the window
-	const Rectf windowRect = Rectf(0,0,getWindowSize().x,getWindowSize().y);
-	const Rectf frame      = bounds.getCenteredFit( windowRect, true );
-	
-	mMainImageView->setFrame( frame );
+	// what if it hasn't been made yet?
+	if (mMainImageView)
+	{
+		mMainImageView->setBounds( bounds );
+		
+		// it fills the window
+		const Rectf windowRect = Rectf(0,0,getWindowSize().x,getWindowSize().y);
+		const Rectf frame      = bounds.getCenteredFit( windowRect, true );
+		
+		mMainImageView->setFrame( frame );
+	}
 }
 
 void PaperBounce3App::drawProjectorWindow()
