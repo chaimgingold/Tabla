@@ -3,11 +3,11 @@ Pipeline viz
 	√ Draw world inside of each pipeline stage view
 		- On a switch.
 	- Polygon editor for configuration
-		- Will probably require fixing a known UI mapping bug.
+		- Will probably require fixing a known UI mapping bug. (not really)
 		- √ Camera selection
 		- √ Projector world coordinates
 		- World units/measurement.
-		- Save user LightLink settings.
+		- Save/Load user LightLink settings.
 	- Hide when in projector full-screen mode
 		(Or put in secondary UI window)
 • Maybe
@@ -89,6 +89,7 @@ Simulation
 - √ Proper ball-ball collisions
 - √ Ball masses/relative sizes matter.
 - √ Ball <> Ball collision position correction is now relative to masses.
+- High quality draw mode (for projector/main image) that draws more circle polygon facets.
 
 New features
 - Generalized calibration of camera and projector.

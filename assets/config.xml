@@ -13,6 +13,10 @@
 		<DrawPolyBoundingRect>		0 </DrawPolyBoundingRect>
 		<DrawContourTree>			0 </DrawContourTree>
 		<DrawPipeline>				1 </DrawPipeline>
+		
+		<ConfigWindowMainImageMargin> 32 </ConfigWindowMainImageMargin>
+		<ConfigWindowPipelineGutter> 8 </ConfigWindowPipelineGutter>
+		<ConfigWindowPipelineWidth> 64 </ConfigWindowPipelineWidth>
 	</App>
 
 	<BallWorld>

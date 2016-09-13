@@ -91,6 +91,10 @@ void PaperBounce3App::setup()
 			getXml(app,"DrawContourTree",mDrawContourTree);
 			getXml(app,"DrawPipeline",mDrawPipeline);
 			getXml(app,"DrawContourMousePick",mDrawContourMousePick);
+			
+			getXml(app,"ConfigWindowPipelineWidth",mConfigWindowPipelineWidth);
+			getXml(app,"ConfigWindowPipelineGutter",mConfigWindowPipelineGutter);
+			getXml(app,"ConfigWindowMainImageMargin",mConfigWindowMainImageMargin);
 		}
 
 		// 2. respond
@@ -200,12 +204,9 @@ void PaperBounce3App::updatePipelineViews( bool areViewsVisible )
 	if (!win) return;
 	ViewCollection& views = win->getViews();
 	
-	const float kUIGutter = 8.f ;
-	const float kUIWidth  = 64.f ;
-	
 	const auto stages = mPipeline.getStages();
 	
-	vec2 pos(kUIGutter,kUIGutter);
+	vec2 pos = vec2(1,1) * mConfigWindowPipelineGutter;
 	
 	for( const auto &s : stages )
 	{
@@ -238,13 +239,13 @@ void PaperBounce3App::updatePipelineViews( bool areViewsVisible )
 			// update its location
 			vec2 size = s.mImageSize;
 			
-			size *= kUIWidth / size.x ;
+			size *= mConfigWindowPipelineWidth / size.x ;
 			
 			view->setFrame ( Rectf(pos, pos + size) );
 			view->setBounds( Rectf(vec2(0,0), s.mImageSize) );
 			
 			// next pos
-			pos = view->getFrame().getLowerLeft() + vec2(0,kUIGutter);
+			pos = view->getFrame().getLowerLeft() + vec2(0,mConfigWindowPipelineGutter);
 		}
 	}
 }

@@ -23,7 +23,9 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 	if ( mIsUIWindow )
 	{
 		// margin
-		mMainImageView->setMargin(32);
+		Rectf margin = Rectf(1,1,1,1) * mApp.mConfigWindowMainImageMargin;
+		margin.x1 = max( margin.x1, mApp.mConfigWindowPipelineWidth + mApp.mConfigWindowPipelineGutter*2.f );
+		mMainImageView->setMargin( margin );
 		mMainImageView->setFrameColor( ColorA(1,1,1,.35f) );
 	}
 	else
@@ -192,8 +194,12 @@ void WindowData::updateMainImageTransform()
 	
 	// it fills the window
 	Rectf windowRect = Rectf(0,0,mWindow->getSize().x,mWindow->getSize().y);
+	Rectf margin = mMainImageView->getMargin();
 	
-	windowRect.inflate( -vec2(1,1) * mMainImageView->getMargin() );
+	windowRect.x1 += margin.x1;
+	windowRect.x2 -= margin.x2;
+	windowRect.y1 += margin.y1;
+	windowRect.y2 -= margin.y2;
 	
 	Rectf frame      = bounds.getCenteredFit( windowRect, true );
 	

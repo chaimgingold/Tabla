@@ -77,8 +77,9 @@ public:
 	void	setFrameColor( ColorA c ) { mFrameColor=c; }
 	ColorA	getFrameColor() { return mFrameColor; }
 	
-	void	setMargin( float m ) { mMargin=m; }
-	float	getMargin() const { return mMargin; }
+	void	setMargin( float m ) { mMargin=Rectf(1,1,1,1)*m; }
+	void	setMargin( Rectf m ) { mMargin=m; }
+	Rectf	getMargin() const { return mMargin; }
 	
 private:
 	GameWorld&		mGameWorld;
@@ -86,7 +87,7 @@ private:
 	string			mStageName;
 
 	ColorA			mFrameColor=ColorA(0,0,0,0); // none by default
-	float			mMargin=0; // we will place the image inset into this margin.
+	Rectf			mMargin; // we will place the image inset into this margin (css style margin for each side)
 	
 };
 
