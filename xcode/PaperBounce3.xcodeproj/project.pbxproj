@@ -253,32 +253,19 @@
 			name = Blocks;
 			sourceTree = "<group>";
 		};
-		080E96DDFE201D6D7F000001 /* Source */ = {
+		080E96DDFE201D6D7F000001 /* Light */ = {
 			isa = PBXGroup;
 			children = (
-				2635C8CD1D83245400DF30BE /* GameWorld.h */,
-				26FA36451D53C31A00C64A00 /* BallWorld.h */,
-				26FA36441D53C31A00C64A00 /* BallWorld.cpp */,
 				26FA36481D53C5D300C64A00 /* Contour.h */,
 				26FA36471D53C5D300C64A00 /* Contour.cpp */,
 				26FA364C1D53CBDA00C64A00 /* Vision.h */,
 				26FA364B1D53CBDA00C64A00 /* Vision.cpp */,
 				26FA36521D55351400C64A00 /* LightLink.h */,
 				26FA36531D55365800C64A00 /* LightLink.cpp */,
-				26FA36561D592CE700C64A00 /* XmlFileWatch.h */,
-				26FA36551D592CE700C64A00 /* XmlFileWatch.cpp */,
 				26FA36591D5BDBC300C64A00 /* Pipeline.h */,
 				26FA36581D5BDBC300C64A00 /* Pipeline.cpp */,
-				26FA365D1D77673500C64A00 /* View.h */,
-				26FA365C1D77673500C64A00 /* View.cpp */,
-				26BC84B21D80DF89006001DC /* PipelineStageView.h */,
-				26BC84B11D80DF89006001DC /* PipelineStageView.cpp */,
-				2635C8D11D87695000DF30BE /* PaperBounce3App.h */,
-				D873CF0CF96D4D8E8D1A7A87 /* PaperBounce3App.cpp */,
-				2635C8CF1D8768C900DF30BE /* WindowData.h */,
-				2635C8CE1D8768C900DF30BE /* WindowData.cpp */,
 			);
-			name = Source;
+			name = Light;
 			sourceTree = "<group>";
 		};
 		097D35CBB89B4DAF8DD7CCD4 /* Common */ = {
@@ -382,12 +369,39 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		26FD3CCC1D88745800B20327 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				2635C8D11D87695000DF30BE /* PaperBounce3App.h */,
+				D873CF0CF96D4D8E8D1A7A87 /* PaperBounce3App.cpp */,
+				26FA365D1D77673500C64A00 /* View.h */,
+				26FA365C1D77673500C64A00 /* View.cpp */,
+				26BC84B21D80DF89006001DC /* PipelineStageView.h */,
+				26BC84B11D80DF89006001DC /* PipelineStageView.cpp */,
+				2635C8CF1D8768C900DF30BE /* WindowData.h */,
+				2635C8CE1D8768C900DF30BE /* WindowData.cpp */,
+			);
+			name = App;
+			sourceTree = "<group>";
+		};
+		26FD3CCD1D88746D00B20327 /* World */ = {
+			isa = PBXGroup;
+			children = (
+				2635C8CD1D83245400DF30BE /* GameWorld.h */,
+				26FA36451D53C31A00C64A00 /* BallWorld.h */,
+				26FA36441D53C31A00C64A00 /* BallWorld.cpp */,
+			);
+			name = World;
+			sourceTree = "<group>";
+		};
 		29B97314FDCFA39411CA2CEA /* PaperBounce3 */ = {
 			isa = PBXGroup;
 			children = (
 				01B97315FEAEA392516A2CEA /* Blocks */,
-				29B97315FDCFA39411CA2CEA /* Headers */,
-				080E96DDFE201D6D7F000001 /* Source */,
+				29B97315FDCFA39411CA2CEA /* Utilities */,
+				080E96DDFE201D6D7F000001 /* Light */,
+				26FD3CCC1D88745800B20327 /* App */,
+				26FD3CCD1D88746D00B20327 /* World */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
@@ -398,7 +412,7 @@
 			name = PaperBounce3;
 			sourceTree = "<group>";
 		};
-		29B97315FDCFA39411CA2CEA /* Headers */ = {
+		29B97315FDCFA39411CA2CEA /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
 				A1507E8BA18B4101B17D8A1F /* Resources.h */,
@@ -406,8 +420,10 @@
 				26FA364A1D53C78D00C64A00 /* geom.h */,
 				26FA36511D551F8900C64A00 /* xml.h */,
 				26FA365B1D5BDC8000C64A00 /* ocv.h */,
+				26FA36561D592CE700C64A00 /* XmlFileWatch.h */,
+				26FA36551D592CE700C64A00 /* XmlFileWatch.cpp */,
 			);
-			name = Headers;
+			name = Utilities;
 			sourceTree = "<group>";
 		};
 		29B97317FDCFA39411CA2CEA /* Resources */ = {

@@ -194,6 +194,7 @@ void PaperBounce3App::addProjectorPipelineStages()
 
 void PaperBounce3App::updatePipelineViews( bool areViewsVisible )
 {
+	// only do UI window
 	if (!mUIWindow) return;
 	WindowData *win = mUIWindow->getUserData<WindowData>();
 	if (!win) return;

@@ -58,13 +58,14 @@ void PipelineStageView::drawFrame()
 
 void MainImageView::draw()
 {
+	const Pipeline::Stage* stage = getPipelineStage();
+	
 	// vision pipeline image
-	if ( mPipeline.getQueryStage() &&
-		 mPipeline.getQueryStage()->mImage )
+	if ( stage && stage->mImage )
 	{
 		gl::color( 1, 1, 1 );
 		
-		gl::draw( mPipeline.getQueryStage()->mImage );
+		gl::draw( stage->mImage );
 	}
 
 //	if (1)
@@ -81,16 +82,25 @@ void MainImageView::draw()
 	// ===== World space =====
 	gl::pushViewMatrix();
 	{
-		if (mPipeline.getQueryStage())
+		if (stage)
 		{
 			// convert world coordinates to drawn texture coords
-			gl::multViewMatrix( mPipeline.getQueryStage()->mWorldToImage );
+			gl::multViewMatrix( stage->mWorldToImage );
 		}
 		
 		if (mWorldDrawFunc) mWorldDrawFunc(); // overload it.
 		else mGameWorld.draw();
 	}
 	gl::popViewMatrix();
+}
+
+void MainImageView::drawFrame()
+{
+	if ( mFrameColor.a > 0 )
+	{
+		gl::color( mFrameColor );
+		gl::drawStrokedRect( getFrame() );
+	}
 }
 
 void MainImageView::mouseDown( MouseEvent event )
@@ -109,9 +119,9 @@ vec2 MainImageView::mouseToWorld( vec2 p )
 	// convert image coordinates to world coords
 	vec2 p2 = mouseToImage(p);
 	
-	if (mPipeline.getQueryStage())
+	if (getPipelineStage())
 	{
-		p2 = vec2( mPipeline.getQueryStage()->mImageToWorld * vec4(p2,0,1) ) ;
+		p2 = vec2( getPipelineStage()->mImageToWorld * vec4(p2,0,1) ) ;
 	}
 	
 	return p2;

@@ -19,6 +19,19 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 		// draw all the contours, etc... as well as the game world itself.
 	mViews.addView(mMainImageView);
 	
+	// customize it
+	if ( mIsUIWindow )
+	{
+		// margin
+		mMainImageView->setMargin(32);
+		mMainImageView->setFrameColor( ColorA(1,1,1,.35f) );
+	}
+	else
+	{
+		// lock it into this stage
+		mMainImageView->setPipelineStageName("projector");
+	}
+	
 	// poly editors
 	if ( mIsUIWindow )
 	{
@@ -151,16 +164,18 @@ void WindowData::updateMainImageTransform()
 	// get content bounds
 	Rectf bounds;
 
+	auto stage = mMainImageView->getPipelineStage();
+	
 	{
 		// in terms of size...
 		// this is a little weird, but it's basically historical code that needs to be
 		// refactored.
 		vec2 drawSize;
 		
-		if ( mApp.mPipeline.getQueryStage() )
+		if ( stage )
 		{
 			// should always be the case
-			drawSize = mApp.mPipeline.getQueryStage()->mImageSize;
+			drawSize = stage->mImageSize;
 		}
 		else
 		{
@@ -176,8 +191,11 @@ void WindowData::updateMainImageTransform()
 	mMainImageView->setBounds( bounds );
 	
 	// it fills the window
-	const Rectf windowRect = Rectf(0,0,mWindow->getSize().x,mWindow->getSize().y);
-	const Rectf frame      = bounds.getCenteredFit( windowRect, true );
+	Rectf windowRect = Rectf(0,0,mWindow->getSize().x,mWindow->getSize().y);
+	
+	windowRect.inflate( -vec2(1,1) * mMainImageView->getMargin() );
+	
+	Rectf frame      = bounds.getCenteredFit( windowRect, true );
 	
 	mMainImageView->setFrame( frame );
 }

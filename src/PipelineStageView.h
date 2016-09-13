@@ -55,22 +55,38 @@ public:
 	}
 
 	void draw() override;
+	void drawFrame() override; // none by default unless you set its color
 
 	vec2 mouseToImage( vec2 ); // maps mouse (screen) to drawn image coords
 	vec2 mouseToWorld( vec2 ); // maps mouse (screen) to world coordinates
 
 	void mouseDown( MouseEvent ) override;
 	
-	string getPipelineStageName() const { return mPipeline.getQuery(); }
+	void   setPipelineStageName( string n ) { mStageName=n; }
+	string getPipelineStageName() const { return mStageName.empty() ? mPipeline.getQuery() : mStageName; }
+		// by default is empty to track Pipeline's query stage
+		// setting it allows you to overload the query stage and lock it in place.
+	
+	const Pipeline::Stage* getPipelineStage() const { return mPipeline.getStage(getPipelineStageName()); }
 	
 	function<void(void)> mWorldDrawFunc; // this overloads use of mGameWorld.draw()
 	// :P kinda lame.
 	// this clunkiness is b/c app::drawWorld() handles all the contour drawing, debug info, etc...
 	// for the time being.
 	
+	void	setFrameColor( ColorA c ) { mFrameColor=c; }
+	ColorA	getFrameColor() { return mFrameColor; }
+	
+	void	setMargin( float m ) { mMargin=m; }
+	float	getMargin() const { return mMargin; }
+	
 private:
 	GameWorld&		mGameWorld;
 	Pipeline&		mPipeline;
+	string			mStageName;
+
+	ColorA			mFrameColor=ColorA(0,0,0,0); // none by default
+	float			mMargin=0; // we will place the image inset into this margin.
 	
 };
 
