@@ -14,6 +14,7 @@
 const int  kRequestFrameRate = 60 ; // was 120, don't think it matters/we got there
 const vec2 kDefaultWindowSize( 640, 480 );
 
+const string kDocumentsDirectoryName = "PaperES";
 
 vec2 PaperBounce3App::getWorldSize() const
 {
@@ -28,8 +29,20 @@ vec2 PaperBounce3App::getWorldSize() const
 	return hi - lo ;
 }
 
+fs::path PaperBounce3App::getDocsPath() const
+{
+	return getDocumentsDirectory() / kDocumentsDirectoryName ;
+}
+
+fs::path PaperBounce3App::getUserLightLinkFilePath() const
+{
+	return getDocsPath() / "LightLink.xml" ;
+}
+
 void PaperBounce3App::setup()
 {
+	cout << getAppPath() << endl;
+	
 	// command line args
 	auto args = getCommandLineArgs();
 	
@@ -59,6 +72,9 @@ void PaperBounce3App::setup()
 		cout << "\t" << c->getName() << endl ;
 	}
 	
+	// make docs folder if needed
+	if ( !fs::exists(getDocsPath()) ) fs::create_directory(getDocsPath());
+	
 	// configuration
 	mXmlFileWatch.load( myGetAssetPath("config.xml"), [this]( XmlTree xml )
 	{
@@ -73,7 +89,7 @@ void PaperBounce3App::setup()
 			mVision.setParams(xml.getChild("PaperBounce3/Vision"));
 		}
 
-		if (xml.hasChild("PaperBounce3/LightLink"))
+		if (xml.hasChild("PaperBounce3/LightLink") && !fs::exists(getUserLightLinkFilePath()) )
 		{
 			mLightLink.setParams(xml.getChild("PaperBounce3/LightLink"));
 		}
@@ -104,6 +120,17 @@ void PaperBounce3App::setup()
 		// - get a new camera capture object so that resolution can change live
 		// - respond to fullscreen projector flag
 		// - aux display config
+	});
+
+	// settings: LightLink
+	mXmlFileWatch.load( getUserLightLinkFilePath(), [this]( XmlTree xml )
+	{
+		// this overloads the one in config.xml
+		if ( xml.hasChild("LightLink") )
+		{
+			mLightLink.setParams(xml.getChild("LightLink"));
+			mVision.setLightLink(mLightLink);
+		}
 	});
 	
 	// ui stuff (do before making windows)

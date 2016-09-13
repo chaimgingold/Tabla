@@ -159,8 +159,8 @@ void WindowData::draw()
 		{
 			gl::color( c[i] );
 			mApp.mTextureFont->drawString(
-				"Window: " + toString(pt) +
-				"\tImage: "  + toString( mMainImageView->mouseToImage(pt) ) +
+//				"Window: " + toString(pt) + "\t" +
+				"Image: "  + toString( mMainImageView->mouseToImage(pt) ) +
 				"\tWorld: " + toString( mMainImageView->mouseToWorld(pt) )
 				, o[i]+vec2( 8.f, getWindowSize().y - mApp.mTextureFont->getAscent()+mApp.mTextureFont->getDescent()) ) ;
 		}

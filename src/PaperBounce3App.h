@@ -131,6 +131,9 @@ class PaperBounce3App : public App {
 	string mOverloadedAssetPath;
 	
 	XmlFileWatch mXmlFileWatch;
+
+	fs::path getDocsPath() const;
+	fs::path getUserLightLinkFilePath() const;
 };
 
 #endif /* PaperBounce3App_h */

@@ -153,8 +153,12 @@ void PolyEditView::draw()
 {
 	const PolyLine2 poly = getPolyInImageSpace();
 
-	if ( isEditable() ) gl::color(.7,.3,.4);
-	else gl::color(.5,.5,.5,1);
+	if ( isEditable() )
+	{
+		if ( getHasRollover() ) gl::color(1.,.3,.4);
+		else gl::color(.7,.3,.4);
+	}
+	else gl::color(.5,.5,.7,.5);
 	gl::draw( poly );
 
 	if ( isEditable() )
