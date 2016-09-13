@@ -4,6 +4,8 @@
 	have to be consistent across all these parameters. -->
 
 	<App>
+	
+<!--	This could use a cleanup since we refactored into two windows	-->
 		<AutoFullScreenProjector>	1 </AutoFullScreenProjector>
 		<DrawCameraImage>			1 </DrawCameraImage>
 		<DrawContours>				1 </DrawContours>

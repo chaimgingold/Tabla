@@ -81,6 +81,8 @@ public:
 	void	setMargin( Rectf m ) { mMargin=m; }
 	Rectf	getMargin() const { return mMargin; }
 	
+	void	setFont( gl::TextureFontRef f ) { mTextureFont=f; }
+	
 private:
 	GameWorld&		mGameWorld;
 	Pipeline&		mPipeline;
@@ -89,6 +91,7 @@ private:
 	ColorA			mFrameColor=ColorA(0,0,0,0); // none by default
 	Rectf			mMargin; // we will place the image inset into this margin (css style margin for each side)
 	
+	gl::TextureFontRef mTextureFont;
 };
 
 class PolyEditView : public View

@@ -37,13 +37,25 @@ Rectf asBoundingRect( vec2 pts[4] )
 
 void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 {
+	// ---- Input ----
+	
 	// make cv frame
 	cv::Mat input( toOcv( Channel( surface ) ) );
 	cv::Mat clipped, output, gray, thresholded ;
 
 	pipeline.then( input, "input" );
 
+	pipeline.setImageToWorldTransform( getOcvPerspectiveTransform(
+		mLightLink.mCaptureCoords,
+		mLightLink.mCaptureWorldSpaceCoords ) );
 	
+	// ---- World Boundaries ----
+	pipeline.then( vec2(4,4)*100.f, "world-boundaries" ); // 4m^2 configurable area
+	pipeline.setImageToWorldTransform( mat4() ); // identity; do it in world space
+		// this is here just so it can be configured by the user.
+	
+	// ---- Clipped ----
+
 	// clip
 	float contourPixelToWorld = 1.f;
 	
@@ -59,11 +71,6 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 			dstpt[i] = toOcv( mLightLink.mCaptureWorldSpaceCoords[i] );
 		}
 
-		// store this transformation
-		pipeline.setImageToWorldTransform( getOcvPerspectiveTransform(
-			mLightLink.mCaptureCoords,
-			mLightLink.mCaptureWorldSpaceCoords ) );
-		
 		// compute output size pixel scaling factor
 		const Rectf inputBounds  = asBoundingRect( mLightLink.mCaptureCoords );
 		const Rectf outputBounds = asBoundingRect( mLightLink.mCaptureWorldSpaceCoords );
@@ -96,6 +103,7 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 		
 		pipeline.setImageToWorldTransform( imageToWorld );
 	}
+	
 	
 	// blur
 	cv::GaussianBlur( clipped, gray, cv::Size(5,5), 0 );

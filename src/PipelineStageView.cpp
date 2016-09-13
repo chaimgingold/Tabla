@@ -100,6 +100,12 @@ void MainImageView::drawFrame()
 	{
 		gl::color( mFrameColor );
 		gl::drawStrokedRect( getFrame() );
+		
+		if ( mTextureFont )
+		{
+			gl::color(1,1,1,1);
+			mTextureFont->drawString( getPipelineStageName(), getFrame().getUpperLeft() + vec2(0,-4.f) );
+		}
 	}
 }
 

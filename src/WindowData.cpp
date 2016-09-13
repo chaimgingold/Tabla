@@ -27,6 +27,7 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 		margin.x1 = max( margin.x1, mApp.mConfigWindowPipelineWidth + mApp.mConfigWindowPipelineGutter*2.f );
 		mMainImageView->setMargin( margin );
 		mMainImageView->setFrameColor( ColorA(1,1,1,.35f) );
+		mMainImageView->setFont(mApp.mTextureFont);
 	}
 	else
 	{
@@ -42,19 +43,29 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 		// - √ set data after editing (lambda?)
 		// - √ specify native coordinate system
 
+		auto getPointsAsPoly = []( const vec2* v, int n )
+		{
+			return PolyLine2( vector<vec2>(v,v+n) );
+		};
+		
+		auto setPointsFromPoly = []( vec2* v, int n, PolyLine2 vv )
+		{
+			assert( vv.getPoints().size()==n );
+			for( int i=0; i<n; ++i ) v[i] = vv.getPoints()[i];
+		};
+		
 		// - camera capture coords
 		{
 			std::shared_ptr<PolyEditView> cameraPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
 					mApp.mPipeline,
-					PolyLine2(vector<vec2>(mApp.mLightLink.mCaptureCoords,mApp.mLightLink.mCaptureCoords+4)),
+					getPointsAsPoly(mApp.mLightLink.mCaptureCoords,4),
 					"input"
 					)
 				);
 			
 			cameraPolyEditView->setPolyFunc( [&]( const PolyLine2& poly ){
-				assert( poly.getPoints().size()==4 );
-				for( int i=0; i<4; ++i ) mApp.mLightLink.mCaptureCoords[i] = poly.getPoints()[i];
+				setPointsFromPoly( mApp.mLightLink.mCaptureCoords, 4, poly );
 				mApp.mVision.setLightLink(mApp.mLightLink);
 			});
 			
@@ -65,27 +76,46 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 		}
 
 		// - projector mapping
-		if (1)
 		{
-			PolyLine2 poly(vector<vec2>(mApp.mLightLink.mProjectorCoords,mApp.mLightLink.mProjectorCoords+4));
-			
 			// convert to input coords
 			std::shared_ptr<PolyEditView> projPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
 					mApp.mPipeline,
-					PolyLine2(vector<vec2>(mApp.mLightLink.mProjectorCoords,mApp.mLightLink.mProjectorCoords+4)),
+					getPointsAsPoly(mApp.mLightLink.mProjectorCoords,4),
 					"projector"
 					)
 			);
 			
 			projPolyEditView->setPolyFunc( [&]( const PolyLine2& poly ){
-				assert( poly.getPoints().size()==4 );
-				for( int i=0; i<4; ++i ) mApp.mLightLink.mProjectorCoords[i] = poly.getPoints()[i];
+				setPointsFromPoly( mApp.mLightLink.mProjectorCoords, 4, poly );
 				mApp.mVision.setLightLink(mApp.mLightLink);
 			});
 			
 			projPolyEditView->setMainImageView( mMainImageView );
 			projPolyEditView->getEditableInStages().push_back("projector");
+			
+			mViews.addView( projPolyEditView );
+		}
+		
+		// - world boundaries
+		// (for both camera + projector)
+		{
+			std::shared_ptr<PolyEditView> projPolyEditView = make_shared<PolyEditView>(
+				PolyEditView(
+					mApp.mPipeline,
+					getPointsAsPoly(mApp.mLightLink.mCaptureWorldSpaceCoords,4),
+					"world-boundaries"
+					)
+			);
+			
+			projPolyEditView->setPolyFunc( [&]( const PolyLine2& poly ){
+				setPointsFromPoly( mApp.mLightLink.mCaptureWorldSpaceCoords  , 4, poly );
+				setPointsFromPoly( mApp.mLightLink.mProjectorWorldSpaceCoords, 4, poly );
+				mApp.mVision.setLightLink(mApp.mLightLink);
+			});
+			
+			projPolyEditView->setMainImageView( mMainImageView );
+			projPolyEditView->getEditableInStages().push_back("world-boundaries");
 			
 			mViews.addView( projPolyEditView );
 		}

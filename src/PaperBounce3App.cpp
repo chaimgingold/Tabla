@@ -105,7 +105,10 @@ void PaperBounce3App::setup()
 		// - respond to fullscreen projector flag
 		// - aux display config
 	});
-
+	
+	// ui stuff (do before making windows)
+	mTextureFont = gl::TextureFont::create( Font("Avenir",12) );
+	
 	// get camera
 	mCapture = Capture::create( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y, cameras.back() ) ; // get last camera
 	mCapture->start();
@@ -143,17 +146,10 @@ void PaperBounce3App::setup()
 		}
 	}
 	
-	// text
-	mTextureFont = gl::TextureFont::create( Font("Avenir",12) );
-
 	// default pipeline image to query
 	// (after loading xml)
 	// (we query before making the pipeline because we only store the image requested :P!)
-	if ( mPipeline.getQuery().empty() )
-	{
-		if (mAutoFullScreenProjector) mPipeline.setQuery("projector");
-		else mPipeline.setQuery("clipped");
-	}
+	if ( mPipeline.getQuery().empty() ) mPipeline.setQuery("input");
 	mPipeline.setCaptureAllStageImages(mDrawPipeline);
 }
 
