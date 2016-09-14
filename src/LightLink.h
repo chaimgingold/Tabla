@@ -21,6 +21,7 @@ public:
 
 	// calibration for camera <> world <> projector
 	void setParams( XmlTree );
+	XmlTree getParams() const;
 	
 	vec2 getCaptureSize() const { return mCaptureSize; }
 	

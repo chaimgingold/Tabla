@@ -98,7 +98,7 @@ class PolyEditView : public View
 {
 public:
 
-	PolyEditView( Pipeline&, PolyLine2, string polyCoordSpace );
+	PolyEditView( Pipeline&, function<PolyLine2()>, string polyCoordSpace );
 	
 	void draw() override;
 	bool pick( vec2 ) override;
@@ -109,7 +109,7 @@ public:
 
 	void setMainImageView( std::shared_ptr<MainImageView> ); // becomes the parent
 	
-	void setPolyFunc( function<void(const PolyLine2&)> f ) {mPolyFunc=f;}
+	void setSetPolyFunc( function<void(const PolyLine2&)> f ) {mSetPolyFunc=f;}
 
 	void setDoLiveUpdate( bool v ) { mDoLiveUpdate=v; }
 	bool getDoLiveUpdate() const { return true; }
@@ -129,21 +129,23 @@ private:
 	Rectf getPointControlRect( vec2 ) const; // image coord space
 
 	mat4 getPolyToImageTransform() const;
-	mat4 getImagetoPolyTransform() const;
+	mat4 getImageToPolyTransform() const;
 	
 	Pipeline& mPipeline;
 
 	string mPolyCoordSpace;
 	
-	function<void(const PolyLine2&)> mPolyFunc;
+	function<PolyLine2()> mGetPolyFunc;
+	function<void(const PolyLine2&)> mSetPolyFunc;
 	
-	PolyLine2 mPoly; // poly coord space
-	PolyLine2 getPolyInImageSpace() const;
-	PolyLine2 getPolyInPolySpace() const { return mPoly; }
+	PolyLine2 getPolyInImageSpace( bool withDrag=true ) const;
+	PolyLine2 getPolyInPolySpace ( bool withDrag=true ) const;
 	
 	int mDragPointIndex=-1;
 	vec2 mDragStartMousePos; // should really be in view manager; put it there when we do backlinks
-	vec2 mDragStartPoint;
+	
+	vec2 mDragStartPoint; // where poly point started (in poly space)
+	vec2 mDragAtPoint; // where dragged poly point is (")
 	
 	bool mDoLiveUpdate=true;
 	

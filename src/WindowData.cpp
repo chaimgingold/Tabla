@@ -54,19 +54,31 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 			for( int i=0; i<n; ++i ) v[i] = vv.getPoints()[i];
 		};
 		
+		auto updateLightLink = []( PaperBounce3App& app )
+		{
+			// for some reason the recursive lambda capture (doing a capture in this function)
+			// causes everything to explode, so just passing in a param.
+			app.mVision.setLightLink(app.mLightLink);
+			
+			XmlTree lightLinkXml = app.mLightLink.getParams();
+			
+			lightLinkXml.write( writeFile(app.getUserLightLinkFilePath()) );
+			// this will trigger a reload, but that shouldn't matter.
+		};
+		
 		// - camera capture coords
 		{
 			std::shared_ptr<PolyEditView> cameraPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
 					mApp.mPipeline,
-					getPointsAsPoly(mApp.mLightLink.mCaptureCoords,4),
+					[&](){ return getPointsAsPoly(mApp.mLightLink.mCaptureCoords,4); },
 					"input"
 					)
 				);
 			
-			cameraPolyEditView->setPolyFunc( [&]( const PolyLine2& poly ){
+			cameraPolyEditView->setSetPolyFunc( [&]( const PolyLine2& poly ){
 				setPointsFromPoly( mApp.mLightLink.mCaptureCoords, 4, poly );
-				mApp.mVision.setLightLink(mApp.mLightLink);
+				updateLightLink(mApp);
 			});
 			
 			cameraPolyEditView->setMainImageView( mMainImageView );
@@ -81,14 +93,14 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 			std::shared_ptr<PolyEditView> projPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
 					mApp.mPipeline,
-					getPointsAsPoly(mApp.mLightLink.mProjectorCoords,4),
+					[&](){ return getPointsAsPoly(mApp.mLightLink.mProjectorCoords,4); },
 					"projector"
 					)
 			);
 			
-			projPolyEditView->setPolyFunc( [&]( const PolyLine2& poly ){
+			projPolyEditView->setSetPolyFunc( [&]( const PolyLine2& poly ){
 				setPointsFromPoly( mApp.mLightLink.mProjectorCoords, 4, poly );
-				mApp.mVision.setLightLink(mApp.mLightLink);
+				updateLightLink(mApp);
 			});
 			
 			projPolyEditView->setMainImageView( mMainImageView );
@@ -103,15 +115,15 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 			std::shared_ptr<PolyEditView> projPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
 					mApp.mPipeline,
-					getPointsAsPoly(mApp.mLightLink.mCaptureWorldSpaceCoords,4),
+					[&](){ return getPointsAsPoly(mApp.mLightLink.mCaptureWorldSpaceCoords,4); },
 					"world-boundaries"
 					)
 			);
 			
-			projPolyEditView->setPolyFunc( [&]( const PolyLine2& poly ){
+			projPolyEditView->setSetPolyFunc( [&]( const PolyLine2& poly ){
 				setPointsFromPoly( mApp.mLightLink.mCaptureWorldSpaceCoords  , 4, poly );
 				setPointsFromPoly( mApp.mLightLink.mProjectorWorldSpaceCoords, 4, poly );
-				mApp.mVision.setLightLink(mApp.mLightLink);
+				updateLightLink(mApp);
 			});
 			
 			projPolyEditView->setMainImageView( mMainImageView );

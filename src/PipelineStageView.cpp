@@ -135,12 +135,11 @@ vec2 MainImageView::mouseToWorld( vec2 p )
 
 const float kRadius = 8.f;
 
-PolyEditView::PolyEditView( Pipeline& pipeline, PolyLine2 poly, string polyCoordSpace )
+PolyEditView::PolyEditView( Pipeline& pipeline, function<PolyLine2()> getter, string polyCoordSpace )
 	: mPipeline(pipeline)
-	, mPoly(poly)
+	, mGetPolyFunc(getter)
 	, mPolyCoordSpace(polyCoordSpace)
 {
-	mPoly.setClosed();
 }
 
 void PolyEditView::setMainImageView( shared_ptr<MainImageView> miv )
@@ -186,12 +185,20 @@ void PolyEditView::mouseDown( MouseEvent event )
 	
 	mDragStartMousePos = pos;
 	
-	if ( mDragPointIndex != -1 ) mDragStartPoint=getPolyInImageSpace().getPoints()[mDragPointIndex];
+	if ( mDragPointIndex != -1 )
+	{
+		// getPolyInPolySpace(false) because we want undragged location (we are in an inconsistent state right now)
+		mDragStartPoint = getPolyInPolySpace(false).getPoints()[mDragPointIndex];
+		mDragAtPoint    = mDragStartPoint ;
+	}
 }
 
 void PolyEditView::mouseUp  ( MouseEvent event )
 {
-	if ( mDragPointIndex!=-1 && !getDoLiveUpdate() && mPolyFunc) mPolyFunc( mPoly );
+	if ( mDragPointIndex!=-1 && !getDoLiveUpdate() && mSetPolyFunc )
+	{
+		mSetPolyFunc( getPolyInPolySpace() );
+	}
 
 	mDragPointIndex = -1;
 }
@@ -200,15 +207,15 @@ void PolyEditView::mouseDrag( MouseEvent event )
 {
 	vec2 pos = rootToChild(event.getPos());
 	
-	if ( mDragPointIndex >= 0 && mDragPointIndex < mPoly.size() )
+	if ( mDragPointIndex >= 0 )
 	{
-		mPoly.getPoints()[mDragPointIndex] = vec2(
-			getImagetoPolyTransform()
+		mDragAtPoint = vec2(
+			getImageToPolyTransform()
 			* vec4( mDragStartPoint + (pos - mDragStartMousePos), 0, 1 )
 			);
 	}
 	
-	if ( getDoLiveUpdate() && mPolyFunc) mPolyFunc( mPoly );
+	if ( getDoLiveUpdate() && mSetPolyFunc) mSetPolyFunc( getPolyInPolySpace() );
 }
 
 int PolyEditView::pickPoint( vec2 p ) const
@@ -235,7 +242,7 @@ mat4 PolyEditView::getPolyToImageTransform() const
 		);
 }
 
-mat4 PolyEditView::getImagetoPolyTransform() const
+mat4 PolyEditView::getImageToPolyTransform() const
 {
 	return mPipeline.getCoordSpaceTransform(
 		mMainImageView ? mMainImageView->getPipelineStageName() : "world",
@@ -244,11 +251,24 @@ mat4 PolyEditView::getImagetoPolyTransform() const
 	// should be inverse of getPolyToImageTransform()
 }
 
-PolyLine2 PolyEditView::getPolyInImageSpace() const
+PolyLine2 PolyEditView::getPolyInPolySpace( bool withDrag ) const
+{
+	PolyLine2 p = mGetPolyFunc();
+	p.setClosed();
+	
+	if ( withDrag && mDragPointIndex >=0 && mDragPointIndex < p.size() )
+	{
+		p.getPoints()[mDragPointIndex] = mDragAtPoint;
+	}
+	
+	return p;
+}
+
+PolyLine2 PolyEditView::getPolyInImageSpace( bool withDrag ) const
 {
 	const mat4 transform = getPolyToImageTransform();
 	
-	PolyLine2 poly = mPoly;
+	PolyLine2 poly = getPolyInPolySpace(withDrag);
 	
 	for ( vec2 &pt : poly.getPoints() )
 	{
