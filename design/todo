@@ -1,15 +1,23 @@
+Next
+- Finish my desk setup
+	- Short throw projector
+	- Black paper
+	- Calibrate
+- Manufacture a second one
+- Go back to toy prototyping...
+
 Pipeline viz
 • Must-have
 	√ Draw world inside of each pipeline stage view
 		- On a switch.
-	- Polygon editor for configuration
+	- √ Polygon editor for configuration
 		- Will probably require fixing a known UI mapping bug. (not really)
 		- √ Camera selection
 		- √ Projector world coordinates
-		- World units/measurement.
-		- Save/Load user LightLink settings.
-	- Hide when in projector full-screen mode
-		(Or put in secondary UI window)
+		- √ World units/measurement.
+		- √ Save/Load user LightLink settings.
+	- √ Hide when in projector full-screen mode
+		√ (Or put in secondary UI window)
 • Maybe
 	- Different view for full screen version? Or maybe we're covered already.
 	- Clip drawing in each stage to the bounding rectangle.
@@ -17,7 +25,7 @@ Pipeline viz
 	- Put name of each stage in text
 	- Scale to fill available vertical space.
 		- And/Or: (Put gutter and horizontal scaling amount in xml)
-	- Put pipeline stage view caching logic on an xml switch
+	- √ Put pipeline stage view caching logic on an xml switch
 		- Time the performance impact of this.
 		- Allow each stage to store its content in its own native format.
 	- Mouse click to select stage to view large

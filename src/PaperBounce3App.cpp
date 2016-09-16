@@ -247,7 +247,7 @@ void PaperBounce3App::updatePipelineViews( bool areViewsVisible )
 		if ( !view && areViewsVisible )
 		{
 			PipelineStageView psv( mPipeline, s.mName );
-			psv.setWorldDrawFunc( [&](){ drawWorld(); } );
+			psv.setWorldDrawFunc( [&](){ drawWorld(false); } );
 			
 			view = make_shared<PipelineStageView>(psv);
 			
@@ -325,13 +325,13 @@ void PaperBounce3App::resize()
 	updateMainImageTransform(getWindow());
 }
 
-void PaperBounce3App::drawWorld()
+void PaperBounce3App::drawWorld( bool highQuality )
 {
 	WindowData *win = getWindow()->getUserData<WindowData>();
 	
 	const vec2 mouseInWindow   = win->getMousePosInWindow();
 	const vec2 mouseInWorld    = win->getMainImageView()->mouseToWorld(mouseInWindow);
-	const bool isMouseInWindow = getWindowBounds().contains(win->getMousePosInWindow());
+	const bool isMouseInWindow = win->getWindow()->getBounds().contains(win->getMousePosInWindow());
 	
 	
 	// draw frame
@@ -445,7 +445,7 @@ void PaperBounce3App::drawWorld()
 	}
 	
 	// draw balls
-	mBallWorld.draw();
+	mBallWorld.draw(highQuality);
 	
 	// mouse debug info
 	if ( mDrawMouseDebugInfo && isMouseInWindow )

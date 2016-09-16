@@ -15,7 +15,7 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 	, mIsUIWindow(isUIWindow)
 {
 	mMainImageView = make_shared<MainImageView>( MainImageView( mApp.mPipeline, mApp.mBallWorld ) );
-	mMainImageView->mWorldDrawFunc = [&](){mApp.drawWorld();};
+	mMainImageView->mWorldDrawFunc = [&](){mApp.drawWorld(true);};
 		// draw all the contours, etc... as well as the game world itself.
 	mViews.addView(mMainImageView);
 	

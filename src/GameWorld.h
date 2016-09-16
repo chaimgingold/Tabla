@@ -19,7 +19,7 @@ public:
 	virtual void updateContours( const ContourVector &c ){}
 	
 	virtual void update(){}
-	virtual void draw(){}
+	virtual void draw( bool highQuality ){}
 	
 	// because mice, etc... do sometimes touch these worlds...
 	// all positions in world space

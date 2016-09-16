@@ -98,19 +98,18 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 		pipeline.then( clipped, "clipped" );
 		
 		glm::mat4 imageToWorld = glm::scale( vec3( 1.f / pixelScale, 1.f / pixelScale, 1.f ) );
-//		glm::mat3x3();
-//		imageToWorld /= pixelScale;
 		
 		pipeline.setImageToWorldTransform( imageToWorld );
 	}
 	
 	
 	// blur
-	cv::GaussianBlur( clipped, gray, cv::Size(5,5), 0 );
-	pipeline.then( gray, "gray" );
+//	cv::GaussianBlur( clipped, gray, cv::Size(5,5), 0 );
+//	pipeline.then( gray, "gray" );
 
 	// threshold
-	cv::threshold( gray, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
+//	cv::threshold( gray, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
+	cv::threshold( clipped, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
 	pipeline.then( thresholded, "thresholded" );
 	
 	// contour detect

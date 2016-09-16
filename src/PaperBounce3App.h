@@ -48,7 +48,7 @@ class PaperBounce3App : public App {
 	void resize() override;
 	void keyDown( KeyEvent event ) override;
 	
-	void drawWorld();
+	void drawWorld( bool highQuality );
 	
 	LightLink			mLightLink; // calibration for camera <> world <> projector
 	CaptureRef			mCapture;	// input device		->

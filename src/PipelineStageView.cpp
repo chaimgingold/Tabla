@@ -89,7 +89,7 @@ void MainImageView::draw()
 		}
 		
 		if (mWorldDrawFunc) mWorldDrawFunc(); // overload it.
-		else mGameWorld.draw();
+		else mGameWorld.draw(true); // high quality
 	}
 	gl::popViewMatrix();
 }

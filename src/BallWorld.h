@@ -60,7 +60,7 @@ public:
 	void updateContours( const ContourVector &c ) override { mContours = c; }
 	
 	void update() override;
-	void draw() override;
+	void draw( bool highQuality ) override;
 	
 	void newRandomBall( vec2 loc );
 	void clearBalls() { mBalls.clear(); }

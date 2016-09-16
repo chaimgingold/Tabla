@@ -19,7 +19,7 @@ void BallWorld::setParams( XmlTree xml )
 	getXml(xml,"BallMaxVel",mBallMaxVel);
 }
 
-void BallWorld::draw()
+void BallWorld::draw( bool highQuality )
 {
 	for( auto b : mBalls )
 	{
@@ -32,6 +32,10 @@ void BallWorld::draw()
 		}
 		else
 		{
+			int numSegments = -1 ;
+			
+			if (highQuality) numSegments = 20;
+			
 			// squash + stretch
 			gl::pushModelView() ;
 			gl::translate( b.mLoc ) ;
@@ -50,7 +54,7 @@ void BallWorld::draw()
 			float f = .25f * (l / b.mRadius) ;
 			
 			gl::rotate( glm::atan( stretch.y, stretch.x ) ) ;
-			gl::drawSolidEllipse( vec2(0,0), b.mRadius*(1.f+f), b.mRadius*(1.f-f) ) ;
+			gl::drawSolidEllipse( vec2(0,0), b.mRadius*(1.f+f), b.mRadius*(1.f-f), numSegments ) ;
 			
 			gl::popModelView() ;
 		}

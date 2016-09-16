@@ -23,7 +23,7 @@
 
 	<BallWorld>
 		<!-- cm -->
-		<BallDefaultRadius>			1 </BallDefaultRadius>
+		<BallDefaultRadius>			.5 </BallDefaultRadius>
 		<BallDefaultMaxRadius>		2 </BallDefaultMaxRadius>
 		<BallMaxVel>				1 </BallMaxVel>
 		<BallDefaultColor>			C62D41 </BallDefaultColor>
