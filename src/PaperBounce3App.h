@@ -81,6 +81,9 @@ class PaperBounce3App : public App {
 	WindowRef			mMainWindow;// projector
 	WindowRef			mUIWindow; // for other debug info, on computer screen
 	
+	WindowData*			getWindowData() { return getWindow() ? getWindow()->getUserData<WindowData>() : 0 ; }
+	// for front window
+	
 	double				mLastFrameTime = 0. ;
 	
 	// to help us visualize

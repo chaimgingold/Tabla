@@ -186,22 +186,22 @@ PaperBounce3App::myGetAssetPath( fs::path p ) const
 
 void PaperBounce3App::mouseDown( MouseEvent event )
 {
-	if (getWindow()) getWindow()->getUserData<WindowData>()->mouseDown(event);
+	if (getWindowData()) getWindowData()->mouseDown(event);
 }
 
 void PaperBounce3App::mouseUp( MouseEvent event )
 {
-	if (getWindow()) getWindow()->getUserData<WindowData>()->mouseUp(event);
+	if (getWindowData()) getWindowData()->mouseUp(event);
 }
 
 void PaperBounce3App::mouseMove( MouseEvent event )
 {
-	if (getWindow()) getWindow()->getUserData<WindowData>()->mouseMove(event);
+	if (getWindowData()) getWindowData()->mouseMove(event);
 }
 
 void PaperBounce3App::mouseDrag( MouseEvent event )
 {
-	if (getWindow()) getWindow()->getUserData<WindowData>()->mouseDrag(event);
+	if (getWindowData()) getWindowData()->mouseDrag(event);
 }
 
 void PaperBounce3App::addProjectorPipelineStages()
