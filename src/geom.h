@@ -9,6 +9,8 @@
 #ifndef geom_h
 #define geom_h
 
+#include "cinder/PolyLine.h"
+
 inline vec2 perp( vec2 p )
 {
 	vec3 cross = glm::cross( vec3(p,0), vec3(0,0,1) ) ;
@@ -60,5 +62,17 @@ inline vec2 closestPointOnPoly( vec2 pt, const PolyLine2& poly, size_t *ai=0, si
 	if (dist) *dist = best ;
 	return result ;
 }
+
+PolyLine2 getPointsAsPoly( const vec2* v, int n )
+{
+	return PolyLine2( vector<vec2>(v,v+n) );
+};
+
+void setPointsFromPoly( vec2* v, int n, PolyLine2 vv )
+{
+	assert( vv.getPoints().size()==n );
+	for( int i=0; i<n; ++i ) v[i] = vv.getPoints()[i];
+};
+
 
 #endif /* geom_h */

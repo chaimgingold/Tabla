@@ -38,6 +38,7 @@
 		26FA36571D592CE700C64A00 /* XmlFileWatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA36551D592CE700C64A00 /* XmlFileWatch.cpp */; };
 		26FA365A1D5BDBC300C64A00 /* Pipeline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA36581D5BDBC300C64A00 /* Pipeline.cpp */; };
 		26FA365E1D77673500C64A00 /* View.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA365C1D77673500C64A00 /* View.cpp */; };
+		26FD3CCF1D90A12B00B20327 /* GameWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FD3CCE1D90A12B00B20327 /* GameWorld.cpp */; };
 		27FB686FA380493A8438C8BB /* b2Joint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D8E21292E75443F0B3FD59BF /* b2Joint.cpp */; };
 		307B0C3825A3481599FFE3BD /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9366F177495484A87934087 /* OpenCL.framework */; };
 		364054B04EB14DC0944BC464 /* b2Draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DA8A3392B64949EDA055E180 /* b2Draw.cpp */; };
@@ -125,6 +126,7 @@
 		26FA365B1D5BDC8000C64A00 /* ocv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ocv.h; path = ../src/ocv.h; sourceTree = "<group>"; };
 		26FA365C1D77673500C64A00 /* View.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = View.cpp; path = ../src/View.cpp; sourceTree = "<group>"; };
 		26FA365D1D77673500C64A00 /* View.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = View.h; path = ../src/View.h; sourceTree = "<group>"; };
+		26FD3CCE1D90A12B00B20327 /* GameWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GameWorld.cpp; path = ../src/GameWorld.cpp; sourceTree = "<group>"; };
 		297736FC91944CE996B6A2A1 /* b2Fixture.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = b2Fixture.h; path = ../blocks/Box2D/src/Box2D/Dynamics/b2Fixture.h; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
@@ -388,6 +390,7 @@
 			isa = PBXGroup;
 			children = (
 				2635C8CD1D83245400DF30BE /* GameWorld.h */,
+				26FD3CCE1D90A12B00B20327 /* GameWorld.cpp */,
 				26FA36451D53C31A00C64A00 /* BallWorld.h */,
 				26FA36441D53C31A00C64A00 /* BallWorld.cpp */,
 			);
@@ -671,6 +674,7 @@
 				3F51BFBD57064C0FBBDC06D5 /* b2EdgeAndCircleContact.cpp in Sources */,
 				708F4BB51EFC4EB29281662D /* b2EdgeAndPolygonContact.cpp in Sources */,
 				23756771BB404A04991A26CB /* b2PolygonAndCircleContact.cpp in Sources */,
+				26FD3CCF1D90A12B00B20327 /* GameWorld.cpp in Sources */,
 				B66BF6020B6B4738AF2E400D /* b2PolygonContact.cpp in Sources */,
 				5BB8C5F56F5943658CC78ED8 /* b2DistanceJoint.cpp in Sources */,
 				E63AB3EAB9064A24A06D7722 /* b2FrictionJoint.cpp in Sources */,

@@ -18,15 +18,12 @@ const string kDocumentsDirectoryName = "PaperES";
 
 vec2 PaperBounce3App::getWorldSize() const
 {
-	vec2 lo=mLightLink.mCaptureWorldSpaceCoords[0], hi=mLightLink.mCaptureWorldSpaceCoords[0];
-	
-	for( int i=1; i<4; ++i )
-	{
-		lo = min( lo, mLightLink.mCaptureWorldSpaceCoords[i] );
-		hi = max( hi, mLightLink.mCaptureWorldSpaceCoords[i] );
-	}
-	
-	return hi - lo ;
+	return Rectf( getWorldBoundsPoly().getPoints() ).getSize();
+}
+
+PolyLine2 PaperBounce3App::getWorldBoundsPoly() const
+{
+	return getPointsAsPoly( mLightLink.mCaptureWorldSpaceCoords, 4 );
 }
 
 fs::path PaperBounce3App::getDocsPath() const
@@ -114,7 +111,7 @@ void PaperBounce3App::setup()
 		}
 
 		// 2. respond
-		mVision.setLightLink(mLightLink);
+		setLightLink(mLightLink);
 		
 		// TODO:
 		// - get a new camera capture object so that resolution can change live
@@ -129,7 +126,7 @@ void PaperBounce3App::setup()
 		if ( xml.hasChild("LightLink") )
 		{
 			mLightLink.setParams(xml.getChild("LightLink"));
-			mVision.setLightLink(mLightLink);
+			setLightLink(mLightLink);
 		}
 	});
 	
@@ -189,22 +186,22 @@ PaperBounce3App::myGetAssetPath( fs::path p ) const
 
 void PaperBounce3App::mouseDown( MouseEvent event )
 {
-	getWindow()->getUserData<WindowData>()->mouseDown(event);
+	if (getWindow()) getWindow()->getUserData<WindowData>()->mouseDown(event);
 }
 
 void PaperBounce3App::mouseUp( MouseEvent event )
 {
-	getWindow()->getUserData<WindowData>()->mouseUp(event);
+	if (getWindow()) getWindow()->getUserData<WindowData>()->mouseUp(event);
 }
 
 void PaperBounce3App::mouseMove( MouseEvent event )
 {
-	getWindow()->getUserData<WindowData>()->mouseMove(event);
+	if (getWindow()) getWindow()->getUserData<WindowData>()->mouseMove(event);
 }
 
 void PaperBounce3App::mouseDrag( MouseEvent event )
 {
-	getWindow()->getUserData<WindowData>()->mouseDrag(event);
+	if (getWindow()) getWindow()->getUserData<WindowData>()->mouseDrag(event);
 }
 
 void PaperBounce3App::addProjectorPipelineStages()
@@ -338,7 +335,7 @@ void PaperBounce3App::drawWorld( bool highQuality )
 	if (0)
 	{
 		gl::color( 1, 1, 1 );
-		gl::drawStrokedRect( Rectf(0,0,getWorldSize().x,getWorldSize().y).inflated( vec2(-1,-1) ) ) ;
+		gl::draw( getWorldBoundsPoly() ) ;
 	}
 
 	// draw contour bounding boxes, etc...
@@ -454,6 +451,7 @@ void PaperBounce3App::drawWorld( bool highQuality )
 		const float r = mBallWorld.getBallDefaultRadius() ;
 		
 		vec2 fixed = mBallWorld.resolveCollisionWithContours(mouseInWorld,r);
+//		vec2 fixed = mBallWorld.resolveCollisionWithInverseContours(mouseInWorld,r);
 		
 		gl::color( ColorAf(0.f,0.f,1.f) ) ;
 		gl::drawStrokedCircle(fixed,r);
@@ -504,14 +502,15 @@ void PaperBounce3App::keyDown( KeyEvent event )
 			break ;
 
 		case KeyEvent::KEY_b:
-			// make a random ball
-			mBallWorld.newRandomBall( randVec2() * getWorldSize() ) ;
+		{
+			mBallWorld.newRandomBall( mBallWorld.getRandomPointInWorldBoundsPoly() );
 			// we could traverse paper hierarchy and pick a random point on paper...
 			// might be a useful function, randomPointOnPaper()
 			//
 			// how to generalize this?
 			// pass unhandled key events into GameWorld?
-			break ;
+		}
+		break ;
 			
 		case KeyEvent::KEY_c:
 			mBallWorld.clearBalls() ;

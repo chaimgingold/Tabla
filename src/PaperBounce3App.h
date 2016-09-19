@@ -50,6 +50,15 @@ class PaperBounce3App : public App {
 	
 	void drawWorld( bool highQuality );
 	
+	void setLightLink( const LightLink& ll )
+	{
+		// notify people
+		// might need to privatize mLightLink and make this a proper setter
+		// or rename it to be "notify" or "onChange" or "didChange" something
+		mVision.setLightLink(ll);
+		mBallWorld.setWorldBoundsPoly( getWorldBoundsPoly() );
+	}
+	
 	LightLink			mLightLink; // calibration for camera <> world <> projector
 	CaptureRef			mCapture;	// input device		->
 	Vision				mVision ;	// edge detection	->
@@ -59,17 +68,10 @@ class PaperBounce3App : public App {
 	Pipeline			mPipeline; // traces processing
 	
 	// world info
-	vec2 getWorldSize() const ;
-		// world rect might be more appropriate...
-		// this is kind of a deprecated concept; it is used to:
-		// - draw a frame
-		// - spawn random balls
-		// What are we talking about? Replace with these concepts:
-		// - contour boundaries?
-		// - camera world bounds?
-		// - projector world bounds?
-		// - union of camera + projector bounds?
-		// - some other arbitrary thing?
+	PolyLine2 getWorldBoundsPoly() const;
+	vec2	  getWorldSize() const; // almost completely deprecated; hardly used.
+		// This is actually the camera world polygon mapping.
+		// For all practical purposes, this is identical to the projector world polygon mapping.
 	
 	
 	// ui

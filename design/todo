@@ -1,9 +1,32 @@
+More Game Worlds
+- Support
+	- Allow ball simulation in empty space (space between paddles) (Pong)
+		- Flag certain balls as doing inverse contour geometry.
+	- Put Vision settings in their own object; put xml in each GameWorld, pass it to Vision system.
+		- We will still want some generic system settings, too. A little dicey.
+			Maybe start with overloading or something? Or try not to do this at all.
+	- Allow game sim to insert their own geometry into reusable physics sim (breakout bricks) (Breakout)
+		- Component architecture of some sort.
+	- Color token recognition (PCS)
+	- Interframe paper coherency (Garden City, Music Box)
+
+- Worlds
+	- Ball World
+		- Allow ball insertion (at least)/deletion without keyboard keys.
+			. Just do automatic ball insertion (say 10?).
+	- Pong
+	- Breakout
+	- Pinball Construction Set
+	- Racing Cars
+	- Garden City
+	- Music Box
+
 Next
-- Finish my desk setup
+- √ Finish my desk setup
 	- Short throw projector
 	- Black paper
 	- Calibrate
-- Manufacture a second one
+- (meh) Manufacture a second one
 - Go back to toy prototyping...
 
 Pipeline viz

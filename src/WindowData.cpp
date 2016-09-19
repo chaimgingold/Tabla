@@ -8,6 +8,7 @@
 
 #include "WindowData.h"
 #include "PaperBounce3App.h"
+#include "geom.h" // getPointsAsPoly
 
 WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app )
 	: mApp(app)
@@ -43,22 +44,11 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 		// - √ set data after editing (lambda?)
 		// - √ specify native coordinate system
 
-		auto getPointsAsPoly = []( const vec2* v, int n )
-		{
-			return PolyLine2( vector<vec2>(v,v+n) );
-		};
-		
-		auto setPointsFromPoly = []( vec2* v, int n, PolyLine2 vv )
-		{
-			assert( vv.getPoints().size()==n );
-			for( int i=0; i<n; ++i ) v[i] = vv.getPoints()[i];
-		};
-		
 		auto updateLightLink = []( PaperBounce3App& app )
 		{
 			// for some reason the recursive lambda capture (doing a capture in this function)
 			// causes everything to explode, so just passing in a param.
-			app.mVision.setLightLink(app.mLightLink);
+			app.setLightLink(app.mLightLink);
 			
 			XmlTree lightLinkXml = app.mLightLink.getParams();
 			

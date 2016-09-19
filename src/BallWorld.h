@@ -45,9 +45,10 @@ public:
 	}
 
 	vec2  mSquash ; // direction and magnitude
+	bool  mCollideWithContours=true; // false: collide with inverse contours
 	
 private:
-	float mMass = 1.f ; // let's start by doing the right thing.
+	float	mMass = 1.f ; // let's start by doing the right thing.
 
 };
 
@@ -67,7 +68,9 @@ public:
 	
 	float getBallDefaultRadius() const { return mBallDefaultRadius ; }
 	
-	vec2 resolveCollisionWithContours	( vec2 p, float r ) const ; // returns pinned version of point
+	vec2 resolveCollisionWithContours		( vec2 p, float r ) const ; // 
+	vec2 resolveCollisionWithInverseContours( vec2 p, float r ) const ;
+		 // returns pinned version of point
 		// public so we can show it with the mouse...
 	
 	void mouseClick( vec2 p ) override { newRandomBall(p) ; }

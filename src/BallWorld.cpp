@@ -80,7 +80,11 @@ void BallWorld::update()
 		{
 			vec2 oldVel = b.getVel() ;
 			vec2 oldLoc = b.mLoc ;
-			vec2 newLoc = resolveCollisionWithContours( b.mLoc, b.mRadius ) ;
+			
+			vec2 newLoc;
+			
+			if (b.mCollideWithContours)	newLoc = resolveCollisionWithContours		( b.mLoc, b.mRadius ) ;
+			else						newLoc = resolveCollisionWithInverseContours( b.mLoc, b.mRadius ) ;
 			
 			// update?
 			if ( newLoc != oldLoc )
@@ -147,6 +151,9 @@ void BallWorld::newRandomBall ( vec2 loc )
 	ball.setLoc( loc ) ;
 	ball.mRadius = Rand::randFloat(mBallDefaultRadius,mBallDefaultMaxRadius) ;
 	ball.setMass( M_PI * powf(ball.mRadius,3.f) ) ;
+	
+	ball.mCollideWithContours = randBool();
+	if (!ball.mCollideWithContours) ball.mColor = Color(0,0,1);
 	
 	ball.setVel( Rand::randVec2() * mBallDefaultRadius/2.f ) ;
 	
@@ -271,86 +278,58 @@ void BallWorld::resolveBallCollisions()
 
 vec2 BallWorld::resolveCollisionWithContours ( vec2 point, float radius ) const
 {
-//	size_t ai=-1, bi=-1 ; // line segment indices we collide with
-	
-	const Contour* inHole=0 ;
-	const Contour* inPoly=0 ;
-	// being inside a poly means we're OK (inside a piece of paper)
-	// BUT we then should still test against holes to make sure...
-
-	/*
-	auto doNormal = [&]( const Contour& c, size_t ai, size_t bi )
-	{
-		if (surfaceNormal)
-		{
-			if (ai==-1) *surfaceNormal = vec2(0,0) ;
-			else
-			{
-				vec2 a2b = c.mPolyLine.getPoints()[ai] - c.mPolyLine.getPoints()[bi] ;
-				
-				vec3 cross = glm::cross( vec3(a2b,0), vec3(0,0,1) ) ;
-				
-				*surfaceNormal = glm::normalize( vec2(cross.x,cross.y) ) ;
-			}
-		}
-	};*/
-	
 	// inside a poly?
 	const Contour* in = mContours.findLeafContourContainingPoint(point) ;
 	
 	if (in)
 	{
-		if ( in->mIsHole )	inHole = in ;
-		else				inPoly = in ;
-	}
-	
-	// ok, find closest
-	if (inPoly)
-	{
-		// in paper
-
-		// 1. make sure we aren't overlapping the edge
-		auto unlapEdge = []( vec2 p, float r, const Contour& poly ) -> vec2
+		if ( !in->mIsHole )
 		{
-			float dist ;
+			// in paper
 
-			vec2 x = closestPointOnPoly( p, poly.mPolyLine, 0, 0, &dist );
-
-			if ( dist < r ) return glm::normalize( p - x ) * r + x ;
-			else return p ;
-		} ;
-		
-		// 2. make sure we aren't overlapping a hole
-		auto unlapHole = [this]( vec2 p, float r ) -> vec2
-		{
-			float dist ;
-			vec2 x ;
-			
-			const Contour * nearestHole = mContours.findClosestContour( p, &x, &dist, ContourKind::Holes ) ;
-			
-			if ( nearestHole && dist < r && !nearestHole->mPolyLine.contains(p) )
-				// ensure we aren't actually in this hole or that would be bad...
+			// 1. make sure we aren't overlapping the edge
+			auto unlapEdge = []( vec2 p, float r, const Contour& poly ) -> vec2
 			{
-				return glm::normalize( p - x ) * r + x ;
-			}
-			else return p ;
-		} ;
-		
-		// combine
-		vec2 p = point ;
-		
-		p = unlapEdge( p, radius, *inPoly ) ;
-		p = unlapHole( p, radius ) ;
-		
-		// done
-		return p ;
-	}
-	else if ( inHole )
-	{
-		// push us out of this hole
-		vec2 x = closestPointOnPoly(point, inHole->mPolyLine) ;
-		
-		return glm::normalize( x - point ) * radius + x ;
+				float dist ;
+
+				vec2 x = closestPointOnPoly( p, poly.mPolyLine, 0, 0, &dist );
+
+				if ( dist < r ) return glm::normalize( p - x ) * r + x ;
+				else return p ;
+			} ;
+			
+			// 2. make sure we aren't overlapping a hole
+			auto unlapHole = [this]( vec2 p, float r ) -> vec2
+			{
+				float dist ;
+				vec2 x ;
+				
+				const Contour * nearestHole = mContours.findClosestContour( p, &x, &dist, ContourKind::Holes ) ;
+				
+				if ( nearestHole && dist < r && !nearestHole->mPolyLine.contains(p) )
+					// ensure we aren't actually in this hole or that would be bad...
+				{
+					return glm::normalize( p - x ) * r + x ;
+				}
+				else return p ;
+			} ;
+			
+			// combine
+			vec2 p = point ;
+			
+			p = unlapEdge( p, radius, *in ) ;
+			p = unlapHole( p, radius ) ;
+			
+			// done
+			return p ;
+		}
+		else
+		{
+			// push us out of this hole
+			vec2 x = closestPointOnPoly(point, in->mPolyLine) ;
+			
+			return glm::normalize( x - point ) * radius + x ;
+		}
 	}
 	else
 	{
@@ -361,5 +340,111 @@ vec2 BallWorld::resolveCollisionWithContours ( vec2 point, float radius ) const
 		mContours.findClosestContour( point, &x, 0, ContourKind::NonHoles ) ;
 		
 		return glm::normalize( x - point ) * radius + x ;
+	}
+}
+
+vec2 BallWorld::resolveCollisionWithInverseContours ( vec2 point, float radius ) const
+{
+	// inside a poly?
+	const Contour* in = mContours.findLeafContourContainingPoint(point) ;
+	
+	// ok, find closest
+	if (in)
+	{
+		if ( !in->mIsHole )
+		{
+			// in paper
+
+			// push us out of this contour
+			vec2 x1 = closestPointOnPoly(point, in->mPolyLine) ;
+			
+			// but what if it's better to get us into a smaller hole inside?
+			vec2 x2 ;
+			float x2dist;
+			
+			if ( mContours.findClosestContour(point,&x2,&x2dist,ContourKind::Holes) )
+			{
+				// this is closer, so replace x1
+				if ( x2dist < glm::distance(x1,point) )
+				{
+					x1 = x2;
+				}
+			}
+			
+			// compute fix
+			return glm::normalize( x1 - point ) * radius + x1 ;
+		}
+		else
+		{
+			// in hole
+			
+			// 1. make sure we aren't overlapping the edge
+			auto unlapEdge = []( vec2 p, float r, const Contour& poly ) -> vec2
+			{
+				float dist ;
+
+				vec2 x = closestPointOnPoly( p, poly.mPolyLine, 0, 0, &dist );
+
+				if ( dist < r ) return glm::normalize( p - x ) * r + x ;
+				else return p ;
+			} ;
+			
+			// 2. make sure we aren't overlapping paper inside
+			auto unlapHole = [this]( vec2 p, float r ) -> vec2
+			{
+				float dist ;
+				vec2 x ;
+				
+				const Contour * nearestHole = mContours.findClosestContour( p, &x, &dist, ContourKind::NonHoles ) ;
+				
+				if ( nearestHole && dist < r && !nearestHole->mPolyLine.contains(p) )
+					// ensure we aren't actually in this hole or that would be bad...
+				{
+					return glm::normalize( p - x ) * r + x ;
+				}
+				else return p ;
+			} ;
+			
+			// combine
+			vec2 p = point ;
+			
+			p = unlapEdge( p, radius, *in ) ;
+			p = unlapHole( p, radius ) ;
+			
+			// done
+			return p ;
+		}
+	}
+	else
+	{
+		// in empty space
+		
+		// make sure we aren't grazing a contour
+		vec2 x;
+		float dist;
+		const Contour * nearest = mContours.findClosestContour( point, &x, &dist, ContourKind::NonHoles ) ;
+		
+		if ( nearest && dist < radius )
+		{
+			point = glm::normalize( point - x ) * radius + x ;
+		}
+		
+		// make sure we are inside the world (not floating away)
+		if ( getWorldBoundsPoly().size() > 0 )
+		{
+			vec2 x1 = closestPointOnPoly( point, getWorldBoundsPoly(), 0, 0, &dist );
+
+			if ( getWorldBoundsPoly().contains(point) )
+			{
+				if ( dist < radius ) point = glm::normalize( point - x1 ) * radius + x1 ;
+			}
+			else
+			{
+				point = glm::normalize( x1 - point ) * radius + x1 ;
+			}
+		}
+		
+		// inside of nothing
+		return point;
 	}
 }
