@@ -15,12 +15,20 @@ vec2 GameWorld::getRandomPointInWorldBoundsPoly() const
 {
 	PolyLine2 wb = getWorldBoundsPoly();
 	
-	Rectf b( wb.getPoints() );
+	if ( wb.getPoints().empty() )
+	{
+		return vec2(0,0);
+	}
+	else
+	{
+		Rectf b( wb.getPoints() );
+		cout << b << endl;
+		
+		vec2 p = b.getSize() * vec2( randFloat(), randFloat() ) + b.getUpperLeft();
+		
+		if ( !wb.contains(p) ) p = closestPointOnPoly( p, wb ) ;
 	
-	vec2 p = b.getSize() * vec2( randFloat(), randFloat() ) + b.getUpperLeft();
-	
-	if ( !wb.contains(p) ) p = closestPointOnPoly( p, wb ) ;
-	
-	return p;
+		return p;
+	}
 }
 

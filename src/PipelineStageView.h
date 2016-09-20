@@ -17,6 +17,8 @@
 using namespace std;
 using namespace ci;
 
+class PaperBounce3App;
+
 class PipelineStageView : public View
 {
 public:
@@ -48,26 +50,28 @@ private:
 class MainImageView : public View
 {
 public:
-	MainImageView( Pipeline& p, GameWorld& w )
-		: mPipeline(p)
-		, mGameWorld(w)
+	MainImageView( PaperBounce3App& app )
+		: mApp(app)
+//		: mPipeline(p)
+//		, mGameWorld(w)
 	{
 	}
 
 	void draw() override;
 	void drawFrame() override; // none by default unless you set its color
 
-	vec2 mouseToImage( vec2 ); // maps mouse (screen) to drawn image coords
-	vec2 mouseToWorld( vec2 ); // maps mouse (screen) to world coordinates
+	vec2 windowToImage( vec2 ); // maps mouse (screen) to drawn image coords
+	vec2 windowToWorld( vec2 ); // maps mouse (screen) to world coordinates
+	vec2 worldToWindow( vec2 );
 
 	void mouseDown( MouseEvent ) override;
 	
-	void   setPipelineStageName( string n ) { mStageName=n; }
-	string getPipelineStageName() const { return mStageName.empty() ? mPipeline.getQuery() : mStageName; }
+	void   setPipelineStageName( string n );
+	string getPipelineStageName() const;
 		// by default is empty to track Pipeline's query stage
 		// setting it allows you to overload the query stage and lock it in place.
 	
-	const Pipeline::Stage* getPipelineStage() const { return mPipeline.getStage(getPipelineStageName()); }
+	const Pipeline::Stage* getPipelineStage() const;
 	
 	function<void(void)> mWorldDrawFunc; // this overloads use of mGameWorld.draw()
 	// :P kinda lame.
@@ -84,8 +88,12 @@ public:
 	void	setFont( gl::TextureFontRef f ) { mTextureFont=f; }
 	
 private:
-	GameWorld&		mGameWorld;
-	Pipeline&		mPipeline;
+	GameWorld* getGameWorld() const;
+	Pipeline&  getPipeline () const;
+
+	PaperBounce3App& mApp;
+//	GameWorld&		mGameWorld;
+//	Pipeline&		mPipeline;
 	string			mStageName;
 
 	ColorA			mFrameColor=ColorA(0,0,0,0); // none by default

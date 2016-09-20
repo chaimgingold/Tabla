@@ -101,9 +101,9 @@
 		1967F5787DB34245B2B91CBA /* b2EdgeAndCircleContact.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = b2EdgeAndCircleContact.h; path = ../blocks/Box2D/src/Box2D/Dynamics/Contacts/b2EdgeAndCircleContact.h; sourceTree = "<group>"; };
 		1DCA2C3FD6C84A6DAB24027E /* b2DistanceJoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2DistanceJoint.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Joints/b2DistanceJoint.cpp; sourceTree = "<group>"; };
 		2635C8CD1D83245400DF30BE /* GameWorld.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GameWorld.h; path = ../src/GameWorld.h; sourceTree = "<group>"; };
-		2635C8CE1D8768C900DF30BE /* WindowData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WindowData.cpp; path = ../src/WindowData.cpp; sourceTree = "<group>"; };
+		2635C8CE1D8768C900DF30BE /* WindowData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = WindowData.cpp; path = ../src/WindowData.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		2635C8CF1D8768C900DF30BE /* WindowData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WindowData.h; path = ../src/WindowData.h; sourceTree = "<group>"; };
-		2635C8D11D87695000DF30BE /* PaperBounce3App.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PaperBounce3App.h; path = ../src/PaperBounce3App.h; sourceTree = "<group>"; };
+		2635C8D11D87695000DF30BE /* PaperBounce3App.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = PaperBounce3App.h; path = ../src/PaperBounce3App.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		26BC84B11D80DF89006001DC /* PipelineStageView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PipelineStageView.cpp; path = ../src/PipelineStageView.cpp; sourceTree = "<group>"; };
 		26BC84B21D80DF89006001DC /* PipelineStageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PipelineStageView.h; path = ../src/PipelineStageView.h; sourceTree = "<group>"; };
 		26FA36401D4A7D5300C64A00 /* todo */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = todo; path = ../design/todo; sourceTree = "<group>"; };
@@ -114,7 +114,7 @@
 		26FA36481D53C5D300C64A00 /* Contour.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Contour.h; path = ../src/Contour.h; sourceTree = "<group>"; };
 		26FA364A1D53C78D00C64A00 /* geom.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = geom.h; path = ../src/geom.h; sourceTree = "<group>"; };
 		26FA364B1D53CBDA00C64A00 /* Vision.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vision.cpp; path = ../src/Vision.cpp; sourceTree = "<group>"; };
-		26FA364C1D53CBDA00C64A00 /* Vision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vision.h; path = ../src/Vision.h; sourceTree = "<group>"; };
+		26FA364C1D53CBDA00C64A00 /* Vision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = Vision.h; path = ../src/Vision.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		26FA364F1D5519DA00C64A00 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = assets; path = ../assets; sourceTree = "<group>"; };
 		26FA36511D551F8900C64A00 /* xml.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = xml.h; path = ../src/xml.h; sourceTree = "<group>"; };
 		26FA36521D55351400C64A00 /* LightLink.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = LightLink.h; path = ../src/LightLink.h; sourceTree = "<group>"; };
@@ -206,7 +206,7 @@
 		D62F398D423A44CF806B628B /* b2RevoluteJoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2RevoluteJoint.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Joints/b2RevoluteJoint.cpp; sourceTree = "<group>"; };
 		D6B648D73A5D453781A11E34 /* b2PolygonAndCircleContact.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2PolygonAndCircleContact.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Contacts/b2PolygonAndCircleContact.cpp; sourceTree = "<group>"; };
 		D7B371FF081C423FA54B03FD /* b2TimeOfImpact.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = b2TimeOfImpact.h; path = ../blocks/Box2D/src/Box2D/Collision/b2TimeOfImpact.h; sourceTree = "<group>"; };
-		D873CF0CF96D4D8E8D1A7A87 /* PaperBounce3App.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = PaperBounce3App.cpp; path = ../src/PaperBounce3App.cpp; sourceTree = "<group>"; };
+		D873CF0CF96D4D8E8D1A7A87 /* PaperBounce3App.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; lineEnding = 0; name = PaperBounce3App.cpp; path = ../src/PaperBounce3App.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		D8E21292E75443F0B3FD59BF /* b2Joint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2Joint.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Joints/b2Joint.cpp; sourceTree = "<group>"; };
 		DA8A3392B64949EDA055E180 /* b2Draw.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2Draw.cpp; path = ../blocks/Box2D/src/Box2D/Common/b2Draw.cpp; sourceTree = "<group>"; };
 		DC546CFF31FF4452A7000631 /* CinderOpenCV.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CinderOpenCV.h; path = ../blocks/OpenCV3/include/CinderOpenCV.h; sourceTree = "<group>"; };

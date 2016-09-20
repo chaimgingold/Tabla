@@ -15,7 +15,7 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 	, mWindow(window)
 	, mIsUIWindow(isUIWindow)
 {
-	mMainImageView = make_shared<MainImageView>( MainImageView( mApp.mPipeline, mApp.mBallWorld ) );
+	mMainImageView = make_shared<MainImageView>( MainImageView(mApp) );
 	mMainImageView->mWorldDrawFunc = [&](){mApp.drawWorld(true);};
 		// draw all the contours, etc... as well as the game world itself.
 	mViews.addView(mMainImageView);
@@ -48,7 +48,7 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 		{
 			// for some reason the recursive lambda capture (doing a capture in this function)
 			// causes everything to explode, so just passing in a param.
-			app.setLightLink(app.mLightLink);
+			app.lightLinkDidChange(app.mLightLink);
 			
 			XmlTree lightLinkXml = app.mLightLink.getParams();
 			
@@ -162,9 +162,38 @@ void WindowData::draw()
 			gl::color( c[i] );
 			mApp.mTextureFont->drawString(
 //				"Window: " + toString(pt) + "\t" +
-				"Image: "  + toString( mMainImageView->mouseToImage(pt) ) +
-				"\tWorld: " + toString( mMainImageView->mouseToWorld(pt) )
+				"Image: "  + toString( mMainImageView->windowToImage(pt) ) +
+				"\tWorld: " + toString( mMainImageView->windowToWorld(pt) )
 				, o[i]+vec2( 8.f, getWindowSize().y - mApp.mTextureFont->getAscent()+mApp.mTextureFont->getDescent()) ) ;
+		}
+	}
+	
+	// draw contour debug info
+	if (mApp.mDrawContourTree)
+	{
+		const float k = 16.f ;
+		
+		for ( size_t i=0; i<mApp.mContours.size(); ++i )
+		{
+			const auto& c = mApp.mContours[i] ;
+			
+			Rectf rw = c.mBoundingRect ; // world space
+			Rectf r  = Rectf(
+				mMainImageView->worldToWindow(rw.getLowerLeft()),
+				mMainImageView->worldToWindow(rw.getUpperRight()) );
+				
+			// rect in ui space
+			r.y1 = ( c.mTreeDepth + 1 ) * k ;
+			r.y2 = r.y1 + k ;
+			
+			if (c.mIsHole) gl::color(0,0,.3);
+			else gl::color(0,.3,.4);
+			
+			gl::drawSolidRect(r) ;
+			
+			gl::color(.8,.8,.7);
+			mApp.mTextureFont->drawString( to_string(i) + " (" + to_string(c.mParent) + ")",
+				r.getLowerLeft() + vec2(2,-mApp.mTextureFont->getDescent()) ) ;
 		}
 	}
 }

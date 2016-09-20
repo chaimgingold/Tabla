@@ -1,25 +1,45 @@
 More Game Worlds
 - Support
-	- Allow ball simulation in empty space (space between paddles) (Pong)
+	√ Allow ball simulation in empty space (space between paddles) (Pong)
 		- Flag certain balls as doing inverse contour geometry.
+	- Multiple Game Worlds can be toggled between.
+		- Set of them
+		- Use keyboard to switch between them.
+		- Config UI allows you to see which one you are in/click on them.
 	- Put Vision settings in their own object; put xml in each GameWorld, pass it to Vision system.
 		- We will still want some generic system settings, too. A little dicey.
 			Maybe start with overloading or something? Or try not to do this at all.
 	- Allow game sim to insert their own geometry into reusable physics sim (breakout bricks) (Breakout)
 		- Component architecture of some sort.
+		- Allow contours to have user names (strings) and/or ids (ints)... lambdas?
+		- Allow merge of two contour sets (user and system) into a joined set used for simulation.
+			(sim could either generate a new list every frame, maybe with lambdas attached, or keep a persistent list. whatever is easiest to code up.)
 	- Color token recognition (PCS)
 	- Interframe paper coherency (Garden City, Music Box)
+	- Game cartridge recognition.
 
 - Worlds
+
+	Basic
 	- Ball World
 		- Allow ball insertion (at least)/deletion without keyboard keys.
 			. Just do automatic ball insertion (say 10?).
 	- Pong
+		- Detect/place goals, configure and draw board layout.
+		- Score, Game state
+		- Show score, game state
 	- Breakout
+		- Merge detected and simulated geometry
+		- Game state (new, level complete, losing, etc...), scoring
+		- Board (brick) generation
+
+	Fancy (tokens)
 	- Pinball Construction Set
 	- Racing Cars
+
+	Mega-fancy (paper coherency)
 	- Garden City
-	- Music Box
+	- Music Box (more nuanced stroke detection/pixel parsing)
 
 Next
 - √ Finish my desk setup

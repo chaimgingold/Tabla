@@ -418,3 +418,36 @@ vec2 BallWorld::resolveCollisionWithInverseContours ( vec2 point, float radius )
 		return point;
 	}
 }
+
+void BallWorld::keyDown( KeyEvent event )
+{
+	switch ( event.getCode() )
+	{
+		case KeyEvent::KEY_b:
+		{
+			newRandomBall( getRandomPointInWorldBoundsPoly() );
+			// we could traverse paper hierarchy and pick a random point on paper...
+			// might be a useful function, randomPointOnPaper()
+		}
+		break ;
+			
+		case KeyEvent::KEY_c:
+			clearBalls() ;
+			break ;
+	}
+}
+
+void BallWorld::drawMouseDebugInfo( vec2 mouseInWorld )
+{
+	// test collision logic
+	const float r = getBallDefaultRadius() ;
+	
+	vec2 fixed = resolveCollisionWithContours(mouseInWorld,r);
+//		vec2 fixed = mBallWorld.resolveCollisionWithInverseContours(mouseInWorld,r);
+	
+	gl::color( ColorAf(0.f,0.f,1.f) ) ;
+	gl::drawStrokedCircle(fixed,r);
+	
+	gl::color( ColorAf(0.f,1.f,0.f) ) ;
+	gl::drawLine(mouseInWorld, fixed);
+}

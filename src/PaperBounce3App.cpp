@@ -1,5 +1,7 @@
 #include "PaperBounce3App.h"
 
+#include "BallWorld.h"
+
 #include "geom.h"
 #include "xml.h"
 #include "View.h"
@@ -76,9 +78,11 @@ void PaperBounce3App::setup()
 	mXmlFileWatch.load( myGetAssetPath("config.xml"), [this]( XmlTree xml )
 	{
 		// 1. get params
-		if (xml.hasChild("PaperBounce3/BallWorld"))
+		if ( xml.hasChild("PaperBounce3/Games") )
 		{
-			mBallWorld.setParams(xml.getChild("PaperBounce3/BallWorld"));
+			mGameXmlParams = xml.getChild("PaperBounce3/Games");
+			setGameWorldXmlParams();
+//			mBallWorld.setParams(xml.getChild("PaperBounce3/BallWorld"));
 		}
 		
 		if (xml.hasChild("PaperBounce3/Vision"))
@@ -111,7 +115,7 @@ void PaperBounce3App::setup()
 		}
 
 		// 2. respond
-		setLightLink(mLightLink);
+		lightLinkDidChange(mLightLink);
 		
 		// TODO:
 		// - get a new camera capture object so that resolution can change live
@@ -126,7 +130,7 @@ void PaperBounce3App::setup()
 		if ( xml.hasChild("LightLink") )
 		{
 			mLightLink.setParams(xml.getChild("LightLink"));
-			setLightLink(mLightLink);
+			lightLinkDidChange(mLightLink);
 		}
 	});
 	
@@ -175,6 +179,49 @@ void PaperBounce3App::setup()
 	// (we query before making the pipeline because we only store the image requested :P!)
 	if ( mPipeline.getQuery().empty() ) mPipeline.setQuery("input");
 	mPipeline.setCaptureAllStageImages(mDrawPipeline);
+	
+	// load the games and the game
+	setupGameLibrary();
+	loadDefaultGame();
+}
+
+void PaperBounce3App::setupGameLibrary()
+{
+//	mGameLibrary.push_back( GameCartridgeSimple( [](){ return make_shared<BallWorld>(); } ) );
+	mGameLibrary.push_back( make_shared<BallWorldCartridge>() );
+}
+
+void PaperBounce3App::loadDefaultGame()
+{
+	if ( !mGameLibrary.empty() )
+	{
+		loadGame( *mGameLibrary[0] );
+	}
+}
+
+void PaperBounce3App::loadGame( const GameCartridge& g )
+{
+	mGameWorld = g.load();
+	
+	if ( mGameWorld )
+	{
+		setGameWorldXmlParams();
+
+		mGameWorld->setWorldBoundsPoly( getWorldBoundsPoly() );
+	}
+}
+
+void PaperBounce3App::setGameWorldXmlParams()
+{
+	if ( mGameWorld )
+	{
+		string xmlNodeName = mGameWorld->getSystemName();
+		
+		if ( mGameXmlParams.hasChild(xmlNodeName) )
+		{
+			mGameWorld->setParams( mGameXmlParams.getChild(xmlNodeName) );
+		}
+	}
 }
 
 fs::path
@@ -291,7 +338,7 @@ void PaperBounce3App::update()
 		// pass contours to ballworld (probably don't need to store here)
 		mContours = mVision.mContourOutput ;
 		
-		mBallWorld.updateContours( mContours );
+		if (mGameWorld) mGameWorld->updateContours( mContours );
 		
 		// update pipeline visualization
 		updatePipelineViews( mDrawPipeline );
@@ -303,7 +350,7 @@ void PaperBounce3App::update()
 		updateMainImageTransform(mMainWindow);
 	}
 	
-	mBallWorld.update();
+	if (mGameWorld) mGameWorld->update();
 }
 
 void PaperBounce3App::updateMainImageTransform( WindowRef w )
@@ -327,7 +374,7 @@ void PaperBounce3App::drawWorld( bool highQuality )
 	WindowData *win = getWindow()->getUserData<WindowData>();
 	
 	const vec2 mouseInWindow   = win->getMousePosInWindow();
-	const vec2 mouseInWorld    = win->getMainImageView()->mouseToWorld(mouseInWindow);
+	const vec2 mouseInWorld    = win->getMainImageView()->windowToWorld(mouseInWindow);
 	const bool isMouseInWindow = win->getWindow()->getBounds().contains(win->getMousePosInWindow());
 	
 	
@@ -442,47 +489,12 @@ void PaperBounce3App::drawWorld( bool highQuality )
 	}
 	
 	// draw balls
-	mBallWorld.draw(highQuality);
+	if (mGameWorld) mGameWorld->draw(highQuality);
 	
 	// mouse debug info
-	if ( mDrawMouseDebugInfo && isMouseInWindow )
+	if ( mDrawMouseDebugInfo && isMouseInWindow && mGameWorld )
 	{
-		// test collision logic
-		const float r = mBallWorld.getBallDefaultRadius() ;
-		
-		vec2 fixed = mBallWorld.resolveCollisionWithContours(mouseInWorld,r);
-//		vec2 fixed = mBallWorld.resolveCollisionWithInverseContours(mouseInWorld,r);
-		
-		gl::color( ColorAf(0.f,0.f,1.f) ) ;
-		gl::drawStrokedCircle(fixed,r);
-		
-		gl::color( ColorAf(0.f,1.f,0.f) ) ;
-		gl::drawLine(mouseInWorld, fixed);
-	}
-	
-	// draw contour debug info
-	if (mDrawContourTree)
-	{
-		const float k = 16.f ;
-		
-		for ( size_t i=0; i<mContours.size(); ++i )
-		{
-			const auto& c = mContours[i] ;
-			
-			Rectf r = c.mBoundingRect ;
-			
-			r.y1 = ( c.mTreeDepth + 1 ) * k ;
-			r.y2 = r.y1 + k ;
-			
-			if (c.mIsHole) gl::color(0,0,.3);
-			else gl::color(0,.3,.4);
-			
-			gl::drawSolidRect(r) ;
-			
-			gl::color(.8,.8,.7);
-			mTextureFont->drawString( to_string(i) + " (" + to_string(c.mParent) + ")",
-				r.getLowerLeft() + vec2(2,-mTextureFont->getDescent()) ) ;
-		}
+		mGameWorld->drawMouseDebugInfo(mouseInWorld);
 	}
 }
 
@@ -501,21 +513,6 @@ void PaperBounce3App::keyDown( KeyEvent event )
 			cout << "Frame rate: " << getFrameRate() << endl ;
 			break ;
 
-		case KeyEvent::KEY_b:
-		{
-			mBallWorld.newRandomBall( mBallWorld.getRandomPointInWorldBoundsPoly() );
-			// we could traverse paper hierarchy and pick a random point on paper...
-			// might be a useful function, randomPointOnPaper()
-			//
-			// how to generalize this?
-			// pass unhandled key events into GameWorld?
-		}
-		break ;
-			
-		case KeyEvent::KEY_c:
-			mBallWorld.clearBalls() ;
-			break ;
-
 		case KeyEvent::KEY_x:
 			::system( (string("open \"") + myGetAssetPath("config.xml").string() + "\"").c_str() );
 			break ;
@@ -530,6 +527,9 @@ void PaperBounce3App::keyDown( KeyEvent event )
 			else mPipeline.setQuery( mPipeline.getNextStageName(mPipeline.getQuery() ) );
 			break;
 
+		default:
+			if (mGameWorld) mGameWorld->keyDown(event);
+			break;
 	}
 }
 

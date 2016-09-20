@@ -7,6 +7,7 @@
 //
 
 #include "PipelineStageView.h"
+#include "PaperBounce3App.h"
 
 void PipelineStageView::draw()
 {
@@ -56,6 +57,8 @@ void PipelineStageView::drawFrame()
 	gl::drawStrokedRect( getFrame(), 2.f );
 }
 
+
+
 void MainImageView::draw()
 {
 	const Pipeline::Stage* stage = getPipelineStage();
@@ -70,7 +73,7 @@ void MainImageView::draw()
 
 //	if (1)
 //	{
-//		vec2 p = mouseToImage(mMousePos);
+//		vec2 p = windowToImage(mMousePos);
 //		gl::color( 0., .5, .1 );
 //		gl::drawSolidRect( Rectf(p,p+vec2(100,100)) );
 //		gl::color( 1., .8, .1 );
@@ -89,7 +92,7 @@ void MainImageView::draw()
 		}
 		
 		if (mWorldDrawFunc) mWorldDrawFunc(); // overload it.
-		else mGameWorld.draw(true); // high quality
+		else if (getGameWorld()) getGameWorld()->draw(true); // high quality
 	}
 	gl::popViewMatrix();
 }
@@ -111,19 +114,34 @@ void MainImageView::drawFrame()
 
 void MainImageView::mouseDown( MouseEvent event )
 {
-	mGameWorld.mouseClick( mouseToWorld( event.getPos() ) ) ;
+	if (getGameWorld()) getGameWorld()->mouseClick( windowToWorld( event.getPos() ) ) ;
 }
 
-vec2 MainImageView::mouseToImage( vec2 p )
+void MainImageView::setPipelineStageName( string n )
+{
+	mStageName=n;
+}
+
+string MainImageView::getPipelineStageName() const
+{
+	return mStageName.empty() ? mApp.mPipeline.getQuery() : mStageName;
+}
+
+const Pipeline::Stage* MainImageView::getPipelineStage() const
+{
+	return getPipeline().getStage(getPipelineStageName());
+}
+
+vec2 MainImageView::windowToImage( vec2 p )
 {
 	// convert screen/window coordinates to image coords
 	return rootToChild(p);
 }
 
-vec2 MainImageView::mouseToWorld( vec2 p )
+vec2 MainImageView::windowToWorld( vec2 p )
 {
 	// convert image coordinates to world coords
-	vec2 p2 = mouseToImage(p);
+	vec2 p2 = windowToImage(p);
 	
 	if (getPipelineStage())
 	{
@@ -132,6 +150,28 @@ vec2 MainImageView::mouseToWorld( vec2 p )
 	
 	return p2;
 }
+
+vec2 MainImageView::worldToWindow( vec2 p )
+{
+	if (getPipelineStage())
+	{
+		p = vec2( getPipelineStage()->mWorldToImage * vec4(p,0,1) ) ;
+	}
+	
+	return childToRoot(p);
+}
+
+GameWorld* MainImageView::getGameWorld() const
+{
+	return mApp.mGameWorld.get();
+}
+
+Pipeline&  MainImageView::getPipeline() const
+{
+	return mApp.mPipeline;
+}
+
+
 
 const float kRadius = 8.f;
 
@@ -142,7 +182,7 @@ PolyEditView::PolyEditView( Pipeline& pipeline, function<PolyLine2()> getter, st
 {
 }
 
-void PolyEditView::setMainImageView( shared_ptr<MainImageView> miv )
+void PolyEditView::setMainImageView( std::shared_ptr<MainImageView> miv )
 {
 	mMainImageView=miv;
 	setParent(miv);

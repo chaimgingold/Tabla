@@ -9,6 +9,8 @@
 #ifndef PaperBounce3App_h
 #define PaperBounce3App_h
 
+#include <memory>
+
 #include "cinder/app/App.h"
 #include "cinder/app/RendererGl.h"
 #include "cinder/gl/gl.h"
@@ -24,7 +26,7 @@
 #include "LightLink.h"
 #include "Vision.h"
 #include "Contour.h"
-#include "BallWorld.h"
+#include "GameWorld.h"
 #include "XmlFileWatch.h"
 #include "Pipeline.h"
 
@@ -50,23 +52,34 @@ class PaperBounce3App : public App {
 	
 	void drawWorld( bool highQuality );
 	
-	void setLightLink( const LightLink& ll )
+	void lightLinkDidChange( const LightLink& ll )
 	{
 		// notify people
 		// might need to privatize mLightLink and make this a proper setter
 		// or rename it to be "notify" or "onChange" or "didChange" something
 		mVision.setLightLink(ll);
-		mBallWorld.setWorldBoundsPoly( getWorldBoundsPoly() );
+		if (mGameWorld) mGameWorld->setWorldBoundsPoly( getWorldBoundsPoly() );
 	}
 	
 	LightLink			mLightLink; // calibration for camera <> world <> projector
 	CaptureRef			mCapture;	// input device		->
 	Vision				mVision ;	// edge detection	->
 	ContourVector		mContours;	// edges output		->
-	BallWorld			mBallWorld ;// world simulation
+	std::shared_ptr<GameWorld> mGameWorld ;// world simulation
 	
 	Pipeline			mPipeline; // traces processing
 	
+	// game library
+	void setupGameLibrary();
+	void loadDefaultGame();
+	void loadGame( const GameCartridge& );
+	
+	vector< std::shared_ptr<GameCartridge> > mGameLibrary;
+
+	// game xml params
+	XmlTree				mGameXmlParams; // right now for all games
+	void				setGameWorldXmlParams(); // sets mGameWorld params from mGameXmlParams
+
 	// world info
 	PolyLine2 getWorldBoundsPoly() const;
 	vec2	  getWorldSize() const; // almost completely deprecated; hardly used.

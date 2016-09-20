@@ -13,7 +13,7 @@
 		<DrawMouseDebugInfo>		1 </DrawMouseDebugInfo>
 		<DrawContourMousePick>		1 </DrawContourMousePick>
 		<DrawPolyBoundingRect>		0 </DrawPolyBoundingRect>
-		<DrawContourTree>			0 </DrawContourTree>
+		<DrawContourTree>			1 </DrawContourTree>
 		<DrawPipeline>				1 </DrawPipeline>
 		
 		<ConfigWindowMainImageMargin> 32 </ConfigWindowMainImageMargin>
@@ -21,14 +21,6 @@
 		<ConfigWindowPipelineWidth> 64 </ConfigWindowPipelineWidth>
 	</App>
 
-	<BallWorld>
-		<!-- cm -->
-		<BallDefaultRadius>			.5 </BallDefaultRadius>
-		<BallDefaultMaxRadius>		2 </BallDefaultMaxRadius>
-		<BallMaxVel>				1 </BallMaxVel>
-		<BallDefaultColor>			C62D41 </BallDefaultColor>
-	</BallWorld>
-	
 	<LightLink>
 
 		<!-- px -->
@@ -80,4 +72,17 @@
 		<ContourMinWidth>			2	</ContourMinWidth>
 	</Vision>
 
+
+	<Games>
+	
+		<BallWorld>
+			<!-- cm -->
+			<BallDefaultRadius>			.5 </BallDefaultRadius>
+			<BallDefaultMaxRadius>		2 </BallDefaultMaxRadius>
+			<BallMaxVel>				1 </BallMaxVel>
+			<BallDefaultColor>			C62D41 </BallDefaultColor>
+		</BallWorld>
+
+	</Games>
+	
 </PaperBounce3>

@@ -63,12 +63,12 @@ inline vec2 closestPointOnPoly( vec2 pt, const PolyLine2& poly, size_t *ai=0, si
 	return result ;
 }
 
-PolyLine2 getPointsAsPoly( const vec2* v, int n )
+inline PolyLine2 getPointsAsPoly( const vec2* v, int n )
 {
 	return PolyLine2( vector<vec2>(v,v+n) );
 };
 
-void setPointsFromPoly( vec2* v, int n, PolyLine2 vv )
+inline void setPointsFromPoly( vec2* v, int n, PolyLine2 vv )
 {
 	assert( vv.getPoints().size()==n );
 	for( int i=0; i<n; ++i ) v[i] = vv.getPoints()[i];

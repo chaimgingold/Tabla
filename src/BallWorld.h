@@ -56,6 +56,8 @@ private:
 class BallWorld : public GameWorld
 {
 public:
+
+	string getSystemName() const override { return "BallWorld"; }
 	
 	void setParams( XmlTree ) override;
 	void updateContours( const ContourVector &c ) override { mContours = c; }
@@ -74,6 +76,8 @@ public:
 		// public so we can show it with the mouse...
 	
 	void mouseClick( vec2 p ) override { newRandomBall(p) ; }
+	void keyDown( KeyEvent ) override;
+	void drawMouseDebugInfo( vec2 ) override;
 	
 private:
 
@@ -96,5 +100,13 @@ private:
 	
 } ;
 
+class BallWorldCartridge : public GameCartridge
+{
+public:
+	virtual std::shared_ptr<GameWorld> load() const override
+	{
+		return std::make_shared<BallWorld>();
+	}
+};
 
 #endif /* Balls_hpp */
