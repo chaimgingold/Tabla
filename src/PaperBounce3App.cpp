@@ -1,6 +1,7 @@
 #include "PaperBounce3App.h"
 
 #include "BallWorld.h"
+#include "PongWorld.h"
 
 #include "geom.h"
 #include "xml.h"
@@ -189,25 +190,45 @@ void PaperBounce3App::setupGameLibrary()
 {
 //	mGameLibrary.push_back( GameCartridgeSimple( [](){ return make_shared<BallWorld>(); } ) );
 	mGameLibrary.push_back( make_shared<BallWorldCartridge>() );
+	mGameLibrary.push_back( make_shared<PongWorldCartridge>() );
 }
 
 void PaperBounce3App::loadDefaultGame()
 {
 	if ( !mGameLibrary.empty() )
 	{
-		loadGame( *mGameLibrary[0] );
+		loadGame(0);
 	}
 }
 
-void PaperBounce3App::loadGame( const GameCartridge& g )
+void PaperBounce3App::loadGame( int libraryIndex )
 {
-	mGameWorld = g.load();
+	assert( libraryIndex >=0 && libraryIndex < mGameLibrary.size() );
+	
+	mGameWorldCartridgeIndex = libraryIndex ;
+	
+	mGameWorld = mGameLibrary[libraryIndex]->load();
 	
 	if ( mGameWorld )
 	{
+		cout << "loadGame: " << mGameWorld->getSystemName() << endl;
+		
 		setGameWorldXmlParams();
 
 		mGameWorld->setWorldBoundsPoly( getWorldBoundsPoly() );
+	}
+}
+
+void PaperBounce3App::loadAdjacentGame( int libraryIndexDelta )
+{
+	if ( !mGameLibrary.empty() )
+	{
+		int i = mGameWorldCartridgeIndex + libraryIndexDelta;
+		
+		if ( i >= mGameLibrary.size() ) i = i % mGameLibrary.size();
+		if ( i < 0 ) i = mGameLibrary.size() - ((-i) % mGameLibrary.size()) ;
+		
+		loadGame(i);
 	}
 }
 
@@ -526,7 +547,15 @@ void PaperBounce3App::keyDown( KeyEvent event )
 			if (event.isMetaDown()) mPipeline.setQuery( mPipeline.getLastStageName() );
 			else mPipeline.setQuery( mPipeline.getNextStageName(mPipeline.getQuery() ) );
 			break;
-
+		
+		case KeyEvent::KEY_LEFT:
+			loadAdjacentGame(-1);
+			break;
+		
+		case KeyEvent::KEY_RIGHT:
+			loadAdjacentGame(1);
+			break;
+		
 		default:
 			if (mGameWorld) mGameWorld->keyDown(event);
 			break;

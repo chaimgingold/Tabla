@@ -72,9 +72,11 @@ class PaperBounce3App : public App {
 	// game library
 	void setupGameLibrary();
 	void loadDefaultGame();
-	void loadGame( const GameCartridge& );
+	void loadGame( int libraryIndex );
+	void loadAdjacentGame( int libraryIndexDelta );
 	
 	vector< std::shared_ptr<GameCartridge> > mGameLibrary;
+	int mGameWorldCartridgeIndex=-1; // what index of mGameLibrary did mGameWorld come from?
 
 	// game xml params
 	XmlTree				mGameXmlParams; // right now for all games

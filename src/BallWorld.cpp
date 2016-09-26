@@ -83,8 +83,8 @@ void BallWorld::update()
 			
 			vec2 newLoc;
 			
-			if (b.mCollideWithContours)	newLoc = resolveCollisionWithContours		( b.mLoc, b.mRadius ) ;
-			else						newLoc = resolveCollisionWithInverseContours( b.mLoc, b.mRadius ) ;
+			if (b.mCollideWithContours)	newLoc = resolveCollisionWithContours		( b.mLoc, b.mRadius, &b ) ;
+			else						newLoc = resolveCollisionWithInverseContours( b.mLoc, b.mRadius, &b ) ;
 			
 			// update?
 			if ( newLoc != oldLoc )
@@ -272,36 +272,50 @@ void BallWorld::resolveBallCollisions()
 			b.noteSquashImpact( bvel_new - bvel ) ;
 				// *cough* just undoing some of the comptuation i did earlier. compiler can figure this out,
 				// but the point is that we just want the velocities along the axis of collision.
+			
+			// note it
+			onBallBallCollide(a,b);
 		}
 	}
 }
 
-vec2 unlapEdge( vec2 p, float r, const Contour& poly )
+vec2 BallWorld::unlapEdge( vec2 p, float r, const Contour& poly, const Ball* b )
 {
 	float dist ;
 
 	vec2 x = closestPointOnPoly( p, poly.mPolyLine, 0, 0, &dist );
 
-	if ( dist < r ) return glm::normalize( p - x ) * r + x ;
-	else return p ;
-}
-
-vec2 unlapHoles( vec2 p, float r, const ContourVector& contours, ContourKind kind )
-{
-	float dist ;
-	vec2 x ;
-	
-	const Contour * nearestHole = contours.findClosestContour( p, &x, &dist, kind ) ;
-	
-	if ( nearestHole && dist < r && !nearestHole->mPolyLine.contains(p) )
-		// ensure we aren't actually in this hole or that would be bad...
+	if ( dist < r )
 	{
+		if (b) onBallContourCollide( *b, poly );
+		
 		return glm::normalize( p - x ) * r + x ;
 	}
 	else return p ;
 }
 
-vec2 BallWorld::resolveCollisionWithContours ( vec2 point, float radius ) const
+vec2 BallWorld::unlapHoles( vec2 p, float r, ContourKind kind, const Ball* b )
+{
+	float dist ;
+	vec2 x ;
+	
+	const Contour * nearestHole = mContours.findClosestContour( p, &x, &dist, kind ) ;
+	
+	if ( nearestHole && dist < r && !nearestHole->mPolyLine.contains(p) )
+		// ensure we aren't actually in this hole or that would be bad...
+	{
+		if (b) onBallContourCollide( *b, *nearestHole );
+
+		return glm::normalize( p - x ) * r + x ;
+	}
+	else return p ;
+}
+
+/*	Marc ten Bosch suggests we could refactor this into a giant pile of edges.
+	That would easily handle both insides and outsides, and allow us to ignore tree topology (I think, though maybe not).
+*/
+
+vec2 BallWorld::resolveCollisionWithContours ( vec2 point, float radius, const Ball* b )
 {
 	// inside a poly?
 	const Contour* in = mContours.findLeafContourContainingPoint(point) ;
@@ -313,8 +327,8 @@ vec2 BallWorld::resolveCollisionWithContours ( vec2 point, float radius ) const
 			// we are in paper
 			vec2 p = point ;
 			
-			p = unlapEdge ( p, radius, *in ) ; // get off an edge we might be on
-			p = unlapHoles( p, radius, mContours, ContourKind::Holes ) ; // make sure we aren't in a hole
+			p = unlapEdge ( p, radius, *in, b ) ; // get off an edge we might be on
+			p = unlapHoles( p, radius, ContourKind::Holes, b ) ; // make sure we aren't in a hole
 			
 			// done
 			return p ;
@@ -323,6 +337,8 @@ vec2 BallWorld::resolveCollisionWithContours ( vec2 point, float radius ) const
 		{
 			// push us out of this hole
 			vec2 x = closestPointOnPoly(point, in->mPolyLine) ;
+
+			if (b) onBallContourCollide( *b, *in );
 			
 			return glm::normalize( x - point ) * radius + x ;
 		}
@@ -334,15 +350,19 @@ vec2 BallWorld::resolveCollisionWithContours ( vec2 point, float radius ) const
 		// push us into nearest paper
 		vec2 x ;
 		
-		if ( mContours.findClosestContour( point, &x, 0, ContourKind::NonHoles ) )
+		const Contour* nearest = mContours.findClosestContour( point, &x, 0, ContourKind::NonHoles );
+		
+		if ( nearest )
 		{
+			if (b) onBallContourCollide( *b, *nearest );
+			
 			return glm::normalize( x - point ) * radius + x ;
 		}
 		else return point; // ah! no constraints.
 	}
 }
 
-vec2 BallWorld::resolveCollisionWithInverseContours ( vec2 point, float radius ) const
+vec2 BallWorld::resolveCollisionWithInverseContours ( vec2 point, float radius, const Ball* b )
 {
 	// inside a poly?
 	const Contour* in = mContours.findLeafContourContainingPoint(point) ;
@@ -355,34 +375,42 @@ vec2 BallWorld::resolveCollisionWithInverseContours ( vec2 point, float radius )
 			// in paper
 
 			// push us out of this contour
+			bool pushOut = true ;
+			
 			vec2 x1 = closestPointOnPoly(point, in->mPolyLine) ;
 			
 			// but what if it's better to get us into a smaller hole inside?
 			vec2 x2 ;
 			float x2dist;
 			
-			if ( mContours.findClosestContour(point,&x2,&x2dist,ContourKind::Holes) )
+			const Contour* interiorHole = mContours.findClosestContour(point,&x2,&x2dist,ContourKind::Holes);
+			
+			if ( interiorHole )
 			{
 				// this is closer, so replace x1
 				if ( x2dist < glm::distance(x1,point) )
 				{
+					pushOut = false;
 					x1 = x2;
 				}
 			}
 			
 			// compute fix
-			return glm::normalize( x1 - point ) * radius + x1 ;
+			point = glm::normalize( x1 - point ) * radius + x1 ;
+			
+			// note
+			if (b) onBallContourCollide(*b, pushOut ? *in : *interiorHole );
 		}
 		else
 		{
 			// in hole			
 			vec2 p = point ;
 			
-			p = unlapEdge ( p, radius, *in ) ;
-			p = unlapHoles( p, radius, mContours, ContourKind::NonHoles ) ;
+			p = unlapEdge ( p, radius, *in, b ) ;
+			p = unlapHoles( p, radius, ContourKind::NonHoles, b ) ;
 			
 			// done
-			return p ;
+			point = p ;
 		}
 	}
 	else
@@ -397,6 +425,8 @@ vec2 BallWorld::resolveCollisionWithInverseContours ( vec2 point, float radius )
 		if ( nearest && dist < radius )
 		{
 			point = glm::normalize( point - x ) * radius + x ;
+			
+			if (b) onBallContourCollide(*b,*nearest);
 		}
 		
 		// make sure we are inside the world (not floating away)
@@ -406,17 +436,24 @@ vec2 BallWorld::resolveCollisionWithInverseContours ( vec2 point, float radius )
 
 			if ( getWorldBoundsPoly().contains(point) )
 			{
-				if ( dist < radius ) point = glm::normalize( point - x1 ) * radius + x1 ;
+				if ( dist < radius )
+				{
+					point = glm::normalize( point - x1 ) * radius + x1 ;
+				
+					if (b) onBallWorldBoundaryCollide(*b);
+				}
 			}
 			else
 			{
 				point = glm::normalize( x1 - point ) * radius + x1 ;
+				
+				if (b) onBallWorldBoundaryCollide(*b);
 			}
 		}
-		
-		// inside of nothing
-		return point;
 	}
+	
+	// return
+	return point;
 }
 
 void BallWorld::keyDown( KeyEvent event )

@@ -13,7 +13,7 @@
 		<DrawMouseDebugInfo>		1 </DrawMouseDebugInfo>
 		<DrawContourMousePick>		1 </DrawContourMousePick>
 		<DrawPolyBoundingRect>		0 </DrawPolyBoundingRect>
-		<DrawContourTree>			1 </DrawContourTree>
+		<DrawContourTree>			0 </DrawContourTree>
 		<DrawPipeline>				1 </DrawPipeline>
 		
 		<ConfigWindowMainImageMargin> 32 </ConfigWindowMainImageMargin>
@@ -82,6 +82,14 @@
 			<BallMaxVel>				1 </BallMaxVel>
 			<BallDefaultColor>			C62D41 </BallDefaultColor>
 		</BallWorld>
+
+		<PongWorld>
+			<!-- cm -->
+			<BallDefaultRadius>			2 </BallDefaultRadius>
+			<BallDefaultMaxRadius>		2 </BallDefaultMaxRadius>
+			<BallMaxVel>				1 </BallMaxVel>
+			<BallDefaultColor>			C62D41 </BallDefaultColor>
+		</PongWorld>
 
 	</Games>
 	

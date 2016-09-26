@@ -24,8 +24,9 @@ public:
 	virtual void setParams( XmlTree ){}
 	virtual void updateContours( const ContourVector &c ){}
 	
-	void		setWorldBoundsPoly( PolyLine2 p ) { mWorldBoundsPoly=p; }
+	void		setWorldBoundsPoly( PolyLine2 p ) { mWorldBoundsPoly=p; worldBoundsPolyDidChange(); }
 	PolyLine2	getWorldBoundsPoly() const { return mWorldBoundsPoly; }
+	virtual void worldBoundsPolyDidChange(){}
 	
 	vec2		getRandomPointInWorldBoundsPoly() const; // a little lamely special case;
 	// might be more useful to have something like random point on contour,

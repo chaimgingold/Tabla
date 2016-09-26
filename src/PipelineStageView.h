@@ -92,8 +92,6 @@ private:
 	Pipeline&  getPipeline () const;
 
 	PaperBounce3App& mApp;
-//	GameWorld&		mGameWorld;
-//	Pipeline&		mPipeline;
 	string			mStageName;
 
 	ColorA			mFrameColor=ColorA(0,0,0,0); // none by default

@@ -70,17 +70,33 @@ public:
 	
 	float getBallDefaultRadius() const { return mBallDefaultRadius ; }
 	
-	vec2 resolveCollisionWithContours		( vec2 p, float r ) const ; // 
-	vec2 resolveCollisionWithInverseContours( vec2 p, float r ) const ;
-		 // returns pinned version of point
+	vec2 resolveCollisionWithContours		( vec2 p, float r, const Ball* b=0 );
+	vec2 resolveCollisionWithInverseContours( vec2 p, float r, const Ball* b=0 );
+		// returns pinned version of point
 		// public so we can show it with the mouse...
+		// optional Ball* so we can record collisions (onBall*Collide())
+		// not const because if b != 0 then we will note collisions and mutate state
 	
 	void mouseClick( vec2 p ) override { newRandomBall(p) ; }
 	void keyDown( KeyEvent ) override;
 	void drawMouseDebugInfo( vec2 ) override;
 	
+	vector<Ball>& getBalls() { return mBalls; }
+	
+protected:
+	virtual void onBallBallCollide			( const Ball&, const Ball& ){}
+	virtual void onBallContourCollide		( const Ball&, const Contour& ){}
+	virtual void onBallWorldBoundaryCollide	( const Ball& ){}
+	// you probably want to just note this stuff and then transform Balls/Contours/etc... later
+	// ideally BallWorld would just provide a list of collisions to others.
+	// once we can uniquely id balls + contours with user data we'll switch to that model
+	// and make these functions non-virtual and then they can do the recording.
+	
 private:
 
+	vec2 unlapEdge( vec2 p, float r, const Contour& poly, const Ball* b=0 );
+	vec2 unlapHoles( vec2 p, float r, ContourKind kind, const Ball* b=0 );
+	
 	// params
 	float	mBallDefaultRadius		= 8.f *  .5f ;
 	float	mBallDefaultMaxRadius	= 8.f * 4.f ;

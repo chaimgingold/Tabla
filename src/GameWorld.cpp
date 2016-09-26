@@ -22,7 +22,6 @@ vec2 GameWorld::getRandomPointInWorldBoundsPoly() const
 	else
 	{
 		Rectf b( wb.getPoints() );
-		cout << b << endl;
 		
 		vec2 p = b.getSize() * vec2( randFloat(), randFloat() ) + b.getUpperLeft();
 		

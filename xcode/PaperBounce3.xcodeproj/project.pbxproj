@@ -39,6 +39,7 @@
 		26FA365A1D5BDBC300C64A00 /* Pipeline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA36581D5BDBC300C64A00 /* Pipeline.cpp */; };
 		26FA365E1D77673500C64A00 /* View.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA365C1D77673500C64A00 /* View.cpp */; };
 		26FD3CCF1D90A12B00B20327 /* GameWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FD3CCE1D90A12B00B20327 /* GameWorld.cpp */; };
+		26FD3CD21D91E01E00B20327 /* PongWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FD3CD01D91E01E00B20327 /* PongWorld.cpp */; };
 		27FB686FA380493A8438C8BB /* b2Joint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D8E21292E75443F0B3FD59BF /* b2Joint.cpp */; };
 		307B0C3825A3481599FFE3BD /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9366F177495484A87934087 /* OpenCL.framework */; };
 		364054B04EB14DC0944BC464 /* b2Draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DA8A3392B64949EDA055E180 /* b2Draw.cpp */; };
@@ -127,6 +128,8 @@
 		26FA365C1D77673500C64A00 /* View.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = View.cpp; path = ../src/View.cpp; sourceTree = "<group>"; };
 		26FA365D1D77673500C64A00 /* View.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = View.h; path = ../src/View.h; sourceTree = "<group>"; };
 		26FD3CCE1D90A12B00B20327 /* GameWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GameWorld.cpp; path = ../src/GameWorld.cpp; sourceTree = "<group>"; };
+		26FD3CD01D91E01E00B20327 /* PongWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PongWorld.cpp; path = ../src/PongWorld.cpp; sourceTree = "<group>"; };
+		26FD3CD11D91E01E00B20327 /* PongWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PongWorld.h; path = ../src/PongWorld.h; sourceTree = "<group>"; };
 		297736FC91944CE996B6A2A1 /* b2Fixture.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = b2Fixture.h; path = ../blocks/Box2D/src/Box2D/Dynamics/b2Fixture.h; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
@@ -393,6 +396,8 @@
 				26FD3CCE1D90A12B00B20327 /* GameWorld.cpp */,
 				26FA36451D53C31A00C64A00 /* BallWorld.h */,
 				26FA36441D53C31A00C64A00 /* BallWorld.cpp */,
+				26FD3CD11D91E01E00B20327 /* PongWorld.h */,
+				26FD3CD01D91E01E00B20327 /* PongWorld.cpp */,
 			);
 			name = World;
 			sourceTree = "<group>";
@@ -640,6 +645,7 @@
 				26FA365A1D5BDBC300C64A00 /* Pipeline.cpp in Sources */,
 				C84DC4502D0A4C2384BE60F8 /* b2CollideEdge.cpp in Sources */,
 				741A16EB71BE4A308C86D708 /* b2CollidePolygon.cpp in Sources */,
+				26FD3CD21D91E01E00B20327 /* PongWorld.cpp in Sources */,
 				509D1EB4420C46A3BB6D751D /* b2Collision.cpp in Sources */,
 				26FA36571D592CE700C64A00 /* XmlFileWatch.cpp in Sources */,
 				2635C8D01D8768C900DF30BE /* WindowData.cpp in Sources */,
