@@ -10,6 +10,7 @@
 #define PongWorld_hpp
 
 #include "BallWorld.h"
+#include <chrono>
 
 class PongWorld : public BallWorld
 {
@@ -78,6 +79,25 @@ private:
 	void didScore( int player );
 	void serve();
 	
+	enum class GameState
+	{
+		Attract,// waiting for play to start
+		Serve,	// serve in progress
+		Play,	// ball is in play
+		Score,	// someone just scored
+		Over	// someone won
+	};
+	string getStateName( GameState ) const;
+	// might be nice to do this will strings entirely, and then have timeouts etc stored in a tuning file.
+	// then it can be generalized to our other games easily, too.
+	
+	GameState mState;
+	chrono::milliseconds mStateEnterTime;
+	
+	float getSecsInState() const; // how long we been in this state?
+	
+	void goToState( GameState );
+	void stateDidChange( GameState old, GameState newState );
 	
 };
 

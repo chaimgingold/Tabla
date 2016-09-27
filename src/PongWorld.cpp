@@ -6,12 +6,20 @@
 //
 //
 
+#include <time.h>
 #include "PongWorld.h"
 #include "geom.h"
 #include "cinder/rand.h"
 
+using namespace std::chrono;
+
 PongWorld::PongWorld()
 {
+//	mStateEnterTime = time(0);
+	mStateEnterTime = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
+	
+	mState = GameState::Attract;
+	
 	mPlayerColor[0] = Color(1,0,0);
 	mPlayerColor[1] = Color(0,0,1);
 	
@@ -29,13 +37,137 @@ vec2 PongWorld::fieldCorner( int i ) const
 
 void PongWorld::update()
 {
-	// update ball sim
-	BallWorld::update();
-	
-	// make new ball?
-	if ( getBalls().empty() )
+	switch (mState)
 	{
-		serve();
+		// start a game?
+		case GameState::Attract:
+		{
+			goToState( GameState::Serve );
+		}
+		break;
+		
+		// serve?
+		case GameState::Serve:
+		{
+			if ( getSecsInState() > .5f )
+			{
+				// clear old paused ball
+				clearBalls();
+
+				if ( getBalls().empty() )
+				{
+					serve();
+					goToState( GameState::Play );
+				}
+			}
+		}
+		break;
+
+		//
+		case GameState::Play:
+		{
+			BallWorld::update();
+			// collision handlers will catch scoring
+		}
+		break;
+		
+		case GameState::Score:
+		{
+			if ( getSecsInState() > 1.5f )
+			{
+				// todo: timer
+				if ( mPlayerScore[0] == mMaxScore || mPlayerScore[1] == mMaxScore )
+				{
+					goToState( GameState::Over );
+				}
+				else
+				{
+					goToState( GameState::Serve );
+				}
+			}
+		}
+		break;
+		
+		case GameState::Over:
+		{
+			// todo: timer
+			if ( getSecsInState() > 2.f )
+			{
+				goToState( GameState::Attract );
+			}
+		}
+		break;
+	}
+}
+
+string PongWorld::getStateName( GameState s ) const
+{
+	switch (s)
+	{
+		case GameState::Attract: return "Attract"; break;
+		case GameState::Serve: return "Serve"; break;
+		case GameState::Play: return "Play"; break;
+		case GameState::Score: return "Score"; break;
+		case GameState::Over: return "Over"; break;
+	}
+}
+
+float PongWorld::getSecsInState() const
+{
+	milliseconds ms = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
+	
+	std::chrono::duration<float> fsec = ms - mStateEnterTime;
+	
+	float f = fsec.count() ;
+	
+	if (0) cout << f << endl;
+	
+	return f;
+}
+
+void PongWorld::goToState( GameState s )
+{
+	GameState old = mState;
+	
+	mState = s;
+//	mStateEnterTime = time(0);
+	mStateEnterTime = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
+	
+	stateDidChange(old,s);
+}
+
+void PongWorld::stateDidChange( GameState old, GameState newState )
+{
+	if (1) cout << "stateDidChange " << getStateName(old) << " => " << getStateName(newState) << endl;
+	
+	switch (newState)
+	{
+		case GameState::Attract:
+		{
+			mPlayerScore[0]=0;
+			mPlayerScore[1]=0;
+		}
+		break;
+		
+		case GameState::Serve:
+		{
+		}
+		break;
+
+		case GameState::Play:
+		{
+		}
+		break;
+		
+		case GameState::Score:
+		{
+		}
+		break;
+		
+		case GameState::Over:
+		{
+		}
+		break;
 	}
 }
 
@@ -71,6 +203,8 @@ void PongWorld::didScore( int player )
 	cout << "didScore " << player << endl;
 
 	mPlayerScore[player] = ( mPlayerScore[player] + 1 ) % mMaxScore;
+	
+	goToState(GameState::Score);
 }
 
 void PongWorld::serve()
