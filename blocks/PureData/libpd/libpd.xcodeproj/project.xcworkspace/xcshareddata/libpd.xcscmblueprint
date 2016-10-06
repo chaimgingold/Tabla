@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "55AD89B46A9E576EF65303EBEE8FD4E5B017EB60",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "6F7A20C0CDB7BDCD5180DBA15CA6EBFFD435B7B5" : 9223372036854775807,
+    "55AD89B46A9E576EF65303EBEE8FD4E5B017EB60" : 9223372036854775807
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "A09FF5FC-92B4-4E69-8921-C2F4CA5CCB2D",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "6F7A20C0CDB7BDCD5180DBA15CA6EBFFD435B7B5" : "PaperBounce3\/blocks\/PureData\/libpd\/pure-data\/",
+    "55AD89B46A9E576EF65303EBEE8FD4E5B017EB60" : "PaperBounce3\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "libpd",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "blocks\/PureData\/libpd\/libpd.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:lukexi\/PaperBounce3",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "55AD89B46A9E576EF65303EBEE8FD4E5B017EB60"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "git:\/\/git.code.sf.net\/p\/pure-data\/pure-data",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "6F7A20C0CDB7BDCD5180DBA15CA6EBFFD435B7B5"
+    }
+  ]
+}

@@ -11,12 +11,14 @@
 
 #include "BallWorld.h"
 #include <chrono>
+#include "PureDataNode.h"
 
 class PongWorld : public BallWorld
 {
 public:
 
 	PongWorld();
+	~PongWorld();
 	
 	string getSystemName() const override { return "PongWorld"; }
 
@@ -99,6 +101,12 @@ private:
 	void goToState( GameState );
 	void stateDidChange( GameState old, GameState newState );
 	
+	
+	// synthesis
+	cipd::PureDataNodeRef	mPureDataNode;	// synth engine
+	cipd::PatchRef			mPatch;			// pong patch
+	
+	void setupSynthesis();
 };
 
 class PongWorldCartridge : public GameCartridge

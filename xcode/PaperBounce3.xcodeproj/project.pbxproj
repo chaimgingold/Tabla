@@ -73,6 +73,11 @@
 		B66BF6020B6B4738AF2E400D /* b2PolygonContact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9E75530E63FA4EC397C0D1E2 /* b2PolygonContact.cpp */; };
 		B82FE516E59446FB928ED0B8 /* b2Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 474731D0E50948D4B9522AA0 /* b2Timer.cpp */; };
 		BF8EA3BC1AE14D83A5112094 /* b2Contact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D9B3511148F4C0DB5FE5C5C /* b2Contact.cpp */; };
+		C2EC76FC1DA7157F00DB39C8 /* PureDataNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EC76401DA7157E00DB39C8 /* PureDataNode.cpp */; };
+		C2EC76FD1DA7157F00DB39C8 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = C2EC76441DA7157E00DB39C8 /* LICENSE.txt */; };
+		C2EC76FE1DA7157F00DB39C8 /* PdBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EC76451DA7157E00DB39C8 /* PdBase.cpp */; };
+		C2EC76FF1DA7157F00DB39C8 /* PdTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EC76491DA7157E00DB39C8 /* PdTypes.cpp */; };
+		C2EC77971DA715B000DB39C8 /* libpd-osx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C2EC77941DA7157F00DB39C8 /* libpd-osx.a */; };
 		C84DC4502D0A4C2384BE60F8 /* b2CollideEdge.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F13B4FFF724D4AE2835C1466 /* b2CollideEdge.cpp */; };
 		CB13ED488BF746B1BE951350 /* b2BroadPhase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F93652F56B44079C370901 /* b2BroadPhase.cpp */; };
 		E1F68EE0EF96421CAF0C6B52 /* b2Body.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C0B1C0F0E0A44565970E6E65 /* b2Body.cpp */; };
@@ -81,6 +86,30 @@
 		E63AB3EAB9064A24A06D7722 /* b2FrictionJoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5CDE0830E6EE4F0F98AE2856 /* b2FrictionJoint.cpp */; };
 		FE95B791332E4B49916DF787 /* b2DynamicTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B3C7770F8AC430A8E129474 /* b2DynamicTree.cpp */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C2EC77911DA7157F00DB39C8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C2EC764B1DA7157E00DB39C8 /* libpd.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC07E0554694100DB518D;
+			remoteInfo = "libpd-ios";
+		};
+		C2EC77931DA7157F00DB39C8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C2EC764B1DA7157E00DB39C8 /* libpd.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 119013AB1486450C00086F19;
+			remoteInfo = "libpd-osx";
+		};
+		C2EC77951DA715AA00DB39C8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C2EC764B1DA7157E00DB39C8 /* libpd.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 1190134E1486450C00086F19;
+			remoteInfo = "libpd-osx";
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		006D720219952D00008149E2 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
@@ -200,6 +229,16 @@
 		C0B1C0F0E0A44565970E6E65 /* b2Body.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2Body.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/b2Body.cpp; sourceTree = "<group>"; };
 		C159A0020C244479B7849346 /* b2EdgeAndPolygonContact.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2EdgeAndPolygonContact.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Contacts/b2EdgeAndPolygonContact.cpp; sourceTree = "<group>"; };
 		C20E7BFEBC8645C79A3B1048 /* b2RopeJoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2RopeJoint.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Joints/b2RopeJoint.cpp; sourceTree = "<group>"; };
+		C2EC76401DA7157E00DB39C8 /* PureDataNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PureDataNode.cpp; sourceTree = "<group>"; };
+		C2EC76411DA7157E00DB39C8 /* PureDataNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PureDataNode.h; sourceTree = "<group>"; };
+		C2EC76441DA7157E00DB39C8 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
+		C2EC76451DA7157E00DB39C8 /* PdBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PdBase.cpp; sourceTree = "<group>"; };
+		C2EC76461DA7157E00DB39C8 /* PdBase.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PdBase.hpp; sourceTree = "<group>"; };
+		C2EC76471DA7157E00DB39C8 /* PdMidiReceiver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PdMidiReceiver.hpp; sourceTree = "<group>"; };
+		C2EC76481DA7157E00DB39C8 /* PdReceiver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PdReceiver.hpp; sourceTree = "<group>"; };
+		C2EC76491DA7157E00DB39C8 /* PdTypes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PdTypes.cpp; sourceTree = "<group>"; };
+		C2EC764A1DA7157E00DB39C8 /* PdTypes.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PdTypes.hpp; sourceTree = "<group>"; };
+		C2EC764B1DA7157E00DB39C8 /* libpd.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = libpd.xcodeproj; sourceTree = "<group>"; };
 		C3C2844BE031475A8AD70FEF /* b2Island.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2Island.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/b2Island.cpp; sourceTree = "<group>"; };
 		C9366F177495484A87934087 /* OpenCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenCL.framework; path = System/Library/Frameworks/OpenCL.framework; sourceTree = SDKROOT; };
 		CBED44E9F44F448D8514086A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -231,6 +270,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2EC77971DA715B000DB39C8 /* libpd-osx.a in Frameworks */,
 				006D720419952D00008149E2 /* AVFoundation.framework in Frameworks */,
 				006D720519952D00008149E2 /* CoreMedia.framework in Frameworks */,
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
@@ -252,6 +292,7 @@
 		01B97315FEAEA392516A2CEA /* Blocks */ = {
 			isa = PBXGroup;
 			children = (
+				C2EC763E1DA7157E00DB39C8 /* PureData */,
 				3BA24452A4BE4625A810020B /* Box2D */,
 				BC3D44BD779D48C6980C3280 /* OpenCV3 */,
 			);
@@ -573,6 +614,57 @@
 			name = OpenCV3;
 			sourceTree = "<group>";
 		};
+		C2EC763E1DA7157E00DB39C8 /* PureData */ = {
+			isa = PBXGroup;
+			children = (
+				C2EC763F1DA7157E00DB39C8 /* Cinder-PureDataNode */,
+				C2EC76421DA7157E00DB39C8 /* libpd */,
+			);
+			name = PureData;
+			path = ../blocks/PureData;
+			sourceTree = "<group>";
+		};
+		C2EC763F1DA7157E00DB39C8 /* Cinder-PureDataNode */ = {
+			isa = PBXGroup;
+			children = (
+				C2EC76401DA7157E00DB39C8 /* PureDataNode.cpp */,
+				C2EC76411DA7157E00DB39C8 /* PureDataNode.h */,
+			);
+			path = "Cinder-PureDataNode";
+			sourceTree = "<group>";
+		};
+		C2EC76421DA7157E00DB39C8 /* libpd */ = {
+			isa = PBXGroup;
+			children = (
+				C2EC76431DA7157E00DB39C8 /* cpp */,
+				C2EC764B1DA7157E00DB39C8 /* libpd.xcodeproj */,
+			);
+			path = libpd;
+			sourceTree = "<group>";
+		};
+		C2EC76431DA7157E00DB39C8 /* cpp */ = {
+			isa = PBXGroup;
+			children = (
+				C2EC76441DA7157E00DB39C8 /* LICENSE.txt */,
+				C2EC76451DA7157E00DB39C8 /* PdBase.cpp */,
+				C2EC76461DA7157E00DB39C8 /* PdBase.hpp */,
+				C2EC76471DA7157E00DB39C8 /* PdMidiReceiver.hpp */,
+				C2EC76481DA7157E00DB39C8 /* PdReceiver.hpp */,
+				C2EC76491DA7157E00DB39C8 /* PdTypes.cpp */,
+				C2EC764A1DA7157E00DB39C8 /* PdTypes.hpp */,
+			);
+			path = cpp;
+			sourceTree = "<group>";
+		};
+		C2EC764C1DA7157E00DB39C8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C2EC77921DA7157F00DB39C8 /* libpd-ios.a */,
+				C2EC77941DA7157F00DB39C8 /* libpd-osx.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -587,6 +679,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				C2EC77961DA715AA00DB39C8 /* PBXTargetDependency */,
 			);
 			name = PaperBounce3;
 			productInstallPath = "$(HOME)/Applications";
@@ -613,12 +706,35 @@
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* PaperBounce3 */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = C2EC764C1DA7157E00DB39C8 /* Products */;
+					ProjectRef = C2EC764B1DA7157E00DB39C8 /* libpd.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				8D1107260486CEB800E47090 /* PaperBounce3 */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		C2EC77921DA7157F00DB39C8 /* libpd-ios.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libpd-ios.a";
+			remoteRef = C2EC77911DA7157F00DB39C8 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C2EC77941DA7157F00DB39C8 /* libpd-osx.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libpd-osx.a";
+			remoteRef = C2EC77931DA7157F00DB39C8 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		8D1107290486CEB800E47090 /* Resources */ = {
@@ -628,6 +744,7 @@
 				26FA36431D53C05700C64A00 /* research in Resources */,
 				26FA36501D5519DA00C64A00 /* assets in Resources */,
 				26FA36411D4A7D5300C64A00 /* todo in Resources */,
+				C2EC76FD1DA7157F00DB39C8 /* LICENSE.txt in Resources */,
 				75B53A468D1D4FD8A68DD3D9 /* CinderApp.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -644,6 +761,7 @@
 				3A09A46A8AF949E89CBDD5B5 /* b2CollideCircle.cpp in Sources */,
 				26FA365A1D5BDBC300C64A00 /* Pipeline.cpp in Sources */,
 				C84DC4502D0A4C2384BE60F8 /* b2CollideEdge.cpp in Sources */,
+				C2EC76FF1DA7157F00DB39C8 /* PdTypes.cpp in Sources */,
 				741A16EB71BE4A308C86D708 /* b2CollidePolygon.cpp in Sources */,
 				26FD3CD21D91E01E00B20327 /* PongWorld.cpp in Sources */,
 				509D1EB4420C46A3BB6D751D /* b2Collision.cpp in Sources */,
@@ -678,12 +796,14 @@
 				BF8EA3BC1AE14D83A5112094 /* b2Contact.cpp in Sources */,
 				9E53F22939EC46629ECD511A /* b2ContactSolver.cpp in Sources */,
 				3F51BFBD57064C0FBBDC06D5 /* b2EdgeAndCircleContact.cpp in Sources */,
+				C2EC76FE1DA7157F00DB39C8 /* PdBase.cpp in Sources */,
 				708F4BB51EFC4EB29281662D /* b2EdgeAndPolygonContact.cpp in Sources */,
 				23756771BB404A04991A26CB /* b2PolygonAndCircleContact.cpp in Sources */,
 				26FD3CCF1D90A12B00B20327 /* GameWorld.cpp in Sources */,
 				B66BF6020B6B4738AF2E400D /* b2PolygonContact.cpp in Sources */,
 				5BB8C5F56F5943658CC78ED8 /* b2DistanceJoint.cpp in Sources */,
 				E63AB3EAB9064A24A06D7722 /* b2FrictionJoint.cpp in Sources */,
+				C2EC76FC1DA7157F00DB39C8 /* PureDataNode.cpp in Sources */,
 				0CA79800755547E89E33867D /* b2GearJoint.cpp in Sources */,
 				26FA36491D53C5D300C64A00 /* Contour.cpp in Sources */,
 				27FB686FA380493A8438C8BB /* b2Joint.cpp in Sources */,
@@ -700,6 +820,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C2EC77961DA715AA00DB39C8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "libpd-osx";
+			targetProxy = C2EC77951DA715AA00DB39C8 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		C01FCF4B08A954540054247B /* Debug */ = {
@@ -809,6 +937,8 @@
 				HEADER_SEARCH_PATHS = (
 					"\"$(CINDER_PATH)/include\"",
 					../blocks/Box2D/src,
+					"../blocks/PureData/libpd/pure-data/src",
+					"../blocks/PureData/libpd/libpd_wrapper/**",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				ONLY_ACTIVE_ARCH = YES;
@@ -829,6 +959,8 @@
 				HEADER_SEARCH_PATHS = (
 					"\"$(CINDER_PATH)/include\"",
 					../blocks/Box2D/src,
+					"../blocks/PureData/libpd/pure-data/src",
+					"../blocks/PureData/libpd/libpd_wrapper/**",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				SDKROOT = macosx;
