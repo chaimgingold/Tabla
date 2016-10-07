@@ -10,6 +10,8 @@
 #include "PongWorld.h"
 #include "geom.h"
 #include "cinder/rand.h"
+#include "cinder/audio/Context.h"
+#include "cinder/audio/Source.h"
 
 using namespace std::chrono;
 
@@ -26,6 +28,8 @@ PongWorld::PongWorld()
 	mPlayerScore[0] = mPlayerScore[1] = 0;
 	
 	mMaxScore=5;
+
+	setupSynthesis();
 }
 
 vec2 PongWorld::fieldCorner( int i ) const
@@ -168,6 +172,7 @@ void PongWorld::stateDidChange( GameState old, GameState newState )
 		
 		case GameState::Over:
 		{
+			mPureDataNode->sendBang("new-game");
 		}
 		break;
 	}
@@ -175,16 +180,21 @@ void PongWorld::stateDidChange( GameState old, GameState newState )
 
 void PongWorld::onBallBallCollide   ( const Ball&, const Ball& )
 {
+
 	if (0) cout << "ball ball collide" << endl;
 }
 
 void PongWorld::onBallContourCollide( const Ball&, const Contour& )
 {
+	mPureDataNode->sendBang("hit-object");
+
 	if (0) cout << "ball contour collide" << endl;
 }
 
 void PongWorld::onBallWorldBoundaryCollide	( const Ball& b )
 {
+	mPureDataNode->sendBang("hit-wall");
+
 	if (0) cout << "ball world collide" << endl;
 
 	// which player side did it hit?
@@ -202,10 +212,13 @@ void PongWorld::onBallWorldBoundaryCollide	( const Ball& b )
 
 void PongWorld::didScore( int player )
 {
+	mPureDataNode->sendFloat("scored-point", player);
+
 	cout << "didScore " << player << endl;
 
-	mPlayerScore[player] = ( mPlayerScore[player] + 1 ) % mMaxScore;
+	mPlayerScore[player] = ( mPlayerScore[player] + 1 ) % (mMaxScore + 1);
 	
+	mPlayerJustScored=player;
 	goToState(GameState::Score);
 }
 
@@ -314,10 +327,25 @@ void PongWorld::computeFieldLayout()
 
 void PongWorld::drawScore( int player, vec2 dotStart, vec2 dotStep, float dotRadius, int score, int maxScore ) const
 {
+	float a=1.f;
+	
+	if ( ( mState==GameState::Score && player==mPlayerJustScored ) ||
+	     ( mState==GameState::Over) )
+	{
+		float kFreq = .35f;
+		
+		float t = getSecsInState();
+		
+		a = (t/kFreq) - floorf(t/kFreq) ;
+		
+		if ( a<.5 ) a=0.f;
+	}
+
+
 	const int   kNumSegments = 12;
 	const float kStrokeWidth = .2f;
 	
-	gl::color(mPlayerColor[player]);
+	gl::color( ColorA( mPlayerColor[player],a) );
 	
 	for( int i=0; i<maxScore; ++i )
 	{
@@ -349,4 +377,29 @@ void PongWorld::strobeBalls()
 	{
 		b.mColor.a = a;
 	}
+}
+
+// Synthesis
+void PongWorld::setupSynthesis()
+{
+	auto ctx = audio::master();
+	
+	// Create the synth engine
+	mPureDataNode = ctx->makeNode( new cipd::PureDataNode( audio::Node::Format().autoEnable() ) );
+	
+	// Enable Cinder audio
+	ctx->enable();
+	
+	// Load pong synthesis
+	mPureDataNode->disconnectAll();
+	mPatch = mPureDataNode->loadPatch( DataSourcePath::create(getAssetPath("synths/pong.pd")) );
+	
+	// Connect synth to master output
+	mPureDataNode >> audio::master()->getOutput();
+}
+
+PongWorld::~PongWorld() {
+	// Clean up synth engine
+	mPureDataNode->disconnectAll();
+	mPureDataNode->closePatch(mPatch);
 }
