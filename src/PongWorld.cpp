@@ -73,9 +73,10 @@ void PongWorld::update()
 		
 		case GameState::Score:
 		{
+			strobeBalls();
+
 			if ( getSecsInState() > 1.5f )
 			{
-				// todo: timer
 				if ( mPlayerScore[0] == mMaxScore || mPlayerScore[1] == mMaxScore )
 				{
 					goToState( GameState::Over );
@@ -90,7 +91,8 @@ void PongWorld::update()
 		
 		case GameState::Over:
 		{
-			// todo: timer
+			clearBalls();
+			
 			if ( getSecsInState() > 2.f )
 			{
 				goToState( GameState::Attract );
@@ -334,3 +336,17 @@ void PongWorld::drawScore( int player, vec2 dotStart, vec2 dotStep, float dotRad
 	}
 }
 
+void PongWorld::strobeBalls()
+{
+	float kFreq = .35f;
+	
+	float t = getSecsInState();
+	
+	float a = (t/kFreq) - floorf(t/kFreq) ;
+//	float a = (t - roundf( t / kFreq )) > .5f ? 1.f : 0.f ;
+	
+	for( auto &b : getBalls() )
+	{
+		b.mColor.a = a;
+	}
+}

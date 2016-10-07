@@ -99,6 +99,8 @@ private:
 	void goToState( GameState );
 	void stateDidChange( GameState old, GameState newState );
 	
+	// feedback
+	void strobeBalls();
 };
 
 class PongWorldCartridge : public GameCartridge

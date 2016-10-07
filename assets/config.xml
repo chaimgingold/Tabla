@@ -8,7 +8,7 @@
 <!--	This could use a cleanup since we refactored into two windows	-->
 		<AutoFullScreenProjector>	1 </AutoFullScreenProjector>
 		<DrawCameraImage>			1 </DrawCameraImage>
-		<DrawContours>				1 </DrawContours>
+		<DrawContours>				0 </DrawContours>
 		<DrawContoursFilled>		0 </DrawContoursFilled>
 		<DrawMouseDebugInfo>		1 </DrawMouseDebugInfo>
 		<DrawContourMousePick>		1 </DrawContourMousePick>
@@ -68,7 +68,7 @@
 	<Vision>
 		<ContourMinRadius>			1	</ContourMinRadius>
 		<ContourMinArea>			1	</ContourMinArea>
-		<ContourDPEpsilon>			2	</ContourDPEpsilon>
+		<ContourDPEpsilon>			1	</ContourDPEpsilon>
 		<ContourMinWidth>			2	</ContourMinWidth>
 	</Vision>
 
@@ -79,7 +79,7 @@
 			<!-- cm -->
 			<BallDefaultRadius>			.5 </BallDefaultRadius>
 			<BallDefaultMaxRadius>		2 </BallDefaultMaxRadius>
-			<BallMaxVel>				1 </BallMaxVel>
+			<BallMaxVel>				.2 </BallMaxVel>
 			<BallDefaultColor>			C62D41 </BallDefaultColor>
 		</BallWorld>
 

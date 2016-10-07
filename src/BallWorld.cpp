@@ -148,12 +148,19 @@ void BallWorld::newRandomBall ( vec2 loc )
 	Ball ball ;
 	
 	ball.mColor = mBallDefaultColor;
+	
 	ball.setLoc( loc ) ;
 	ball.mRadius = Rand::randFloat(mBallDefaultRadius,mBallDefaultMaxRadius) ;
 	ball.setMass( M_PI * powf(ball.mRadius,3.f) ) ;
 	
 	ball.mCollideWithContours = randBool();
 	if (!ball.mCollideWithContours) ball.mColor = Color(0,0,1);
+
+	if ( Rand::randBool() )
+	{
+		if (ball.mCollideWithContours) ball.mColor = Color(0,1,0);
+		else ball.mColor = Color(.5,0,.5);
+	}
 	
 	ball.setVel( Rand::randVec2() * mBallDefaultRadius/2.f ) ;
 	

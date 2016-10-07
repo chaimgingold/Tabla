@@ -424,51 +424,29 @@ void PaperBounce3App::drawWorld( bool highQuality )
 		// filled
 		if ( mDrawContoursFilled )
 		{
+			// TODO make fill colors tunable
+			ColorA holecolor(.0f,.0f,.0f,.8f);
+			ColorA fillcolor(.2f,.2f,.4f,.5f);
+			
 			// recursive tree
-			if (1)
+			function<void(const Contour&)> drawOne = [&]( const Contour& c )
 			{
-				function<void(const Contour&)> drawOne = [&]( const Contour& c )
-				{
-					if ( c.mIsHole ) gl::color(.0f,.0f,.0f,.8f);
-					else gl::color(.2f,.2f,.4f,.5f);
-					
-					gl::drawSolid(c.mPolyLine);
-					
-					for( auto childIndex : c.mChild )
-					{
-						drawOne( mContours[childIndex] ) ;
-					}
-				};
+				if ( c.mIsHole ) gl::color( holecolor );
+				else gl::color( fillcolor );
 				
-				for( auto const &c : mContours )
+				gl::drawSolid(c.mPolyLine);
+				
+				for( auto childIndex : c.mChild )
 				{
-					if ( c.mTreeDepth==0 )
-					{
-						drawOne(c) ;
-					}
+					drawOne( mContours[childIndex] ) ;
 				}
-			}
-			else
-			// flat... (should work just the same, hmm)
+			};
+			
+			for( auto const &c : mContours )
 			{
-				// solids
-				for( auto c : mContours )
+				if ( c.mTreeDepth==0 )
 				{
-					if ( !c.mIsHole )
-					{
-						gl::color(.2f,.2f,.4f,.5f);
-						gl::drawSolid(c.mPolyLine);
-					}
-				}
-	
-				// holes
-				for( auto c : mContours )
-				{
-					if ( c.mIsHole )
-					{
-						gl::color(.0f,.0f,.0f,.8f);
-						gl::drawSolid(c.mPolyLine);
-					}
+					drawOne(c) ;
 				}
 			}
 		}

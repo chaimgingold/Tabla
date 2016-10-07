@@ -1,4 +1,29 @@
+Vi, Emily playtest
+	More colors of paper
+	More colors of ball per behavior
+	Some agent/wall-following behavior. A roomba?
+	Things that explode when they hit the wall. (Goetz)
+	Colors of ball stay on same colors of paper. (We have colored paper)
+	Balls are infinitely more fun than Pong game.
+	No contour lines.
+	Balls collide and change colors
+	Smashed together and balls merge;
+	(me) balls split apart when 'frustrated'
+	Googley eyes projected onto paper
+
+
 More Game Worlds
+- Pong
+	- Synch start state: touch here to start (p1 + p2) (at side of field)
+	- 321 start
+	- Synch state at game end? touch center to burst that button and start?
+	- Sound effects
+	- Make ball get faster as volleys increase; or random start speed?
+	- Pause:
+		- Hand over camera?
+		- Take paddles off the table.
+		- One paddle on each side of table.
+
 - Support
 	√ Allow ball simulation in empty space (space between paddles) (Pong)
 		- Flag certain balls as doing inverse contour geometry.

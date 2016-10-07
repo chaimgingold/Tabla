@@ -91,17 +91,17 @@ protected:
 	// ideally BallWorld would just provide a list of collisions to others.
 	// once we can uniquely id balls + contours with user data we'll switch to that model
 	// and make these functions non-virtual and then they can do the recording.
-	
-private:
 
-	vec2 unlapEdge( vec2 p, float r, const Contour& poly, const Ball* b=0 );
-	vec2 unlapHoles( vec2 p, float r, ContourKind kind, const Ball* b=0 );
-	
 	// params
 	float	mBallDefaultRadius		= 8.f *  .5f ;
 	float	mBallDefaultMaxRadius	= 8.f * 4.f ;
 	float	mBallMaxVel				= 8.f ;
 	ColorAf mBallDefaultColor		= ColorAf::hex(0xC62D41);
+	
+private:
+
+	vec2 unlapEdge( vec2 p, float r, const Contour& poly, const Ball* b=0 );
+	vec2 unlapHoles( vec2 p, float r, ContourKind kind, const Ball* b=0 );
 	
 	//
 	vec2 resolveCollisionWithBalls		( vec2 p, float r, Ball* ignore=0, float correctionFraction=1.f ) const ;
