@@ -61,6 +61,14 @@ void BallWorld::draw( bool highQuality )
 	}
 }
 
+void BallWorld::gameWillLoad()
+{
+	for ( int i=0; i<20; ++i )
+	{
+		newRandomBall( getRandomPointInWorldBoundsPoly() );
+	}
+}
+
 void BallWorld::update()
 {
 	int   steps = 1 ;

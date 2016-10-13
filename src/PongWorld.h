@@ -10,7 +10,6 @@
 #define PongWorld_hpp
 
 #include "BallWorld.h"
-#include <chrono>
 #include "PureDataNode.h"
 
 class PongWorld : public BallWorld
@@ -22,6 +21,7 @@ public:
 	
 	string getSystemName() const override { return "PongWorld"; }
 
+	void gameWillLoad() override;
 	void update() override;
 	void draw( bool highQuality ) override;
 	
@@ -94,7 +94,7 @@ private:
 	// then it can be generalized to our other games easily, too.
 	
 	GameState mState;
-	chrono::milliseconds mStateEnterTime;
+	float mStateEnterTime;
 	int mPlayerJustScored;
 	
 	float getSecsInState() const; // how long we been in this state?

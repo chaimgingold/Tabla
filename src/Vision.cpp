@@ -10,7 +10,7 @@
 #include "xml.h"
 #include "ocv.h"
 
-void Vision::setParams( XmlTree xml )
+void Vision::Params::set( XmlTree xml )
 {
 	getXml(xml,"ContourMinRadius",mContourMinRadius);
 	getXml(xml,"ContourMinArea",mContourMinArea);
@@ -146,9 +146,9 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 		
 		cv::RotatedRect rotatedRect = minAreaRect(c) ;
 		
-		if (	radius > mContourMinRadius &&
-				area > mContourMinArea &&
-				min( rotatedRect.size.width, rotatedRect.size.height ) > mContourMinWidth )
+		if (	radius > mParams.mContourMinRadius &&
+				area   > mParams.mContourMinArea   &&
+				min( rotatedRect.size.width, rotatedRect.size.height ) > mParams.mContourMinWidth )
 		{
 			auto addContour = [&]( const vector<cv::Point>& c )
 			{
@@ -183,12 +183,12 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 				ocvContourIdxToMyContourIdx[i] = mContourOutput.size()-1 ;
 			} ;
 			
-			if ( mContourDPEpsilon > 0 )
+			if ( mParams.mContourDPEpsilon > 0 )
 			{
 				// simplify
 				vector<cv::Point> approx ;
 				
-				cv::approxPolyDP( c, approx, mContourDPEpsilon, true ) ;
+				cv::approxPolyDP( c, approx, mParams.mContourDPEpsilon, true ) ;
 				
 				addContour(approx);
 			}

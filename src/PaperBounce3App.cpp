@@ -2,6 +2,7 @@
 
 #include "BallWorld.h"
 #include "PongWorld.h"
+#include "MusicWorld.h"
 
 #include "geom.h"
 #include "xml.h"
@@ -83,14 +84,8 @@ void PaperBounce3App::setup()
 		{
 			mGameXmlParams = xml.getChild("PaperBounce3/Games");
 			setGameWorldXmlParams();
-//			mBallWorld.setParams(xml.getChild("PaperBounce3/BallWorld"));
 		}
 		
-		if (xml.hasChild("PaperBounce3/Vision"))
-		{
-			mVision.setParams(xml.getChild("PaperBounce3/Vision"));
-		}
-
 		if (xml.hasChild("PaperBounce3/LightLink") && !fs::exists(getUserLightLinkFilePath()) )
 		{
 			mLightLink.setParams(xml.getChild("PaperBounce3/LightLink"));
@@ -188,9 +183,9 @@ void PaperBounce3App::setup()
 
 void PaperBounce3App::setupGameLibrary()
 {
-//	mGameLibrary.push_back( GameCartridgeSimple( [](){ return make_shared<BallWorld>(); } ) );
 	mGameLibrary.push_back( make_shared<BallWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<PongWorldCartridge>() );
+	mGameLibrary.push_back( make_shared<MusicWorldCartridge>() );
 }
 
 void PaperBounce3App::loadDefaultGame()
@@ -214,8 +209,10 @@ void PaperBounce3App::loadGame( int libraryIndex )
 		cout << "loadGame: " << mGameWorld->getSystemName() << endl;
 		
 		setGameWorldXmlParams();
+		mVision.setParams( mGameWorld->getVisionParams() );
 
 		mGameWorld->setWorldBoundsPoly( getWorldBoundsPoly() );
+		mGameWorld->gameWillLoad();
 	}
 }
 
@@ -225,8 +222,8 @@ void PaperBounce3App::loadAdjacentGame( int libraryIndexDelta )
 	{
 		int i = mGameWorldCartridgeIndex + libraryIndexDelta;
 		
-		if ( i >= mGameLibrary.size() ) i = i % mGameLibrary.size();
-		if ( i < 0 ) i = mGameLibrary.size() - ((-i) % mGameLibrary.size()) ;
+		if ( i >= (int)mGameLibrary.size() ) i = i % (int)mGameLibrary.size();
+		if ( i < 0 ) i = (int)mGameLibrary.size() - ((-i) % (int)mGameLibrary.size()) ;
 		
 		loadGame(i);
 	}
@@ -240,7 +237,20 @@ void PaperBounce3App::setGameWorldXmlParams()
 		
 		if ( mGameXmlParams.hasChild(xmlNodeName) )
 		{
-			mGameWorld->setParams( mGameXmlParams.getChild(xmlNodeName) );
+			XmlTree gameParams = mGameXmlParams.getChild(xmlNodeName);
+			
+			// load game specific params
+			mGameWorld->setParams( gameParams );
+			
+			// load Vision params for it
+			if ( gameParams.hasChild("Vision") )
+			{
+				Vision::Params p;
+				p.set( gameParams.getChild("Vision") );
+				mGameWorld->setVisionParams(p);
+				mVision.setParams( mGameWorld->getVisionParams() );
+				cout << "load dp " << mGameWorld->getVisionParams().mContourDPEpsilon << endl;
+			}
 		}
 	}
 }
@@ -398,6 +408,7 @@ void PaperBounce3App::drawWorld( bool highQuality )
 	const vec2 mouseInWorld    = win->getMainImageView()->windowToWorld(mouseInWindow);
 	const bool isMouseInWindow = win->getWindow()->getBounds().contains(win->getMousePosInWindow());
 	
+	const bool isUIWindow = win->getIsUIWindow();
 	
 	// draw frame
 	if (0)
@@ -419,7 +430,7 @@ void PaperBounce3App::drawWorld( bool highQuality )
 	}
 
 	// draw contours
-	if ( mDrawContours )
+	if ( mDrawContours || isUIWindow )
 	{
 		// filled
 		if ( mDrawContoursFilled )
@@ -465,7 +476,7 @@ void PaperBounce3App::drawWorld( bool highQuality )
 			}
 		}
 
-		if ( mDrawContourMousePick )
+		if ( mDrawContourMousePick || isUIWindow )
 		{
 			// picked highlight
 			const Contour* picked = mContours.findLeafContourContainingPoint( mouseInWorld ) ;
@@ -491,7 +502,7 @@ void PaperBounce3App::drawWorld( bool highQuality )
 	if (mGameWorld) mGameWorld->draw(highQuality);
 	
 	// mouse debug info
-	if ( mDrawMouseDebugInfo && isMouseInWindow && mGameWorld )
+	if ( (mDrawMouseDebugInfo||isUIWindow) && isMouseInWindow && mGameWorld )
 	{
 		mGameWorld->drawMouseDebugInfo(mouseInWorld);
 	}

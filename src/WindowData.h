@@ -34,6 +34,8 @@ public:
 	
 	ViewCollection& getViews() { return mViews; }
 	
+	bool getIsUIWindow() const { return mIsUIWindow; }
+	
 private:
 
 	WindowRef mWindow;

@@ -26,6 +26,7 @@
 		22088F63A8874EB4BAA43888 /* b2BlockAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 591FA7613BF840AF83A5482A /* b2BlockAllocator.cpp */; };
 		23756771BB404A04991A26CB /* b2PolygonAndCircleContact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6B648D73A5D453781A11E34 /* b2PolygonAndCircleContact.cpp */; };
 		24F2003E479C4BC49D1F7374 /* b2WheelJoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 627E59F1B82E4F36ABF0DE48 /* b2WheelJoint.cpp */; };
+		262A886B1DB011FF00FE2336 /* MusicWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 262A88691DB011FF00FE2336 /* MusicWorld.cpp */; };
 		2635C8D01D8768C900DF30BE /* WindowData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2635C8CE1D8768C900DF30BE /* WindowData.cpp */; };
 		26BC84B31D80DF89006001DC /* PipelineStageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26BC84B11D80DF89006001DC /* PipelineStageView.cpp */; };
 		26FA36411D4A7D5300C64A00 /* todo in Resources */ = {isa = PBXBuildFile; fileRef = 26FA36401D4A7D5300C64A00 /* todo */; };
@@ -130,6 +131,8 @@
 		1329BFF5C8084A8E9BB37921 /* b2Collision.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2Collision.cpp; path = ../blocks/Box2D/src/Box2D/Collision/b2Collision.cpp; sourceTree = "<group>"; };
 		1967F5787DB34245B2B91CBA /* b2EdgeAndCircleContact.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = b2EdgeAndCircleContact.h; path = ../blocks/Box2D/src/Box2D/Dynamics/Contacts/b2EdgeAndCircleContact.h; sourceTree = "<group>"; };
 		1DCA2C3FD6C84A6DAB24027E /* b2DistanceJoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2DistanceJoint.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Joints/b2DistanceJoint.cpp; sourceTree = "<group>"; };
+		262A88691DB011FF00FE2336 /* MusicWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MusicWorld.cpp; path = ../src/MusicWorld.cpp; sourceTree = "<group>"; };
+		262A886A1DB011FF00FE2336 /* MusicWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MusicWorld.h; path = ../src/MusicWorld.h; sourceTree = "<group>"; };
 		2635C8CD1D83245400DF30BE /* GameWorld.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GameWorld.h; path = ../src/GameWorld.h; sourceTree = "<group>"; };
 		2635C8CE1D8768C900DF30BE /* WindowData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = WindowData.cpp; path = ../src/WindowData.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		2635C8CF1D8768C900DF30BE /* WindowData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WindowData.h; path = ../src/WindowData.h; sourceTree = "<group>"; };
@@ -439,6 +442,8 @@
 				26FA36441D53C31A00C64A00 /* BallWorld.cpp */,
 				26FD3CD11D91E01E00B20327 /* PongWorld.h */,
 				26FD3CD01D91E01E00B20327 /* PongWorld.cpp */,
+				262A88691DB011FF00FE2336 /* MusicWorld.cpp */,
+				262A886A1DB011FF00FE2336 /* MusicWorld.h */,
 			);
 			name = World;
 			sourceTree = "<group>";
@@ -761,6 +766,7 @@
 				3A09A46A8AF949E89CBDD5B5 /* b2CollideCircle.cpp in Sources */,
 				26FA365A1D5BDBC300C64A00 /* Pipeline.cpp in Sources */,
 				C84DC4502D0A4C2384BE60F8 /* b2CollideEdge.cpp in Sources */,
+				262A886B1DB011FF00FE2336 /* MusicWorld.cpp in Sources */,
 				C2EC76FF1DA7157F00DB39C8 /* PdTypes.cpp in Sources */,
 				741A16EB71BE4A308C86D708 /* b2CollidePolygon.cpp in Sources */,
 				26FD3CD21D91E01E00B20327 /* PongWorld.cpp in Sources */,

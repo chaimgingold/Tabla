@@ -14,12 +14,17 @@
 #include "cinder/Xml.h"
 #include "cinder/PolyLine.h"
 #include "Contour.h"
-
+#include "Vision.h"
 
 class GameWorld
 {
 public:
 	virtual string getSystemName() const { return "GameWorld"; } // for xml param block name
+	
+	void		   setVisionParams( Vision::Params p ) { mVisionParams=p; }
+	Vision::Params getVisionParams() const { return mVisionParams; }
+	// app automatically loads xml params for GameWorld and sets them.
+	// it then gets them when they are needed.
 	
 	virtual void setParams( XmlTree ){}
 	virtual void updateContours( const ContourVector &c ){}
@@ -33,7 +38,7 @@ public:
 	// and then pick whether you want a hole or not hole.
 	// randomPointOnContour()
 
-	
+	virtual void gameWillLoad(){}
 	virtual void update(){}
 	virtual void draw( bool highQuality ){}
 	
@@ -44,7 +49,8 @@ public:
 	virtual void keyDown( KeyEvent ){}
 	
 private:
-	PolyLine2 mWorldBoundsPoly;
+	Vision::Params	mVisionParams;
+	PolyLine2		mWorldBoundsPoly;
 	
 };
 

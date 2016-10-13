@@ -32,12 +32,18 @@ class Vision
 public:
 
 	// settings
-	void setParams( XmlTree );
+	class Params
+	{
+	public:
+		void set( XmlTree );
+	
+		float mContourMinRadius	=	3;
+		float mContourMinArea	=	100;
+		float mContourDPEpsilon	=	5;
+		float mContourMinWidth	=	5;
+	};
 
-	float mContourMinRadius	=	3;
-	float mContourMinArea	=	100;
-	float mContourDPEpsilon	=	5;
-	float mContourMinWidth	=	5;
+	void setParams( Params p ) { mParams=p; }
 
 	void setLightLink( const LightLink &ll ) { mLightLink=ll; }
 	
@@ -48,7 +54,8 @@ public:
 	ContourVector mContourOutput;
 	
 private:
-	LightLink mLightLink;
+	Params		mParams;
+	LightLink	mLightLink;
 
 };
 

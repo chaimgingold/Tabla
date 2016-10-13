@@ -6,19 +6,15 @@
 //
 //
 
-#include <time.h>
 #include "PongWorld.h"
 #include "geom.h"
 #include "cinder/rand.h"
 #include "cinder/audio/Context.h"
 #include "cinder/audio/Source.h"
 
-using namespace std::chrono;
-
 PongWorld::PongWorld()
 {
-//	mStateEnterTime = time(0);
-	mStateEnterTime = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
+	mStateEnterTime = ci::app::getElapsedSeconds();
 	
 	mState = GameState::Attract;
 	
@@ -37,6 +33,11 @@ vec2 PongWorld::fieldCorner( int i ) const
 	int j = i + mFieldPlayer0LeftCornerIndex;
 	
 	return getWorldBoundsPoly().getPoints()[ j % getWorldBoundsPoly().getPoints().size() ];
+}
+
+void PongWorld::gameWillLoad()
+{
+	// most important thing is to prevent BallWorld from doing its default thing.
 }
 
 void PongWorld::update()
@@ -120,15 +121,7 @@ string PongWorld::getStateName( GameState s ) const
 
 float PongWorld::getSecsInState() const
 {
-	milliseconds ms = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
-	
-	std::chrono::duration<float> fsec = ms - mStateEnterTime;
-	
-	float f = fsec.count() ;
-	
-	if (0) cout << f << endl;
-	
-	return f;
+	return ci::app::getElapsedSeconds() - mStateEnterTime;
 }
 
 void PongWorld::goToState( GameState s )
@@ -136,8 +129,7 @@ void PongWorld::goToState( GameState s )
 	GameState old = mState;
 	
 	mState = s;
-//	mStateEnterTime = time(0);
-	mStateEnterTime = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
+	mStateEnterTime = ci::app::getElapsedSeconds();
 	
 	stateDidChange(old,s);
 }

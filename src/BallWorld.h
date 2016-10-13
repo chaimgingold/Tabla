@@ -56,12 +56,13 @@ private:
 class BallWorld : public GameWorld
 {
 public:
-
+	
 	string getSystemName() const override { return "BallWorld"; }
 	
 	void setParams( XmlTree ) override;
 	void updateContours( const ContourVector &c ) override { mContours = c; }
 	
+	void gameWillLoad() override; // make some balls by default
 	void update() override;
 	void draw( bool highQuality ) override;
 	
