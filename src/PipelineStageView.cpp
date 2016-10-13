@@ -11,13 +11,13 @@
 
 void PipelineStageView::draw()
 {
-	const Pipeline::Stage* stage = mPipeline.getStage(mStageName);		
+	const Pipeline::StageRef stage = mPipeline.getStage(mStageName);
 
 	// image
-	if ( stage && stage->mImage )
+	if ( stage && stage->getGLImage() )
 	{
 		gl::color(1,1,1);
-		gl::draw( stage->mImage, getBounds() );
+		gl::draw( stage->getGLImage(), getBounds() );
 	}
 	else
 	{
@@ -61,14 +61,14 @@ void PipelineStageView::drawFrame()
 
 void MainImageView::draw()
 {
-	const Pipeline::Stage* stage = getPipelineStage();
+	const Pipeline::StageRef stage = getPipelineStage();
 	
 	// vision pipeline image
-	if ( stage && stage->mImage )
+	if ( stage && stage->getGLImage() )
 	{
 		gl::color( 1, 1, 1 );
 		
-		gl::draw( stage->mImage );
+		gl::draw( stage->getGLImage() );
 	}
 
 //	if (1)
@@ -127,7 +127,7 @@ string MainImageView::getPipelineStageName() const
 	return mStageName.empty() ? mApp.mPipeline.getQuery() : mStageName;
 }
 
-const Pipeline::Stage* MainImageView::getPipelineStage() const
+const Pipeline::StageRef MainImageView::getPipelineStage() const
 {
 	return getPipeline().getStage(getPipelineStageName());
 }

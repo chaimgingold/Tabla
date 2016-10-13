@@ -284,7 +284,7 @@ void PaperBounce3App::mouseDrag( MouseEvent event )
 void PaperBounce3App::addProjectorPipelineStages()
 {
 	// set that image
-	mPipeline.then( mLightLink.mProjectorSize, "projector" ) ;
+	mPipeline.then( "projector", mLightLink.mProjectorSize ) ;
 	
 	mPipeline.setImageToWorldTransform(
 		getOcvPerspectiveTransform(
@@ -308,7 +308,7 @@ void PaperBounce3App::updatePipelineViews( bool areViewsVisible )
 	for( const auto &s : stages )
 	{
 		// view exists?
-		ViewRef view = views.getViewByName(s.mName);
+		ViewRef view = views.getViewByName(s->mName);
 		
 		// erase it?
 		if ( view && !areViewsVisible )
@@ -320,12 +320,12 @@ void PaperBounce3App::updatePipelineViews( bool areViewsVisible )
 		// make a new one?
 		if ( !view && areViewsVisible )
 		{
-			PipelineStageView psv( mPipeline, s.mName );
+			PipelineStageView psv( mPipeline, s->mName );
 			psv.setWorldDrawFunc( [&](){ drawWorld(false); } );
 			
 			view = make_shared<PipelineStageView>(psv);
 			
-			view->setName(s.mName);
+			view->setName(s->mName);
 			
 			views.addView(view);
 		}
@@ -334,12 +334,12 @@ void PaperBounce3App::updatePipelineViews( bool areViewsVisible )
 		if (view)
 		{
 			// update its location
-			vec2 size = s.mImageSize;
+			vec2 size = s->mImageSize;
 			
 			size *= mConfigWindowPipelineWidth / size.x ;
 			
 			view->setFrame ( Rectf(pos, pos + size) );
-			view->setBounds( Rectf(vec2(0,0), s.mImageSize) );
+			view->setBounds( Rectf(vec2(0,0), s->mImageSize) );
 			
 			// next pos
 			pos = view->getFrame().getLowerLeft() + vec2(0,mConfigWindowPipelineGutter);

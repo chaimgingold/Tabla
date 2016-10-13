@@ -71,7 +71,7 @@ public:
 		// by default is empty to track Pipeline's query stage
 		// setting it allows you to overload the query stage and lock it in place.
 	
-	const Pipeline::Stage* getPipelineStage() const;
+	const Pipeline::StageRef getPipelineStage() const;
 	
 	function<void(void)> mWorldDrawFunc; // this overloads use of mGameWorld.draw()
 	// :P kinda lame.

@@ -123,7 +123,7 @@ void MusicWorld::update()
 {
 }
 
-void MusicWorld::getQuadOrderedSides( const PolyLine2& p, vec2 out[4] )
+void MusicWorld::getTimeOrderedQuad( const PolyLine2& p, vec2 out[4] )
 {
 	// could have simplified a bit and just examined two bisecting lines. oh well. it works.
 	assert( p.size()==4 );
@@ -204,7 +204,7 @@ void MusicWorld::draw( bool highQuality )
 			
 			//
 			vec2 pts[4];
-			getQuadOrderedSides(c.mPolyLine,pts);
+			getTimeOrderedQuad(c.mPolyLine,pts);
 			
 			gl::color(0,1,0);
 			float t = getPlayheadForQuad(pts);

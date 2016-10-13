@@ -36,7 +36,7 @@ private:
 	// scores
 	ContourVector mContours;
 	
-	void  getQuadOrderedSides( const PolyLine2& p, vec2 out[4] );
+	void  getTimeOrderedQuad( const PolyLine2& p, vec2 out[4] );
 	float getPlayheadForQuad( vec2 quad[4] ) const; // returns 0..1
 	
 	/*  Quad vertices are played back like so:

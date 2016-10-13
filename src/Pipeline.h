@@ -27,7 +27,7 @@ class Pipeline
 	*/
 	
 public:
-
+	
 	bool empty() const { return mStages.empty(); }
 	
 	void	setQuery( string q ) { mQuery=q; } ;
@@ -38,13 +38,6 @@ public:
 	
 	string	getNextStageName( string s ) const { return getAdjStageName(s, 1); }
 	string	getPrevStageName( string s ) const { return getAdjStageName(s,-1); }
-	
-	void start();
-	
-	void then( Surface &img, string name );
-	void then( cv::Mat &img, string name );
-	void then( gl::Texture2dRef ref, string name );
-	void then( vec2 frameSize, string name );
 	
 	void setImageToWorldTransform( const glm::mat4& );
 	
@@ -59,12 +52,29 @@ public:
 		mat4			mImageToWorld;
 		mat4			mWorldToImage;
 		vec2			mImageSize;
-		gl::TextureRef	mImage;
+		
+		cv::Mat			mImageCV;
+		mutable gl::TextureRef	mImageGL;
+		
+		gl::TextureRef getGLImage() const; // will convert mImageCV -> mImageGL if needed & possible.
 	};
+
+	typedef shared_ptr<Stage> StageRef;
+
+
+	void start();
 	
-	const Stage* getQueryStage() const { return (mQueryIndex==-1) ? 0 : &mStages[mQueryIndex] ; }
-	const vector<Stage>& getStages() const { return mStages ; }
-	const Stage* getStage( string name ) const;
+	StageRef then( string name );
+	StageRef then( string name, vec2 frameSize );
+
+	StageRef then( string name, Surface &img );
+	StageRef then( string name, cv::Mat &img );
+	StageRef then( string name, gl::Texture2dRef ref );
+	
+	
+	const StageRef getQueryStage() const { return (mQueryIndex==-1) ? 0 : mStages[mQueryIndex] ; }
+	const vector<StageRef>& getStages() const { return mStages ; }
+	const StageRef getStage( string name ) const;
 	
 	void setCaptureAllStageImages( bool v ) { mCaptureAllStageImages=v; }
 	
@@ -79,10 +89,12 @@ private:
 	void then( function<gl::Texture2dRef()>, string name, vec2 size );
 		// so that we only fabricate the texture if it matches the query.
 		// this might be a silly optimization, and we should just cache them all.
+
+	bool	 getShouldCacheImage( const StageRef );
 	
 	string getAdjStageName( string, int adj ) const;
 
-	vector<Stage> mStages;
+	vector<StageRef> mStages;
 	
 	string		   mQuery ;
 	int			   mQueryIndex=-1 ;

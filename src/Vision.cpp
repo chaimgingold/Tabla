@@ -43,14 +43,14 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 	cv::Mat input( toOcv( Channel( surface ) ) );
 	cv::Mat clipped, output, gray, thresholded ;
 
-	pipeline.then( input, "input" );
-
+	pipeline.then( "input", input );
+	
 	pipeline.setImageToWorldTransform( getOcvPerspectiveTransform(
 		mLightLink.mCaptureCoords,
 		mLightLink.mCaptureWorldSpaceCoords ) );
 	
 	// ---- World Boundaries ----
-	pipeline.then( vec2(4,4)*100.f, "world-boundaries" ); // 4m^2 configurable area
+	pipeline.then( "world-boundaries", vec2(4,4)*100.f ); // 4m^2 configurable area
 	pipeline.setImageToWorldTransform( mat4() ); // identity; do it in world space
 		// this is here just so it can be configured by the user.
 	
@@ -95,7 +95,7 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 		cv::warpPerspective(input, clipped, xform, outputSize );
 		
 		// log to pipeline
-		pipeline.then( clipped, "clipped" );
+		pipeline.then( "clipped", clipped );
 		
 		glm::mat4 imageToWorld = glm::scale( vec3( 1.f / pixelScale, 1.f / pixelScale, 1.f ) );
 		
@@ -110,7 +110,7 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 	// threshold
 //	cv::threshold( gray, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
 	cv::threshold( clipped, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
-	pipeline.then( thresholded, "thresholded" );
+	pipeline.then( "thresholded", thresholded );
 	
 	// contour detect
 	vector<vector<cv::Point> > contours;
