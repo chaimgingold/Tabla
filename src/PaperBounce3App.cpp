@@ -249,7 +249,6 @@ void PaperBounce3App::setGameWorldXmlParams()
 				p.set( gameParams.getChild("Vision") );
 				mGameWorld->setVisionParams(p);
 				mVision.setParams( mGameWorld->getVisionParams() );
-				cout << "load dp " << mGameWorld->getVisionParams().mContourDPEpsilon << endl;
 			}
 		}
 	}

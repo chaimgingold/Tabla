@@ -22,11 +22,18 @@ public:
 	string getSystemName() const override { return "MusicWorld"; }
 
 	void update() override;
+	void updateContours( const ContourVector &c ) override { mContours=c; }
 	void draw( bool highQuality ) override;
 
 private:
 	
 	float mStartTime;
+	vec2  mTimeVec; // in world space, which way does time flow forward?
+	
+	// scores
+	ContourVector mContours;
+	
+	void getQuadOrderedSides( const PolyLine2& p, vec2 out[4] );
 	
 	// synthesis
 	cipd::PureDataNodeRef	mPureDataNode;	// synth engine

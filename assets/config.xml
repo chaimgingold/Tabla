@@ -105,10 +105,10 @@
 		
 			<!-- cm -->
 			<Vision>
-				<ContourMinRadius>			1	</ContourMinRadius>
+				<ContourMinRadius>			5	</ContourMinRadius>
 				<ContourMinArea>			1	</ContourMinArea>
-				<ContourDPEpsilon>			1	</ContourDPEpsilon>
-				<ContourMinWidth>			2	</ContourMinWidth>
+				<ContourDPEpsilon>			5	</ContourDPEpsilon>
+				<ContourMinWidth>			10	</ContourMinWidth>
 			</Vision>
 
 		</MusicWorld>
