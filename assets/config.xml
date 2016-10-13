@@ -110,7 +110,10 @@
 				<ContourDPEpsilon>			5	</ContourDPEpsilon>
 				<ContourMinWidth>			10	</ContourMinWidth>
 			</Vision>
-
+			
+			<Phase>4</Phase>
+			<TimeVec>0 -1</TimeVec>
+			
 		</MusicWorld>
 
 	</Games>

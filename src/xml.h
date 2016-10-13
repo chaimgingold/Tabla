@@ -77,7 +77,7 @@ inline bool getXml( XmlTree &xml, string name, vec2& var )
 	if (n!=xml.end())
 	{
 		try {
-			stringstream s( n->getValue() );
+			stringstream s( n->getValue() + " " ); // hack, because s.good() fails when it bumps against the end of the string
 			vec2 t ;
 			s >> t.x >> t.y ;
 			if (s.good())

@@ -18,6 +18,8 @@ public:
 
 	MusicWorld();
 	~MusicWorld();
+
+	void setParams( XmlTree ) override;
 	
 	string getSystemName() const override { return "MusicWorld"; }
 
@@ -29,11 +31,22 @@ private:
 	
 	float mStartTime;
 	vec2  mTimeVec; // in world space, which way does time flow forward?
+	float mPhase;
 	
 	// scores
 	ContourVector mContours;
 	
-	void getQuadOrderedSides( const PolyLine2& p, vec2 out[4] );
+	void  getQuadOrderedSides( const PolyLine2& p, vec2 out[4] );
+	float getPlayheadForQuad( vec2 quad[4] ) const; // returns 0..1
+	
+	/*  Quad vertices are played back like so:
+	
+		0---2
+	    |   |
+		1---3
+		
+		 --> time
+	*/
 	
 	// synthesis
 	cipd::PureDataNodeRef	mPureDataNode;	// synth engine

@@ -11,9 +11,14 @@
 #include "cinder/rand.h"
 #include "cinder/audio/Context.h"
 #include "cinder/audio/Source.h"
+#include "xml.h"
 
 using namespace std::chrono;
 
+// ShapeTracker was started to do inter-frame coherency,
+// but I realized I don't need this to start with.
+// It's gravy.
+/*
 class ShapeTracker
 {
 public:
@@ -95,15 +100,23 @@ void ShapeTracker::indexShapes()
 		mShapeById[mShapes[i].mId] = i;
 	}
 }
+*/
 
 MusicWorld::MusicWorld()
 {
 	mStartTime = ci::app::getElapsedSeconds();
 
 	mTimeVec = vec2(0,-1);
+	mPhase   = 8.f;
 	
 //	setupSynthesis();
-//	cg: pd code seems to be causing crashes, but same code as PongWorld. (???)
+//	cg: pd code seems to be causing crashes (when leaving the game), but same code as PongWorld. (???)
+}
+
+void MusicWorld::setParams( XmlTree xml )
+{
+	getXml(xml,"Phase",mPhase);
+	getXml(xml,"TimeVec",mTimeVec);
 }
 
 void MusicWorld::update()
@@ -169,23 +182,32 @@ void MusicWorld::getQuadOrderedSides( const PolyLine2& p, vec2 out[4] )
 	out[3] = in(bestSide+2);
 }
 
+float MusicWorld::getPlayheadForQuad( vec2 quad[4] ) const
+{
+	float quadPhase = mPhase;
+	// could modulate quadPhase by size/shape of quad
+	
+	float t = fmod( (ci::app::getElapsedSeconds() - mStartTime)/quadPhase, 1.f ) ;
+	
+	return t;
+}
+
 void MusicWorld::draw( bool highQuality )
 {
-	const float kPhase = 8.f;
-	const float t = fmod( (ci::app::getElapsedSeconds() - mStartTime)/kPhase, 1.f ) ;
-	
 	for( const auto &c : mContours )
 	{
 		if ( c.mPolyLine.size()==4 )
 		{
 			gl::color(.5,0,0);
-			gl::drawSolid(c.mPolyLine);
+//			gl::drawSolid(c.mPolyLine);
+			gl::draw(c.mPolyLine);
 			
 			//
 			vec2 pts[4];
 			getQuadOrderedSides(c.mPolyLine,pts);
 			
 			gl::color(0,1,0);
+			float t = getPlayheadForQuad(pts);
 			gl::drawLine( lerp(pts[1],pts[3],t), lerp(pts[0],pts[2],t) );
 		}
 	}
@@ -215,6 +237,9 @@ void MusicWorld::setupSynthesis()
 
 MusicWorld::~MusicWorld() {
 	// Clean up synth engine
-//	mPureDataNode->disconnectAll();
-//	mPureDataNode->closePatch(mPatch);
+	if (mPureDataNode)
+	{
+		mPureDataNode->disconnectAll();
+		mPureDataNode->closePatch(mPatch);
+	}
 }
