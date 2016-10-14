@@ -209,7 +209,7 @@ void MusicWorld::updateContours( const ContourVector &contours )
 	// get new ones
 	for( const auto &c : contours )
 	{
-		if ( c.mPolyLine.size()==4 )
+		if ( !c.mIsHole && c.mPolyLine.size()==4 )
 		{
 			Score score;
 			
@@ -224,11 +224,13 @@ void MusicWorld::updateContours( const ContourVector &contours )
 
 void MusicWorld::updateCustomVision( Pipeline& pipeline )
 {
+	// this function grabs the bitmaps for each score
+	
 	// get the image we are slicing from
 	Pipeline::StageRef world = pipeline.getStage("clipped");
 	if ( !world || world->mImageCV.empty() ) return;
 	
-	// each score
+	// for each score...
 	vec2 outsize(100,100);
 
 	vec2		srcpt[4];

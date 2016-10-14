@@ -103,8 +103,7 @@ class PaperBounce3App : public App {
 	
 	// to help us visualize
 	void addProjectorPipelineStages();
-	void updatePipelineViews( bool areViewsVisible );
-	
+		
 	void updateMainImageTransform( WindowRef );
 	
 	/* Coordinates spaces, there are a few:

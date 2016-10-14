@@ -267,3 +267,58 @@ void WindowData::updateMainImageTransform()
 	mMainImageView->setFrame( frame );
 }
 
+void WindowData::updatePipelineViews()
+{
+	const auto stages = mApp.mPipeline.getStages();
+	
+	vec2 pos = vec2(1,1) * mApp.mConfigWindowPipelineGutter;
+	
+	auto oldPipelineViews = mPipelineViews;
+	mPipelineViews.clear();
+	
+	// cull views
+	for( auto v : oldPipelineViews )
+	{
+		if ( !mApp.mDrawPipeline || !mApp.mPipeline.getStage(v->getName()) )
+		{
+			mViews.removeView(v);
+		}
+		else mPipelineViews.push_back(v);
+	}
+	
+	// scan stages
+	for( const auto &s : stages )
+	{
+		// view exists?
+		ViewRef view = mViews.getViewByName(s->mName);
+		
+		// make a new one?
+		if ( !view && mApp.mDrawPipeline )
+		{
+			PipelineStageView psv( mApp.mPipeline, s->mName );
+			psv.setWorldDrawFunc( [&](){ mApp.drawWorld(false); } );
+			
+			view = make_shared<PipelineStageView>(psv);
+			
+			view->setName(s->mName);
+			
+			mViews.addView(view);
+			mPipelineViews.push_back(view);
+		}
+		
+		// configure it
+		if (view)
+		{
+			// update its location
+			vec2 size = s->mImageSize;
+			
+			size *= mApp.mConfigWindowPipelineWidth / size.x ;
+			
+			view->setFrame ( Rectf(pos, pos + size) );
+			view->setBounds( Rectf(vec2(0,0), s->mImageSize) );
+			
+			// next pos
+			pos = view->getFrame().getLowerLeft() + vec2(0,mApp.mConfigWindowPipelineGutter);
+		}
+	}
+}

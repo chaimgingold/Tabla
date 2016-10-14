@@ -69,7 +69,7 @@
 	
 		<BallWorld>
 			<!-- cm -->
-			<DefaultNumBalls>			60 </DefaultNumBalls>
+			<DefaultNumBalls>			40 </DefaultNumBalls>
 			<BallDefaultRadius>			.5 </BallDefaultRadius>
 			<BallDefaultMaxRadius>		2 </BallDefaultMaxRadius>
 			<BallMaxVel>				.2 </BallMaxVel>
@@ -107,7 +107,7 @@
 			<!-- cm -->
 			<Vision>
 				<ContourMinRadius>			5	</ContourMinRadius>
-				<ContourMinArea>			1	</ContourMinArea>
+				<ContourMinArea>			100	</ContourMinArea>
 				<ContourDPEpsilon>			5	</ContourDPEpsilon>
 				<ContourMinWidth>			10	</ContourMinWidth>
 				<CaptureAllPipelineStages>1</CaptureAllPipelineStages> <!-- So we can extract bitmaps -->

@@ -35,6 +35,8 @@ public:
 	ViewCollection& getViews() { return mViews; }
 	
 	bool getIsUIWindow() const { return mIsUIWindow; }
+
+	void updatePipelineViews();
 	
 private:
 
@@ -47,7 +49,9 @@ private:
 	vec2 mMousePosInWindow=vec2(-1000,-1000); // just get it out of bounds!
 
 	std::shared_ptr<MainImageView> mMainImageView; // main view, with image in it.
-
+	
+	vector<ViewRef> mPipelineViews;
+	
 	PaperBounce3App& mApp; // hacky transitional refactor thing.
 
 };

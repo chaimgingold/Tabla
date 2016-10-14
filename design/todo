@@ -1,3 +1,11 @@
+MusicWorld ideas
+	vertical displacement of score is pitch/instrument (could have distinct registers for tones, then switch pitch inside of that register)
+	ratio of score size (very wide vs. square) is the length.
+	arbitrary polygons... just a litle more complex math
+	persist scores...
+		if things are stable, then rescan/update
+		maybe just keep them around via partial match if we can locate some fraction of the points of the score on the table.
+
 Vi, Emily playtest
 	More colors of paper
 	More colors of ball per behavior

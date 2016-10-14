@@ -296,61 +296,6 @@ void PaperBounce3App::addProjectorPipelineStages()
 			mLightLink.mProjectorWorldSpaceCoords ));
 }
 
-
-void PaperBounce3App::updatePipelineViews( bool areViewsVisible )
-{
-	// only do UI window
-	if (!mUIWindow) return;
-	WindowData *win = mUIWindow->getUserData<WindowData>();
-	if (!win) return;
-	ViewCollection& views = win->getViews();
-	
-	const auto stages = mPipeline.getStages();
-	
-	vec2 pos = vec2(1,1) * mConfigWindowPipelineGutter;
-	
-	for( const auto &s : stages )
-	{
-		// view exists?
-		ViewRef view = views.getViewByName(s->mName);
-		
-		// erase it?
-		if ( view && !areViewsVisible )
-		{
-			views.removeView(view);
-			view=0;
-		}
-		
-		// make a new one?
-		if ( !view && areViewsVisible )
-		{
-			PipelineStageView psv( mPipeline, s->mName );
-			psv.setWorldDrawFunc( [&](){ drawWorld(false); } );
-			
-			view = make_shared<PipelineStageView>(psv);
-			
-			view->setName(s->mName);
-			
-			views.addView(view);
-		}
-		
-		// configure it
-		if (view)
-		{
-			// update its location
-			vec2 size = s->mImageSize;
-			
-			size *= mConfigWindowPipelineWidth / size.x ;
-			
-			view->setFrame ( Rectf(pos, pos + size) );
-			view->setBounds( Rectf(vec2(0,0), s->mImageSize) );
-			
-			// next pos
-			pos = view->getFrame().getLowerLeft() + vec2(0,mConfigWindowPipelineGutter);
-		}
-	}
-}
-
 void PaperBounce3App::update()
 {
 	mXmlFileWatch.update();
@@ -379,7 +324,7 @@ void PaperBounce3App::update()
 		}
 		
 		// update pipeline visualization
-		updatePipelineViews( mDrawPipeline );
+		if (mUIWindow && mUIWindow->getUserData<WindowData>() ) mUIWindow->getUserData<WindowData>()->updatePipelineViews();
 		
 		// since the pipeline stage we are drawing might have changed... (or come into existence)
 		// update the window mapping
