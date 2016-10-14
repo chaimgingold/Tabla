@@ -69,7 +69,7 @@
 	
 		<BallWorld>
 			<!-- cm -->
-			<DefaultNumBalls>			40 </DefaultNumBalls>
+			<DefaultNumBalls>			60 </DefaultNumBalls>
 			<BallDefaultRadius>			.5 </BallDefaultRadius>
 			<BallDefaultMaxRadius>		2 </BallDefaultMaxRadius>
 			<BallMaxVel>				.2 </BallMaxVel>

@@ -16,6 +16,8 @@
 #include "Contour.h"
 #include "Vision.h"
 
+class Pipeline;
+
 class GameWorld
 {
 public:
@@ -27,7 +29,8 @@ public:
 	// it then gets them when they are needed.
 	
 	virtual void setParams( XmlTree ){}
-	virtual void updateContours( const ContourVector &c ){}
+	virtual void updateContours( const ContourVector &c ){} // called 1st
+	virtual void updateCustomVision( Pipeline& ){} // called 2nd
 	
 	void		setWorldBoundsPoly( PolyLine2 p ) { mWorldBoundsPoly=p; worldBoundsPolyDidChange(); }
 	PolyLine2	getWorldBoundsPoly() const { return mWorldBoundsPoly; }

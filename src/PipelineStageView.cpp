@@ -11,6 +11,13 @@
 
 void PipelineStageView::draw()
 {
+	// scissor us so we only draw into our little frame
+	// this will fail to work right if we are nested in other transforms
+	gl::ScopedScissor scissor(
+		toPixels(getFrame().x1), toPixels(getWindowHeight()) - toPixels(getFrame().y2),
+		toPixels(getFrame().getWidth()), toPixels(getFrame().getHeight())
+		);
+	
 	const Pipeline::StageRef stage = mPipeline.getStage(mStageName);
 
 	// image

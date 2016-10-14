@@ -12,6 +12,8 @@
 #include "cinder/audio/Context.h"
 #include "cinder/audio/Source.h"
 #include "xml.h"
+#include "Pipeline.h"
+#include "ocv.h"
 
 using namespace std::chrono;
 
@@ -102,6 +104,86 @@ void ShapeTracker::indexShapes()
 }
 */
 
+bool MusicWorld::Score::setQuadFromPolyLine( PolyLine2 poly, vec2 timeVec )
+{
+	// could have simplified a bit and just examined two bisecting lines. oh well. it works.
+	// also calling this object 'Score' and the internal scores 'score' is a little confusing.
+	if ( poly.size()==4 )
+	{
+		auto in = [&]( int i ) -> vec2
+		{
+			return poly.getPoints()[i%4];
+		};
+		
+		auto scoreEdge = [&]( int from, int to )
+		{
+			return dot( timeVec, normalize( in(to) - in(from) ) );
+		};
+		
+		auto scoreSide = [&]( int side )
+		{
+			/* input pts:
+			   0--1
+			   |  |
+			   3--2
+			   
+			   side 0 : score of 0-->1, 3-->2
+			*/
+			
+			return ( scoreEdge(side+0,side+1) + scoreEdge(side+3,side+2) ) / 2.f;
+		};
+		
+		int   bestSide =0;
+		float bestScore=0;
+		
+		for( int i=0; i<4; ++i )
+		{
+			float score = scoreSide(i);
+			
+			if ( score > bestScore )
+			{
+				bestScore = score ;
+				bestSide  = i;
+			}
+		}
+		
+		// copy to mQuad
+		for ( int i=0; i<4; ++i ) mQuad[i] = in(bestSide+i);
+		
+		return true ;
+	}
+	else return false;
+}
+
+PolyLine2 MusicWorld::Score::getPolyLine() const
+{
+	PolyLine2 p;
+	p.setClosed();
+	
+	for( int i=0; i<4; ++i ) p.getPoints().push_back( mQuad[i] );
+	
+	return p;
+}
+
+float MusicWorld::Score::getPlayheadFrac() const
+{
+	// could modulate quadPhase by size/shape of quad
+	
+	float t = fmod( (ci::app::getElapsedSeconds() - mStartTime)/mPhase, 1.f ) ;
+	
+	return t;
+}
+
+void MusicWorld::Score::getPlayheadLine( vec2 line[2] ) const
+{
+	float t = getPlayheadFrac();
+	
+	line[0] = lerp(mQuad[0],mQuad[1],t);
+	line[1] = lerp(mQuad[3],mQuad[2],t);
+}
+
+
+
 MusicWorld::MusicWorld()
 {
 	mStartTime = ci::app::getElapsedSeconds();
@@ -119,101 +201,89 @@ void MusicWorld::setParams( XmlTree xml )
 	getXml(xml,"TimeVec",mTimeVec);
 }
 
+void MusicWorld::updateContours( const ContourVector &contours )
+{
+	// erase old scores
+	mScore.clear();
+	
+	// get new ones
+	for( const auto &c : contours )
+	{
+		if ( c.mPolyLine.size()==4 )
+		{
+			Score score;
+			
+			score.setQuadFromPolyLine(c.mPolyLine,mTimeVec);
+			score.mStartTime = mStartTime;
+			score.mPhase = mPhase; // inherit, but it could be custom based on shape or something
+			
+			mScore.push_back(score);
+		}
+	}
+}
+
+void MusicWorld::updateCustomVision( Pipeline& pipeline )
+{
+	// get the image we are slicing from
+	Pipeline::StageRef world = pipeline.getStage("clipped");
+	if ( !world || world->mImageCV.empty() ) return;
+	
+	// each score
+	vec2 outsize(100,100);
+
+	vec2		srcpt[4];
+	cv::Point2f srcpt_cv[4];
+	vec2		dstpt[4]    = { {0,0}, {outsize.x,0}, {outsize.x,outsize.y}, {0,outsize.y} };
+	cv::Point2f dstpt_cv[4]	= { {0,0}, {outsize.x,0}, {outsize.x,outsize.y}, {0,outsize.y} };
+
+	int scoreNum=1;
+	
+	for( Score& s : mScore )
+	{
+		// get src points
+		for ( int i=0; i<4; ++i )
+		{
+			srcpt[i] = vec2( world->mWorldToImage * vec4(s.mQuad[i],0,1) );
+			srcpt_cv[i] = toOcv( srcpt[i] );
+		}
+		
+		// use default dstpts
+		
+		// grab it
+		cv::Mat xform = cv::getPerspectiveTransform( srcpt_cv, dstpt_cv ) ;
+		cv::warpPerspective( world->mImageCV, s.mImage, xform, cv::Size(outsize.x,outsize.y) );
+
+		//
+		pipeline.then( string("score")+toString(scoreNum++), s.mImage);
+		pipeline.setImageToWorldTransform( getOcvPerspectiveTransform(dstpt,s.mQuad) );
+	}
+}
+
 void MusicWorld::update()
 {
 }
 
-void MusicWorld::getTimeOrderedQuad( const PolyLine2& p, vec2 out[4] )
-{
-	// could have simplified a bit and just examined two bisecting lines. oh well. it works.
-	assert( p.size()==4 );
-
-	/*  Output points in this order:
-	
-		0---2
-	    |   |
-		1---3
-		
-		 --> time
-	*/
-	
-	auto in = [&]( int i ) -> vec2
-	{
-		return p.getPoints()[i%4];
-	};
-	
-	auto scoreEdge = [&]( int from, int to )
-	{
-		return dot( mTimeVec, normalize( in(to) - in(from) ) );
-	};
-	
-	auto scoreSide = [&]( int side )
-	{
-		/* input pts:
-		   0--1
-		   |  |
-		   3--2
-		   
-		   side 0 : score of 0-->1, 3-->2
-		*/
-		
-		return ( scoreEdge(side+0,side+1) + scoreEdge(side+3,side+2) ) / 2.f;
-	};
-	
-	int   bestSide =0;
-	float bestScore=0;
-	
-	for( int i=0; i<4; ++i )
-	{
-		float score = scoreSide(i);
-		
-		if ( score > bestScore )
-		{
-			bestScore = score ;
-			bestSide  = i;
-		}
-	}
-	
-	// copy to out
-	out[0] = in(bestSide+0);
-	out[1] = in(bestSide+3);
-	
-	out[2] = in(bestSide+1);
-	out[3] = in(bestSide+2);
-}
-
-float MusicWorld::getPlayheadForQuad( vec2 quad[4] ) const
-{
-	float quadPhase = mPhase;
-	// could modulate quadPhase by size/shape of quad
-	
-	float t = fmod( (ci::app::getElapsedSeconds() - mStartTime)/quadPhase, 1.f ) ;
-	
-	return t;
-}
-
 void MusicWorld::draw( bool highQuality )
 {
-	for( const auto &c : mContours )
+	for( const auto &score : mScore )
 	{
-		if ( c.mPolyLine.size()==4 )
-		{
-			gl::color(.5,0,0);
-//			gl::drawSolid(c.mPolyLine);
-			gl::draw(c.mPolyLine);
-			
-			//
-			vec2 pts[4];
-			getTimeOrderedQuad(c.mPolyLine,pts);
-			
-			gl::color(0,1,0);
-			float t = getPlayheadForQuad(pts);
-			gl::drawLine( lerp(pts[1],pts[3],t), lerp(pts[0],pts[2],t) );
-		}
+		gl::color(.5,0,0);
+//		gl::drawSolid( score.getPolyLine() );
+		gl::draw( score.getPolyLine() );
+		
+		//
+		gl::color(0,1,0);
+		vec2 playhead[2];
+		score.getPlayheadLine(playhead);
+		gl::drawLine( playhead[0], playhead[1] );
 	}
 	
-	gl::color(0,1,0);
-	gl::drawLine( vec2(0,0), vec2(0,0) + mTimeVec*10.f );
+	// draw time direction (for debugging score generation)
+	if (0)
+	{
+		gl::color(0,1,0);
+		gl::drawLine( vec2(0,0), vec2(0,0) + mTimeVec*10.f );
+	}
 }
 
 // Synthesis
