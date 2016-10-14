@@ -210,7 +210,11 @@ void PaperBounce3App::loadGame( int libraryIndex )
 		
 		setGameWorldXmlParams();
 		mVision.setParams( mGameWorld->getVisionParams() );
-
+		mPipeline.setCaptureAllStageImages( mDrawPipeline || mGameWorld->getVisionParams().mCaptureAllPipelineStages );
+			// this won't quite hotload right with mDrawPipeline,
+			// but it never did.
+			// we might just want to switch pipeline to always capturing everything.
+		
 		mGameWorld->setWorldBoundsPoly( getWorldBoundsPoly() );
 		mGameWorld->gameWillLoad();
 	}

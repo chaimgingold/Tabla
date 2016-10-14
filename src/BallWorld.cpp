@@ -13,6 +13,7 @@
 
 void BallWorld::setParams( XmlTree xml )
 {
+	getXml(xml,"DefaultNumBalls",mDefaultNumBalls);
 	getXml(xml,"BallDefaultRadius",mBallDefaultRadius);
 	getXml(xml,"BallDefaultMaxRadius",mBallDefaultMaxRadius);
 	getXml(xml,"BallDefaultColor",mBallDefaultColor);
@@ -63,7 +64,7 @@ void BallWorld::draw( bool highQuality )
 
 void BallWorld::gameWillLoad()
 {
-	for ( int i=0; i<20; ++i )
+	for ( int i=0; i<mDefaultNumBalls; ++i )
 	{
 		newRandomBall( getRandomPointInWorldBoundsPoly() );
 	}

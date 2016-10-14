@@ -26,7 +26,7 @@ gl::TextureRef Pipeline::Stage::getGLImage() const
 void Pipeline::start()
 {
 	mStages.clear();
-	mQueryIndex = -1;
+//	mQueryIndex = -1;
 }
 
 Pipeline::StageRef Pipeline::then( string name, Surface &img )
@@ -78,8 +78,6 @@ Pipeline::StageRef Pipeline::then( string name )
 	}
 	
 	mStages.push_back(s);
-
-	if ( name==mQuery ) mQueryIndex = mStages.size()-1;
 
 	return mStages.back();
 }

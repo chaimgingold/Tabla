@@ -16,6 +16,7 @@ void Vision::Params::set( XmlTree xml )
 	getXml(xml,"ContourMinArea",mContourMinArea);
 	getXml(xml,"ContourDPEpsilon",mContourDPEpsilon);
 	getXml(xml,"ContourMinWidth",mContourMinWidth);
+	getXml(xml,"CaptureAllPipelineStages",mCaptureAllPipelineStages);
 }
 
 template<class T>
@@ -144,7 +145,7 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 		
 		float		area = cv::contourArea(c) * contourPixelToWorld ;
 		
-		cv::RotatedRect rotatedRect = minAreaRect(c) ;
+		cv::RotatedRect rotatedRect = minAreaRect(c) ; // TODO: output this
 		
 		if (	radius > mParams.mContourMinRadius &&
 				area   > mParams.mContourMinArea   &&

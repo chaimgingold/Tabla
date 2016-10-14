@@ -72,7 +72,6 @@ public:
 	StageRef then( string name, gl::Texture2dRef ref );
 	
 	
-	const StageRef getQueryStage() const { return (mQueryIndex==-1) ? 0 : mStages[mQueryIndex] ; }
 	const vector<StageRef>& getStages() const { return mStages ; }
 	const StageRef getStage( string name ) const;
 	
@@ -97,7 +96,6 @@ private:
 	vector<StageRef> mStages;
 	
 	string		   mQuery ;
-	int			   mQueryIndex=-1 ;
 	
 } ;
 

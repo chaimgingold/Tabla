@@ -29,6 +29,7 @@ public:
 	Rectf		mBoundingRect ;
 	float		mRadius ;
 	float		mArea ;
+	// TODO: rotated rect
 	
 	bool		mIsHole = false ;
 	bool		mIsLeaf = true ;

@@ -41,6 +41,8 @@ public:
 		float mContourMinArea	=	100;
 		float mContourDPEpsilon	=	5;
 		float mContourMinWidth	=	5;
+		
+		bool mCaptureAllPipelineStages = false; // this is OR'd in
 	};
 
 	void setParams( Params p ) { mParams=p; }

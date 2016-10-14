@@ -94,6 +94,7 @@ protected:
 	// and make these functions non-virtual and then they can do the recording.
 
 	// params
+	int		mDefaultNumBalls		= 5;
 	float	mBallDefaultRadius		= 8.f *  .5f ;
 	float	mBallDefaultMaxRadius	= 8.f * 4.f ;
 	float	mBallMaxVel				= 8.f ;
