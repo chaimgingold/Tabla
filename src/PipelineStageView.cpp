@@ -197,6 +197,9 @@ void PolyEditView::setMainImageView( std::shared_ptr<MainImageView> miv )
 
 void PolyEditView::draw()
 {
+	if ( !isEditable() ) return; // this trasnform seems to just hosed, so hide it to make things clearer.
+	
+	//
 	const PolyLine2 poly = getPolyInImageSpace();
 
 	if ( isEditable() )

@@ -57,6 +57,10 @@ public:
 		mutable gl::TextureRef	mImageGL;
 		
 		gl::TextureRef getGLImage() const; // will convert mImageCV -> mImageGL if needed & possible.
+		
+		// layout hints
+		float			mLayoutHintScale=1.f;
+		bool			mLayoutHintOrtho=false; // keep laying out in the same row?
 	};
 
 	typedef shared_ptr<Stage> StageRef;
@@ -70,7 +74,6 @@ public:
 	StageRef then( string name, Surface &img );
 	StageRef then( string name, cv::Mat &img );
 	StageRef then( string name, gl::Texture2dRef ref );
-	
 	
 	const vector<StageRef>& getStages() const { return mStages ; }
 	const StageRef getStage( string name ) const;

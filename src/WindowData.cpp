@@ -272,6 +272,10 @@ void WindowData::updatePipelineViews()
 	const auto stages = mApp.mPipeline.getStages();
 	
 	vec2 pos = vec2(1,1) * mApp.mConfigWindowPipelineGutter;
+	const float left = pos.x;
+	
+	ViewRef lastView;
+	bool wasLastViewOrtho=false;
 	
 	auto oldPipelineViews = mPipelineViews;
 	mPipelineViews.clear();
@@ -312,13 +316,24 @@ void WindowData::updatePipelineViews()
 			// update its location
 			vec2 size = s->mImageSize;
 			
-			size *= mApp.mConfigWindowPipelineWidth / size.x ;
+			size *= (mApp.mConfigWindowPipelineWidth * s->mLayoutHintScale) / size.x ;
 			
-			view->setFrame ( Rectf(pos, pos + size) );
+			vec2 usepos = pos;
+			
+			// do ortho layout
+			if (lastView && wasLastViewOrtho && s->mLayoutHintOrtho)
+			{
+				usepos = lastView->getFrame().getUpperRight() + vec2(1,0) * mApp.mConfigWindowPipelineGutter;
+			}
+			
+			view->setFrame ( Rectf(usepos, usepos + size) );
 			view->setBounds( Rectf(vec2(0,0), s->mImageSize) );
 			
+			lastView = view;
+			wasLastViewOrtho = s->mLayoutHintOrtho;
+			
 			// next pos
-			pos = view->getFrame().getLowerLeft() + vec2(0,mApp.mConfigWindowPipelineGutter);
+			pos = vec2( left, view->getFrame().y2 + mApp.mConfigWindowPipelineGutter ) ;
 		}
 	}
 }

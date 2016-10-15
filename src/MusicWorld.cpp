@@ -258,6 +258,9 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		//
 		pipeline.then( string("score")+toString(scoreNum++), s.mImage);
 		pipeline.setImageToWorldTransform( getOcvPerspectiveTransform(dstpt,s.mQuad) );
+
+		pipeline.getStages().back()->mLayoutHintScale = .5f;
+		pipeline.getStages().back()->mLayoutHintOrtho = true;
 	}
 }
 
