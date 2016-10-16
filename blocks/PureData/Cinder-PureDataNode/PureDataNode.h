@@ -9,6 +9,9 @@
 
 namespace cipd {
 
+
+
+
 class PureDataPrintReceiver : public pd::PdReceiver {
 
 public:
@@ -21,6 +24,10 @@ typedef std::shared_ptr<class PureDataNode> PureDataNodeRef;
 
 class PureDataNode : public ci::audio::Node {
 public:
+	// LibPd currently only supports a single instance,
+	// so use this to get ahold of the PureDataNode.
+	static PureDataNodeRef Global();
+	
 	PureDataNode( const Format &format = Format() );
 	~PureDataNode();
 
@@ -55,6 +62,7 @@ private:
 
 	PureDataPrintReceiver mPdReceiver;
 };
+
 
 
 } // namespace cipd

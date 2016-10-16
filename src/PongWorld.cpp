@@ -374,24 +374,12 @@ void PongWorld::strobeBalls()
 // Synthesis
 void PongWorld::setupSynthesis()
 {
-	auto ctx = audio::master();
-	
-	// Create the synth engine
-	mPureDataNode = ctx->makeNode( new cipd::PureDataNode( audio::Node::Format().autoEnable() ) );
-	
-	// Enable Cinder audio
-	ctx->enable();
-	
-	// Load pong synthesis
-	mPureDataNode->disconnectAll();
+	mPureDataNode = cipd::PureDataNode::Global();
+	// Load pong synthesis patch
 	mPatch = mPureDataNode->loadPatch( DataSourcePath::create(getAssetPath("synths/pong.pd")) );
-	
-	// Connect synth to master output
-	mPureDataNode >> audio::master()->getOutput();
 }
 
 PongWorld::~PongWorld() {
-	// Clean up synth engine
-	mPureDataNode->disconnectAll();
+	// Close pong synthesis patch
 	mPureDataNode->closePatch(mPatch);
 }
