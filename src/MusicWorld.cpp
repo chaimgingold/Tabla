@@ -15,7 +15,7 @@
 #include "Pipeline.h"
 #include "ocv.h"
 
-#define MAX_SCORES 3
+#define MAX_SCORES 8
 
 using namespace std::chrono;
 
@@ -271,11 +271,19 @@ void MusicWorld::update()
 }
 
 void MusicWorld::updateScoreSynthesis() {
+
 	// send scores to Pd
 	int scoreNum=0;
 	
 	for( const auto &score : mScore )
 	{
+		mPureDataNode->sendFloat(string("pan")+toString(scoreNum),
+								 score.getPolyLine().calcCentroid().x / 100);
+
+		// Update time
+		mPureDataNode->sendFloat(string("phase")+toString(scoreNum),
+								 score.getPlayheadFrac()*100.0);
+
 		// Create a float version of the image
 		cv::Mat imageFloatMat;
 		
@@ -292,8 +300,11 @@ void MusicWorld::updateScoreSynthesis() {
 
 	// Clear remaining scores
 	std::vector<float> emptyVector(10000, 1.0);
-	for( int remaining=scoreNum; remaining < MAX_SCORES; remaining++ ) {
-		mPureDataNode->writeArray(string("image")+toString(remaining), emptyVector);
+	while( scoreNum < MAX_SCORES ) {
+		mPureDataNode->sendFloat(string("phase")+toString(scoreNum),
+								 0);
+		mPureDataNode->writeArray(string("image")+toString(scoreNum), emptyVector);
+		scoreNum++;
 	}
 }
 
