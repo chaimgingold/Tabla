@@ -15,6 +15,8 @@
 #include "Pipeline.h"
 #include "ocv.h"
 
+#define MAX_SCORES 3
+
 using namespace std::chrono;
 
 // ShapeTracker was started to do inter-frame coherency,
@@ -265,12 +267,15 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 
 void MusicWorld::update()
 {
+	updateScoreSynthesis();
+}
+
+void MusicWorld::updateScoreSynthesis() {
 	// send scores to Pd
+	int scoreNum=0;
 	
-//	for( const auto &score : mScore )
-	if (mScore.size() > 0)
+	for( const auto &score : mScore )
 	{
-		const auto &score = mScore.at(0);
 		// Create a float version of the image
 		cv::Mat imageFloatMat;
 		
@@ -279,9 +284,16 @@ void MusicWorld::update()
 		
 		// Convert to a vector to pass to Pd
 		std::vector<float> imageVector;
-		imageVector.assign((float*)imageFloatMat.datastart, (float*)imageFloatMat.dataend);
-		
-		mPureDataNode->writeArray("image1", imageVector);
+		imageVector.assign( (float*)imageFloatMat.datastart, (float*)imageFloatMat.dataend );
+
+		mPureDataNode->writeArray(string("image")+toString(scoreNum), imageVector);
+		scoreNum++;
+	}
+
+	// Clear remaining scores
+	std::vector<float> emptyVector(10000, 1.0);
+	for( int remaining=scoreNum; remaining < MAX_SCORES; remaining++ ) {
+		mPureDataNode->writeArray(string("image")+toString(remaining), emptyVector);
 	}
 }
 
