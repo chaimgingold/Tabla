@@ -15,6 +15,8 @@
 #include "Pipeline.h"
 #include "ocv.h"
 
+#define MAX_SCORES 8
+
 using namespace std::chrono;
 
 // ShapeTracker was started to do inter-frame coherency,
@@ -191,8 +193,7 @@ MusicWorld::MusicWorld()
 	mTimeVec = vec2(0,-1);
 	mPhase   = 8.f;
 	
-//	setupSynthesis();
-//	cg: pd code seems to be causing crashes (when leaving the game), but same code as PongWorld. (???)
+	setupSynthesis();
 }
 
 void MusicWorld::setParams( XmlTree xml )
@@ -266,6 +267,45 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 
 void MusicWorld::update()
 {
+	updateScoreSynthesis();
+}
+
+void MusicWorld::updateScoreSynthesis() {
+
+	// send scores to Pd
+	int scoreNum=0;
+	
+	for( const auto &score : mScore )
+	{
+		mPureDataNode->sendFloat(string("pan")+toString(scoreNum),
+								 score.getPolyLine().calcCentroid().x / 100);
+
+		// Update time
+		mPureDataNode->sendFloat(string("phase")+toString(scoreNum),
+								 score.getPlayheadFrac()*100.0);
+
+		// Create a float version of the image
+		cv::Mat imageFloatMat;
+		
+		// Copy the uchar version scaled 0-1
+		score.mImage.convertTo(imageFloatMat, CV_32FC1, 1/255.0);
+		
+		// Convert to a vector to pass to Pd
+		std::vector<float> imageVector;
+		imageVector.assign( (float*)imageFloatMat.datastart, (float*)imageFloatMat.dataend );
+
+		mPureDataNode->writeArray(string("image")+toString(scoreNum), imageVector);
+		scoreNum++;
+	}
+
+	// Clear remaining scores
+	std::vector<float> emptyVector(10000, 1.0);
+	while( scoreNum < MAX_SCORES ) {
+		mPureDataNode->sendFloat(string("phase")+toString(scoreNum),
+								 0);
+		mPureDataNode->writeArray(string("image")+toString(scoreNum), emptyVector);
+		scoreNum++;
+	}
 }
 
 void MusicWorld::draw( bool highQuality )
@@ -294,27 +334,12 @@ void MusicWorld::draw( bool highQuality )
 // Synthesis
 void MusicWorld::setupSynthesis()
 {
-	auto ctx = audio::master();
-	
 	// Create the synth engine
-	mPureDataNode = ctx->makeNode( new cipd::PureDataNode( audio::Node::Format().autoEnable() ) );
-	
-	// Enable Cinder audio
-	ctx->enable();
-	
-	// Load pong synthesis
-	mPureDataNode->disconnectAll();
-	mPatch = mPureDataNode->loadPatch( DataSourcePath::create(getAssetPath("synths/pong.pd")) );
-	
-	// Connect synth to master output
-	mPureDataNode >> audio::master()->getOutput();
+	mPureDataNode = cipd::PureDataNode::Global();
+	mPatch = mPureDataNode->loadPatch( DataSourcePath::create(getAssetPath("synths/music.pd")) );
 }
 
 MusicWorld::~MusicWorld() {
 	// Clean up synth engine
-	if (mPureDataNode)
-	{
-		mPureDataNode->disconnectAll();
-		mPureDataNode->closePatch(mPatch);
-	}
+	mPureDataNode->closePatch(mPatch);
 }

@@ -72,6 +72,7 @@ private:
 	cipd::PatchRef			mPatch;			// pong patch
 	
 	void setupSynthesis();
+	void updateScoreSynthesis();
 };
 
 class MusicWorldCartridge : public GameCartridge

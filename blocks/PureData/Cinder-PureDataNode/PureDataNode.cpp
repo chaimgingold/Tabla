@@ -15,6 +15,31 @@ void PureDataPrintReceiver::print(const std::string& message) {
 	cout << message + "\n";
 };
 
+PureDataNodeRef PureDataNode::Global() {
+	static mutex globalMutex;
+	static PureDataNodeRef globalInstance;
+	if (!globalInstance) {
+		lock_guard<mutex> lock(globalMutex);
+		
+		// Double checked locking to avoid grabbing the mutex on every invocation
+		if (!globalInstance) {
+			auto ctx = audio::master();
+			
+			// Create the synth engine
+			PureDataNodeRef node = ctx->makeNode( new cipd::PureDataNode( audio::Node::Format().autoEnable() ) );
+			globalInstance = node;
+			
+			// Enable Cinder audio
+			ctx->enable();
+			
+			// Connect synth to master output
+			globalInstance >> audio::master()->getOutput();
+		}
+		
+	}
+	return globalInstance;
+}
+
 PureDataNode::PureDataNode( const Format &format )
 	: Node( format )
 {
@@ -26,6 +51,7 @@ PureDataNode::PureDataNode( const Format &format )
 
 PureDataNode::~PureDataNode()
 {
+	disconnectAll();
 }
 
 void PureDataNode::initialize()
@@ -148,5 +174,5 @@ void PureDataNode::clearArray( const std::string& arrayName, int value )
 	lock_guard<mutex> lock( mMutex );
 	mPdBase.clearArray( arrayName, value );
 }
-
+	
 } // namespace cipd
