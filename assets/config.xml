@@ -113,8 +113,9 @@
 				<CaptureAllPipelineStages>1</CaptureAllPipelineStages> <!-- So we can extract bitmaps -->
 			</Vision>
 			
-			<Phase>4</Phase>
+			<Tempo>3</Tempo>
 			<TimeVec>0 -1</TimeVec>
+			<NoteCount>13</NoteCount>
 			
 		</MusicWorld>
 

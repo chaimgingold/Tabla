@@ -1,4 +1,4 @@
-#N canvas 1528 475 628 478 10;
+#N canvas 13 543 628 478 10;
 #X obj 299 255 dac~;
 #N canvas 0 22 680 823 dump-image-table 0;
 #X obj 155 225 until;
@@ -64,6 +64,7 @@
 #X obj 371 214 rev3~ 100 80 3000 20;
 #X text 270 329 [x] panning;
 #X text 270 349 [x] cpu reduction;
+#X obj 264 91 clone 16 music-midi;
 #X connect 2 0 0 0;
 #X connect 2 0 3 0;
 #X connect 2 1 0 1;

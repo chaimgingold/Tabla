@@ -11,6 +11,7 @@
 
 #include "GameWorld.h"
 #include "PureDataNode.h"
+#include "RtMidi.h"
 
 class MusicWorld : public GameWorld
 {
@@ -34,16 +35,14 @@ private:
 	// params
 	float mStartTime;	// when MusicWorld created
 	vec2  mTimeVec;		// in world space, which way does time flow forward?
-	float mPhase;		// how fast to playback?
+	float mTempo;		// how fast to playback?
+	int	  mNoteCount=8;
 	
 	// scores
 	class Score
 	{
 	public:
-		// time params -- same as MusicWorld by default
-		float mStartTime;
-		float mPhase;
-
+		
 		// shape
 		vec2  mQuad[4];
 		/*  Vertices are played back like so:
@@ -54,8 +53,28 @@ private:
 			
 			 --> time		*/
 
-		// bitmap
+
+		// synth parameters
+		enum class SynthType
+		{
+			Additive = 1,
+			MIDI	 = 2
+		};
+
 		cv::Mat		mImage;
+		cv::Mat		mQuantizedImage;
+		SynthType	mSynthType;
+		
+		float		mStartTime;
+		float		mDuration;
+		
+		float		mNoteRoot;
+		int			mNoteCount;
+		vector<bool> mNoteState;
+		int			mNoteInstrument;
+		
+		float		mPan;
+		//float		mVolume;
 		
 		// constructing shape
 		bool		setQuadFromPolyLine( PolyLine2, vec2 timeVec );
@@ -67,9 +86,49 @@ private:
 	};
 	vector<Score> mScore;
 	
+	// midi note management
+	struct tOnNoteKey
+	{
+		tOnNoteKey();
+		tOnNoteKey( int i, int n ) : mInstrument(i), mNote(n){}
+		
+		int mInstrument;
+		int mNote;
+		
+	};
+
+	struct cmpOnNoteKey {
+		bool operator()(const tOnNoteKey& a, const tOnNoteKey& b) const {
+			if ( a.mInstrument > b.mInstrument ) return true;
+			else if ( a.mInstrument < b.mInstrument ) return false;
+			else
+			{
+				if ( a.mNote > b.mNote ) return true;
+				else if ( a.mNote < b.mNote ) return false;
+			}
+			return false;
+		}
+	};
+
+	struct tOnNoteInfo
+	{
+		float mStartTime;
+		float mDuration;
+	};
+	
+	map< tOnNoteKey, tOnNoteInfo, cmpOnNoteKey > mOnNotes ;
+		// (instrument,note) -> (start time, duration)
+	
+	bool isNoteInFlight( int instr, int note ) const;
+	void updateNoteOffs();
+	void doNoteOn( int instr, int note, float duration ); // start time is now
+	
+	void sendMidi( int, int, int );
+	
 	// synthesis
 	cipd::PureDataNodeRef	mPureDataNode;	// synth engine
 	cipd::PatchRef			mPatch;			// pong patch
+	std::shared_ptr<RtMidiOut>	mMidiOut;
 	
 	void setupSynthesis();
 	void updateScoreSynthesis();

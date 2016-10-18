@@ -27,6 +27,8 @@
 		23756771BB404A04991A26CB /* b2PolygonAndCircleContact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6B648D73A5D453781A11E34 /* b2PolygonAndCircleContact.cpp */; };
 		24F2003E479C4BC49D1F7374 /* b2WheelJoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 627E59F1B82E4F36ABF0DE48 /* b2WheelJoint.cpp */; };
 		262A886B1DB011FF00FE2336 /* MusicWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 262A88691DB011FF00FE2336 /* MusicWorld.cpp */; };
+		262A88701DB58D7D00FE2336 /* RtMidi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 262A886E1DB58D7D00FE2336 /* RtMidi.cpp */; };
+		262A88751DB594B700FE2336 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 262A88741DB594B700FE2336 /* CoreMIDI.framework */; };
 		2635C8D01D8768C900DF30BE /* WindowData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2635C8CE1D8768C900DF30BE /* WindowData.cpp */; };
 		26BC84B31D80DF89006001DC /* PipelineStageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26BC84B11D80DF89006001DC /* PipelineStageView.cpp */; };
 		26FA36411D4A7D5300C64A00 /* todo in Resources */ = {isa = PBXBuildFile; fileRef = 26FA36401D4A7D5300C64A00 /* todo */; };
@@ -133,6 +135,9 @@
 		1DCA2C3FD6C84A6DAB24027E /* b2DistanceJoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2DistanceJoint.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Joints/b2DistanceJoint.cpp; sourceTree = "<group>"; };
 		262A88691DB011FF00FE2336 /* MusicWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MusicWorld.cpp; path = ../src/MusicWorld.cpp; sourceTree = "<group>"; };
 		262A886A1DB011FF00FE2336 /* MusicWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MusicWorld.h; path = ../src/MusicWorld.h; sourceTree = "<group>"; };
+		262A886E1DB58D7D00FE2336 /* RtMidi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RtMidi.cpp; path = ../src/rtmidi/RtMidi.cpp; sourceTree = "<group>"; };
+		262A886F1DB58D7D00FE2336 /* RtMidi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RtMidi.h; path = ../src/rtmidi/RtMidi.h; sourceTree = "<group>"; };
+		262A88741DB594B700FE2336 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
 		2635C8CD1D83245400DF30BE /* GameWorld.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GameWorld.h; path = ../src/GameWorld.h; sourceTree = "<group>"; };
 		2635C8CE1D8768C900DF30BE /* WindowData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = WindowData.cpp; path = ../src/WindowData.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		2635C8CF1D8768C900DF30BE /* WindowData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WindowData.h; path = ../src/WindowData.h; sourceTree = "<group>"; };
@@ -273,6 +278,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				262A88751DB594B700FE2336 /* CoreMIDI.framework in Frameworks */,
 				C2EC77971DA715B000DB39C8 /* libpd-osx.a in Frameworks */,
 				006D720419952D00008149E2 /* AVFoundation.framework in Frameworks */,
 				006D720519952D00008149E2 /* CoreMedia.framework in Frameworks */,
@@ -365,6 +371,7 @@
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				262A88741DB594B700FE2336 /* CoreMIDI.framework */,
 				006D720219952D00008149E2 /* AVFoundation.framework */,
 				006D720319952D00008149E2 /* CoreMedia.framework */,
 				00B784AF0FF439BC000DE1D7 /* Accelerate.framework */,
@@ -476,6 +483,8 @@
 				26FA365B1D5BDC8000C64A00 /* ocv.h */,
 				26FA36561D592CE700C64A00 /* XmlFileWatch.h */,
 				26FA36551D592CE700C64A00 /* XmlFileWatch.cpp */,
+				262A886E1DB58D7D00FE2336 /* RtMidi.cpp */,
+				262A886F1DB58D7D00FE2336 /* RtMidi.h */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -799,6 +808,7 @@
 				26FA36541D55365800C64A00 /* LightLink.cpp in Sources */,
 				065D029E5180471999C3E354 /* b2CircleContact.cpp in Sources */,
 				26BC84B31D80DF89006001DC /* PipelineStageView.cpp in Sources */,
+				262A88701DB58D7D00FE2336 /* RtMidi.cpp in Sources */,
 				BF8EA3BC1AE14D83A5112094 /* b2Contact.cpp in Sources */,
 				9E53F22939EC46629ECD511A /* b2ContactSolver.cpp in Sources */,
 				3F51BFBD57064C0FBBDC06D5 /* b2EdgeAndCircleContact.cpp in Sources */,
@@ -854,6 +864,7 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_CFLAGS = "-D__MACOSX_CORE__";
 				OTHER_LDFLAGS = (
 					"\"$(CINDER_PATH)/lib/libcinder_d.a\"",
 					../blocks/OpenCV3/lib/macosx/libopencv_calib3d.a,
@@ -901,6 +912,7 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_CFLAGS = "-D__MACOSX_CORE__";
 				OTHER_LDFLAGS = (
 					"\"$(CINDER_PATH)/lib/libcinder.a\"",
 					../blocks/OpenCV3/lib/macosx/libopencv_calib3d.a,

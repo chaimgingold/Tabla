@@ -166,7 +166,7 @@ bool getXml( XmlTree &xml, string name, T& var )
 	if (n!=xml.end())
 	{
 		try {
-			stringstream s( n->getValue() );
+			stringstream s( n->getValue() + " ");
 			T t ;
 			s >> t ;
 			if (s.good())
