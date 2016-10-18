@@ -13,8 +13,8 @@
 
 inline vec2 perp( vec2 p )
 {
-	vec3 cross = glm::cross( vec3(p,0), vec3(0,0,1) ) ;
-	return vec2( cross.x, cross.y ) ;
+	vec3 cross = glm::cross( vec3(p,0), -vec3(0,0,1) ) ;
+	return vec2(cross) ;
 }
 
 inline vec2 closestPointOnLineSeg ( vec2 p, vec2 a, vec2 b )

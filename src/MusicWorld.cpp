@@ -212,10 +212,36 @@ void MusicWorld::setParams( XmlTree xml )
 	cout << "NoteCount " << mNoteCount << endl;
 }
 
+pair<float,float> getShapeRange( const vec2* pts, int npts, vec2 lookVec )
+{
+	float worldy1=MAXFLOAT, worldy2=-MAXFLOAT;
+
+	for( int i=0; i<npts; ++i )
+	{
+		vec2 p = pts[i];
+		
+		float y = dot( p, lookVec );
+		
+		worldy1 = min( worldy1, y );
+		worldy2 = max( worldy2, y );
+	}
+	
+	return pair<float,float>(worldy1,worldy2);
+}
+
 void MusicWorld::updateContours( const ContourVector &contours )
 {
 	// board shape
-	Rectf worldBoundsRect( getWorldBoundsPoly().getPoints() );
+	const vec2 lookVec = perp(mTimeVec);
+
+	pair<float,float> worldYs(0,0);
+	pair<float,float> worldXs(0,0);
+	
+	if ( getWorldBoundsPoly().size() > 0 )
+	{
+		worldYs = getShapeRange( &getWorldBoundsPoly().getPoints()[0], getWorldBoundsPoly().size(), lookVec );
+		worldXs = getShapeRange( &getWorldBoundsPoly().getPoints()[0], getWorldBoundsPoly().size(), mTimeVec );
+	}
 	
 	// erase old scores
 	mScore.clear();
@@ -234,10 +260,16 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			score.mStartTime = mStartTime;
 			score.mDuration = mTempo; // inherit, but it could be custom based on shape or something
 			
+			// use place in world to determine some factors...
+			pair<float,float> ys = getShapeRange( score.mQuad, 4, lookVec );
+			const float yf = 1.f - (ys.first - worldYs.first) / (worldYs.second-worldYs.first);
+			
 			// synth type
-//			score.mSynthType = c.mArea > 15 ? Score::SynthType::MIDI : Score::SynthType::Additive ;
 			score.mSynthType = Score::SynthType::MIDI ;
 //			score.mSynthType = Score::SynthType::Additive ;
+
+//			if ( yf > .8f ) score.mSynthType = Score::SynthType::Additive;
+//			else score.mSynthType = Score::SynthType::MIDI;
 			
 			// synth params
 			if ( score.mSynthType==Score::SynthType::MIDI )
@@ -246,16 +278,13 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			}
 			
 			// spatialization
-			vec2 centroid = score.getPolyLine().calcCentroid();
-			vec2 centroidNorm = (centroid - worldBoundsRect.getLowerLeft()) / (worldBoundsRect.getSize()) ;
-
-			score.mPan		= centroidNorm.y;
-//			score.mNoteRoot = centroidNorm.x;
-			score.mNoteRoot = 60; // middle C
+			int octaveShift = (yf - .5f) * 10.f ;
+			
+			score.mPan		= .5f ;
+			score.mNoteRoot = 60 + octaveShift*8; // middle C
 //			score.mNoteRoot = 27; // base drum (High Q)
 
-			score.mNoteInstrument = floorf( centroidNorm.x / 8.f );
-			// TODO: this needs to be oriented relative to mTimeVec; would a simple rotation do?
+			score.mNoteInstrument = 0; // change instrument instead of octave?
 			
 			mScore.push_back(score);
 		}
@@ -310,7 +339,8 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 			cv::resize( s.mImage, quantized, cv::Size(s.mImage.cols,s.mNoteCount) );
 			pipeline.then( scoreName + "quantized", quantized);
 			pipeline.setImageToWorldTransform(
-				pipeline.getStages().back()->mImageToWorld * glm::scale(vec3(1,(float)s.mNoteCount,1))
+				pipeline.getStages().back()->mImageToWorld
+					* glm::scale(vec3(1, outsize.y / (float)s.mNoteCount, 1))
 				);
 			pipeline.getStages().back()->mLayoutHintScale = .5f;
 			pipeline.getStages().back()->mLayoutHintOrtho = true;
@@ -597,9 +627,12 @@ void MusicWorld::setupSynthesis()
 	
 	mMidiOut->openVirtualPort();
 	
-	unsigned int nPorts = mMidiOut->getPortCount();
-	if ( nPorts == 0 ) {
-		std::cout << "No ports available!\n";
+	if (0)
+	{
+		unsigned int nPorts = mMidiOut->getPortCount();
+		if ( nPorts == 0 ) {
+			std::cout << "No ports available!\n";
+		}
 	}
 	
 	// Create the synth engine
