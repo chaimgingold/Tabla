@@ -83,10 +83,15 @@ private:
 		PolyLine2	getPolyLine() const;
 		float		getPlayheadFrac() const;
 		void		getPlayheadLine( vec2 line[2] ) const;
+		vec2		fracToQuad( vec2 frac ) const; // frac.x = time[0,1], frac.y = note_space[0,1]
 	};
 	vector<Score> mScore;
 	
-	// midi note management
+	// midi note playing and management
+	bool  isScoreValueHigh( uchar ) const;
+	float getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const;
+	int   getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const;
+	
 	struct tOnNoteKey
 	{
 		tOnNoteKey();
@@ -99,14 +104,7 @@ private:
 
 	struct cmpOnNoteKey {
 		bool operator()(const tOnNoteKey& a, const tOnNoteKey& b) const {
-			if ( a.mInstrument > b.mInstrument ) return true;
-			else if ( a.mInstrument < b.mInstrument ) return false;
-			else
-			{
-				if ( a.mNote > b.mNote ) return true;
-				else if ( a.mNote < b.mNote ) return false;
-			}
-			return false;
+			return pair<int,int>(a.mInstrument,a.mNote) > pair<int,int>(b.mInstrument,b.mNote);
 		}
 	};
 

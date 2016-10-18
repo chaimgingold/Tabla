@@ -185,7 +185,13 @@ void MusicWorld::Score::getPlayheadLine( vec2 line[2] ) const
 	line[1] = lerp(mQuad[3],mQuad[2],t);
 }
 
-
+vec2 MusicWorld::Score::fracToQuad( vec2 frac ) const
+{
+	vec2 top = lerp(mQuad[0],mQuad[1],frac.x);
+	vec2 bot = lerp(mQuad[3],mQuad[2],frac.x);
+	
+	return lerp(bot,top,frac.y);
+}
 
 MusicWorld::MusicWorld()
 {
@@ -246,6 +252,8 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			score.mPan		= centroidNorm.y;
 //			score.mNoteRoot = centroidNorm.x;
 			score.mNoteRoot = 60; // middle C
+//			score.mNoteRoot = 27; // base drum (High Q)
+
 			score.mNoteInstrument = floorf( centroidNorm.x / 8.f );
 			// TODO: this needs to be oriented relative to mTimeVec; would a simple rotation do?
 			
@@ -302,7 +310,7 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 			cv::resize( s.mImage, quantized, cv::Size(s.mImage.cols,s.mNoteCount) );
 			pipeline.then( scoreName + "quantized", quantized);
 			pipeline.setImageToWorldTransform(
-				pipeline.getStages().back()->mImageToWorld * glm::scale(vec3(1,1.f/(float)s.mNoteCount,1))
+				pipeline.getStages().back()->mImageToWorld * glm::scale(vec3(1,(float)s.mNoteCount,1))
 				);
 			pipeline.getStages().back()->mLayoutHintScale = .5f;
 			pipeline.getStages().back()->mLayoutHintOrtho = true;
@@ -326,6 +334,33 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 	updateScoreSynthesis();
 }
 
+bool MusicWorld::isScoreValueHigh( uchar value ) const
+{
+	const int kValueThresh = 100;
+	
+	return value < kValueThresh ;
+	// if dark, then high
+	// else low
+}
+
+int MusicWorld::getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const
+{
+	int x2;
+	
+	for( x2=x;
+		 x2<image.cols
+			&& isScoreValueHigh(image.at<unsigned char>(y,x2)) ;
+		 ++x2 )
+	{}
+	
+	return x2-x;
+}
+
+float MusicWorld::getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const
+{
+	return (float)getNoteLengthAsImageCols(image,x,y) / (float)image.cols;
+}
+
 void MusicWorld::update()
 {
 	// send @fps values to Pd
@@ -337,13 +372,11 @@ void MusicWorld::update()
 		mPureDataNode->sendFloat(string("phase")+toString(scoreNum),
 								 score.getPlayheadFrac()*score.mDuration );
 
-		// midi
-//		inst = int[] = { 3, 16, 4 }[scoreNum];
-		
+		// send midi notes
 		if ( score.mSynthType==Score::SynthType::MIDI )
 		{
 			// instrument
-			mPureDataNode->sendFloat(string("midi-instrument")+toString(scoreNum), scoreNum);
+//			mPureDataNode->sendFloat(string("midi-instrument")+toString(scoreNum), scoreNum);
 			
 			// notes
 			int x = score.getPlayheadFrac() * (float)(score.mQuantizedImage.cols-1) ;
@@ -352,13 +385,12 @@ void MusicWorld::update()
 			{
 				unsigned char value = score.mQuantizedImage.at<unsigned char>(y,x) ;
 				
-				if ( value < 100 ) value=1; // if dark, then high
-				else value=0; // else low
-				
-				float duration = .3f;
-				// TODO: look in image, and make duration length of on pixels in that row!
-				
-				if (value) doNoteOn( score.mNoteInstrument, score.mNoteRoot+y, duration );
+				if ( isScoreValueHigh(value) )
+				{
+					float duration = score.mDuration * getNoteLengthAsScoreFrac(score.mQuantizedImage,x,y);
+
+					doNoteOn( score.mNoteInstrument, score.mNoteRoot+y, duration );
+				}
 			}
 		}
 		
@@ -476,11 +508,57 @@ void MusicWorld::draw( bool highQuality )
 	{
 		if ( score.mSynthType==Score::SynthType::Additive )
 		{
+			// additive
 			gl::color(.5,0,0);
 			gl::draw( score.getPolyLine() );
 		}
-		else
+		else if ( score.mSynthType==Score::SynthType::MIDI )
 		{
+			// midi
+			
+			// draw notes
+			// (probably wise to extract this geometry/data when processing vision data,
+			// then use it for both playback and drawing).
+			const float invcols = 1.f / (float)(score.mQuantizedImage.cols-1);
+
+			const float yheight = 1.f / (float)score.mNoteCount;
+			
+			for ( int y=0; y<score.mNoteCount; ++y )
+			{
+				const float fracy1 = 1.f - (y * yheight + yheight*.2f);
+				const float fracy2 = 1.f - (y * yheight + yheight*.8f);
+				
+				for( int x=0; x<score.mQuantizedImage.cols; ++x )
+				{
+					if ( isScoreValueHigh(score.mQuantizedImage.at<unsigned char>(y,x)) )
+					{
+						// how wide?
+						int length = getNoteLengthAsImageCols(score.mQuantizedImage,x,y);
+						
+						vec2 start1 = score.fracToQuad( vec2( (float)(x * invcols), fracy1 ) ) ;
+						vec2 end1   = score.fracToQuad( vec2( (float)(x+length) * invcols, fracy1) ) ;
+
+						vec2 start2 = score.fracToQuad( vec2( (float)(x * invcols), fracy2 ) ) ;
+						vec2 end2   = score.fracToQuad( vec2( (float)(x+length) * invcols, fracy2) ) ;
+						
+						if ( isNoteInFlight(score.mNoteInstrument, score.mNoteRoot+y) )
+						{
+							gl::color(1,0,0);
+						}
+						else gl::color(0,1,0);
+
+						gl::drawSolidTriangle(start1, end1, end2);
+						gl::drawSolidTriangle(start1, end2, start2);
+						// this is insanity, but i don't yet get how to easily draw raw triangles in glNext.
+						// gl::begin(GL_QUAD)/end didn't quite work.
+						
+						// skip ahead
+						x = x + length+1;
+					}
+				}
+			}
+			
+			// lines
 			gl::color(1,0,0);
 			gl::draw( score.getPolyLine() );
 
