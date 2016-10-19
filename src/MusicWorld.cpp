@@ -138,7 +138,7 @@ void MusicWorld::Instrument::setup()
 {
 	assert(!mMidiOut);
 	
-	cout << "Opening port " << mPort << "for '" << mName << "'" << endl;
+	cout << "Opening port " << mPort << " for '" << mName << "'" << endl;
 
 	mMidiOut = make_shared<RtMidiOut>();
 	mMidiOut->openPort( mPort );
@@ -294,6 +294,14 @@ void MusicWorld::setParams( XmlTree xml )
 //	{
 //		
 //	}
+
+	// instr regions
+	generateInstrumentRegions();
+}
+
+void MusicWorld::worldBoundsPolyDidChange()
+{
+	generateInstrumentRegions();
 }
 
 pair<float,float> getShapeRange( const vec2* pts, int npts, vec2 lookVec )
@@ -311,6 +319,67 @@ pair<float,float> getShapeRange( const vec2* pts, int npts, vec2 lookVec )
 	}
 	
 	return pair<float,float>(worldy1,worldy2);
+}
+
+void MusicWorld::generateInstrumentRegions()
+{
+	mInstrumentRegions.clear();
+	
+	Rectf worldRect( getWorldBoundsPoly().getPoints() );
+	
+	int ninstr = mInstruments.size();
+	
+	int dim = ceil( sqrt(ninstr) );
+	
+	vec2 scale = worldRect.getSize() / vec2(dim,dim);
+//	vec2 scale = worldRect.getSize() / vec2(dim,dim);
+	
+	int x=0, y=0;
+	
+	for( auto i : mInstruments )
+	{
+		Rectf r(0,0,1,1);
+		r.offset( vec2(x,y) );
+		r.scale(scale);
+		
+		cout << r << " " << i.second->mName << endl;
+		
+		PolyLine2 p;
+		p.push_back( r.getUpperLeft() );
+		p.push_back( r.getUpperRight() );
+		p.push_back( r.getLowerRight() );
+		p.push_back( r.getLowerLeft() );
+		p.setClosed();
+		
+		mInstrumentRegions.push_back( pair<PolyLine2,InstrumentRef>(p,i.second) );
+		
+		//
+		x++;
+		if (x>=dim)
+		{
+			x=0;
+			y++;
+		}
+	}
+}
+
+MusicWorld::InstrumentRef
+MusicWorld::decideInstrumentForScore( const Score& s ) const
+{
+	vec2 c = s.getPolyLine().calcCentroid();
+	
+	// find
+	for( auto i : mInstrumentRegions )
+	{
+		if ( i.first.contains(c) ) return i.second;
+	}
+	
+	// default to first
+	auto i = mInstrumentRegions.begin();
+	if (i!=mInstrumentRegions.end()) return i->second;
+	
+	// none
+	return 0;
 }
 
 void MusicWorld::updateContours( const ContourVector &contours )
@@ -343,7 +412,13 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			// timing
 			score.mStartTime = mStartTime;
 			score.mDuration = mTempo; // inherit, but it could be custom based on shape or something
+
+			// instrument
+			InstrumentRef instr = decideInstrumentForScore(score);
 			
+			if (instr) score.mInstrumentName = instr->mName ;
+			
+			/*
 			// use place in world to determine some factors...
 			pair<float,float> ys = getShapeRange( score.mQuad, 4, lookVec );
 //			pair<float,float> xs = getShapeRange( score.mQuad, 4, mTimeVec );
@@ -355,18 +430,19 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			// synth type
 			const float xAdditiveZone = 0.5;
 			if ( yf > xAdditiveZone ) score.mInstrumentName = "Additive";
-			else score.mInstrumentName = "MIDI";
+			else score.mInstrumentName = "Volca Sample";
 				// TODO: make and use a spatial grid for each instrument.
+			*/
 			
 			// Choose octave based on up<>down
-			int octaveShift = (yf - .5f) * 10.f;
+//			int octaveShift = (yf - .5f) * 10.f;
+			int octaveShift = 0;
 			int noteRoot = 60 + octaveShift*12; // middle C
 			score.mNoteRoot = noteRoot;
 
 			// MIDI synth params
-			auto instr = getInstrumentForScore(score);
-	
-			assert(instr);
+//			auto instr = getInstrumentForScore(score);
+//			assert(instr);
 			
 			if ( instr && instr->mSynthType==Instrument::SynthType::MIDI )
 			{
@@ -464,7 +540,7 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 	updateAdditiveScoreSynthesis();
 }
 
-shared_ptr<MusicWorld::Instrument> MusicWorld::getInstrumentForScore( const Score& score )
+MusicWorld::InstrumentRef MusicWorld::getInstrumentForScore( const Score& score ) const
 {
 	auto i = mInstruments.find(score.mInstrumentName);
 	
@@ -700,6 +776,14 @@ void MusicWorld::updateAdditiveScoreSynthesis() {
 
 void MusicWorld::draw( bool highQuality )
 {
+	// instrument regions
+	for( auto &r : mInstrumentRegions )
+	{
+		gl::color( r.second->mScoreColor );
+		gl::draw ( r.first ) ;
+	}
+	
+	// scores
 	for( const auto &score : mScores )
 	{
 		InstrumentRef instr = getInstrumentForScore(score);
@@ -788,42 +872,16 @@ void MusicWorld::draw( bool highQuality )
 // Synthesis
 void MusicWorld::setupSynthesis()
 {
-	// We open a fixed number of MIDI ports.
-	// If no real MIDI ports are available, we open virtual MIDI ports instead.
-//	const int numMIDIPortsToOpen = 4;
-
-	// Create a temp midi out just to query the number of available ports
-	/*
-	RtMidiOutRef tempMidiOut = make_shared<RtMidiOut>();
-	int numRealMIDIPorts = tempMidiOut->getPortCount();
-
-	for (int portNum = 0; portNum < numMIDIPortsToOpen; portNum++) {
-		RtMidiOutRef midiOut = make_shared<RtMidiOut>();
-		if (portNum < numRealMIDIPorts) {
-			midiOut->openPort(portNum);
-		} else {
-			midiOut->openVirtualPort();
-		}
-		mMidiOuts.push_back(midiOut);
-	}
-	killAllNotes();
-	*/
-
-
 	// Create the synth engine
 	mPureDataNode = cipd::PureDataNode::Global();
 	mPatch = mPureDataNode->loadPatch( DataSourcePath::create(getAssetPath("synths/music.pd")) );
 }
 
 MusicWorld::~MusicWorld() {
-	// FIXME: this isn't called at shutdown
-	
 	cout << "~MusicWorld" << endl;
 
 	killAllNotes();
-//	for ( const auto &midiOut : mMidiOuts ) {
-//		midiOut->closePort();
-//	}
+
 	// Clean up synth engine
 	mPureDataNode->closePatch(mPatch);
 }

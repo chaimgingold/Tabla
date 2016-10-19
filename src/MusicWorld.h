@@ -30,9 +30,14 @@ public:
 	void updateContours( const ContourVector &c ) override;
 	void updateCustomVision( Pipeline& ) override; // extract bitmaps we need
 
+	void worldBoundsPolyDidChange();
+
 	void draw( bool highQuality ) override;
 
 private:
+	
+	class Instrument;
+	class Score;
 	
 	// params
 	float mStartTime;	// when MusicWorld created
@@ -82,6 +87,10 @@ private:
 	
 	map<string,InstrumentRef> mInstruments;
 	
+	vector< pair<PolyLine2,InstrumentRef> > mInstrumentRegions;
+	void generateInstrumentRegions();
+	InstrumentRef decideInstrumentForScore( const Score& ) const;
+	
 	// scores
 	class Score
 	{
@@ -101,7 +110,6 @@ private:
 		// synth parameters
 		cv::Mat		mImage;
 		cv::Mat		mQuantizedImage;
-//		SynthType	mSynthType;
 		string		mInstrumentName;
 		
 		float		mStartTime;
@@ -126,7 +134,7 @@ private:
 	};
 	vector<Score> mScores;
 	
-	InstrumentRef getInstrumentForScore( const Score& );
+	InstrumentRef getInstrumentForScore( const Score& ) const;
 	
 	// midi note playing and management
 	bool  isScoreValueHigh( uchar ) const;
