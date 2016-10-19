@@ -20,6 +20,15 @@ const vec2 kDefaultWindowSize( 640, 480 );
 
 const string kDocumentsDirectoryName = "PaperES";
 
+PaperBounce3App::~PaperBounce3App()
+{
+	cout << "Shutting down..." << endl;
+
+//	mGameWorld.reset();
+	
+//	cipd::PureDataNode::ShutdownGlobal();
+}
+
 vec2 PaperBounce3App::getWorldSize() const
 {
 	return Rectf( getWorldBoundsPoly().getPoints() ).getSize();

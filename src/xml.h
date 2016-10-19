@@ -54,6 +54,18 @@ inline bool getXml( XmlTree &xml, string name, bool& var )
 	return false;
 } ;
 
+inline bool getXml( XmlTree &xml, string name, string& var )
+{
+	auto n = xml.begin(name);
+	
+	if (n!=xml.end())
+	{
+		var = n->getValue() ;
+	}
+	
+	return false;
+} ;
+
 inline bool getXml( XmlTree &xml, string name, float& var )
 {
 	auto n = xml.begin(name);
@@ -77,10 +89,10 @@ inline bool getXml( XmlTree &xml, string name, vec2& var )
 	if (n!=xml.end())
 	{
 		try {
-			stringstream s( n->getValue() + " " ); // hack, because s.good() fails when it bumps against the end of the string
+			stringstream s( n->getValue() ); //+ " " ); // hack, because !s.fail() fails when it bumps against the end of the string
 			vec2 t ;
 			s >> t.x >> t.y ;
-			if (s.good())
+			if (!s.fail())
 			{
 				var=t ;
 				return true;
@@ -107,7 +119,7 @@ inline bool getXml( XmlTree &xml, string name, vector<vec2> &var )
 			{
 				s >> t.x >> t.y ;
 				
-				if (s.good()) var.push_back(t) ;
+				if (!s.fail()) var.push_back(t) ;
 				else break;
 				
 			}
@@ -117,6 +129,34 @@ inline bool getXml( XmlTree &xml, string name, vector<vec2> &var )
 	
 	return ok;
 } ;
+
+template<class T>
+bool getXml( XmlTree &xml, string name, vector<T> &var )
+{
+	auto n = xml.begin(name);
+	bool ok=false;
+	
+	if (n!=xml.end())
+	{
+		try {
+			stringstream s( n->getValue() );
+			T t ;
+
+			while(1)
+			{
+				s >> t ;
+				
+				if (!s.fail()) var.push_back(t) ;
+				else break;
+				
+			}
+		}
+		catch( std::exception ){}
+	}
+	
+	return ok;
+} ;
+
 
 inline bool getXml( XmlTree &xml, string name, vec2 var[], int len )
 {
@@ -146,7 +186,7 @@ inline bool getXml( XmlTree &xml, string name, ColorAf& var )
 			s >> hex >> value;
 			// TODO: Take 0xRGBA as well as 1 1 1 format; test for "0x" at start
 			
-			if (s.good())
+			if (!s.fail())
 			{
 				var = ColorA::hex(value) ;
 				return true;
@@ -166,10 +206,10 @@ bool getXml( XmlTree &xml, string name, T& var )
 	if (n!=xml.end())
 	{
 		try {
-			stringstream s( n->getValue() + " ");
+			stringstream s( n->getValue() );
 			T t ;
 			s >> t ;
-			if (s.good())
+			if (!s.fail())
 			{
 				var=t ;
 				return true;

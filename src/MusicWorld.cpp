@@ -105,6 +105,51 @@ void ShapeTracker::indexShapes()
 }
 */
 
+void MusicWorld::Instrument::setParams( XmlTree xml )
+{
+	getXml(xml,"PlayheadColor",mPlayheadColor);
+	getXml(xml,"ScoreColor",mScoreColor);
+	getXml(xml,"NoteOffColor",mNoteOffColor);
+	getXml(xml,"NoteOnColor",mNoteOnColor);
+	
+	getXml(xml,"Name",mName);
+	getXml(xml,"Scale",mScale);
+//	getXml(xml,"IsAdditiveSynth",mIsAdditiveSynth);
+	
+	if ( xml.hasChild("SynthType") )
+	{
+		string t = xml.getChild("SynthType").getValue();
+		
+		if (t=="Additive") mSynthType=SynthType::Additive;
+		else mSynthType=SynthType::MIDI;
+	}
+	
+	getXml(xml,"Port",mPort);
+	getXml(xml,"Channel",mChannel);
+	getXml(xml,"MapNotesToChannels",mMapNotesToChannels);
+}
+
+MusicWorld::Instrument::~Instrument()
+{
+	if (mMidiOut) mMidiOut->closePort();
+}
+
+void MusicWorld::Instrument::setup()
+{
+	assert(!mMidiOut);
+	
+	cout << "Opening port " << mPort << "for '" << mName << "'" << endl;
+
+	mMidiOut = make_shared<RtMidiOut>();
+	mMidiOut->openPort( mPort );
+	
+	if ( !mMidiOut->isPortOpen() ) // does this properly check for failure?
+	{
+		cout << "...Opening virtual port for '" << mName << "'" << endl;
+		mMidiOut->openVirtualPort();
+	}
+}
+
 bool MusicWorld::Score::setQuadFromPolyLine( PolyLine2 poly, vec2 timeVec )
 {
 	// could have simplified a bit and just examined two bisecting lines. oh well. it works.
@@ -203,12 +248,42 @@ MusicWorld::MusicWorld()
 
 void MusicWorld::setParams( XmlTree xml )
 {
+	killAllNotes();
+
 	getXml(xml,"Tempo",mTempo);
 	getXml(xml,"TimeVec",mTimeVec);
-	getXml(xml,"NoteCount",mNoteCount); // ??? not working
+	getXml(xml,"NoteCount",mNoteCount);
 	getXml(xml,"BeatCount",mBeatCount);
+
+	cout << "Notes " << mNoteCount << endl;
 	
-	cout << "NoteCount " << mNoteCount << endl;
+	// instruments
+	cout << "Instruments:" << endl;
+	
+	map<string,InstrumentRef> newInstr;
+	
+	for( auto i = xml.begin( "Instruments/Instrument" ); i != xml.end(); ++i )
+	{
+		Instrument instr;
+		instr.setParams(*i);
+		
+		cout << "\t" << instr.mName << endl;
+		
+		newInstr[instr.mName] = std::make_shared<Instrument>(instr);
+	}
+	
+	// bind new instruments
+	auto oldInstr = mInstruments;
+	mInstruments.clear();
+
+	mInstruments = newInstr;
+	for( auto i : mInstruments ) i.second->setup();
+	
+	// TODO: diff them smartly.
+//	for( auto i : newInstr )
+//	{
+//		
+//	}
 }
 
 pair<float,float> getShapeRange( const vec2* pts, int npts, vec2 lookVec )
@@ -268,30 +343,25 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			const float xf = score.getPolyLine().calcCentroid().y / (worldXs.second-worldXs.first);
 
 			// synth type
-//			score.mSynthType = Score::SynthType::MIDI ;
-//			score.mSynthType = Score::SynthType::Additive ;
-
-			const float xAdditiveZone = 0.9;
-
-			if ( xf > xAdditiveZone ) score.mSynthType = Score::SynthType::Additive;
-			else score.mSynthType = Score::SynthType::MIDI;
-
+			const float xAdditiveZone = 0.5;
+			if ( yf > xAdditiveZone ) score.mInstrumentName = "Additive";
+			else score.mInstrumentName = "MIDI";
+				// TODO: make and use a spatial grid for each instrument.
+			
 			// Choose octave based on up<>down
 			int octaveShift = (yf - .5f) * 10.f;
 			int noteRoot = 60 + octaveShift*12; // middle C
 			score.mNoteRoot = noteRoot;
 
 			// MIDI synth params
-			if ( score.mSynthType==Score::SynthType::MIDI )
+			auto instr = getInstrumentForScore(score);
+	
+			assert(instr);
+			
+			if ( instr && instr->mSynthType==Instrument::SynthType::MIDI )
 			{
-				// Choose instrument based on left<>right
-				int instrumentNum = mMidiOuts.size() * (xf / xAdditiveZone);
-				score.mNoteInstrument = instrumentNum;
 				score.mNoteCount = mNoteCount;
 				score.mBeatCount = mBeatCount;
-
-			} else if ( score.mSynthType==Score::SynthType::Additive ) {
-
 			}
 
 			score.mPan		= .5f ;
@@ -342,7 +412,9 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		pipeline.getStages().back()->mLayoutHintOrtho = true;
 
 		// midi quantize
-		if ( s.mSynthType==Score::SynthType::MIDI )
+		auto instr = getInstrumentForScore(s);
+		
+		if ( instr && instr->mSynthType==Instrument::SynthType::MIDI )
 		{
 			const int numRows = s.mNoteCount;
 			int numCols = s.mImage.cols;
@@ -380,6 +452,20 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 
 	// update additive synths based on new image data
 	updateAdditiveScoreSynthesis();
+}
+
+shared_ptr<MusicWorld::Instrument> MusicWorld::getInstrumentForScore( const Score& score )
+{
+	auto i = mInstruments.find(score.mInstrumentName);
+	
+	if ( i == mInstruments.end() )
+	{
+		// fail!
+		i = mInstruments.begin();
+		if (i != mInstruments.end()) return i->second;
+		else return 0;
+	}
+	else return i->second;
 }
 
 bool MusicWorld::isScoreValueHigh( uchar value ) const
@@ -422,13 +508,16 @@ void MusicWorld::update()
 	
 	for( const auto &score : mScores )
 	{
-		if ( score.mSynthType==Score::SynthType::Additive ) {
+		auto instr = getInstrumentForScore(score);
+		if (!instr) continue;
+
+		if ( instr->mSynthType==Instrument::SynthType::Additive ) {
 			// Update time
 			mPureDataNode->sendFloat(string("phase")+toString(scoreNum),
 									 score.getPlayheadFrac()*100.0 );
 		}
 		// send midi notes
-		else if ( score.mSynthType==Score::SynthType::MIDI )
+		else if ( instr->mSynthType==Instrument::SynthType::MIDI )
 		{
 			
 			// notes
@@ -444,7 +533,7 @@ void MusicWorld::update()
 					
 					if (duration>0)
 					{
-						doNoteOn( score.mNoteInstrument, score.mNoteRoot+y, duration );
+						doNoteOn( instr, score.mNoteRoot+y, duration );
 					}
 				}
 			}
@@ -458,7 +547,7 @@ void MusicWorld::update()
 	updateNoteOffs();
 }
 
-bool MusicWorld::isNoteInFlight( int instr, int note ) const
+bool MusicWorld::isNoteInFlight( InstrumentRef instr, int note ) const
 {
 	return mOnNotes.find( tOnNoteKey(instr,note) ) != mOnNotes.end();
 }
@@ -475,10 +564,8 @@ void MusicWorld::updateNoteOffs()
 		
 		if (off)
 		{
-			int instr = it->first.mInstrument;
-			RtMidiOutRef midiOut = mMidiOuts[instr % mMidiOuts.size()];
-			uchar channel = 0;
-			sendNoteOff( midiOut, channel, it->first.mNote);
+			InstrumentRef instr = it->first.mInstrument;
+			sendNoteOff( instr->mMidiOut, instr->mChannel, it->first.mNote);
 		}
 		
 		if (off) mOnNotes.erase(it++);
@@ -487,22 +574,19 @@ void MusicWorld::updateNoteOffs()
 }
 
 void MusicWorld::killAllNotes() {
-	uchar channel = 0;
-	for ( const auto &midiOut : mMidiOuts ) {
+	for ( const auto i : mInstruments ) {
 		for (int note = 0; note < 128; note++) {
-			sendNoteOff( midiOut, channel, note );
+			sendNoteOff( i.second->mMidiOut, i.second->mChannel, note );
 		}
 	}
 }
 
-void MusicWorld::doNoteOn( int instr, int note, float duration )
+void MusicWorld::doNoteOn( InstrumentRef instr, int note, float duration )
 {
 	if ( !isNoteInFlight(instr,note) )
 	{
-		RtMidiOutRef midiOut = mMidiOuts[instr % mMidiOuts.size()];
-		uchar channel = 0;
 		uchar velocity = 100; // 0-127
-		sendNoteOn( midiOut, channel, note, velocity );
+		sendNoteOn( instr->mMidiOut, instr->mChannel, note, velocity );
 		
 		tOnNoteInfo i;
 		i.mStartTime = ci::app::getElapsedSeconds();
@@ -549,8 +633,11 @@ void MusicWorld::updateAdditiveScoreSynthesis() {
 	
 	for( const auto &score : mScores )
 	{
+		InstrumentRef instr = getInstrumentForScore(score);
+		if (!instr) continue;
+		
 		// send image for additive synthesis
-		if ( score.mSynthType==Score::SynthType::Additive && !score.mImage.empty() )
+		if ( instr->mSynthType==Instrument::SynthType::Additive && !score.mImage.empty() )
 		{
 			// Update pan
 			mPureDataNode->sendFloat(string("pan")+toString(scoreNum),
@@ -597,13 +684,16 @@ void MusicWorld::draw( bool highQuality )
 {
 	for( const auto &score : mScores )
 	{
-		if ( score.mSynthType==Score::SynthType::Additive )
+		InstrumentRef instr = getInstrumentForScore(score);
+		if (!instr) continue;
+
+		if ( instr->mSynthType==Instrument::SynthType::Additive )
 		{
 			// additive
 			gl::color(.5,0,0);
 			gl::draw( score.getPolyLine() );
 		}
-		else if ( score.mSynthType==Score::SynthType::MIDI )
+		else if ( instr->mSynthType==Instrument::SynthType::MIDI )
 		{
 			// midi
 			
@@ -632,7 +722,7 @@ void MusicWorld::draw( bool highQuality )
 						vec2 start2 = score.fracToQuad( vec2( (float)(x * invcols), fracy2 ) ) ;
 						vec2 end2   = score.fracToQuad( vec2( (float)(x+length) * invcols, fracy2) ) ;
 						
-						if ( isNoteInFlight(score.mNoteInstrument, score.mNoteRoot+y) )
+						if ( isNoteInFlight(instr, score.mNoteRoot+y) )
 						{
 							gl::color(1,0,0);
 						}
@@ -665,7 +755,7 @@ void MusicWorld::draw( bool highQuality )
 		}
 		
 		//
-		if (score.mSynthType==Score::SynthType::Additive) gl::color(0,1,1);
+		if (instr->mSynthType==Instrument::SynthType::Additive) gl::color(0,1,1);
 		else gl::color(0, 1, 0);
 		
 		vec2 playhead[2];
@@ -686,9 +776,10 @@ void MusicWorld::setupSynthesis()
 {
 	// We open a fixed number of MIDI ports.
 	// If no real MIDI ports are available, we open virtual MIDI ports instead.
-	const int numMIDIPortsToOpen = 4;
+//	const int numMIDIPortsToOpen = 4;
 
 	// Create a temp midi out just to query the number of available ports
+	/*
 	RtMidiOutRef tempMidiOut = make_shared<RtMidiOut>();
 	int numRealMIDIPorts = tempMidiOut->getPortCount();
 
@@ -702,6 +793,7 @@ void MusicWorld::setupSynthesis()
 		mMidiOuts.push_back(midiOut);
 	}
 	killAllNotes();
+	*/
 
 
 	// Create the synth engine
@@ -711,11 +803,13 @@ void MusicWorld::setupSynthesis()
 
 MusicWorld::~MusicWorld() {
 	// FIXME: this isn't called at shutdown
+	
+	cout << "~MusicWorld" << endl;
 
 	killAllNotes();
-	for ( const auto &midiOut : mMidiOuts ) {
-		midiOut->closePort();
-	}
+//	for ( const auto &midiOut : mMidiOuts ) {
+//		midiOut->closePort();
+//	}
 	// Clean up synth engine
 	mPureDataNode->closePatch(mPatch);
 }

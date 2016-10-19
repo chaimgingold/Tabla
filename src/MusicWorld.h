@@ -41,6 +41,45 @@ private:
 	int	  mNoteCount=8;
 	int	  mBeatCount=32;
 	
+	// instrument info
+	class Instrument
+	{
+	public:
+
+		~Instrument();
+		
+		void setParams( XmlTree );
+		void setup();
+		
+		// colors!
+		ColorA mPlayheadColor;
+		ColorA mScoreColor;
+		ColorA mNoteOffColor, mNoteOnColor;
+		
+		//
+		string mName;
+		vector<int> mScale; // maps score rows -> notes
+
+		//
+		enum class SynthType
+		{
+			Additive = 1,
+			MIDI	 = 2
+		};
+		
+		SynthType mSynthType;
+		
+		// midi
+		int  mPort=0;
+		int  mChannel=0;
+		bool mMapNotesToChannels=false; // for KORG Volca Sample
+		RtMidiOutRef mMidiOut;
+		
+	};
+	typedef std::shared_ptr<Instrument> InstrumentRef;
+	
+	map<string,InstrumentRef> mInstruments;
+	
 	// scores
 	class Score
 	{
@@ -58,15 +97,10 @@ private:
 
 
 		// synth parameters
-		enum class SynthType
-		{
-			Additive = 1,
-			MIDI	 = 2
-		};
-
 		cv::Mat		mImage;
 		cv::Mat		mQuantizedImage;
-		SynthType	mSynthType;
+//		SynthType	mSynthType;
+		string		mInstrumentName;
 		
 		float		mStartTime;
 		float		mDuration;
@@ -90,6 +124,8 @@ private:
 	};
 	vector<Score> mScores;
 	
+	InstrumentRef getInstrumentForScore( const Score& );
+	
 	// midi note playing and management
 	bool  isScoreValueHigh( uchar ) const;
 	float getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const;
@@ -98,16 +134,16 @@ private:
 	struct tOnNoteKey
 	{
 		tOnNoteKey();
-		tOnNoteKey( int i, int n ) : mInstrument(i), mNote(n){}
+		tOnNoteKey( InstrumentRef i, int n ) : mInstrument(i), mNote(n){}
 		
-		int mInstrument;
+		InstrumentRef mInstrument;
 		int mNote;
 		
 	};
 
 	struct cmpOnNoteKey {
 		bool operator()(const tOnNoteKey& a, const tOnNoteKey& b) const {
-			return pair<int,int>(a.mInstrument,a.mNote) > pair<int,int>(b.mInstrument,b.mNote);
+			return pair<InstrumentRef,int>(a.mInstrument,a.mNote) > pair<InstrumentRef,int>(b.mInstrument,b.mNote);
 		}
 	};
 
@@ -120,9 +156,9 @@ private:
 	map< tOnNoteKey, tOnNoteInfo, cmpOnNoteKey > mOnNotes ;
 		// (instrument,note) -> (start time, duration)
 	
-	bool isNoteInFlight( int instr, int note ) const;
+	bool isNoteInFlight( InstrumentRef instr, int note ) const;
 	void updateNoteOffs();
-	void doNoteOn( int instr, int note, float duration ); // start time is now
+	void doNoteOn( InstrumentRef instr, int note, float duration ); // start time is now
 
 
 
@@ -136,7 +172,7 @@ private:
 	// synthesis
 	cipd::PureDataNodeRef	mPureDataNode;	// synth engine
 	cipd::PatchRef			mPatch;			// music patch
-	vector<RtMidiOutRef>	mMidiOuts;
+//	vector<RtMidiOutRef>	mMidiOuts;
 
 	void setupSynthesis();
 	void updateAdditiveScoreSynthesis();

@@ -15,31 +15,36 @@ void PureDataPrintReceiver::print(const std::string& message) {
 	cout << message + "\n";
 };
 
+static mutex globalMutex;
+static PureDataNodeRef globalInstance;
+
 PureDataNodeRef PureDataNode::Global() {
-	static mutex globalMutex;
-	static PureDataNodeRef globalInstance;
+	lock_guard<mutex> lock(globalMutex);
+
 	if (!globalInstance) {
-		lock_guard<mutex> lock(globalMutex);
+		auto ctx = audio::master();
 		
-		// Double checked locking to avoid grabbing the mutex on every invocation
-		if (!globalInstance) {
-			auto ctx = audio::master();
-			
-			// Create the synth engine
-			PureDataNodeRef node = ctx->makeNode( new cipd::PureDataNode( audio::Node::Format().autoEnable() ) );
-			globalInstance = node;
-			
-			// Enable Cinder audio
-			ctx->enable();
-			
-			// Connect synth to master output
-			globalInstance >> audio::master()->getOutput();
-		}
+		// Create the synth engine
+		PureDataNodeRef node = ctx->makeNode( new cipd::PureDataNode( audio::Node::Format().autoEnable() ) );
+		globalInstance = node;
 		
+		// Enable Cinder audio
+		ctx->enable();
+		
+		// Connect synth to master output
+		globalInstance >> audio::master()->getOutput();
 	}
+	
 	return globalInstance;
 }
 
+void PureDataNode::ShutdownGlobal()
+{
+	lock_guard<mutex> lock(globalMutex);
+	
+	globalInstance.reset();
+}
+	
 PureDataNode::PureDataNode( const Format &format )
 	: Node( format )
 {
@@ -51,6 +56,7 @@ PureDataNode::PureDataNode( const Format &format )
 
 PureDataNode::~PureDataNode()
 {
+	lock_guard<mutex> lock( mMutex );
 	disconnectAll();
 }
 

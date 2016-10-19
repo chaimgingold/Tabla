@@ -27,6 +27,7 @@ public:
 	// LibPd currently only supports a single instance,
 	// so use this to get ahold of the PureDataNode.
 	static PureDataNodeRef Global();
+	static void ShutdownGlobal();
 	
 	PureDataNode( const Format &format = Format() );
 	~PureDataNode();

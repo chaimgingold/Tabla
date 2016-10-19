@@ -40,6 +40,8 @@ using namespace std;
 
 class PaperBounce3App : public App {
   public:
+	~PaperBounce3App();
+	
 	void setup() override;
 	void mouseDown( MouseEvent event ) override;
 	void mouseUp( MouseEvent event ) override;
