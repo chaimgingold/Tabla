@@ -138,15 +138,15 @@ void MusicWorld::Instrument::setup()
 {
 	assert(!mMidiOut);
 	
-	cout << "Opening port " << mPort << "for '" << mName << "'" << endl;
+	cout << "Opening port " << mPort << " for '" << mName << "'" << endl;
 
 	mMidiOut = make_shared<RtMidiOut>();
-	mMidiOut->openPort( mPort );
-	
-	if ( !mMidiOut->isPortOpen() ) // does this properly check for failure?
-	{
+
+	if (mPort < mMidiOut->getPortCount()) {
+		mMidiOut->openPort( mPort );
+	} else {
 		cout << "...Opening virtual port for '" << mName << "'" << endl;
-		mMidiOut->openVirtualPort();
+		mMidiOut->openVirtualPort(mName);
 	}
 }
 
