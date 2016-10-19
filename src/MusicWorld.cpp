@@ -141,12 +141,12 @@ void MusicWorld::Instrument::setup()
 	cout << "Opening port " << mPort << " for '" << mName << "'" << endl;
 
 	mMidiOut = make_shared<RtMidiOut>();
-	mMidiOut->openPort( mPort );
-	
-	if ( !mMidiOut->isPortOpen() ) // does this properly check for failure?
-	{
+
+	if (mPort < mMidiOut->getPortCount()) {
+		mMidiOut->openPort( mPort );
+	} else {
 		cout << "...Opening virtual port for '" << mName << "'" << endl;
-		mMidiOut->openVirtualPort();
+		mMidiOut->openVirtualPort(mName);
 	}
 }
 
@@ -872,6 +872,8 @@ void MusicWorld::draw( bool highQuality )
 // Synthesis
 void MusicWorld::setupSynthesis()
 {
+	killAllNotes();
+
 	// Create the synth engine
 	mPureDataNode = cipd::PureDataNode::Global();
 	mPatch = mPureDataNode->loadPatch( DataSourcePath::create(getAssetPath("synths/music.pd")) );
