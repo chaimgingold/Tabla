@@ -583,7 +583,7 @@ void MusicWorld::killAllNotes() {
 
 void MusicWorld::doNoteOn( InstrumentRef instr, int note, float duration )
 {
-	if ( !isNoteInFlight(instr,note) )
+	if ( !isNoteInFlight(instr,note) && instr->mMidiOut )
 	{
 		uchar velocity = 100; // 0-127
 		sendNoteOn( instr->mMidiOut, instr->mChannel, note, velocity );
@@ -690,7 +690,7 @@ void MusicWorld::draw( bool highQuality )
 		if ( instr->mSynthType==Instrument::SynthType::Additive )
 		{
 			// additive
-			gl::color(.5,0,0);
+			gl::color(instr->mScoreColor);
 			gl::draw( score.getPolyLine() );
 		}
 		else if ( instr->mSynthType==Instrument::SynthType::MIDI )
@@ -722,11 +722,8 @@ void MusicWorld::draw( bool highQuality )
 						vec2 start2 = score.fracToQuad( vec2( (float)(x * invcols), fracy2 ) ) ;
 						vec2 end2   = score.fracToQuad( vec2( (float)(x+length) * invcols, fracy2) ) ;
 						
-						if ( isNoteInFlight(instr, score.mNoteRoot+y) )
-						{
-							gl::color(1,0,0);
-						}
-						else gl::color(0,1,0);
+						if ( isNoteInFlight(instr, score.mNoteRoot+y) ) gl::color(instr->mNoteOnColor);
+						else gl::color(instr->mNoteOffColor);
 
 						gl::drawSolidTriangle(start1, end1, end2);
 						gl::drawSolidTriangle(start1, end2, start2);
@@ -740,7 +737,7 @@ void MusicWorld::draw( bool highQuality )
 			}
 			
 			// lines
-			gl::color(1,0,0);
+			gl::color(instr->mScoreColor);
 			gl::draw( score.getPolyLine() );
 
 			for( int i=0; i<score.mNoteCount; ++i )
@@ -755,8 +752,7 @@ void MusicWorld::draw( bool highQuality )
 		}
 		
 		//
-		if (instr->mSynthType==Instrument::SynthType::Additive) gl::color(0,1,1);
-		else gl::color(0, 1, 0);
+		gl::color( instr->mPlayheadColor );
 		
 		vec2 playhead[2];
 		score.getPlayheadLine(playhead);

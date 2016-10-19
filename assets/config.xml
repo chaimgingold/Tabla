@@ -121,10 +121,10 @@
 			<Instruments>
 
 				<Instrument>
-					<PlayheadColor>0 1 0</PlayheadColor>
-					<ScoreColor>0 0 1</ScoreColor>
-					<NoteOffColor>0 1 0</NoteOffColor>
-					<NoteOnColor>1 0 0</NoteOnColor>
+					<PlayheadColor>00FFFF</PlayheadColor>
+					<ScoreColor>FF00FF</ScoreColor>
+					<NoteOffColor>00FF00</NoteOffColor>
+					<NoteOnColor>FF0000</NoteOnColor>
 					
 					<Name>Additive</Name>
 					<Scale>0 1 2 3 4 5 6 7 8 9 10 11 12</Scale>
@@ -136,10 +136,10 @@
 				</Instrument>
 				
 				<Instrument>
-					<PlayheadColor>0 1 0</PlayheadColor>
-					<ScoreColor>0 0 1</ScoreColor>
-					<NoteOffColor>0 1 0</NoteOffColor>
-					<NoteOnColor>1 0 0</NoteOnColor>
+					<PlayheadColor>00FF00</PlayheadColor>
+					<ScoreColor>005566</ScoreColor>
+					<NoteOffColor>FFFF00</NoteOffColor>
+					<NoteOnColor>00FF00</NoteOnColor>
 					
 					<Name>MIDI</Name>
 					<Scale>0 1 2 3 4 5 6 7 8 9 10 11 12</Scale>
