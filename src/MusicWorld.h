@@ -70,7 +70,6 @@ private:
 		
 		float		mNoteRoot;
 		int			mNoteCount;
-		vector<bool> mNoteState;
 		int			mNoteInstrument;
 		
 		float		mPan;

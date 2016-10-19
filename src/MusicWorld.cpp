@@ -265,26 +265,29 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			const float yf = 1.f - (ys.first - worldYs.first) / (worldYs.second-worldYs.first);
 			
 			// synth type
-			score.mSynthType = Score::SynthType::MIDI ;
+//			score.mSynthType = Score::SynthType::MIDI ;
 //			score.mSynthType = Score::SynthType::Additive ;
 
-//			if ( yf > .8f ) score.mSynthType = Score::SynthType::Additive;
-//			else score.mSynthType = Score::SynthType::MIDI;
-			
+			if ( yf > .8f ) score.mSynthType = Score::SynthType::Additive;
+			else score.mSynthType = Score::SynthType::MIDI;
+
 			// synth params
 			if ( score.mSynthType==Score::SynthType::MIDI )
 			{
-				score.mNoteCount = mNoteCount;
-			}
-			
-			// spatialization
-			int octaveShift = (yf - .5f) * 10.f ;
-			
-			score.mPan		= .5f ;
-			score.mNoteRoot = 60 + octaveShift*12; // middle C
-//			score.mNoteRoot = 27; // bass drum (High Q)
+				// spatialization
+				int octaveShift = (yf - .5f) * 10.f ;
 
-			score.mNoteInstrument = 0; // change instrument instead of octave?
+
+				score.mNoteRoot = 60 + octaveShift*12; // middle C
+				//			score.mNoteRoot = 27; // bass drum (High Q)
+
+				score.mNoteInstrument = 0; // change instrument instead of octave?
+
+				score.mNoteCount = mNoteCount;
+			} else {
+				score.mNoteRoot = 60; // middle C
+			}
+			score.mPan		= .5f ;
 			
 			mScore.push_back(score);
 		}
@@ -347,8 +350,11 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 			
 			// threshold
 			cv::Mat thresholded;
-//			cv::threshold( quantized, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
-			cv::threshold( quantized, thresholded, 220, 255, cv::THRESH_BINARY );
+
+
+			cv::threshold( quantized, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
+			// NOTE(lxi): below broke note detection, restored to above
+//			cv::threshold( quantized, thresholded, 220, 255, cv::THRESH_BINARY );
 			pipeline.then( scoreName + "thresholded", thresholded);
 			pipeline.getStages().back()->mLayoutHintScale = .5f;
 			pipeline.getStages().back()->mLayoutHintOrtho = true;
@@ -618,7 +624,7 @@ void MusicWorld::draw( bool highQuality )
 		}
 		
 		//
-		if (score.mSynthType==Score::SynthType::Additive) gl::color(0,1,0);
+		if (score.mSynthType==Score::SynthType::Additive) gl::color(0,1,1);
 		else gl::color(0, 1, 0);
 		
 		vec2 playhead[2];
@@ -638,16 +644,16 @@ void MusicWorld::draw( bool highQuality )
 void MusicWorld::setupSynthesis()
 {
 	mMidiOut = make_shared<RtMidiOut>();
-	
-	mMidiOut->openVirtualPort();
-	
-	if (0)
-	{
-		unsigned int nPorts = mMidiOut->getPortCount();
-		if ( nPorts == 0 ) {
-			std::cout << "No ports available!\n";
-		}
+
+	unsigned int nPorts = mMidiOut->getPortCount();
+	if ( nPorts > 0 ) {
+
+		mMidiOut->openPort();
+	} else {
+		std::cout << "Creating virtual MIDI port\n";
+		mMidiOut->openVirtualPort();
 	}
+
 	
 	// Create the synth engine
 	mPureDataNode = cipd::PureDataNode::Global();
