@@ -116,6 +116,7 @@
 			<Tempo>3</Tempo>
 			<TimeVec>0 -1</TimeVec>
 			<NoteCount>13</NoteCount>
+			<BeatCount>64</BeatCount>
 			
 		</MusicWorld>
 

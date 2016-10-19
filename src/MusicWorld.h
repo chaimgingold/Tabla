@@ -39,6 +39,7 @@ private:
 	vec2  mTimeVec;		// in world space, which way does time flow forward?
 	float mTempo;		// how fast to playback?
 	int	  mNoteCount=8;
+	int	  mBeatCount=32;
 	
 	// scores
 	class Score
@@ -72,6 +73,7 @@ private:
 		
 		float		mNoteRoot;
 		int			mNoteCount;
+		int         mBeatCount;
 		int			mNoteInstrument;
 		
 		float		mPan;

@@ -206,6 +206,7 @@ void MusicWorld::setParams( XmlTree xml )
 	getXml(xml,"Tempo",mTempo);
 	getXml(xml,"TimeVec",mTimeVec);
 	getXml(xml,"NoteCount",mNoteCount); // ??? not working
+	getXml(xml,"BeatCount",mBeatCount);
 	
 	cout << "NoteCount " << mNoteCount << endl;
 }
@@ -287,6 +288,7 @@ void MusicWorld::updateContours( const ContourVector &contours )
 				int instrumentNum = mMidiOuts.size() * (xf / xAdditiveZone);
 				score.mNoteInstrument = instrumentNum;
 				score.mNoteCount = mNoteCount;
+				score.mBeatCount = mBeatCount;
 
 			} else if ( score.mSynthType==Score::SynthType::Additive ) {
 
@@ -342,13 +344,17 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		// midi quantize
 		if ( s.mSynthType==Score::SynthType::MIDI )
 		{
+			const int numRows = s.mNoteCount;
+			int numCols = s.mImage.cols;
+			if (mBeatCount > 0) numCols = mBeatCount;
+
 			// resample
 			cv::Mat quantized;
-			cv::resize( s.mImage, quantized, cv::Size(s.mImage.cols,s.mNoteCount) );
+			cv::resize( s.mImage, quantized, cv::Size(numCols,numRows) );
 			pipeline.then( scoreName + "quantized", quantized);
 			pipeline.setImageToWorldTransform(
 				pipeline.getStages().back()->mImageToWorld
-					* glm::scale(vec3(1, outsize.y / (float)s.mNoteCount, 1))
+					* glm::scale(vec3(outsize.x / (float)numCols, outsize.y / (float)numRows, 1))
 				);
 			pipeline.getStages().back()->mLayoutHintScale = .5f;
 			pipeline.getStages().back()->mLayoutHintOrtho = true;
