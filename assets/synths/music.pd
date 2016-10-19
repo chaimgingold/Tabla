@@ -28,6 +28,7 @@
 -1 -1;
 #X obj 181 539 > 0.5;
 #X obj 272 177 print **************;
+#X text 438 103 print image 1 in ASCII;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;
 #X connect 1 0 9 0;
@@ -60,14 +61,13 @@
 #X connect 23 0 4 0;
 #X connect 24 0 20 0;
 #X restore 43 96 pd dump-image-table;
-#X obj 265 170 clone 8 music-image;
 #X obj 371 214 rev3~ 100 80 3000 20;
 #X text 270 329 [x] panning;
 #X text 270 349 [x] cpu reduction;
-#X obj 264 91 clone 16 music-midi;
+#X obj 265 170 clone 8 music-image;
 #X connect 2 0 0 0;
-#X connect 2 0 3 0;
 #X connect 2 1 0 1;
-#X connect 2 1 3 1;
-#X connect 3 0 0 0;
-#X connect 3 1 0 1;
+#X connect 5 0 0 0;
+#X connect 5 0 2 0;
+#X connect 5 1 0 1;
+#X connect 5 1 2 1;

@@ -125,11 +125,11 @@ private:
 	
 	// synthesis
 	cipd::PureDataNodeRef	mPureDataNode;	// synth engine
-	cipd::PatchRef			mPatch;			// pong patch
+	cipd::PatchRef			mPatch;			// music patch
 	std::shared_ptr<RtMidiOut>	mMidiOut;
 	
 	void setupSynthesis();
-	void updateScoreSynthesis();
+	void updateAdditiveScoreSynthesis();
 };
 
 class MusicWorldCartridge : public GameCartridge

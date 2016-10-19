@@ -282,7 +282,7 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			
 			score.mPan		= .5f ;
 			score.mNoteRoot = 60 + octaveShift*12; // middle C
-//			score.mNoteRoot = 27; // base drum (High Q)
+//			score.mNoteRoot = 27; // bass drum (High Q)
 
 			score.mNoteInstrument = 0; // change instrument instead of octave?
 			
@@ -361,8 +361,8 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		scoreNum++;
 	}
 
-	// update synth
-	updateScoreSynthesis();
+	// update additive synths based on new image data
+	updateAdditiveScoreSynthesis();
 }
 
 bool MusicWorld::isScoreValueHigh( uchar value ) const
@@ -405,15 +405,14 @@ void MusicWorld::update()
 	
 	for( const auto &score : mScore )
 	{
-		// Update time
-		mPureDataNode->sendFloat(string("phase")+toString(scoreNum),
-								 score.getPlayheadFrac()*score.mDuration );
-
+		if ( score.mSynthType==Score::SynthType::Additive ) {
+			// Update time
+			mPureDataNode->sendFloat(string("phase")+toString(scoreNum),
+									 score.getPlayheadFrac()*100.0 );
+		}
 		// send midi notes
-		if ( score.mSynthType==Score::SynthType::MIDI )
+		else if ( score.mSynthType==Score::SynthType::MIDI )
 		{
-			// instrument
-//			mPureDataNode->sendFloat(string("midi-instrument")+toString(scoreNum), scoreNum);
 			
 			// notes
 			int x = score.getPlayheadFrac() * (float)(score.mQuantizedImage.cols-1) ;
@@ -450,7 +449,9 @@ bool MusicWorld::isNoteInFlight( int instr, int note ) const
 void MusicWorld::updateNoteOffs()
 {
 	const float now = ci::app::getElapsedSeconds();
-	
+
+	// search for "expired" notes and send them their note-off MIDI message,
+	// then remove them from the mOnNotes map
 	for ( auto it = mOnNotes.begin(); it != mOnNotes.end(); /*manually...*/ )
 	{
 		bool off = now > it->second.mStartTime + it->second.mDuration;
@@ -495,26 +496,24 @@ void MusicWorld::sendMidi( int a, int b, int c )
 	}
 }
 
-void MusicWorld::updateScoreSynthesis() {
+void MusicWorld::updateAdditiveScoreSynthesis() {
 
 	// send scores to Pd
 	int scoreNum=0;
 	
 	for( const auto &score : mScore )
 	{
-		// Update pan
-		mPureDataNode->sendFloat(string("pan")+toString(scoreNum),score.mPan);
-		
-		// Update per-score pitch
-		mPureDataNode->sendFloat(string("note-root")+toString(scoreNum),score.mNoteRoot);
-
-		// Update time
-//		mPureDataNode->sendFloat(string("phase")+toString(scoreNum),
-//								 score.getPlayheadFrac()*score.mDuration );
-
-		// send image
-		if ( !score.mImage.empty() )
+		// send image for additive synthesis
+		if ( score.mSynthType==Score::SynthType::Additive && !score.mImage.empty() )
 		{
+			// Update pan
+			mPureDataNode->sendFloat(string("pan")+toString(scoreNum),
+									 score.mPan);
+
+			// Update per-score pitch
+			mPureDataNode->sendFloat(string("note-root")+toString(scoreNum),
+									 score.mNoteRoot);
+
 			// Create a float version of the image
 			cv::Mat imageFloatMat;
 			
@@ -525,7 +524,8 @@ void MusicWorld::updateScoreSynthesis() {
 			std::vector<float> imageVector;
 			imageVector.assign( (float*)imageFloatMat.datastart, (float*)imageFloatMat.dataend );
 
-			mPureDataNode->writeArray(string("image")+toString(scoreNum), imageVector);
+			mPureDataNode->writeArray(string("image")+toString(scoreNum),
+									  imageVector);
 		}
 
 		//
@@ -535,9 +535,13 @@ void MusicWorld::updateScoreSynthesis() {
 	// Clear remaining scores
 	std::vector<float> emptyVector(10000, 1.0);
 	while( scoreNum < MAX_SCORES ) {
+
+		mPureDataNode->writeArray(string("image")+toString(scoreNum),
+								  emptyVector);
+
 		mPureDataNode->sendFloat(string("phase")+toString(scoreNum),
 								 0);
-		mPureDataNode->writeArray(string("image")+toString(scoreNum), emptyVector);
+
 		scoreNum++;
 	}
 }
@@ -651,6 +655,7 @@ void MusicWorld::setupSynthesis()
 }
 
 MusicWorld::~MusicWorld() {
+	mMidiOut->closePort();
 	// Clean up synth engine
 	mPureDataNode->closePatch(mPatch);
 }

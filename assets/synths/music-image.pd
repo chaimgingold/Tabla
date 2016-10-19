@@ -14,10 +14,10 @@
 #X obj 189 330 until;
 #X obj 189 361 t b b;
 #X msg 189 386 1;
-#X text 18 339 initialize to"white image";
+#X text 18 339 initialize to "white image";
 #X obj 329 154 pan~;
 #X obj 376 232 outlet~;
-#X obj 382 154 r pan\$1;
+#X obj 372 154 r pan\$1;
 #X connect 2 0 13 0;
 #X connect 3 0 2 0;
 #X connect 4 0 6 0;
