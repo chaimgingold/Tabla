@@ -397,6 +397,7 @@ void MusicWorld::updateContours( const ContourVector &contours )
 	}
 	
 	// erase old scores
+	vector<Score> oldScores = mScores;
 	mScores.clear();
 	
 	// get new ones
@@ -454,6 +455,38 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			
 			mScores.push_back(score);
 		}
+	}
+	
+	// map old <=> new scores
+	for ( const auto &c : oldScores )
+	{
+		// do polygon similarity test...
+		// Hard: test distance of old mQuad to all new mQuads.
+		//		each corner to each corner..., to mitigate possible ordering issues
+		//		cumulative error < thresh
+		// Soft: test perimeter similarity of old mQuad to new contours
+		//		perhaps each old corner to nearest point on new contours (same one)
+		//		even more: sample a bunch of old perimeter points and test distance to new polygons.
+		// Reject: we also need a hard rejection, a way to quickly eliminate something that has moved.
+		//		something like: no overlapping scores allowed. and if they overlap, then kill non-zombies.
+		//		do this at the very end? if any zombie quads intersect non-zombie quads, then kill zombie.
+		
+		// Checking zombie against not-zombie could actually be about mScoreDetectError
+		// new scores have an error of zero
+		// older scores are >0
+		// this could be basis for zombie rejection
+		
+		// Q: When, if at all, do we update quads with updated shapes? (only if we have a 4 corner to 4 corner match, so error is quite small)
+		
+		// cases:
+		// 1: [ Hard] found a match. optionally propagate forward any data.
+		// 2: [!Hard] not found
+		//
+		//	2a: [!Soft] || [Reject] (hard reject) cull <probably a zombie timeout or some other factor>
+		//			eg [Reject] zombie quad intersects non-zombie quad
+		//			eg timeout (?)
+		//			eg [Reject] no nearby soft second pass polygon test to match to
+		//  2b: [Soft]  keep zombie around, propagate forward into mScore and mark as missing.
 	}
 }
 
