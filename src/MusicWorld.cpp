@@ -281,7 +281,7 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			int octaveShift = (yf - .5f) * 10.f ;
 			
 			score.mPan		= .5f ;
-			score.mNoteRoot = 60 + octaveShift*8; // middle C
+			score.mNoteRoot = 60 + octaveShift*12; // middle C
 //			score.mNoteRoot = 27; // base drum (High Q)
 
 			score.mNoteInstrument = 0; // change instrument instead of octave?
@@ -347,7 +347,8 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 			
 			// threshold
 			cv::Mat thresholded;
-			cv::threshold( quantized, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
+//			cv::threshold( quantized, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
+			cv::threshold( quantized, thresholded, 220, 255, cv::THRESH_BINARY );
 			pipeline.then( scoreName + "thresholded", thresholded);
 			pipeline.getStages().back()->mLayoutHintScale = .5f;
 			pipeline.getStages().back()->mLayoutHintOrtho = true;
@@ -382,12 +383,18 @@ int MusicWorld::getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const
 			&& isScoreValueHigh(image.at<unsigned char>(y,x2)) ;
 		 ++x2 )
 	{}
+
+	int len = x2-x;
 	
-	return x2-x;
+	if (len==1) len=0; // filter out 1 pixel wide notes.
+	
+	return len;
 }
 
 float MusicWorld::getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const
 {
+	// can return 0, which means we filtered out super short image noise-notes
+	
 	return (float)getNoteLengthAsImageCols(image,x,y) / (float)image.cols;
 }
 
@@ -418,8 +425,11 @@ void MusicWorld::update()
 				if ( isScoreValueHigh(value) )
 				{
 					float duration = score.mDuration * getNoteLengthAsScoreFrac(score.mQuantizedImage,x,y);
-
-					doNoteOn( score.mNoteInstrument, score.mNoteRoot+y, duration );
+					
+					if (duration>0)
+					{
+						doNoteOn( score.mNoteInstrument, score.mNoteRoot+y, duration );
+					}
 				}
 			}
 		}
