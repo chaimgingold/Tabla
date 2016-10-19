@@ -280,16 +280,14 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			int noteRoot = 60 + octaveShift*12; // middle C
 			score.mNoteRoot = noteRoot;
 
-
 			// MIDI synth params
 			if ( score.mSynthType==Score::SynthType::MIDI )
 			{
 				// Choose instrument based on left<>right
 				int instrumentNum = mMidiOuts.size() * (xf / xAdditiveZone);
 				score.mNoteInstrument = instrumentNum;
-				cout << instrumentNum << "\n";
-
 				score.mNoteCount = mNoteCount;
+
 			} else if ( score.mSynthType==Score::SynthType::Additive ) {
 
 			}
