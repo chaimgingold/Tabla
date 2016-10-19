@@ -704,6 +704,8 @@ void MusicWorld::setupSynthesis()
 }
 
 MusicWorld::~MusicWorld() {
+	// FIXME: this isn't called at shutdown
+
 	killAllNotes();
 	for ( const auto &midiOut : mMidiOuts ) {
 		midiOut->closePort();
