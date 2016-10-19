@@ -16,8 +16,6 @@
 #include "ocv.h"
 #include "RtMidi.h"
 
-#define MAX_SCORES 8
-
 using namespace std::chrono;
 
 // ShapeTracker was started to do inter-frame coherency,
@@ -244,7 +242,7 @@ void MusicWorld::updateContours( const ContourVector &contours )
 	}
 	
 	// erase old scores
-	mScore.clear();
+	mScores.clear();
 	
 	// get new ones
 	for( const auto &c : contours )
@@ -262,34 +260,43 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			
 			// use place in world to determine some factors...
 			pair<float,float> ys = getShapeRange( score.mQuad, 4, lookVec );
+//			pair<float,float> xs = getShapeRange( score.mQuad, 4, mTimeVec );
 			const float yf = 1.f - (ys.first - worldYs.first) / (worldYs.second-worldYs.first);
-			
+
+			// FIXME: fix this scaling to get an even distribution of instruments across the X axis
+			const float xf = score.getPolyLine().calcCentroid().y / (worldXs.second-worldXs.first);
+
 			// synth type
 //			score.mSynthType = Score::SynthType::MIDI ;
 //			score.mSynthType = Score::SynthType::Additive ;
 
-			if ( yf > .8f ) score.mSynthType = Score::SynthType::Additive;
+			const float xAdditiveZone = 0.9;
+
+			if ( xf > xAdditiveZone ) score.mSynthType = Score::SynthType::Additive;
 			else score.mSynthType = Score::SynthType::MIDI;
 
-			// synth params
+			// Choose octave based on up<>down
+			int octaveShift = (yf - .5f) * 10.f;
+			int noteRoot = 60 + octaveShift*12; // middle C
+			score.mNoteRoot = noteRoot;
+
+
+			// MIDI synth params
 			if ( score.mSynthType==Score::SynthType::MIDI )
 			{
-				// spatialization
-				int octaveShift = (yf - .5f) * 10.f ;
-
-
-				score.mNoteRoot = 60 + octaveShift*12; // middle C
-				//			score.mNoteRoot = 27; // bass drum (High Q)
-
-				score.mNoteInstrument = 0; // change instrument instead of octave?
+				// Choose instrument based on left<>right
+				int instrumentNum = mMidiOuts.size() * (xf / xAdditiveZone);
+				score.mNoteInstrument = instrumentNum;
+				cout << instrumentNum << "\n";
 
 				score.mNoteCount = mNoteCount;
-			} else {
-				score.mNoteRoot = 60; // middle C
+			} else if ( score.mSynthType==Score::SynthType::Additive ) {
+
 			}
+
 			score.mPan		= .5f ;
 			
-			mScore.push_back(score);
+			mScores.push_back(score);
 		}
 	}
 }
@@ -312,7 +319,7 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 
 	int scoreNum=1;
 	
-	for( Score& s : mScore )
+	for( Score& s : mScores )
 	{
 		string scoreName = string("score")+toString(scoreNum);
 		
@@ -409,7 +416,7 @@ void MusicWorld::update()
 	// send @fps values to Pd
 	int scoreNum=0;
 	
-	for( const auto &score : mScore )
+	for( const auto &score : mScores )
 	{
 		if ( score.mSynthType==Score::SynthType::Additive ) {
 			// Update time
@@ -464,8 +471,10 @@ void MusicWorld::updateNoteOffs()
 		
 		if (off)
 		{
-			uchar channel = it->first.mInstrument & 0xF;
-			sendMidi( (8<<4) | channel, it->first.mNote, 40 );
+			int instr = it->first.mInstrument;
+			RtMidiOutRef midiOut = mMidiOuts[instr % mMidiOuts.size()];
+			uchar channel = 0;
+			sendNoteOff( midiOut, channel, it->first.mNote);
 		}
 		
 		if (off) mOnNotes.erase(it++);
@@ -473,12 +482,23 @@ void MusicWorld::updateNoteOffs()
 	}
 }
 
+void MusicWorld::killAllNotes() {
+	uchar channel = 0;
+	for ( const auto &midiOut : mMidiOuts ) {
+		for (int note = 0; note < 128; note++) {
+			sendNoteOff( midiOut, channel, note );
+		}
+	}
+}
+
 void MusicWorld::doNoteOn( int instr, int note, float duration )
 {
 	if ( !isNoteInFlight(instr,note) )
 	{
-		uchar channel = instr & 0xF;
-		sendMidi( (9<<4) | channel, note, 90);
+		RtMidiOutRef midiOut = mMidiOuts[instr % mMidiOuts.size()];
+		uchar channel = 0;
+		uchar velocity = 100; // 0-127
+		sendNoteOn( midiOut, channel, note, velocity );
 		
 		tOnNoteInfo i;
 		i.mStartTime = ci::app::getElapsedSeconds();
@@ -488,18 +508,34 @@ void MusicWorld::doNoteOn( int instr, int note, float duration )
 	}
 }
 
-void MusicWorld::sendMidi( int a, int b, int c )
-{
-	if (mMidiOut)
-	{
-		std::vector<unsigned char> message(3);
+void MusicWorld::sendNoteOn ( RtMidiOutRef midiOut, uchar channel, uchar note, uchar velocity ) {
+	const uchar noteOnBits = 9;
 
-		message[0] = a;
-		message[1] = b;
-		message[2] = c;
-		
-		mMidiOut->sendMessage( &message );
-	}
+	uchar channelBits = channel & 0xF;
+
+	sendMidi( midiOut, (noteOnBits<<4) | channelBits, note, velocity);
+}
+
+void MusicWorld::sendNoteOff ( RtMidiOutRef midiOut, uchar channel, uchar note ) {
+	const uchar velocity = 0; // MIDI supports "note off velocity", but that's esoteric and we're not using it
+	const uchar noteOffBits = 8;
+
+	uchar channelBits = channel & 0xF;
+
+	sendMidi( midiOut, (noteOffBits<<4) | channelBits, note, velocity);
+}
+
+void MusicWorld::sendMidi( RtMidiOutRef midiOut, uchar a, uchar b, uchar c )
+{
+
+	std::vector<uchar> message(3);
+
+	message[0] = a;
+	message[1] = b;
+	message[2] = c;
+
+	midiOut->sendMessage( &message );
+
 }
 
 void MusicWorld::updateAdditiveScoreSynthesis() {
@@ -507,7 +543,7 @@ void MusicWorld::updateAdditiveScoreSynthesis() {
 	// send scores to Pd
 	int scoreNum=0;
 	
-	for( const auto &score : mScore )
+	for( const auto &score : mScores )
 	{
 		// send image for additive synthesis
 		if ( score.mSynthType==Score::SynthType::Additive && !score.mImage.empty() )
@@ -539,8 +575,9 @@ void MusicWorld::updateAdditiveScoreSynthesis() {
 	}
 
 	// Clear remaining scores
+	const int kMaxScores = 8; // This corresponds to [clone 8 music-voice] in music.pd
 	std::vector<float> emptyVector(10000, 1.0);
-	while( scoreNum < MAX_SCORES ) {
+	while( scoreNum < kMaxScores ) {
 
 		mPureDataNode->writeArray(string("image")+toString(scoreNum),
 								  emptyVector);
@@ -554,7 +591,7 @@ void MusicWorld::updateAdditiveScoreSynthesis() {
 
 void MusicWorld::draw( bool highQuality )
 {
-	for( const auto &score : mScore )
+	for( const auto &score : mScores )
 	{
 		if ( score.mSynthType==Score::SynthType::Additive )
 		{
@@ -643,25 +680,36 @@ void MusicWorld::draw( bool highQuality )
 // Synthesis
 void MusicWorld::setupSynthesis()
 {
-	mMidiOut = make_shared<RtMidiOut>();
+	// We open a fixed number of MIDI ports.
+	// If no real MIDI ports are available, we open virtual MIDI ports instead.
+	const int numMIDIPortsToOpen = 4;
 
-	unsigned int nPorts = mMidiOut->getPortCount();
-	if ( nPorts > 0 ) {
+	// Create a temp midi out just to query the number of available ports
+	RtMidiOutRef tempMidiOut = make_shared<RtMidiOut>();
+	int numRealMIDIPorts = tempMidiOut->getPortCount();
 
-		mMidiOut->openPort();
-	} else {
-		std::cout << "Creating virtual MIDI port\n";
-		mMidiOut->openVirtualPort();
+	for (int portNum = 0; portNum < numMIDIPortsToOpen; portNum++) {
+		RtMidiOutRef midiOut = make_shared<RtMidiOut>();
+		if (portNum < numRealMIDIPorts) {
+			midiOut->openPort(portNum);
+		} else {
+			midiOut->openVirtualPort();
+		}
+		mMidiOuts.push_back(midiOut);
 	}
+	killAllNotes();
 
-	
+
 	// Create the synth engine
 	mPureDataNode = cipd::PureDataNode::Global();
 	mPatch = mPureDataNode->loadPatch( DataSourcePath::create(getAssetPath("synths/music.pd")) );
 }
 
 MusicWorld::~MusicWorld() {
-	mMidiOut->closePort();
+	killAllNotes();
+	for ( const auto &midiOut : mMidiOuts ) {
+		midiOut->closePort();
+	}
 	// Clean up synth engine
 	mPureDataNode->closePatch(mPatch);
 }

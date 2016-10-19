@@ -13,6 +13,8 @@
 #include "PureDataNode.h"
 #include "RtMidi.h"
 
+typedef std::shared_ptr<RtMidiOut> RtMidiOutRef;
+
 class MusicWorld : public GameWorld
 {
 public:
@@ -84,7 +86,7 @@ private:
 		void		getPlayheadLine( vec2 line[2] ) const;
 		vec2		fracToQuad( vec2 frac ) const; // frac.x = time[0,1], frac.y = note_space[0,1]
 	};
-	vector<Score> mScore;
+	vector<Score> mScores;
 	
 	// midi note playing and management
 	bool  isScoreValueHigh( uchar ) const;
@@ -119,14 +121,21 @@ private:
 	bool isNoteInFlight( int instr, int note ) const;
 	void updateNoteOffs();
 	void doNoteOn( int instr, int note, float duration ); // start time is now
-	
-	void sendMidi( int, int, int );
+
+
+
+	// midi convenience methods
+	void sendMidi( RtMidiOutRef, uchar, uchar, uchar );
+	void sendNoteOn ( RtMidiOutRef midiOut, uchar channel, uchar note, uchar velocity );
+	void sendNoteOff ( RtMidiOutRef midiOut, uchar channel, uchar note );
+
+	void killAllNotes(); // sends a note off for all MIDI notes (0-127)
 	
 	// synthesis
 	cipd::PureDataNodeRef	mPureDataNode;	// synth engine
 	cipd::PatchRef			mPatch;			// music patch
-	std::shared_ptr<RtMidiOut>	mMidiOut;
-	
+	vector<RtMidiOutRef>	mMidiOuts;
+
 	void setupSynthesis();
 	void updateAdditiveScoreSynthesis();
 };
