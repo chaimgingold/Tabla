@@ -788,27 +788,7 @@ void MusicWorld::draw( bool highQuality )
 // Synthesis
 void MusicWorld::setupSynthesis()
 {
-	// We open a fixed number of MIDI ports.
-	// If no real MIDI ports are available, we open virtual MIDI ports instead.
-//	const int numMIDIPortsToOpen = 4;
-
-	// Create a temp midi out just to query the number of available ports
-	/*
-	RtMidiOutRef tempMidiOut = make_shared<RtMidiOut>();
-	int numRealMIDIPorts = tempMidiOut->getPortCount();
-
-	for (int portNum = 0; portNum < numMIDIPortsToOpen; portNum++) {
-		RtMidiOutRef midiOut = make_shared<RtMidiOut>();
-		if (portNum < numRealMIDIPorts) {
-			midiOut->openPort(portNum);
-		} else {
-			midiOut->openVirtualPort();
-		}
-		mMidiOuts.push_back(midiOut);
-	}
 	killAllNotes();
-	*/
-
 
 	// Create the synth engine
 	mPureDataNode = cipd::PureDataNode::Global();
