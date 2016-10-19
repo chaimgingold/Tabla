@@ -50,6 +50,8 @@ private:
 		
 		void setParams( XmlTree );
 		void setup();
+
+		int channelForNote(int note);
 		
 		// colors!
 		ColorA mPlayheadColor;
@@ -72,7 +74,7 @@ private:
 		// midi
 		int  mPort=0;
 		int  mChannel=0;
-		bool mMapNotesToChannels=false; // for KORG Volca Sample
+		int  mMapNotesToChannels=0; // for KORG Volca Sample
 		RtMidiOutRef mMidiOut;
 		
 	};

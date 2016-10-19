@@ -150,6 +150,16 @@ void MusicWorld::Instrument::setup()
 	}
 }
 
+// For most synths this is just the assigned channel,
+// but in the case of the Volca Sample we want to
+// send each note to a different channel as per its MIDI implementation.
+int MusicWorld::Instrument::channelForNote(int note) {
+	if (mMapNotesToChannels > 0) {
+		return note % mMapNotesToChannels;
+	}
+	return mChannel;
+}
+
 bool MusicWorld::Score::setQuadFromPolyLine( PolyLine2 poly, vec2 timeVec )
 {
 	// could have simplified a bit and just examined two bisecting lines. oh well. it works.
@@ -565,7 +575,10 @@ void MusicWorld::updateNoteOffs()
 		if (off)
 		{
 			InstrumentRef instr = it->first.mInstrument;
-			sendNoteOff( instr->mMidiOut, instr->mChannel, it->first.mNote);
+
+			uchar channel = instr->channelForNote(it->first.mNote);
+
+			sendNoteOff( instr->mMidiOut, channel, it->first.mNote);
 		}
 		
 		if (off) mOnNotes.erase(it++);
@@ -575,8 +588,10 @@ void MusicWorld::updateNoteOffs()
 
 void MusicWorld::killAllNotes() {
 	for ( const auto i : mInstruments ) {
-		for (int note = 0; note < 128; note++) {
-			sendNoteOff( i.second->mMidiOut, i.second->mChannel, note );
+		for (int channel = 0; channel < 16; channel++) {
+			for (int note = 0; note < 128; note++) {
+				sendNoteOff( i.second->mMidiOut, channel, note );
+			}
 		}
 	}
 }
@@ -586,7 +601,10 @@ void MusicWorld::doNoteOn( InstrumentRef instr, int note, float duration )
 	if ( !isNoteInFlight(instr,note) && instr->mMidiOut )
 	{
 		uchar velocity = 100; // 0-127
-		sendNoteOn( instr->mMidiOut, instr->mChannel, note, velocity );
+
+		uchar channel = instr->channelForNote(note);
+
+		sendNoteOn( instr->mMidiOut, channel, note, velocity );
 		
 		tOnNoteInfo i;
 		i.mStartTime = ci::app::getElapsedSeconds();
