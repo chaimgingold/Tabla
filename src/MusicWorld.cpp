@@ -245,11 +245,19 @@ vec2 MusicWorld::Score::fracToQuad( vec2 frac ) const
 	return lerp(bot,top,frac.y);
 }
 
-int MusicWorld::Score::noteForY( int y ) const {
+int MusicWorld::Score::noteForY( InstrumentRef instr, int y ) const {
+
+	if (instr && instr->mMapNotesToChannels) {
+		return y;
+	}
+
+
 	int numNotes = mScale.size();
 	int extraOctaveShift = y / numNotes * 12;
 	int degree = y % numNotes;
 	int note = mScale[degree];
+
+
 
 	return note + extraOctaveShift;
 }
@@ -723,7 +731,7 @@ void MusicWorld::update()
 					
 					if (duration>0)
 					{
-						int note = score.noteForY(y);
+						int note = score.noteForY(instr, y);
 						doNoteOn( instr, note, duration );
 					}
 				}
@@ -840,6 +848,10 @@ void MusicWorld::updateAdditiveScoreSynthesis() {
 		// send image for additive synthesis
 		if ( instr->mSynthType==Instrument::SynthType::Additive && !score.mImage.empty() )
 		{
+
+			int rows = score.mImage.rows;
+			int cols = score.mImage.cols;
+			
 			// Update pan
 			mPureDataNode->sendFloat(string("pan")+toString(scoreNum),
 									 score.mPan);
@@ -847,6 +859,13 @@ void MusicWorld::updateAdditiveScoreSynthesis() {
 			// Update per-score pitch
 			mPureDataNode->sendFloat(string("note-root")+toString(scoreNum),
 									 score.mNoteRoot);
+
+			// Update resolution
+			mPureDataNode->sendFloat(string("resolution-x")+toString(scoreNum),
+									 rows);
+
+			mPureDataNode->sendFloat(string("resolution-y")+toString(scoreNum),
+									 cols);
 
 			// Create a float version of the image
 			cv::Mat imageFloatMat;
@@ -940,7 +959,7 @@ void MusicWorld::draw( bool highQuality ) // need a new flag for 'inprojector'
 						vec2 start2 = score.fracToQuad( vec2( (float)(x * invcols), fracy2 ) ) ;
 						vec2 end2   = score.fracToQuad( vec2( (float)(x+length) * invcols, fracy2) ) ;
 						
-						if ( isNoteInFlight(instr, score.noteForY(y)) ) gl::color(instr->mNoteOnColor);
+						if ( isNoteInFlight(instr, score.noteForY(instr, y)) ) gl::color(instr->mNoteOnColor);
 						else gl::color(instr->mNoteOffColor);
 
 						gl::drawSolidTriangle(start1, end1, end2);
