@@ -134,6 +134,7 @@ class PaperBounce3App : public App {
 	*/
 	
 	// settings
+	int  mCameraIndex = -1; // negative is last, positive is nth
 	bool mAutoFullScreenProjector = false ;
 	bool mDrawCameraImage = false ;
 	bool mDrawContours = false ;

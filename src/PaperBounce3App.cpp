@@ -68,18 +68,20 @@ void PaperBounce3App::setup()
 	mLastFrameTime = getElapsedSeconds() ;
 
 	// enumerate hardware
-	auto displays = Display::getDisplays() ;
-	cout << displays.size() << " Displays" << endl ;
-	for ( auto d : displays )
 	{
-		cout << "\t" << d->getName() << " " << d->getBounds() << endl ;
-	}
+		auto displays = Display::getDisplays() ;
+		cout << displays.size() << " Displays" << endl ;
+		for ( auto d : displays )
+		{
+			cout << "\t" << d->getName() << " " << d->getBounds() << endl ;
+		}
 
-	auto cameras = Capture::getDevices() ;
-	cout << cameras.size() << " Cameras" << endl ;
-	for ( auto c : cameras )
-	{
-		cout << "\t" << c->getName() << endl ;
+		auto cameras = Capture::getDevices() ;
+		cout << cameras.size() << " Cameras" << endl ;
+		for ( auto c : cameras )
+		{
+			cout << "\t" << c->getName() << endl ;
+		}
 	}
 	
 	// make docs folder if needed
@@ -104,6 +106,8 @@ void PaperBounce3App::setup()
 		{
 			XmlTree app = xml.getChild("PaperBounce3/App");
 			
+			getXml(app,"CameraIndex",mCameraIndex);
+
 			getXml(app,"AutoFullScreenProjector",mAutoFullScreenProjector);
 			getXml(app,"DrawCameraImage",mDrawCameraImage);
 			getXml(app,"DrawContours",mDrawContours);
@@ -121,6 +125,20 @@ void PaperBounce3App::setup()
 
 		// 2. respond
 		lightLinkDidChange(mLightLink);
+
+		// camera
+		{
+			auto cameras = Capture::getDevices() ;
+			
+			Capture::DeviceRef camera;
+			
+			if (mCameraIndex<0) camera = cameras.back();
+			else camera = cameras[ mCameraIndex % cameras.size() ];
+			
+			mCapture = Capture::create( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y, camera ) ; // get last camera
+			mCapture->start();
+		}
+
 		
 		// TODO:
 		// - get a new camera capture object so that resolution can change live
@@ -142,10 +160,6 @@ void PaperBounce3App::setup()
 	// ui stuff (do before making windows)
 	mTextureFont = gl::TextureFont::create( Font("Avenir",12) );
 	
-	// get camera
-	mCapture = Capture::create( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y, cameras.back() ) ; // get last camera
-	mCapture->start();
-
 	// setup main window
 	mMainWindow = getWindow();
 	mMainWindow->setTitle("Projector");
@@ -155,6 +169,8 @@ void PaperBounce3App::setup()
 	setWindowSize( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y ) ;
 
 	// Fullscreen main window in secondary display
+	auto displays = Display::getDisplays() ;
+
 	if ( displays.size()>1 && mAutoFullScreenProjector )
 	{
 		// move to 2nd display
@@ -309,7 +325,7 @@ void PaperBounce3App::update()
 {
 	mXmlFileWatch.update();
 	
-	if ( mCapture->checkNewFrame() )
+	if ( mCapture && mCapture->checkNewFrame() )
 	{
 		// start pipeline
 		mPipeline.start();

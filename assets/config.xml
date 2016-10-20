@@ -5,6 +5,9 @@
 
 	<App>
 	
+		<CameraIndex>-1</CameraIndex>
+		<!-- Which camera to use? 0 indexed. -1 means last. -->
+
 <!--	This could use a cleanup since we refactored into two windows	-->
 		<AutoFullScreenProjector>	1 </AutoFullScreenProjector>
 		<DrawCameraImage>			1 </DrawCameraImage>
@@ -21,6 +24,11 @@
 		<ConfigWindowPipelineWidth> 64 </ConfigWindowPipelineWidth>
 	</App>
 
+
+	<!-- Projector <> Camera <> World mapping
+			This just gives initial values for user configuration.
+			Configuration you do in app is saved and loaded from ~Documents/PaperES/.
+	-->
 	<LightLink>
 
 		<!-- px -->

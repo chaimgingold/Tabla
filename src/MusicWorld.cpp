@@ -387,14 +387,25 @@ int MusicWorld::getScoreOctaveShift( const Score& score, const PolyLine2& wrtReg
 	
 	if ( wrtRegion.size() > 0 )
 	{
-		worldYs = getShapeRange( &getWorldBoundsPoly().getPoints()[0], getWorldBoundsPoly().size(), lookVec );
+		worldYs = getShapeRange( &wrtRegion.getPoints()[0], wrtRegion.size(), lookVec );
 	}
 	
 	getShapeRange( score.mQuad, 4, lookVec );
 	
 	//
 	
-//	cout << "s: " << scoreYs.x <<  << ", p: " << worldYs << endl;
+	auto c = []( string n, pair<float,float> p )
+	{
+		cout << n << ": [ " << p.first << ", " << p.second << " ]" ;
+	};
+	
+	cout << "s " << (long int)(&wrtRegion) << " { " ;
+	c("worldYs",worldYs);
+	cout << "  ";
+	c("scoreYs",scoreYs);
+	cout <<" }"<<endl;
+	
+	return 0;
 }
 
 MusicWorld::InstrumentRef
@@ -1000,8 +1011,8 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 			
 			for ( int y=0; y<score.mNoteCount; ++y )
 			{
-				const float fracy1 = 1.f - (y * yheight + yheight*.2f);
-				const float fracy2 = 1.f - (y * yheight + yheight*.8f);
+				const float y1frac = 1.f - (y * yheight + yheight*.2f);
+				const float y2frac = 1.f - (y * yheight + yheight*.8f);
 				
 				for( int x=0; x<score.mQuantizedImage.cols; ++x )
 				{
@@ -1010,11 +1021,14 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 						// how wide?
 						int length = getNoteLengthAsImageCols(score.mQuantizedImage,x,y);
 						
-						vec2 start1 = score.fracToQuad( vec2( (float)(x * invcols), fracy1 ) ) ;
-						vec2 end1   = score.fracToQuad( vec2( (float)(x+length) * invcols, fracy1) ) ;
+						const float x1frac = x * invcols;
+						const float x2frac = min( 1.f, (x+length) * invcols );
+						
+						vec2 start1 = score.fracToQuad( vec2( x1frac, y1frac) ) ;
+						vec2 end1   = score.fracToQuad( vec2( x2frac, y1frac) ) ;
 
-						vec2 start2 = score.fracToQuad( vec2( (float)(x * invcols), fracy2 ) ) ;
-						vec2 end2   = score.fracToQuad( vec2( (float)(x+length) * invcols, fracy2) ) ;
+						vec2 start2 = score.fracToQuad( vec2( x1frac, y2frac) ) ;
+						vec2 end2   = score.fracToQuad( vec2( x2frac, y2frac) ) ;
 						
 						if ( isNoteInFlight(instr, score.noteForY(y)) ) gl::color(instr->mNoteOnColor);
 						else gl::color(instr->mNoteOffColor);
