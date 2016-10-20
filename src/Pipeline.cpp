@@ -42,7 +42,11 @@ Pipeline::StageRef Pipeline::then( string name, cv::Mat &img )
 {
 	StageRef s = then( name, vec2(img.cols,img.rows) );
 
-	if ( getShouldCacheImage(s) ) s->mImageCV = img;
+	if ( getShouldCacheImage(s) )
+	{
+		s->mImageCV = img.clone(); // copy by value
+		//s->mImageCV = img; // copy by ref (problematic)
+	}
 
 	return s;
 }

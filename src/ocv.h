@@ -11,6 +11,11 @@
 
 namespace cinder {
 	
+	inline void vec2toOCV_4( vec2 in[4], cv::Point2f o[4] )
+	{
+		for ( int i=0; i<4; ++i ) o[i] = toOcv( in[i] );
+	}
+	
 	inline PolyLine2 fromOcv( vector<cv::Point> pts )
 	{
 		PolyLine2 pl;
