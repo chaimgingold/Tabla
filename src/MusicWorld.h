@@ -139,7 +139,7 @@ private:
 		vec2		fracToQuad( vec2 frac ) const; // frac.x = time[0,1], frac.y = note_space[0,1]
 
 		Scale mScale;
-		int noteForY( int y ) const;
+		int noteForY( InstrumentRef instr, int y ) const;
 	};
 	vector<Score> mScores;
 	
