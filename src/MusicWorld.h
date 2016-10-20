@@ -49,7 +49,8 @@ private:
 	int	  mBeatCount=32;
 	Scale mScale;
 	
-	int	 mScoreNoteVisionThresh=-1; // 0..255, or -1 for OTSU
+	int	  mScoreNoteVisionThresh=-1; // 0..255, or -1 for OTSU
+	float mScoreVisionTrimFrac=0.f;
 	
 	// instrument info
 	class Instrument
@@ -93,7 +94,8 @@ private:
 	
 	vector< pair<PolyLine2,InstrumentRef> > mInstrumentRegions;
 	void generateInstrumentRegions();
-	InstrumentRef decideInstrumentForScore( const Score& ) const;
+	int  getScoreOctaveShift( const Score& s, const PolyLine2& wrtRegion ) const;
+	InstrumentRef decideInstrumentForScore( const Score&, int* octaveShift=0 ) const;
 	
 	// scores
 	class Score

@@ -273,7 +273,9 @@ void MusicWorld::setParams( XmlTree xml )
 	getXml(xml,"NoteCount",mNoteCount);
 	getXml(xml,"BeatCount",mBeatCount);
 	getXml(xml,"Scale",mScale);
-	getXml(xml,"ScoreNoteVisionThresh",mScoreNoteVisionThresh);
+
+	getXml(xml,"ScoreNoteVisionThresh", mScoreNoteVisionThresh);
+	getXml(xml,"ScoreVisionTrimFrac", mScoreVisionTrimFrac);
 	
 	cout << "Notes " << mNoteCount << endl;
 	
@@ -373,20 +375,47 @@ void MusicWorld::generateInstrumentRegions()
 	}
 }
 
+int MusicWorld::getScoreOctaveShift( const Score& score, const PolyLine2& wrtRegion ) const
+{
+	const vec2 lookVec = perp(mTimeVec);
+
+	pair<float,float> worldYs(0,0), scoreYs(0,0);
+//	pair<float,float> worldXs(0,0);
+	
+	if ( wrtRegion.size() > 0 )
+	{
+		worldYs = getShapeRange( &getWorldBoundsPoly().getPoints()[0], getWorldBoundsPoly().size(), lookVec );
+	}
+	
+	getShapeRange( score.mQuad, 4, lookVec );
+	
+	//
+	
+//	cout << "s: " << scoreYs.x <<  << ", p: " << worldYs << endl;
+}
+
 MusicWorld::InstrumentRef
-MusicWorld::decideInstrumentForScore( const Score& s ) const
+MusicWorld::decideInstrumentForScore( const Score& s, int* octaveShift ) const
 {
 	vec2 c = s.getPolyLine().calcCentroid();
 	
 	// find
 	for( auto i : mInstrumentRegions )
 	{
-		if ( i.first.contains(c) ) return i.second;
+		if ( i.first.contains(c) )
+		{
+			if (octaveShift) *octaveShift = getScoreOctaveShift(s,i.first);
+			return i.second;
+		}
 	}
 	
 	// default to first
 	auto i = mInstrumentRegions.begin();
-	if (i!=mInstrumentRegions.end()) return i->second;
+	if (i!=mInstrumentRegions.end())
+	{
+		if (octaveShift) *octaveShift = getScoreOctaveShift(s,i->first);
+		return i->second;
+	}
 	
 	// none
 	return 0;
@@ -395,16 +424,16 @@ MusicWorld::decideInstrumentForScore( const Score& s ) const
 void MusicWorld::updateContours( const ContourVector &contours )
 {
 	// board shape
-	const vec2 lookVec = perp(mTimeVec);
-
-	pair<float,float> worldYs(0,0);
-	pair<float,float> worldXs(0,0);
-	
-	if ( getWorldBoundsPoly().size() > 0 )
-	{
-		worldYs = getShapeRange( &getWorldBoundsPoly().getPoints()[0], getWorldBoundsPoly().size(), lookVec );
-		worldXs = getShapeRange( &getWorldBoundsPoly().getPoints()[0], getWorldBoundsPoly().size(), mTimeVec );
-	}
+//	const vec2 lookVec = perp(mTimeVec);
+//
+//	pair<float,float> worldYs(0,0);
+//	pair<float,float> worldXs(0,0);
+//	
+//	if ( getWorldBoundsPoly().size() > 0 )
+//	{
+//		worldYs = getShapeRange( &getWorldBoundsPoly().getPoints()[0], getWorldBoundsPoly().size(), lookVec );
+//		worldXs = getShapeRange( &getWorldBoundsPoly().getPoints()[0], getWorldBoundsPoly().size(), mTimeVec );
+//	}
 	
 	// erase old scores
 	vector<Score> oldScores = mScores;
@@ -425,7 +454,8 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			score.mDuration = mTempo; // inherit, but it could be custom based on shape or something
 
 			// instrument
-			InstrumentRef instr = decideInstrumentForScore(score);
+			int octaveShift = 0;
+			InstrumentRef instr = decideInstrumentForScore(score,&octaveShift);
 			
 			if (instr) score.mInstrumentName = instr->mName ;
 			
@@ -447,7 +477,6 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			
 			// Choose octave based on up<>down
 //			int octaveShift = (yf - .5f) * 10.f;
-			int octaveShift = 0;
 			int noteRoot = 60 + octaveShift*12; // middle C
 			score.mNoteRoot = noteRoot;
 
@@ -508,31 +537,48 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 	// this function grabs the bitmaps for each score
 	
 	// get the image we are slicing from
-	Pipeline::StageRef world = pipeline.getStage("clipped");
+	Pipeline::StageRef world = pipeline.getStage("thresholded");
 	if ( !world || world->mImageCV.empty() ) return;
 	
 	// for each score...
-	vec2 outsize(100,100);
-
-	vec2		srcpt[4];
-	cv::Point2f srcpt_cv[4];
-	vec2		dstpt[4]    = { {0,0}, {outsize.x,0}, {outsize.x,outsize.y}, {0,outsize.y} };
-	cv::Point2f dstpt_cv[4]	= { {0,0}, {outsize.x,0}, {outsize.x,outsize.y}, {0,outsize.y} };
-
 	int scoreNum=1;
 	
 	for( Score& s : mScores )
 	{
 		string scoreName = string("score")+toString(scoreNum);
+
+		// quantization params
+		int quantizeNumRows = s.mNoteCount;
+		int quantizeNumCols = mBeatCount;
 		
 		// get src points
-		for ( int i=0; i<4; ++i )
+		vec2		srcpt[4];
+		cv::Point2f srcpt_cv[4];
 		{
-			srcpt[i] = vec2( world->mWorldToImage * vec4(s.mQuad[i],0,1) );
-			srcpt_cv[i] = toOcv( srcpt[i] );
+			vec2  trimto; // average of corners
+			
+			for ( int i=0; i<4; ++i )
+			{
+				srcpt[i] = vec2( world->mWorldToImage * vec4(s.mQuad[i],0,1) );
+				trimto += srcpt[i]*.25f;
+			}
+			
+			// trim
+			for ( int i=0; i<4; ++i ) srcpt[i] = lerp( srcpt[i], trimto, mScoreVisionTrimFrac );
+			
+			// to ocv
+			vec2toOCV_4(srcpt, srcpt_cv);
 		}
 		
-		// use default dstpts
+		// get output points
+		float outdim = 0.f;
+		for( int i=0; i<4; ++i ) outdim = max( outdim, distance(srcpt[i],srcpt[(i+1)%4]) );
+
+		vec2		outsize		= vec2(1,1) * outdim;
+		vec2		dstpt[4]    = { {0,0}, {outsize.x,0}, {outsize.x,outsize.y}, {0,outsize.y} };
+
+		cv::Point2f dstpt_cv[4];
+		vec2toOCV_4(dstpt, dstpt_cv);
 		
 		// grab it
 		cv::Mat xform = cv::getPerspectiveTransform( srcpt_cv, dstpt_cv ) ;
@@ -551,16 +597,19 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 			// quantize
 			cv::Mat &inquant = s.mImage;
 			
-			const int numRows = s.mNoteCount;
-			int numCols = inquant.cols;
-			if (mBeatCount > 0) numCols = mBeatCount;
-
+			if (quantizeNumCols<=0) quantizeNumCols = inquant.cols;
+			if (quantizeNumRows<=0) quantizeNumRows = inquant.rows;
+			
 			cv::Mat quantized;
-			cv::resize( inquant, quantized, cv::Size(numCols,numRows) );
+//			cv::resize( inquant, quantized, cv::Size(quantizeNumCols,quantizeNumRows), 0, 0, cv::INTER_NEAREST );
+//			cv::resize( inquant, quantized, cv::Size(quantizeNumCols,quantizeNumRows), 0, 0, cv::INTER_LINEAR );
+//			cv::resize( inquant, quantized, cv::Size(quantizeNumCols,quantizeNumRows), 0, 0, cv::INTER_CUBIC );
+//			cv::resize( inquant, quantized, cv::Size(quantizeNumCols,quantizeNumRows), 0, 0, cv::INTER_LANCZOS4 ); // good
+			cv::resize( inquant, quantized, cv::Size(quantizeNumCols,quantizeNumRows), 0, 0, cv::INTER_AREA ); // best?
 			pipeline.then( scoreName + "quantized", quantized);
 			pipeline.setImageToWorldTransform(
 				pipeline.getStages().back()->mImageToWorld
-					* glm::scale(vec3(outsize.x / (float)numCols, outsize.y / (float)numRows, 1))
+					* glm::scale(vec3(outsize.x / (float)quantizeNumCols, outsize.y / (float)quantizeNumRows, 1))
 				);
 			pipeline.getStages().back()->mLayoutHintScale = .5f;
 			pipeline.getStages().back()->mLayoutHintOrtho = true;
@@ -630,7 +679,7 @@ int MusicWorld::getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const
 
 	int len = x2-x;
 	
-	if (len==1) len=0; // filter out 1 pixel wide notes.
+//	if (len==1) len=0; // filter out 1 pixel wide notes.
 	
 	return len;
 }
@@ -832,13 +881,16 @@ void MusicWorld::updateAdditiveScoreSynthesis() {
 	}
 }
 
-void MusicWorld::draw( bool highQuality )
+void MusicWorld::draw( bool highQuality ) // need a new flag for 'inprojector'
 {
 	// instrument regions
-	for( auto &r : mInstrumentRegions )
+	if (highQuality&&0)
 	{
-		gl::color( r.second->mScoreColor );
-		gl::drawSolid( r.first ) ;
+		for( auto &r : mInstrumentRegions )
+		{
+			gl::color( r.second->mScoreColor );
+			gl::drawSolid( r.first ) ;
+		}
 	}
 	
 	// scores
@@ -847,8 +899,11 @@ void MusicWorld::draw( bool highQuality )
 		InstrumentRef instr = getInstrumentForScore(score);
 		if (!instr) continue;
 
-		gl::color(0,0,0);
-		gl::drawSolid(score.getPolyLine());
+		if (highQuality&&0)
+		{
+			gl::color(0,0,0);
+			gl::drawSolid(score.getPolyLine());
+		}
 		
 		if ( instr->mSynthType==Instrument::SynthType::Additive )
 		{

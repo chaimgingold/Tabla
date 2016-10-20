@@ -104,6 +104,7 @@
 
 		<MusicWorld>
 		
+			<!-- Vision settings -->
 			<!-- cm -->
 			<Vision>
 				<ContourMinRadius>			5	</ContourMinRadius>
@@ -112,16 +113,27 @@
 				<ContourMinWidth>			12	</ContourMinWidth>
 				<CaptureAllPipelineStages>1</CaptureAllPipelineStages> <!-- So we can extract bitmaps -->
 			</Vision>
-			
+
+			<!-- Custom vision settings... Probably shouldn't change unless you know what you are doing!-->
+			<ScoreNoteVisionThresh>254</ScoreNoteVisionThresh>
+			<!-- 0..255, -1 for OTSU (adaptive) -->
+			<ScoreVisionTrimFrac>.05</ScoreVisionTrimFrac>
+			<!-- When sampling image for each score, -->
+
+
+			<!--	Music stuff	-->
 			<Tempo>3</Tempo>
 			<TimeVec>0 -1</TimeVec>
 			<NoteCount>13</NoteCount>
 			<BeatCount>32</BeatCount>
-<!--			<Scale>0 1 2 3 4 5 6 7 8 9 10 11</Scale>-->
-			<Scale>0 2 4 5 7 9</Scale>
-
-			<ScoreNoteVisionThresh>-1</ScoreNoteVisionThresh>
-			<!-- 0..255, -1 for OTSU (adaptive) -->
+			<!-- Chromatic -->
+			<!-- <Scale>0 1 2 3 4 5 6 7 8 9 10 11</Scale>-->
+			<!-- Major -->
+<!--			<Scale>0 2 4 5 7 9</Scale>-->
+			<!-- Pentatonic -->
+			<Scale>1 3 6 8 10</Scale>
+			<!-- Minor -->
+<!--			<Scale>0 2 4 5 7 9</Scale>-->
 
 			<Instruments>
 

@@ -79,6 +79,7 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 		const float pixelScale
 			= max( inputBounds .getWidth(), inputBounds .getHeight() )
 			/ max( outputBounds.getWidth(), outputBounds.getHeight() ) ;
+		// more robust would be to process input edges: outputSize = [ max(l-edge,r-edge), max(topedge,botedge) ] 
 		
 		contourPixelToWorld = 1.f / pixelScale ;
 		
