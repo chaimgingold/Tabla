@@ -15,8 +15,11 @@
 #include "Pipeline.h"
 #include "ocv.h"
 #include "RtMidi.h"
+#include "cinder/gl/Context.h"
+
 
 using namespace std::chrono;
+using namespace ci::gl;
 
 // ShapeTracker was started to do inter-frame coherency,
 // but I realized I don't need this to start with.
@@ -865,10 +868,81 @@ void MusicWorld::updateAdditiveScoreSynthesis() {
 	}
 }
 
-void MusicWorld::draw( bool highQuality ) // need a new flag for 'inprojector'
+void drawLines( vector<vec2> points )
 {
+	const int dims = 2;
+	const int size = sizeof( vec2 ) * points.size();
+	auto ctx = context();
+	const GlslProg* curGlslProg = ctx->getGlslProg();
+	if( ! curGlslProg ) {
+//		CI_LOG_E( "No GLSL program bound" );
+		return;
+	}
+
+	ctx->pushVao();
+	ctx->getDefaultVao()->replacementBindBegin();
+
+	VboRef arrayVbo = ctx->getDefaultArrayVbo( size );
+	ScopedBuffer bufferBindScp( arrayVbo );
+
+	arrayVbo->bufferSubData( 0, size, points.data() );
+	int posLoc = curGlslProg->getAttribSemanticLocation( geom::Attrib::POSITION );
+	if( posLoc >= 0 ) {
+		enableVertexAttribArray( posLoc );
+		vertexAttribPointer( posLoc, dims, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)nullptr );
+	}
+	ctx->getDefaultVao()->replacementBindEnd();
+	ctx->setDefaultShaderVars();
+	ctx->drawArrays( GL_LINES, 0, points.size() );
+	ctx->popVao();
+}
+
+void drawSolidTriangles( vector<vec2> pts )
+{
+	auto ctx = context();
+	const GlslProg* curGlslProg = ctx->getGlslProg();
+	if( ! curGlslProg ) {
+//		CI_LOG_E( "No GLSL program bound" );
+		return;
+	}
+
+//	GLfloat data[3*2+3*2]; // both verts and texCoords
+//	memcpy( data, pts, sizeof(float) * pts.size() * 2 );
+//	if( texCoord )
+//		memcpy( data + 3 * 2, texCoord, sizeof(float) * 3 * 2 );
+
+	ctx->pushVao();
+	ctx->getDefaultVao()->replacementBindBegin();
+	VboRef defaultVbo = ctx->getDefaultArrayVbo( sizeof(float)*12 );
+	ScopedBuffer bufferBindScp( defaultVbo );
+	defaultVbo->bufferSubData( 0, sizeof(float) * pts.size() * 2, &pts[0] );
+
+	int posLoc = curGlslProg->getAttribSemanticLocation( geom::Attrib::POSITION );
+	if( posLoc >= 0 ) {
+		enableVertexAttribArray( posLoc );
+		vertexAttribPointer( posLoc, 2, GL_FLOAT, GL_FALSE, 0, (void*)0 );
+	}
+//	if( texCoord ) {
+//		int texLoc = curGlslProg->getAttribSemanticLocation( geom::Attrib::TEX_COORD_0 );
+//		if( texLoc >= 0 ) {
+//			enableVertexAttribArray( texLoc );
+//			vertexAttribPointer( texLoc, 2, GL_FLOAT, GL_FALSE, 0, (void*)(sizeof(float)*6) );
+//		}
+//	}
+	ctx->getDefaultVao()->replacementBindEnd();
+	ctx->setDefaultShaderVars();
+	ctx->drawArrays( GL_TRIANGLES, 0, 3 );
+	ctx->popVao();
+}
+
+void MusicWorld::draw( bool highQuality )
+{
+	bool drawSolidColorBlocks = highQuality && 0;
+	 // need a new flag for 'inprojector'
+	 // BECAUSE the color blocks screw up our ability to see what is going on in the UI
+	
 	// instrument regions
-	if (highQuality&&0)
+	if (drawSolidColorBlocks)
 	{
 		for( auto &r : mInstrumentRegions )
 		{
@@ -883,7 +957,7 @@ void MusicWorld::draw( bool highQuality ) // need a new flag for 'inprojector'
 		InstrumentRef instr = getInstrumentForScore(score);
 		if (!instr) continue;
 
-		if (highQuality&&0)
+		if (drawSolidColorBlocks)
 		{
 			gl::color(0,0,0);
 			gl::drawSolid(score.getPolyLine());
@@ -906,6 +980,9 @@ void MusicWorld::draw( bool highQuality ) // need a new flag for 'inprojector'
 
 			const float yheight = 1.f / (float)score.mNoteCount;
 			
+			vector<vec2> onNoteTris;
+			vector<vec2> offNoteTris;
+			
 			for ( int y=0; y<score.mNoteCount; ++y )
 			{
 				const float fracy1 = 1.f - (y * yheight + yheight*.2f);
@@ -927,10 +1004,24 @@ void MusicWorld::draw( bool highQuality ) // need a new flag for 'inprojector'
 						if ( isNoteInFlight(instr, score.mNoteRoot+y) ) gl::color(instr->mNoteOnColor);
 						else gl::color(instr->mNoteOffColor);
 
-						gl::drawSolidTriangle(start1, end1, end2);
-						gl::drawSolidTriangle(start1, end2, start2);
-						// this is insanity, but i don't yet get how to easily draw raw triangles in glNext.
-						// gl::begin(GL_QUAD)/end didn't quite work.
+						PolyLine2 poly;
+						poly.push_back( start1 );
+						poly.push_back( start2 );
+						poly.push_back( end2 );
+						poly.push_back( end1 );
+						poly.setClosed();
+						gl::drawSolid(poly);
+
+//						vector<vec2>& tris = isNoteInFlight(instr, score.mNoteRoot+y) ? onNoteTris : offNoteTris ;
+//						
+//						tris.push_back( start1 );
+//						tris.push_back( start2 );
+//						tris.push_back( end2 );
+//						tris.push_back( start1 );
+//						tris.push_back( end2 );
+//						tris.push_back( end1 );
+						// ideally we aggregate a giant triangle list, or a quad list.
+						// this code isn't quite working right yet.
 						
 						// skip ahead
 						x = x + length+1;
@@ -938,18 +1029,34 @@ void MusicWorld::draw( bool highQuality ) // need a new flag for 'inprojector'
 				}
 			}
 			
-			// lines
-			gl::color(instr->mScoreColor);
-			gl::draw( score.getPolyLine() );
-
-			for( int i=0; i<score.mNoteCount; ++i )
+			if (!onNoteTris.empty())
 			{
-				float f = (float)(i+1) / (float)score.mNoteCount;
+				gl::color(instr->mNoteOnColor);
+				drawSolidTriangles(onNoteTris);
+			}
+			if (!offNoteTris.empty())
+			{
+				gl::color(instr->mNoteOffColor);
+				drawSolidTriangles(offNoteTris);
+			}
+			
+			
+			// lines
+			{
+				vector<vec2> pts;
 				
-				gl::drawLine(
-					lerp(score.mQuad[3], score.mQuad[0],f),
-					lerp(score.mQuad[2], score.mQuad[1],f)
-					);
+				gl::color(instr->mScoreColor);
+				gl::draw( score.getPolyLine() );
+
+				for( int i=0; i<score.mNoteCount; ++i )
+				{
+					float f = (float)(i+1) / (float)score.mNoteCount;
+					
+					pts.push_back( lerp(score.mQuad[3], score.mQuad[0],f) );
+					pts.push_back( lerp(score.mQuad[2], score.mQuad[1],f) );
+				}
+				
+				drawLines(pts);
 			}
 		}
 		
