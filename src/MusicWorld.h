@@ -15,6 +15,8 @@
 
 typedef std::shared_ptr<RtMidiOut> RtMidiOutRef;
 
+typedef vector<int> Scale;
+
 class MusicWorld : public GameWorld
 {
 public:
@@ -45,6 +47,7 @@ private:
 	float mTempo;		// how fast to playback?
 	int	  mNoteCount=8;
 	int	  mBeatCount=32;
+	Scale mScale;
 	
 	int	 mScoreNoteVisionThresh=-1; // 0..255, or -1 for OTSU
 	
@@ -67,7 +70,6 @@ private:
 		
 		//
 		string mName;
-		vector<int> mScale; // maps score rows -> notes
 
 		//
 		enum class SynthType
@@ -133,6 +135,9 @@ private:
 		float		getPlayheadFrac() const;
 		void		getPlayheadLine( vec2 line[2] ) const;
 		vec2		fracToQuad( vec2 frac ) const; // frac.x = time[0,1], frac.y = note_space[0,1]
+
+		Scale mScale;
+		int noteForY( int y ) const;
 	};
 	vector<Score> mScores;
 	
