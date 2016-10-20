@@ -264,7 +264,8 @@ void MusicWorld::setParams( XmlTree xml )
 	getXml(xml,"TimeVec",mTimeVec);
 	getXml(xml,"NoteCount",mNoteCount);
 	getXml(xml,"BeatCount",mBeatCount);
-
+	getXml(xml,"ScoreNoteVisionThresh", mScoreNoteVisionThresh);
+	
 	cout << "Notes " << mNoteCount << endl;
 	
 	// instruments
@@ -535,13 +536,15 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		
 		if ( instr && instr->mSynthType==Instrument::SynthType::MIDI )
 		{
+			// quantize
+			cv::Mat &inquant = s.mImage;
+			
 			const int numRows = s.mNoteCount;
-			int numCols = s.mImage.cols;
+			int numCols = inquant.cols;
 			if (mBeatCount > 0) numCols = mBeatCount;
 
-			// resample
 			cv::Mat quantized;
-			cv::resize( s.mImage, quantized, cv::Size(numCols,numRows) );
+			cv::resize( inquant, quantized, cv::Size(numCols,numRows) );
 			pipeline.then( scoreName + "quantized", quantized);
 			pipeline.setImageToWorldTransform(
 				pipeline.getStages().back()->mImageToWorld
@@ -549,17 +552,24 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 				);
 			pipeline.getStages().back()->mLayoutHintScale = .5f;
 			pipeline.getStages().back()->mLayoutHintOrtho = true;
-			
+
 			// threshold
+			cv::Mat &inthresh = quantized;
 			cv::Mat thresholded;
 
-
-			cv::threshold( quantized, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
-			// NOTE(lxi): below broke note detection, restored to above
-//			cv::threshold( quantized, thresholded, 220, 255, cv::THRESH_BINARY );
+			if ( mScoreNoteVisionThresh < 0 )
+			{
+				cv::threshold( inthresh, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
+			}
+			else
+			{
+				cv::threshold( inthresh, thresholded, mScoreNoteVisionThresh, 255, cv::THRESH_BINARY );
+			}
+			
 			pipeline.then( scoreName + "thresholded", thresholded);
 			pipeline.getStages().back()->mLayoutHintScale = .5f;
 			pipeline.getStages().back()->mLayoutHintOrtho = true;
+
 
 			// output
 			s.mQuantizedImage = thresholded;
@@ -813,7 +823,7 @@ void MusicWorld::draw( bool highQuality )
 	for( auto &r : mInstrumentRegions )
 	{
 		gl::color( r.second->mScoreColor );
-		gl::draw ( r.first ) ;
+		gl::drawSolid( r.first ) ;
 	}
 	
 	// scores
@@ -822,6 +832,9 @@ void MusicWorld::draw( bool highQuality )
 		InstrumentRef instr = getInstrumentForScore(score);
 		if (!instr) continue;
 
+		gl::color(0,0,0);
+		gl::drawSolid(score.getPolyLine());
+		
 		if ( instr->mSynthType==Instrument::SynthType::Additive )
 		{
 			// additive

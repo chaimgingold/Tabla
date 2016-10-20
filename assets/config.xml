@@ -109,15 +109,18 @@
 				<ContourMinRadius>			5	</ContourMinRadius>
 				<ContourMinArea>			100	</ContourMinArea>
 				<ContourDPEpsilon>			5	</ContourDPEpsilon>
-				<ContourMinWidth>			10	</ContourMinWidth>
+				<ContourMinWidth>			12	</ContourMinWidth>
 				<CaptureAllPipelineStages>1</CaptureAllPipelineStages> <!-- So we can extract bitmaps -->
 			</Vision>
 			
 			<Tempo>3</Tempo>
 			<TimeVec>0 -1</TimeVec>
 			<NoteCount>13</NoteCount>
-			<BeatCount>64</BeatCount>
+			<BeatCount>32</BeatCount>
 			
+			<ScoreNoteVisionThresh>-1</ScoreNoteVisionThresh>
+			<!-- 0..255, -1 for OTSU (adaptive) -->
+
 			<Instruments>
 
 				<Instrument>

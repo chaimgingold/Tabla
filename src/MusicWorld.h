@@ -30,7 +30,7 @@ public:
 	void updateContours( const ContourVector &c ) override;
 	void updateCustomVision( Pipeline& ) override; // extract bitmaps we need
 
-	void worldBoundsPolyDidChange();
+	void worldBoundsPolyDidChange() override;
 
 	void draw( bool highQuality ) override;
 
@@ -45,6 +45,8 @@ private:
 	float mTempo;		// how fast to playback?
 	int	  mNoteCount=8;
 	int	  mBeatCount=32;
+	
+	int	 mScoreNoteVisionThresh=-1; // 0..255, or -1 for OTSU
 	
 	// instrument info
 	class Instrument
