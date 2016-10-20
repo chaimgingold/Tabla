@@ -16,7 +16,10 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 	, mIsUIWindow(isUIWindow)
 {
 	mMainImageView = make_shared<MainImageView>( MainImageView(mApp) );
-	mMainImageView->mWorldDrawFunc = [&](){mApp.drawWorld(true);};
+	mMainImageView->setIsProjectorView(!isUIWindow);
+	mMainImageView->mWorldDrawFunc = [this](){
+		mApp.drawWorld( getIsUIWindow() ? GameWorld::DrawType::UIMain : GameWorld::DrawType::Projector );
+	};
 		// draw all the contours, etc... as well as the game world itself.
 	mViews.addView(mMainImageView);
 	
@@ -61,7 +64,7 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 			std::shared_ptr<PolyEditView> cameraPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
 					mApp.mPipeline,
-					[&](){ return getPointsAsPoly(mApp.mLightLink.mCaptureCoords,4); },
+					[this](){ return getPointsAsPoly(mApp.mLightLink.mCaptureCoords,4); },
 					"input"
 					)
 				);
@@ -300,7 +303,9 @@ void WindowData::updatePipelineViews()
 		if ( !view && mApp.mDrawPipeline )
 		{
 			PipelineStageView psv( mApp.mPipeline, s->mName );
-			psv.setWorldDrawFunc( [&](){ mApp.drawWorld(false); } );
+			psv.setWorldDrawFunc( [&](){
+				mApp.drawWorld( GameWorld::DrawType::UIPipelineThumb );
+			});
 			
 			view = make_shared<PipelineStageView>(psv);
 			

@@ -23,7 +23,7 @@ public:
 
 	void gameWillLoad() override;
 	void update() override;
-	void draw( bool highQuality ) override;
+	void draw( DrawType ) override;
 	
 	void worldBoundsPolyDidChange() override;
 

@@ -361,7 +361,7 @@ void PaperBounce3App::resize()
 	updateMainImageTransform(getWindow());
 }
 
-void PaperBounce3App::drawWorld( bool highQuality )
+void PaperBounce3App::drawWorld( GameWorld::DrawType drawType )
 {
 	WindowData *win = getWindow()->getUserData<WindowData>();
 	
@@ -460,7 +460,7 @@ void PaperBounce3App::drawWorld( bool highQuality )
 	}
 	
 	// draw balls
-	if (mGameWorld) mGameWorld->draw(highQuality);
+	if (mGameWorld) mGameWorld->draw(drawType);
 	
 	// mouse debug info
 	if ( (mDrawMouseDebugInfo||isUIWindow) && isMouseInWindow && mGameWorld )

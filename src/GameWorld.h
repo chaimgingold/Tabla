@@ -41,9 +41,16 @@ public:
 	// and then pick whether you want a hole or not hole.
 	// randomPointOnContour()
 
+	enum class DrawType
+	{
+		Projector,
+		UIPipelineThumb,
+		UIMain
+	};
+	
 	virtual void gameWillLoad(){}
 	virtual void update(){}
-	virtual void draw( bool highQuality ){}
+	virtual void draw( DrawType ){}
 	
 	// because mice, etc... do sometimes touch these worlds...
 	// all positions in world space
