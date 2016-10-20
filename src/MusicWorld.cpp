@@ -724,7 +724,7 @@ void MusicWorld::update()
 		if ( instr->mSynthType==Instrument::SynthType::Additive ) {
 			// Update time
 			mPureDataNode->sendFloat(string("phase")+toString(scoreNum),
-									 score.getPlayheadFrac()*100.0 );
+									 score.getPlayheadFrac() );
 		}
 		// send midi notes
 		else if ( instr->mSynthType==Instrument::SynthType::MIDI )

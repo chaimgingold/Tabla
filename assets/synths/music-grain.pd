@@ -10,7 +10,7 @@
 #X text 270 66 determines pitch;
 #X text 363 382 invert image (could do this on OpenCV side);
 #X msg 236 105 100 \$1;
-#X obj 332 216 r phase\$2;
+#X obj 332 176 r phase\$2;
 #X obj 332 313 +;
 #X obj 332 336 tabread image\$2;
 #X obj 332 381 -;
@@ -32,6 +32,8 @@
 100th is lowest;
 #X obj 347 281 * \$1;
 #X obj 347 254 r resolution-x\$2;
+#X obj 346 219 r resolution-x\$1;
+#X obj 294 216 *;
 #X connect 0 0 2 0;
 #X connect 2 0 1 0;
 #X connect 3 0 10 0;
@@ -39,7 +41,7 @@
 #X connect 5 0 0 0;
 #X connect 6 0 25 0;
 #X connect 10 0 6 0;
-#X connect 11 0 12 0;
+#X connect 11 0 32 0;
 #X connect 12 0 13 0;
 #X connect 13 0 15 0;
 #X connect 14 0 20 0;
@@ -59,3 +61,5 @@
 #X connect 27 0 26 0;
 #X connect 29 0 12 1;
 #X connect 30 0 29 0;
+#X connect 31 0 32 1;
+#X connect 32 0 12 0;
