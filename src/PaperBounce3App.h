@@ -52,7 +52,7 @@ class PaperBounce3App : public App {
 	void resize() override;
 	void keyDown( KeyEvent event ) override;
 	
-	void drawWorld( bool highQuality );
+	void drawWorld( GameWorld::DrawType );
 	
 	void lightLinkDidChange( const LightLink& ll )
 	{

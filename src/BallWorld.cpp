@@ -20,7 +20,7 @@ void BallWorld::setParams( XmlTree xml )
 	getXml(xml,"BallMaxVel",mBallMaxVel);
 }
 
-void BallWorld::draw( bool highQuality )
+void BallWorld::draw( DrawType drawType )
 {
 	for( auto b : mBalls )
 	{
@@ -34,8 +34,7 @@ void BallWorld::draw( bool highQuality )
 		else
 		{
 			int numSegments = -1 ;
-			
-			if (highQuality) numSegments = 20;
+			if ( drawType==DrawType::Projector || drawType==DrawType::UIMain ) numSegments = 20;
 			
 			// squash + stretch
 			gl::pushModelView() ;

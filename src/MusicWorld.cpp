@@ -254,7 +254,7 @@ int MusicWorld::Score::noteForY( int y ) const {
 	int degree = y % numNotes;
 	int note = mScale[degree];
 
-	return note + extraOctaveShift;
+	return note + extraOctaveShift + mNoteRoot;
 }
 
 MusicWorld::MusicWorld()
@@ -951,11 +951,10 @@ void drawSolidTriangles( vector<vec2> pts )
 	ctx->popVao();
 }
 
-void MusicWorld::draw( bool highQuality )
+void MusicWorld::draw( GameWorld::DrawType drawType )
 {
-	bool drawSolidColorBlocks = highQuality && 0;
-	 // need a new flag for 'inprojector'
-	 // BECAUSE the color blocks screw up our ability to see what is going on in the UI
+	bool drawSolidColorBlocks = drawType == GameWorld::DrawType::Projector;
+	// otherwise we can't see score contents in the UI view... 
 	
 	// instrument regions
 	if (drawSolidColorBlocks)

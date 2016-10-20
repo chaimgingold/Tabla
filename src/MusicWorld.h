@@ -34,7 +34,7 @@ public:
 
 	void worldBoundsPolyDidChange() override;
 
-	void draw( bool highQuality ) override;
+	void draw( GameWorld::DrawType ) override;
 
 private:
 	

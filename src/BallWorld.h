@@ -64,7 +64,7 @@ public:
 	
 	void gameWillLoad() override; // make some balls by default
 	void update() override;
-	void draw( bool highQuality ) override;
+	void draw( DrawType ) override;
 	
 	void newRandomBall( vec2 loc );
 	void clearBalls() { mBalls.clear(); }

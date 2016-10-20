@@ -99,7 +99,13 @@ void MainImageView::draw()
 		}
 		
 		if (mWorldDrawFunc) mWorldDrawFunc(); // overload it.
-		else if (getGameWorld()) getGameWorld()->draw(true); // high quality
+		else if (getGameWorld())
+		{
+			getGameWorld()->draw(
+				mSetIsProjectorView
+				? GameWorld::DrawType::Projector
+				: GameWorld::DrawType::UIMain ); // high quality
+		}
 	}
 	gl::popViewMatrix();
 }

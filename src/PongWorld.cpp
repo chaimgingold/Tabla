@@ -230,7 +230,7 @@ void PongWorld::serve()
 	getBalls().push_back( ball ) ;
 }
 
-void PongWorld::draw( bool highQuality )
+void PongWorld::draw( DrawType drawType )
 {
 	//
 	// Draw field layout markings
@@ -256,7 +256,7 @@ void PongWorld::draw( bool highQuality )
 	//
 	// Draw world
 	//
-	BallWorld::draw(highQuality);
+	BallWorld::draw(drawType);
 	
 	//
 	// Draw Score/UI
