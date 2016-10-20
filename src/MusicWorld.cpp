@@ -116,7 +116,6 @@ void MusicWorld::Instrument::setParams( XmlTree xml )
 	getXml(xml,"NoteOnColor",mNoteOnColor);
 	
 	getXml(xml,"Name",mName);
-	getXml(xml,"Scale",mScale);
 //	getXml(xml,"IsAdditiveSynth",mIsAdditiveSynth);
 	
 	if ( xml.hasChild("SynthType") )
@@ -249,6 +248,15 @@ vec2 MusicWorld::Score::fracToQuad( vec2 frac ) const
 	return lerp(bot,top,frac.y);
 }
 
+int MusicWorld::Score::noteForY( int y ) const {
+	int numNotes = mScale.size();
+	int extraOctaveShift = y / numNotes * 12;
+	int degree = y % numNotes;
+	int note = mScale[degree];
+
+	return note + extraOctaveShift;
+}
+
 MusicWorld::MusicWorld()
 {
 	mStartTime = ci::app::getElapsedSeconds();
@@ -267,6 +275,8 @@ void MusicWorld::setParams( XmlTree xml )
 	getXml(xml,"TimeVec",mTimeVec);
 	getXml(xml,"NoteCount",mNoteCount);
 	getXml(xml,"BeatCount",mBeatCount);
+	getXml(xml,"Scale",mScale);
+
 	getXml(xml,"ScoreNoteVisionThresh", mScoreNoteVisionThresh);
 	getXml(xml,"ScoreVisionTrimFrac", mScoreVisionTrimFrac);
 	
@@ -472,6 +482,9 @@ void MusicWorld::updateContours( const ContourVector &contours )
 //			int octaveShift = (yf - .5f) * 10.f;
 			int noteRoot = 60 + octaveShift*12; // middle C
 			score.mNoteRoot = noteRoot;
+
+			// Inherit scale from global scale
+			score.mScale = mScale;
 
 			// MIDI synth params
 //			auto instr = getInstrumentForScore(score);
@@ -713,7 +726,8 @@ void MusicWorld::update()
 					
 					if (duration>0)
 					{
-						doNoteOn( instr, score.mNoteRoot+y, duration );
+						int note = score.noteForY(y);
+						doNoteOn( instr, note, duration );
 					}
 				}
 			}
@@ -731,6 +745,8 @@ bool MusicWorld::isNoteInFlight( InstrumentRef instr, int note ) const
 {
 	return mOnNotes.find( tOnNoteKey(instr,note) ) != mOnNotes.end();
 }
+
+
 
 void MusicWorld::updateNoteOffs()
 {
@@ -1001,7 +1017,7 @@ void MusicWorld::draw( bool highQuality )
 						vec2 start2 = score.fracToQuad( vec2( (float)(x * invcols), fracy2 ) ) ;
 						vec2 end2   = score.fracToQuad( vec2( (float)(x+length) * invcols, fracy2) ) ;
 						
-						if ( isNoteInFlight(instr, score.mNoteRoot+y) ) gl::color(instr->mNoteOnColor);
+						if ( isNoteInFlight(instr, score.noteForY(y)) ) gl::color(instr->mNoteOnColor);
 						else gl::color(instr->mNoteOffColor);
 
 						PolyLine2 poly;
