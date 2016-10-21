@@ -121,6 +121,7 @@ private:
 		float		mStartTime;
 		float		mDuration;
 		
+		int			mOctave;
 		float		mNoteRoot;
 		int			mNoteCount;
 		int         mBeatCount;

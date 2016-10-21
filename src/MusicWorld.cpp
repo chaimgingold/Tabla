@@ -21,6 +21,8 @@
 using namespace std::chrono;
 using namespace ci::gl;
 
+const int kNumOctaves = 5;
+
 // ShapeTracker was started to do inter-frame coherency,
 // but I realized I don't need this to start with.
 // It's gravy.
@@ -260,7 +262,7 @@ int MusicWorld::Score::noteForY( InstrumentRef instr, int y ) const {
 	int degree = y % numNotes;
 	int note = mScale[degree];
 
-	return note + extraOctaveShift + mNoteRoot;
+	return note + extraOctaveShift + mNoteRoot + mOctave*12;
 }
 
 MusicWorld::MusicWorld()
@@ -389,29 +391,38 @@ int MusicWorld::getScoreOctaveShift( const Score& score, const PolyLine2& wrtReg
 	const vec2 lookVec = perp(mTimeVec);
 
 	pair<float,float> worldYs(0,0), scoreYs(0,0);
-//	pair<float,float> worldXs(0,0);
 	
 	if ( wrtRegion.size() > 0 )
 	{
 		worldYs = getShapeRange( &wrtRegion.getPoints()[0], wrtRegion.size(), lookVec );
 	}
 	
-	getShapeRange( score.mQuad, 4, lookVec );
+	scoreYs = getShapeRange( score.mQuad, 4, lookVec );
+	
+	float scorey = lerp(scoreYs.first,scoreYs.second,.5f);
+
+	float f = 1.f - (scorey - worldYs.first) / (worldYs.second - worldYs.first);
+	
+	int o = roundf( (f-.5f) * (float)kNumOctaves ) ;
+	
+	cout << o << endl;
+	
+	return o;
 	
 	//
 	
-	auto c = []( string n, pair<float,float> p )
-	{
-		cout << n << ": [ " << p.first << ", " << p.second << " ]" ;
-	};
-	
-	cout << "s " << (long int)(&wrtRegion) << " { " ;
-	c("worldYs",worldYs);
-	cout << "  ";
-	c("scoreYs",scoreYs);
-	cout <<" }"<<endl;
-	
-	return 0;
+//	auto c = []( string n, pair<float,float> p )
+//	{
+//		cout << n << ": [ " << p.first << ", " << p.second << " ]" ;
+//	};
+//	
+//	cout << "s " << " { " ;
+//	c("worldYs",worldYs);
+//	cout << "  ";
+//	c("scoreYs",scoreYs);
+//	cout <<" }"<<endl;
+//	
+//	return 0;
 }
 
 MusicWorld::InstrumentRef
@@ -433,7 +444,8 @@ MusicWorld::decideInstrumentForScore( const Score& s, int* octaveShift ) const
 	auto i = mInstrumentRegions.begin();
 	if (i!=mInstrumentRegions.end())
 	{
-		if (octaveShift) *octaveShift = getScoreOctaveShift(s,i->first);
+		if (octaveShift) *octaveShift = getScoreOctaveShift(s,getWorldBoundsPoly());
+			// and do octave wrt world bounds
 		return i->second;
 	}
 	
@@ -498,6 +510,7 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			// Choose octave based on up<>down
 //			int octaveShift = (yf - .5f) * 10.f;
 			int noteRoot = 60 + octaveShift*12; // middle C
+			score.mOctave = octaveShift;
 			score.mNoteRoot = noteRoot;
 
 			// Inherit scale from global scale
@@ -1112,6 +1125,13 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 		vec2 playhead[2];
 		score.getPlayheadLine(playhead);
 		gl::drawLine( playhead[0], playhead[1] );
+		
+		// octave indicator
+		{
+			float octaveFrac = (float)score.mOctave / (float)kNumOctaves + .5f ;
+			
+			gl::drawSolidCircle( lerp(playhead[0],playhead[1],octaveFrac), .5f, 6 );
+		}
 	}
 	
 	// draw time direction (for debugging score generation)
