@@ -1,0 +1,18 @@
+#N canvas 1116 720 576 420 10;
+#X obj 323 377 s~ \$1osc;
+#X obj 323 343 osc~;
+#X obj 323 58 loadbang;
+#X obj 323 301 mtof;
+#X obj 323 89 \$1;
+#X obj 323 221 + 20;
+#X obj 323 171 * 100;
+#X text 364 170 note-range;
+#X text 362 219 note-root;
+#X obj 323 122 / \$2;
+#X connect 1 0 0 0;
+#X connect 2 0 4 0;
+#X connect 3 0 1 0;
+#X connect 4 0 9 0;
+#X connect 5 0 3 0;
+#X connect 6 0 5 0;
+#X connect 9 0 6 0;

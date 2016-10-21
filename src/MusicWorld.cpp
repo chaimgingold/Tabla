@@ -141,17 +141,20 @@ MusicWorld::Instrument::~Instrument()
 void MusicWorld::Instrument::setup()
 {
 	assert(!mMidiOut);
-	
-	cout << "Opening port " << mPort << " for '" << mName << "'" << endl;
 
-	mMidiOut = make_shared<RtMidiOut>();
+	if (mSynthType == SynthType::MIDI) {
+		cout << "Opening port " << mPort << " for '" << mName << "'" << endl;
 
-	if (mPort < mMidiOut->getPortCount()) {
-		mMidiOut->openPort( mPort );
-	} else {
-		cout << "...Opening virtual port for '" << mName << "'" << endl;
-		mMidiOut->openVirtualPort(mName);
+		mMidiOut = make_shared<RtMidiOut>();
+
+		if (mPort < mMidiOut->getPortCount()) {
+			mMidiOut->openPort( mPort );
+		} else {
+			cout << "...Opening virtual port for '" << mName << "'" << endl;
+			mMidiOut->openVirtualPort(mName);
+		}
 	}
+
 }
 
 // For most synths this is just the assigned channel,
@@ -743,7 +746,7 @@ void MusicWorld::update()
 
 		if ( instr->mSynthType==Instrument::SynthType::Additive ) {
 			// Update time
-			mPureDataNode->sendFloat(string("phase")+toString(scoreNum),
+			mPureDataNode->sendFloat(toString(scoreNum)+string("phase"),
 									 score.getPlayheadFrac() );
 		}
 		// send midi notes
@@ -811,9 +814,11 @@ void MusicWorld::updateNoteOffs()
 
 void MusicWorld::killAllNotes() {
 	for ( const auto i : mInstruments ) {
-		for (int channel = 0; channel < 16; channel++) {
-			for (int note = 0; note < 128; note++) {
-				sendNoteOff( i.second->mMidiOut, channel, note );
+		if (i.second->mMidiOut) {
+			for (int channel = 0; channel < 16; channel++) {
+				for (int note = 0; note < 128; note++) {
+					sendNoteOff( i.second->mMidiOut, channel, note );
+				}
 			}
 		}
 	}
@@ -875,7 +880,10 @@ void MusicWorld::updateAdditiveScoreSynthesis() {
 	for( const auto &score : mScores )
 	{
 		InstrumentRef instr = getInstrumentForScore(score);
-		if (!instr) continue;
+		if (!instr) {
+			scoreNum++;
+			continue;
+		}
 		
 		// send image for additive synthesis
 		if ( instr->mSynthType==Instrument::SynthType::Additive && !score.mImage.empty() )
@@ -885,19 +893,23 @@ void MusicWorld::updateAdditiveScoreSynthesis() {
 			int cols = score.mImage.cols;
 			
 			// Update pan
-			mPureDataNode->sendFloat(string("pan")+toString(scoreNum),
-									 score.mPan);
-
-			// Update per-score pitch
-			mPureDataNode->sendFloat(string("note-root")+toString(scoreNum),
-									 score.mNoteRoot);
+//			mPureDataNode->sendFloat(toString(scoreNum)+string("pan"),
+//									 score.mPan);
+//
+//			// Update per-score pitch
+//			mPureDataNode->sendFloat(toString(scoreNum)+string("note-root"),
+//									 20 );
+//
+//			// Update range of notes covered by additive synthesis
+//			mPureDataNode->sendFloat(toString(scoreNum)+string("note-range"),
+//									 100 );
 
 			// Update resolution
-			mPureDataNode->sendFloat(string("resolution-x")+toString(scoreNum),
-									 rows);
-
-			mPureDataNode->sendFloat(string("resolution-y")+toString(scoreNum),
+			mPureDataNode->sendFloat(toString(scoreNum)+string("resolution-x"),
 									 cols);
+
+			mPureDataNode->sendFloat(toString(scoreNum)+string("resolution-y"),
+									 rows);
 
 			// Create a float version of the image
 			cv::Mat imageFloatMat;
@@ -909,8 +921,7 @@ void MusicWorld::updateAdditiveScoreSynthesis() {
 			std::vector<float> imageVector;
 			imageVector.assign( (float*)imageFloatMat.datastart, (float*)imageFloatMat.dataend );
 
-			mPureDataNode->writeArray(string("image")+toString(scoreNum),
-									  imageVector);
+			mPureDataNode->writeArray(toString(scoreNum)+string("image"), imageVector);
 		}
 
 		//
@@ -919,15 +930,16 @@ void MusicWorld::updateAdditiveScoreSynthesis() {
 
 	// Clear remaining scores
 	const int kMaxScores = 8; // This corresponds to [clone 8 music-voice] in music.pd
-	std::vector<float> emptyVector(10000, 1.0);
+	static std::vector<float> emptyVector(20000, 1.0);
 	while( scoreNum < kMaxScores ) {
 
-		mPureDataNode->writeArray(string("image")+toString(scoreNum),
+//		mPureDataNode->sendBang(toString(scoreNum)+string("clear"));
+
+		mPureDataNode->writeArray(toString(scoreNum)+string("image"),
 								  emptyVector);
 
-		mPureDataNode->sendFloat(string("phase")+toString(scoreNum),
+		mPureDataNode->sendFloat(toString(scoreNum)+string("phase"),
 								 0);
-
 		scoreNum++;
 	}
 }
@@ -1166,6 +1178,7 @@ void MusicWorld::setupSynthesis()
 
 	// Create the synth engine
 	mPureDataNode = cipd::PureDataNode::Global();
+
 	mPatch = mPureDataNode->loadPatch( DataSourcePath::create(getAssetPath("synths/music.pd")) );
 }
 

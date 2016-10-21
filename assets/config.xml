@@ -148,28 +148,29 @@
 			<!--	Instruments -->
 			<Instruments>
 
+			<Instrument>
+				<PlayheadColor>00FF00</PlayheadColor>
+				<ScoreColor>332288</ScoreColor>
+				<NoteOffColor>FFFF00</NoteOffColor>
+				<NoteOnColor>00FF00</NoteOnColor>
+
+				<Name>0Volca FM</Name>
+				<SynthType>MIDI</SynthType>
+
+				<Port>2</Port>
+				<Channel>0</Channel>
+				<MapNotesToChannels>0</MapNotesToChannels>
+			</Instrument>
+
+
 				<Instrument>
 					<PlayheadColor>00FFFF</PlayheadColor>
-					<ScoreColor>FF00FF</ScoreColor>
+					<ScoreColor>993377</ScoreColor>
 					<NoteOffColor>00FF00</NoteOffColor>
 					<NoteOnColor>FF0000</NoteOnColor>
 					
-					<Name>Additive</Name>
+					<Name>1Additive</Name>
 					<SynthType>Additive</SynthType>
-					
-					<Port>0</Port>
-					<Channel>0</Channel>
-					<MapNotesToChannels>0</MapNotesToChannels>
-				</Instrument>
-				
-				<Instrument>
-					<PlayheadColor>00FF00</PlayheadColor>
-					<ScoreColor>005566</ScoreColor>
-					<NoteOffColor>FFFF00</NoteOffColor>
-					<NoteOnColor>00FF00</NoteOnColor>
-					
-					<Name>Volca Keys</Name>
-					<SynthType>MIDI</SynthType>
 					
 					<Port>0</Port>
 					<Channel>0</Channel>
@@ -182,7 +183,7 @@
 					<NoteOffColor>FFFF00</NoteOffColor>
 					<NoteOnColor>00FF00</NoteOnColor>
 
-					<Name>Volca Sample</Name>
+					<Name>2Volca Sample</Name>
 					<SynthType>MIDI</SynthType>
 
 					<Port>1</Port>
@@ -190,16 +191,48 @@
 					<MapNotesToChannels>10</MapNotesToChannels>
 				</Instrument>
 
+
+
 				<Instrument>
-					<PlayheadColor>00FF00</PlayheadColor>
-					<ScoreColor>332288</ScoreColor>
-					<NoteOffColor>FFFF00</NoteOffColor>
-					<NoteOnColor>00FF00</NoteOnColor>
+					<PlayheadColor>00FFFF</PlayheadColor>
+					<ScoreColor>993377</ScoreColor>
+					<NoteOffColor>00FF00</NoteOffColor>
+					<NoteOnColor>FF0000</NoteOnColor>
 
-					<Name>Volca FM</Name>
-					<SynthType>MIDI</SynthType>
+					<Name>3Additive</Name>
+					<SynthType>Additive</SynthType>
 
-					<Port>2</Port>
+					<Port>0</Port>
+					<Channel>0</Channel>
+					<MapNotesToChannels>0</MapNotesToChannels>
+				</Instrument>
+
+
+				<Instrument>
+					<PlayheadColor>00FFFF</PlayheadColor>
+					<ScoreColor>993377</ScoreColor>
+					<NoteOffColor>00FF00</NoteOffColor>
+					<NoteOnColor>FF0000</NoteOnColor>
+
+					<Name>4Additive</Name>
+					<SynthType>Additive</SynthType>
+
+					<Port>0</Port>
+					<Channel>0</Channel>
+					<MapNotesToChannels>0</MapNotesToChannels>
+				</Instrument>
+
+
+				<Instrument>
+					<PlayheadColor>00FFFF</PlayheadColor>
+					<ScoreColor>993377</ScoreColor>
+					<NoteOffColor>00FF00</NoteOffColor>
+					<NoteOnColor>FF0000</NoteOnColor>
+
+					<Name>5Additive</Name>
+					<SynthType>Additive</SynthType>
+
+					<Port>0</Port>
 					<Channel>0</Channel>
 					<MapNotesToChannels>0</MapNotesToChannels>
 				</Instrument>
@@ -210,13 +243,50 @@
 					<NoteOffColor>FFFF00</NoteOffColor>
 					<NoteOnColor>00FF00</NoteOnColor>
 
-					<Name>Volca Bass</Name>
+					<Name>6Volca Bass</Name>
 					<SynthType>MIDI</SynthType>
 
 					<Port>3</Port>
 					<Channel>0</Channel>
 					<MapNotesToChannels>0</MapNotesToChannels>
 				</Instrument>
+
+
+				<Instrument>
+					<PlayheadColor>00FFFF</PlayheadColor>
+					<ScoreColor>993377</ScoreColor>
+					<NoteOffColor>00FF00</NoteOffColor>
+					<NoteOnColor>FF0000</NoteOnColor>
+
+					<Name>7Additive</Name>
+					<SynthType>Additive</SynthType>
+
+					<Port>0</Port>
+					<Channel>0</Channel>
+					<MapNotesToChannels>0</MapNotesToChannels>
+				</Instrument>
+
+
+
+				<Instrument>
+					<PlayheadColor>00FF00</PlayheadColor>
+					<ScoreColor>005566</ScoreColor>
+					<NoteOffColor>FFFF00</NoteOffColor>
+					<NoteOnColor>00FF00</NoteOnColor>
+					
+					<Name>8Volca Keys</Name>
+					<SynthType>MIDI</SynthType>
+					
+					<Port>0</Port>
+					<Channel>0</Channel>
+					<MapNotesToChannels>0</MapNotesToChannels>
+				</Instrument>
+
+
+
+
+
+
 
 
 
