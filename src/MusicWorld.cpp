@@ -208,7 +208,11 @@ bool MusicWorld::Score::setQuadFromPolyLine( PolyLine2 poly, vec2 timeVec )
 		}
 		
 		// copy to mQuad
-		for ( int i=0; i<4; ++i ) mQuad[i] = in(bestSide+i);
+		mQuad[0] = in( bestSide+3 );
+		mQuad[1] = in( bestSide+2 );
+		mQuad[2] = in( bestSide+1 );
+		mQuad[3] = in( bestSide+0 );
+		// wtf i don't get the logic but it works
 		
 		return true ;
 	}
@@ -238,8 +242,8 @@ void MusicWorld::Score::getPlayheadLine( vec2 line[2] ) const
 {
 	float t = getPlayheadFrac();
 	
-	line[0] = lerp(mQuad[0],mQuad[1],t);
-	line[1] = lerp(mQuad[3],mQuad[2],t);
+	line[0] = lerp(mQuad[3],mQuad[2],t); // bottom
+	line[1] = lerp(mQuad[0],mQuad[1],t); // top
 }
 
 vec2 MusicWorld::Score::fracToQuad( vec2 frac ) const
@@ -402,27 +406,27 @@ int MusicWorld::getScoreOctaveShift( const Score& score, const PolyLine2& wrtReg
 	float scorey = lerp(scoreYs.first,scoreYs.second,.5f);
 
 	float f = 1.f - (scorey - worldYs.first) / (worldYs.second - worldYs.first);
+	// don't understand why i need 1-, but it works.
 	
 	int o = roundf( (f-.5f) * (float)kNumOctaves ) ;
 	
 	cout << o << endl;
 	
-	return o;
 	
 	//
 	
-//	auto c = []( string n, pair<float,float> p )
-//	{
-//		cout << n << ": [ " << p.first << ", " << p.second << " ]" ;
-//	};
-//	
-//	cout << "s " << " { " ;
-//	c("worldYs",worldYs);
-//	cout << "  ";
-//	c("scoreYs",scoreYs);
-//	cout <<" }"<<endl;
-//	
-//	return 0;
+	auto c = []( string n, pair<float,float> p )
+	{
+		cout << n << ": [ " << p.first << ", " << p.second << " ]" ;
+	};
+	
+	cout << "s " << " { " ;
+	c("worldYs",worldYs);
+	cout << "  ";
+	c("scoreYs",scoreYs);
+	cout <<" }"<<endl;
+
+	return o;
 }
 
 MusicWorld::InstrumentRef
@@ -706,7 +710,7 @@ int MusicWorld::getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const
 	
 	for( x2=x;
 		 x2<image.cols
-			&& isScoreValueHigh(image.at<unsigned char>(y,x2)) ;
+			&& isScoreValueHigh(image.at<unsigned char>(image.rows-1-y,x2)) ;
 		 ++x2 )
 	{}
 
@@ -748,7 +752,7 @@ void MusicWorld::update()
 
 			for ( int y=0; y<score.mNoteCount; ++y )
 			{
-				unsigned char value = score.mQuantizedImage.at<unsigned char>(y,x) ;
+				unsigned char value = score.mQuantizedImage.at<unsigned char>(score.mNoteCount-1-y,x) ;
 				
 				if ( isScoreValueHigh(value) )
 				{
@@ -1041,12 +1045,12 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 			
 			for ( int y=0; y<score.mNoteCount; ++y )
 			{
-				const float y1frac = 1.f - (y * yheight + yheight*.2f);
-				const float y2frac = 1.f - (y * yheight + yheight*.8f);
+				const float y1frac = y * yheight + yheight*.2f;
+				const float y2frac = y * yheight + yheight*.8f;
 				
 				for( int x=0; x<score.mQuantizedImage.cols; ++x )
 				{
-					if ( isScoreValueHigh(score.mQuantizedImage.at<unsigned char>(y,x)) )
+					if ( isScoreValueHigh(score.mQuantizedImage.at<unsigned char>(score.mNoteCount-1-y,x)) )
 					{
 						// how wide?
 						int length = getNoteLengthAsImageCols(score.mQuantizedImage,x,y);
@@ -1132,7 +1136,17 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 			
 			gl::drawSolidCircle( lerp(playhead[0],playhead[1],octaveFrac), .5f, 6 );
 		}
+
+		// quad debug
+		if (0)
+		{
+			gl::color( 1,0,0 );
+			gl::drawSolidCircle(score.mQuad[0], 1);
+			gl::color( 0,1,0 );
+			gl::drawSolidCircle(score.mQuad[1], 1);
+		}
 	}
+
 	
 	// draw time direction (for debugging score generation)
 	if (0)

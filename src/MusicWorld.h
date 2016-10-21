@@ -136,7 +136,7 @@ private:
 		// getting stuff
 		PolyLine2	getPolyLine() const;
 		float		getPlayheadFrac() const;
-		void		getPlayheadLine( vec2 line[2] ) const;
+		void		getPlayheadLine( vec2 line[2] ) const; // line goes from [3..2] >> [0..1]
 		vec2		fracToQuad( vec2 frac ) const; // frac.x = time[0,1], frac.y = note_space[0,1]
 
 		Scale mScale;
