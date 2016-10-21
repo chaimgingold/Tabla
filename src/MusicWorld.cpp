@@ -410,21 +410,24 @@ int MusicWorld::getScoreOctaveShift( const Score& score, const PolyLine2& wrtReg
 	
 	int o = roundf( (f-.5f) * (float)kNumOctaves ) ;
 	
-	cout << o << endl;
+	if (0) cout << o << endl;
 	
 	
 	//
 	
-	auto c = []( string n, pair<float,float> p )
+	if (0)
 	{
-		cout << n << ": [ " << p.first << ", " << p.second << " ]" ;
-	};
-	
-	cout << "s " << " { " ;
-	c("worldYs",worldYs);
-	cout << "  ";
-	c("scoreYs",scoreYs);
-	cout <<" }"<<endl;
+		auto c = []( string n, pair<float,float> p )
+		{
+			cout << n << ": [ " << p.first << ", " << p.second << " ]" ;
+		};
+		
+		cout << "s " << " { " ;
+		c("worldYs",worldYs);
+		cout << "  ";
+		c("scoreYs",scoreYs);
+		cout <<" }"<<endl;
+	}
 
 	return o;
 }
