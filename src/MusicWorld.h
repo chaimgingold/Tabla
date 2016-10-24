@@ -44,13 +44,17 @@ private:
 	// params
 	float mStartTime;	// when MusicWorld created
 	vec2  mTimeVec;		// in world space, which way does time flow forward?
-	float mTempo;		// how fast to playback?
 	int	  mNoteCount=8;
 	int	  mBeatCount=32;
 	Scale mScale;
 	
 	int	  mScoreNoteVisionThresh=-1; // 0..255, or -1 for OTSU
 	float mScoreVisionTrimFrac=0.f;
+	
+	// new tempo system
+	vector<float> mTempos; // what tempos do we support? 0 entry means free form, 1 means all are fixed.
+	float mTempoWorldUnitsPerSecond = 5.f;
+	float getNearestTempo( float ) const; // input -> closest mTempos[]
 	
 	// instrument info
 	class Instrument
@@ -96,6 +100,7 @@ private:
 	void generateInstrumentRegions();
 	int  getScoreOctaveShift( const Score& s, const PolyLine2& wrtRegion ) const;
 	InstrumentRef decideInstrumentForScore( const Score&, int* octaveShift=0 ) const;
+	float		  decideDurationForScore  ( const Score& ) const;
 	
 	// scores
 	class Score
@@ -137,6 +142,9 @@ private:
 		PolyLine2	getPolyLine() const;
 		float		getPlayheadFrac() const;
 		void		getPlayheadLine( vec2 line[2] ) const; // line goes from [3..2] >> [0..1]
+		vec2		getSizeInWorldSpace() const;
+			// if not a perfect rect, then it's approximate (measures two bisecting axes)
+			// x is axis along which playhead moves; y is perp to it (parallel to playhead)
 		vec2		fracToQuad( vec2 frac ) const; // frac.x = time[0,1], frac.y = note_space[0,1]
 
 		Scale mScale;
@@ -144,7 +152,7 @@ private:
 	};
 	vector<Score> mScores;
 	
-	InstrumentRef getInstrumentForScore( const Score& ) const;
+	InstrumentRef	getInstrumentForScore( const Score& ) const;
 	
 	// midi note playing and management
 	bool  isScoreValueHigh( uchar ) const;
