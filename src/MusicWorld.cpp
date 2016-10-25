@@ -266,6 +266,16 @@ void MusicWorld::Score::getPlayheadLine( vec2 line[2] ) const
 	line[1] = lerp(mQuad[0],mQuad[1],t); // top
 }
 
+vec2 MusicWorld::Score::getSizeInWorldSpace() const
+{
+	vec2 size;
+	
+	size.x = distance( lerp(mQuad[0],mQuad[3],.5f), lerp(mQuad[1],mQuad[2],.5f) );
+	size.y = distance( lerp(mQuad[0],mQuad[1],.5f), lerp(mQuad[3],mQuad[2],.5f) );
+	
+	return size;
+}
+
 vec2 MusicWorld::Score::fracToQuad( vec2 frac ) const
 {
 	vec2 top = lerp(mQuad[0],mQuad[1],frac.x);
@@ -294,7 +304,6 @@ MusicWorld::MusicWorld()
 	mStartTime = ci::app::getElapsedSeconds();
 
 	mTimeVec = vec2(0,-1);
-	mTempo   = 8.f;
 	
 	setupSynthesis();
 }
@@ -303,7 +312,12 @@ void MusicWorld::setParams( XmlTree xml )
 {
 	killAllNotes();
 
-	getXml(xml,"Tempo",mTempo);
+	mTempos.clear();
+	mScale.clear();
+	
+	getXml(xml,"Tempos",mTempos);
+	getXml(xml,"TempoWorldUnitsPerSecond",mTempoWorldUnitsPerSecond);
+	
 	getXml(xml,"TimeVec",mTimeVec);
 	getXml(xml,"NoteCount",mNoteCount);
 	getXml(xml,"BeatCount",mBeatCount);
@@ -311,8 +325,6 @@ void MusicWorld::setParams( XmlTree xml )
 
 	getXml(xml,"ScoreNoteVisionThresh", mScoreNoteVisionThresh);
 	getXml(xml,"ScoreVisionTrimFrac", mScoreVisionTrimFrac);
-	
-	cout << "Notes " << mNoteCount << endl;
 	
 	// instruments
 	cout << "Instruments:" << endl;
@@ -480,28 +492,66 @@ MusicWorld::decideInstrumentForScore( const Score& s, int* octaveShift ) const
 	return 0;
 }
 
+float
+MusicWorld::getNearestTempo( float t ) const
+{
+	if (mTempos.empty())
+	{
+		// free-form
+		if (1)
+		{
+			// quantize (de-jitter, which amplifies over time)
+			const float k = 4.f;
+			t *= k;
+			t = roundf(t);
+			t /= k;
+		}
+		
+		return t;
+	}
+	if (mTempos.size()==1) return mTempos[0]; // globally fixed
+	if (mTempos[0]>=t) return mTempos[0]; // minimum
+	
+	// find nearest in between two tempos
+	for( size_t i=0; i<mTempos.size()-1; ++i )
+	{
+		if ( t >= mTempos[i] && t <= mTempos[i+1] )
+		{
+			float mid = lerp(mTempos[i],mTempos[i+1],.5f);
+			
+			if ( t < mid ) return mTempos[i];
+			else return mTempos[i+1];
+		}
+	}
+	
+	// maximum
+	return mTempos.back();
+}
+
+float
+MusicWorld::decideDurationForScore ( const Score& score ) const
+{
+	vec2 size = score.getSizeInWorldSpace();
+	
+	float d = size.x / mTempoWorldUnitsPerSecond;
+
+	float t = getNearestTempo(d);
+	
+	cout << size.x << "cm = " << d << "sec => " << t << "sec" << endl;
+	
+	return t;
+}
+
 void MusicWorld::updateContours( const ContourVector &contours )
 {
-	// board shape
-//	const vec2 lookVec = perp(mTimeVec);
-//
-//	pair<float,float> worldYs(0,0);
-//	pair<float,float> worldXs(0,0);
-//	
-//	if ( getWorldBoundsPoly().size() > 0 )
-//	{
-//		worldYs = getShapeRange( &getWorldBoundsPoly().getPoints()[0], getWorldBoundsPoly().size(), lookVec );
-//		worldXs = getShapeRange( &getWorldBoundsPoly().getPoints()[0], getWorldBoundsPoly().size(), mTimeVec );
-//	}
-	
 	// erase old scores
-	vector<Score> oldScores = mScores;
+//	vector<Score> oldScores = mScores;
 	mScores.clear();
 	
 	// get new ones
 	for( const auto &c : contours )
 	{
-		if ( !c.mIsHole && c.mPolyLine.size()==4 )
+		if ( !c.mIsHole && c.mTreeDepth==0 && c.mPolyLine.size()==4 )
 		{
 			Score score;
 			
@@ -510,32 +560,14 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			
 			// timing
 			score.mStartTime = mStartTime;
-			score.mDuration = mTempo; // inherit, but it could be custom based on shape or something
+			score.mDuration  = decideDurationForScore(score); // inherit, but it could be custom based on shape or something
 
 			// instrument
 			int octaveShift = 0;
 			InstrumentRef instr = decideInstrumentForScore(score,&octaveShift);
-			
 			if (instr) score.mInstrumentName = instr->mName ;
 			
-			/*
-			// use place in world to determine some factors...
-			pair<float,float> ys = getShapeRange( score.mQuad, 4, lookVec );
-//			pair<float,float> xs = getShapeRange( score.mQuad, 4, mTimeVec );
-			const float yf = 1.f - (ys.first - worldYs.first) / (worldYs.second-worldYs.first);
-
-			// FIXME: fix this scaling to get an even distribution of instruments across the X axis
-			const float xf = score.getPolyLine().calcCentroid().y / (worldXs.second-worldXs.first);
-
-			// synth type
-			const float xAdditiveZone = 0.5;
-			if ( yf > xAdditiveZone ) score.mInstrumentName = "Additive";
-			else score.mInstrumentName = "Volca Sample";
-				// TODO: make and use a spatial grid for each instrument.
-			*/
-			
 			// Choose octave based on up<>down
-//			int octaveShift = (yf - .5f) * 10.f;
 			int noteRoot = 60 + octaveShift*12; // middle C
 			score.mOctave = octaveShift;
 			score.mNoteRoot = noteRoot;
@@ -544,9 +576,6 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			score.mScale = mScale;
 
 			// MIDI synth params
-//			auto instr = getInstrumentForScore(score);
-//			assert(instr);
-			
 			if ( instr && instr->mSynthType==Instrument::SynthType::MIDI )
 			{
 				score.mNoteCount = mNoteCount;
@@ -560,7 +589,7 @@ void MusicWorld::updateContours( const ContourVector &contours )
 	}
 	
 	// map old <=> new scores
-	for ( const auto &c : oldScores )
+//	for ( const auto &c : oldScores )
 	{
 		// do polygon similarity test...
 		// Hard: test distance of old mQuad to all new mQuads.
@@ -738,8 +767,6 @@ int MusicWorld::getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const
 	{}
 
 	int len = x2-x;
-	
-//	if (len==1) len=0; // filter out 1 pixel wide notes.
 	
 	return len;
 }
