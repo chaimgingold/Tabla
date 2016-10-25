@@ -138,6 +138,11 @@ MusicWorld::Instrument::~Instrument()
 	if (mMidiOut) mMidiOut->closePort();
 }
 
+// Setting this keeps RtMidi from throwing exceptions when something goes wrong talking to the MIDI system.
+void midiErrorCallback(RtMidiError::Type type, const std::string &errorText, void *userData) {
+	cout << "MIDI out error: " << type << errorText << endl;
+}
+
 void MusicWorld::Instrument::setup()
 {
 	assert(!mMidiOut);
@@ -145,17 +150,29 @@ void MusicWorld::Instrument::setup()
 	if (mSynthType == SynthType::MIDI) {
 		cout << "Opening port " << mPort << " for '" << mName << "'" << endl;
 
-		mMidiOut = make_shared<RtMidiOut>();
-
-		if (mPort < mMidiOut->getPortCount()) {
-			mMidiOut->openPort( mPort );
-		} else {
-			cout << "...Opening virtual port for '" << mName << "'" << endl;
-			mMidiOut->openVirtualPort(mName);
+		// RtMidiOut can throw an OSError if it has trouble initializing CoreMIDI.
+		try {
+			mMidiOut = make_shared<RtMidiOut>();
+		} catch (std::exception) {
+			cout << "Error creating RtMidiOut " << mPort << " for '" << mName << "'" << endl;
 		}
+
+		if (mMidiOut) {
+
+			mMidiOut->setErrorCallback(midiErrorCallback, NULL);
+			if (mPort < mMidiOut->getPortCount()) {
+				mMidiOut->openPort( mPort );
+			} else {
+				cout << "...Opening virtual port for '" << mName << "'" << endl;
+				mMidiOut->openVirtualPort(mName);
+			}
+		}
+
 	}
 
 }
+
+
 
 // For most synths this is just the assigned channel,
 // but in the case of the Volca Sample we want to
