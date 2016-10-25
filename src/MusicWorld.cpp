@@ -537,7 +537,7 @@ MusicWorld::decideDurationForScore ( const Score& score ) const
 
 	float t = getNearestTempo(d);
 	
-	cout << size.x << "cm = " << d << "sec => " << t << "sec" << endl;
+//	cout << size.x << "cm = " << d << "sec => " << t << "sec" << endl;
 	
 	return t;
 }
@@ -1039,7 +1039,7 @@ void drawSolidTriangles( vector<vec2> pts )
 
 	ctx->pushVao();
 	ctx->getDefaultVao()->replacementBindBegin();
-	VboRef defaultVbo = ctx->getDefaultArrayVbo( sizeof(float)*12 );
+	VboRef defaultVbo = ctx->getDefaultArrayVbo( sizeof(float)*pts.size()*2 );
 	ScopedBuffer bufferBindScp( defaultVbo );
 	defaultVbo->bufferSubData( 0, sizeof(float) * pts.size() * 2, &pts[0] );
 
@@ -1057,7 +1057,7 @@ void drawSolidTriangles( vector<vec2> pts )
 //	}
 	ctx->getDefaultVao()->replacementBindEnd();
 	ctx->setDefaultShaderVars();
-	ctx->drawArrays( GL_TRIANGLES, 0, 3 );
+	ctx->drawArrays( GL_TRIANGLES, 0, pts.size() );
 	ctx->popVao();
 }
 
@@ -1129,27 +1129,16 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 						vec2 start2 = score.fracToQuad( vec2( x1frac, y2frac) ) ;
 						vec2 end2   = score.fracToQuad( vec2( x2frac, y2frac) ) ;
 						
-						if ( isNoteInFlight(instr, score.noteForY(instr, y)) ) gl::color(instr->mNoteOnColor);
-						else gl::color(instr->mNoteOffColor);
-
-						PolyLine2 poly;
-						poly.push_back( start1 );
-						poly.push_back( start2 );
-						poly.push_back( end2 );
-						poly.push_back( end1 );
-						poly.setClosed();
-						gl::drawSolid(poly);
-
-//						vector<vec2>& tris = isNoteInFlight(instr, score.mNoteRoot+y) ? onNoteTris : offNoteTris ;
-//						
-//						tris.push_back( start1 );
-//						tris.push_back( start2 );
-//						tris.push_back( end2 );
-//						tris.push_back( start1 );
-//						tris.push_back( end2 );
-//						tris.push_back( end1 );
-						// ideally we aggregate a giant triangle list, or a quad list.
-						// this code isn't quite working right yet.
+						const bool isInFlight = isNoteInFlight(instr, score.noteForY(instr, y)) ;
+						
+						vector<vec2>& tris = isInFlight ? onNoteTris : offNoteTris ;
+						
+						tris.push_back( start1 );
+						tris.push_back( start2 );
+						tris.push_back( end2 );
+						tris.push_back( start1 );
+						tris.push_back( end2 );
+						tris.push_back( end1 );
 						
 						// skip ahead
 						x = x + length+1;
@@ -1167,7 +1156,6 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 				gl::color(instr->mNoteOffColor);
 				drawSolidTriangles(offNoteTris);
 			}
-			
 			
 			// lines
 			{
@@ -1189,14 +1177,15 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 		}
 		
 		//
-		gl::color( instr->mPlayheadColor );
-		
-		vec2 playhead[2];
-		score.getPlayheadLine(playhead);
-		gl::drawLine( playhead[0], playhead[1] );
-		
-		// octave indicator
+		if (1)
 		{
+			gl::color( instr->mPlayheadColor );
+			
+			vec2 playhead[2];
+			score.getPlayheadLine(playhead);
+			gl::drawLine( playhead[0], playhead[1] );
+		
+			// octave indicator
 			float octaveFrac = (float)score.mOctave / (float)kNumOctaves + .5f ;
 			
 			gl::drawSolidCircle( lerp(playhead[0],playhead[1],octaveFrac), .5f, 6 );
