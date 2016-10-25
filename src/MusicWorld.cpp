@@ -829,11 +829,16 @@ void MusicWorld::updateNoteOffs()
 	}
 }
 
-void MusicWorld::killAllNotes() {
-	for ( const auto i : mInstruments ) {
-		if (i.second->mMidiOut) {
-			for (int channel = 0; channel < 16; channel++) {
-				for (int note = 0; note < 128; note++) {
+void MusicWorld::killAllNotes()
+{
+	for ( const auto i : mInstruments )
+	{
+		if (i.second->mMidiOut)
+		{
+			for (int channel = 0; channel < 16; channel++)
+			{
+				for (int note = 0; note < 128; note++)
+				{
 					sendNoteOff( i.second->mMidiOut, channel, note );
 				}
 			}
@@ -859,7 +864,8 @@ void MusicWorld::doNoteOn( InstrumentRef instr, int note, float duration )
 	}
 }
 
-void MusicWorld::sendNoteOn ( RtMidiOutRef midiOut, uchar channel, uchar note, uchar velocity ) {
+void MusicWorld::sendNoteOn ( RtMidiOutRef midiOut, uchar channel, uchar note, uchar velocity )
+{
 	const uchar noteOnBits = 9;
 
 	uchar channelBits = channel & 0xF;
@@ -867,7 +873,8 @@ void MusicWorld::sendNoteOn ( RtMidiOutRef midiOut, uchar channel, uchar note, u
 	sendMidi( midiOut, (noteOnBits<<4) | channelBits, note, velocity);
 }
 
-void MusicWorld::sendNoteOff ( RtMidiOutRef midiOut, uchar channel, uchar note ) {
+void MusicWorld::sendNoteOff ( RtMidiOutRef midiOut, uchar channel, uchar note )
+{
 	const uchar velocity = 0; // MIDI supports "note off velocity", but that's esoteric and we're not using it
 	const uchar noteOffBits = 8;
 
@@ -878,7 +885,6 @@ void MusicWorld::sendNoteOff ( RtMidiOutRef midiOut, uchar channel, uchar note )
 
 void MusicWorld::sendMidi( RtMidiOutRef midiOut, uchar a, uchar b, uchar c )
 {
-
 	std::vector<uchar> message(3);
 
 	message[0] = a;
