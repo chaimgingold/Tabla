@@ -542,10 +542,139 @@ MusicWorld::decideDurationForScore ( const Score& score ) const
 	return t;
 }
 
+MusicWorld::Score* MusicWorld::matchOldScoreToNewScore( const Score& old )
+{
+	Score* best   = 0;
+	float  bestErr = MAXFLOAT;
+	
+	auto closestCorner = []( vec2 pt, const vec2 quad[4], float& err, float maxerr=MAXFLOAT ) -> int
+	{
+		float cornerErr=maxerr;
+		int c=-1;
+		
+		for( int i=0; i<4; ++i )
+		{
+			float d = distance(quad[i],pt);
+			
+			if (d<cornerErr)
+			{
+				c=i;
+				cornerErr=d;
+			}
+		}
+		
+		return c;
+	};
+	
+	auto scoreError = [closestCorner]( const vec2 a[4], const vec2 b[4], float maxerr=MAXFLOAT ) -> float
+	{
+		float c[4] = {MAXFLOAT,MAXFLOAT,MAXFLOAT,MAXFLOAT};
+		
+		for( int i=0; i<4; ++i )
+		{
+			float err;
+			
+			int cc = closestCorner( a[i], b, err, maxerr );
+			if (cc==-1) return MAXFLOAT;
+			c[cc]=err;
+		}
+		
+		float sumerr=0.f;
+		for( int i=0; i<4; ++i )
+		{
+			if ( c[i] == MAXFLOAT ) return MAXFLOAT;
+			else sumerr += c[i];
+		}
+		return sumerr;
+	};
+	
+	const float kMaxErr = 1.f; // TODO move to xml
+	for( size_t i=0; i<mScores.size(); ++i )
+	{
+		float err = scoreError( old.mQuad, mScores[i].mQuad, kMaxErr ) ;
+		if (err<bestErr)
+		{
+			bestErr=err;
+			best=&mScores[i];
+		}
+	}
+	
+	return best;
+}
+
+bool
+MusicWorld::doesZombieScoreIntersectZombieScores( const Score& old )
+{
+	bool r=false;
+	
+	PolyLine2 op = old.getPolyLine();
+	vector<PolyLine2> opv;
+	opv.push_back(op);
+	
+	for( auto &s : mScores )
+	{
+		bool touches=false;
+		
+		{
+			PolyLine2 p = s.getPolyLine();
+			vector<PolyLine2> pv;
+			pv.push_back(p);
+
+			touches = ! PolyLine2::calcIntersection(opv,pv).empty() ;
+			// this is CRAZY performance wise, but it should work for now
+			// TODO: do poly-poly intersection correctly
+		}
+		
+		if ( touches )
+		{
+			s.mDoesZombieTouchOtherZombies = true;
+			r=true;
+		}
+	}
+	
+	return r;
+}
+
+bool
+MusicWorld::shouldPersistOldScore ( const Score& old, const ContourVector &contours )
+{
+	// TODO: xml me
+	const float kSuccessFrac = .2f;
+	const int kNumSamples = 20;
+	
+	// did we go dark?
+	if ( scoreFractionInContours(old, contours, kNumSamples) < kSuccessFrac ) return false;
+	
+	if ( doesZombieScoreIntersectZombieScores(old) ) return false;
+	
+	return true;
+}
+
+float
+MusicWorld::scoreFractionInContours( const Score& old, const ContourVector &contours, int numSamples ) const
+{
+	int hit=0;
+	
+	for( int i=0; i<numSamples; ++i )
+	{
+		vec2 pt( randFloat(), randFloat() ); // [0..1,0..1] random
+		
+		pt = old.fracToQuad(pt); // map into score quad
+		
+		// see if it lands in top level contours
+		for( auto &c : contours )
+		{
+			if ( c.mTreeDepth==0 && c.mPolyLine.contains(pt) ) hit++;
+		}
+	}
+	
+	return (float)hit / (float)numSamples;
+}
+
 void MusicWorld::updateContours( const ContourVector &contours )
 {
 	// erase old scores
-//	vector<Score> oldScores = mScores;
+	vector<Score> oldScores = mScores;
 	mScores.clear();
 	
 	// get new ones
@@ -589,35 +718,30 @@ void MusicWorld::updateContours( const ContourVector &contours )
 	}
 	
 	// map old <=> new scores
-//	for ( const auto &c : oldScores )
+	for ( const auto &c : oldScores )
 	{
-		// do polygon similarity test...
-		// Hard: test distance of old mQuad to all new mQuads.
-		//		each corner to each corner..., to mitigate possible ordering issues
-		//		cumulative error < thresh
-		// Soft: test perimeter similarity of old mQuad to new contours
-		//		perhaps each old corner to nearest point on new contours (same one)
-		//		even more: sample a bunch of old perimeter points and test distance to new polygons.
-		// Reject: we also need a hard rejection, a way to quickly eliminate something that has moved.
-		//		something like: no overlapping scores allowed. and if they overlap, then kill non-zombies.
-		//		do this at the very end? if any zombie quads intersect non-zombie quads, then kill zombie.
+		Score* match = matchOldScoreToNewScore(c);
 		
-		// Checking zombie against not-zombie could actually be about mScoreDetectError
-		// new scores have an error of zero
-		// older scores are >0
-		// this could be basis for zombie rejection
-		
-		// Q: When, if at all, do we update quads with updated shapes? (only if we have a 4 corner to 4 corner match, so error is quite small)
-		
-		// cases:
-		// 1: [ Hard] found a match. optionally propagate forward any data.
-		// 2: [!Hard] not found
-		//
-		//	2a: [!Soft] || [Reject] (hard reject) cull <probably a zombie timeout or some other factor>
-		//			eg [Reject] zombie quad intersects non-zombie quad
-		//			eg timeout (?)
-		//			eg [Reject] no nearby soft second pass polygon test to match to
-		//  2b: [Soft]  keep zombie around, propagate forward into mScore and mark as missing.
+		if ( !match )
+		{
+			// zombie! c has no match...
+			
+			// persist it?
+			if ( shouldPersistOldScore(c,contours) ) // this flags other zombies that might need to be culled
+			{
+				mScores.push_back(c);
+				mScores.back().mIsZombie = true;
+			}
+		}
+	}
+	
+	// 2nd eliminate intersecting zombie pass (anything flagged)
+	oldScores = mScores;
+	mScores.clear();
+	
+	for( auto &s : oldScores )
+	{
+		if ( !s.mDoesZombieTouchOtherZombies ) mScores.push_back(s);
 	}
 }
 
@@ -1063,6 +1187,7 @@ void drawSolidTriangles( vector<vec2> pts )
 
 void MusicWorld::draw( GameWorld::DrawType drawType )
 {
+//	return;
 	bool drawSolidColorBlocks = drawType == GameWorld::DrawType::Projector;
 	// otherwise we can't see score contents in the UI view... 
 	
@@ -1098,7 +1223,7 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 		{
 			// midi
 			
-			// draw notes
+			// collect notes into a batch
 			// (probably wise to extract this geometry/data when processing vision data,
 			// then use it for both playback and drawing).
 			const float invcols = 1.f / (float)(score.mQuantizedImage.cols-1);
@@ -1146,6 +1271,7 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 				}
 			}
 			
+			// draw batched notes
 			if (!onNoteTris.empty())
 			{
 				gl::color(instr->mNoteOnColor);

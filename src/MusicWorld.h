@@ -117,7 +117,10 @@ private:
 			
 			 --> time		*/
 
-
+		// detection meta-data
+		bool mIsZombie=false;
+		bool mDoesZombieTouchOtherZombies=false;
+		
 		// synth parameters
 		cv::Mat		mImage;
 		cv::Mat		mQuantizedImage;
@@ -153,6 +156,11 @@ private:
 	vector<Score> mScores;
 	
 	InstrumentRef	getInstrumentForScore( const Score& ) const;
+	
+	Score* matchOldScoreToNewScore( const Score& old ); // can return 0 if no match
+	float  scoreFractionInContours( const Score& old, const ContourVector &contours, int numSamples ) const;
+	bool   doesZombieScoreIntersectZombieScores( const Score& old ); // marks other zombies if so
+	bool   shouldPersistOldScore  ( const Score& old, const ContourVector &contours ); // match failed; do we want to keep it?
 	
 	// midi note playing and management
 	bool  isScoreValueHigh( uchar ) const;
