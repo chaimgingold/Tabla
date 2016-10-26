@@ -21,95 +21,6 @@
 using namespace std::chrono;
 using namespace ci::gl;
 
-const int kNumOctaves = 5;
-
-// ShapeTracker was started to do inter-frame coherency,
-// but I realized I don't need this to start with.
-// It's gravy.
-/*
-class ShapeTracker
-{
-public:
-	
-	enum class ShapeState
-	{
-		Found,
-		Missing
-	};
-	
-	class Shape
-	{
-	public:
-	private:
-		friend class ShapeTracker;
-		
-		int	mId=0; // unique id for inter-frame tracking
-		
-		PolyLine2 mCreatedPoly;
-		PolyLine2 mLastSeenPoly;
-		
-		ShapeState	mState;
-		float		mEnteredStateWhen;
-
-		Shape()
-		{
-			setState(ShapeState::Found);
-		}
-
-		void setState( ShapeState s )
-		{
-			mState = ShapeState::Found;
-			mEnteredStateWhen = ci::app::getElapsedSeconds();
-		}
-	};
-	
-	void update( const ContourVector& );
-	const Shape* getShape( int id ) const;
-	
-private:
-	int getNewShapeId() { return mNextId++; }
-
-	void indexShapes();
-	
-	int mNextId=1;
-	vector<Shape>	mShapes;
-	map<int,int>	mShapeById; // maps shape ids to mShapes indices
-};
-
-void ShapeTracker::update( const ContourVector& contours )
-{
-	// we're just going to filter for 4 cornered things for now
-	const int kNumCorners = 4;
-	
-	for( const auto &c : contours )
-	{
-		if ( c.mPolyLine.size()==kNumCorners &&
-			 c.mIsHole==false )
-		{
-			
-		}
-	}
-}
-
-const ShapeTracker::Shape* ShapeTracker::getShape( int id ) const
-{
-	auto i = mShapeById.find(id);
-	
-	if ( i == mShapeById.end() ) return 0;
-	else return &mShapes[i->second];
-}
-
-void ShapeTracker::indexShapes()
-{
-	mShapeById.clear();
-	
-	for( int i=0; i<mShapes.size(); ++i )
-	{
-		mShapeById[mShapes[i].mId] = i;
-	}
-}
-*/
-
 void MusicWorld::Instrument::setParams( XmlTree xml )
 {
 	getXml(xml,"PlayheadColor",mPlayheadColor);
@@ -118,7 +29,6 @@ void MusicWorld::Instrument::setParams( XmlTree xml )
 	getXml(xml,"NoteOnColor",mNoteOnColor);
 	
 	getXml(xml,"Name",mName);
-//	getXml(xml,"IsAdditiveSynth",mIsAdditiveSynth);
 	
 	if ( xml.hasChild("SynthType") )
 	{
@@ -345,6 +255,7 @@ void MusicWorld::setParams( XmlTree xml )
 	getXml(xml,"NoteCount",mNoteCount);
 	getXml(xml,"BeatCount",mBeatCount);
 	getXml(xml,"Scale",mScale);
+	getXml(xml,"NumOctaves",mNumOctaves);
 
 	getXml(xml,"ScoreNoteVisionThresh", mScoreNoteVisionThresh);
 	getXml(xml,"ScoreVisionTrimFrac", mScoreVisionTrimFrac);
@@ -468,7 +379,7 @@ int MusicWorld::getScoreOctaveShift( const Score& score, const PolyLine2& wrtReg
 	float f = 1.f - (scorey - worldYs.first) / (worldYs.second - worldYs.first);
 	// don't understand why i need 1-, but it works.
 	
-	int o = roundf( (f-.5f) * (float)kNumOctaves ) ;
+	int o = roundf( (f-.5f) * (float)mNumOctaves ) ;
 	
 	if (0) cout << o << endl;
 	
@@ -1371,7 +1282,7 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 			gl::drawLine( playhead[0], playhead[1] );
 		
 			// octave indicator
-			float octaveFrac = (float)score.mOctave / (float)kNumOctaves + .5f ;
+			float octaveFrac = (float)score.mOctave / (float)mNumOctaves + .5f ;
 			
 			gl::drawSolidCircle( lerp(playhead[0],playhead[1],octaveFrac), .5f, 6 );
 		}
