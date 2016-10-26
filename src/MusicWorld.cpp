@@ -989,18 +989,13 @@ void MusicWorld::sendMidi( RtMidiOutRef midiOut, uchar a, uchar b, uchar c )
 
 void MusicWorld::updateAdditiveScoreSynthesis() {
 
-	// Clear synths
+
 	const int kMaxSynths = 8; // This corresponds to [clone 8 music-voice] in music.pd
-	static std::vector<float> emptyVector(20000, 1.0);
+
+	// Mute all synths
 	for( int synthNum=0; synthNum<kMaxSynths; ++synthNum )
 	{
-//		mPureDataNode->sendBang(toString(scoreNum)+string("clear"));
-
-		mPureDataNode->writeArray(toString(synthNum)+string("image"),
-								  emptyVector);
-
-		mPureDataNode->sendFloat(toString(synthNum)+string("phase"),
-								 0);
+		mPureDataNode->sendFloat(toString(synthNum)+string("volume"), 0);
 	}
 
 	// send scores to Pd
@@ -1050,6 +1045,8 @@ void MusicWorld::updateAdditiveScoreSynthesis() {
 			imageVector.assign( (float*)imageFloatMat.datastart, (float*)imageFloatMat.dataend );
 
 			mPureDataNode->writeArray(toString(synthNum)+string("image"), imageVector);
+
+			mPureDataNode->sendFloat(toString(synthNum)+string("volume"), 1);
 			
 			synthNum++;
 		}
