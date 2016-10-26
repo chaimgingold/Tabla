@@ -299,6 +299,29 @@ int MusicWorld::Score::noteForY( InstrumentRef instr, int y ) const {
 	return note + extraOctaveShift + mNoteRoot + mOctave*12;
 }
 
+float
+MusicWorld::Score::getQuadMaxInteriorAngle() const
+{
+	float mang=0.f;
+	
+	for( int i=0; i<4; ++i )
+	{
+		vec2 a = mQuad[i];
+		vec2 x = mQuad[(i+1)%4];
+		vec2 b = mQuad[(i+2)%4];
+		
+		a -= x;
+		b -= x;
+		
+		float ang = acos( dot(a,b) / (length(a)*length(b)) );
+		
+		if (ang>mang) mang=ang;
+		
+	}
+	
+	return mang;
+}
+
 MusicWorld::MusicWorld()
 {
 	mStartTime = ci::app::getElapsedSeconds();
@@ -329,6 +352,7 @@ void MusicWorld::setParams( XmlTree xml )
 	getXml(xml,"ScoreRejectNumSamples",mScoreRejectNumSamples);
 	getXml(xml,"ScoreRejectSuccessThresh",mScoreRejectSuccessThresh);
 	getXml(xml,"ScoreTrackMaxError",mScoreTrackMaxError);
+	getXml(xml,"ScoreMaxInteriorAngleDeg",mScoreMaxInteriorAngleDeg);
 
 	// instruments
 	cout << "Instruments:" << endl;
@@ -685,6 +709,7 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			
 			// shape
 			score.setQuadFromPolyLine(c.mPolyLine,mTimeVec);
+			if ( score.getQuadMaxInteriorAngle() > toRadians(mScoreMaxInteriorAngleDeg) ) continue;
 			
 			// timing
 			score.mStartTime = mStartTime;

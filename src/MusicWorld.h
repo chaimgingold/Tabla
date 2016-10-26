@@ -54,6 +54,7 @@ private:
 	int   mScoreRejectNumSamples=10;
 	float mScoreRejectSuccessThresh=.2f;
 	float mScoreTrackMaxError=1.f;
+	float mScoreMaxInteriorAngleDeg=120.f;
 	
 	// new tempo system
 	vector<float> mTempos; // what tempos do we support? 0 entry means free form, 1 means all are fixed.
@@ -153,7 +154,8 @@ private:
 			// if not a perfect rect, then it's approximate (measures two bisecting axes)
 			// x is axis along which playhead moves; y is perp to it (parallel to playhead)
 		vec2		fracToQuad( vec2 frac ) const; // frac.x = time[0,1], frac.y = note_space[0,1]
-
+		float		getQuadMaxInteriorAngle() const; // looking for concave-ish shapes...
+		
 		Scale mScale;
 		int noteForY( InstrumentRef instr, int y ) const;
 	};

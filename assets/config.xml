@@ -131,12 +131,12 @@
 			<!-- 0..255, -1 for OTSU (adaptive) -->
 			<ScoreVisionTrimFrac>.07</ScoreVisionTrimFrac>
 			<!-- When sampling image for each score, what amount to trim the corners (% push towards the center) -->
+			<ScoreMaxInteriorAngleDeg>110</ScoreMaxInteriorAngleDeg>
 
 			<!-- Inter-frame score tracking tuning... -->
 			<ScoreRejectNumSamples>10</ScoreRejectNumSamples> <!-- How many random samples to try when testing for rejection?-->
 			<ScoreRejectSuccessThresh>.2</ScoreRejectSuccessThresh> <!-- What % need to be valid to continue tracking? -->
 			<ScoreTrackMaxError>1</ScoreTrackMaxError> <!-- How much can scores drift between frames to count as the same score? (world space cumulative error (over each corner) -->
-
 
 				<!-- Music -->
 
