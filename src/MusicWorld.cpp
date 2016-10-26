@@ -1285,6 +1285,9 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 			
 			// lines
 			{
+				// TODO: Make this configurable for 5/4 time, etc.
+				const int drawBeatDivision = 4;
+
 				vector<vec2> pts;
 				
 				gl::color(instr->mScoreColor);
@@ -1299,15 +1302,35 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 					pts.push_back( lerp(score.mQuad[2], score.mQuad[1],f) );
 				}
 
-				// Beat lines
+				// Off-beat lines
 				for( int i=0; i<score.mBeatCount; ++i )
 				{
+					if (i % drawBeatDivision == 3) continue;
+
 					float f = (float)(i+1) / (float)score.mBeatCount;
 
 					pts.push_back( lerp(score.mQuad[1], score.mQuad[0],f) );
 					pts.push_back( lerp(score.mQuad[2], score.mQuad[3],f) );
 				}
 				
+				drawLines(pts);
+
+				// New points for new colors
+				pts.clear();
+				// Down-beat lines
+				for( int i=0; i<score.mBeatCount; ++i )
+				{
+					// FIXME: why do we need to compare i % drawBeatDivision != 3 with 3 to hit the downbeat? (ditto above)
+					if (i % drawBeatDivision != 3) continue;
+
+					float f = (float)(i+1) / (float)score.mBeatCount;
+
+					pts.push_back( lerp(score.mQuad[1], score.mQuad[0],f) );
+					pts.push_back( lerp(score.mQuad[2], score.mQuad[3],f) );
+				}
+				vec3 scoreColorHSV = rgbToHsv(instr->mScoreColor);
+				scoreColorHSV.x = fmod(scoreColorHSV.x + 0.5, 1.0);
+				gl::color( hsvToRgb(scoreColorHSV)  );
 				drawLines(pts);
 			}
 
