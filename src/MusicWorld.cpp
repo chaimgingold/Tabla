@@ -299,6 +299,29 @@ int MusicWorld::Score::noteForY( InstrumentRef instr, int y ) const {
 	return note + extraOctaveShift + mNoteRoot + mOctave*12;
 }
 
+float
+MusicWorld::Score::getQuadMaxInteriorAngle() const
+{
+	float mang=0.f;
+	
+	for( int i=0; i<4; ++i )
+	{
+		vec2 a = mQuad[i];
+		vec2 x = mQuad[(i+1)%4];
+		vec2 b = mQuad[(i+2)%4];
+		
+		a -= x;
+		b -= x;
+		
+		float ang = acos( dot(a,b) / (length(a)*length(b)) );
+		
+		if (ang>mang) mang=ang;
+		
+	}
+	
+	return mang;
+}
+
 MusicWorld::MusicWorld()
 {
 	mStartTime = ci::app::getElapsedSeconds();
@@ -325,7 +348,12 @@ void MusicWorld::setParams( XmlTree xml )
 
 	getXml(xml,"ScoreNoteVisionThresh", mScoreNoteVisionThresh);
 	getXml(xml,"ScoreVisionTrimFrac", mScoreVisionTrimFrac);
-	
+
+	getXml(xml,"ScoreRejectNumSamples",mScoreRejectNumSamples);
+	getXml(xml,"ScoreRejectSuccessThresh",mScoreRejectSuccessThresh);
+	getXml(xml,"ScoreTrackMaxError",mScoreTrackMaxError);
+	getXml(xml,"ScoreMaxInteriorAngleDeg",mScoreMaxInteriorAngleDeg);
+
 	// instruments
 	cout << "Instruments:" << endl;
 	
@@ -588,10 +616,9 @@ MusicWorld::Score* MusicWorld::matchOldScoreToNewScore( const Score& old )
 		return sumerr;
 	};
 	
-	const float kMaxErr = 1.f; // TODO move to xml
 	for( size_t i=0; i<mScores.size(); ++i )
 	{
-		float err = scoreError( old.mQuad, mScores[i].mQuad, kMaxErr ) ;
+		float err = scoreError( old.mQuad, mScores[i].mQuad, mScoreTrackMaxError ) ;
 		if (err<bestErr)
 		{
 			bestErr=err;
@@ -627,7 +654,7 @@ MusicWorld::doesZombieScoreIntersectZombieScores( const Score& old )
 		
 		if ( touches )
 		{
-			s.mDoesZombieTouchOtherZombies = true;
+			if (s.mIsZombie) s.mDoesZombieTouchOtherZombies = true;
 			r=true;
 		}
 	}
@@ -638,12 +665,8 @@ MusicWorld::doesZombieScoreIntersectZombieScores( const Score& old )
 bool
 MusicWorld::shouldPersistOldScore ( const Score& old, const ContourVector &contours )
 {
-	// TODO: xml me
-	const float kSuccessFrac = .2f;
-	const int kNumSamples = 20;
-	
 	// did we go dark?
-	if ( scoreFractionInContours(old, contours, kNumSamples) < kSuccessFrac ) return false;
+	if ( scoreFractionInContours(old, contours, mScoreRejectNumSamples) < mScoreRejectSuccessThresh ) return false;
 	
 	if ( doesZombieScoreIntersectZombieScores(old) ) return false;
 	
@@ -686,6 +709,7 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			
 			// shape
 			score.setQuadFromPolyLine(c.mPolyLine,mTimeVec);
+			if ( score.getQuadMaxInteriorAngle() > toRadians(mScoreMaxInteriorAngleDeg) ) continue;
 			
 			// timing
 			score.mStartTime = mStartTime;
