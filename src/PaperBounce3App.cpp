@@ -25,8 +25,9 @@ PaperBounce3App::~PaperBounce3App()
 	cout << "Shutting down..." << endl;
 
 //	mGameWorld.reset();
-	
-//	cipd::PureDataNode::ShutdownGlobal();
+
+	// Don't think we actually need this
+	// cipd::PureDataNode::ShutdownGlobal();
 }
 
 vec2 PaperBounce3App::getWorldSize() const
@@ -51,6 +52,7 @@ fs::path PaperBounce3App::getUserLightLinkFilePath() const
 
 void PaperBounce3App::setup()
 {
+
 	cout << getAppPath() << endl;
 	
 	// command line args

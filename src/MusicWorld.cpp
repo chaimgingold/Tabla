@@ -400,9 +400,9 @@ void MusicWorld::generateInstrumentRegions()
 		Rectf r(0,0,1,1);
 		r.offset( vec2(x,y) );
 		r.scale(scale);
-		
-		cout << r << " " << i.second->mName << endl;
-		
+
+		if (0) cout << r << " " << i.second->mName << endl;
+
 		PolyLine2 p;
 		p.push_back( r.getUpperLeft() );
 		p.push_back( r.getUpperRight() );
@@ -537,7 +537,7 @@ MusicWorld::decideDurationForScore ( const Score& score ) const
 
 	float t = getNearestTempo(d);
 	
-//	cout << size.x << "cm = " << d << "sec => " << t << "sec" << endl;
+	if (0) cout << size.x << "cm = " << d << "sec => " << t << "sec" << endl;
 	
 	return t;
 }
@@ -1290,6 +1290,7 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 				gl::color(instr->mScoreColor);
 				gl::draw( score.getPolyLine() );
 
+				// Scale lines
 				for( int i=0; i<score.mNoteCount; ++i )
 				{
 					float f = (float)(i+1) / (float)score.mNoteCount;
@@ -1297,9 +1298,20 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 					pts.push_back( lerp(score.mQuad[3], score.mQuad[0],f) );
 					pts.push_back( lerp(score.mQuad[2], score.mQuad[1],f) );
 				}
+
+				// Beat lines
+				for( int i=0; i<score.mBeatCount; ++i )
+				{
+					float f = (float)(i+1) / (float)score.mBeatCount;
+
+					pts.push_back( lerp(score.mQuad[1], score.mQuad[0],f) );
+					pts.push_back( lerp(score.mQuad[2], score.mQuad[3],f) );
+				}
 				
 				drawLines(pts);
 			}
+
+
 		}
 		
 		//
