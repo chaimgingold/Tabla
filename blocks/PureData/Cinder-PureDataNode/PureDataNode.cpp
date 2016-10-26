@@ -25,14 +25,13 @@ PureDataNodeRef PureDataNode::Global() {
 		auto ctx = audio::master();
 		
 		// Create the synth engine
-		PureDataNodeRef node = ctx->makeNode( new cipd::PureDataNode( audio::Node::Format().autoEnable() ) );
-		globalInstance = node;
-		
-		// Enable Cinder audio
-		ctx->enable();
+		globalInstance = ctx->makeNode( new cipd::PureDataNode( audio::Node::Format().autoEnable() ) );
 		
 		// Connect synth to master output
 		globalInstance >> audio::master()->getOutput();
+
+		// Enable Cinder audio
+		ctx->enable();
 	}
 	
 	return globalInstance;
@@ -44,7 +43,7 @@ void PureDataNode::ShutdownGlobal()
 	
 	globalInstance.reset();
 }
-	
+
 PureDataNode::PureDataNode( const Format &format )
 	: Node( format )
 {
@@ -56,8 +55,7 @@ PureDataNode::PureDataNode( const Format &format )
 
 PureDataNode::~PureDataNode()
 {
-	lock_guard<mutex> lock( mMutex );
-	disconnectAll();
+
 }
 
 void PureDataNode::initialize()
