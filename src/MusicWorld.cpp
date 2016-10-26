@@ -481,7 +481,7 @@ MusicWorld::decideDurationForScore ( const Score& score ) const
 	return t;
 }
 
-MusicWorld::Score* MusicWorld::matchOldScoreToNewScore( const Score& old )
+MusicWorld::Score* MusicWorld::matchOldScoreToNewScore( const Score& old, float* outError )
 {
 	Score* best   = 0;
 	float  bestErr = MAXFLOAT;
@@ -537,6 +537,7 @@ MusicWorld::Score* MusicWorld::matchOldScoreToNewScore( const Score& old )
 		}
 	}
 	
+	if (outError) *outError=bestErr;
 	return best;
 }
 
@@ -655,9 +656,18 @@ void MusicWorld::updateContours( const ContourVector &contours )
 	// map old <=> new scores
 	for ( const auto &c : oldScores )
 	{
-		Score* match = matchOldScoreToNewScore(c);
+		float matchError;
+		Score* match = matchOldScoreToNewScore(c,&matchError);
 		
-		if ( !match )
+		if ( match )
+		{
+			// de-jitter by copying old vertices forward unless error is too big.
+			if (1)
+			{
+				for( int i=0; i<4; ++i ) match->mQuad[i] = c.mQuad[i];
+			}
+		}
+		else
 		{
 			// zombie! c has no match...
 			
