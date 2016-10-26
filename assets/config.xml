@@ -112,6 +112,9 @@
 
 		<MusicWorld>
 		
+		
+				<!-- Vision -->
+				
 			<!-- Vision settings -->
 			<!-- cm -->
 			<Vision>
@@ -123,13 +126,21 @@
 			</Vision>
 
 			<!-- Custom vision settings... Probably shouldn't change unless you know what you are doing!-->
+			
 			<ScoreNoteVisionThresh>254</ScoreNoteVisionThresh>
 			<!-- 0..255, -1 for OTSU (adaptive) -->
 			<ScoreVisionTrimFrac>.07</ScoreVisionTrimFrac>
 			<!-- When sampling image for each score, what amount to trim the corners (% push towards the center) -->
 
+			<!-- Inter-frame score tracking tuning... -->
+			<ScoreRejectNumSamples>10</ScoreRejectNumSamples> <!-- How many random samples to try when testing for rejection?-->
+			<ScoreRejectSuccessThresh>.2</ScoreRejectSuccessThresh> <!-- What % need to be valid to continue tracking? -->
+			<ScoreTrackMaxError>1</ScoreTrackMaxError> <!-- How much can scores drift between frames to count as the same score? (world space cumulative error (over each corner) -->
 
-			<!--	Music stuff	-->
+
+				<!-- Music -->
+
+			<!--	Tempo	-->
 			<Tempos>.5 1 1.5 2 4 6</Tempos>
 <!--			<Tempos>.5 1.5 3 6 9 12</Tempos>-->
 				<!-- 0 entries means no global tempo, 1 entry means all are fixed.
@@ -137,7 +148,7 @@
 			<TempoWorldUnitsPerSecond>5</TempoWorldUnitsPerSecond>
 				<!-- how many cm become 1 second? -->
 
-			<TimeVec>0 -1</TimeVec>
+			<TimeVec>0 -1</TimeVec> <!-- Vector in world space time moves along -->
 			<NoteCount>13</NoteCount>
 			<BeatCount>32</BeatCount>
 			
@@ -287,13 +298,6 @@
 					<Channel>0</Channel>
 					<MapNotesToChannels>0</MapNotesToChannels>
 				</Instrument>
-
-
-
-
-
-
-
 
 
 			</Instruments>

@@ -325,7 +325,11 @@ void MusicWorld::setParams( XmlTree xml )
 
 	getXml(xml,"ScoreNoteVisionThresh", mScoreNoteVisionThresh);
 	getXml(xml,"ScoreVisionTrimFrac", mScoreVisionTrimFrac);
-	
+
+	getXml(xml,"ScoreRejectNumSamples",mScoreRejectNumSamples);
+	getXml(xml,"ScoreRejectSuccessThresh",mScoreRejectSuccessThresh);
+	getXml(xml,"ScoreTrackMaxError",mScoreTrackMaxError);
+
 	// instruments
 	cout << "Instruments:" << endl;
 	
@@ -588,10 +592,9 @@ MusicWorld::Score* MusicWorld::matchOldScoreToNewScore( const Score& old )
 		return sumerr;
 	};
 	
-	const float kMaxErr = 1.f; // TODO move to xml
 	for( size_t i=0; i<mScores.size(); ++i )
 	{
-		float err = scoreError( old.mQuad, mScores[i].mQuad, kMaxErr ) ;
+		float err = scoreError( old.mQuad, mScores[i].mQuad, mScoreTrackMaxError ) ;
 		if (err<bestErr)
 		{
 			bestErr=err;
@@ -627,7 +630,7 @@ MusicWorld::doesZombieScoreIntersectZombieScores( const Score& old )
 		
 		if ( touches )
 		{
-			s.mDoesZombieTouchOtherZombies = true;
+			if (s.mIsZombie) s.mDoesZombieTouchOtherZombies = true;
 			r=true;
 		}
 	}
@@ -638,12 +641,8 @@ MusicWorld::doesZombieScoreIntersectZombieScores( const Score& old )
 bool
 MusicWorld::shouldPersistOldScore ( const Score& old, const ContourVector &contours )
 {
-	// TODO: xml me
-	const float kSuccessFrac = .2f;
-	const int kNumSamples = 20;
-	
 	// did we go dark?
-	if ( scoreFractionInContours(old, contours, kNumSamples) < kSuccessFrac ) return false;
+	if ( scoreFractionInContours(old, contours, mScoreRejectNumSamples) < mScoreRejectSuccessThresh ) return false;
 	
 	if ( doesZombieScoreIntersectZombieScores(old) ) return false;
 	
