@@ -840,7 +840,7 @@ float MusicWorld::getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const
 void MusicWorld::update()
 {
 	// send @fps values to Pd
-	int scoreNum=0;
+	int synthNum=0;
 	
 	for( const auto &score : mScores )
 	{
@@ -849,8 +849,9 @@ void MusicWorld::update()
 
 		if ( instr->mSynthType==Instrument::SynthType::Additive ) {
 			// Update time
-			mPureDataNode->sendFloat(toString(scoreNum)+string("phase"),
+			mPureDataNode->sendFloat(toString(synthNum)+string("phase"),
 									 score.getPlayheadFrac() );
+			synthNum++;
 		}
 		// send midi notes
 		else if ( instr->mSynthType==Instrument::SynthType::MIDI )
@@ -875,9 +876,6 @@ void MusicWorld::update()
 				}
 			}
 		}
-		
-		//
-		scoreNum++;
 	}
 	
 	// retire notes
@@ -888,8 +886,6 @@ bool MusicWorld::isNoteInFlight( InstrumentRef instr, int note ) const
 {
 	return mOnNotes.find( tOnNoteKey(instr,note) ) != mOnNotes.end();
 }
-
-
 
 void MusicWorld::updateNoteOffs()
 {
@@ -983,14 +979,27 @@ void MusicWorld::sendMidi( RtMidiOutRef midiOut, uchar a, uchar b, uchar c )
 
 void MusicWorld::updateAdditiveScoreSynthesis() {
 
+	// Clear synths
+	const int kMaxSynths = 8; // This corresponds to [clone 8 music-voice] in music.pd
+	static std::vector<float> emptyVector(20000, 1.0);
+	for( int synthNum=0; synthNum<kMaxSynths; ++synthNum )
+	{
+//		mPureDataNode->sendBang(toString(scoreNum)+string("clear"));
+
+		mPureDataNode->writeArray(toString(synthNum)+string("image"),
+								  emptyVector);
+
+		mPureDataNode->sendFloat(toString(synthNum)+string("phase"),
+								 0);
+	}
+
 	// send scores to Pd
-	int scoreNum=0;
+	int synthNum=0;
 	
 	for( const auto &score : mScores )
 	{
 		InstrumentRef instr = getInstrumentForScore(score);
 		if (!instr) {
-			scoreNum++;
 			continue;
 		}
 		
@@ -1014,10 +1023,10 @@ void MusicWorld::updateAdditiveScoreSynthesis() {
 //									 100 );
 
 			// Update resolution
-			mPureDataNode->sendFloat(toString(scoreNum)+string("resolution-x"),
+			mPureDataNode->sendFloat(toString(synthNum)+string("resolution-x"),
 									 cols);
 
-			mPureDataNode->sendFloat(toString(scoreNum)+string("resolution-y"),
+			mPureDataNode->sendFloat(toString(synthNum)+string("resolution-y"),
 									 rows);
 
 			// Create a float version of the image
@@ -1030,26 +1039,10 @@ void MusicWorld::updateAdditiveScoreSynthesis() {
 			std::vector<float> imageVector;
 			imageVector.assign( (float*)imageFloatMat.datastart, (float*)imageFloatMat.dataend );
 
-			mPureDataNode->writeArray(toString(scoreNum)+string("image"), imageVector);
+			mPureDataNode->writeArray(toString(synthNum)+string("image"), imageVector);
+			
+			synthNum++;
 		}
-
-		//
-		scoreNum++;
-	}
-
-	// Clear remaining scores
-	const int kMaxScores = 8; // This corresponds to [clone 8 music-voice] in music.pd
-	static std::vector<float> emptyVector(20000, 1.0);
-	while( scoreNum < kMaxScores ) {
-
-//		mPureDataNode->sendBang(toString(scoreNum)+string("clear"));
-
-		mPureDataNode->writeArray(toString(scoreNum)+string("image"),
-								  emptyVector);
-
-		mPureDataNode->sendFloat(toString(scoreNum)+string("phase"),
-								 0);
-		scoreNum++;
 	}
 }
 
