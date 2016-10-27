@@ -716,11 +716,10 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 	{
 		string scoreName = string("score")+toString(scoreNum);
 		const auto instr = getInstrumentForScore(s);
-		const bool doTemporalBlend = instr && instr->mSynthType==Instrument::SynthType::MIDI;
 		
 		cv::Mat oldTemporalBlendImage;
-		
-		if ( doTemporalBlend && mScoreTrackTemporalBlendFrac>0.f ) oldTemporalBlendImage = s.mImage.clone(); // must clone to work!
+		const bool doTemporalBlend = instr && instr->mSynthType==Instrument::SynthType::MIDI && mScoreTrackTemporalBlendFrac>0.f;
+		if ( doTemporalBlend ) oldTemporalBlendImage = s.mImage.clone(); // must clone to work!
 		
 		
 		// quantization params
@@ -732,7 +731,6 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		cv::Point2f srcpt_cv[4];
 		{
 			vec2  trimto; // average of corners
-			
 			for ( int i=0; i<4; ++i )
 			{
 				srcpt[i] = vec2( world->mWorldToImage * vec4(s.mQuad[i],0,1) );
@@ -747,11 +745,11 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		}
 		
 		// get output points
-		float outdim = 0.f;
-		for( int i=0; i<4; ++i ) outdim = max( outdim, distance(srcpt[i],srcpt[(i+1)%4]) );
-
-		vec2		outsize		= vec2(1,1) * outdim;
-		vec2		dstpt[4]    = { {0,0}, {outsize.x,0}, {outsize.x,outsize.y}, {0,outsize.y} };
+		vec2 outsize(
+			max( distance(srcpt[0],srcpt[1]), distance(srcpt[3],srcpt[2]) ),
+			max( distance(srcpt[0],srcpt[3]), distance(srcpt[1],srcpt[2]) )
+		);
+		vec2 dstpt[4] = { {0,0}, {outsize.x,0}, {outsize.x,outsize.y}, {0,outsize.y} };
 
 		cv::Point2f dstpt_cv[4];
 		vec2toOCV_4(dstpt, dstpt_cv);
@@ -768,8 +766,6 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		// temporal blending (to remove temporal aliasing)
 		if ( doTemporalBlend && !oldTemporalBlendImage.empty() && oldTemporalBlendImage.size == s.mImage.size )
 		{
-//			cout << "blend!" << endl;
-			
 			float oldWeight = mScoreTrackTemporalBlendFrac;
 			float newWeight = 1.f - oldWeight;
 			
@@ -806,12 +802,9 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 			cv::Mat &inthresh = quantized;
 			cv::Mat thresholded;
 
-			if ( mScoreNoteVisionThresh < 0 )
-			{
+			if ( mScoreNoteVisionThresh < 0 ) {
 				cv::threshold( inthresh, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
-			}
-			else
-			{
+			} else {
 				cv::threshold( inthresh, thresholded, mScoreNoteVisionThresh, 255, cv::THRESH_BINARY );
 			}
 			
