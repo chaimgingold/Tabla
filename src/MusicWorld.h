@@ -52,10 +52,11 @@ private:
 	int	  mScoreNoteVisionThresh=-1; // 0..255, or -1 for OTSU
 	float mScoreVisionTrimFrac=0.f;
 	
-	int   mScoreRejectNumSamples=10;
-	float mScoreRejectSuccessThresh=.2f;
+	int   mScoreTrackRejectNumSamples=10;
+	float mScoreTrackRejectSuccessThresh=.2f;
 	float mScoreTrackMaxError=1.f;
 	float mScoreMaxInteriorAngleDeg=120.f;
+	float mScoreTrackTemporalBlendFrac=.5f; // 0 means off, so all new
 	
 	// new tempo system
 	vector<float> mTempos; // what tempos do we support? 0 entry means free form, 1 means all are fixed.

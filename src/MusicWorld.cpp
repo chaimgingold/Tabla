@@ -260,11 +260,12 @@ void MusicWorld::setParams( XmlTree xml )
 	getXml(xml,"ScoreNoteVisionThresh", mScoreNoteVisionThresh);
 	getXml(xml,"ScoreVisionTrimFrac", mScoreVisionTrimFrac);
 
-	getXml(xml,"ScoreRejectNumSamples",mScoreRejectNumSamples);
-	getXml(xml,"ScoreRejectSuccessThresh",mScoreRejectSuccessThresh);
+	getXml(xml,"ScoreTrackRejectNumSamples",mScoreTrackRejectNumSamples);
+	getXml(xml,"ScoreTrackRejectSuccessThresh",mScoreTrackRejectSuccessThresh);
 	getXml(xml,"ScoreTrackMaxError",mScoreTrackMaxError);
 	getXml(xml,"ScoreMaxInteriorAngleDeg",mScoreMaxInteriorAngleDeg);
-
+	getXml(xml,"ScoreTrackTemporalBlendFrac",mScoreTrackTemporalBlendFrac);
+	
 	// instruments
 	cout << "Instruments:" << endl;
 	
@@ -579,7 +580,7 @@ bool
 MusicWorld::shouldPersistOldScore ( const Score& old, const ContourVector &contours )
 {
 	// did we go dark?
-	if ( scoreFractionInContours(old, contours, mScoreRejectNumSamples) < mScoreRejectSuccessThresh ) return false;
+	if ( scoreFractionInContours(old, contours, mScoreTrackRejectNumSamples) < mScoreTrackRejectSuccessThresh ) return false;
 	
 	if ( doesZombieScoreIntersectZombieScores(old) ) return false;
 	
@@ -664,8 +665,15 @@ void MusicWorld::updateContours( const ContourVector &contours )
 		{
 //			cout << "match" << endl;
 			
+			// should we just copy everything?
+			// ...let's keep doing it piecemeal for now
+			
 			// de-jitter by copying old vertices forward
 			for( int i=0; i<4; ++i ) match->mQuad[i] = c.mQuad[i];
+			
+			// copy images forward so we can do temporal anti-aliasing and other effects
+			match->mImage = c.mImage;
+			match->mQuantizedImage = c.mImage;
 		}
 		else
 		{
@@ -707,7 +715,14 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 	for( Score& s : mScores )
 	{
 		string scoreName = string("score")+toString(scoreNum);
-
+		const auto instr = getInstrumentForScore(s);
+		const bool doTemporalBlend = instr && instr->mSynthType==Instrument::SynthType::MIDI;
+		
+		cv::Mat oldTemporalBlendImage;
+		
+		if ( doTemporalBlend && mScoreTrackTemporalBlendFrac>0.f ) oldTemporalBlendImage = s.mImage.clone(); // must clone to work!
+		
+		
 		// quantization params
 		int quantizeNumRows = s.mNoteCount;
 		int quantizeNumCols = mBeatCount;
@@ -750,9 +765,21 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		pipeline.getStages().back()->mLayoutHintScale = .5f;
 		pipeline.getStages().back()->mLayoutHintOrtho = true;
 
-		// midi quantize
-		auto instr = getInstrumentForScore(s);
+		// temporal blending (to remove temporal aliasing)
+		if ( doTemporalBlend && !oldTemporalBlendImage.empty() && oldTemporalBlendImage.size == s.mImage.size )
+		{
+//			cout << "blend!" << endl;
+			
+			float oldWeight = mScoreTrackTemporalBlendFrac;
+			float newWeight = 1.f - oldWeight;
+			
+			cv::addWeighted( s.mImage, newWeight, oldTemporalBlendImage, oldWeight, 0.f, s.mImage );
+			pipeline.then( scoreName + " temporally blended", s.mImage);
+			pipeline.getStages().back()->mLayoutHintScale = .5f;
+			pipeline.getStages().back()->mLayoutHintOrtho = true;
+		}
 		
+		// midi quantize
 		if ( instr && instr->mSynthType==Instrument::SynthType::MIDI )
 		{
 			// quantize
@@ -767,7 +794,7 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 //			cv::resize( inquant, quantized, cv::Size(quantizeNumCols,quantizeNumRows), 0, 0, cv::INTER_CUBIC );
 //			cv::resize( inquant, quantized, cv::Size(quantizeNumCols,quantizeNumRows), 0, 0, cv::INTER_LANCZOS4 ); // good
 			cv::resize( inquant, quantized, cv::Size(quantizeNumCols,quantizeNumRows), 0, 0, cv::INTER_AREA ); // best?
-			pipeline.then( scoreName + "quantized", quantized);
+			pipeline.then( scoreName + " quantized", quantized);
 			pipeline.setImageToWorldTransform(
 				pipeline.getStages().back()->mImageToWorld
 					* glm::scale(vec3(outsize.x / (float)quantizeNumCols, outsize.y / (float)quantizeNumRows, 1))
@@ -788,7 +815,7 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 				cv::threshold( inthresh, thresholded, mScoreNoteVisionThresh, 255, cv::THRESH_BINARY );
 			}
 			
-			pipeline.then( scoreName + "thresholded", thresholded);
+			pipeline.then( scoreName + " thresholded", thresholded);
 			pipeline.getStages().back()->mLayoutHintScale = .5f;
 			pipeline.getStages().back()->mLayoutHintOrtho = true;
 
