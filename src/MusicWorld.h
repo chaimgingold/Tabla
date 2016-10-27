@@ -57,6 +57,7 @@ private:
 	float mScoreTrackMaxError=1.f;
 	float mScoreMaxInteriorAngleDeg=120.f;
 	float mScoreTrackTemporalBlendFrac=.5f; // 0 means off, so all new
+	float mScoreTrackTemporalBlendIfDiffFracLT=.1f; // only do blending if frames are similar enough; otherwise: fast no blend mode.
 	
 	// new tempo system
 	vector<float> mTempos; // what tempos do we support? 0 entry means free form, 1 means all are fixed.

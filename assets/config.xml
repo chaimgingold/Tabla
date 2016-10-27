@@ -127,7 +127,7 @@
 
 			<!-- Custom vision settings... Probably shouldn't change unless you know what you are doing!-->
 			
-			<ScoreNoteVisionThresh>180</ScoreNoteVisionThresh>
+			<ScoreNoteVisionThresh>220</ScoreNoteVisionThresh>
 			<!-- 0..255, -1 for OTSU (adaptive) -->
 			<ScoreVisionTrimFrac>.07</ScoreVisionTrimFrac>
 			<!-- When sampling image for each score, what amount to trim the corners (% push towards the center) -->
@@ -143,7 +143,9 @@
 					Numbers in between make sense. :-)
 					1 kind of doesn't make sense, since it's 100% old, but might be useful for testing.
 				-->
-			
+			<ScoreTrackTemporalBlendIfDiffFracLT>.1</ScoreTrackTemporalBlendIfDiffFracLT>
+				<!--	Only do temporal blending if frame difference is less than this amount; so fast motion is still fast -->
+
 				<!-- Music -->
 
 			<!--	Tempo	-->

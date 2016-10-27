@@ -265,6 +265,7 @@ void MusicWorld::setParams( XmlTree xml )
 	getXml(xml,"ScoreTrackMaxError",mScoreTrackMaxError);
 	getXml(xml,"ScoreMaxInteriorAngleDeg",mScoreMaxInteriorAngleDeg);
 	getXml(xml,"ScoreTrackTemporalBlendFrac",mScoreTrackTemporalBlendFrac);
+	getXml(xml,"ScoreTrackTemporalBlendIfDiffFracLT",mScoreTrackTemporalBlendIfDiffFracLT);
 	
 	// instruments
 	cout << "Instruments:" << endl;
@@ -719,6 +720,21 @@ static void doTemporalMatBlend( Pipeline& pipeline, string scoreName, cv::Mat ol
 	}
 }
 
+static float getImgDiffFrac( cv::Mat a, cv::Mat b )
+{
+	if ( !b.empty() && !a.empty() && a.size == b.size )
+	{
+		cv::Mat diffm;
+		cv::subtract( a, b, diffm);
+		cv::Scalar diff = cv::sum(diffm);
+		float d = diff[0] / (a.size[0] * a.size[1]);
+		//cout << "diff: " << d << endl;
+		return d;
+	}
+	
+	return 1.f;
+}
+
 void MusicWorld::updateCustomVision( Pipeline& pipeline )
 {
 	// this function grabs the bitmaps for each score
@@ -811,7 +827,7 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 			pipeline.getStages().back()->mLayoutHintOrtho = true;
 
 			// blend
-			if ( doTemporalBlend )
+			if ( doTemporalBlend && getImgDiffFrac(oldTemporalBlendImage,quantized) < mScoreTrackTemporalBlendIfDiffFracLT )
 			{
 				doTemporalMatBlend( pipeline, scoreName, oldTemporalBlendImage, quantized, mScoreTrackTemporalBlendFrac );
 			}
