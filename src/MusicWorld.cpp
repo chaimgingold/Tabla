@@ -991,9 +991,8 @@ void MusicWorld::sendMidi( RtMidiOutRef midiOut, uchar a, uchar b, uchar c )
 
 }
 
-void MusicWorld::updateAdditiveScoreSynthesis() {
-
-
+void MusicWorld::updateAdditiveScoreSynthesis()
+{
 	const int kMaxSynths = 8; // This corresponds to [clone 8 music-voice] in music.pd
 
 	// Mute all synths
