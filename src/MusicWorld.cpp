@@ -782,10 +782,10 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		pipeline.getStages().back()->mLayoutHintOrtho = true;
 
 		// temporal blending (to remove temporal aliasing)
-		if ( doTemporalBlend )
-		{
-			doTemporalMatBlend( pipeline, scoreName, oldTemporalBlendImage, s.mImage, mScoreTrackTemporalBlendFrac );
-		}
+//		if ( doTemporalBlend )
+//		{
+//			doTemporalMatBlend( pipeline, scoreName, oldTemporalBlendImage, s.mImage, mScoreTrackTemporalBlendFrac );
+//		}
 		
 		// midi quantize
 		if ( instr && instr->mSynthType==Instrument::SynthType::MIDI )
