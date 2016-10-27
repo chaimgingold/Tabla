@@ -330,7 +330,6 @@ void MusicWorld::generateInstrumentRegions()
 	int dim = ceil( sqrt(ninstr) );
 	
 	vec2 scale = worldRect.getSize() / vec2(dim,dim);
-//	vec2 scale = worldRect.getSize() / vec2(dim,dim);
 	
 	int x=0, y=0;
 	
@@ -339,8 +338,6 @@ void MusicWorld::generateInstrumentRegions()
 		Rectf r(0,0,1,1);
 		r.offset( vec2(x,y) );
 		r.scale(scale);
-
-		if (0) cout << r << " " << i.second->mName << endl;
 
 		PolyLine2 p;
 		p.push_back( r.getUpperLeft() );
@@ -481,7 +478,7 @@ MusicWorld::decideDurationForScore ( const Score& score ) const
 	return t;
 }
 
-MusicWorld::Score* MusicWorld::matchOldScoreToNewScore( const Score& old, float* outError )
+MusicWorld::Score* MusicWorld::matchOldScoreToNewScore( const Score& old, float maxErr, float* outError )
 {
 	Score* best   = 0;
 	float  bestErr = MAXFLOAT;
@@ -502,6 +499,7 @@ MusicWorld::Score* MusicWorld::matchOldScoreToNewScore( const Score& old, float*
 			}
 		}
 		
+		err=cornerErr;
 		return c;
 	};
 	
@@ -517,6 +515,8 @@ MusicWorld::Score* MusicWorld::matchOldScoreToNewScore( const Score& old, float*
 			if (cc==-1) return MAXFLOAT;
 			c[cc]=err;
 		}
+
+//		cout << "\t" << c[0] << " " << c[1] << " " << c[2] << " " << c[3] << endl;
 		
 		float sumerr=0.f;
 		for( int i=0; i<4; ++i )
@@ -529,7 +529,8 @@ MusicWorld::Score* MusicWorld::matchOldScoreToNewScore( const Score& old, float*
 	
 	for( size_t i=0; i<mScores.size(); ++i )
 	{
-		float err = scoreError( old.mQuad, mScores[i].mQuad, mScoreTrackMaxError ) ;
+		float err = scoreError( old.mQuad, mScores[i].mQuad, maxErr ) ;
+//		cout << "err " << err << endl;
 		if (err<bestErr)
 		{
 			bestErr=err;
@@ -657,15 +658,14 @@ void MusicWorld::updateContours( const ContourVector &contours )
 	for ( const auto &c : oldScores )
 	{
 		float matchError;
-		Score* match = matchOldScoreToNewScore(c,&matchError);
+		Score* match = matchOldScoreToNewScore(c,mScoreTrackMaxError,&matchError);
 		
 		if ( match )
 		{
-			// de-jitter by copying old vertices forward unless error is too big.
-			if (1)
-			{
-				for( int i=0; i<4; ++i ) match->mQuad[i] = c.mQuad[i];
-			}
+//			cout << "match" << endl;
+			
+			// de-jitter by copying old vertices forward
+			for( int i=0; i<4; ++i ) match->mQuad[i] = c.mQuad[i];
 		}
 		else
 		{
@@ -674,9 +674,12 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			// persist it?
 			if ( shouldPersistOldScore(c,contours) ) // this flags other zombies that might need to be culled
 			{
+//				cout << "zombie" << endl;
+
 				mScores.push_back(c);
 				mScores.back().mIsZombie = true;
 			}
+//			else cout << "die" << endl;
 		}
 	}
 	
@@ -894,7 +897,8 @@ void MusicWorld::update()
 
 bool MusicWorld::isNoteInFlight( InstrumentRef instr, int note ) const
 {
-	return mOnNotes.find( tOnNoteKey(instr,note) ) != mOnNotes.end();
+	auto i = mOnNotes.find( tOnNoteKey(instr,note) );
+	return i != mOnNotes.end();
 }
 
 void MusicWorld::updateNoteOffs()
@@ -1168,6 +1172,8 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 			vector<vec2> onNoteTris;
 			vector<vec2> offNoteTris;
 			
+			const float playheadFrac = score.getPlayheadFrac();
+			
 			for ( int y=0; y<score.mNoteCount; ++y )
 			{
 				const float y1frac = y * yheight + yheight*.2f;
@@ -1189,7 +1195,7 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 						vec2 start2 = score.fracToQuad( vec2( x1frac, y2frac) ) ;
 						vec2 end2   = score.fracToQuad( vec2( x2frac, y2frac) ) ;
 						
-						const bool isInFlight = isNoteInFlight(instr, score.noteForY(instr, y)) ;
+						const bool isInFlight = playheadFrac > x1frac && playheadFrac < x2frac;
 						
 						vector<vec2>& tris = isInFlight ? onNoteTris : offNoteTris ;
 						

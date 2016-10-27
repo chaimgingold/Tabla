@@ -164,7 +164,7 @@ private:
 	
 	InstrumentRef	getInstrumentForScore( const Score& ) const;
 	
-	Score* matchOldScoreToNewScore( const Score& old, float* matchError=0 ); // can return 0 if no match; returns new score (in mScores)
+	Score* matchOldScoreToNewScore( const Score& old, float maxErr, float* matchError=0 ); // can return 0 if no match; returns new score (in mScores)
 	float  scoreFractionInContours( const Score& old, const ContourVector &contours, int numSamples ) const;
 	bool   doesZombieScoreIntersectZombieScores( const Score& old ); // marks other zombies if so
 	bool   shouldPersistOldScore  ( const Score& old, const ContourVector &contours ); // match failed; do we want to keep it?

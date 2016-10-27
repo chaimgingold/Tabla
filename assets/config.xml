@@ -5,7 +5,7 @@
 
 	<App>
 	
-		<CameraIndex>0</CameraIndex>
+		<CameraIndex>-1</CameraIndex>
 		<!-- Which camera to use? 0 indexed. -1 means last. -->
 
 <!--	This could use a cleanup since we refactored into two windows	-->
@@ -136,7 +136,7 @@
 			<!-- Inter-frame score tracking tuning... -->
 			<ScoreRejectNumSamples>10</ScoreRejectNumSamples> <!-- How many random samples to try when testing for rejection?-->
 			<ScoreRejectSuccessThresh>.2</ScoreRejectSuccessThresh> <!-- What % need to be valid to continue tracking? -->
-			<ScoreTrackMaxError>1</ScoreTrackMaxError> <!-- How much can scores drift between frames to count as the same score? (world space cumulative error (over each corner) -->
+			<ScoreTrackMaxError>.5</ScoreTrackMaxError> <!-- How much can scores drift between frames to count as the same score? (world space cumulative error (over each corner) -->
 
 				<!-- Music -->
 
