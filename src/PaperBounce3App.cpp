@@ -534,5 +534,6 @@ void PaperBounce3App::keyDown( KeyEvent event )
 CINDER_APP( PaperBounce3App, RendererGl(RendererGl::Options().msaa(8)), [&]( App::Settings *settings ) {
 	settings->setFrameRate(kRequestFrameRate);
 	settings->setWindowSize(kDefaultWindowSize);
+	settings->setPowerManagementEnabled(false);
 	settings->setTitle("See Paper") ;
 })
