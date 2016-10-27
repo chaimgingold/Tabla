@@ -1239,9 +1239,9 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 				// Off-beat lines
 				for( int i=0; i<score.mBeatCount; ++i )
 				{
-					if (i % drawBeatDivision == 3) continue;
+					if (i % drawBeatDivision == 0) continue;
 
-					float f = (float)(i+1) / (float)score.mBeatCount;
+					float f = (float)i / (float)score.mBeatCount;
 
 					pts.push_back( lerp(score.mQuad[1], score.mQuad[0],f) );
 					pts.push_back( lerp(score.mQuad[2], score.mQuad[3],f) );
@@ -1254,10 +1254,9 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 				// Down-beat lines
 				for( int i=0; i<score.mBeatCount; ++i )
 				{
-					// FIXME: why do we need to compare i % drawBeatDivision != 3 with 3 to hit the downbeat? (ditto above)
-					if (i % drawBeatDivision != 3) continue;
+					if (i % drawBeatDivision != 0) continue;
 
-					float f = (float)(i+1) / (float)score.mBeatCount;
+					float f = (float)i / (float)score.mBeatCount;
 
 					pts.push_back( lerp(score.mQuad[1], score.mQuad[0],f) );
 					pts.push_back( lerp(score.mQuad[2], score.mQuad[3],f) );
