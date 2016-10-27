@@ -137,7 +137,7 @@
 			<ScoreTrackRejectNumSamples>10</ScoreTrackRejectNumSamples> <!-- How many random samples to try when testing for rejection?-->
 			<ScoreTrackRejectSuccessThresh>.2</ScoreTrackRejectSuccessThresh> <!-- What % need to be valid to continue tracking? -->
 			<ScoreTrackMaxError>.5</ScoreTrackMaxError> <!-- How much can scores drift between frames to count as the same score? (world space cumulative error (over each corner) -->
-			<ScoreTrackTemporalBlendFrac>.7</ScoreTrackTemporalBlendFrac>
+			<ScoreTrackTemporalBlendFrac>.9</ScoreTrackTemporalBlendFrac>
 				<!-- Only for discrete (MIDI) scores; how much inter-frame temporal blending to do?
 					0 for none.
 					Numbers in between make sense. :-)

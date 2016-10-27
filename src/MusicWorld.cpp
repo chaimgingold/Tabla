@@ -582,6 +582,7 @@ MusicWorld::shouldPersistOldScore ( const Score& old, const ContourVector &conto
 	// did we go dark?
 	if ( scoreFractionInContours(old, contours, mScoreTrackRejectNumSamples) < mScoreTrackRejectSuccessThresh ) return false;
 	
+	// do we touch other zombies?
 	if ( doesZombieScoreIntersectZombieScores(old) ) return false;
 	
 	return true;
@@ -665,20 +666,22 @@ void MusicWorld::updateContours( const ContourVector &contours )
 		{
 //			cout << "match" << endl;
 			
-			// should we just copy everything?
-			// ...let's keep doing it piecemeal for now
-			
-			// de-jitter by copying old vertices forward
-			for( int i=0; i<4; ++i ) match->mQuad[i] = c.mQuad[i];
-			
-			// copy images forward so we can do temporal anti-aliasing and other effects
-			match->mImage = c.mImage;
-			match->mQuantizedImage = c.mImage;
+			if (1) // just copy everything
+			{
+				*match = c;
+				// ...any exceptions?
+			}
+			else // do it piecemeal
+			{
+				for( int i=0; i<4; ++i ) match->mQuad[i] = c.mQuad[i]; // de-jitter vertices
+	
+				// copy images forward so we can do temporal anti-aliasing and other effects
+				match->mImage = c.mImage;
+				match->mQuantizedImage = c.mImage;
+			}
 		}
-		else
+		else // zombie! (c has no match)
 		{
-			// zombie! c has no match...
-			
 			// persist it?
 			if ( shouldPersistOldScore(c,contours) ) // this flags other zombies that might need to be culled
 			{
@@ -691,13 +694,28 @@ void MusicWorld::updateContours( const ContourVector &contours )
 		}
 	}
 	
-	// 2nd eliminate intersecting zombie pass (anything flagged)
+	// 2nd pass eliminate intersecting zombie (anything flagged)
 	oldScores = mScores;
 	mScores.clear();
 	
 	for( auto &s : oldScores )
 	{
 		if ( !s.mDoesZombieTouchOtherZombies ) mScores.push_back(s);
+	}
+}
+
+static void doTemporalMatBlend( Pipeline& pipeline, string scoreName, cv::Mat oldimg, cv::Mat newimg, float oldWeight )
+{
+	// newimg = oldimg * oldWeight + newimg * (1 - oldWeight)
+	
+	if ( !oldimg.empty() && oldimg.size == newimg.size )
+	{
+		float newWeight = 1.f - oldWeight;
+		
+		cv::addWeighted( newimg, newWeight, oldimg, oldWeight, 0.f, newimg );
+		pipeline.then( scoreName + " temporally blended", newimg);
+		pipeline.getStages().back()->mLayoutHintScale = .5f;
+		pipeline.getStages().back()->mLayoutHintOrtho = true;
 	}
 }
 
@@ -719,7 +737,7 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		
 		cv::Mat oldTemporalBlendImage;
 		const bool doTemporalBlend = instr && instr->mSynthType==Instrument::SynthType::MIDI && mScoreTrackTemporalBlendFrac>0.f;
-		if ( doTemporalBlend ) oldTemporalBlendImage = s.mImage.clone(); // must clone to work!
+		if ( doTemporalBlend ) oldTemporalBlendImage = s.mQuantizedImagePreThreshold.clone(); // must clone to work!
 		
 		
 		// quantization params
@@ -764,15 +782,9 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		pipeline.getStages().back()->mLayoutHintOrtho = true;
 
 		// temporal blending (to remove temporal aliasing)
-		if ( doTemporalBlend && !oldTemporalBlendImage.empty() && oldTemporalBlendImage.size == s.mImage.size )
+		if ( doTemporalBlend )
 		{
-			float oldWeight = mScoreTrackTemporalBlendFrac;
-			float newWeight = 1.f - oldWeight;
-			
-			cv::addWeighted( s.mImage, newWeight, oldTemporalBlendImage, oldWeight, 0.f, s.mImage );
-			pipeline.then( scoreName + " temporally blended", s.mImage);
-			pipeline.getStages().back()->mLayoutHintScale = .5f;
-			pipeline.getStages().back()->mLayoutHintOrtho = true;
+			doTemporalMatBlend( pipeline, scoreName, oldTemporalBlendImage, s.mImage, mScoreTrackTemporalBlendFrac );
 		}
 		
 		// midi quantize
@@ -785,11 +797,11 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 			if (quantizeNumRows<=0) quantizeNumRows = inquant.rows;
 			
 			cv::Mat quantized;
-//			cv::resize( inquant, quantized, cv::Size(quantizeNumCols,quantizeNumRows), 0, 0, cv::INTER_NEAREST );
-//			cv::resize( inquant, quantized, cv::Size(quantizeNumCols,quantizeNumRows), 0, 0, cv::INTER_LINEAR );
-//			cv::resize( inquant, quantized, cv::Size(quantizeNumCols,quantizeNumRows), 0, 0, cv::INTER_CUBIC );
-//			cv::resize( inquant, quantized, cv::Size(quantizeNumCols,quantizeNumRows), 0, 0, cv::INTER_LANCZOS4 ); // good
 			cv::resize( inquant, quantized, cv::Size(quantizeNumCols,quantizeNumRows), 0, 0, cv::INTER_AREA ); // best?
+				// cv::INTER_AREA is the best.
+				// cv::INTER_LANCZOS4 is good
+				// these are not so great: cv::INTER_CUBIC, cv::INTER_NEAREST, cv::INTER_LINEAR
+			
 			pipeline.then( scoreName + " quantized", quantized);
 			pipeline.setImageToWorldTransform(
 				pipeline.getStages().back()->mImageToWorld
@@ -798,6 +810,12 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 			pipeline.getStages().back()->mLayoutHintScale = .5f;
 			pipeline.getStages().back()->mLayoutHintOrtho = true;
 
+			// blend
+			if ( doTemporalBlend )
+			{
+				doTemporalMatBlend( pipeline, scoreName, oldTemporalBlendImage, quantized, mScoreTrackTemporalBlendFrac );
+			}
+			
 			// threshold
 			cv::Mat &inthresh = quantized;
 			cv::Mat thresholded;
@@ -814,6 +832,7 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 
 
 			// output
+			s.mQuantizedImagePreThreshold = quantized;
 			s.mQuantizedImage = thresholded;
 		}
 		

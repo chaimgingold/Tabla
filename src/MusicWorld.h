@@ -128,9 +128,12 @@ private:
 		bool mIsZombie=false;
 		bool mDoesZombieTouchOtherZombies=false;
 		
+		// image data
+		cv::Mat		mImage;				// thresholded image
+		cv::Mat		mQuantizedImagePreThreshold; // (for inter-frame smoothing)
+		cv::Mat		mQuantizedImage;	// quantized image data for midi playback
+		
 		// synth parameters
-		cv::Mat		mImage;
-		cv::Mat		mQuantizedImage;
 		string		mInstrumentName;
 		
 		float		mStartTime;
@@ -168,8 +171,11 @@ private:
 	Score* matchOldScoreToNewScore( const Score& old, float maxErr, float* matchError=0 ); // can return 0 if no match; returns new score (in mScores)
 	float  scoreFractionInContours( const Score& old, const ContourVector &contours, int numSamples ) const;
 	bool   doesZombieScoreIntersectZombieScores( const Score& old ); // marks other zombies if so
-	bool   shouldPersistOldScore  ( const Score& old, const ContourVector &contours ); // match failed; do we want to keep it?
+	bool   shouldPersistOldScore  ( const Score& old, const ContourVector &contours );
+		// match failed; do we want to keep it?
+		// any intersecting zombie scores are marked for removal (mDoesZombieTouchOtherZombies)
 	
+
 	// midi note playing and management
 	bool  isScoreValueHigh( uchar ) const;
 	float getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const;
