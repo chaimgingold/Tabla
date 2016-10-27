@@ -705,21 +705,6 @@ void MusicWorld::updateContours( const ContourVector &contours )
 	}
 }
 
-static void doTemporalMatBlend( Pipeline& pipeline, string scoreName, cv::Mat oldimg, cv::Mat newimg, float oldWeight )
-{
-	// newimg = oldimg * oldWeight + newimg * (1 - oldWeight)
-	
-	if ( !oldimg.empty() && oldimg.size == newimg.size )
-	{
-		float newWeight = 1.f - oldWeight;
-		
-		cv::addWeighted( newimg, newWeight, oldimg, oldWeight, 0.f, newimg );
-		pipeline.then( scoreName + " temporally blended", newimg);
-		pipeline.getStages().back()->mLayoutHintScale = .5f;
-		pipeline.getStages().back()->mLayoutHintOrtho = true;
-	}
-}
-
 static float getImgDiffFrac( cv::Mat a, cv::Mat b )
 {
 	if ( !b.empty() && !a.empty() && a.size == b.size )
@@ -727,12 +712,37 @@ static float getImgDiffFrac( cv::Mat a, cv::Mat b )
 		cv::Mat diffm;
 		cv::subtract( a, b, diffm);
 		cv::Scalar diff = cv::sum(diffm);
-		float d = diff[0] / (a.size[0] * a.size[1]);
+		float d = (diff[0]/255.f) / (a.size[0] * a.size[1]);
 		//cout << "diff: " << d << endl;
 		return d;
 	}
 	
 	return 1.f;
+}
+
+static void doTemporalMatBlend( Pipeline& pipeline, string scoreName, cv::Mat oldimg, cv::Mat newimg, float oldWeight, float diffthresh )
+{
+	// newimg = oldimg * oldWeight + newimg * (1 - oldWeight)
+
+	bool verbose=false;
+	
+	float diff = getImgDiffFrac(oldimg,newimg);
+	
+	if ( diff < diffthresh )
+	{
+		if (verbose) cout << "blend" << endl ;
+		
+		if ( !oldimg.empty() && oldimg.size == newimg.size )
+		{
+			float newWeight = 1.f - oldWeight;
+			
+			cv::addWeighted( newimg, newWeight, oldimg, oldWeight, 0.f, newimg );
+			pipeline.then( scoreName + " temporally blended", newimg);
+			pipeline.getStages().back()->mLayoutHintScale = .5f;
+			pipeline.getStages().back()->mLayoutHintOrtho = true;
+		}
+	}
+	else if (verbose) cout << "no-blend " << diff << endl;
 }
 
 void MusicWorld::updateCustomVision( Pipeline& pipeline )
@@ -827,9 +837,10 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 			pipeline.getStages().back()->mLayoutHintOrtho = true;
 
 			// blend
-			if ( doTemporalBlend && getImgDiffFrac(oldTemporalBlendImage,quantized) < mScoreTrackTemporalBlendIfDiffFracLT )
+			if ( doTemporalBlend )
 			{
-				doTemporalMatBlend( pipeline, scoreName, oldTemporalBlendImage, quantized, mScoreTrackTemporalBlendFrac );
+				doTemporalMatBlend( pipeline, scoreName, oldTemporalBlendImage, quantized,
+					mScoreTrackTemporalBlendFrac, mScoreTrackTemporalBlendIfDiffFracLT );
 			}
 			
 			// threshold
