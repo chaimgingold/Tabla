@@ -52,10 +52,11 @@ private:
 	int	  mScoreNoteVisionThresh=-1; // 0..255, or -1 for OTSU
 	float mScoreVisionTrimFrac=0.f;
 	
-	int   mScoreRejectNumSamples=10;
-	float mScoreRejectSuccessThresh=.2f;
+	int   mScoreTrackRejectNumSamples=10;
+	float mScoreTrackRejectSuccessThresh=.2f;
 	float mScoreTrackMaxError=1.f;
 	float mScoreMaxInteriorAngleDeg=120.f;
+	float mScoreTrackTemporalBlendFrac=.5f; // 0 means off, so all new
 	
 	// new tempo system
 	vector<float> mTempos; // what tempos do we support? 0 entry means free form, 1 means all are fixed.
@@ -127,9 +128,12 @@ private:
 		bool mIsZombie=false;
 		bool mDoesZombieTouchOtherZombies=false;
 		
+		// image data
+		cv::Mat		mImage;				// thresholded image
+		cv::Mat		mQuantizedImagePreThreshold; // (for inter-frame smoothing)
+		cv::Mat		mQuantizedImage;	// quantized image data for midi playback
+		
 		// synth parameters
-		cv::Mat		mImage;
-		cv::Mat		mQuantizedImage;
 		string		mInstrumentName;
 		
 		float		mStartTime;
@@ -164,11 +168,14 @@ private:
 	
 	InstrumentRef	getInstrumentForScore( const Score& ) const;
 	
-	Score* matchOldScoreToNewScore( const Score& old, float* matchError=0 ); // can return 0 if no match; returns new score (in mScores)
+	Score* matchOldScoreToNewScore( const Score& old, float maxErr, float* matchError=0 ); // can return 0 if no match; returns new score (in mScores)
 	float  scoreFractionInContours( const Score& old, const ContourVector &contours, int numSamples ) const;
 	bool   doesZombieScoreIntersectZombieScores( const Score& old ); // marks other zombies if so
-	bool   shouldPersistOldScore  ( const Score& old, const ContourVector &contours ); // match failed; do we want to keep it?
+	bool   shouldPersistOldScore  ( const Score& old, const ContourVector &contours );
+		// match failed; do we want to keep it?
+		// any intersecting zombie scores are marked for removal (mDoesZombieTouchOtherZombies)
 	
+
 	// midi note playing and management
 	bool  isScoreValueHigh( uchar ) const;
 	float getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const;

@@ -260,11 +260,12 @@ void MusicWorld::setParams( XmlTree xml )
 	getXml(xml,"ScoreNoteVisionThresh", mScoreNoteVisionThresh);
 	getXml(xml,"ScoreVisionTrimFrac", mScoreVisionTrimFrac);
 
-	getXml(xml,"ScoreRejectNumSamples",mScoreRejectNumSamples);
-	getXml(xml,"ScoreRejectSuccessThresh",mScoreRejectSuccessThresh);
+	getXml(xml,"ScoreTrackRejectNumSamples",mScoreTrackRejectNumSamples);
+	getXml(xml,"ScoreTrackRejectSuccessThresh",mScoreTrackRejectSuccessThresh);
 	getXml(xml,"ScoreTrackMaxError",mScoreTrackMaxError);
 	getXml(xml,"ScoreMaxInteriorAngleDeg",mScoreMaxInteriorAngleDeg);
-
+	getXml(xml,"ScoreTrackTemporalBlendFrac",mScoreTrackTemporalBlendFrac);
+	
 	// instruments
 	cout << "Instruments:" << endl;
 	
@@ -330,7 +331,6 @@ void MusicWorld::generateInstrumentRegions()
 	int dim = ceil( sqrt(ninstr) );
 	
 	vec2 scale = worldRect.getSize() / vec2(dim,dim);
-//	vec2 scale = worldRect.getSize() / vec2(dim,dim);
 	
 	int x=0, y=0;
 	
@@ -339,8 +339,6 @@ void MusicWorld::generateInstrumentRegions()
 		Rectf r(0,0,1,1);
 		r.offset( vec2(x,y) );
 		r.scale(scale);
-
-		if (0) cout << r << " " << i.second->mName << endl;
 
 		PolyLine2 p;
 		p.push_back( r.getUpperLeft() );
@@ -481,7 +479,7 @@ MusicWorld::decideDurationForScore ( const Score& score ) const
 	return t;
 }
 
-MusicWorld::Score* MusicWorld::matchOldScoreToNewScore( const Score& old, float* outError )
+MusicWorld::Score* MusicWorld::matchOldScoreToNewScore( const Score& old, float maxErr, float* outError )
 {
 	Score* best   = 0;
 	float  bestErr = MAXFLOAT;
@@ -502,6 +500,7 @@ MusicWorld::Score* MusicWorld::matchOldScoreToNewScore( const Score& old, float*
 			}
 		}
 		
+		err=cornerErr;
 		return c;
 	};
 	
@@ -517,6 +516,8 @@ MusicWorld::Score* MusicWorld::matchOldScoreToNewScore( const Score& old, float*
 			if (cc==-1) return MAXFLOAT;
 			c[cc]=err;
 		}
+
+//		cout << "\t" << c[0] << " " << c[1] << " " << c[2] << " " << c[3] << endl;
 		
 		float sumerr=0.f;
 		for( int i=0; i<4; ++i )
@@ -529,7 +530,8 @@ MusicWorld::Score* MusicWorld::matchOldScoreToNewScore( const Score& old, float*
 	
 	for( size_t i=0; i<mScores.size(); ++i )
 	{
-		float err = scoreError( old.mQuad, mScores[i].mQuad, mScoreTrackMaxError ) ;
+		float err = scoreError( old.mQuad, mScores[i].mQuad, maxErr ) ;
+//		cout << "err " << err << endl;
 		if (err<bestErr)
 		{
 			bestErr=err;
@@ -578,8 +580,9 @@ bool
 MusicWorld::shouldPersistOldScore ( const Score& old, const ContourVector &contours )
 {
 	// did we go dark?
-	if ( scoreFractionInContours(old, contours, mScoreRejectNumSamples) < mScoreRejectSuccessThresh ) return false;
+	if ( scoreFractionInContours(old, contours, mScoreTrackRejectNumSamples) < mScoreTrackRejectSuccessThresh ) return false;
 	
+	// do we touch other zombies?
 	if ( doesZombieScoreIntersectZombieScores(old) ) return false;
 	
 	return true;
@@ -657,36 +660,62 @@ void MusicWorld::updateContours( const ContourVector &contours )
 	for ( const auto &c : oldScores )
 	{
 		float matchError;
-		Score* match = matchOldScoreToNewScore(c,&matchError);
+		Score* match = matchOldScoreToNewScore(c,mScoreTrackMaxError,&matchError);
 		
 		if ( match )
 		{
-			// de-jitter by copying old vertices forward unless error is too big.
-			if (1)
+//			cout << "match" << endl;
+			
+			if (1) // just copy everything
 			{
-				for( int i=0; i<4; ++i ) match->mQuad[i] = c.mQuad[i];
+				*match = c;
+				// ...any exceptions?
+			}
+			else // do it piecemeal
+			{
+				for( int i=0; i<4; ++i ) match->mQuad[i] = c.mQuad[i]; // de-jitter vertices
+	
+				// copy images forward so we can do temporal anti-aliasing and other effects
+				match->mImage = c.mImage;
+				match->mQuantizedImage = c.mImage;
 			}
 		}
-		else
+		else // zombie! (c has no match)
 		{
-			// zombie! c has no match...
-			
 			// persist it?
 			if ( shouldPersistOldScore(c,contours) ) // this flags other zombies that might need to be culled
 			{
+//				cout << "zombie" << endl;
+
 				mScores.push_back(c);
 				mScores.back().mIsZombie = true;
 			}
+//			else cout << "die" << endl;
 		}
 	}
 	
-	// 2nd eliminate intersecting zombie pass (anything flagged)
+	// 2nd pass eliminate intersecting zombie (anything flagged)
 	oldScores = mScores;
 	mScores.clear();
 	
 	for( auto &s : oldScores )
 	{
 		if ( !s.mDoesZombieTouchOtherZombies ) mScores.push_back(s);
+	}
+}
+
+static void doTemporalMatBlend( Pipeline& pipeline, string scoreName, cv::Mat oldimg, cv::Mat newimg, float oldWeight )
+{
+	// newimg = oldimg * oldWeight + newimg * (1 - oldWeight)
+	
+	if ( !oldimg.empty() && oldimg.size == newimg.size )
+	{
+		float newWeight = 1.f - oldWeight;
+		
+		cv::addWeighted( newimg, newWeight, oldimg, oldWeight, 0.f, newimg );
+		pipeline.then( scoreName + " temporally blended", newimg);
+		pipeline.getStages().back()->mLayoutHintScale = .5f;
+		pipeline.getStages().back()->mLayoutHintOrtho = true;
 	}
 }
 
@@ -704,7 +733,13 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 	for( Score& s : mScores )
 	{
 		string scoreName = string("score")+toString(scoreNum);
-
+		const auto instr = getInstrumentForScore(s);
+		
+		cv::Mat oldTemporalBlendImage;
+		const bool doTemporalBlend = instr && instr->mSynthType==Instrument::SynthType::MIDI && mScoreTrackTemporalBlendFrac>0.f;
+		if ( doTemporalBlend ) oldTemporalBlendImage = s.mQuantizedImagePreThreshold.clone(); // must clone to work!
+		
+		
 		// quantization params
 		int quantizeNumRows = s.mNoteCount;
 		int quantizeNumCols = mBeatCount;
@@ -714,7 +749,6 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		cv::Point2f srcpt_cv[4];
 		{
 			vec2  trimto; // average of corners
-			
 			for ( int i=0; i<4; ++i )
 			{
 				srcpt[i] = vec2( world->mWorldToImage * vec4(s.mQuad[i],0,1) );
@@ -729,11 +763,11 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		}
 		
 		// get output points
-		float outdim = 0.f;
-		for( int i=0; i<4; ++i ) outdim = max( outdim, distance(srcpt[i],srcpt[(i+1)%4]) );
-
-		vec2		outsize		= vec2(1,1) * outdim;
-		vec2		dstpt[4]    = { {0,0}, {outsize.x,0}, {outsize.x,outsize.y}, {0,outsize.y} };
+		vec2 outsize(
+			max( distance(srcpt[0],srcpt[1]), distance(srcpt[3],srcpt[2]) ),
+			max( distance(srcpt[0],srcpt[3]), distance(srcpt[1],srcpt[2]) )
+		);
+		vec2 dstpt[4] = { {0,0}, {outsize.x,0}, {outsize.x,outsize.y}, {0,outsize.y} };
 
 		cv::Point2f dstpt_cv[4];
 		vec2toOCV_4(dstpt, dstpt_cv);
@@ -747,9 +781,13 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		pipeline.getStages().back()->mLayoutHintScale = .5f;
 		pipeline.getStages().back()->mLayoutHintOrtho = true;
 
-		// midi quantize
-		auto instr = getInstrumentForScore(s);
+		// temporal blending (to remove temporal aliasing)
+//		if ( doTemporalBlend )
+//		{
+//			doTemporalMatBlend( pipeline, scoreName, oldTemporalBlendImage, s.mImage, mScoreTrackTemporalBlendFrac );
+//		}
 		
+		// midi quantize
 		if ( instr && instr->mSynthType==Instrument::SynthType::MIDI )
 		{
 			// quantize
@@ -759,12 +797,12 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 			if (quantizeNumRows<=0) quantizeNumRows = inquant.rows;
 			
 			cv::Mat quantized;
-//			cv::resize( inquant, quantized, cv::Size(quantizeNumCols,quantizeNumRows), 0, 0, cv::INTER_NEAREST );
-//			cv::resize( inquant, quantized, cv::Size(quantizeNumCols,quantizeNumRows), 0, 0, cv::INTER_LINEAR );
-//			cv::resize( inquant, quantized, cv::Size(quantizeNumCols,quantizeNumRows), 0, 0, cv::INTER_CUBIC );
-//			cv::resize( inquant, quantized, cv::Size(quantizeNumCols,quantizeNumRows), 0, 0, cv::INTER_LANCZOS4 ); // good
 			cv::resize( inquant, quantized, cv::Size(quantizeNumCols,quantizeNumRows), 0, 0, cv::INTER_AREA ); // best?
-			pipeline.then( scoreName + "quantized", quantized);
+				// cv::INTER_AREA is the best.
+				// cv::INTER_LANCZOS4 is good
+				// these are not so great: cv::INTER_CUBIC, cv::INTER_NEAREST, cv::INTER_LINEAR
+			
+			pipeline.then( scoreName + " quantized", quantized);
 			pipeline.setImageToWorldTransform(
 				pipeline.getStages().back()->mImageToWorld
 					* glm::scale(vec3(outsize.x / (float)quantizeNumCols, outsize.y / (float)quantizeNumRows, 1))
@@ -772,25 +810,29 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 			pipeline.getStages().back()->mLayoutHintScale = .5f;
 			pipeline.getStages().back()->mLayoutHintOrtho = true;
 
+			// blend
+			if ( doTemporalBlend )
+			{
+				doTemporalMatBlend( pipeline, scoreName, oldTemporalBlendImage, quantized, mScoreTrackTemporalBlendFrac );
+			}
+			
 			// threshold
 			cv::Mat &inthresh = quantized;
 			cv::Mat thresholded;
 
-			if ( mScoreNoteVisionThresh < 0 )
-			{
+			if ( mScoreNoteVisionThresh < 0 ) {
 				cv::threshold( inthresh, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
-			}
-			else
-			{
+			} else {
 				cv::threshold( inthresh, thresholded, mScoreNoteVisionThresh, 255, cv::THRESH_BINARY );
 			}
 			
-			pipeline.then( scoreName + "thresholded", thresholded);
+			pipeline.then( scoreName + " thresholded", thresholded);
 			pipeline.getStages().back()->mLayoutHintScale = .5f;
 			pipeline.getStages().back()->mLayoutHintOrtho = true;
 
 
 			// output
+			s.mQuantizedImagePreThreshold = quantized;
 			s.mQuantizedImage = thresholded;
 		}
 		
@@ -894,7 +936,8 @@ void MusicWorld::update()
 
 bool MusicWorld::isNoteInFlight( InstrumentRef instr, int note ) const
 {
-	return mOnNotes.find( tOnNoteKey(instr,note) ) != mOnNotes.end();
+	auto i = mOnNotes.find( tOnNoteKey(instr,note) );
+	return i != mOnNotes.end();
 }
 
 void MusicWorld::updateNoteOffs()
@@ -1167,6 +1210,8 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 			vector<vec2> onNoteTris;
 			vector<vec2> offNoteTris;
 			
+			const float playheadFrac = score.getPlayheadFrac();
+			
 			for ( int y=0; y<score.mNoteCount; ++y )
 			{
 				const float y1frac = y * yheight + yheight*.2f;
@@ -1188,7 +1233,7 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 						vec2 start2 = score.fracToQuad( vec2( x1frac, y2frac) ) ;
 						vec2 end2   = score.fracToQuad( vec2( x2frac, y2frac) ) ;
 						
-						const bool isInFlight = isNoteInFlight(instr, score.noteForY(instr, y)) ;
+						const bool isInFlight = playheadFrac > x1frac && playheadFrac < x2frac;
 						
 						vector<vec2>& tris = isInFlight ? onNoteTris : offNoteTris ;
 						

@@ -5,7 +5,7 @@
 
 	<App>
 	
-		<CameraIndex>0</CameraIndex>
+		<CameraIndex>-1</CameraIndex>
 		<!-- Which camera to use? 0 indexed. -1 means last. -->
 
 <!--	This could use a cleanup since we refactored into two windows	-->
@@ -127,17 +127,23 @@
 
 			<!-- Custom vision settings... Probably shouldn't change unless you know what you are doing!-->
 			
-			<ScoreNoteVisionThresh>254</ScoreNoteVisionThresh>
+			<ScoreNoteVisionThresh>180</ScoreNoteVisionThresh>
 			<!-- 0..255, -1 for OTSU (adaptive) -->
 			<ScoreVisionTrimFrac>.07</ScoreVisionTrimFrac>
 			<!-- When sampling image for each score, what amount to trim the corners (% push towards the center) -->
 			<ScoreMaxInteriorAngleDeg>110</ScoreMaxInteriorAngleDeg>
 
 			<!-- Inter-frame score tracking tuning... -->
-			<ScoreRejectNumSamples>10</ScoreRejectNumSamples> <!-- How many random samples to try when testing for rejection?-->
-			<ScoreRejectSuccessThresh>.2</ScoreRejectSuccessThresh> <!-- What % need to be valid to continue tracking? -->
-			<ScoreTrackMaxError>1</ScoreTrackMaxError> <!-- How much can scores drift between frames to count as the same score? (world space cumulative error (over each corner) -->
-
+			<ScoreTrackRejectNumSamples>10</ScoreTrackRejectNumSamples> <!-- How many random samples to try when testing for rejection?-->
+			<ScoreTrackRejectSuccessThresh>.2</ScoreTrackRejectSuccessThresh> <!-- What % need to be valid to continue tracking? -->
+			<ScoreTrackMaxError>.5</ScoreTrackMaxError> <!-- How much can scores drift between frames to count as the same score? (world space cumulative error (over each corner) -->
+			<ScoreTrackTemporalBlendFrac>.7</ScoreTrackTemporalBlendFrac>
+				<!-- Only for discrete (MIDI) scores; how much inter-frame temporal blending to do?
+					0 for none.
+					Numbers in between make sense. :-)
+					1 kind of doesn't make sense, since it's 100% old, but might be useful for testing.
+				-->
+			
 				<!-- Music -->
 
 			<!--	Tempo	-->
