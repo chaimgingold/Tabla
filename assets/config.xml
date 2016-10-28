@@ -5,7 +5,7 @@
 
 	<App>
 	
-		<CameraIndex>-1</CameraIndex>
+		<CameraIndex>0</CameraIndex>
 		<!-- Which camera to use? 0 indexed. -1 means last. -->
 
 <!--	This could use a cleanup since we refactored into two windows	-->
@@ -137,7 +137,7 @@
 			<ScoreTrackRejectNumSamples>10</ScoreTrackRejectNumSamples> <!-- How many random samples to try when testing for rejection?-->
 			<ScoreTrackRejectSuccessThresh>.2</ScoreTrackRejectSuccessThresh> <!-- What % need to be valid to continue tracking? -->
 			<ScoreTrackMaxError>.5</ScoreTrackMaxError> <!-- How much can scores drift between frames to count as the same score? (world space cumulative error (over each corner) -->
-			<ScoreTrackTemporalBlendFrac>.01</ScoreTrackTemporalBlendFrac>
+			<ScoreTrackTemporalBlendFrac>.7</ScoreTrackTemporalBlendFrac>
 				<!-- Only for discrete (MIDI) scores; how much inter-frame temporal blending to do?
 					0 for none.
 					Numbers in between make sense. :-)
@@ -159,17 +159,26 @@
 			<TimeVec>0 -1</TimeVec> <!-- Vector in world space time moves along -->
 			<NoteCount>13</NoteCount>
 			<BeatCount>32</BeatCount>
-			<NumOctaves>5</NumOctaves>
+			<NumOctaves>5</NumOctaves> <!-- Number of octaves available for shifting when moving scores in zone along Y -->
+			<RootNote>60</RootNote>
 			
-			<!--	Music Scales	-->
-			<!-- Chromatic -->
-			<!-- <Scale>0 1 2 3 4 5 6 7 8 9 10 11</Scale>-->
-			<!-- Major -->
-<!--			<Scale>0 2 4 5 7 9</Scale>-->
+			<!--	Musical Scales	-->
+
 			<!-- Pentatonic -->
 			<Scale>1 3 6 8 10</Scale>
-			<!-- Minor -->
+
+			<!-- Major -->
 <!--			<Scale>0 2 4 5 7 9</Scale>-->
+
+			<!-- Minor -->
+<!--			<Scale>0 2 3 5 6 8</Scale>-->
+
+			<!-- Whole Tone -->
+<!--			<Scale>0 2 4 6 8 10</Scale>-->
+
+			<!-- Chromatic -->
+<!--			 <Scale>0 1 2 3 4 5 6 7 8 9 10 11</Scale>-->
+
 
 			<!--	Instruments -->
 			<Instruments>

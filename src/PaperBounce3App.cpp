@@ -139,9 +139,12 @@ void PaperBounce3App::setup()
 			
 			if (mCameraIndex<0) camera = cameras.back();
 			else camera = cameras[ mCameraIndex % cameras.size() ];
-			
-			mCapture = Capture::create( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y, camera ) ; // get last camera
-			mCapture->start();
+
+			if ( !mCapture || mCapture->getDevice() != camera )
+			{
+				mCapture = Capture::create( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y, camera ) ; // get last camera
+				mCapture->start();
+			}
 		}
 
 		

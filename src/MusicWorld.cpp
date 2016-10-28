@@ -206,11 +206,10 @@ int MusicWorld::Score::noteForY( InstrumentRef instr, int y ) const {
 	int degree = y % numNotes;
 	int note = mScale[degree];
 
-	return note + extraOctaveShift + mNoteRoot + mOctave*12;
+	return note + extraOctaveShift + mRootNote + mOctave*12;
 }
 
-float
-MusicWorld::Score::getQuadMaxInteriorAngle() const
+float MusicWorld::Score::getQuadMaxInteriorAngle() const
 {
 	float mang=0.f;
 	
@@ -256,6 +255,7 @@ void MusicWorld::setParams( XmlTree xml )
 	getXml(xml,"BeatCount",mBeatCount);
 	getXml(xml,"Scale",mScale);
 	getXml(xml,"NumOctaves",mNumOctaves);
+	getXml(xml,"RootNote",mRootNote);
 
 	getXml(xml,"ScoreNoteVisionThresh", mScoreNoteVisionThresh);
 	getXml(xml,"ScoreVisionTrimFrac", mScoreVisionTrimFrac);
@@ -637,9 +637,9 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			if (instr) score.mInstrumentName = instr->mName ;
 			
 			// Choose octave based on up<>down
-			int noteRoot = 60 + octaveShift*12; // middle C
+			int noteRoot = mRootNote + octaveShift*12; // middle C
 			score.mOctave = octaveShift;
-			score.mNoteRoot = noteRoot;
+			score.mRootNote = noteRoot;
 
 			// Inherit scale from global scale
 			score.mScale = mScale;
@@ -702,6 +702,15 @@ void MusicWorld::updateContours( const ContourVector &contours )
 	for( auto &s : oldScores )
 	{
 		if ( !s.mDoesZombieTouchOtherZombies ) mScores.push_back(s);
+	}
+
+	// Update the scale/beat configuration in case it's changed from the xml
+	// FIXME: is this the right place to do this?
+	for (auto &s : mScores ) {
+		s.mRootNote = mRootNote;
+		s.mNoteCount = mNoteCount;
+		s.mScale = mScale;
+		s.mBeatCount = mBeatCount;
 	}
 }
 
@@ -937,7 +946,7 @@ void MusicWorld::update()
 		{
 			
 			// notes
-			int x = score.getPlayheadFrac() * (float)(score.mQuantizedImage.cols-1) ;
+			int x = score.getPlayheadFrac() * (float)(score.mQuantizedImage.cols) ;
 
 			for ( int y=0; y<score.mNoteCount; ++y )
 			{
@@ -1111,31 +1120,21 @@ void MusicWorld::updateAdditiveScoreSynthesis()
 			
 			// Convert to a vector to pass to Pd
 
-#if 0
-			std::vector<float> imageVector;
-			imageVector.assign( (float*)imageFloatMat.datastart, (float*)imageFloatMat.dataend );
-
-			mPureDataNode->writeArray(toString(synthNum)+string("image"), imageVector);
-#else
-
-
-			// Grab
+			// Grab the current column at the playhead. We send updates even if the
+			// phase doesn't change enough to change the colIndex,
+			// as the pixels might have changed instead.
 			float phase = score.getPlayheadFrac();
 			int colIndex = imageFloatMat.cols * phase;
 
 			cv::Mat columnMat = imageFloatMat.col(colIndex);
 
-
-//			std::vector <float> columnVector;
+			// We use a list message rather than writeArray as it causes less contention with Pd's execution thread
 			auto list = pd::List();
 			for (int i = 0; i < columnMat.rows; i++) {
-//				columnVector.push_back(columnMat.at<float>(i, 0));
 				list.addFloat(columnMat.at<float>(i, 0));
 			}
 
 			mPureDataNode->sendList(toString(synthNum)+string("vals"), list);
-
-#endif
 
 			// Turn the synth on
 			mPureDataNode->sendFloat(toString(synthNum)+string("volume"), 1);
@@ -1253,7 +1252,7 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 			// collect notes into a batch
 			// (probably wise to extract this geometry/data when processing vision data,
 			// then use it for both playback and drawing).
-			const float invcols = 1.f / (float)(score.mQuantizedImage.cols-1);
+			const float invcols = 1.f / (float)(score.mQuantizedImage.cols);
 
 			const float yheight = 1.f / (float)score.mNoteCount;
 			

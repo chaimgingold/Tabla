@@ -47,6 +47,7 @@ private:
 	int	  mNoteCount=8;
 	int	  mBeatCount=32;
 	Scale mScale;
+	float mRootNote=60;
 	float mNumOctaves=5;
 	
 	int	  mScoreNoteVisionThresh=-1; // 0..255, or -1 for OTSU
@@ -141,7 +142,7 @@ private:
 		float		mDuration;
 		
 		int			mOctave;
-		float		mNoteRoot;
+		float		mRootNote;
 		int			mNoteCount;
 		int         mBeatCount;
 		int			mNoteInstrument;
