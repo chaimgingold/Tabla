@@ -54,6 +54,8 @@ public:
 	bool writeArray( const std::string& arrayName, std::vector<float>& source, int writeLen = -1, int offset = 0 );
 	void clearArray( const std::string& arrayName, int value = 0 );
 
+	void setMaxMessageLength( unsigned int len ); // normally 32
+
 private:
 	pd::PdBase	mPdBase;
 	std::mutex	mMutex;

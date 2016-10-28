@@ -1,0 +1,15 @@
+#N canvas 0 22 450 300 10;
+#X obj 188 135 loadbang;
+#X obj 188 159 \$1;
+#X obj 155 235 print;
+#X obj 155 211 spigot;
+#X obj 188 185 \$2 \$3;
+#X obj 155 73 inlet;
+#X obj 155 99 list prepend \$4;
+#X text 259 30 [print-if \$1 == 50 mylabel];
+#X connect 0 0 1 0;
+#X connect 1 0 4 0;
+#X connect 3 0 2 0;
+#X connect 4 0 3 1;
+#X connect 5 0 6 0;
+#X connect 6 0 3 0;

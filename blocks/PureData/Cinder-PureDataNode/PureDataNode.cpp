@@ -33,6 +33,8 @@ PureDataNodeRef PureDataNode::Global() {
 		// Enable Cinder audio
 		ctx->enable();
 	}
+
+
 	
 	return globalInstance;
 }
@@ -177,6 +179,12 @@ void PureDataNode::clearArray( const std::string& arrayName, int value )
 {
 	lock_guard<mutex> lock( mMutex );
 	mPdBase.clearArray( arrayName, value );
+}
+
+void PureDataNode::setMaxMessageLength ( unsigned int len )
+{
+	lock_guard<mutex> lock( mMutex );
+	mPdBase.setMaxMessageLen( len );
 }
 	
 } // namespace cipd

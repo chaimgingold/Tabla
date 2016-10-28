@@ -1110,13 +1110,36 @@ void MusicWorld::updateAdditiveScoreSynthesis()
 			score.mImage.convertTo(imageFloatMat, CV_32FC1, 1/255.0);
 			
 			// Convert to a vector to pass to Pd
+
+#if 0
 			std::vector<float> imageVector;
 			imageVector.assign( (float*)imageFloatMat.datastart, (float*)imageFloatMat.dataend );
 
 			mPureDataNode->writeArray(toString(synthNum)+string("image"), imageVector);
+#else
 
+
+			// Grab
+			float phase = score.getPlayheadFrac();
+			int colIndex = imageFloatMat.cols * phase;
+
+			cv::Mat columnMat = imageFloatMat.col(colIndex);
+
+
+//			std::vector <float> columnVector;
+			auto list = pd::List();
+			for (int i = 0; i < columnMat.rows; i++) {
+//				columnVector.push_back(columnMat.at<float>(i, 0));
+				list.addFloat(columnMat.at<float>(i, 0));
+			}
+
+			mPureDataNode->sendList(toString(synthNum)+string("vals"), list);
+
+#endif
+
+			// Turn the synth on
 			mPureDataNode->sendFloat(toString(synthNum)+string("volume"), 1);
-			
+
 			synthNum++;
 		}
 	}
@@ -1383,6 +1406,9 @@ void MusicWorld::setupSynthesis()
 
 	// Create the synth engine
 	mPureDataNode = cipd::PureDataNode::Global();
+
+	// Lets us use lists to set arrays, which seems to cause less thread contention
+	mPureDataNode->setMaxMessageLength(1024);
 
 	mPatch = mPureDataNode->loadPatch( DataSourcePath::create(getAssetPath("synths/music.pd")) );
 }
