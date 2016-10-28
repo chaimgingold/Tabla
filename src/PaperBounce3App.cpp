@@ -62,7 +62,10 @@ void PaperBounce3App::setup()
 	{
 		if ( args[a]=="-assets" && args.size()>a )
 		{
-			mOverloadedAssetPath = args[a+1];
+			string overloadedAssetPath = args[a+1];
+			if ( fs::exists(overloadedAssetPath) ) {
+				mOverloadedAssetPath = overloadedAssetPath;
+			}
 		}
 	}
 	

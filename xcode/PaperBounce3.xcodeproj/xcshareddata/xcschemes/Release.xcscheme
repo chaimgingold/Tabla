@@ -63,7 +63,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-assets /Users/chaim/Documents/PaperBounce3/assets"
+            argument = "-assets /Users/$USER/Documents/PaperBounce3/assets"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
