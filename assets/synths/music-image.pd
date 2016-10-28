@@ -16,11 +16,11 @@
 #X obj 281 574 int;
 #X obj 317 540 r \$1resolution-x-change;
 #X obj 329 128 /~ 75;
-#X obj 339 164 *~;
+#X obj 329 164 *~;
 #X obj 392 174 line~;
 #X msg 392 149 \$1 10;
 #X obj 392 124 r \$1volume;
-#N canvas 354 288 566 594 dump-image-table 1;
+#N canvas 354 288 566 594 dump-image-table 0;
 #X obj 132 305 until;
 #X obj 132 336 f;
 #X obj 161 336 + 1;
@@ -74,7 +74,7 @@
 #X connect 12 0 11 0;
 #X connect 14 0 13 0;
 #X connect 15 0 11 1;
-#X connect 16 0 1 0;
+#X connect 16 0 17 0;
 #X connect 17 0 1 0;
 #X connect 18 0 17 1;
 #X connect 19 0 18 0;
