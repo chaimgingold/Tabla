@@ -42,6 +42,18 @@ private:
 	class Score;
 	
 	// params
+	enum class MetaParam
+	{
+		Scale=0,
+		RootNote,
+		Tempo,
+//		BeatCount,
+		kNumMetaParams
+	};
+	
+	MetaParam mNextMetaParam = (MetaParam)0;
+	MetaParam chooseNextMetaParam(); // tries to avoid duplicates on table
+	
 	float mStartTime;	// when MusicWorld created
 	vec2  mTimeVec;		// in world space, which way does time flow forward?
 	int	  mNoteCount=8;
@@ -89,10 +101,12 @@ private:
 		enum class SynthType
 		{
 			Additive = 1,
-			MIDI	 = 2
+			MIDI	 = 2,
+			Meta	 = 3  // controls global params
 		};
 		
 		SynthType mSynthType;
+		MetaParam mMetaParam; // only matters if mSynthType==Meta
 		
 		// midi
 		int  mPort=0;
@@ -108,8 +122,9 @@ private:
 	vector< pair<PolyLine2,InstrumentRef> > mInstrumentRegions;
 	void generateInstrumentRegions();
 	int  getScoreOctaveShift( const Score& s, const PolyLine2& wrtRegion ) const;
-	InstrumentRef decideInstrumentForScore( const Score&, int* octaveShift=0 ) const;
+	InstrumentRef decideInstrumentForScore( const Score&, int* octaveShift=0 );
 	float		  decideDurationForScore  ( const Score& ) const;
+	InstrumentRef getInstrumentForMetaParam( MetaParam ) const;
 	
 	// scores
 	class Score
@@ -136,7 +151,7 @@ private:
 		cv::Mat		mQuantizedImage;	// quantized image data for midi playback
 		
 		// synth parameters
-		string		mInstrumentName;
+		string		mInstrumentName; // which synth
 		
 		float		mStartTime;
 		float		mDuration;
@@ -177,6 +192,7 @@ private:
 		// match failed; do we want to keep it?
 		// any intersecting zombie scores are marked for removal (mDoesZombieTouchOtherZombies)
 	
+	Score* getScoreForMetaParam( MetaParam );
 
 	// midi note playing and management
 	bool  isScoreValueHigh( uchar ) const;

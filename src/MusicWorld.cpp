@@ -34,8 +34,24 @@ void MusicWorld::Instrument::setParams( XmlTree xml )
 	{
 		string t = xml.getChild("SynthType").getValue();
 		
-		if (t=="Additive") mSynthType=SynthType::Additive;
-		else mSynthType=SynthType::MIDI;
+		map<string,SynthType> synths;
+		synths["Additive"] = SynthType::Additive;
+		synths["MIDI"] = SynthType::MIDI;
+		synths["Meta"] = SynthType::Meta;
+		auto i = synths.find(t);
+		mSynthType = (i!=synths.end()) ? i->second : SynthType::MIDI ; // default to MIDI
+		
+		if ( mSynthType==SynthType::Meta )
+		{
+			string p = xml.getChild("MetaParam").getValue();
+			
+			map<string,MetaParam> params;
+			params["Scale"] = MetaParam::Scale;
+			params["RootNote"] = MetaParam::RootNote;
+			params["Tempo"] = MetaParam::Tempo;
+			auto i = params.find(p);
+			mMetaParam = (i!=params.end()) ? i->second : MetaParam::RootNote ; // default to RootNote
+		}
 	}
 	
 	getXml(xml,"Port",mPort);
@@ -327,7 +343,13 @@ void MusicWorld::generateInstrumentRegions()
 	
 	Rectf worldRect( getWorldBoundsPoly().getPoints() );
 	
-	int ninstr = mInstruments.size();
+	int ninstr=0;
+	for( auto i : mInstruments )
+	{
+		if ( i.second->mSynthType!=Instrument::SynthType::Meta ) ninstr++;
+	}
+	
+	mInstruments.size();
 	
 	int dim = ceil( sqrt(ninstr) );
 	
@@ -337,6 +359,8 @@ void MusicWorld::generateInstrumentRegions()
 	
 	for( auto i : mInstruments )
 	{
+		if ( i.second->mSynthType==Instrument::SynthType::Meta ) continue;
+		
 		Rectf r(0,0,1,1);
 		r.offset( vec2(x,y) );
 		r.scale(scale);
@@ -403,8 +427,13 @@ int MusicWorld::getScoreOctaveShift( const Score& score, const PolyLine2& wrtReg
 }
 
 MusicWorld::InstrumentRef
-MusicWorld::decideInstrumentForScore( const Score& s, int* octaveShift ) const
+MusicWorld::decideInstrumentForScore( const Score& s, int* octaveShift )
 {
+	// FIXME: finish meta parameter system
+//	InstrumentRef meta = getInstrumentForMetaParam( chooseNextMetaParam() );
+//	if (meta) return meta;
+	/////
+	
 	vec2 c = s.getPolyLine().calcCentroid();
 	
 	// find
@@ -478,6 +507,19 @@ MusicWorld::decideDurationForScore ( const Score& score ) const
 	if (0) cout << size.x << "cm = " << d << "sec => " << t << "sec" << endl;
 	
 	return t;
+}
+
+MusicWorld::InstrumentRef
+MusicWorld::getInstrumentForMetaParam( MetaParam p ) const
+{
+	for ( auto i : mInstruments )
+	{
+		if ( i.second->mSynthType == Instrument::SynthType::Meta && i.second->mMetaParam==p )
+		{
+			return i.second;
+		}
+	}
+	return 0;
 }
 
 MusicWorld::Score* MusicWorld::matchOldScoreToNewScore( const Score& old, float maxErr, float* outError )
@@ -608,6 +650,38 @@ MusicWorld::scoreFractionInContours( const Score& old, const ContourVector &cont
 	}
 	
 	return (float)hit / (float)numSamples;
+}
+
+MusicWorld::Score* MusicWorld::getScoreForMetaParam( MetaParam p )
+{
+	for( int i=0; i<mScores.size(); ++i )
+	{
+		InstrumentRef instr = getInstrumentForScore(mScores[i]);
+		
+		if ( instr && instr->mSynthType==Instrument::SynthType::Meta && instr->mMetaParam==p )
+		{
+			return &mScores[i];
+		}
+	}
+	return 0;
+}
+
+MusicWorld::MetaParam MusicWorld::chooseNextMetaParam()
+{
+	MetaParam start = mNextMetaParam;
+	
+	while ( getScoreForMetaParam(mNextMetaParam) )
+	{
+		mNextMetaParam = (MetaParam)( ((int)mNextMetaParam + 1 ) % (int)MetaParam::kNumMetaParams );
+		
+		if (mNextMetaParam==start) break;
+	}
+	
+	MetaParam result = mNextMetaParam;
+	
+	mNextMetaParam = (MetaParam)( ((int)mNextMetaParam + 1) % (int)MetaParam::kNumMetaParams );
+	
+	return result;
 }
 
 void MusicWorld::updateContours( const ContourVector &contours )
@@ -1245,6 +1319,15 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 			gl::color(instr->mScoreColor);
 			gl::draw( score.getPolyLine() );
 		}
+		else if ( instr->mSynthType==Instrument::SynthType::Meta )
+		{
+			Rectf r( score.mQuad[0], score.mQuad[2] );
+			r.canonicalize();
+			
+			gl::color(instr->mScoreColor);
+//			gl::drawSolidRoundedRect( r, 1.f );
+			gl::drawStrokedRoundedRect(r, 1.f );
+		}
 		else if ( instr->mSynthType==Instrument::SynthType::MIDI )
 		{
 			// midi
@@ -1364,8 +1447,8 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 
 		}
 		
-		//
-		if (1)
+		// Draw playhead (if not a Meta instrument score)
+		if (instr->mSynthType != Instrument::SynthType::Meta)
 		{
 			gl::color( instr->mPlayheadColor );
 			

@@ -317,7 +317,41 @@
 					<MapNotesToChannels>0</MapNotesToChannels>
 				</Instrument>
 
+				<!-- Meta Param Instruments -->
 
+				<Instrument>
+					<PlayheadColor>00FF00</PlayheadColor>
+					<ScoreColor>0066FF</ScoreColor>
+					<NoteOffColor>FFFF00</NoteOffColor>
+					<NoteOnColor>00FF00</NoteOnColor>
+					
+					<Name>Scale</Name>
+					<SynthType>Meta</SynthType>
+					<MetaParam>Scale</MetaParam>
+				</Instrument>
+
+				<Instrument>
+					<PlayheadColor>00FF00</PlayheadColor>
+					<ScoreColor>CC2211</ScoreColor>
+					<NoteOffColor>FFFF00</NoteOffColor>
+					<NoteOnColor>00FF00</NoteOnColor>
+					
+					<Name>RootNote</Name>
+					<SynthType>Meta</SynthType>
+					<MetaParam>RootNote</MetaParam>
+				</Instrument>
+				
+				<Instrument>
+					<PlayheadColor>00FF00</PlayheadColor>
+					<ScoreColor>66FF33</ScoreColor>
+					<NoteOffColor>FFFF00</NoteOffColor>
+					<NoteOnColor>00FF00</NoteOnColor>
+					
+					<Name>Tempo</Name>
+					<SynthType>Meta</SynthType>
+					<MetaParam>Tempo</MetaParam>
+				</Instrument>
+				
 			</Instruments>
 
 		</MusicWorld>
