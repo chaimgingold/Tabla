@@ -76,6 +76,7 @@
 		B66BF6020B6B4738AF2E400D /* b2PolygonContact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9E75530E63FA4EC397C0D1E2 /* b2PolygonContact.cpp */; };
 		B82FE516E59446FB928ED0B8 /* b2Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 474731D0E50948D4B9522AA0 /* b2Timer.cpp */; };
 		BF8EA3BC1AE14D83A5112094 /* b2Contact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D9B3511148F4C0DB5FE5C5C /* b2Contact.cpp */; };
+		C24197A71DC42959005AE51F /* ChangeLog.md in Sources */ = {isa = PBXBuildFile; fileRef = C24197A61DC42959005AE51F /* ChangeLog.md */; };
 		C2EC76FC1DA7157F00DB39C8 /* PureDataNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EC76401DA7157E00DB39C8 /* PureDataNode.cpp */; };
 		C2EC76FD1DA7157F00DB39C8 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = C2EC76441DA7157E00DB39C8 /* LICENSE.txt */; };
 		C2EC76FE1DA7157F00DB39C8 /* PdBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EC76451DA7157E00DB39C8 /* PdBase.cpp */; };
@@ -237,6 +238,7 @@
 		C0B1C0F0E0A44565970E6E65 /* b2Body.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2Body.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/b2Body.cpp; sourceTree = "<group>"; };
 		C159A0020C244479B7849346 /* b2EdgeAndPolygonContact.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2EdgeAndPolygonContact.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Contacts/b2EdgeAndPolygonContact.cpp; sourceTree = "<group>"; };
 		C20E7BFEBC8645C79A3B1048 /* b2RopeJoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2RopeJoint.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Joints/b2RopeJoint.cpp; sourceTree = "<group>"; };
+		C24197A61DC42959005AE51F /* ChangeLog.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = ChangeLog.md; path = ../ChangeLog.md; sourceTree = "<group>"; };
 		C2EC76401DA7157E00DB39C8 /* PureDataNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PureDataNode.cpp; sourceTree = "<group>"; };
 		C2EC76411DA7157E00DB39C8 /* PureDataNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PureDataNode.h; sourceTree = "<group>"; };
 		C2EC76441DA7157E00DB39C8 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
@@ -467,6 +469,7 @@
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 				26FA36401D4A7D5300C64A00 /* todo */,
+				C24197A61DC42959005AE51F /* ChangeLog.md */,
 				26FA36421D53C05700C64A00 /* research */,
 				26FA364F1D5519DA00C64A00 /* assets */,
 			);
@@ -784,6 +787,7 @@
 				2635C8D01D8768C900DF30BE /* WindowData.cpp in Sources */,
 				26FA36461D53C31A00C64A00 /* BallWorld.cpp in Sources */,
 				58F3F572E622458BA5EA9B45 /* b2Distance.cpp in Sources */,
+				C24197A71DC42959005AE51F /* ChangeLog.md in Sources */,
 				FE95B791332E4B49916DF787 /* b2DynamicTree.cpp in Sources */,
 				7D4B6A1410EE43358255E704 /* b2TimeOfImpact.cpp in Sources */,
 				36991D11792C4997967FCEC7 /* b2ChainShape.cpp in Sources */,
