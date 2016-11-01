@@ -30,6 +30,7 @@
 		262A88701DB58D7D00FE2336 /* RtMidi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 262A886E1DB58D7D00FE2336 /* RtMidi.cpp */; };
 		262A88751DB594B700FE2336 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 262A88741DB594B700FE2336 /* CoreMIDI.framework */; };
 		2632320F1DC8166500CB2048 /* Score.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2632320E1DC8166500CB2048 /* Score.cpp */; };
+		263232141DC91F8900CB2048 /* CalibrateWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 263232121DC91F8900CB2048 /* CalibrateWorld.cpp */; };
 		2635C8D01D8768C900DF30BE /* WindowData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2635C8CE1D8768C900DF30BE /* WindowData.cpp */; };
 		26BC84B31D80DF89006001DC /* PipelineStageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26BC84B11D80DF89006001DC /* PipelineStageView.cpp */; };
 		26FA36411D4A7D5300C64A00 /* todo in Resources */ = {isa = PBXBuildFile; fileRef = 26FA36401D4A7D5300C64A00 /* todo */; };
@@ -140,6 +141,8 @@
 		262A886F1DB58D7D00FE2336 /* RtMidi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RtMidi.h; path = ../src/rtmidi/RtMidi.h; sourceTree = "<group>"; };
 		262A88741DB594B700FE2336 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
 		2632320E1DC8166500CB2048 /* Score.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Score.cpp; path = ../src/MusicWorld/Score.cpp; sourceTree = "<group>"; };
+		263232121DC91F8900CB2048 /* CalibrateWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CalibrateWorld.cpp; path = ../src/CalibrateWorld/CalibrateWorld.cpp; sourceTree = "<group>"; };
+		263232131DC91F8900CB2048 /* CalibrateWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CalibrateWorld.h; path = ../src/CalibrateWorld/CalibrateWorld.h; sourceTree = "<group>"; };
 		2635C8CD1D83245400DF30BE /* GameWorld.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GameWorld.h; path = ../src/GameWorld.h; sourceTree = "<group>"; };
 		2635C8CE1D8768C900DF30BE /* WindowData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = WindowData.cpp; path = ../src/WindowData.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		2635C8CF1D8768C900DF30BE /* WindowData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WindowData.h; path = ../src/WindowData.h; sourceTree = "<group>"; };
@@ -438,6 +441,15 @@
 			name = MusicWorld;
 			sourceTree = "<group>";
 		};
+		263232151DC91F9D00CB2048 /* CalibrateWorld */ = {
+			isa = PBXGroup;
+			children = (
+				263232121DC91F8900CB2048 /* CalibrateWorld.cpp */,
+				263232131DC91F8900CB2048 /* CalibrateWorld.h */,
+			);
+			name = CalibrateWorld;
+			sourceTree = "<group>";
+		};
 		26FD3CCC1D88745800B20327 /* App */ = {
 			isa = PBXGroup;
 			children = (
@@ -463,6 +475,7 @@
 				26FA36441D53C31A00C64A00 /* BallWorld.cpp */,
 				26FD3CD11D91E01E00B20327 /* PongWorld.h */,
 				26FD3CD01D91E01E00B20327 /* PongWorld.cpp */,
+				263232151DC91F9D00CB2048 /* CalibrateWorld */,
 			);
 			name = World;
 			sourceTree = "<group>";
@@ -803,6 +816,7 @@
 				819C4FF415DF49DCAEA34DC7 /* b2CircleShape.cpp in Sources */,
 				45BE040AA3C64DA6B477A384 /* b2EdgeShape.cpp in Sources */,
 				525C9D7D427141D18CB4B547 /* b2PolygonShape.cpp in Sources */,
+				263232141DC91F8900CB2048 /* CalibrateWorld.cpp in Sources */,
 				22088F63A8874EB4BAA43888 /* b2BlockAllocator.cpp in Sources */,
 				364054B04EB14DC0944BC464 /* b2Draw.cpp in Sources */,
 				4B0FADE8EBFD4032BD327749 /* b2Math.cpp in Sources */,

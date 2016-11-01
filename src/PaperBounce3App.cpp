@@ -3,6 +3,7 @@
 #include "BallWorld.h"
 #include "PongWorld.h"
 #include "MusicWorld.h"
+#include "CalibrateWorld.h"
 
 #include "geom.h"
 #include "xml.h"
@@ -218,6 +219,7 @@ void PaperBounce3App::setupGameLibrary()
 	mGameLibrary.push_back( make_shared<BallWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<PongWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<MusicWorldCartridge>() );
+	mGameLibrary.push_back( make_shared<CalibrateWorldCartridge>() );
 }
 
 void PaperBounce3App::loadDefaultGame()

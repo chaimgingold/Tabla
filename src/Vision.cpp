@@ -156,7 +156,8 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 			{
 				Contour myc ;
 				
-				myc.mPolyLine = fromOcv(c) ;
+				myc.mPolyLine = PolyLine2( fromOcv(c) );
+				myc.mPolyLine.setClosed();
 
 				// scale polyline to world space (from pixel space)
 				for( auto &p : myc.mPolyLine.getPoints() ) p *= contourPixelToWorld ;
