@@ -109,7 +109,7 @@ int MusicWorld::Instrument::channelForNote(int note) {
 
 MusicWorld::MusicWorld()
 {
-	mStartTime = ci::app::getElapsedSeconds();
+	mLastFrameTime = ci::app::getElapsedSeconds();
 
 	mTimeVec = vec2(0,-1);
 	
@@ -580,8 +580,7 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			if ( score.getQuadMaxInteriorAngle() > toRadians(mScoreMaxInteriorAngleDeg) ) continue;
 			
 			// timing
-			score.mStartTime = mStartTime;
-			score.mDuration  = decideDurationForScore(score); // inherit, but it could be custom based on shape or something
+			score.mDurationFrac = decideDurationForScore(score); // inherit, but it could be custom based on shape or something
 
 			// instrument
 			int octaveShift = 0;
@@ -884,7 +883,16 @@ MusicWorld::InstrumentRef MusicWorld::getInstrumentForScore( const Score& score 
 
 void MusicWorld::update()
 {
-	// send @fps values to Pd
+	const float dt = getDT();
+
+	tickGlobalClock(dt);
+
+	for( auto &score : mScores )
+	{
+		score.tickPhase(mPhaseInBeats);
+	}
+
+
 	int synthNum=0;
 	
 	for( const auto &score : mScores )
@@ -901,17 +909,19 @@ void MusicWorld::update()
 		// send midi notes
 		else if ( instr->mSynthType==Instrument::SynthType::MIDI )
 		{
-			
 			// notes
-			int x = score.getPlayheadFrac() * (float)(score.mQuantizedImage.cols) ;
+			int x = score.getPlayheadFrac() * (float)(score.mQuantizedImage.cols);
 
 			for ( int y=0; y<score.mNoteCount; ++y )
 			{
-				unsigned char value = score.mQuantizedImage.at<unsigned char>(score.mNoteCount-1-y,x) ;
+				unsigned char value = score.mQuantizedImage.at<unsigned char>(score.mNoteCount-1-y,x);
 				
 				if ( score.isScoreValueHigh(value) )
 				{
-					float duration = score.mDuration * score.getNoteLengthAsScoreFrac(score.mQuantizedImage,x,y);
+					float duration =
+					    getBeatDuration() *
+					    score.mDurationFrac *
+					    score.getNoteLengthAsScoreFrac(score.mQuantizedImage,x,y);
 					
 					if (duration>0)
 					{
@@ -925,6 +935,34 @@ void MusicWorld::update()
 	
 	// retire notes
 	updateNoteOffs();
+}
+
+float MusicWorld::getBeatDuration() const {
+	static const float oneMinute = 60;
+
+	const float oneBeat = oneMinute / mTempo;
+
+	return oneBeat;
+}
+
+void MusicWorld::tickGlobalClock(float dt) {
+
+	const float beatsPerSec = 1 / getBeatDuration();
+
+	const float elapsedBeats = beatsPerSec * dt;
+
+	const float newPhase = mPhaseInBeats + elapsedBeats;
+
+	mPhaseInBeats = fmod(newPhase, mDurationInBeats);
+}
+
+
+float MusicWorld::getDT() {
+	const float now = ci::app::getElapsedSeconds();
+	const float dt = now - mLastFrameTime;
+	mLastFrameTime = now;
+
+	return dt;
 }
 
 bool MusicWorld::isNoteInFlight( InstrumentRef instr, int note ) const
@@ -1030,10 +1068,11 @@ void MusicWorld::updateMetaParameter(MetaParam metaParam, float value)
 			mScale = mScales[ min( (int)(value * mScales.size()), (int)mScales.size()-1 ) ];
 			break;
 		case MetaParam::RootNote:
+			// this could also be "root degree", and stay locked to the scale (or that could be separate slider)
 			mRootNote = value * 12 + 48;
 			break;
 		case MetaParam::Tempo:
-			mTempoWorldUnitsPerSecond = lerp(.1f,4.f,value);
+			mTempo = value * 120;
 			break;
 		default:
 			break;
@@ -1058,9 +1097,7 @@ void MusicWorld::updateAdditiveScoreSynthesis()
 	for( const auto &score : mScores )
 	{
 		InstrumentRef instr = getInstrumentForScore(score);
-		if (!instr) {
-			continue;
-		}
+		if (!instr) continue;
 		
 		// send image for additive synthesis
 		if ( instr->mSynthType==Instrument::SynthType::Additive && !score.mImage.empty() )

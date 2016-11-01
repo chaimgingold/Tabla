@@ -54,7 +54,6 @@ private:
 	MetaParam mNextMetaParam = (MetaParam)0;
 	MetaParam chooseNextMetaParam(); // tries to avoid duplicates on table
 	
-	float mStartTime;	// when MusicWorld created
 	vec2  mTimeVec;		// in world space, which way does time flow forward?
 	int	  mNoteCount=8;
 	int	  mBeatCount=32;
@@ -161,8 +160,9 @@ private:
 		// synth parameters
 		string		mInstrumentName; // which synth
 		
-		float		mStartTime;
-		float		mDuration;
+		float		mPhase=0;
+		float		mDurationFrac=1;
+		void tickPhase(float globalPhase);
 		
 		int			mOctave;
 		float		mRootNote;
@@ -265,6 +265,19 @@ private:
 
 	void setupSynthesis();
 	void updateAdditiveScoreSynthesis();
+
+
+
+	// DT calculation
+	float mLastFrameTime;
+	float getDT();
+
+	// Global clock
+	float mPhaseInBeats=0;
+	float mDurationInBeats=16;
+	float mTempo=120;
+	void tickGlobalClock(float dt);
+	float getBeatDuration() const;
 };
 
 class MusicWorldCartridge : public GameCartridge

@@ -342,13 +342,14 @@ PolyLine2 MusicWorld::Score::getPolyLine() const
 	return p;
 }
 
+void MusicWorld::Score::tickPhase(float globalPhase)
+{
+	mPhase = fmod(globalPhase, mDurationFrac) / mDurationFrac;
+}
+
 float MusicWorld::Score::getPlayheadFrac() const
 {
-	// could modulate quadPhase by size/shape of quad
-	
-	float t = fmod( (ci::app::getElapsedSeconds() - mStartTime)/mDuration, 1.f ) ;
-	
-	return t;
+	return mPhase;
 }
 
 void MusicWorld::Score::getPlayheadLine( vec2 line[2] ) const
