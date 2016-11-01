@@ -16,12 +16,18 @@ namespace cinder {
 		for ( int i=0; i<4; ++i ) o[i] = toOcv( in[i] );
 	}
 	
-	inline PolyLine2 fromOcv( vector<cv::Point> pts )
+	inline vector<vec2> fromOcv( vector<cv::Point> pts )
 	{
-		PolyLine2 pl;
-		for( auto p : pts ) pl.push_back(vec2(p.x,p.y));
-		pl.setClosed(true);
-		return pl;
+		vector<vec2> v;
+		for( auto p : pts ) v.push_back(vec2(p.x,p.y));
+		return v;
+	}
+
+	inline vector<vec2> fromOcv( vector<cv::Point2f> pts )
+	{
+		vector<vec2> v;
+		for( auto p : pts ) v.push_back(vec2(p.x,p.y));
+		return v;
 	}
 
 	// stuff below doesn't really belong in cinder namespace, but whatever.
