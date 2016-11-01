@@ -269,7 +269,6 @@ void MusicWorld::setParams( XmlTree xml )
 	getXml(xml,"TimeVec",mTimeVec);
 	getXml(xml,"NoteCount",mNoteCount);
 	getXml(xml,"BeatCount",mBeatCount);
-	getXml(xml,"Scale",mScale);
 	getXml(xml,"NumOctaves",mNumOctaves);
 	getXml(xml,"RootNote",mRootNote);
 
@@ -282,7 +281,21 @@ void MusicWorld::setParams( XmlTree xml )
 	getXml(xml,"ScoreMaxInteriorAngleDeg",mScoreMaxInteriorAngleDeg);
 	getXml(xml,"ScoreTrackTemporalBlendFrac",mScoreTrackTemporalBlendFrac);
 	getXml(xml,"ScoreTrackTemporalBlendIfDiffFracLT",mScoreTrackTemporalBlendIfDiffFracLT);
-	
+
+	// scales
+	mScales.clear();
+	for( auto i = xml.begin( "Scales/Scale" ); i != xml.end(); ++i )
+	{
+		Scale notes;
+		string name; // not used yet
+
+		getXml(*i,"Name",name);
+		getXml(*i,"Notes",notes);
+
+		mScales.push_back(notes);
+	}
+	mScale = mScales[0];
+
 	// instruments
 	cout << "Instruments:" << endl;
 	
@@ -778,6 +791,10 @@ void MusicWorld::updateContours( const ContourVector &contours )
 		if ( !s.mDoesZombieTouchOtherZombies ) mScores.push_back(s);
 	}
 
+	updateScoresWithMetaParams();
+}
+
+void MusicWorld::updateScoresWithMetaParams() {
 	// Update the scale/beat configuration in case it's changed from the xml
 	// FIXME: is this the right place to do this?
 	for (auto &s : mScores ) {
@@ -1138,6 +1155,26 @@ void MusicWorld::sendMidi( RtMidiOutRef midiOut, uchar a, uchar b, uchar c )
 
 	midiOut->sendMessage( &message );
 
+}
+
+void MusicWorld::updateMetaParameter(MetaParam metaParam, float value)
+{
+	switch (metaParam) {
+		case MetaParam::Scale:
+
+			mScale = mScales[value * mScales.size()];
+			break;
+		case MetaParam::RootNote:
+			mRootNote = value * 12 + 48;
+			break;
+		case MetaParam::Tempo:
+			mTempoWorldUnitsPerSecond = value;
+			break;
+		default:
+			break;
+	}
+
+	updateScoresWithMetaParams();
 }
 
 void MusicWorld::updateAdditiveScoreSynthesis()

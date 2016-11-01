@@ -26,8 +26,7 @@ PaperBounce3App::~PaperBounce3App()
 
 //	mGameWorld.reset();
 
-	// Don't think we actually need this
-	// cipd::PureDataNode::ShutdownGlobal();
+	cipd::PureDataNode::ShutdownGlobal();
 }
 
 vec2 PaperBounce3App::getWorldSize() const

@@ -118,6 +118,7 @@ private:
 	typedef std::shared_ptr<Instrument> InstrumentRef;
 	
 	map<string,InstrumentRef> mInstruments;
+	vector<Scale> mScales;
 	
 	vector< pair<PolyLine2,InstrumentRef> > mInstrumentRegions;
 	void generateInstrumentRegions();
@@ -125,6 +126,10 @@ private:
 	InstrumentRef decideInstrumentForScore( const Score&, int* octaveShift=0 );
 	float		  decideDurationForScore  ( const Score& ) const;
 	InstrumentRef getInstrumentForMetaParam( MetaParam ) const;
+
+
+	void updateMetaParameter(MetaParam metaParam, float value);
+	void updateScoresWithMetaParams();
 	
 	// scores
 	class Score
