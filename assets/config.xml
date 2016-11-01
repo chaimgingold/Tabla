@@ -5,7 +5,7 @@
 
 	<App>
 	
-		<CameraIndex>0</CameraIndex>
+		<CameraIndex>-1</CameraIndex>
 		<!-- Which camera to use? 0 indexed. -1 means last. -->
 
 <!--	This could use a cleanup since we refactored into two windows	-->
@@ -149,7 +149,7 @@
 				<!-- Music -->
 
 			<!--	Tempo	-->
-			<Tempos>.5 1 1.5 2 4 6</Tempos>
+			<Tempos>.25 .5 1 1.5 2 4</Tempos>
 <!--			<Tempos>.5 1.5 3 6 9 12</Tempos>-->
 				<!-- 0 entries means no global tempo, 1 entry means all are fixed.
 					 in practice 0 entries--freeform--produces temporally jittery results.-->
@@ -163,8 +163,6 @@
 			<RootNote>60</RootNote>
 			
 			<!--	Musical Scales	-->
-
-			<Scale>1 3 6 8 10</Scale>
 
             <Scales>
 				<Scale>
