@@ -299,19 +299,18 @@ int MusicWorld::getScoreOctaveShift( const Score& score, const PolyLine2& wrtReg
 	return o;
 }
 
+bool
+MusicWorld::shouldBeMetaParamScore( const Score& s ) const
+{
+	vec2 scoreSize = s.getSizeInWorldSpace();
+	
+	return min(scoreSize.x,scoreSize.y) < 10.f ;
+}
+
 MusicWorld::InstrumentRef
 MusicWorld::decideInstrumentForScore( const Score& s, int* octaveShift )
 {
-	// meta-parameter?
-	vec2 scoreSize = s.getSizeInWorldSpace();
-	
-	if ( min(scoreSize.x,scoreSize.y) < 10.f )
-	{
-		InstrumentRef meta = getInstrumentForMetaParam( chooseNextMetaParam() );
-		if (meta) return meta;
-	}
-	
-	// ...else: do instrument by world region
+	// do instrument by world region
 	vec2 c = s.getPolyLine().calcCentroid();
 	
 	// find
@@ -544,22 +543,47 @@ MusicWorld::Score* MusicWorld::getScoreForMetaParam( MetaParam p )
 	return 0;
 }
 
-MusicWorld::MetaParam MusicWorld::chooseNextMetaParam()
+void MusicWorld::assignUnassignedMetaParams()
 {
-	MetaParam start = mNextMetaParam;
-	
-	while ( getScoreForMetaParam(mNextMetaParam) )
+	// what do we have?
+	vector<int> sliders((int)MetaParam::kNumMetaParams);
+	for( auto &s : sliders ) s=0;
+
+	for ( const auto &s : mScores )
 	{
-		mNextMetaParam = (MetaParam)( ((int)mNextMetaParam + 1 ) % (int)MetaParam::kNumMetaParams );
-		
-		if (mNextMetaParam==start) break;
+		InstrumentRef i = getInstrumentForScore(s);
+		if ( i && i->mSynthType==Instrument::SynthType::Meta )
+		{
+			sliders[(int)i->mMetaParam]++;
+		}
 	}
 	
-	MetaParam result = mNextMetaParam;
+	// which ones do we want?
+	vector<MetaParam> unassignedParams;
 	
-	mNextMetaParam = (MetaParam)( ((int)mNextMetaParam + 1) % (int)MetaParam::kNumMetaParams );
+	for( int i=0; i<sliders.size(); ++i )
+	{
+		if (sliders[i]==0) unassignedParams.push_back( (MetaParam)i );
+	}
 	
-	return result;
+	// assign
+	for ( auto &s : mScores )
+	{
+		if ( s.mInstrumentName == "_meta-slider" )
+		{
+			MetaParam param;
+			
+			if ( unassignedParams.empty() ) param = (MetaParam)(rand() % (int)MetaParam::kNumMetaParams);
+			else
+			{
+				param = unassignedParams.back();
+				unassignedParams.pop_back();
+			}
+			
+			InstrumentRef instr = getInstrumentForMetaParam( param );
+			if (instr) s.mInstrumentName = instr->mName;
+		}
+	}
 }
 
 void MusicWorld::updateContours( const ContourVector &contours )
@@ -582,27 +606,36 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			// timing
 			score.mDurationFrac = decideDurationForScore(score); // inherit, but it could be custom based on shape or something
 
-			// instrument
-			int octaveShift = 0;
-			InstrumentRef instr = decideInstrumentForScore(score,&octaveShift);
-			if (instr) score.mInstrumentName = instr->mName ;
 			
-			// Choose octave based on up<>down
-			int noteRoot = mRootNote + octaveShift*12; // middle C
-			score.mOctave = octaveShift;
-			score.mRootNote = noteRoot;
-
-			// Inherit scale from global scale
-			score.mScale = mScale;
-
-			// MIDI synth params
-			if ( instr && instr->mSynthType==Instrument::SynthType::MIDI )
+			// meta param?
+			if ( shouldBeMetaParamScore(score) )
 			{
-				score.mNoteCount = mNoteCount;
-				score.mBeatCount = mBeatCount;
+				score.mInstrumentName = "_meta-slider";
 			}
+			else
+			{
+				// instrument
+				int octaveShift = 0;
+				InstrumentRef instr = decideInstrumentForScore(score,&octaveShift);
+				if (instr) score.mInstrumentName = instr->mName ;
+				
+				// Choose octave based on up<>down
+				int noteRoot = mRootNote + octaveShift*12; // middle C
+				score.mOctave = octaveShift;
+				score.mRootNote = noteRoot;
 
-			score.mPan		= .5f ;
+				// Inherit scale from global scale
+				score.mScale = mScale;
+
+				// MIDI synth params
+				if ( instr && instr->mSynthType==Instrument::SynthType::MIDI )
+				{
+					score.mNoteCount = mNoteCount;
+					score.mBeatCount = mBeatCount;
+				}
+
+				score.mPan		= .5f ;
+			}
 			
 			mScores.push_back(score);
 		}
@@ -618,10 +651,10 @@ void MusicWorld::updateContours( const ContourVector &contours )
 		{
 //			cout << "match" << endl;
 			
-			if (1) // just copy everything
+			if (1) // just copy everything forward from previous one
 			{
 				*match = c;
-				// ...any exceptions?
+				// any exceptions introduce here
 			}
 			else // do it piecemeal
 			{
@@ -656,6 +689,9 @@ void MusicWorld::updateContours( const ContourVector &contours )
 	}
 
 	updateScoresWithMetaParams();
+	
+	// finally, assign any unassigned meta-params
+	assignUnassignedMetaParams();
 }
 
 void MusicWorld::updateScoresWithMetaParams() {

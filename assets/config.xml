@@ -5,7 +5,7 @@
 
 	<App>
 	
-		<CameraIndex>-1</CameraIndex>
+		<CameraIndex>0</CameraIndex>
 		<!-- Which camera to use? 0 indexed. -1 means last. -->
 
 <!--	This could use a cleanup since we refactored into two windows	-->

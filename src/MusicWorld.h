@@ -51,9 +51,6 @@ private:
 		kNumMetaParams
 	};
 	
-	MetaParam mNextMetaParam = (MetaParam)0;
-	MetaParam chooseNextMetaParam(); // tries to avoid duplicates on table
-	
 	vec2  mTimeVec;		// in world space, which way does time flow forward?
 	int	  mNoteCount=8;
 	int	  mBeatCount=32;
@@ -126,6 +123,8 @@ private:
 	float		  decideDurationForScore  ( const Score& ) const;
 	InstrumentRef getInstrumentForMetaParam( MetaParam ) const;
 
+	bool		  shouldBeMetaParamScore( const Score& ) const;
+	void		  assignUnassignedMetaParams(); // we do them all at once to get uniqueness.
 
 	void updateMetaParameter(MetaParam metaParam, float value);
 	void updateScoresWithMetaParams();
