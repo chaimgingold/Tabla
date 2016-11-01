@@ -164,38 +164,51 @@
 			
 			<!--	Musical Scales	-->
 
-			<!-- Pentatonic -->
 			<Scale>1 3 6 8 10</Scale>
 
-			<!-- Major -->
-<!--			<Scale>0 2 4 5 7 9</Scale>-->
+            <Scales>
+				<Scale>
+					<Name>Pentatonic</Name>
+					<Notes>1 3 6 8 10</Notes>
+				</Scale>
 
-			<!-- Minor -->
-<!--			<Scale>0 2 3 5 6 8</Scale>-->
+				<Scale>
+					<Name>Major</Name>
+					<Notes>0 2 4 5 7 9</Notes>
+				</Scale>
 
-			<!-- Whole Tone -->
-<!--			<Scale>0 2 4 6 8 10</Scale>-->
+				<Scale>
+					<Name>Minor</Name>
+					<Notes>0 2 3 5 6 8</Notes>
+				</Scale>
 
-			<!-- Chromatic -->
-<!--			 <Scale>0 1 2 3 4 5 6 7 8 9 10 11</Scale>-->
+				<Scale>
+					<Name>Whole Tone</Name>
+					<Notes>0 2 4 6 8 10</Notes>
+				</Scale>
 
+				<Scale>
+					<Name>Chromatic</Name>
+					<Notes>0 1 2 3 4 5 6 7 8 9 10 11</Notes>
+				</Scale>
+			</Scales>
 
 			<!--	Instruments -->
 			<Instruments>
 
-			<Instrument>
-				<PlayheadColor>00FF00</PlayheadColor>
-				<ScoreColor>332288</ScoreColor>
-				<NoteOffColor>FFFF00</NoteOffColor>
-				<NoteOnColor>00FF00</NoteOnColor>
+				<Instrument>
+					<PlayheadColor>00FF00</PlayheadColor>
+					<ScoreColor>332288</ScoreColor>
+					<NoteOffColor>FFFF00</NoteOffColor>
+					<NoteOnColor>00FF00</NoteOnColor>
 
-				<Name>0Volca FM</Name>
-				<SynthType>MIDI</SynthType>
+					<Name>0Volca FM</Name>
+					<SynthType>MIDI</SynthType>
 
-				<Port>2</Port>
-				<Channel>0</Channel>
-				<MapNotesToChannels>0</MapNotesToChannels>
-			</Instrument>
+					<Port>2</Port>
+					<Channel>0</Channel>
+					<MapNotesToChannels>0</MapNotesToChannels>
+				</Instrument>
 
 
 				<Instrument>
