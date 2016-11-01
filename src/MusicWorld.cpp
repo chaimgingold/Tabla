@@ -847,6 +847,17 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 			}
 			
 			s.mMetaParamSliderValue /= sumw;
+			
+			if ( sumw==0.f )
+			{
+				// uh-oh!
+				s.mMetaParamSliderValue=0.f;
+			}
+			else
+			{
+				// update
+				updateMetaParameter( instr->mMetaParam, s.mMetaParamSliderValue );
+			}
 		}
 		
 		//
@@ -1016,14 +1027,13 @@ void MusicWorld::updateMetaParameter(MetaParam metaParam, float value)
 {
 	switch (metaParam) {
 		case MetaParam::Scale:
-
-			mScale = mScales[value * mScales.size()];
+			mScale = mScales[ min( (int)(value * mScales.size()), (int)mScales.size()-1 ) ];
 			break;
 		case MetaParam::RootNote:
 			mRootNote = value * 12 + 48;
 			break;
 		case MetaParam::Tempo:
-			mTempoWorldUnitsPerSecond = value;
+			mTempoWorldUnitsPerSecond = lerp(.1f,4.f,value);
 			break;
 		default:
 			break;
