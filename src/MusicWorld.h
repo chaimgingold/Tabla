@@ -131,6 +131,8 @@ private:
 	{
 	public:
 		
+		void draw( MusicWorld& world, GameWorld::DrawType ) const;
+		
 		// shape
 		vec2  mQuad[4];
 		/*  Vertices are played back like so:
@@ -149,6 +151,7 @@ private:
 		cv::Mat		mImage;				// thresholded image
 		cv::Mat		mQuantizedImagePreThreshold; // (for inter-frame smoothing)
 		cv::Mat		mQuantizedImage;	// quantized image data for midi playback
+		float		mMetaParamSliderValue; // 0..1
 		
 		// synth parameters
 		string		mInstrumentName; // which synth
@@ -180,6 +183,11 @@ private:
 		
 		Scale mScale;
 		int noteForY( InstrumentRef instr, int y ) const;
+
+		// score vision
+		bool  isScoreValueHigh( uchar ) const;
+		float getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const;
+		int   getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const;
 	};
 	vector<Score> mScores;
 	
@@ -194,11 +202,19 @@ private:
 	
 	Score* getScoreForMetaParam( MetaParam );
 
-	// midi note playing and management
-	bool  isScoreValueHigh( uchar ) const;
-	float getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const;
-	int   getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const;
+	// image processing helper code
+	void quantizeImage( Pipeline& pipeline,
+		Score& score,
+		string scoreName,
+		bool doTemporalBlend,
+		cv::Mat oldTemporalBlendImage,
+		int quantizeNumCols, int quantizeNumRows ) const;
+		// logs to pipeline
+		// resizes score.mImage => mQuantizedImage + mQuantizedImagePreThreshold,
+		// and does temporal smoothing (optionally)
+		// if you pass -1 for cols or rows then it isn't resized in that dimension
 	
+	// midi note playing and management
 	struct tOnNoteKey
 	{
 		tOnNoteKey();

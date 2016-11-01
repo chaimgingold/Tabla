@@ -15,7 +15,6 @@
 #include "Pipeline.h"
 #include "ocv.h"
 #include "RtMidi.h"
-#include "cinder/gl/Context.h"
 
 
 using namespace std::chrono;
@@ -98,8 +97,6 @@ void MusicWorld::Instrument::setup()
 
 }
 
-
-
 // For most synths this is just the assigned channel,
 // but in the case of the Volca Sample we want to
 // send each note to a different channel as per its MIDI implementation.
@@ -108,143 +105,6 @@ int MusicWorld::Instrument::channelForNote(int note) {
 		return note % mMapNotesToChannels;
 	}
 	return mChannel;
-}
-
-bool MusicWorld::Score::setQuadFromPolyLine( PolyLine2 poly, vec2 timeVec )
-{
-	// could have simplified a bit and just examined two bisecting lines. oh well. it works.
-	// also calling this object 'Score' and the internal scores 'score' is a little confusing.
-	if ( poly.size()==4 )
-	{
-		auto in = [&]( int i ) -> vec2
-		{
-			return poly.getPoints()[i%4];
-		};
-		
-		auto scoreEdge = [&]( int from, int to )
-		{
-			return dot( timeVec, normalize( in(to) - in(from) ) );
-		};
-		
-		auto scoreSide = [&]( int side )
-		{
-			/* input pts:
-			   0--1
-			   |  |
-			   3--2
-			   
-			   side 0 : score of 0-->1, 3-->2
-			*/
-			
-			return ( scoreEdge(side+0,side+1) + scoreEdge(side+3,side+2) ) / 2.f;
-		};
-		
-		int   bestSide =0;
-		float bestScore=0;
-		
-		for( int i=0; i<4; ++i )
-		{
-			float score = scoreSide(i);
-			
-			if ( score > bestScore )
-			{
-				bestScore = score ;
-				bestSide  = i;
-			}
-		}
-		
-		// copy to mQuad
-		mQuad[0] = in( bestSide+3 );
-		mQuad[1] = in( bestSide+2 );
-		mQuad[2] = in( bestSide+1 );
-		mQuad[3] = in( bestSide+0 );
-		// wtf i don't get the logic but it works
-		
-		return true ;
-	}
-	else return false;
-}
-
-PolyLine2 MusicWorld::Score::getPolyLine() const
-{
-	PolyLine2 p;
-	p.setClosed();
-	
-	for( int i=0; i<4; ++i ) p.getPoints().push_back( mQuad[i] );
-	
-	return p;
-}
-
-float MusicWorld::Score::getPlayheadFrac() const
-{
-	// could modulate quadPhase by size/shape of quad
-	
-	float t = fmod( (ci::app::getElapsedSeconds() - mStartTime)/mDuration, 1.f ) ;
-	
-	return t;
-}
-
-void MusicWorld::Score::getPlayheadLine( vec2 line[2] ) const
-{
-	float t = getPlayheadFrac();
-	
-	line[0] = lerp(mQuad[3],mQuad[2],t); // bottom
-	line[1] = lerp(mQuad[0],mQuad[1],t); // top
-}
-
-vec2 MusicWorld::Score::getSizeInWorldSpace() const
-{
-	vec2 size;
-	
-	size.x = distance( lerp(mQuad[0],mQuad[3],.5f), lerp(mQuad[1],mQuad[2],.5f) );
-	size.y = distance( lerp(mQuad[0],mQuad[1],.5f), lerp(mQuad[3],mQuad[2],.5f) );
-	
-	return size;
-}
-
-vec2 MusicWorld::Score::fracToQuad( vec2 frac ) const
-{
-	vec2 top = lerp(mQuad[0],mQuad[1],frac.x);
-	vec2 bot = lerp(mQuad[3],mQuad[2],frac.x);
-	
-	return lerp(bot,top,frac.y);
-}
-
-int MusicWorld::Score::noteForY( InstrumentRef instr, int y ) const {
-
-	if (instr && instr->mMapNotesToChannels) {
-		return y;
-	}
-
-
-	int numNotes = mScale.size();
-	int extraOctaveShift = y / numNotes * 12;
-	int degree = y % numNotes;
-	int note = mScale[degree];
-
-	return note + extraOctaveShift + mRootNote + mOctave*12;
-}
-
-float MusicWorld::Score::getQuadMaxInteriorAngle() const
-{
-	float mang=0.f;
-	
-	for( int i=0; i<4; ++i )
-	{
-		vec2 a = mQuad[i];
-		vec2 x = mQuad[(i+1)%4];
-		vec2 b = mQuad[(i+2)%4];
-		
-		a -= x;
-		b -= x;
-		
-		float ang = acos( dot(a,b) / (length(a)*length(b)) );
-		
-		if (ang>mang) mang=ang;
-		
-	}
-	
-	return mang;
 }
 
 MusicWorld::MusicWorld()
@@ -429,11 +289,16 @@ int MusicWorld::getScoreOctaveShift( const Score& score, const PolyLine2& wrtReg
 MusicWorld::InstrumentRef
 MusicWorld::decideInstrumentForScore( const Score& s, int* octaveShift )
 {
-	// FIXME: finish meta parameter system
-//	InstrumentRef meta = getInstrumentForMetaParam( chooseNextMetaParam() );
-//	if (meta) return meta;
-	/////
+	// meta-parameter?
+	vec2 scoreSize = s.getSizeInWorldSpace();
 	
+	if ( min(scoreSize.x,scoreSize.y) < 10.f )
+	{
+		InstrumentRef meta = getInstrumentForMetaParam( chooseNextMetaParam() );
+		if (meta) return meta;
+	}
+	
+	// ...else: do instrument by world region
 	vec2 c = s.getPolyLine().calcCentroid();
 	
 	// find
@@ -828,6 +693,61 @@ static void doTemporalMatBlend( Pipeline& pipeline, string scoreName, cv::Mat ol
 	else if (verbose) cout << "no-blend " << diff << endl;
 }
 
+void MusicWorld::quantizeImage( Pipeline& pipeline,
+	MusicWorld::Score& s,
+	string scoreName,
+	bool doTemporalBlend,
+	cv::Mat oldTemporalBlendImage,
+	int quantizeNumCols, int quantizeNumRows ) const
+{
+	cv::Mat &inquant = s.mImage;
+	
+	if (quantizeNumCols<=0) quantizeNumCols = inquant.cols;
+	if (quantizeNumRows<=0) quantizeNumRows = inquant.rows;
+	
+	cv::Mat quantized;
+	cv::resize( inquant, quantized, cv::Size(quantizeNumCols,quantizeNumRows), 0, 0, cv::INTER_AREA ); // best?
+		// cv::INTER_AREA is the best.
+		// cv::INTER_LANCZOS4 is good
+		// these are not so great: cv::INTER_CUBIC, cv::INTER_NEAREST, cv::INTER_LINEAR
+	
+	vec2 outsize = vec2( s.mImage.cols, s.mImage.rows );
+	
+	pipeline.then( scoreName + " quantized", quantized);
+	pipeline.setImageToWorldTransform(
+		pipeline.getStages().back()->mImageToWorld
+			* glm::scale(vec3(outsize.x / (float)quantizeNumCols, outsize.y / (float)quantizeNumRows, 1))
+		);
+	pipeline.getStages().back()->mLayoutHintScale = .5f;
+	pipeline.getStages().back()->mLayoutHintOrtho = true;
+
+	// blend
+	if ( doTemporalBlend )
+	{
+		doTemporalMatBlend( pipeline, scoreName, oldTemporalBlendImage, quantized,
+			mScoreTrackTemporalBlendFrac, mScoreTrackTemporalBlendIfDiffFracLT );
+	}
+	
+	// threshold
+	cv::Mat &inthresh = quantized;
+	cv::Mat thresholded;
+
+	if ( mScoreNoteVisionThresh < 0 ) {
+		cv::threshold( inthresh, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
+	} else {
+		cv::threshold( inthresh, thresholded, mScoreNoteVisionThresh, 255, cv::THRESH_BINARY );
+	}
+	
+	pipeline.then( scoreName + " thresholded", thresholded);
+	pipeline.getStages().back()->mLayoutHintScale = .5f;
+	pipeline.getStages().back()->mLayoutHintOrtho = true;
+
+
+	// output
+	s.mQuantizedImagePreThreshold = quantized;
+	s.mQuantizedImage = thresholded;
+}
+
 void MusicWorld::updateCustomVision( Pipeline& pipeline )
 {
 	// this function grabs the bitmaps for each score
@@ -847,11 +767,6 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		cv::Mat oldTemporalBlendImage;
 		const bool doTemporalBlend = instr && instr->mSynthType==Instrument::SynthType::MIDI && mScoreTrackTemporalBlendFrac>0.f;
 		if ( doTemporalBlend ) oldTemporalBlendImage = s.mQuantizedImagePreThreshold.clone(); // must clone to work!
-		
-		
-		// quantization params
-		int quantizeNumRows = s.mNoteCount;
-		int quantizeNumCols = mBeatCount;
 		
 		// get src points
 		vec2		srcpt[4];
@@ -889,61 +804,32 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		pipeline.setImageToWorldTransform( getOcvPerspectiveTransform(dstpt,s.mQuad) );
 		pipeline.getStages().back()->mLayoutHintScale = .5f;
 		pipeline.getStages().back()->mLayoutHintOrtho = true;
-
-		// temporal blending (to remove temporal aliasing)
-//		if ( doTemporalBlend )
-//		{
-//			doTemporalMatBlend( pipeline, scoreName, oldTemporalBlendImage, s.mImage, mScoreTrackTemporalBlendFrac );
-//		}
 		
-		// midi quantize
+		// quantize
 		if ( instr && instr->mSynthType==Instrument::SynthType::MIDI )
 		{
-			// quantize
-			cv::Mat &inquant = s.mImage;
+			// midi
+			quantizeImage(pipeline,s,scoreName,doTemporalBlend,oldTemporalBlendImage, mBeatCount, s.mNoteCount );
+		}
+		else if ( instr && instr->mSynthType==Instrument::SynthType::Meta )
+		{
+			// meta-param
+			quantizeImage(pipeline,s,scoreName,doTemporalBlend,oldTemporalBlendImage, 1, -1 );
 			
-			if (quantizeNumCols<=0) quantizeNumCols = inquant.cols;
-			if (quantizeNumRows<=0) quantizeNumRows = inquant.rows;
+			// parse value...
+			s.mMetaParamSliderValue = 0.f;
+			float sumw = 0.f;
 			
-			cv::Mat quantized;
-			cv::resize( inquant, quantized, cv::Size(quantizeNumCols,quantizeNumRows), 0, 0, cv::INTER_AREA ); // best?
-				// cv::INTER_AREA is the best.
-				// cv::INTER_LANCZOS4 is good
-				// these are not so great: cv::INTER_CUBIC, cv::INTER_NEAREST, cv::INTER_LINEAR
-			
-			pipeline.then( scoreName + " quantized", quantized);
-			pipeline.setImageToWorldTransform(
-				pipeline.getStages().back()->mImageToWorld
-					* glm::scale(vec3(outsize.x / (float)quantizeNumCols, outsize.y / (float)quantizeNumRows, 1))
-				);
-			pipeline.getStages().back()->mLayoutHintScale = .5f;
-			pipeline.getStages().back()->mLayoutHintOrtho = true;
-
-			// blend
-			if ( doTemporalBlend )
+			for( int i=0; i<s.mQuantizedImage.rows; ++i )
 			{
-				doTemporalMatBlend( pipeline, scoreName, oldTemporalBlendImage, quantized,
-					mScoreTrackTemporalBlendFrac, mScoreTrackTemporalBlendIfDiffFracLT );
+				float v = 1.f - (float)i / (float)(s.mQuantizedImage.rows-1);
+				float w = 1.f - (float)s.mQuantizedImage.at<unsigned char>(i,0) / 255.f;
+				
+				sumw += w;
+				s.mMetaParamSliderValue += v * w;
 			}
 			
-			// threshold
-			cv::Mat &inthresh = quantized;
-			cv::Mat thresholded;
-
-			if ( mScoreNoteVisionThresh < 0 ) {
-				cv::threshold( inthresh, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
-			} else {
-				cv::threshold( inthresh, thresholded, mScoreNoteVisionThresh, 255, cv::THRESH_BINARY );
-			}
-			
-			pipeline.then( scoreName + " thresholded", thresholded);
-			pipeline.getStages().back()->mLayoutHintScale = .5f;
-			pipeline.getStages().back()->mLayoutHintOrtho = true;
-
-
-			// output
-			s.mQuantizedImagePreThreshold = quantized;
-			s.mQuantizedImage = thresholded;
+			s.mMetaParamSliderValue /= sumw;
 		}
 		
 		//
@@ -966,37 +852,6 @@ MusicWorld::InstrumentRef MusicWorld::getInstrumentForScore( const Score& score 
 		else return 0;
 	}
 	else return i->second;
-}
-
-bool MusicWorld::isScoreValueHigh( uchar value ) const
-{
-	const int kValueThresh = 100;
-	
-	return value < kValueThresh ;
-	// if dark, then high
-	// else low
-}
-
-int MusicWorld::getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const
-{
-	int x2;
-	
-	for( x2=x;
-		 x2<image.cols
-			&& isScoreValueHigh(image.at<unsigned char>(image.rows-1-y,x2)) ;
-		 ++x2 )
-	{}
-
-	int len = x2-x;
-	
-	return len;
-}
-
-float MusicWorld::getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const
-{
-	// can return 0, which means we filtered out super short image noise-notes
-	
-	return (float)getNoteLengthAsImageCols(image,x,y) / (float)image.cols;
 }
 
 void MusicWorld::update()
@@ -1026,9 +881,9 @@ void MusicWorld::update()
 			{
 				unsigned char value = score.mQuantizedImage.at<unsigned char>(score.mNoteCount-1-y,x) ;
 				
-				if ( isScoreValueHigh(value) )
+				if ( score.isScoreValueHigh(value) )
 				{
-					float duration = score.mDuration * getNoteLengthAsScoreFrac(score.mQuantizedImage,x,y);
+					float duration = score.mDuration * score.getNoteLengthAsScoreFrac(score.mQuantizedImage,x,y);
 					
 					if (duration>0)
 					{
@@ -1218,73 +1073,6 @@ void MusicWorld::updateAdditiveScoreSynthesis()
 	}
 }
 
-void drawLines( vector<vec2> points )
-{
-	const int dims = 2;
-	const int size = sizeof( vec2 ) * points.size();
-	auto ctx = context();
-	const GlslProg* curGlslProg = ctx->getGlslProg();
-	if( ! curGlslProg ) {
-//		CI_LOG_E( "No GLSL program bound" );
-		return;
-	}
-
-	ctx->pushVao();
-	ctx->getDefaultVao()->replacementBindBegin();
-
-	VboRef arrayVbo = ctx->getDefaultArrayVbo( size );
-	ScopedBuffer bufferBindScp( arrayVbo );
-
-	arrayVbo->bufferSubData( 0, size, points.data() );
-	int posLoc = curGlslProg->getAttribSemanticLocation( geom::Attrib::POSITION );
-	if( posLoc >= 0 ) {
-		enableVertexAttribArray( posLoc );
-		vertexAttribPointer( posLoc, dims, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)nullptr );
-	}
-	ctx->getDefaultVao()->replacementBindEnd();
-	ctx->setDefaultShaderVars();
-	ctx->drawArrays( GL_LINES, 0, points.size() );
-	ctx->popVao();
-}
-
-void drawSolidTriangles( vector<vec2> pts )
-{
-	auto ctx = context();
-	const GlslProg* curGlslProg = ctx->getGlslProg();
-	if( ! curGlslProg ) {
-//		CI_LOG_E( "No GLSL program bound" );
-		return;
-	}
-
-//	GLfloat data[3*2+3*2]; // both verts and texCoords
-//	memcpy( data, pts, sizeof(float) * pts.size() * 2 );
-//	if( texCoord )
-//		memcpy( data + 3 * 2, texCoord, sizeof(float) * 3 * 2 );
-
-	ctx->pushVao();
-	ctx->getDefaultVao()->replacementBindBegin();
-	VboRef defaultVbo = ctx->getDefaultArrayVbo( sizeof(float)*pts.size()*2 );
-	ScopedBuffer bufferBindScp( defaultVbo );
-	defaultVbo->bufferSubData( 0, sizeof(float) * pts.size() * 2, &pts[0] );
-
-	int posLoc = curGlslProg->getAttribSemanticLocation( geom::Attrib::POSITION );
-	if( posLoc >= 0 ) {
-		enableVertexAttribArray( posLoc );
-		vertexAttribPointer( posLoc, 2, GL_FLOAT, GL_FALSE, 0, (void*)0 );
-	}
-//	if( texCoord ) {
-//		int texLoc = curGlslProg->getAttribSemanticLocation( geom::Attrib::TEX_COORD_0 );
-//		if( texLoc >= 0 ) {
-//			enableVertexAttribArray( texLoc );
-//			vertexAttribPointer( texLoc, 2, GL_FLOAT, GL_FALSE, 0, (void*)(sizeof(float)*6) );
-//		}
-//	}
-	ctx->getDefaultVao()->replacementBindEnd();
-	ctx->setDefaultShaderVars();
-	ctx->drawArrays( GL_TRIANGLES, 0, pts.size() );
-	ctx->popVao();
-}
-
 void MusicWorld::draw( GameWorld::DrawType drawType )
 {
 //	return;
@@ -1304,172 +1092,7 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 	// scores
 	for( const auto &score : mScores )
 	{
-		InstrumentRef instr = getInstrumentForScore(score);
-		if (!instr) continue;
-
-		if (drawSolidColorBlocks)
-		{
-			gl::color(0,0,0);
-			gl::drawSolid(score.getPolyLine());
-		}
-		
-		if ( instr->mSynthType==Instrument::SynthType::Additive )
-		{
-			// additive
-			gl::color(instr->mScoreColor);
-			gl::draw( score.getPolyLine() );
-		}
-		else if ( instr->mSynthType==Instrument::SynthType::Meta )
-		{
-			Rectf r( score.mQuad[0], score.mQuad[2] );
-			r.canonicalize();
-			
-			gl::color(instr->mScoreColor);
-//			gl::drawSolidRoundedRect( r, 1.f );
-			gl::drawStrokedRoundedRect(r, 1.f );
-		}
-		else if ( instr->mSynthType==Instrument::SynthType::MIDI )
-		{
-			// midi
-			
-			// collect notes into a batch
-			// (probably wise to extract this geometry/data when processing vision data,
-			// then use it for both playback and drawing).
-			const float invcols = 1.f / (float)(score.mQuantizedImage.cols);
-
-			const float yheight = 1.f / (float)score.mNoteCount;
-			
-			vector<vec2> onNoteTris;
-			vector<vec2> offNoteTris;
-			
-			const float playheadFrac = score.getPlayheadFrac();
-			
-			for ( int y=0; y<score.mNoteCount; ++y )
-			{
-				const float y1frac = y * yheight + yheight*.2f;
-				const float y2frac = y * yheight + yheight*.8f;
-				
-				for( int x=0; x<score.mQuantizedImage.cols; ++x )
-				{
-					if ( isScoreValueHigh(score.mQuantizedImage.at<unsigned char>(score.mNoteCount-1-y,x)) )
-					{
-						// how wide?
-						int length = getNoteLengthAsImageCols(score.mQuantizedImage,x,y);
-						
-						const float x1frac = x * invcols;
-						const float x2frac = min( 1.f, (x+length) * invcols );
-						
-						vec2 start1 = score.fracToQuad( vec2( x1frac, y1frac) ) ;
-						vec2 end1   = score.fracToQuad( vec2( x2frac, y1frac) ) ;
-
-						vec2 start2 = score.fracToQuad( vec2( x1frac, y2frac) ) ;
-						vec2 end2   = score.fracToQuad( vec2( x2frac, y2frac) ) ;
-						
-						const bool isInFlight = playheadFrac > x1frac && playheadFrac < x2frac;
-						
-						vector<vec2>& tris = isInFlight ? onNoteTris : offNoteTris ;
-						
-						tris.push_back( start1 );
-						tris.push_back( start2 );
-						tris.push_back( end2 );
-						tris.push_back( start1 );
-						tris.push_back( end2 );
-						tris.push_back( end1 );
-						
-						// skip ahead
-						x = x + length+1;
-					}
-				}
-			}
-			
-			// draw batched notes
-			if (!onNoteTris.empty())
-			{
-				gl::color(instr->mNoteOnColor);
-				drawSolidTriangles(onNoteTris);
-			}
-			if (!offNoteTris.empty())
-			{
-				gl::color(instr->mNoteOffColor);
-				drawSolidTriangles(offNoteTris);
-			}
-			
-			// lines
-			{
-				// TODO: Make this configurable for 5/4 time, etc.
-				const int drawBeatDivision = 4;
-
-				vector<vec2> pts;
-				
-				gl::color(instr->mScoreColor);
-				gl::draw( score.getPolyLine() );
-
-				// Scale lines
-				for( int i=0; i<score.mNoteCount; ++i )
-				{
-					float f = (float)(i+1) / (float)score.mNoteCount;
-					
-					pts.push_back( lerp(score.mQuad[3], score.mQuad[0],f) );
-					pts.push_back( lerp(score.mQuad[2], score.mQuad[1],f) );
-				}
-
-				// Off-beat lines
-				for( int i=0; i<score.mBeatCount; ++i )
-				{
-					if (i % drawBeatDivision == 0) continue;
-
-					float f = (float)i / (float)score.mBeatCount;
-
-					pts.push_back( lerp(score.mQuad[1], score.mQuad[0],f) );
-					pts.push_back( lerp(score.mQuad[2], score.mQuad[3],f) );
-				}
-				
-				drawLines(pts);
-
-				// New points for new colors
-				pts.clear();
-				// Down-beat lines
-				for( int i=0; i<score.mBeatCount; ++i )
-				{
-					if (i % drawBeatDivision != 0) continue;
-
-					float f = (float)i / (float)score.mBeatCount;
-
-					pts.push_back( lerp(score.mQuad[1], score.mQuad[0],f) );
-					pts.push_back( lerp(score.mQuad[2], score.mQuad[3],f) );
-				}
-				vec3 scoreColorHSV = rgbToHsv(instr->mScoreColor);
-				scoreColorHSV.x = fmod(scoreColorHSV.x + 0.5, 1.0);
-				gl::color( hsvToRgb(scoreColorHSV)  );
-				drawLines(pts);
-			}
-
-
-		}
-		
-		// Draw playhead (if not a Meta instrument score)
-		if (instr->mSynthType != Instrument::SynthType::Meta)
-		{
-			gl::color( instr->mPlayheadColor );
-			
-			vec2 playhead[2];
-			score.getPlayheadLine(playhead);
-			gl::drawLine( playhead[0], playhead[1] );
-		
-			// octave indicator
-			float octaveFrac = (float)score.mOctave / (float)mNumOctaves + .5f ;
-			
-			gl::drawSolidCircle( lerp(playhead[0],playhead[1],octaveFrac), .5f, 6 );
-		}
-
-		// quad debug
-		if (0)
-		{
-			gl::color( 1,0,0 );
-			gl::drawSolidCircle(score.mQuad[0], 1);
-			gl::color( 0,1,0 );
-			gl::drawSolidCircle(score.mQuad[1], 1);
-		}
+		score.draw(*this,drawType);
 	}
 
 	
