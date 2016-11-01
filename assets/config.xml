@@ -110,6 +110,23 @@
 
 		</PongWorld>
 
+		<CalibrateWorld>
+
+			<BoardCols>7</BoardCols>
+			<BoardRows>7</BoardRows>
+			<DrawBoard>0</DrawBoard>
+			
+			<!-- cm -->
+			<Vision>
+				<ContourMinRadius>			1	</ContourMinRadius>
+				<ContourMinArea>			1	</ContourMinArea>
+				<ContourDPEpsilon>			1	</ContourDPEpsilon>
+				<ContourMinWidth>			2	</ContourMinWidth>
+			</Vision>
+
+		</CalibrateWorld>
+		
+		
 		<MusicWorld>
 		
 		

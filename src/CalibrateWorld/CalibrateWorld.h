@@ -19,15 +19,35 @@ public:
 //	~CalibrateWorld();
 	
 	string getSystemName() const override { return "CalibrateWorld"; }
+	void setParams( XmlTree ) override;
 
 //	void gameWillLoad() override;
 	void update() override;
-	void updateCustomVision( Pipeline& pipeline );
+	void updateCustomVision( Pipeline& pipeline ) override;
 	
 	void draw( DrawType ) override;
 
 private:
-	vector<vec2> mCorners;
+
+	// params
+	int mBoardCols=7, mBoardRows=7;
+	bool mDrawBoard=false;
+	bool mVerbose=true;
+	
+	//
+	void drawChessboard( vec2 c, vec2 size  ) const;
+	
+	bool areBoardCornersUnique( vector<cv::Point2f> ) const; // make sure different enough from those we know already
+	void foundFullSetOfCorners( vector<cv::Point2f> );
+	
+	//
+	vector< vector<cv::Point2f> > mKnownBoards;
+	void tryToSolveWithKnownBoards( cv::Size );
+	
+	// for visual feedback; in world space
+	vector<vec2> mLiveCorners;
+	
+	bool mLiveAllCornersFound=false;
 	
 };
 
