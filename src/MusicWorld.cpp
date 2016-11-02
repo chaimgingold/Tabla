@@ -1004,6 +1004,10 @@ void MusicWorld::update()
 				// See if the note was previously triggered but no longer exists, and turn it off if so
 				else if (isNoteInFlight( instr, note ))
 				{
+					// TODO: this should work as long a there isn't >1 score per instrument. In that case,
+					// this will start to behave weirdly. Proper solution is to scan all scores and
+					// aggregate all the on notes, and then join the list of desired on notes to actual on notes
+					// in a single pass, taking action to on/off them as needed.
 					sendNoteOffForInstr( instr, note );
 				}
 			}

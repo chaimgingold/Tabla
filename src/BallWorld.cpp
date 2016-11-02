@@ -33,7 +33,7 @@ void BallWorld::draw( DrawType drawType )
 		}
 		else
 		{
-			int numSegments = -1 ;
+			int numSegments = -1 ; // should resolve to a small #
 			if ( drawType==DrawType::Projector || drawType==DrawType::UIMain ) numSegments = 20;
 			
 			// squash + stretch

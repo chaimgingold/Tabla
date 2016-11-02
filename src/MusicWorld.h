@@ -144,7 +144,6 @@ private:
 	class Score
 	{
 	public:
-		
 		void draw( MusicWorld& world, GameWorld::DrawType ) const;
 		
 		// shape
@@ -203,6 +202,12 @@ private:
 		bool  isScoreValueHigh( uchar ) const;
 		float getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const;
 		int   getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const;
+		
+	private:
+		void drawNotes		( InstrumentRef instr, MusicWorld& world, GameWorld::DrawType drawType ) const;
+		void drawScoreLines	( InstrumentRef instr, MusicWorld& world, GameWorld::DrawType drawType ) const;
+		void drawPlayhead	( InstrumentRef instr, MusicWorld& world, GameWorld::DrawType drawType ) const;
+		void drawMetaParam	( InstrumentRef instr, MusicWorld& world, GameWorld::DrawType drawType ) const;
 	};
 	vector<Score> mScores;
 	
