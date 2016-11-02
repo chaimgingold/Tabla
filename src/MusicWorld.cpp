@@ -551,6 +551,10 @@ MusicWorld::MetaParamInfo MusicWorld::getMetaParamInfo( MetaParam p ) const
 	{
 		info.mNumDiscreteStates = mScales.size();
 	}
+	else if ( p==MetaParam::RootNote )
+	{
+		info.mNumDiscreteStates = 12;
+	}
 	
 	return info;
 }
@@ -665,8 +669,14 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			
 			if (1) // just copy everything forward from previous one
 			{
+				Score newScore = *match; // store it for exceptions
+				
+				// new <= old
 				*match = c;
+
 				// any exceptions introduce here
+				if (match->mMetaParamSliderValue==-1.f) match->mMetaParamSliderValue = newScore.mMetaParamSliderValue;
+					// maybe we lost a slider value
 			}
 			else // do it piecemeal
 			{
@@ -877,6 +887,8 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		}
 		else if ( instr && instr->mSynthType==Instrument::SynthType::Meta )
 		{
+			float oldSliderValue = s.mMetaParamSliderValue;
+			
 			// meta-param
 			quantizeImage(pipeline,s,scoreName,doTemporalBlend,oldTemporalBlendImage, 1, -1 );
 				// we don't quantize to num states because it behaves weird.
@@ -899,8 +911,8 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 			
 			if ( sumw==0.f )
 			{
-				// uh-oh!
-				s.mMetaParamSliderValue=0.f;
+				// uh-oh! fall back to last frame value
+				s.mMetaParamSliderValue = oldSliderValue;
 			}
 			else
 			{

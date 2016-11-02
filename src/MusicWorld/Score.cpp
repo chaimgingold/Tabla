@@ -135,12 +135,17 @@ void MusicWorld::Score::draw( MusicWorld& world, GameWorld::DrawType drawType ) 
 		float y1, y2;
 		if ( info.isDiscrete() )
 		{
+			vector<vec2> lines;
+			
 			for( int i=0; i<info.mNumDiscreteStates; ++i )
 			{
 				float y = (float)i/(float)(info.mNumDiscreteStates);
-				gl::drawLine( fracToQuad(vec2(0.f,y)), fracToQuad(vec2(1.f,y)) );
+				lines.push_back( fracToQuad(vec2(0.f,y)) );
+				lines.push_back( fracToQuad(vec2(1.f,y)) );
 			}
-
+			
+			drawLines(lines);
+			
 			y1=mMetaParamSliderValue;
 			y2=mMetaParamSliderValue + 1.f / (float)info.mNumDiscreteStates;
 		}
@@ -151,15 +156,17 @@ void MusicWorld::Score::draw( MusicWorld& world, GameWorld::DrawType drawType ) 
 			y1 = max( 0.f, mMetaParamSliderValue - k );
 			y2 = min( 1.f, mMetaParamSliderValue + k );
 		}
-		//else gl::drawLine( fracToQuad(vec2(0.f,mMetaParamSliderValue)), fracToQuad(vec2(1.f,mMetaParamSliderValue)) );
 
-		PolyLine2 p;
-		p.push_back( fracToQuad(vec2(0.f,y1)) );
-		p.push_back( fracToQuad(vec2(0.f,y2)) );
-		p.push_back( fracToQuad(vec2(1.f,y2)) );
-		p.push_back( fracToQuad(vec2(1.f,y1)) );
-		p.setClosed();
-		gl::drawSolid(p);
+		if ( mMetaParamSliderValue != -1.f )
+		{
+			PolyLine2 p;
+			p.push_back( fracToQuad(vec2(0.f,y1)) );
+			p.push_back( fracToQuad(vec2(0.f,y2)) );
+			p.push_back( fracToQuad(vec2(1.f,y2)) );
+			p.push_back( fracToQuad(vec2(1.f,y1)) );
+			p.setClosed();
+			gl::drawSolid(p);
+		}
 	}
 	else if ( instr->mSynthType==Instrument::SynthType::MIDI )
 	{
