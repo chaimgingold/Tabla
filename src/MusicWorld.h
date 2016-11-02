@@ -126,7 +126,6 @@ private:
 	float		  decideDurationForScore  ( const Score& ) const;
 	InstrumentRef getInstrumentForMetaParam( MetaParam ) const;
 
-
 	void updateMetaParameter(MetaParam metaParam, float value);
 	void updateScoresWithMetaParams();
 	
@@ -242,14 +241,14 @@ private:
 		float mDuration;
 	};
 	
-	map< tOnNoteKey, tOnNoteInfo, cmpOnNoteKey > mOnNotes ;
+	map < tOnNoteKey, tOnNoteInfo, cmpOnNoteKey > mOnNotes ;
 		// (instrument,note) -> (start time, duration)
 	
 	bool isNoteInFlight( InstrumentRef instr, int note ) const;
 	void updateNoteOffs();
 	void doNoteOn( InstrumentRef instr, int note, float duration ); // start time is now
 
-
+	void sendNoteOffForInstr( InstrumentRef instr, int note);
 
 	// midi convenience methods
 	void sendMidi( RtMidiOutRef, uchar, uchar, uchar );

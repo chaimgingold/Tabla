@@ -660,7 +660,6 @@ void MusicWorld::updateContours( const ContourVector &contours )
 
 void MusicWorld::updateScoresWithMetaParams() {
 	// Update the scale/beat configuration in case it's changed from the xml
-	// FIXME: is this the right place to do this?
 	for (auto &s : mScores ) {
 		s.mRootNote = mRootNote;
 		s.mNoteCount = mNoteCount;
@@ -915,7 +914,9 @@ void MusicWorld::update()
 			for ( int y=0; y<score.mNoteCount; ++y )
 			{
 				unsigned char value = score.mQuantizedImage.at<unsigned char>(score.mNoteCount-1-y,x);
-				
+
+				int note = score.noteForY(instr, y);
+
 				if ( score.isScoreValueHigh(value) )
 				{
 					float duration =
@@ -925,9 +926,13 @@ void MusicWorld::update()
 					
 					if (duration>0)
 					{
-						int note = score.noteForY(instr, y);
 						doNoteOn( instr, note, duration );
 					}
+				}
+				// See if the note was previously triggered but no longer exists, and turn it off if so
+				else if (isNoteInFlight( instr, note ))
+				{
+					sendNoteOffForInstr( instr, note );
 				}
 			}
 		}
@@ -983,16 +988,19 @@ void MusicWorld::updateNoteOffs()
 		
 		if (off)
 		{
-			InstrumentRef instr = it->first.mInstrument;
-
-			uchar channel = instr->channelForNote(it->first.mNote);
-
-			sendNoteOff( instr->mMidiOut, channel, it->first.mNote);
+			sendNoteOffForInstr( it->first.mInstrument, it->first.mNote );
 		}
 		
 		if (off) mOnNotes.erase(it++);
 		else ++it;
 	}
+}
+
+void MusicWorld::sendNoteOffForInstr( InstrumentRef instr, int note)
+{
+	uchar channel = instr->channelForNote(note);
+
+	sendNoteOff( instr->mMidiOut, channel, note);
 }
 
 void MusicWorld::killAllNotes()
