@@ -41,7 +41,7 @@ private:
 	class Instrument;
 	class Score;
 	
-	// params
+	// meta-params
 	enum class MetaParam
 	{
 		Scale=0,
@@ -50,10 +50,18 @@ private:
 //		BeatCount,
 		kNumMetaParams
 	};
+
+	class MetaParamInfo
+	{
+	public:
+		bool isDiscrete() const { return mNumDiscreteStates!=-1; }
+		
+		int mNumDiscreteStates=-1;
+	};
 	
-	MetaParam mNextMetaParam = (MetaParam)0;
-	MetaParam chooseNextMetaParam(); // tries to avoid duplicates on table
-	
+	MetaParamInfo getMetaParamInfo( MetaParam ) const;
+
+	//
 	vec2  mTimeVec;		// in world space, which way does time flow forward?
 	int	  mNoteCount=8;
 	int	  mBeatCount=32;
@@ -126,6 +134,9 @@ private:
 	float		  decideDurationForScore  ( const Score& ) const;
 	InstrumentRef getInstrumentForMetaParam( MetaParam ) const;
 
+	bool		  shouldBeMetaParamScore( const Score& ) const;
+	void		  assignUnassignedMetaParams(); // we do them all at once to get uniqueness.
+
 	void updateMetaParameter(MetaParam metaParam, float value);
 	void updateScoresWithMetaParams();
 	
@@ -154,7 +165,7 @@ private:
 		cv::Mat		mImage;				// thresholded image
 		cv::Mat		mQuantizedImagePreThreshold; // (for inter-frame smoothing)
 		cv::Mat		mQuantizedImage;	// quantized image data for midi playback
-		float		mMetaParamSliderValue; // 0..1
+		float		mMetaParamSliderValue=-1.f; // 0..1
 		
 		// synth parameters
 		string		mInstrumentName; // which synth

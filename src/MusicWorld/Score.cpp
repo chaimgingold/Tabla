@@ -130,12 +130,99 @@ void MusicWorld::Score::draw( MusicWorld& world, GameWorld::DrawType drawType ) 
 		gl::drawStrokedRoundedRect(r, 1.f );
 		
 		// level
-		gl::drawLine( fracToQuad(vec2(0.f,mMetaParamSliderValue)), fracToQuad(vec2(1.f,mMetaParamSliderValue)) );
+		MetaParamInfo info = world.getMetaParamInfo(instr->mMetaParam);
+		
+		float y1, y2;
+		if ( info.isDiscrete() )
+		{
+			vector<vec2> lines;
+			
+			for( int i=0; i<info.mNumDiscreteStates; ++i )
+			{
+				float y = (float)i/(float)(info.mNumDiscreteStates);
+				lines.push_back( fracToQuad(vec2(0.f,y)) );
+				lines.push_back( fracToQuad(vec2(1.f,y)) );
+			}
+			
+			drawLines(lines);
+			
+			y1=mMetaParamSliderValue;
+			y2=mMetaParamSliderValue + 1.f / (float)info.mNumDiscreteStates;
+		}
+		else
+		{
+			float kcm = 1.f;
+			float k = kcm / getSizeInWorldSpace().y ;
+			y1 = max( 0.f, mMetaParamSliderValue - k );
+			y2 = min( 1.f, mMetaParamSliderValue + k );
+		}
+
+		if ( mMetaParamSliderValue != -1.f )
+		{
+			PolyLine2 p;
+			p.push_back( fracToQuad(vec2(0.f,y1)) );
+			p.push_back( fracToQuad(vec2(0.f,y2)) );
+			p.push_back( fracToQuad(vec2(1.f,y2)) );
+			p.push_back( fracToQuad(vec2(1.f,y1)) );
+			p.setClosed();
+			gl::drawSolid(p);
+		}
 	}
 	else if ( instr->mSynthType==Instrument::SynthType::MIDI )
 	{
 		// midi
+
+		// lines
+		{
+			// TODO: Make this configurable for 5/4 time, etc.
+			const int drawBeatDivision = 4;
+
+			vector<vec2> pts;
+			
+			gl::color(instr->mScoreColor);
+			gl::draw( getPolyLine() );
+
+			// Scale lines
+			for( int i=0; i<mNoteCount; ++i )
+			{
+				float f = (float)(i+1) / (float)mNoteCount;
+				
+				pts.push_back( lerp(mQuad[3], mQuad[0],f) );
+				pts.push_back( lerp(mQuad[2], mQuad[1],f) );
+			}
+
+			// Off-beat lines
+			for( int i=0; i<mBeatCount; ++i )
+			{
+				if (i % drawBeatDivision == 0) continue;
+
+				float f = (float)i / (float)mBeatCount;
+
+				pts.push_back( lerp(mQuad[1], mQuad[0],f) );
+				pts.push_back( lerp(mQuad[2], mQuad[3],f) );
+			}
+			
+			drawLines(pts);
+
+			// New points for new colors
+			pts.clear();
+			// Down-beat lines
+			for( int i=0; i<mBeatCount; ++i )
+			{
+				if (i % drawBeatDivision != 0) continue;
+
+				float f = (float)i / (float)mBeatCount;
+
+				pts.push_back( lerp(mQuad[1], mQuad[0],f) );
+				pts.push_back( lerp(mQuad[2], mQuad[3],f) );
+			}
+			vec3 scoreColorHSV = rgbToHsv(instr->mScoreColor);
+			scoreColorHSV.x = fmod(scoreColorHSV.x + 0.5, 1.0);
+			gl::color( hsvToRgb(scoreColorHSV)  );
+			drawLines(pts);
+		}
 		
+		// notes
 		// collect notes into a batch
 		// (probably wise to extract this geometry/data when processing vision data,
 		// then use it for both playback and drawing).
@@ -197,58 +284,6 @@ void MusicWorld::Score::draw( MusicWorld& world, GameWorld::DrawType drawType ) 
 			gl::color(instr->mNoteOffColor);
 			drawSolidTriangles(offNoteTris);
 		}
-		
-		// lines
-		{
-			// TODO: Make this configurable for 5/4 time, etc.
-			const int drawBeatDivision = 4;
-
-			vector<vec2> pts;
-			
-			gl::color(instr->mScoreColor);
-			gl::draw( getPolyLine() );
-
-			// Scale lines
-			for( int i=0; i<mNoteCount; ++i )
-			{
-				float f = (float)(i+1) / (float)mNoteCount;
-				
-				pts.push_back( lerp(mQuad[3], mQuad[0],f) );
-				pts.push_back( lerp(mQuad[2], mQuad[1],f) );
-			}
-
-			// Off-beat lines
-			for( int i=0; i<mBeatCount; ++i )
-			{
-				if (i % drawBeatDivision == 0) continue;
-
-				float f = (float)i / (float)mBeatCount;
-
-				pts.push_back( lerp(mQuad[1], mQuad[0],f) );
-				pts.push_back( lerp(mQuad[2], mQuad[3],f) );
-			}
-			
-			drawLines(pts);
-
-			// New points for new colors
-			pts.clear();
-			// Down-beat lines
-			for( int i=0; i<mBeatCount; ++i )
-			{
-				if (i % drawBeatDivision != 0) continue;
-
-				float f = (float)i / (float)mBeatCount;
-
-				pts.push_back( lerp(mQuad[1], mQuad[0],f) );
-				pts.push_back( lerp(mQuad[2], mQuad[3],f) );
-			}
-			vec3 scoreColorHSV = rgbToHsv(instr->mScoreColor);
-			scoreColorHSV.x = fmod(scoreColorHSV.x + 0.5, 1.0);
-			gl::color( hsvToRgb(scoreColorHSV)  );
-			drawLines(pts);
-		}
-
-
 	}
 	
 	// Draw playhead (if not a Meta instrument score)
