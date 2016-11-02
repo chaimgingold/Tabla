@@ -60,7 +60,8 @@ private:
 	};
 	
 	MetaParamInfo getMetaParamInfo( MetaParam ) const;
-
+	map<MetaParam,vec2> mLastSeenMetaParamLoc; // for better inter-frame coherence
+	
 	//
 	vec2  mTimeVec;		// in world space, which way does time flow forward?
 	int	  mNoteCount=8;
@@ -193,6 +194,7 @@ private:
 			// if not a perfect rect, then it's approximate (measures two bisecting axes)
 			// x is axis along which playhead moves; y is perp to it (parallel to playhead)
 		vec2		fracToQuad( vec2 frac ) const; // frac.x = time[0,1], frac.y = note_space[0,1]
+		vec2		getCentroid() const { return fracToQuad(vec2(.5,.5)); }
 		float		getQuadMaxInteriorAngle() const; // looking for concave-ish shapes...
 		
 		Scale mScale;
