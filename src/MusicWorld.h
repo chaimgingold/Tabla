@@ -41,7 +41,7 @@ private:
 	class Instrument;
 	class Score;
 	
-	// params
+	// meta-params
 	enum class MetaParam
 	{
 		Scale=0,
@@ -50,7 +50,18 @@ private:
 //		BeatCount,
 		kNumMetaParams
 	};
+
+	class MetaParamInfo
+	{
+	public:
+		bool isDiscrete() const { return mNumDiscreteStates!=-1; }
+		
+		int mNumDiscreteStates=-1;
+	};
 	
+	MetaParamInfo getMetaParamInfo( MetaParam ) const;
+
+	//
 	vec2  mTimeVec;		// in world space, which way does time flow forward?
 	int	  mNoteCount=8;
 	int	  mBeatCount=32;

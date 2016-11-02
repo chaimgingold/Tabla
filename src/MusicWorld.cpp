@@ -543,6 +543,18 @@ MusicWorld::Score* MusicWorld::getScoreForMetaParam( MetaParam p )
 	return 0;
 }
 
+MusicWorld::MetaParamInfo MusicWorld::getMetaParamInfo( MetaParam p ) const
+{
+	MetaParamInfo info;
+	
+	if ( p==MetaParam::Scale )
+	{
+		info.mNumDiscreteStates = mScales.size();
+	}
+	
+	return info;
+}
+
 void MusicWorld::assignUnassignedMetaParams()
 {
 	// what do we have?
@@ -867,6 +879,8 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		{
 			// meta-param
 			quantizeImage(pipeline,s,scoreName,doTemporalBlend,oldTemporalBlendImage, 1, -1 );
+				// we don't quantize to num states because it behaves weird.
+				// maybe 2x or 4x that might help, but the code below handles continuous values best.
 			
 			// parse value...
 			s.mMetaParamSliderValue = 0.f;
@@ -892,6 +906,16 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 			{
 				// update
 				updateMetaParameter( instr->mMetaParam, s.mMetaParamSliderValue );
+			}
+			
+			// discretize
+			MetaParamInfo paramInfo = getMetaParamInfo(instr->mMetaParam);
+
+			if ( paramInfo.isDiscrete() )
+			{
+				s.mMetaParamSliderValue = roundf( (float)paramInfo.mNumDiscreteStates * s.mMetaParamSliderValue );
+				s.mMetaParamSliderValue = min( s.mMetaParamSliderValue, (float)paramInfo.mNumDiscreteStates-1 );
+				s.mMetaParamSliderValue /= (float)paramInfo.mNumDiscreteStates;
 			}
 		}
 		

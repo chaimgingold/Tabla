@@ -5,6 +5,9 @@
 * Clock system for synced variable tempos
 * Disable sleep
 * Metaparameter sliders (tempo/scale/root-note/beats-per-measure)
+• Discrete sliders for scales 
+• Sliders easier to see
+• Calibration game world WIP
 
 10/24/2016 - 10/28/2016
 * Danceability! Fix off-by-one errors in gridlines and number of beats during playback.
