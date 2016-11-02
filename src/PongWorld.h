@@ -115,6 +115,8 @@ private:
 class PongWorldCartridge : public GameCartridge
 {
 public:
+	virtual string getSystemName() const override { return "PongWorld"; }
+
 	virtual std::shared_ptr<GameWorld> load() const override
 	{
 		return std::make_shared<PongWorld>();

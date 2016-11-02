@@ -300,6 +300,8 @@ private:
 class MusicWorldCartridge : public GameCartridge
 {
 public:
+	virtual string getSystemName() const override { return "MusicWorld"; }
+
 	virtual std::shared_ptr<GameWorld> load() const override
 	{
 		return std::make_shared<MusicWorld>();

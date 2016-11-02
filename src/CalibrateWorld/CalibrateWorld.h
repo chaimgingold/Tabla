@@ -54,6 +54,8 @@ private:
 class CalibrateWorldCartridge : public GameCartridge
 {
 public:
+	virtual string getSystemName() const override { return "CalibrateWorld"; }
+
 	virtual std::shared_ptr<GameWorld> load() const override
 	{
 		return std::make_shared<CalibrateWorld>();

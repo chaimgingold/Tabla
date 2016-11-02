@@ -22,7 +22,33 @@
 		<ConfigWindowMainImageMargin> 32 </ConfigWindowMainImageMargin>
 		<ConfigWindowPipelineGutter> 8 </ConfigWindowPipelineGutter>
 		<ConfigWindowPipelineWidth> 64 </ConfigWindowPipelineWidth>
+		
+		<KeyboardStringTimeout>.2</KeyboardStringTimeout>
 	</App>
+
+	<RFID>
+	<!-- Expects RFID reader to be a USB keyboard that emits 8 digits + a newline char -->
+		<tag>
+			<id>17317668</id>
+			<value>cartridge/BallWorld</value>
+		</tag>
+
+		<tag>
+			<id>17308708</id>
+			<value>cartridge/PongWorld</value>
+		</tag>
+
+		<tag>
+			<id>17317412</id>
+			<value>cartridge/MusicWorld</value>
+		</tag>
+
+		<tag>
+			<id>17325860</id>
+			<value>cartridge/CalibrateWorld</value>
+		</tag>
+		
+	</RFID>
 
 
 	<!-- Projector <> Camera <> World mapping

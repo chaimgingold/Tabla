@@ -11,6 +11,7 @@
 * Better slider value persistence; root note slider is discrete.
 * Improved slider graphics; improved FPS, refactored Score::draw().
 * Meta-sliders have much more solid inter-frame coherency.
+* RFID tag -> game loading works
 
 10/24/2016 - 10/28/2016
 * Danceability! Fix off-by-one errors in gridlines and number of beats during playback.

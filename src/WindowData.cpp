@@ -245,9 +245,8 @@ void WindowData::updateMainImageTransform()
 		}
 		else
 		{
-			// world by default.
-			// (deprecated; not really sure what this even means anymore.)
-			drawSize = mApp.getWorldSize();
+			// world by default. (not really sure what this even means anymore; should never happen.)
+			drawSize = Rectf( mApp.getWorldBoundsPoly().getPoints() ).getSize();
 		}
 		
 		bounds = Rectf( 0, 0, drawSize.x, drawSize.y );

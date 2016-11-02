@@ -245,16 +245,19 @@ void MusicWorld::Score::drawMetaParam( InstrumentRef instr, MusicWorld& world, G
 	float y1, y2;
 	if ( info.isDiscrete() )
 	{
-		vector<vec2> lines;
-		
-		for( int i=0; i<info.mNumDiscreteStates; ++i )
+		if ( drawType != GameWorld::DrawType::UIPipelineThumb ) // optimization
 		{
-			float y = (float)i/(float)(info.mNumDiscreteStates);
-			lines.push_back( fracToQuad(vec2(0.f,y)) );
-			lines.push_back( fracToQuad(vec2(1.f,y)) );
+			vector<vec2> lines;
+			
+			for( int i=0; i<info.mNumDiscreteStates; ++i )
+			{
+				float y = (float)i/(float)(info.mNumDiscreteStates);
+				lines.push_back( fracToQuad(vec2(0.f,y)) );
+				lines.push_back( fracToQuad(vec2(1.f,y)) );
+			}
+			
+			drawLines(lines);
 		}
-		
-		drawLines(lines);
 		
 		y1=mMetaParamSliderValue;
 		y2=mMetaParamSliderValue + 1.f / (float)info.mNumDiscreteStates;

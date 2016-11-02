@@ -30,11 +30,6 @@ PaperBounce3App::~PaperBounce3App()
 	cipd::PureDataNode::ShutdownGlobal();
 }
 
-vec2 PaperBounce3App::getWorldSize() const
-{
-	return Rectf( getWorldBoundsPoly().getPoints() ).getSize();
-}
-
 PolyLine2 PaperBounce3App::getWorldBoundsPoly() const
 {
 	return getPointsAsPoly( mLightLink.mCaptureWorldSpaceCoords, 4 );
@@ -126,8 +121,26 @@ void PaperBounce3App::setup()
 			getXml(app,"ConfigWindowPipelineWidth",mConfigWindowPipelineWidth);
 			getXml(app,"ConfigWindowPipelineGutter",mConfigWindowPipelineGutter);
 			getXml(app,"ConfigWindowMainImageMargin",mConfigWindowMainImageMargin);
+			
+			getXml(app,"KeyboardStringTimeout",mKeyboardStringTimeout);
 		}
 
+		if (xml.hasChild("PaperBounce3/RFID"))
+		{
+			XmlTree rfid = xml.getChild("PaperBounce3/RFID");
+			
+			for( auto item = rfid.begin("tag"); item != rfid.end(); ++item )
+			{
+				if ( item->hasChild("id") && item->hasChild("value") )
+				{
+					int		id		= item->getChild("id").getValue<int>();
+					string	value	= item->getChild("value").getValue();
+					
+					mRFIDKeyToValue[id] = value;
+				}
+			}
+		}
+		
 		// 2. respond
 		lightLinkDidChange(mLightLink);
 
@@ -212,6 +225,7 @@ void PaperBounce3App::setup()
 	// load the games and the game
 	setupGameLibrary();
 	loadDefaultGame();
+	setupRFIDValueToFunction();
 }
 
 void PaperBounce3App::setupGameLibrary()
@@ -220,6 +234,25 @@ void PaperBounce3App::setupGameLibrary()
 	mGameLibrary.push_back( make_shared<PongWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<CalibrateWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<MusicWorldCartridge>() );
+}
+
+void PaperBounce3App::setupRFIDValueToFunction()
+{
+	mRFIDValueToFunction.clear();
+	
+	// game loader functions
+	for( auto i : mGameLibrary )
+	{
+		string name = i->getSystemName();
+		
+		mRFIDValueToFunction[ string("cartridge/") + name ] = [this,name]()
+		{
+			int cartNum = findCartridgeByName(name);
+			
+			if (cartNum==-1) cout << "Failed to find cartridge '" << name << "'" << endl;
+			else this->loadGame(cartNum);
+		};
+	}
 }
 
 void PaperBounce3App::loadDefaultGame()
@@ -265,6 +298,15 @@ void PaperBounce3App::loadAdjacentGame( int libraryIndexDelta )
 		
 		loadGame(i);
 	}
+}
+
+int PaperBounce3App::findCartridgeByName( string name )
+{
+	for( size_t i=0; i<mGameLibrary.size(); ++i )
+	{
+		if ( mGameLibrary[i]->getSystemName() == name ) return i;
+	}
+	return -1;
 }
 
 void PaperBounce3App::setGameWorldXmlParams()
@@ -503,6 +545,22 @@ void PaperBounce3App::draw()
 
 void PaperBounce3App::keyDown( KeyEvent event )
 {
+	// string aggregation
+	{
+		float now = getElapsedSeconds();
+		
+		if ( now - mLastKeyEventTime > mKeyboardStringTimeout )
+		{
+			mKeyboardString.clear();
+		}
+		
+		mKeyboardString += event.getChar();
+		mLastKeyEventTime=now;
+		
+		parseKeyboardString(mKeyboardString);
+	}
+	
+	// handle char
 	switch ( event.getCode() )
 	{
 		case KeyEvent::KEY_f:
@@ -537,6 +595,50 @@ void PaperBounce3App::keyDown( KeyEvent event )
 	}
 }
 
+bool PaperBounce3App::parseKeyboardString( string str )
+{
+	// RFID reader
+	// - 8 digits + newline
+	
+//	cout << "parseKeyboardString( '" << str << "' )" << endl;
+	
+	auto getAsRFID = []( string str ) -> int
+	{
+		if ( str.length() != 9 ) return 0;
+		if ( str[8]!='\n' && str[8]!='\r' ) return 0;
+		
+		for( int i=0; i<8; ++i ) if ( !isdigit(str[i]) ) return 0;
+		
+		return stoi( str.substr(0,8) );
+	};
+	
+	int rfid = getAsRFID(str);
+	
+	if (rfid)
+	{
+		// rfid -> value
+		cout << "RFID: #" << rfid << endl;
+		
+		auto value = mRFIDKeyToValue.find(rfid);
+		
+		if (value == mRFIDKeyToValue.end()) cout << "\tUnmapped RFID key " << rfid << endl;
+		else
+		{
+			cout << "\t" << rfid << " => " << value->second << endl;
+			
+			// value -> function
+			auto func = mRFIDValueToFunction.find(value->second);
+			if ( func != mRFIDValueToFunction.end() && func->second )
+			{
+				// do it
+				func->second();
+			}
+			else cout << "\tNo function defined" << endl;
+		}
+	}
+
+	return false;
+}
 
 CINDER_APP( PaperBounce3App, RendererGl(RendererGl::Options().msaa(8)), [&]( App::Settings *settings ) {
 	settings->setFrameRate(kRequestFrameRate);

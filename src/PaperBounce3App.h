@@ -76,8 +76,9 @@ class PaperBounce3App : public App {
 	void loadDefaultGame();
 	void loadGame( int libraryIndex );
 	void loadAdjacentGame( int libraryIndexDelta );
+	int  findCartridgeByName( string ); // -1 for fail
 	
-	vector< std::shared_ptr<GameCartridge> > mGameLibrary;
+	vector<GameCartridgeRef> mGameLibrary;
 	int mGameWorldCartridgeIndex=-1; // what index of mGameLibrary did mGameWorld come from?
 
 	// game xml params
@@ -86,10 +87,20 @@ class PaperBounce3App : public App {
 
 	// world info
 	PolyLine2 getWorldBoundsPoly() const;
-	vec2	  getWorldSize() const; // almost completely deprecated; hardly used.
 		// This is actually the camera world polygon mapping.
 		// For all practical purposes, this is identical to the projector world polygon mapping.
 	
+	
+	// keyboard input (for RFID device code parsing)
+	string	mKeyboardString; // aggregate keystrokes here
+	float	mLastKeyEventTime=-MAXFLOAT; // when was last keystroke?
+	float	mKeyboardStringTimeout=.2f; // how long to wait before clearing the keyboard string buffer?
+	bool	parseKeyboardString( string ); // returns true if successful
+	
+	map<int,string> mRFIDKeyToValue; // maps RFID #s to semantic strings
+	map<string,function<void()>> mRFIDValueToFunction; // maps RFID semantic strings to code
+	
+	void setupRFIDValueToFunction(); // scans game library and binds loader code to rfid values
 	
 	// ui
 	Font				mFont;
