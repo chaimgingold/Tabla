@@ -152,23 +152,11 @@ void CalibrateWorld::draw( DrawType drawType )
 		if ( ci::app::getElapsedSeconds()-mLastCornersSeenWhen > 2.f )
 		{
 			float k = 4.f;
-			promptDraw = fmod( ci::app::getElapsedSeconds(), k ) < k/4 ;
+			promptDraw = fmod( ci::app::getElapsedSeconds(), k ) < k*.5 ;
 		}
 		
 		if (mDrawBoard || promptDraw) drawChessboard( center, vec2(1,1)*40.f );
 	}
-	
-//	gl::color(1,0,0);
-//	gl::draw( getWorldBoundsPoly() );
-	
-//	gl::drawStrokedCircle( center, 10.f, 20 );
-	
-//	vec2 c = getWorldBoundsPoly().calcCentroid();
-	
-//	for( auto p : getWorldBoundsPoly().getPoints() )
-//	{
-//		gl::drawLine( center, p );
-//	}
 	
 	//
 	if ( drawType != GameWorld::DrawType::UIPipelineThumb )
