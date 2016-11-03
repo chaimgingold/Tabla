@@ -250,7 +250,7 @@ void PaperBounce3App::setupRFIDValueToFunction()
 			int cartNum = findCartridgeByName(name);
 			
 			if (cartNum==-1) cout << "Failed to find cartridge '" << name << "'" << endl;
-			else this->loadGame(cartNum);
+			else if (cartNum!=mGameWorldCartridgeIndex) this->loadGame(cartNum);
 		};
 	}
 }
