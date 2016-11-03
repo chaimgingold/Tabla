@@ -557,7 +557,8 @@ void PaperBounce3App::keyDown( KeyEvent event )
 		mKeyboardString += event.getChar();
 		mLastKeyEventTime=now;
 		
-		parseKeyboardString(mKeyboardString);
+		bool handled = parseKeyboardString(mKeyboardString);
+		if (handled) mKeyboardString="";
 	}
 	
 	// handle char
@@ -597,19 +598,20 @@ void PaperBounce3App::keyDown( KeyEvent event )
 
 bool PaperBounce3App::parseKeyboardString( string str )
 {
+	bool handled = false;
+	
 	// RFID reader
-	// - 8 digits + newline
+	// - digits + newline
 	
 //	cout << "parseKeyboardString( '" << str << "' )" << endl;
 	
 	auto getAsRFID = []( string str ) -> int
 	{
-		if ( str.length() != 9 ) return 0;
-		if ( str[8]!='\n' && str[8]!='\r' ) return 0;
+		if ( str.back()!='\n' && str.back()!='\r' ) return 0;
 		
-		for( int i=0; i<8; ++i ) if ( !isdigit(str[i]) ) return 0;
+		for( int i=0; i<str.length()-2; ++i ) if ( !isdigit(str[i]) ) return 0;
 		
-		return stoi( str.substr(0,8) );
+		return stoi( str.substr(0,str.length()-1) );
 	};
 	
 	int rfid = getAsRFID(str);
@@ -632,12 +634,13 @@ bool PaperBounce3App::parseKeyboardString( string str )
 			{
 				// do it
 				func->second();
+				handled=true;
 			}
 			else cout << "\tNo function defined" << endl;
 		}
 	}
 
-	return false;
+	return handled;
 }
 
 CINDER_APP( PaperBounce3App, RendererGl(RendererGl::Options().msaa(8)), [&]( App::Settings *settings ) {

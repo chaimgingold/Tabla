@@ -27,7 +27,7 @@
 	</App>
 
 	<RFID>
-	<!-- Expects RFID reader to be a USB keyboard that emits 8 digits + a newline char -->
+	<!-- Expects RFID reader to be a USB keyboard that emits digits + a newline char -->
 		<tag>
 			<id>17317668</id>
 			<value>cartridge/BallWorld</value>
