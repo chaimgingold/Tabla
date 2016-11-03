@@ -11,6 +11,7 @@
 
 void LightLink::setParams( XmlTree xml )
 {
+	getXml(xml,"CameraIndex",mCameraIndex);
 	getXml(xml,"CaptureSize",mCaptureSize);
 	
 	getXml(xml, "CaptureCoords", mCaptureCoords, 4 );
@@ -43,6 +44,7 @@ XmlTree LightLink::getParams() const
 		return s;
 	};
 	
+	t.push_back( XmlTree( "CameraIndex", toString(mCameraIndex) ) );
 	t.push_back( XmlTree( "CaptureSize", v(mCaptureSize) ) );
 	
 	t.push_back( XmlTree( "CaptureCoords", c(mCaptureCoords,4) ));

@@ -54,14 +54,9 @@ class PaperBounce3App : public App {
 	
 	void drawWorld( GameWorld::DrawType );
 	
-	void lightLinkDidChange( const LightLink& ll )
-	{
-		// notify people
-		// might need to privatize mLightLink and make this a proper setter
-		// or rename it to be "notify" or "onChange" or "didChange" something
-		mVision.setLightLink(ll);
-		if (mGameWorld) mGameWorld->setWorldBoundsPoly( getWorldBoundsPoly() );
-	}
+	void lightLinkDidChange(); // calls setupCaptureDevice, tells mVision, tells mGameWorld, saves it to disk
+	void setupCaptureDevice(); // specified by mLightLink.mCameraIndex
+	void chooseNextCaptureDevice(); // iterate through them
 	
 	LightLink			mLightLink; // calibration for camera <> world <> projector
 	CaptureRef			mCapture;	// input device		->
@@ -145,7 +140,6 @@ class PaperBounce3App : public App {
 	*/
 	
 	// settings
-	int  mCameraIndex = -1; // negative is last, positive is nth
 	bool mAutoFullScreenProjector = false ;
 	bool mDrawCameraImage = false ;
 	bool mDrawContours = false ;

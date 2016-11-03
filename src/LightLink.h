@@ -31,6 +31,7 @@ public:
 	// Pipeline looks like this:
 	
 	// -- Camera --
+	int  mCameraIndex = -1; // negative is last, positive is nth
 	
 	//  • Capture
 	vec2 mCaptureSize = vec2(640,480) ;

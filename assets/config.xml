@@ -5,9 +5,6 @@
 
 	<App>
 	
-		<CameraIndex>0</CameraIndex>
-		<!-- Which camera to use? 0 indexed. -1 means last. -->
-
 <!--	This could use a cleanup since we refactored into two windows	-->
 		<AutoFullScreenProjector>	1 </AutoFullScreenProjector>
 		<DrawCameraImage>			1 </DrawCameraImage>
@@ -56,6 +53,9 @@
 			Configuration you do in app is saved and loaded from ~Documents/PaperES/.
 	-->
 	<LightLink>
+
+		<CameraIndex>-1</CameraIndex>
+		<!-- Which camera to use? 0 indexed. -1 means last. -->
 
 		<!-- px -->
 		<CaptureSize> 640 480 </CaptureSize>
