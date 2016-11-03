@@ -46,6 +46,7 @@ private:
 	
 	// for visual feedback; in world space
 	vector<vec2> mLiveCorners;
+	float mLastCornersSeenWhen=-MAXFLOAT;
 	
 	bool mLiveAllCornersFound=false;
 	
