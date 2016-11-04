@@ -36,6 +36,37 @@ Rectf asBoundingRect( vec2 pts[4] )
 	return Rectf(v);
 }
 
+void Vision::setLightLink( const LightLink &ll )
+{
+	mLightLink=ll;
+	
+	// compute remap?
+	if ( !isMatEqual(mLightLink.mDistCoeffs, mDistCoeffs) )
+	{
+		cout << "Vision:: computing remap " << mLightLink.mDistCoeffs << endl;
+		
+		mDistCoeffs = ll.mDistCoeffs;
+		
+		cv::Mat cameraMatrix(3,3,CV_32F); // calibrateCamera uses empty. same should be good. but that crashes us here.
+		// [ fx  0 cx ]
+		// [ 0  fy cy ]
+		// [ 0   0  1 ]
+		// fx, fy, cx, cy should all be zero, i think, since we are centered, etc... (p.372 of O'Reilly book)
+		
+		cv::Size imageSize(mLightLink.mCaptureSize.x,mLightLink.mCaptureSize.y);
+		
+		cv::initUndistortRectifyMap(
+			cameraMatrix,
+			mDistCoeffs,
+			cv::Mat(), // mono, so not needed
+			cameraMatrix, // mono, so same as 1st param
+			imageSize,
+			CV_16SC2, // CV_32FC1 or CV_16SC2
+			mRemap[0],
+			mRemap[1]);
+	}
+}
+
 void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 {
 	// ---- Input ----
@@ -49,6 +80,14 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 	pipeline.setImageToWorldTransform( getOcvPerspectiveTransform(
 		mLightLink.mCaptureCoords,
 		mLightLink.mCaptureWorldSpaceCoords ) );
+	
+	// undistort
+	if ( !mRemap[0].empty() && !mRemap[1].empty() )
+	{
+		cv::Mat mapped;
+		cv::remap(input,mapped,mRemap[0],mRemap[1],cv::INTER_LINEAR);
+		pipeline.then( "mapped", mapped );
+	}
 	
 	// ---- World Boundaries ----
 	pipeline.then( "world-boundaries", vec2(4,4)*100.f ); // 4m^2 configurable area

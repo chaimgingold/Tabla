@@ -84,6 +84,22 @@ namespace cinder {
 		
 		return mat3to4( fromOcvMat3x3(xform) );
 	}
+
+	inline bool isMatEqual( cv::Mat a, cv::Mat b )
+	{
+		// http://stackoverflow.com/questions/9905093/how-to-check-whether-two-matrixes-are-identical-in-opencv
+
+		if ( a.empty() && b.empty() ) return true; // both empty?
+		if ( a.empty() || b.empty() ) return false; // one empty?
+		if ( a.cols != b.cols ) return false;
+		if ( a.rows != b.rows ) return false;
+		
+		cv::Mat diff = a != b;
+		// Equal if no elements disagree
+		bool eq = cv::countNonZero(diff) == 0;
+		
+		return eq;
+	}
 	
 }
 

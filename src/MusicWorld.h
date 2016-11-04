@@ -60,7 +60,8 @@ private:
 	};
 	
 	MetaParamInfo getMetaParamInfo( MetaParam ) const;
-
+	map<MetaParam,vec2> mLastSeenMetaParamLoc; // for better inter-frame coherence
+	
 	//
 	vec2  mTimeVec;		// in world space, which way does time flow forward?
 	int	  mNoteCount=8;
@@ -144,7 +145,6 @@ private:
 	class Score
 	{
 	public:
-		
 		void draw( MusicWorld& world, GameWorld::DrawType ) const;
 		
 		// shape
@@ -194,6 +194,7 @@ private:
 			// if not a perfect rect, then it's approximate (measures two bisecting axes)
 			// x is axis along which playhead moves; y is perp to it (parallel to playhead)
 		vec2		fracToQuad( vec2 frac ) const; // frac.x = time[0,1], frac.y = note_space[0,1]
+		vec2		getCentroid() const { return fracToQuad(vec2(.5,.5)); }
 		float		getQuadMaxInteriorAngle() const; // looking for concave-ish shapes...
 		
 		Scale mScale;
@@ -203,9 +204,16 @@ private:
 		bool  isScoreValueHigh( uchar ) const;
 		float getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const;
 		int   getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const;
-
+		
 		// Shaders
 		gl::GlslProgRef mAdditiveShader;
+		
+	private:
+		void drawNotes		( InstrumentRef instr, MusicWorld& world, GameWorld::DrawType drawType ) const;
+		void drawScoreLines	( InstrumentRef instr, MusicWorld& world, GameWorld::DrawType drawType ) const;
+		void drawPlayhead	( InstrumentRef instr, MusicWorld& world, GameWorld::DrawType drawType ) const;
+		void drawMetaParam	( InstrumentRef instr, MusicWorld& world, GameWorld::DrawType drawType ) const;
+
 	};
 	vector<Score> mScores;
 	
@@ -299,6 +307,8 @@ private:
 class MusicWorldCartridge : public GameCartridge
 {
 public:
+	virtual string getSystemName() const override { return "MusicWorld"; }
+
 	virtual std::shared_ptr<GameWorld> load() const override
 	{
 		return std::make_shared<MusicWorld>();

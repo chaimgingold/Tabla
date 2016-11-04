@@ -134,7 +134,7 @@ template<class T>
 bool getXml( XmlTree &xml, string name, vector<T> &var )
 {
 	auto n = xml.begin(name);
-	bool ok=false;
+//	bool ok=true;
 	
 	if (n!=xml.end())
 	{
@@ -145,6 +145,7 @@ bool getXml( XmlTree &xml, string name, vector<T> &var )
 			while(1)
 			{
 				s >> t ;
+//				cout << t;
 				
 				if (!s.fail()) var.push_back(t) ;
 				else break;
@@ -154,7 +155,7 @@ bool getXml( XmlTree &xml, string name, vector<T> &var )
 		catch( std::exception ){}
 	}
 	
-	return ok;
+	return true;
 } ;
 
 

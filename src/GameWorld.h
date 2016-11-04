@@ -68,9 +68,11 @@ private:
 class GameCartridge
 {
 public:
+	virtual string getSystemName() const { return "GameWorld"; } // should match GameWorld name
 	virtual shared_ptr<GameWorld> load() const { return 0; }
 	
 };
+typedef std::shared_ptr<GameCartridge> GameCartridgeRef;
 
 class GameCartridgeSimple : public GameCartridge
 {

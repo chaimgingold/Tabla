@@ -579,11 +579,11 @@ void MusicWorld::assignUnassignedMetaParams()
 	}
 	
 	// which ones do we want?
-	vector<MetaParam> unassignedParams;
+	set<MetaParam> unassignedParams;
 	
 	for( int i=0; i<sliders.size(); ++i )
 	{
-		if (sliders[i]==0) unassignedParams.push_back( (MetaParam)i );
+		if (sliders[i]==0) unassignedParams.insert( (MetaParam)i );
 	}
 	
 	// assign
@@ -596,8 +596,36 @@ void MusicWorld::assignUnassignedMetaParams()
 			if ( unassignedParams.empty() ) param = (MetaParam)(rand() % (int)MetaParam::kNumMetaParams);
 			else
 			{
-				param = unassignedParams.back();
-				unassignedParams.pop_back();
+				// choose param, closest distance from score to last place we saw unassigned param
+				MetaParam bestParam = *unassignedParams.begin();
+				float bestScore = MAXFLOAT;
+				vec2 scoreLoc = s.getCentroid();
+				
+				for( auto i : unassignedParams )
+				{
+					auto j = mLastSeenMetaParamLoc.find(i);
+					float score;
+					
+					if ( j == mLastSeenMetaParamLoc.end() ) {
+						// never seen
+						score = MAXFLOAT - 100.f; // slightly better than nothing
+					} else {
+						score = distance( scoreLoc, j->second );
+					}
+					
+					// best?
+					if ( score < bestScore )
+					{
+						bestScore = score;
+						bestParam = j->first;
+					}
+				}
+				
+				// remove from list of options
+				unassignedParams.erase( unassignedParams.find(bestParam) ); // should be in there!
+				
+				// pick it (bestParam redundant to param, but this naming makes algorithm clearer)
+				param = bestParam;
 			}
 			
 			InstrumentRef instr = getInstrumentForMetaParam( param );
@@ -981,42 +1009,61 @@ void MusicWorld::update()
 		auto instr = getInstrumentForScore(score);
 		if (!instr) continue;
 
-		if ( instr->mSynthType==Instrument::SynthType::Additive ) {
-			// Update time
-			mPureDataNode->sendFloat(toString(synthNum)+string("phase"),
-									 score.getPlayheadFrac() );
-			synthNum++;
-		}
-		// send midi notes
-		else if ( instr->mSynthType==Instrument::SynthType::MIDI )
+		switch( instr->mSynthType )
 		{
-			// notes
-			int x = score.getPlayheadFrac() * (float)(score.mQuantizedImage.cols);
-
-			for ( int y=0; y<score.mNoteCount; ++y )
+			// Additive
+			case Instrument::SynthType::Additive:
 			{
-				unsigned char value = score.mQuantizedImage.at<unsigned char>(score.mNoteCount-1-y,x);
+				// Update time
+				mPureDataNode->sendFloat(toString(synthNum)+string("phase"),
+										 score.getPlayheadFrac() );
+				synthNum++;
+			}
+			break;
 
-				int note = score.noteForY(instr, y);
+			// MIDI
+			case Instrument::SynthType::MIDI:
+			{
+				// send midi notes
+				int x = score.getPlayheadFrac() * (float)(score.mQuantizedImage.cols);
 
-				if ( score.isScoreValueHigh(value) )
+				for ( int y=0; y<score.mNoteCount; ++y )
 				{
-					float duration =
-					    getBeatDuration() *
-					    score.mDurationFrac *
-					    score.getNoteLengthAsScoreFrac(score.mQuantizedImage,x,y);
-					
-					if (duration>0)
+					unsigned char value = score.mQuantizedImage.at<unsigned char>(score.mNoteCount-1-y,x);
+
+					int note = score.noteForY(instr, y);
+
+					if ( score.isScoreValueHigh(value) )
 					{
-						doNoteOn( instr, note, duration );
+						float duration =
+							getBeatDuration() *
+							score.mDurationFrac *
+							score.getNoteLengthAsScoreFrac(score.mQuantizedImage,x,y);
+						
+						if (duration>0)
+						{
+							doNoteOn( instr, note, duration );
+						}
+					}
+					// See if the note was previously triggered but no longer exists, and turn it off if so
+					else if (isNoteInFlight( instr, note ))
+					{
+						// TODO: this should work as long a there isn't >1 score per instrument. In that case,
+						// this will start to behave weirdly. Proper solution is to scan all scores and
+						// aggregate all the on notes, and then join the list of desired on notes to actual on notes
+						// in a single pass, taking action to on/off them as needed.
+						sendNoteOffForInstr( instr, note );
 					}
 				}
-				// See if the note was previously triggered but no longer exists, and turn it off if so
-				else if (isNoteInFlight( instr, note ))
-				{
-					sendNoteOffForInstr( instr, note );
-				}
 			}
+			break;
+			
+			// Meta
+			case Instrument::SynthType::Meta:
+			{
+				mLastSeenMetaParamLoc[instr->mMetaParam] = score.getCentroid();
+			}
+			break;
 		}
 	}
 	

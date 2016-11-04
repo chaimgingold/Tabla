@@ -10,6 +10,7 @@
 #define LightLink_h
 
 #include "cinder/Xml.h"
+#include "CinderOpenCV.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -25,12 +26,12 @@ public:
 	
 	vec2 getCaptureSize() const { return mCaptureSize; }
 	
-	
 //private:
 	
 	// Pipeline looks like this:
 	
 	// -- Camera --
+	int  mCameraIndex = -1; // negative is last, positive is nth
 	
 	//  • Capture
 	vec2 mCaptureSize = vec2(640,480) ;
@@ -58,7 +59,8 @@ public:
 	vec2 mProjectorSize = vec2(1280,800) ;
 	
 	// • Barrel distortion correct
-	
+	cv::Mat mDistCoeffs;
+
 };
 
 #endif /* LightLink_h */

@@ -30,11 +30,6 @@ PaperBounce3App::~PaperBounce3App()
 	cipd::PureDataNode::ShutdownGlobal();
 }
 
-vec2 PaperBounce3App::getWorldSize() const
-{
-	return Rectf( getWorldBoundsPoly().getPoints() ).getSize();
-}
-
 PolyLine2 PaperBounce3App::getWorldBoundsPoly() const
 {
 	return getPointsAsPoly( mLightLink.mCaptureWorldSpaceCoords, 4 );
@@ -105,14 +100,13 @@ void PaperBounce3App::setup()
 		if (xml.hasChild("PaperBounce3/LightLink") && !fs::exists(getUserLightLinkFilePath()) )
 		{
 			mLightLink.setParams(xml.getChild("PaperBounce3/LightLink"));
+			lightLinkDidChange();
 		}
 		
 		if (xml.hasChild("PaperBounce3/App"))
 		{
 			XmlTree app = xml.getChild("PaperBounce3/App");
 			
-			getXml(app,"CameraIndex",mCameraIndex);
-
 			getXml(app,"AutoFullScreenProjector",mAutoFullScreenProjector);
 			getXml(app,"DrawCameraImage",mDrawCameraImage);
 			getXml(app,"DrawContours",mDrawContours);
@@ -126,26 +120,27 @@ void PaperBounce3App::setup()
 			getXml(app,"ConfigWindowPipelineWidth",mConfigWindowPipelineWidth);
 			getXml(app,"ConfigWindowPipelineGutter",mConfigWindowPipelineGutter);
 			getXml(app,"ConfigWindowMainImageMargin",mConfigWindowMainImageMargin);
+			
+			getXml(app,"KeyboardStringTimeout",mKeyboardStringTimeout);
 		}
 
-		// 2. respond
-		lightLinkDidChange(mLightLink);
-
-		// camera
+		if (xml.hasChild("PaperBounce3/RFID"))
 		{
-			auto cameras = Capture::getDevices() ;
+			XmlTree rfid = xml.getChild("PaperBounce3/RFID");
 			
-			Capture::DeviceRef camera;
-			
-			if (mCameraIndex<0) camera = cameras.back();
-			else camera = cameras[ mCameraIndex % cameras.size() ];
-
-			if ( !mCapture || mCapture->getDevice() != camera )
+			for( auto item = rfid.begin("tag"); item != rfid.end(); ++item )
 			{
-				mCapture = Capture::create( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y, camera ) ; // get last camera
-				mCapture->start();
+				if ( item->hasChild("id") && item->hasChild("value") )
+				{
+					int		id		= item->getChild("id").getValue<int>();
+					string	value	= item->getChild("value").getValue();
+					
+					mRFIDKeyToValue[id] = value;
+				}
 			}
 		}
+		
+		// 2. respond
 
 		
 		// TODO:
@@ -161,7 +156,7 @@ void PaperBounce3App::setup()
 		if ( xml.hasChild("LightLink") )
 		{
 			mLightLink.setParams(xml.getChild("LightLink"));
-			lightLinkDidChange(mLightLink);
+			lightLinkDidChange();
 		}
 	});
 	
@@ -212,14 +207,72 @@ void PaperBounce3App::setup()
 	// load the games and the game
 	setupGameLibrary();
 	loadDefaultGame();
+	setupRFIDValueToFunction();
 }
+
+
 
 void PaperBounce3App::setupGameLibrary()
 {
 	mGameLibrary.push_back( make_shared<BallWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<PongWorldCartridge>() );
-	mGameLibrary.push_back( make_shared<MusicWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<CalibrateWorldCartridge>() );
+	mGameLibrary.push_back( make_shared<MusicWorldCartridge>() );
+}
+
+void PaperBounce3App::setupRFIDValueToFunction()
+{
+	mRFIDValueToFunction.clear();
+	
+	// game loader functions
+	for( auto i : mGameLibrary )
+	{
+		string name = i->getSystemName();
+		
+		mRFIDValueToFunction[ string("cartridge/") + name ] = [this,name]()
+		{
+			int cartNum = findCartridgeByName(name);
+			
+			if (cartNum==-1) cout << "Failed to find cartridge '" << name << "'" << endl;
+			else if (cartNum!=mGameWorldCartridgeIndex) this->loadGame(cartNum);
+		};
+	}
+}
+
+void PaperBounce3App::lightLinkDidChange()
+{
+	// notify people
+	// might need to privatize mLightLink and make this a proper setter
+	// or rename it to be "notify" or "onChange" or "didChange" something
+	setupCaptureDevice();
+	mVision.setLightLink(mLightLink);
+	if (mGameWorld) mGameWorld->setWorldBoundsPoly( getWorldBoundsPoly() );
+	
+//	XmlTree lightLinkXml = mLightLink.getParams();
+//	lightLinkXml.write( writeFile(getUserLightLinkFilePath()) );
+			// this should trigger a reload. and go into an infinite reload/save loop.
+			// but it doesnt... so i'm not worrying about it
+}
+
+void PaperBounce3App::setupCaptureDevice()
+{
+	auto cameras = Capture::getDevices();
+	
+	Capture::DeviceRef camera;
+	
+	if (mLightLink.mCameraIndex<0) camera = cameras.back();
+	else camera = cameras[ mLightLink.mCameraIndex % cameras.size() ];
+
+	if ( !mCapture || mCapture->getDevice() != camera )
+	{
+		mCapture = Capture::create( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y, camera ) ; // get last camera
+		mCapture->start();
+	}
+}
+
+void PaperBounce3App::chooseNextCaptureDevice()
+{
+	mLightLink.mCameraIndex = (mLightLink.mCameraIndex+1) % Capture::getDevices().size();
 }
 
 void PaperBounce3App::loadDefaultGame()
@@ -265,6 +318,15 @@ void PaperBounce3App::loadAdjacentGame( int libraryIndexDelta )
 		
 		loadGame(i);
 	}
+}
+
+int PaperBounce3App::findCartridgeByName( string name )
+{
+	for( size_t i=0; i<mGameLibrary.size(); ++i )
+	{
+		if ( mGameLibrary[i]->getSystemName() == name ) return i;
+	}
+	return -1;
 }
 
 void PaperBounce3App::setGameWorldXmlParams()
@@ -503,40 +565,122 @@ void PaperBounce3App::draw()
 
 void PaperBounce3App::keyDown( KeyEvent event )
 {
-	switch ( event.getCode() )
+	// string aggregation -- still allow it to cascade to later handlers though
+	if ( !event.isMetaDown() && !event.isControlDown() && !event.isAltDown() )
 	{
-		case KeyEvent::KEY_f:
-			cout << "Frame rate: " << getFrameRate() << endl ;
-			break ;
+		float now = getElapsedSeconds();
+		
+		if ( now - mLastKeyEventTime > mKeyboardStringTimeout )
+		{
+			mKeyboardString.clear();
+		}
+		
+		mKeyboardString += event.getChar();
+		mLastKeyEventTime=now;
+		
+		bool handled = parseKeyboardString(mKeyboardString);
+		if (handled) mKeyboardString="";
+	}
+	
+	bool handled = false;
+	
+	// meta chars
+	if ( event.isAltDown() )
+	{
+		switch ( event.getCode() )
+		{
+			case KeyEvent::KEY_TAB:
+				handled=true;
+				chooseNextCaptureDevice();
+				lightLinkDidChange();
+				break;
+		}
+	}
+	
+	// handle char
+	if ( !handled )
+	{
+		switch ( event.getCode() )
+		{
+			case KeyEvent::KEY_f:
+				cout << "Frame rate: " << getFrameRate() << endl ;
+				break ;
 
-		case KeyEvent::KEY_x:
-			::system( (string("open \"") + myGetAssetPath("config.xml").string() + "\"").c_str() );
-			break ;
+			case KeyEvent::KEY_x:
+				::system( (string("open \"") + myGetAssetPath("config.xml").string() + "\"").c_str() );
+				break ;
+				
+			case KeyEvent::KEY_UP:
+				if (event.isMetaDown()) mPipeline.setQuery( mPipeline.getFirstStageName() );
+				else mPipeline.setQuery( mPipeline.getPrevStageName(mPipeline.getQuery() ) );
+				break;
+				
+			case KeyEvent::KEY_DOWN:
+				if (event.isMetaDown()) mPipeline.setQuery( mPipeline.getLastStageName() );
+				else mPipeline.setQuery( mPipeline.getNextStageName(mPipeline.getQuery() ) );
+				break;
 			
-		case KeyEvent::KEY_UP:
-			if (event.isMetaDown()) mPipeline.setQuery( mPipeline.getFirstStageName() );
-			else mPipeline.setQuery( mPipeline.getPrevStageName(mPipeline.getQuery() ) );
-			break;
+			case KeyEvent::KEY_LEFT:
+				loadAdjacentGame(-1);
+				break;
 			
-		case KeyEvent::KEY_DOWN:
-			if (event.isMetaDown()) mPipeline.setQuery( mPipeline.getLastStageName() );
-			else mPipeline.setQuery( mPipeline.getNextStageName(mPipeline.getQuery() ) );
-			break;
-		
-		case KeyEvent::KEY_LEFT:
-			loadAdjacentGame(-1);
-			break;
-		
-		case KeyEvent::KEY_RIGHT:
-			loadAdjacentGame(1);
-			break;
-		
-		default:
-			if (mGameWorld) mGameWorld->keyDown(event);
-			break;
+			case KeyEvent::KEY_RIGHT:
+				loadAdjacentGame(1);
+				break;
+			
+			default:
+				if (mGameWorld) mGameWorld->keyDown(event);
+				break;
+		}
 	}
 }
 
+bool PaperBounce3App::parseKeyboardString( string str )
+{
+	bool handled = false;
+	
+	// RFID reader
+	// - digits + newline
+	
+//	cout << "parseKeyboardString( '" << str << "' )" << endl;
+	
+	auto getAsRFID = []( string str ) -> int
+	{
+		if ( str.back()!='\n' && str.back()!='\r' ) return 0;
+		
+		for( int i=0; i<str.length()-2; ++i ) if ( !isdigit(str[i]) ) return 0;
+		
+		return stoi( str.substr(0,str.length()-1) );
+	};
+	
+	int rfid = getAsRFID(str);
+	
+	if (rfid)
+	{
+		// rfid -> value
+		cout << "RFID: #" << rfid << endl;
+		
+		auto value = mRFIDKeyToValue.find(rfid);
+		
+		if (value == mRFIDKeyToValue.end()) cout << "\tUnmapped RFID key " << rfid << endl;
+		else
+		{
+			cout << "\t" << rfid << " => " << value->second << endl;
+			
+			// value -> function
+			auto func = mRFIDValueToFunction.find(value->second);
+			if ( func != mRFIDValueToFunction.end() && func->second )
+			{
+				// do it
+				func->second();
+				handled=true;
+			}
+			else cout << "\tNo function defined" << endl;
+		}
+	}
+
+	return handled;
+}
 
 CINDER_APP( PaperBounce3App, RendererGl(RendererGl::Options().msaa(8)), [&]( App::Settings *settings ) {
 	settings->setFrameRate(kRequestFrameRate);

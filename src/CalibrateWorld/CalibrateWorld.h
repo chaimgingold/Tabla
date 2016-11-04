@@ -41,11 +41,15 @@ private:
 	void foundFullSetOfCorners( vector<cv::Point2f> );
 	
 	//
+	bool mIsDone=false;
+	
+	//
 	vector< vector<cv::Point2f> > mKnownBoards;
 	void tryToSolveWithKnownBoards( cv::Size );
 	
 	// for visual feedback; in world space
 	vector<vec2> mLiveCorners;
+	float mLastCornersSeenWhen=-MAXFLOAT;
 	
 	bool mLiveAllCornersFound=false;
 	
@@ -54,6 +58,8 @@ private:
 class CalibrateWorldCartridge : public GameCartridge
 {
 public:
+	virtual string getSystemName() const override { return "CalibrateWorld"; }
+
 	virtual std::shared_ptr<GameWorld> load() const override
 	{
 		return std::make_shared<CalibrateWorld>();

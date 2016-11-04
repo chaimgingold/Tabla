@@ -42,6 +42,8 @@ class PaperBounce3App : public App {
   public:
 	~PaperBounce3App();
 	
+	static PaperBounce3App* get() { return dynamic_cast<PaperBounce3App*>(AppBase::get()); }
+	
 	void setup() override;
 	void mouseDown( MouseEvent event ) override;
 	void mouseUp( MouseEvent event ) override;
@@ -54,14 +56,9 @@ class PaperBounce3App : public App {
 	
 	void drawWorld( GameWorld::DrawType );
 	
-	void lightLinkDidChange( const LightLink& ll )
-	{
-		// notify people
-		// might need to privatize mLightLink and make this a proper setter
-		// or rename it to be "notify" or "onChange" or "didChange" something
-		mVision.setLightLink(ll);
-		if (mGameWorld) mGameWorld->setWorldBoundsPoly( getWorldBoundsPoly() );
-	}
+	void lightLinkDidChange(); // calls setupCaptureDevice, tells mVision, tells mGameWorld, saves it to disk
+	void setupCaptureDevice(); // specified by mLightLink.mCameraIndex
+	void chooseNextCaptureDevice(); // iterate through them
 	
 	LightLink			mLightLink; // calibration for camera <> world <> projector
 	CaptureRef			mCapture;	// input device		->
@@ -76,8 +73,9 @@ class PaperBounce3App : public App {
 	void loadDefaultGame();
 	void loadGame( int libraryIndex );
 	void loadAdjacentGame( int libraryIndexDelta );
+	int  findCartridgeByName( string ); // -1 for fail
 	
-	vector< std::shared_ptr<GameCartridge> > mGameLibrary;
+	vector<GameCartridgeRef> mGameLibrary;
 	int mGameWorldCartridgeIndex=-1; // what index of mGameLibrary did mGameWorld come from?
 
 	// game xml params
@@ -86,10 +84,20 @@ class PaperBounce3App : public App {
 
 	// world info
 	PolyLine2 getWorldBoundsPoly() const;
-	vec2	  getWorldSize() const; // almost completely deprecated; hardly used.
 		// This is actually the camera world polygon mapping.
 		// For all practical purposes, this is identical to the projector world polygon mapping.
 	
+	
+	// keyboard input (for RFID device code parsing)
+	string	mKeyboardString; // aggregate keystrokes here
+	float	mLastKeyEventTime=-MAXFLOAT; // when was last keystroke?
+	float	mKeyboardStringTimeout=.2f; // how long to wait before clearing the keyboard string buffer?
+	bool	parseKeyboardString( string ); // returns true if successful
+	
+	map<int,string> mRFIDKeyToValue; // maps RFID #s to semantic strings
+	map<string,function<void()>> mRFIDValueToFunction; // maps RFID semantic strings to code
+	
+	void setupRFIDValueToFunction(); // scans game library and binds loader code to rfid values
 	
 	// ui
 	Font				mFont;
@@ -134,7 +142,6 @@ class PaperBounce3App : public App {
 	*/
 	
 	// settings
-	int  mCameraIndex = -1; // negative is last, positive is nth
 	bool mAutoFullScreenProjector = false ;
 	bool mDrawCameraImage = false ;
 	bool mDrawContours = false ;

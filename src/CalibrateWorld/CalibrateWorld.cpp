@@ -7,6 +7,7 @@
 //
 
 #include "CalibrateWorld.h"
+#include "PaperBounce3App.h" // for config
 #include "ocv.h"
 #include "xml.h"
 
@@ -33,22 +34,28 @@ void CalibrateWorld::updateCustomVision( Pipeline& pipeline )
 	
 	//
 	vector<cv::Point2f> corners; // in image space
-	cv::findChessboardCorners( world->mImageCV, boardSize, corners, 0
+	
+	bool findResult = cv::findChessboardCorners( world->mImageCV, boardSize, corners, 0
 		+ cv::CALIB_CB_ADAPTIVE_THRESH
 //		+ cv::CALIB_CB_NORMALIZE_IMAGE
 //		+ cv::CALIB_CB_FAST_CHECK
 	);
 	
-	bool allCornersFound = corners.size()==boardSize.width*boardSize.height;
+	bool allCornersFound = findResult; // corners.size()==boardSize.width*boardSize.height;
+		// sometimes findResult is false
 	
 	mLiveAllCornersFound = allCornersFound;
 	
+//	assert( findResult == allCornersFound );
+	
 	if ( corners.size()>0 )
 	{
+		mLastCornersSeenWhen = ci::app::getElapsedSeconds();
+		
 		if (mVerbose)
 		{
-			cout << "corners: " << corners.size() << endl;
-			if (allCornersFound) cout << "ALL" << endl;
+//			cout << "corners: " << corners.size() << endl;
+			if (allCornersFound) cout << "ALL corners found" << endl;
 		}
 		
 		if ( allCornersFound )
@@ -75,40 +82,59 @@ void CalibrateWorld::updateCustomVision( Pipeline& pipeline )
 
 void CalibrateWorld::tryToSolveWithKnownBoards( cv::Size imageSize )
 {
-	if (mVerbose) cout << "solving..." << endl;
+	if (mVerbose) cout << "solving... (" << mKnownBoards.size() << " boards)" << endl;
 	
-	vector<vector<cv::Point3f>> objectPoints(mKnownBoards.size()); // in planar chessboard space
-//	vector<vector<cv::Point2f>> imagePoints (mKnownBoards.size()); // in screen space
-	cv::Mat cameraMatrix;
-	cv::Mat distCoeffs;
-	cv::Mat rvecs, tvecs;
-	
-	// objectPoints
-	for( size_t i=0; i<mKnownBoards.size(); ++i )
-	for( size_t j=0; j<mKnownBoards[i].size(); ++j )
 	{
-		objectPoints[i][j].x = j%mBoardCols;
-		objectPoints[i][j].y = j/mBoardCols;
-		objectPoints[i][j].z = 0.f;
-	}
+		vector<vector<cv::Point3f>> objectPoints(mKnownBoards.size()); // in planar chessboard space
+		cv::Mat cameraMatrix;
+		cv::Mat distCoeffs;
+		vector<cv::Mat> rvecs, tvecs;
+		
+		// objectPoints
+		for( size_t i=0; i<mKnownBoards.size(); ++i )
+		{
+			// allocate entry
+			objectPoints[i].resize(mKnownBoards[i].size());
+			
+			// fill it (redundant data; we could v.resize( n, v[0] ) to replicate it n times i think
+			for( size_t j=0; j<mKnownBoards[i].size(); ++j )
+			{
+				objectPoints[i][j] = cv::Point3f(
+					j%mBoardCols,
+					j/mBoardCols,
+					0.f
+				);
+			}
+		}
 
-	// imagePoints
-//	for( size_t i=0; i<mKnownBoards.size(); ++i )
-//	for( size_t j=0; j<mKnownBoards[i].size(); ++j )
-//	{
-//		imagePoints[i][j].x = mKnownBoards[i][j].x;
-//		imagePoints[i][j].y = mKnownBoards[i][j].y;
-//	}
-	
-	float err = cv::calibrateCamera(objectPoints, mKnownBoards, imageSize, cameraMatrix, distCoeffs, rvecs, tvecs);
-	
-	//
-	if (mVerbose) cout << "error: " << err << endl;
+		float err = cv::calibrateCamera(objectPoints, mKnownBoards, imageSize, cameraMatrix, distCoeffs, rvecs, tvecs);
+		
+		if (mVerbose)
+		{
+			cout << "distCoeffs: " << distCoeffs.cols << " x " << distCoeffs.rows << endl;
+			cout << distCoeffs << endl;
+			cout << "error: " << err << endl;
+		}
+		
+		if ( err > 0.f && err < 1.f && mKnownBoards.size() >= 3 )
+		{
+			mIsDone = true;
+			cout << "Calibration done" << endl;
+			
+			// call out to app to configure
+			auto app = PaperBounce3App::get();
+			if (app)
+			{
+				app->mLightLink.mDistCoeffs = distCoeffs;
+				app->lightLinkDidChange();
+			}
+		}
+	}
 }
 
 bool CalibrateWorld::areBoardCornersUnique( vector<cv::Point2f> c ) const
 {
-	const float kErrThresh = 5.f;
+	const float kErrThresh = (float)c.size() * .1f ;
 	float bestErr=MAXFLOAT;
 	
 	for( const auto& c2 : mKnownBoards )
@@ -138,22 +164,18 @@ void CalibrateWorld::draw( DrawType drawType )
 {
 	vec2 center = getWorldBoundsPoly().calcCentroid();
 	
-	if ( !mLiveAllCornersFound )
+	if ( !mLiveAllCornersFound || mIsDone )
 	{
-		if (mDrawBoard) drawChessboard( center, vec2(1,1)*40.f );
+		bool promptDraw = false;
+		
+		if ( ci::app::getElapsedSeconds()-mLastCornersSeenWhen > 2.f )
+		{
+			float k = 4.f;
+			promptDraw = fmod( ci::app::getElapsedSeconds(), k ) < k*.5 ;
+		}
+		
+		if (mDrawBoard || promptDraw || mIsDone) drawChessboard( center, vec2(1,1)*40.f );
 	}
-	
-//	gl::color(1,0,0);
-//	gl::draw( getWorldBoundsPoly() );
-	
-//	gl::drawStrokedCircle( center, 10.f, 20 );
-	
-//	vec2 c = getWorldBoundsPoly().calcCentroid();
-	
-//	for( auto p : getWorldBoundsPoly().getPoints() )
-//	{
-//		gl::drawLine( center, p );
-//	}
 	
 	//
 	if ( drawType != GameWorld::DrawType::UIPipelineThumb )
@@ -173,7 +195,8 @@ void CalibrateWorld::drawChessboard( vec2 c, vec2 size  ) const
 	vec2 squareSize = size / vec2(mBoardCols,mBoardRows);
 	vec2 topleft = c - size*.5f;
 	
-	gl::color(1,1,1);
+	if (mIsDone) gl::color(0,1,0);
+	else gl::color(1,1,1);
 	
 	for( int i=0; i<mBoardCols; ++i )
 	for( int j=0; j<mBoardRows; ++j )

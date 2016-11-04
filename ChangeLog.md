@@ -5,10 +5,14 @@
 * Clock system for synced variable tempos
 * Disable sleep
 * Metaparameter sliders (tempo/scale/root-note/beats-per-measure)
-• Discrete sliders for scales 
-• Sliders easier to see
-• Calibration game world WIP
-• Better slider value persistence; root note slider is discrete.
+* Discrete sliders for scales 
+* Sliders easier to see
+* Calibration game world WIP
+* Better slider value persistence; root note slider is discrete.
+* Improved slider graphics; improved FPS, refactored Score::draw().
+* Meta-sliders have much more solid inter-frame coherency.
+* RFID tag -> game loading works
+* alt-tab to cycle cameras; setting is locally persisted. 
 
 10/24/2016 - 10/28/2016
 * Danceability! Fix off-by-one errors in gridlines and number of beats during playback.

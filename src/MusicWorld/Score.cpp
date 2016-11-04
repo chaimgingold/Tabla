@@ -102,6 +102,194 @@ float MusicWorld::Score::getNoteLengthAsScoreFrac( cv::Mat image, int x, int y )
 	return (float)getNoteLengthAsImageCols(image,x,y) / (float)image.cols;
 }
 
+void MusicWorld::Score::drawNotes( InstrumentRef instr, MusicWorld& world, GameWorld::DrawType drawType ) const
+{
+	// collect notes into a batch
+	// (probably wise to extract this geometry/data when processing vision data,
+	// then use it for both playback and drawing).
+	const float invcols = 1.f / (float)(mQuantizedImage.cols);
+
+	const float yheight = 1.f / (float)mNoteCount;
+	
+
+	vector<vec2> onNoteTris;
+	vector<vec2> offNoteTris;
+	
+	const float playheadFrac = getPlayheadFrac();
+	
+	for ( int y=0; y<mNoteCount; ++y )
+	{
+		const float y1frac = y * yheight + yheight*.2f;
+		const float y2frac = y * yheight + yheight*.8f;
+		
+		for( int x=0; x<mQuantizedImage.cols; ++x )
+		{
+			if ( isScoreValueHigh(mQuantizedImage.at<unsigned char>(mNoteCount-1-y,x)) )
+			{
+				// how wide?
+				int length = getNoteLengthAsImageCols(mQuantizedImage,x,y);
+				
+				const float x1frac = x * invcols;
+				const float x2frac = min( 1.f, (x+length) * invcols );
+				
+				vec2 start1 = fracToQuad( vec2( x1frac, y1frac) ) ;
+				vec2 end1   = fracToQuad( vec2( x2frac, y1frac) ) ;
+
+				vec2 start2 = fracToQuad( vec2( x1frac, y2frac) ) ;
+				vec2 end2   = fracToQuad( vec2( x2frac, y2frac) ) ;
+				
+				const bool isInFlight = playheadFrac > x1frac && playheadFrac < x2frac;
+				
+				vector<vec2>& tris = isInFlight ? onNoteTris : offNoteTris ;
+				
+				tris.push_back( start1 );
+				tris.push_back( start2 );
+				tris.push_back( end2 );
+				tris.push_back( start1 );
+				tris.push_back( end2 );
+				tris.push_back( end1 );
+				
+				// skip ahead
+				x = x + length+1;
+			}
+		}
+	}
+	
+	// draw batched notes
+	if (!onNoteTris.empty())
+	{
+		gl::color(instr->mNoteOnColor);
+		drawSolidTriangles(onNoteTris);
+	}
+	if (!offNoteTris.empty())
+	{
+		gl::color(instr->mNoteOffColor);
+		drawSolidTriangles(offNoteTris);
+	}
+}
+
+void MusicWorld::Score::drawScoreLines( InstrumentRef instr, MusicWorld& world, GameWorld::DrawType drawType ) const
+{
+	// TODO: Make this configurable for 5/4 time, etc.
+	const int drawBeatDivision = 4;
+
+	vector<vec2> pts;
+	
+	gl::color(instr->mScoreColor);
+	gl::draw( getPolyLine() );
+
+	// Scale lines
+	for( int i=0; i<mNoteCount; ++i )
+	{
+		float f = (float)(i+1) / (float)mNoteCount;
+		
+		pts.push_back( lerp(mQuad[3], mQuad[0],f) );
+		pts.push_back( lerp(mQuad[2], mQuad[1],f) );
+	}
+
+	// Off-beat lines
+	for( int i=0; i<mBeatCount; ++i )
+	{
+		if (i % drawBeatDivision == 0) continue;
+
+		float f = (float)i / (float)mBeatCount;
+
+		pts.push_back( lerp(mQuad[1], mQuad[0],f) );
+		pts.push_back( lerp(mQuad[2], mQuad[3],f) );
+	}
+	
+	drawLines(pts);
+
+	// New points for new colors
+	pts.clear();
+	// Down-beat lines
+	for( int i=0; i<mBeatCount; ++i )
+	{
+		if (i % drawBeatDivision != 0) continue;
+
+		float f = (float)i / (float)mBeatCount;
+
+		pts.push_back( lerp(mQuad[1], mQuad[0],f) );
+		pts.push_back( lerp(mQuad[2], mQuad[3],f) );
+	}
+	vec3 scoreColorHSV = rgbToHsv(instr->mScoreColor);
+	scoreColorHSV.x = fmod(scoreColorHSV.x + 0.5, 1.0);
+	gl::color( hsvToRgb(scoreColorHSV)  );
+	drawLines(pts);
+
+}
+
+void MusicWorld::Score::drawPlayhead( InstrumentRef instr, MusicWorld& world, GameWorld::DrawType drawType ) const
+{
+	gl::color( instr->mPlayheadColor );
+	
+	vec2 playhead[2];
+	getPlayheadLine(playhead);
+	gl::drawLine( playhead[0], playhead[1] );
+
+	// octave indicator
+	float octaveFrac = (float)mOctave / (float)world.mNumOctaves + .5f ;
+	
+	gl::drawSolidCircle( lerp(playhead[0],playhead[1],octaveFrac), .5f, 6 );
+}
+
+void MusicWorld::Score::drawMetaParam( InstrumentRef instr, MusicWorld& world, GameWorld::DrawType drawType ) const
+{
+	Rectf r( mQuad[0], mQuad[2] );
+	r.canonicalize();
+	
+	gl::color(instr->mScoreColor);
+	gl::draw( getPolyLine() );
+	
+	// level
+	MetaParamInfo info = world.getMetaParamInfo(instr->mMetaParam);
+	
+	float y1, y2;
+	if ( info.isDiscrete() )
+	{
+		if ( drawType != GameWorld::DrawType::UIPipelineThumb ) // optimization
+		{
+			vector<vec2> lines;
+			
+			for( int i=0; i<info.mNumDiscreteStates; ++i )
+			{
+				float y = (float)i/(float)(info.mNumDiscreteStates);
+				lines.push_back( fracToQuad(vec2(0.f,y)) );
+				lines.push_back( fracToQuad(vec2(1.f,y)) );
+			}
+			
+			drawLines(lines);
+		}
+		
+		y1=mMetaParamSliderValue;
+		y2=mMetaParamSliderValue + 1.f / (float)info.mNumDiscreteStates;
+	}
+	else
+	{
+		float kcm = 1.f;
+		float k = kcm / getSizeInWorldSpace().y ;
+		
+		// thick band @ level
+		//y1 = max( 0.f, mMetaParamSliderValue - k );
+		//y2 = min( 1.f, mMetaParamSliderValue + k );
+		
+		// a meter filled up to the level
+		y1 = 0.f;
+		y2 = max( k, mMetaParamSliderValue );
+	}
+
+	if ( mMetaParamSliderValue != -1.f )
+	{
+		PolyLine2 p;
+		p.push_back( fracToQuad(vec2(0.f,y1)) );
+		p.push_back( fracToQuad(vec2(0.f,y2)) );
+		p.push_back( fracToQuad(vec2(1.f,y2)) );
+		p.push_back( fracToQuad(vec2(1.f,y1)) );
+		p.setClosed();
+		gl::drawSolid(p);
+	}
+}
+
 void MusicWorld::Score::draw( MusicWorld& world, GameWorld::DrawType drawType ) const
 {
 	InstrumentRef instr = world.getInstrumentForScore(*this);
@@ -113,14 +301,15 @@ void MusicWorld::Score::draw( MusicWorld& world, GameWorld::DrawType drawType ) 
 	if (drawSolidColorBlocks)
 	{
 		gl::color(0,0,0);
-
-		gl::drawSolidRect( getWindowBounds() );
-
 		gl::drawSolid(getPolyLine());
 	}
 	
 	if ( instr->mSynthType==Instrument::SynthType::Additive )
 	{
+		// additive
+		// gl::color(instr->mScoreColor);
+		// gl::draw( getPolyLine() );
+
 		// additive
 		gl::color(instr->mScoreColor);
 		gl::draw( getPolyLine() );
@@ -141,182 +330,27 @@ void MusicWorld::Score::draw( MusicWorld& world, GameWorld::DrawType drawType ) 
 	}
 	else if ( instr->mSynthType==Instrument::SynthType::Meta )
 	{
-		Rectf r( mQuad[0], mQuad[2] );
-		r.canonicalize();
-		
-		gl::color(instr->mScoreColor);
-		gl::drawStrokedRoundedRect(r, 1.f );
-		
-		// level
-		MetaParamInfo info = world.getMetaParamInfo(instr->mMetaParam);
-		
-		float y1, y2;
-		if ( info.isDiscrete() )
-		{
-			vector<vec2> lines;
-			
-			for( int i=0; i<info.mNumDiscreteStates; ++i )
-			{
-				float y = (float)i/(float)(info.mNumDiscreteStates);
-				lines.push_back( fracToQuad(vec2(0.f,y)) );
-				lines.push_back( fracToQuad(vec2(1.f,y)) );
-			}
-			
-			drawLines(lines);
-			
-			y1=mMetaParamSliderValue;
-			y2=mMetaParamSliderValue + 1.f / (float)info.mNumDiscreteStates;
-		}
-		else
-		{
-			float kcm = 1.f;
-			float k = kcm / getSizeInWorldSpace().y ;
-			y1 = max( 0.f, mMetaParamSliderValue - k );
-			y2 = min( 1.f, mMetaParamSliderValue + k );
-		}
-
-		if ( mMetaParamSliderValue != -1.f )
-		{
-			PolyLine2 p;
-			p.push_back( fracToQuad(vec2(0.f,y1)) );
-			p.push_back( fracToQuad(vec2(0.f,y2)) );
-			p.push_back( fracToQuad(vec2(1.f,y2)) );
-			p.push_back( fracToQuad(vec2(1.f,y1)) );
-			p.setClosed();
-			gl::drawSolid(p);
-		}
+		// meta
+		drawMetaParam(instr,world,drawType);
 	}
 	else if ( instr->mSynthType==Instrument::SynthType::MIDI )
 	{
 		// midi
-
-		// lines
+		if ( drawType != GameWorld::DrawType::UIPipelineThumb ) // optimization
 		{
-			// TODO: Make this configurable for 5/4 time, etc.
-			const int drawBeatDivision = 4;
-
-			vector<vec2> pts;
-			
+			drawScoreLines(instr,world,drawType);
+			drawNotes(instr,world,drawType);
+		}
+		else
+		{
 			gl::color(instr->mScoreColor);
 			gl::draw( getPolyLine() );
-
-			// Scale lines
-			for( int i=0; i<mNoteCount; ++i )
-			{
-				float f = (float)(i+1) / (float)mNoteCount;
-				
-				pts.push_back( lerp(mQuad[3], mQuad[0],f) );
-				pts.push_back( lerp(mQuad[2], mQuad[1],f) );
-			}
-
-			// Off-beat lines
-			for( int i=0; i<mBeatCount; ++i )
-			{
-				if (i % drawBeatDivision == 0) continue;
-
-				float f = (float)i / (float)mBeatCount;
-
-				pts.push_back( lerp(mQuad[1], mQuad[0],f) );
-				pts.push_back( lerp(mQuad[2], mQuad[3],f) );
-			}
-			
-			drawLines(pts);
-
-			// New points for new colors
-			pts.clear();
-			// Down-beat lines
-			for( int i=0; i<mBeatCount; ++i )
-			{
-				if (i % drawBeatDivision != 0) continue;
-
-				float f = (float)i / (float)mBeatCount;
-
-				pts.push_back( lerp(mQuad[1], mQuad[0],f) );
-				pts.push_back( lerp(mQuad[2], mQuad[3],f) );
-			}
-			vec3 scoreColorHSV = rgbToHsv(instr->mScoreColor);
-			scoreColorHSV.x = fmod(scoreColorHSV.x + 0.5, 1.0);
-			gl::color( hsvToRgb(scoreColorHSV)  );
-			drawLines(pts);
-		}
-		
-		// notes
-		// collect notes into a batch
-		// (probably wise to extract this geometry/data when processing vision data,
-		// then use it for both playback and drawing).
-		const float invcols = 1.f / (float)(mQuantizedImage.cols);
-
-		const float yheight = 1.f / (float)mNoteCount;
-		
-		vector<vec2> onNoteTris;
-		vector<vec2> offNoteTris;
-		
-		const float playheadFrac = getPlayheadFrac();
-		
-		for ( int y=0; y<mNoteCount; ++y )
-		{
-			const float y1frac = y * yheight + yheight*.2f;
-			const float y2frac = y * yheight + yheight*.8f;
-			
-			for( int x=0; x<mQuantizedImage.cols; ++x )
-			{
-				if ( isScoreValueHigh(mQuantizedImage.at<unsigned char>(mNoteCount-1-y,x)) )
-				{
-					// how wide?
-					int length = getNoteLengthAsImageCols(mQuantizedImage,x,y);
-					
-					const float x1frac = x * invcols;
-					const float x2frac = min( 1.f, (x+length) * invcols );
-					
-					vec2 start1 = fracToQuad( vec2( x1frac, y1frac) ) ;
-					vec2 end1   = fracToQuad( vec2( x2frac, y1frac) ) ;
-
-					vec2 start2 = fracToQuad( vec2( x1frac, y2frac) ) ;
-					vec2 end2   = fracToQuad( vec2( x2frac, y2frac) ) ;
-					
-					const bool isInFlight = playheadFrac > x1frac && playheadFrac < x2frac;
-					
-					vector<vec2>& tris = isInFlight ? onNoteTris : offNoteTris ;
-					
-					tris.push_back( start1 );
-					tris.push_back( start2 );
-					tris.push_back( end2 );
-					tris.push_back( start1 );
-					tris.push_back( end2 );
-					tris.push_back( end1 );
-					
-					// skip ahead
-					x = x + length+1;
-				}
-			}
-		}
-		
-		// draw batched notes
-		if (!onNoteTris.empty())
-		{
-			gl::color(instr->mNoteOnColor);
-			drawSolidTriangles(onNoteTris);
-		}
-		if (!offNoteTris.empty())
-		{
-			gl::color(instr->mNoteOffColor);
-			drawSolidTriangles(offNoteTris);
 		}
 	}
-	
-	// Draw playhead (if not a Meta instrument score)
-	if (instr->mSynthType == Instrument::SynthType::MIDI)
+
+	// playhead
 	{
-		gl::color( instr->mPlayheadColor );
-		
-		vec2 playhead[2];
-		getPlayheadLine(playhead);
-		gl::drawLine( playhead[0], playhead[1] );
-	
-		// octave indicator
-		float octaveFrac = (float)mOctave / (float)world.mNumOctaves + .5f ;
-		
-		gl::drawSolidCircle( lerp(playhead[0],playhead[1],octaveFrac), .5f, 6 );
+		drawPlayhead(instr,world,drawType);
 	}
 
 	// quad debug

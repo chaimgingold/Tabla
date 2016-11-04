@@ -51,12 +51,7 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 		{
 			// for some reason the recursive lambda capture (doing a capture in this function)
 			// causes everything to explode, so just passing in a param.
-			app.lightLinkDidChange(app.mLightLink);
-			
-			XmlTree lightLinkXml = app.mLightLink.getParams();
-			
-			lightLinkXml.write( writeFile(app.getUserLightLinkFilePath()) );
-			// this will trigger a reload, but that shouldn't matter.
+			app.lightLinkDidChange();			
 		};
 		
 		// - camera capture coords
@@ -245,9 +240,8 @@ void WindowData::updateMainImageTransform()
 		}
 		else
 		{
-			// world by default.
-			// (deprecated; not really sure what this even means anymore.)
-			drawSize = mApp.getWorldSize();
+			// world by default. (not really sure what this even means anymore; should never happen.)
+			drawSize = Rectf( mApp.getWorldBoundsPoly().getPoints() ).getSize();
 		}
 		
 		bounds = Rectf( 0, 0, drawSize.x, drawSize.y );
