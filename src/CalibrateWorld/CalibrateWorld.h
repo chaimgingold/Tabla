@@ -41,6 +41,9 @@ private:
 	void foundFullSetOfCorners( vector<cv::Point2f> );
 	
 	//
+	bool mIsDone=false;
+	
+	//
 	vector< vector<cv::Point2f> > mKnownBoards;
 	void tryToSolveWithKnownBoards( cv::Size );
 	

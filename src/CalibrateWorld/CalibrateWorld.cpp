@@ -7,6 +7,7 @@
 //
 
 #include "CalibrateWorld.h"
+#include "PaperBounce3App.h" // for config
 #include "ocv.h"
 #include "xml.h"
 
@@ -108,14 +109,32 @@ void CalibrateWorld::tryToSolveWithKnownBoards( cv::Size imageSize )
 
 		float err = cv::calibrateCamera(objectPoints, mKnownBoards, imageSize, cameraMatrix, distCoeffs, rvecs, tvecs);
 		
-		//
-		if (mVerbose) cout << "error: " << err << endl;
+		if (mVerbose)
+		{
+			cout << "distCoeffs: " << distCoeffs.cols << " x " << distCoeffs.rows << endl;
+			cout << distCoeffs << endl;
+			cout << "error: " << err << endl;
+		}
+		
+		if ( err > 0.f && err < 1.f && mKnownBoards.size() >= 3 )
+		{
+			mIsDone = true;
+			cout << "Calibration done" << endl;
+			
+			// call out to app to configure
+			auto app = PaperBounce3App::get();
+			if (app)
+			{
+				app->mLightLink.mDistCoeffs = distCoeffs;
+				app->lightLinkDidChange();
+			}
+		}
 	}
 }
 
 bool CalibrateWorld::areBoardCornersUnique( vector<cv::Point2f> c ) const
 {
-	const float kErrThresh = 5.f;
+	const float kErrThresh = (float)c.size() * .1f ;
 	float bestErr=MAXFLOAT;
 	
 	for( const auto& c2 : mKnownBoards )
@@ -145,7 +164,7 @@ void CalibrateWorld::draw( DrawType drawType )
 {
 	vec2 center = getWorldBoundsPoly().calcCentroid();
 	
-	if ( !mLiveAllCornersFound )
+	if ( !mLiveAllCornersFound || mIsDone )
 	{
 		bool promptDraw = false;
 		
@@ -155,7 +174,7 @@ void CalibrateWorld::draw( DrawType drawType )
 			promptDraw = fmod( ci::app::getElapsedSeconds(), k ) < k*.5 ;
 		}
 		
-		if (mDrawBoard || promptDraw) drawChessboard( center, vec2(1,1)*40.f );
+		if (mDrawBoard || promptDraw || mIsDone) drawChessboard( center, vec2(1,1)*40.f );
 	}
 	
 	//
@@ -176,7 +195,8 @@ void CalibrateWorld::drawChessboard( vec2 c, vec2 size  ) const
 	vec2 squareSize = size / vec2(mBoardCols,mBoardRows);
 	vec2 topleft = c - size*.5f;
 	
-	gl::color(1,1,1);
+	if (mIsDone) gl::color(0,1,0);
+	else gl::color(1,1,1);
 	
 	for( int i=0; i<mBoardCols; ++i )
 	for( int j=0; j<mBoardRows; ++j )

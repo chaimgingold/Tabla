@@ -248,8 +248,8 @@ void PaperBounce3App::lightLinkDidChange()
 	mVision.setLightLink(mLightLink);
 	if (mGameWorld) mGameWorld->setWorldBoundsPoly( getWorldBoundsPoly() );
 	
-	XmlTree lightLinkXml = mLightLink.getParams();
-	lightLinkXml.write( writeFile(getUserLightLinkFilePath()) );
+//	XmlTree lightLinkXml = mLightLink.getParams();
+//	lightLinkXml.write( writeFile(getUserLightLinkFilePath()) );
 			// this should trigger a reload. and go into an infinite reload/save loop.
 			// but it doesnt... so i'm not worrying about it
 }

@@ -47,7 +47,7 @@ public:
 
 	void setParams( Params p ) { mParams=p; }
 
-	void setLightLink( const LightLink &ll ) { mLightLink=ll; }
+	void setLightLink( const LightLink& );
 	
 	// push input through
 	void processFrame( const Surface &surface, Pipeline& tracePipeline );
@@ -58,6 +58,10 @@ public:
 private:
 	Params		mParams;
 	LightLink	mLightLink;
+
+	// undistort params
+	cv::Mat mDistCoeffs; // can be empty for none
+	cv::Mat mRemap[2]; // can be empty for none
 
 };
 

@@ -42,6 +42,8 @@ class PaperBounce3App : public App {
   public:
 	~PaperBounce3App();
 	
+	static PaperBounce3App* get() { return dynamic_cast<PaperBounce3App*>(AppBase::get()); }
+	
 	void setup() override;
 	void mouseDown( MouseEvent event ) override;
 	void mouseUp( MouseEvent event ) override;

@@ -10,6 +10,7 @@
 #define LightLink_h
 
 #include "cinder/Xml.h"
+#include "CinderOpenCV.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -24,7 +25,6 @@ public:
 	XmlTree getParams() const;
 	
 	vec2 getCaptureSize() const { return mCaptureSize; }
-	
 	
 //private:
 	
@@ -59,7 +59,8 @@ public:
 	vec2 mProjectorSize = vec2(1280,800) ;
 	
 	// • Barrel distortion correct
-	
+	cv::Mat mDistCoeffs;
+
 };
 
 #endif /* LightLink_h */
