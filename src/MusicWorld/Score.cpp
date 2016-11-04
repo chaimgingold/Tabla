@@ -1,5 +1,6 @@
 #include "MusicWorld.h"
 #include "cinder/gl/Context.h"
+#include "CinderOpenCV.h"
 
 using namespace ci::gl;
 
@@ -112,6 +113,9 @@ void MusicWorld::Score::draw( MusicWorld& world, GameWorld::DrawType drawType ) 
 	if (drawSolidColorBlocks)
 	{
 		gl::color(0,0,0);
+
+		gl::drawSolidRect( getWindowBounds() );
+
 		gl::drawSolid(getPolyLine());
 	}
 	
@@ -120,6 +124,20 @@ void MusicWorld::Score::draw( MusicWorld& world, GameWorld::DrawType drawType ) 
 		// additive
 		gl::color(instr->mScoreColor);
 		gl::draw( getPolyLine() );
+
+		auto tex = gl::Texture::create( ImageSourceRef( new ImageSourceCvMat(mImage)) );
+		gl::ScopedGlslProg glslScp( mAdditiveShader );
+		gl::ScopedTextureBind texScp( tex );
+		mAdditiveShader->uniform( "uTex0", 0 );
+
+		mAdditiveShader->uniform( "uTime", (float)ci::app::getElapsedSeconds() );
+		mAdditiveShader->uniform( "uPhase", getPlayheadFrac());
+
+		//mAdditiveShader->uniform( "uAspectRatio", getWindowAspectRatio() );
+
+		//gl::drawSolid(getPolyLine());
+		Rectf r( mQuad[0], mQuad[2] );
+		gl::drawSolidRect(r);
 	}
 	else if ( instr->mSynthType==Instrument::SynthType::Meta )
 	{
@@ -287,7 +305,7 @@ void MusicWorld::Score::draw( MusicWorld& world, GameWorld::DrawType drawType ) 
 	}
 	
 	// Draw playhead (if not a Meta instrument score)
-	if (instr->mSynthType != Instrument::SynthType::Meta)
+	if (instr->mSynthType == Instrument::SynthType::MIDI)
 	{
 		gl::color( instr->mPlayheadColor );
 		

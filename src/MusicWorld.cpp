@@ -109,6 +109,10 @@ int MusicWorld::Instrument::channelForNote(int note) {
 
 MusicWorld::MusicWorld()
 {
+	mAdditiveShader = gl::GlslProg::create( DataSourcePath::create(getAssetPath("additive.vert")),
+										    DataSourcePath::create(getAssetPath("additive.frag")) );
+	//gl::Texture::create( loadImage( loadResource( RES_COLORS_PNG ) ) );
+
 	mLastFrameTime = ci::app::getElapsedSeconds();
 
 	mTimeVec = vec2(0,-1);
@@ -649,9 +653,15 @@ void MusicWorld::updateContours( const ContourVector &contours )
 					score.mNoteCount = mNoteCount;
 					score.mBeatCount = mBeatCount;
 				}
+				else if (instr && instr->mSynthType==Instrument::SynthType::Additive)
+				{
+					score.mAdditiveShader = mAdditiveShader;
+				}
 
 				score.mPan		= .5f ;
 			}
+
+
 			
 			mScores.push_back(score);
 		}

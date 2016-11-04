@@ -203,6 +203,9 @@ private:
 		bool  isScoreValueHigh( uchar ) const;
 		float getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const;
 		int   getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const;
+
+		// Shaders
+		gl::GlslProgRef mAdditiveShader;
 	};
 	vector<Score> mScores;
 	
@@ -288,6 +291,9 @@ private:
 	float mTempo=120;
 	void tickGlobalClock(float dt);
 	float getBeatDuration() const;
+
+	// Shaders
+	gl::GlslProgRef mAdditiveShader;
 };
 
 class MusicWorldCartridge : public GameCartridge
