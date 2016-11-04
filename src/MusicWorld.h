@@ -10,6 +10,7 @@
 #define MusicWorld_hpp
 
 #include "GameWorld.h"
+#include "FileWatch.h"
 #include "PureDataNode.h"
 #include "RtMidi.h"
 
@@ -205,9 +206,6 @@ private:
 		float getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const;
 		int   getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const;
 		
-		// Shaders
-		gl::GlslProgRef mAdditiveShader;
-		
 	private:
 		void drawNotes		( InstrumentRef instr, MusicWorld& world, GameWorld::DrawType drawType ) const;
 		void drawScoreLines	( InstrumentRef instr, MusicWorld& world, GameWorld::DrawType drawType ) const;
@@ -282,7 +280,6 @@ private:
 	// synthesis
 	cipd::PureDataNodeRef	mPureDataNode;	// synth engine
 	cipd::PatchRef			mPatch;			// music patch
-//	vector<RtMidiOutRef>	mMidiOuts;
 
 	void setupSynthesis();
 	void updateAdditiveScoreSynthesis();
@@ -301,6 +298,8 @@ private:
 	float getBeatDuration() const;
 
 	// Shaders
+	FileWatch mFileWatch; // hotload our shaders; in this class so when class dies all the callbacks expire.
+	
 	gl::GlslProgRef mAdditiveShader;
 };
 

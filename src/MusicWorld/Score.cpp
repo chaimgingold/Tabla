@@ -306,27 +306,44 @@ void MusicWorld::Score::draw( MusicWorld& world, GameWorld::DrawType drawType ) 
 	
 	if ( instr->mSynthType==Instrument::SynthType::Additive )
 	{
-		// additive
-		// gl::color(instr->mScoreColor);
-		// gl::draw( getPolyLine() );
+		if ( world.mAdditiveShader )
+		{
+			auto tex = gl::Texture::create( ImageSourceRef( new ImageSourceCvMat(mImage)) );
+			gl::ScopedGlslProg glslScp( world.mAdditiveShader );
+			gl::ScopedTextureBind texScp( tex );
+			
+			world.mAdditiveShader->uniform( "uTex0", 0 );
+			world.mAdditiveShader->uniform( "uTime", (float)ci::app::getElapsedSeconds() );
+			world.mAdditiveShader->uniform( "uPhase", getPlayheadFrac());
+			world.mAdditiveShader->uniform( "uAspectRatio", getWindowAspectRatio() );
 
-		// additive
-		gl::color(instr->mScoreColor);
-		gl::draw( getPolyLine() );
+			vec2 v[6];
+			vec2 uv[6];
+			
+			v[0] = mQuad[0];
+			v[1] = mQuad[1];
+			v[2] = mQuad[3];
+			v[3] = mQuad[3];
+			v[4] = mQuad[1];
+			v[5] = mQuad[2];
 
-		auto tex = gl::Texture::create( ImageSourceRef( new ImageSourceCvMat(mImage)) );
-		gl::ScopedGlslProg glslScp( mAdditiveShader );
-		gl::ScopedTextureBind texScp( tex );
-		mAdditiveShader->uniform( "uTex0", 0 );
-
-		mAdditiveShader->uniform( "uTime", (float)ci::app::getElapsedSeconds() );
-		mAdditiveShader->uniform( "uPhase", getPlayheadFrac());
-
-		//mAdditiveShader->uniform( "uAspectRatio", getWindowAspectRatio() );
-
-		//gl::drawSolid(getPolyLine());
-		Rectf r( mQuad[0], mQuad[2] );
-		gl::drawSolidRect(r);
+			float y0=1.f, y1=0.f; // y is inverted to get to texture space; do it here, not in shader.
+			uv[0] = vec2(0,y0);
+			uv[1] = vec2(1,y0);
+			uv[2] = vec2(0,y1);
+			uv[3] = vec2(0,y1);
+			uv[4] = vec2(1,y0);
+			uv[5] = vec2(1,y1);
+			
+			gl::drawSolidTriangle(v,uv);
+			gl::drawSolidTriangle(v+3,uv+3);
+			// TODO: be less dumb and draw as tri strip or quad
+		}
+		else
+		{
+			gl::color(instr->mScoreColor);
+			gl::draw( getPolyLine() );
+		}
 	}
 	else if ( instr->mSynthType==Instrument::SynthType::Meta )
 	{
@@ -346,10 +363,8 @@ void MusicWorld::Score::draw( MusicWorld& world, GameWorld::DrawType drawType ) 
 			gl::color(instr->mScoreColor);
 			gl::draw( getPolyLine() );
 		}
-	}
 
-	// playhead
-	{
+		// playhead
 		drawPlayhead(instr,world,drawType);
 	}
 

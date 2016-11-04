@@ -32,17 +32,29 @@ vec3 colorfield(vec2 xy) {
 }
 
 void main() {
-	float playhead = 1-uPhase;
+
+
+//	float trash = uTime + uPhase + texture(uTex0, vec2(0,0) ).x;
+//	fragColor.r = vertTexCoord0.x;
+//	fragColor.g = vertTexCoord0.y;
+//	fragColor.b = 0.;
+//	fragColor.a = 1.;
+//	return;
+	
+	//
+	float playhead = uPhase;
 
     vec2 xy = vertTexCoord0;
 
 	float gradient = smoothstep(playhead-0.1, playhead, xy.x);
 
-	vec3 image = texture(uTex0, 1-xy.yx).xyz;
+	vec3 image = texture(uTex0, xy).xyz;
 	
-	if ((image.r + image.g + image.b) < 0.5) {
+	if ( (image.r + image.g + image.b)/3 < 0.5 ) {
 		fragColor = vec4(colorfield(xy), 1.);
 
+//		fragColor = mix( fragColor*.25, fragColor, gradient );
+		
 		if (xy.x < playhead) {
 			vec3 inverted = vec3(1.-fragColor.r, 1.-fragColor.g, 1.-fragColor.b);
 

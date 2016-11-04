@@ -88,7 +88,7 @@ void PaperBounce3App::setup()
 	if ( !fs::exists(getDocsPath()) ) fs::create_directory(getDocsPath());
 	
 	// configuration
-	mXmlFileWatch.load( myGetAssetPath("config.xml"), [this]( XmlTree xml )
+	mFileWatch.loadXml( hotloadableAssetPath("config.xml"), [this]( XmlTree xml )
 	{
 		// 1. get params
 		if ( xml.hasChild("PaperBounce3/Games") )
@@ -150,13 +150,13 @@ void PaperBounce3App::setup()
 	});
 
 	// settings: LightLink
-	mXmlFileWatch.load( getUserLightLinkFilePath(), [this]( XmlTree xml )
+	mFileWatch.loadXml( getUserLightLinkFilePath(), [this]( XmlTree xml )
 	{
 		// this overloads the one in config.xml
 		if ( xml.hasChild("LightLink") )
 		{
 			mLightLink.setParams(xml.getChild("LightLink"));
-			lightLinkDidChange();
+			lightLinkDidChange(false); // and don't save, since we are responding to a load.
 		}
 	});
 	
@@ -239,7 +239,7 @@ void PaperBounce3App::setupRFIDValueToFunction()
 	}
 }
 
-void PaperBounce3App::lightLinkDidChange()
+void PaperBounce3App::lightLinkDidChange( bool saveToFile )
 {
 	// notify people
 	// might need to privatize mLightLink and make this a proper setter
@@ -248,10 +248,11 @@ void PaperBounce3App::lightLinkDidChange()
 	mVision.setLightLink(mLightLink);
 	if (mGameWorld) mGameWorld->setWorldBoundsPoly( getWorldBoundsPoly() );
 	
-//	XmlTree lightLinkXml = mLightLink.getParams();
-//	lightLinkXml.write( writeFile(getUserLightLinkFilePath()) );
-			// this should trigger a reload. and go into an infinite reload/save loop.
-			// but it doesnt... so i'm not worrying about it
+	if (saveToFile)
+	{
+		XmlTree lightLinkXml = mLightLink.getParams();
+		lightLinkXml.write( writeFile(getUserLightLinkFilePath()) );
+	}
 }
 
 void PaperBounce3App::setupCaptureDevice()
@@ -355,7 +356,7 @@ void PaperBounce3App::setGameWorldXmlParams()
 }
 
 fs::path
-PaperBounce3App::myGetAssetPath( fs::path p ) const
+PaperBounce3App::hotloadableAssetPath( fs::path p ) const
 {
 	if ( mOverloadedAssetPath.empty() ) return getAssetPath(p);
 	else return fs::path(mOverloadedAssetPath) / p ;
@@ -394,7 +395,7 @@ void PaperBounce3App::addProjectorPipelineStages()
 
 void PaperBounce3App::update()
 {
-	mXmlFileWatch.update();
+	mFileWatch.update();
 	
 	if ( mCapture && mCapture->checkNewFrame() )
 	{
@@ -607,7 +608,7 @@ void PaperBounce3App::keyDown( KeyEvent event )
 				break ;
 
 			case KeyEvent::KEY_x:
-				::system( (string("open \"") + myGetAssetPath("config.xml").string() + "\"").c_str() );
+				::system( (string("open \"") + hotloadableAssetPath("config.xml").string() + "\"").c_str() );
 				break ;
 				
 			case KeyEvent::KEY_UP:

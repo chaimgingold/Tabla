@@ -41,7 +41,7 @@ void Vision::setLightLink( const LightLink &ll )
 	mLightLink=ll;
 	
 	// compute remap?
-	if ( !isMatEqual(mLightLink.mDistCoeffs, mDistCoeffs) )
+	if ( 0 && !isMatEqual(mLightLink.mDistCoeffs, mDistCoeffs) )
 	{
 		cout << "Vision:: computing remap " << mLightLink.mDistCoeffs << endl;
 		

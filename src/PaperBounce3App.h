@@ -27,7 +27,7 @@
 #include "Vision.h"
 #include "Contour.h"
 #include "GameWorld.h"
-#include "XmlFileWatch.h"
+#include "FileWatch.h"
 #include "Pipeline.h"
 
 #include "PipelineStageView.h"
@@ -56,7 +56,7 @@ class PaperBounce3App : public App {
 	
 	void drawWorld( GameWorld::DrawType );
 	
-	void lightLinkDidChange(); // calls setupCaptureDevice, tells mVision, tells mGameWorld, saves it to disk
+	void lightLinkDidChange( bool saveToFile=true ); // calls setupCaptureDevice, tells mVision, tells mGameWorld, saves it to disk
 	void setupCaptureDevice(); // specified by mLightLink.mCameraIndex
 	void chooseNextCaptureDevice(); // iterate through them
 	
@@ -156,10 +156,10 @@ class PaperBounce3App : public App {
 	float mConfigWindowPipelineGutter = 8.f ;
 	float mConfigWindowPipelineWidth  = 64.f ;
 	
-	fs::path myGetAssetPath( fs::path ) const ; // prepends the appropriate thing...
+	fs::path hotloadableAssetPath( fs::path ) const ; // prepends the appropriate thing...
 	string mOverloadedAssetPath;
 	
-	XmlFileWatch mXmlFileWatch;
+	FileWatch mFileWatch;
 
 	fs::path getDocsPath() const;
 	fs::path getUserLightLinkFilePath() const;

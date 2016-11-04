@@ -40,7 +40,7 @@
 		26FA364D1D53CBDA00C64A00 /* Vision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA364B1D53CBDA00C64A00 /* Vision.cpp */; };
 		26FA36501D5519DA00C64A00 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 26FA364F1D5519DA00C64A00 /* assets */; };
 		26FA36541D55365800C64A00 /* LightLink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA36531D55365800C64A00 /* LightLink.cpp */; };
-		26FA36571D592CE700C64A00 /* XmlFileWatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA36551D592CE700C64A00 /* XmlFileWatch.cpp */; };
+		26FA36571D592CE700C64A00 /* FileWatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA36551D592CE700C64A00 /* FileWatch.cpp */; };
 		26FA365A1D5BDBC300C64A00 /* Pipeline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA36581D5BDBC300C64A00 /* Pipeline.cpp */; };
 		26FA365E1D77673500C64A00 /* View.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA365C1D77673500C64A00 /* View.cpp */; };
 		26FD3CCF1D90A12B00B20327 /* GameWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FD3CCE1D90A12B00B20327 /* GameWorld.cpp */; };
@@ -162,8 +162,8 @@
 		26FA36511D551F8900C64A00 /* xml.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = xml.h; path = ../src/xml.h; sourceTree = "<group>"; };
 		26FA36521D55351400C64A00 /* LightLink.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = LightLink.h; path = ../src/LightLink.h; sourceTree = "<group>"; };
 		26FA36531D55365800C64A00 /* LightLink.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LightLink.cpp; path = ../src/LightLink.cpp; sourceTree = "<group>"; };
-		26FA36551D592CE700C64A00 /* XmlFileWatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XmlFileWatch.cpp; path = ../src/XmlFileWatch.cpp; sourceTree = "<group>"; };
-		26FA36561D592CE700C64A00 /* XmlFileWatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XmlFileWatch.h; path = ../src/XmlFileWatch.h; sourceTree = "<group>"; };
+		26FA36551D592CE700C64A00 /* FileWatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FileWatch.cpp; path = ../src/FileWatch.cpp; sourceTree = "<group>"; };
+		26FA36561D592CE700C64A00 /* FileWatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FileWatch.h; path = ../src/FileWatch.h; sourceTree = "<group>"; };
 		26FA36581D5BDBC300C64A00 /* Pipeline.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Pipeline.cpp; path = ../src/Pipeline.cpp; sourceTree = "<group>"; };
 		26FA36591D5BDBC300C64A00 /* Pipeline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Pipeline.h; path = ../src/Pipeline.h; sourceTree = "<group>"; };
 		26FA365B1D5BDC8000C64A00 /* ocv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ocv.h; path = ../src/ocv.h; sourceTree = "<group>"; };
@@ -507,8 +507,8 @@
 				26FA364A1D53C78D00C64A00 /* geom.h */,
 				26FA36511D551F8900C64A00 /* xml.h */,
 				26FA365B1D5BDC8000C64A00 /* ocv.h */,
-				26FA36561D592CE700C64A00 /* XmlFileWatch.h */,
-				26FA36551D592CE700C64A00 /* XmlFileWatch.cpp */,
+				26FA36561D592CE700C64A00 /* FileWatch.h */,
+				26FA36551D592CE700C64A00 /* FileWatch.cpp */,
 				262A886E1DB58D7D00FE2336 /* RtMidi.cpp */,
 				262A886F1DB58D7D00FE2336 /* RtMidi.h */,
 			);
@@ -806,7 +806,7 @@
 				741A16EB71BE4A308C86D708 /* b2CollidePolygon.cpp in Sources */,
 				26FD3CD21D91E01E00B20327 /* PongWorld.cpp in Sources */,
 				509D1EB4420C46A3BB6D751D /* b2Collision.cpp in Sources */,
-				26FA36571D592CE700C64A00 /* XmlFileWatch.cpp in Sources */,
+				26FA36571D592CE700C64A00 /* FileWatch.cpp in Sources */,
 				2635C8D01D8768C900DF30BE /* WindowData.cpp in Sources */,
 				26FA36461D53C31A00C64A00 /* BallWorld.cpp in Sources */,
 				58F3F572E622458BA5EA9B45 /* b2Distance.cpp in Sources */,

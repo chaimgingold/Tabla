@@ -6,6 +6,7 @@
 //
 //
 
+#include "PaperBounce3App.h" // for hotloadable file paths
 #include "MusicWorld.h"
 #include "geom.h"
 #include "cinder/rand.h"
@@ -109,9 +110,13 @@ int MusicWorld::Instrument::channelForNote(int note) {
 
 MusicWorld::MusicWorld()
 {
-	mAdditiveShader = gl::GlslProg::create( DataSourcePath::create(getAssetPath("additive.vert")),
-										    DataSourcePath::create(getAssetPath("additive.frag")) );
-	//gl::Texture::create( loadImage( loadResource( RES_COLORS_PNG ) ) );
+	mFileWatch.loadShader(
+		PaperBounce3App::get()->hotloadableAssetPath("additive.vert"),
+		PaperBounce3App::get()->hotloadableAssetPath("additive.frag"),
+		[this](gl::GlslProgRef prog)
+	{
+		mAdditiveShader = prog; // allows null, so we can easily see if we broke it
+	});
 
 	mLastFrameTime = ci::app::getElapsedSeconds();
 
@@ -683,7 +688,7 @@ void MusicWorld::updateContours( const ContourVector &contours )
 				}
 				else if (instr && instr->mSynthType==Instrument::SynthType::Additive)
 				{
-					score.mAdditiveShader = mAdditiveShader;
+//					score.mAdditiveShader = mAdditiveShader;
 				}
 
 				score.mPan		= .5f ;
@@ -1069,6 +1074,9 @@ void MusicWorld::update()
 	
 	// retire notes
 	updateNoteOffs();
+	
+	// file watch
+	mFileWatch.scanFiles();
 }
 
 float MusicWorld::getBeatDuration() const {
@@ -1336,7 +1344,10 @@ void MusicWorld::setupSynthesis()
 	// Lets us use lists to set arrays, which seems to cause less thread contention
 	mPureDataNode->setMaxMessageLength(1024);
 
-	mPatch = mPureDataNode->loadPatch( DataSourcePath::create(getAssetPath("synths/music.pd")) );
+	mFileWatch.load( PaperBounce3App::get()->hotloadableAssetPath("synths/music.pd"), [this]( fs::path path ){
+		mPureDataNode->closePatch(mPatch);
+		mPatch = mPureDataNode->loadPatch( DataSourcePath::create(path) );
+	});
 }
 
 MusicWorld::~MusicWorld() {
