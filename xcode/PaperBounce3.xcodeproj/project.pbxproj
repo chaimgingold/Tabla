@@ -78,6 +78,7 @@
 		B66BF6020B6B4738AF2E400D /* b2PolygonContact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9E75530E63FA4EC397C0D1E2 /* b2PolygonContact.cpp */; };
 		B82FE516E59446FB928ED0B8 /* b2Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 474731D0E50948D4B9522AA0 /* b2Timer.cpp */; };
 		BF8EA3BC1AE14D83A5112094 /* b2Contact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D9B3511148F4C0DB5FE5C5C /* b2Contact.cpp */; };
+		C267F7531DDA4CEF006B8672 /* Instrument.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C267F7511DDA4CEF006B8672 /* Instrument.cpp */; };
 		C2EC76FC1DA7157F00DB39C8 /* PureDataNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EC76401DA7157E00DB39C8 /* PureDataNode.cpp */; };
 		C2EC76FD1DA7157F00DB39C8 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = C2EC76441DA7157E00DB39C8 /* LICENSE.txt */; };
 		C2EC76FE1DA7157F00DB39C8 /* PdBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EC76451DA7157E00DB39C8 /* PdBase.cpp */; };
@@ -243,6 +244,9 @@
 		C159A0020C244479B7849346 /* b2EdgeAndPolygonContact.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2EdgeAndPolygonContact.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Contacts/b2EdgeAndPolygonContact.cpp; sourceTree = "<group>"; };
 		C20E7BFEBC8645C79A3B1048 /* b2RopeJoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2RopeJoint.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Joints/b2RopeJoint.cpp; sourceTree = "<group>"; };
 		C24197A61DC42959005AE51F /* ChangeLog.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = ChangeLog.md; path = ../ChangeLog.md; sourceTree = "<group>"; };
+		C267F7511DDA4CEF006B8672 /* Instrument.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Instrument.cpp; path = ../src/MusicWorld/Instrument.cpp; sourceTree = "<group>"; };
+		C267F7521DDA4CEF006B8672 /* Instrument.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Instrument.h; path = ../src/MusicWorld/Instrument.h; sourceTree = "<group>"; };
+		C267F7551DDA4E0D006B8672 /* Score.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Score.h; path = ../src/MusicWorld/Score.h; sourceTree = "<group>"; };
 		C2EC76401DA7157E00DB39C8 /* PureDataNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PureDataNode.cpp; sourceTree = "<group>"; };
 		C2EC76411DA7157E00DB39C8 /* PureDataNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PureDataNode.h; sourceTree = "<group>"; };
 		C2EC76441DA7157E00DB39C8 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
@@ -436,7 +440,10 @@
 			children = (
 				262A88691DB011FF00FE2336 /* MusicWorld.cpp */,
 				262A886A1DB011FF00FE2336 /* MusicWorld.h */,
+				C267F7511DDA4CEF006B8672 /* Instrument.cpp */,
+				C267F7521DDA4CEF006B8672 /* Instrument.h */,
 				2632320E1DC8166500CB2048 /* Score.cpp */,
+				C267F7551DDA4E0D006B8672 /* Score.h */,
 			);
 			name = MusicWorld;
 			sourceTree = "<group>";
@@ -844,6 +851,7 @@
 				23756771BB404A04991A26CB /* b2PolygonAndCircleContact.cpp in Sources */,
 				26FD3CCF1D90A12B00B20327 /* GameWorld.cpp in Sources */,
 				B66BF6020B6B4738AF2E400D /* b2PolygonContact.cpp in Sources */,
+				C267F7531DDA4CEF006B8672 /* Instrument.cpp in Sources */,
 				5BB8C5F56F5943658CC78ED8 /* b2DistanceJoint.cpp in Sources */,
 				E63AB3EAB9064A24A06D7722 /* b2FrictionJoint.cpp in Sources */,
 				C2EC76FC1DA7157F00DB39C8 /* PureDataNode.cpp in Sources */,
