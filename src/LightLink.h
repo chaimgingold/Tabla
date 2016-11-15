@@ -60,6 +60,7 @@ public:
 	
 	// • Barrel distortion correct
 	cv::Mat mDistCoeffs;
+	cv::Mat mCameraMatrix;
 
 };
 

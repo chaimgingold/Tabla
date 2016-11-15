@@ -30,9 +30,12 @@ public:
 private:
 
 	// params
-	int mBoardCols=7, mBoardRows=7;
-	bool mDrawBoard=false;
-	bool mVerbose=true;
+	ivec2	mBoardNumCorners = ivec2(7,7);
+	bool	mDrawBoard=false;
+	int		mNumBoardsToSolve=5;
+	float	mUniqueBoardDiffThresh=1.f; // world units per corner
+	float	mMinSecsBetweenCameraSamples=1.f;
+	bool	mVerbose=true;
 	
 	//
 	void drawChessboard( vec2 c, vec2 size  ) const;
@@ -52,6 +55,8 @@ private:
 	float mLastCornersSeenWhen=-MAXFLOAT;
 	
 	bool mLiveAllCornersFound=false;
+	
+	mat4 mImageToWorld;
 	
 };
 

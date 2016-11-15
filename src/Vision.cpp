@@ -38,28 +38,31 @@ Rectf asBoundingRect( vec2 pts[4] )
 
 void Vision::setLightLink( const LightLink &ll )
 {
+	//
+	bool updateRemap = !ll.mDistCoeffs.empty() && !ll.mCameraMatrix.empty();
+	// compute remap?
+	// (we could see if mCameraMatrix or mDistCoeffs have changed... but that code is buggy + unnecessary optimization)
+	
+	// update vars
 	mLightLink=ll;
 	
-	// compute remap?
-	if ( 0 && !isMatEqual(mLightLink.mDistCoeffs, mDistCoeffs) )
+	// update remap
+	if ( updateRemap )
 	{
-		cout << "Vision:: computing remap " << mLightLink.mDistCoeffs << endl;
-		
-		mDistCoeffs = ll.mDistCoeffs;
-		
-		cv::Mat cameraMatrix(3,3,CV_32F); // calibrateCamera uses empty. same should be good. but that crashes us here.
-		// [ fx  0 cx ]
-		// [ 0  fy cy ]
-		// [ 0   0  1 ]
-		// fx, fy, cx, cy should all be zero, i think, since we are centered, etc... (p.372 of O'Reilly book)
+		cout << "Vision:: computing remap " << endl;
 		
 		cv::Size imageSize(mLightLink.mCaptureSize.x,mLightLink.mCaptureSize.y);
 		
+		cout << "cv::initUndistortRectifyMap" << endl;
+		cout << "\tcameraMatrix: " << mLightLink.mCameraMatrix << endl;
+		cout << "\tmDistCoeffs: " << mLightLink.mDistCoeffs << endl;
+		cout << "\timageSize: " << imageSize << endl;
+		
 		cv::initUndistortRectifyMap(
-			cameraMatrix,
-			mDistCoeffs,
+			mLightLink.mCameraMatrix,
+			mLightLink.mDistCoeffs,
 			cv::Mat(), // mono, so not needed
-			cameraMatrix, // mono, so same as 1st param
+			mLightLink.mCameraMatrix, // mono, so same as 1st param
 			imageSize,
 			CV_16SC2, // CV_32FC1 or CV_16SC2
 			mRemap[0],

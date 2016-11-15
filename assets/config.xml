@@ -138,9 +138,14 @@
 
 		<CalibrateWorld>
 
-			<BoardCols>7</BoardCols>
-			<BoardRows>7</BoardRows>
+			<BoardCols>8</BoardCols>
+			<BoardRows>8</BoardRows>
+			
 			<DrawBoard>0</DrawBoard>
+			<NumBoardsToSolve>12</NumBoardsToSolve>
+			<UniqueBoardDiffThresh>5</UniqueBoardDiffThresh>
+			<MinSecsBetweenCameraSamples>.5</MinSecsBetweenCameraSamples>
+			<Verbose>1</Verbose>
 			
 			<!-- cm -->
 			<Vision>

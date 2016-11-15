@@ -60,7 +60,6 @@ private:
 	LightLink	mLightLink;
 
 	// undistort params
-	cv::Mat mDistCoeffs; // can be empty for none
 	cv::Mat mRemap[2]; // can be empty for none
 
 };

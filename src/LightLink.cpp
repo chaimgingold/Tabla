@@ -9,6 +9,31 @@
 #include "LightLink.h"
 #include "xml.h"
 
+static vector<float> stringToFloatVec( string value )
+{
+	// clobber [], chars
+	for( int i=0; i<value.size(); ++i )
+	{
+		if (value[i]==','||value[i]=='['||value[i]==']'||value[i]==';')
+		{
+			value[i]=' ';
+		}
+	}		
+	
+	// break into float vector
+	vector<float> f;
+	
+	std::istringstream ss(value);
+	while ( !ss.fail() )
+	{
+		float x;
+		ss >> x;
+		if (!ss.fail()) f.push_back(x);
+	}
+	
+	return f;
+}
+
 void LightLink::setParams( XmlTree xml )
 {
 	getXml(xml,"CameraIndex",mCameraIndex);
@@ -24,37 +49,26 @@ void LightLink::setParams( XmlTree xml )
 
 	if ( xml.hasChild("DistCoeffs") )
 	{
-		// clobber [], chars
-		string value = xml.getChild("DistCoeffs").getValue();
+		vector<float> f = stringToFloatVec( xml.getChild("DistCoeffs").getValue() );
 		
-		for( int i=0; i<value.size(); ++i )
+		if (f.size() > 0)
 		{
-			if (value[i]==','||value[i]=='['||value[i]==']')
-			{
-				value[i]=' ';
-			}
-		}		
-//		cout << "reading DistCoeffs: " << value << endl;
-		
-		// break into float vector
-		vector<float> f;
-		
-		std::istringstream ss(value);
-		while ( !ss.fail() )
-		{
-			float x;
-			ss >> x;
-			if (!ss.fail())
-			{
-//				cout << "\t" << x << endl;
-				f.push_back(x);
-			}
+			mDistCoeffs = cv::Mat(1,f.size(),CV_32F);
+			for( int i=0; i<f.size(); ++i ) mDistCoeffs.at<float>(i) = f[i];
+			cout << "DistCoeffs: " << mDistCoeffs << endl;
 		}
+	}
+
+	if ( xml.hasChild("CameraMatrix") )
+	{
+		vector<float> f = stringToFloatVec( xml.getChild("CameraMatrix").getValue() );
 		
-		// convert float vector to matrix
-		mDistCoeffs = cv::Mat(1,f.size(),CV_32F);
-		for( int i=0; i<f.size(); ++i ) mDistCoeffs.at<float>(i) = f[i];
-//		cout << "\t" << mDistCoeffs << endl;
+		if (f.size() == 9)
+		{
+			mCameraMatrix = cv::Mat(3,3,CV_32F);
+			for( int i=0; i<f.size(); ++i ) mCameraMatrix.at<float>(i) = f[i];
+			cout << "CameraMatrix: " << mCameraMatrix << endl;
+		}
 	}
 }
 
@@ -94,8 +108,14 @@ XmlTree LightLink::getParams() const
 	{
 		std::ostringstream ss;
 		ss << mDistCoeffs;
-		std::string dc;
-		t.push_back( XmlTree( "DistCoeffs", dc ) );
+		t.push_back( XmlTree( "DistCoeffs", ss.str() ) );
+	}
+
+	if ( !mCameraMatrix.empty() )
+	{
+		std::ostringstream ss;
+		ss << mCameraMatrix;
+		t.push_back( XmlTree( "CameraMatrix", ss.str() ) );
 	}
 	
 	return t;
