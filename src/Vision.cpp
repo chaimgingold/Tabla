@@ -85,12 +85,17 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 		mLightLink.mCaptureWorldSpaceCoords ) );
 	
 	// undistort
-	if ( !mRemap[0].empty() && !mRemap[1].empty() )
-	{
-		cv::Mat mapped;
-		cv::remap(input,mapped,mRemap[0],mRemap[1],cv::INTER_LINEAR);
-		pipeline.then( "mapped", mapped );
+	cv::Mat undistorted;
+	
+	if ( !mRemap[0].empty() && !mRemap[1].empty() ) {
+		cv::remap(input,undistorted,mRemap[0],mRemap[1],cv::INTER_LINEAR);
 	}
+	else
+	{
+		// 2x it, so we always have an 'undistorted' image frame to keep things sane
+		undistorted = input;
+	}
+	pipeline.then( "undistorted", undistorted );
 	
 	// ---- World Boundaries ----
 	pipeline.then( "world-boundaries", vec2(4,4)*100.f ); // 4m^2 configurable area
@@ -136,7 +141,7 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 		
 		// do it
 		cv::Mat xform = cv::getPerspectiveTransform( srcpt, dstpt_pixelspace ) ;
-		cv::warpPerspective(input, clipped, xform, outputSize );
+		cv::warpPerspective( undistorted, clipped, xform, outputSize );
 		
 		// log to pipeline
 		pipeline.then( "clipped", clipped );

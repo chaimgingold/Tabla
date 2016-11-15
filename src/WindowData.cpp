@@ -60,7 +60,7 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 				PolyEditView(
 					mApp.mPipeline,
 					[this](){ return getPointsAsPoly(mApp.mLightLink.mCaptureCoords,4); },
-					"input"
+					"undistorted"
 					)
 				);
 			
@@ -70,7 +70,7 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 			});
 			
 			cameraPolyEditView->setMainImageView( mMainImageView );
-			cameraPolyEditView->getEditableInStages().push_back("input");
+			cameraPolyEditView->getEditableInStages().push_back("undistorted");
 			
 			mViews.addView( cameraPolyEditView );
 		}
