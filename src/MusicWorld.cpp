@@ -21,92 +21,7 @@
 using namespace std::chrono;
 using namespace ci::gl;
 
-void MusicWorld::Instrument::setParams( XmlTree xml )
-{
-	getXml(xml,"PlayheadColor",mPlayheadColor);
-	getXml(xml,"ScoreColor",mScoreColor);
-	getXml(xml,"NoteOffColor",mNoteOffColor);
-	getXml(xml,"NoteOnColor",mNoteOnColor);
-	
-	getXml(xml,"Name",mName);
-	
-	if ( xml.hasChild("SynthType") )
-	{
-		string t = xml.getChild("SynthType").getValue();
-		
-		map<string,SynthType> synths;
-		synths["Additive"] = SynthType::Additive;
-		synths["MIDI"] = SynthType::MIDI;
-		synths["Meta"] = SynthType::Meta;
-		auto i = synths.find(t);
-		mSynthType = (i!=synths.end()) ? i->second : SynthType::MIDI ; // default to MIDI
-		
-		if ( mSynthType==SynthType::Meta )
-		{
-			string p = xml.getChild("MetaParam").getValue();
-			
-			map<string,MetaParam> params;
-			params["Scale"] = MetaParam::Scale;
-			params["RootNote"] = MetaParam::RootNote;
-			params["Tempo"] = MetaParam::Tempo;
-			auto i = params.find(p);
-			mMetaParam = (i!=params.end()) ? i->second : MetaParam::RootNote ; // default to RootNote
-		}
-	}
-	
-	getXml(xml,"Port",mPort);
-	getXml(xml,"Channel",mChannel);
-	getXml(xml,"MapNotesToChannels",mMapNotesToChannels);
-}
 
-MusicWorld::Instrument::~Instrument()
-{
-	if (mMidiOut) mMidiOut->closePort();
-}
-
-// Setting this keeps RtMidi from throwing exceptions when something goes wrong talking to the MIDI system.
-void midiErrorCallback(RtMidiError::Type type, const std::string &errorText, void *userData) {
-	cout << "MIDI out error: " << type << errorText << endl;
-}
-
-void MusicWorld::Instrument::setup()
-{
-	assert(!mMidiOut);
-
-	if (mSynthType == SynthType::MIDI) {
-		cout << "Opening port " << mPort << " for '" << mName << "'" << endl;
-
-		// RtMidiOut can throw an OSError if it has trouble initializing CoreMIDI.
-		try {
-			mMidiOut = make_shared<RtMidiOut>();
-		} catch (std::exception) {
-			cout << "Error creating RtMidiOut " << mPort << " for '" << mName << "'" << endl;
-		}
-
-		if (mMidiOut) {
-
-			mMidiOut->setErrorCallback(midiErrorCallback, NULL);
-			if (mPort < mMidiOut->getPortCount()) {
-				mMidiOut->openPort( mPort );
-			} else {
-				cout << "...Opening virtual port for '" << mName << "'" << endl;
-				mMidiOut->openVirtualPort(mName);
-			}
-		}
-
-	}
-
-}
-
-// For most synths this is just the assigned channel,
-// but in the case of the Volca Sample we want to
-// send each note to a different channel as per its MIDI implementation.
-int MusicWorld::Instrument::channelForNote(int note) {
-	if (mMapNotesToChannels > 0) {
-		return note % mMapNotesToChannels;
-	}
-	return mChannel;
-}
 
 MusicWorld::MusicWorld()
 {
@@ -121,7 +36,7 @@ MusicWorld::MusicWorld()
 	mLastFrameTime = ci::app::getElapsedSeconds();
 
 	mTimeVec = vec2(0,-1);
-	
+
 	setupSynthesis();
 }
 
@@ -131,10 +46,10 @@ void MusicWorld::setParams( XmlTree xml )
 
 	mTempos.clear();
 	mScale.clear();
-	
+
 	getXml(xml,"Tempos",mTempos);
 	getXml(xml,"TempoWorldUnitsPerSecond",mTempoWorldUnitsPerSecond);
-	
+
 	getXml(xml,"TimeVec",mTimeVec);
 	getXml(xml,"NoteCount",mNoteCount);
 	getXml(xml,"BeatCount",mBeatCount);
@@ -167,30 +82,30 @@ void MusicWorld::setParams( XmlTree xml )
 
 	// instruments
 	cout << "Instruments:" << endl;
-	
+
 	map<string,InstrumentRef> newInstr;
-	
+
 	for( auto i = xml.begin( "Instruments/Instrument" ); i != xml.end(); ++i )
 	{
 		Instrument instr;
 		instr.setParams(*i);
-		
+
 		cout << "\t" << instr.mName << endl;
-		
+
 		newInstr[instr.mName] = std::make_shared<Instrument>(instr);
 	}
-	
+
 	// bind new instruments
 	auto oldInstr = mInstruments;
 	mInstruments.clear();
 
 	mInstruments = newInstr;
 	for( auto i : mInstruments ) i.second->setup();
-	
+
 	// TODO: diff them smartly.
 //	for( auto i : newInstr )
 //	{
-//		
+//
 //	}
 
 	// instr regions
@@ -209,40 +124,40 @@ pair<float,float> getShapeRange( const vec2* pts, int npts, vec2 lookVec )
 	for( int i=0; i<npts; ++i )
 	{
 		vec2 p = pts[i];
-		
+
 		float y = dot( p, lookVec );
-		
+
 		worldy1 = min( worldy1, y );
 		worldy2 = max( worldy2, y );
 	}
-	
+
 	return pair<float,float>(worldy1,worldy2);
 }
 
 void MusicWorld::generateInstrumentRegions()
 {
 	mInstrumentRegions.clear();
-	
+
 	Rectf worldRect( getWorldBoundsPoly().getPoints() );
-	
+
 	int ninstr=0;
 	for( auto i : mInstruments )
 	{
 		if ( i.second->mSynthType!=Instrument::SynthType::Meta ) ninstr++;
 	}
-	
+
 	mInstruments.size();
-	
+
 	int dim = ceil( sqrt(ninstr) );
-	
+
 	vec2 scale = worldRect.getSize() / vec2(dim,dim);
-	
+
 	int x=0, y=0;
-	
+
 	for( auto i : mInstruments )
 	{
 		if ( i.second->mSynthType==Instrument::SynthType::Meta ) continue;
-		
+
 		Rectf r(0,0,1,1);
 		r.offset( vec2(x,y) );
 		r.scale(scale);
@@ -253,9 +168,9 @@ void MusicWorld::generateInstrumentRegions()
 		p.push_back( r.getLowerRight() );
 		p.push_back( r.getLowerLeft() );
 		p.setClosed();
-		
+
 		mInstrumentRegions.push_back( pair<PolyLine2,InstrumentRef>(p,i.second) );
-		
+
 		//
 		x++;
 		if (x>=dim)
@@ -271,33 +186,33 @@ int MusicWorld::getScoreOctaveShift( const Score& score, const PolyLine2& wrtReg
 	const vec2 lookVec = perp(mTimeVec);
 
 	pair<float,float> worldYs(0,0), scoreYs(0,0);
-	
+
 	if ( wrtRegion.size() > 0 )
 	{
 		worldYs = getShapeRange( &wrtRegion.getPoints()[0], wrtRegion.size(), lookVec );
 	}
-	
+
 	scoreYs = getShapeRange( score.mQuad, 4, lookVec );
-	
+
 	float scorey = lerp(scoreYs.first,scoreYs.second,.5f);
 
 	float f = 1.f - (scorey - worldYs.first) / (worldYs.second - worldYs.first);
 	// don't understand why i need 1-, but it works.
-	
+
 	int o = roundf( (f-.5f) * (float)mNumOctaves ) ;
-	
+
 	if (0) cout << o << endl;
-	
-	
+
+
 	//
-	
+
 	if (0)
 	{
 		auto c = []( string n, pair<float,float> p )
 		{
 			cout << n << ": [ " << p.first << ", " << p.second << " ]" ;
 		};
-		
+
 		cout << "s " << " { " ;
 		c("worldYs",worldYs);
 		cout << "  ";
@@ -312,16 +227,16 @@ bool
 MusicWorld::shouldBeMetaParamScore( const Score& s ) const
 {
 	vec2 scoreSize = s.getSizeInWorldSpace();
-	
+
 	return min(scoreSize.x,scoreSize.y) < 10.f ;
 }
 
-MusicWorld::InstrumentRef
+InstrumentRef
 MusicWorld::decideInstrumentForScore( const Score& s, int* octaveShift )
 {
 	// do instrument by world region
 	vec2 c = s.getPolyLine().calcCentroid();
-	
+
 	// find
 	for( auto i : mInstrumentRegions )
 	{
@@ -331,7 +246,7 @@ MusicWorld::decideInstrumentForScore( const Score& s, int* octaveShift )
 			return i.second;
 		}
 	}
-	
+
 	// default to first
 	auto i = mInstrumentRegions.begin();
 	if (i!=mInstrumentRegions.end())
@@ -340,7 +255,7 @@ MusicWorld::decideInstrumentForScore( const Score& s, int* octaveShift )
 			// and do octave wrt world bounds
 		return i->second;
 	}
-	
+
 	// none
 	return 0;
 }
@@ -359,24 +274,24 @@ MusicWorld::getNearestTempo( float t ) const
 			t = roundf(t);
 			t /= k;
 		}
-		
+
 		return t;
 	}
 	if (mTempos.size()==1) return mTempos[0]; // globally fixed
 	if (mTempos[0]>=t) return mTempos[0]; // minimum
-	
+
 	// find nearest in between two tempos
 	for( size_t i=0; i<mTempos.size()-1; ++i )
 	{
 		if ( t >= mTempos[i] && t <= mTempos[i+1] )
 		{
 			float mid = lerp(mTempos[i],mTempos[i+1],.5f);
-			
+
 			if ( t < mid ) return mTempos[i];
 			else return mTempos[i+1];
 		}
 	}
-	
+
 	// maximum
 	return mTempos.back();
 }
@@ -385,17 +300,17 @@ float
 MusicWorld::decideDurationForScore ( const Score& score ) const
 {
 	vec2 size = score.getSizeInWorldSpace();
-	
+
 	float d = size.x / mTempoWorldUnitsPerSecond;
 
 	float t = getNearestTempo(d);
-	
+
 	if (0) cout << size.x << "cm = " << d << "sec => " << t << "sec" << endl;
-	
+
 	return t;
 }
 
-MusicWorld::InstrumentRef
+InstrumentRef
 MusicWorld::getInstrumentForMetaParam( MetaParam p ) const
 {
 	for ( auto i : mInstruments )
@@ -408,46 +323,46 @@ MusicWorld::getInstrumentForMetaParam( MetaParam p ) const
 	return 0;
 }
 
-MusicWorld::Score* MusicWorld::matchOldScoreToNewScore( const Score& old, float maxErr, float* outError )
+Score* MusicWorld::matchOldScoreToNewScore( const Score& old, float maxErr, float* outError )
 {
 	Score* best   = 0;
 	float  bestErr = MAXFLOAT;
-	
+
 	auto closestCorner = []( vec2 pt, const vec2 quad[4], float& err, float maxerr=MAXFLOAT ) -> int
 	{
 		float cornerErr=maxerr;
 		int c=-1;
-		
+
 		for( int i=0; i<4; ++i )
 		{
 			float d = distance(quad[i],pt);
-			
+
 			if (d<cornerErr)
 			{
 				c=i;
 				cornerErr=d;
 			}
 		}
-		
+
 		err=cornerErr;
 		return c;
 	};
-	
+
 	auto scoreError = [closestCorner]( const vec2 a[4], const vec2 b[4], float maxerr=MAXFLOAT ) -> float
 	{
 		float c[4] = {MAXFLOAT,MAXFLOAT,MAXFLOAT,MAXFLOAT};
-		
+
 		for( int i=0; i<4; ++i )
 		{
 			float err;
-			
+
 			int cc = closestCorner( a[i], b, err, maxerr );
 			if (cc==-1) return MAXFLOAT;
 			c[cc]=err;
 		}
 
 //		cout << "\t" << c[0] << " " << c[1] << " " << c[2] << " " << c[3] << endl;
-		
+
 		float sumerr=0.f;
 		for( int i=0; i<4; ++i )
 		{
@@ -456,7 +371,7 @@ MusicWorld::Score* MusicWorld::matchOldScoreToNewScore( const Score& old, float 
 		}
 		return sumerr;
 	};
-	
+
 	for( size_t i=0; i<mScores.size(); ++i )
 	{
 		float err = scoreError( old.mQuad, mScores[i].mQuad, maxErr ) ;
@@ -467,7 +382,7 @@ MusicWorld::Score* MusicWorld::matchOldScoreToNewScore( const Score& old, float 
 			best=&mScores[i];
 		}
 	}
-	
+
 	if (outError) *outError=bestErr;
 	return best;
 }
@@ -476,15 +391,15 @@ bool
 MusicWorld::doesZombieScoreIntersectZombieScores( const Score& old )
 {
 	bool r=false;
-	
+
 	PolyLine2 op = old.getPolyLine();
 	vector<PolyLine2> opv;
 	opv.push_back(op);
-	
+
 	for( auto &s : mScores )
 	{
 		bool touches=false;
-		
+
 		{
 			PolyLine2 p = s.getPolyLine();
 			vector<PolyLine2> pv;
@@ -494,14 +409,14 @@ MusicWorld::doesZombieScoreIntersectZombieScores( const Score& old )
 			// this is CRAZY performance wise, but it should work for now
 			// TODO: do poly-poly intersection correctly
 		}
-		
+
 		if ( touches )
 		{
 			if (s.mIsZombie) s.mDoesZombieTouchOtherZombies = true;
 			r=true;
 		}
 	}
-	
+
 	return r;
 }
 
@@ -510,10 +425,10 @@ MusicWorld::shouldPersistOldScore ( const Score& old, const ContourVector &conto
 {
 	// did we go dark?
 	if ( scoreFractionInContours(old, contours, mScoreTrackRejectNumSamples) < mScoreTrackRejectSuccessThresh ) return false;
-	
+
 	// do we touch other zombies?
 	if ( doesZombieScoreIntersectZombieScores(old) ) return false;
-	
+
 	return true;
 }
 
@@ -521,29 +436,29 @@ float
 MusicWorld::scoreFractionInContours( const Score& old, const ContourVector &contours, int numSamples ) const
 {
 	int hit=0;
-	
+
 	for( int i=0; i<numSamples; ++i )
 	{
 		vec2 pt( randFloat(), randFloat() ); // [0..1,0..1] random
-		
+
 		pt = old.fracToQuad(pt); // map into score quad
-		
+
 		// see if it lands in top level contours
 		for( auto &c : contours )
 		{
 			if ( c.mTreeDepth==0 && c.mPolyLine.contains(pt) ) hit++;
 		}
 	}
-	
+
 	return (float)hit / (float)numSamples;
 }
 
-MusicWorld::Score* MusicWorld::getScoreForMetaParam( MetaParam p )
+Score* MusicWorld::getScoreForMetaParam( MetaParam p )
 {
 	for( int i=0; i<mScores.size(); ++i )
 	{
 		InstrumentRef instr = getInstrumentForScore(mScores[i]);
-		
+
 		if ( instr && instr->mSynthType==Instrument::SynthType::Meta && instr->mMetaParam==p )
 		{
 			return &mScores[i];
@@ -552,10 +467,10 @@ MusicWorld::Score* MusicWorld::getScoreForMetaParam( MetaParam p )
 	return 0;
 }
 
-MusicWorld::MetaParamInfo MusicWorld::getMetaParamInfo( MetaParam p ) const
+MetaParamInfo MusicWorld::getMetaParamInfo( MetaParam p ) const
 {
 	MetaParamInfo info;
-	
+
 	if ( p==MetaParam::Scale )
 	{
 		info.mNumDiscreteStates = mScales.size();
@@ -564,7 +479,7 @@ MusicWorld::MetaParamInfo MusicWorld::getMetaParamInfo( MetaParam p ) const
 	{
 		info.mNumDiscreteStates = 12;
 	}
-	
+
 	return info;
 }
 
@@ -582,22 +497,22 @@ void MusicWorld::assignUnassignedMetaParams()
 			sliders[(int)i->mMetaParam]++;
 		}
 	}
-	
+
 	// which ones do we want?
 	set<MetaParam> unassignedParams;
-	
+
 	for( int i=0; i<sliders.size(); ++i )
 	{
 		if (sliders[i]==0) unassignedParams.insert( (MetaParam)i );
 	}
-	
+
 	// assign
 	for ( auto &s : mScores )
 	{
 		if ( s.mInstrumentName == "_meta-slider" )
 		{
 			MetaParam param;
-			
+
 			if ( unassignedParams.empty() ) param = (MetaParam)(rand() % (int)MetaParam::kNumMetaParams);
 			else
 			{
@@ -605,19 +520,19 @@ void MusicWorld::assignUnassignedMetaParams()
 				MetaParam bestParam = *unassignedParams.begin();
 				float bestScore = MAXFLOAT;
 				vec2 scoreLoc = s.getCentroid();
-				
+
 				for( auto i : unassignedParams )
 				{
 					auto j = mLastSeenMetaParamLoc.find(i);
 					float score;
-					
+
 					if ( j == mLastSeenMetaParamLoc.end() ) {
 						// never seen
 						score = MAXFLOAT - 100.f; // slightly better than nothing
 					} else {
 						score = distance( scoreLoc, j->second );
 					}
-					
+
 					// best?
 					if ( score < bestScore )
 					{
@@ -625,14 +540,14 @@ void MusicWorld::assignUnassignedMetaParams()
 						bestParam = j->first;
 					}
 				}
-				
+
 				// remove from list of options
 				unassignedParams.erase( unassignedParams.find(bestParam) ); // should be in there!
-				
+
 				// pick it (bestParam redundant to param, but this naming makes algorithm clearer)
 				param = bestParam;
 			}
-			
+
 			InstrumentRef instr = getInstrumentForMetaParam( param );
 			if (instr) s.mInstrumentName = instr->mName;
 		}
@@ -644,22 +559,22 @@ void MusicWorld::updateContours( const ContourVector &contours )
 	// erase old scores
 	vector<Score> oldScores = mScores;
 	mScores.clear();
-	
+
 	// get new ones
 	for( const auto &c : contours )
 	{
 		if ( !c.mIsHole && c.mTreeDepth==0 && c.mPolyLine.size()==4 )
 		{
 			Score score;
-			
+
 			// shape
 			score.setQuadFromPolyLine(c.mPolyLine,mTimeVec);
 			if ( score.getQuadMaxInteriorAngle() > toRadians(mScoreMaxInteriorAngleDeg) ) continue;
-			
+
 			// timing
 			score.mDurationFrac = decideDurationForScore(score); // inherit, but it could be custom based on shape or something
 
-			
+
 			// meta param?
 			if ( shouldBeMetaParamScore(score) )
 			{
@@ -671,7 +586,7 @@ void MusicWorld::updateContours( const ContourVector &contours )
 				int octaveShift = 0;
 				InstrumentRef instr = decideInstrumentForScore(score,&octaveShift);
 				if (instr) score.mInstrumentName = instr->mName ;
-				
+
 				// Choose octave based on up<>down
 				int noteRoot = mRootNote + octaveShift*12; // middle C
 				score.mOctave = octaveShift;
@@ -688,32 +603,32 @@ void MusicWorld::updateContours( const ContourVector &contours )
 				}
 				else if (instr && instr->mSynthType==Instrument::SynthType::Additive)
 				{
-//					score.mAdditiveShader = mAdditiveShader;
+					score.mAdditiveShader = mAdditiveShader;
 				}
 
 				score.mPan		= .5f ;
 			}
 
 
-			
+
 			mScores.push_back(score);
 		}
 	}
-	
+
 	// map old <=> new scores
 	for ( const auto &c : oldScores )
 	{
 		float matchError;
 		Score* match = matchOldScoreToNewScore(c,mScoreTrackMaxError,&matchError);
-		
+
 		if ( match )
 		{
 //			cout << "match" << endl;
-			
+
 			if (1) // just copy everything forward from previous one
 			{
 				Score newScore = *match; // store it for exceptions
-				
+
 				// new <= old
 				*match = c;
 
@@ -724,7 +639,7 @@ void MusicWorld::updateContours( const ContourVector &contours )
 			else // do it piecemeal
 			{
 				for( int i=0; i<4; ++i ) match->mQuad[i] = c.mQuad[i]; // de-jitter vertices
-	
+
 				// copy images forward so we can do temporal anti-aliasing and other effects
 				match->mImage = c.mImage;
 				match->mQuantizedImage = c.mImage;
@@ -743,20 +658,27 @@ void MusicWorld::updateContours( const ContourVector &contours )
 //			else cout << "die" << endl;
 		}
 	}
-	
+
 	// 2nd pass eliminate intersecting zombie (anything flagged)
 	oldScores = mScores;
 	mScores.clear();
-	
+
 	for( auto &s : oldScores )
 	{
 		if ( !s.mDoesZombieTouchOtherZombies ) mScores.push_back(s);
 	}
 
 	updateScoresWithMetaParams();
-	
+
 	// finally, assign any unassigned meta-params
 	assignUnassignedMetaParams();
+
+
+    // FIXME not factored yet...
+    for (auto &s : mScores ) {
+        s.mInstrument = decideInstrumentForScore(s);
+        s.mMetaParamInfo = getMetaParamInfo(s.mInstrument->mMetaParam);
+    }
 }
 
 void MusicWorld::updateScoresWithMetaParams() {
@@ -766,6 +688,7 @@ void MusicWorld::updateScoresWithMetaParams() {
 		s.mNoteCount = mNoteCount;
 		s.mScale = mScale;
 		s.mBeatCount = mBeatCount;
+        s.mNumOctaves = mNumOctaves;
 	}
 }
 
@@ -780,7 +703,7 @@ static float getImgDiffFrac( cv::Mat a, cv::Mat b )
 		//cout << "diff: " << d << endl;
 		return d;
 	}
-	
+
 	return 1.f;
 }
 
@@ -789,17 +712,17 @@ static void doTemporalMatBlend( Pipeline& pipeline, string scoreName, cv::Mat ol
 	// newimg = oldimg * oldWeight + newimg * (1 - oldWeight)
 
 	bool verbose=false;
-	
+
 	float diff = getImgDiffFrac(oldimg,newimg);
-	
+
 	if ( diff < diffthresh )
 	{
 		if (verbose) cout << "blend" << endl ;
-		
+
 		if ( !oldimg.empty() && oldimg.size == newimg.size )
 		{
 			float newWeight = 1.f - oldWeight;
-			
+
 			cv::addWeighted( newimg, newWeight, oldimg, oldWeight, 0.f, newimg );
 			pipeline.then( scoreName + " temporally blended", newimg);
 			pipeline.getStages().back()->mLayoutHintScale = .5f;
@@ -810,25 +733,25 @@ static void doTemporalMatBlend( Pipeline& pipeline, string scoreName, cv::Mat ol
 }
 
 void MusicWorld::quantizeImage( Pipeline& pipeline,
-	MusicWorld::Score& s,
+	Score& s,
 	string scoreName,
 	bool doTemporalBlend,
 	cv::Mat oldTemporalBlendImage,
 	int quantizeNumCols, int quantizeNumRows ) const
 {
 	cv::Mat &inquant = s.mImage;
-	
+
 	if (quantizeNumCols<=0) quantizeNumCols = inquant.cols;
 	if (quantizeNumRows<=0) quantizeNumRows = inquant.rows;
-	
+
 	cv::Mat quantized;
 	cv::resize( inquant, quantized, cv::Size(quantizeNumCols,quantizeNumRows), 0, 0, cv::INTER_AREA ); // best?
 		// cv::INTER_AREA is the best.
 		// cv::INTER_LANCZOS4 is good
 		// these are not so great: cv::INTER_CUBIC, cv::INTER_NEAREST, cv::INTER_LINEAR
-	
+
 	vec2 outsize = vec2( s.mImage.cols, s.mImage.rows );
-	
+
 	pipeline.then( scoreName + " quantized", quantized);
 	pipeline.setImageToWorldTransform(
 		pipeline.getStages().back()->mImageToWorld
@@ -843,7 +766,7 @@ void MusicWorld::quantizeImage( Pipeline& pipeline,
 		doTemporalMatBlend( pipeline, scoreName, oldTemporalBlendImage, quantized,
 			mScoreTrackTemporalBlendFrac, mScoreTrackTemporalBlendIfDiffFracLT );
 	}
-	
+
 	// threshold
 	cv::Mat &inthresh = quantized;
 	cv::Mat thresholded;
@@ -853,7 +776,7 @@ void MusicWorld::quantizeImage( Pipeline& pipeline,
 	} else {
 		cv::threshold( inthresh, thresholded, mScoreNoteVisionThresh, 255, cv::THRESH_BINARY );
 	}
-	
+
 	pipeline.then( scoreName + " thresholded", thresholded);
 	pipeline.getStages().back()->mLayoutHintScale = .5f;
 	pipeline.getStages().back()->mLayoutHintOrtho = true;
@@ -867,23 +790,23 @@ void MusicWorld::quantizeImage( Pipeline& pipeline,
 void MusicWorld::updateCustomVision( Pipeline& pipeline )
 {
 	// this function grabs the bitmaps for each score
-	
+
 	// get the image we are slicing from
 	Pipeline::StageRef world = pipeline.getStage("thresholded");
 	if ( !world || world->mImageCV.empty() ) return;
-	
+
 	// for each score...
 	int scoreNum=1;
-	
+
 	for( Score& s : mScores )
 	{
 		string scoreName = string("score")+toString(scoreNum);
 		const auto instr = getInstrumentForScore(s);
-		
+
 		cv::Mat oldTemporalBlendImage;
 		const bool doTemporalBlend = instr && instr->mSynthType==Instrument::SynthType::MIDI && mScoreTrackTemporalBlendFrac>0.f;
 		if ( doTemporalBlend ) oldTemporalBlendImage = s.mQuantizedImagePreThreshold.clone(); // must clone to work!
-		
+
 		// get src points
 		vec2		srcpt[4];
 		cv::Point2f srcpt_cv[4];
@@ -894,14 +817,14 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 				srcpt[i] = vec2( world->mWorldToImage * vec4(s.mQuad[i],0,1) );
 				trimto += srcpt[i]*.25f;
 			}
-			
+
 			// trim
 			for ( int i=0; i<4; ++i ) srcpt[i] = lerp( srcpt[i], trimto, mScoreVisionTrimFrac );
-			
+
 			// to ocv
 			vec2toOCV_4(srcpt, srcpt_cv);
 		}
-		
+
 		// get output points
 		vec2 outsize(
 			max( distance(srcpt[0],srcpt[1]), distance(srcpt[3],srcpt[2]) ),
@@ -911,7 +834,7 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 
 		cv::Point2f dstpt_cv[4];
 		vec2toOCV_4(dstpt, dstpt_cv);
-		
+
 		// grab it
 		cv::Mat xform = cv::getPerspectiveTransform( srcpt_cv, dstpt_cv ) ;
 		cv::warpPerspective( world->mImageCV, s.mImage, xform, cv::Size(outsize.x,outsize.y) );
@@ -920,7 +843,7 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		pipeline.setImageToWorldTransform( getOcvPerspectiveTransform(dstpt,s.mQuad) );
 		pipeline.getStages().back()->mLayoutHintScale = .5f;
 		pipeline.getStages().back()->mLayoutHintOrtho = true;
-		
+
 		// quantize
 		if ( instr && instr->mSynthType==Instrument::SynthType::MIDI )
 		{
@@ -930,27 +853,27 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		else if ( instr && instr->mSynthType==Instrument::SynthType::Meta )
 		{
 			float oldSliderValue = s.mMetaParamSliderValue;
-			
+
 			// meta-param
 			quantizeImage(pipeline,s,scoreName,doTemporalBlend,oldTemporalBlendImage, 1, -1 );
 				// we don't quantize to num states because it behaves weird.
 				// maybe 2x or 4x that might help, but the code below handles continuous values best.
-			
+
 			// parse value...
 			s.mMetaParamSliderValue = 0.f;
 			float sumw = 0.f;
-			
+
 			for( int i=0; i<s.mQuantizedImage.rows; ++i )
 			{
 				float v = 1.f - (float)i / (float)(s.mQuantizedImage.rows-1);
 				float w = 1.f - (float)s.mQuantizedImage.at<unsigned char>(i,0) / 255.f;
-				
+
 				sumw += w;
 				s.mMetaParamSliderValue += v * w;
 			}
-			
+
 			s.mMetaParamSliderValue /= sumw;
-			
+
 			if ( sumw==0.f )
 			{
 				// uh-oh! fall back to last frame value
@@ -961,7 +884,7 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 				// update
 				updateMetaParameter( instr->mMetaParam, s.mMetaParamSliderValue );
 			}
-			
+
 			// discretize
 			MetaParamInfo paramInfo = getMetaParamInfo(instr->mMetaParam);
 
@@ -972,7 +895,7 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 				s.mMetaParamSliderValue /= (float)paramInfo.mNumDiscreteStates;
 			}
 		}
-		
+
 		//
 		scoreNum++;
 	}
@@ -981,10 +904,10 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 	updateAdditiveScoreSynthesis();
 }
 
-MusicWorld::InstrumentRef MusicWorld::getInstrumentForScore( const Score& score ) const
+InstrumentRef MusicWorld::getInstrumentForScore( const Score& score ) const
 {
 	auto i = mInstruments.find(score.mInstrumentName);
-	
+
 	if ( i == mInstruments.end() )
 	{
 		// fail!
@@ -1008,7 +931,7 @@ void MusicWorld::update()
 
 
 	int synthNum=0;
-	
+
 	for( const auto &score : mScores )
 	{
 		auto instr = getInstrumentForScore(score);
@@ -1036,7 +959,7 @@ void MusicWorld::update()
 				{
 					unsigned char value = score.mQuantizedImage.at<unsigned char>(score.mNoteCount-1-y,x);
 
-					int note = score.noteForY(instr, y);
+					int note = score.noteForY(y);
 
 					if ( score.isScoreValueHigh(value) )
 					{
@@ -1044,25 +967,25 @@ void MusicWorld::update()
 							getBeatDuration() *
 							score.mDurationFrac *
 							score.getNoteLengthAsScoreFrac(score.mQuantizedImage,x,y);
-						
+
 						if (duration>0)
 						{
-							doNoteOn( instr, note, duration );
+							instr->doNoteOn( note, duration );
 						}
 					}
 					// See if the note was previously triggered but no longer exists, and turn it off if so
-					else if (isNoteInFlight( instr, note ))
+					else if (instr->isNoteInFlight( note ))
 					{
 						// TODO: this should work as long a there isn't >1 score per instrument. In that case,
 						// this will start to behave weirdly. Proper solution is to scan all scores and
 						// aggregate all the on notes, and then join the list of desired on notes to actual on notes
 						// in a single pass, taking action to on/off them as needed.
-						sendNoteOffForInstr( instr, note );
+						instr->doNoteOff( note );
 					}
 				}
 			}
 			break;
-			
+
 			// Meta
 			case Instrument::SynthType::Meta:
 			{
@@ -1070,11 +993,13 @@ void MusicWorld::update()
 			}
 			break;
 		}
+
+        // retire notes
+        instr->updateNoteOffs();
 	}
-	
-	// retire notes
-	updateNoteOffs();
-	
+
+
+
 	// file watch
 	mFileWatch.scanFiles();
 }
@@ -1107,103 +1032,12 @@ float MusicWorld::getDT() {
 	return dt;
 }
 
-bool MusicWorld::isNoteInFlight( InstrumentRef instr, int note ) const
-{
-	auto i = mOnNotes.find( tOnNoteKey(instr,note) );
-	return i != mOnNotes.end();
-}
-
-void MusicWorld::updateNoteOffs()
-{
-	const float now = ci::app::getElapsedSeconds();
-
-	// search for "expired" notes and send them their note-off MIDI message,
-	// then remove them from the mOnNotes map
-	for ( auto it = mOnNotes.begin(); it != mOnNotes.end(); /*manually...*/ )
-	{
-		bool off = now > it->second.mStartTime + it->second.mDuration;
-		
-		if (off)
-		{
-			sendNoteOffForInstr( it->first.mInstrument, it->first.mNote );
-		}
-		
-		if (off) mOnNotes.erase(it++);
-		else ++it;
-	}
-}
-
-void MusicWorld::sendNoteOffForInstr( InstrumentRef instr, int note)
-{
-	uchar channel = instr->channelForNote(note);
-
-	sendNoteOff( instr->mMidiOut, channel, note);
-}
-
 void MusicWorld::killAllNotes()
 {
 	for ( const auto i : mInstruments )
 	{
-		if (i.second->mMidiOut)
-		{
-			for (int channel = 0; channel < 16; channel++)
-			{
-				for (int note = 0; note < 128; note++)
-				{
-					sendNoteOff( i.second->mMidiOut, channel, note );
-				}
-			}
-		}
+        i.second->killAllNotes();
 	}
-}
-
-void MusicWorld::doNoteOn( InstrumentRef instr, int note, float duration )
-{
-	if ( !isNoteInFlight(instr,note) && instr->mMidiOut )
-	{
-		uchar velocity = 100; // 0-127
-
-		uchar channel = instr->channelForNote(note);
-
-		sendNoteOn( instr->mMidiOut, channel, note, velocity );
-		
-		tOnNoteInfo i;
-		i.mStartTime = ci::app::getElapsedSeconds();
-		i.mDuration  = duration;
-		
-		mOnNotes[ tOnNoteKey(instr,note) ] = i;
-	}
-}
-
-void MusicWorld::sendNoteOn ( RtMidiOutRef midiOut, uchar channel, uchar note, uchar velocity )
-{
-	const uchar noteOnBits = 9;
-
-	uchar channelBits = channel & 0xF;
-
-	sendMidi( midiOut, (noteOnBits<<4) | channelBits, note, velocity);
-}
-
-void MusicWorld::sendNoteOff ( RtMidiOutRef midiOut, uchar channel, uchar note )
-{
-	const uchar velocity = 0; // MIDI supports "note off velocity", but that's esoteric and we're not using it
-	const uchar noteOffBits = 8;
-
-	uchar channelBits = channel & 0xF;
-
-	sendMidi( midiOut, (noteOffBits<<4) | channelBits, note, velocity);
-}
-
-void MusicWorld::sendMidi( RtMidiOutRef midiOut, uchar a, uchar b, uchar c )
-{
-	std::vector<uchar> message(3);
-
-	message[0] = a;
-	message[1] = b;
-	message[2] = c;
-
-	midiOut->sendMessage( &message );
-
 }
 
 void MusicWorld::updateMetaParameter(MetaParam metaParam, float value)
@@ -1238,19 +1072,19 @@ void MusicWorld::updateAdditiveScoreSynthesis()
 
 	// send scores to Pd
 	int synthNum=0;
-	
+
 	for( const auto &score : mScores )
 	{
 		InstrumentRef instr = getInstrumentForScore(score);
 		if (!instr) continue;
-		
+
 		// send image for additive synthesis
 		if ( instr->mSynthType==Instrument::SynthType::Additive && !score.mImage.empty() )
 		{
 
 			int rows = score.mImage.rows;
 			int cols = score.mImage.cols;
-			
+
 			// Update pan
 //			mPureDataNode->sendFloat(toString(scoreNum)+string("pan"),
 //									 score.mPan);
@@ -1272,10 +1106,10 @@ void MusicWorld::updateAdditiveScoreSynthesis()
 
 			// Create a float version of the image
 			cv::Mat imageFloatMat;
-			
+
 			// Copy the uchar version scaled 0-1
 			score.mImage.convertTo(imageFloatMat, CV_32FC1, 1/255.0);
-			
+
 			// Convert to a vector to pass to Pd
 
 			// Grab the current column at the playhead. We send updates even if the
@@ -1306,8 +1140,8 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 {
 //	return;
 	bool drawSolidColorBlocks = drawType == GameWorld::DrawType::Projector;
-	// otherwise we can't see score contents in the UI view... 
-	
+	// otherwise we can't see score contents in the UI view...
+
 	// instrument regions
 	if (drawSolidColorBlocks)
 	{
@@ -1317,14 +1151,14 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 			gl::drawSolid( r.first ) ;
 		}
 	}
-	
+
 	// scores
 	for( const auto &score : mScores )
 	{
-		score.draw(*this,drawType);
+		score.draw(drawType);
 	}
 
-	
+
 	// draw time direction (for debugging score generation)
 	if (0)
 	{

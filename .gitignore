@@ -15,3 +15,4 @@ build/
 /xcode/build/PaperBounce3.build/Debug/PaperBounce3.build/PaperBounce3.hmap
 /xcode/build/PaperBounce3.build/Debug/PaperBounce3.build/Objects-normal/x86_64/b2RevoluteJoint.dia
 /xcode/PaperBounce3.xcodeproj/project.xcworkspace/xcshareddata
+*.xcuserdatad/

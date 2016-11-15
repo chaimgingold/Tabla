@@ -13,10 +13,9 @@
 #include "FileWatch.h"
 #include "PureDataNode.h"
 #include "RtMidi.h"
+#include "Instrument.h"
+#include "Score.h"
 
-typedef std::shared_ptr<RtMidiOut> RtMidiOutRef;
-
-typedef vector<int> Scale;
 
 class MusicWorld : public GameWorld
 {
@@ -26,7 +25,7 @@ public:
 	~MusicWorld();
 
 	void setParams( XmlTree ) override;
-	
+
 	string getSystemName() const override { return "MusicWorld"; }
 
 	void update() override;
@@ -38,31 +37,10 @@ public:
 	void draw( GameWorld::DrawType ) override;
 
 private:
-	
-	class Instrument;
-	class Score;
-	
-	// meta-params
-	enum class MetaParam
-	{
-		Scale=0,
-		RootNote,
-		Tempo,
-//		BeatCount,
-		kNumMetaParams
-	};
 
-	class MetaParamInfo
-	{
-	public:
-		bool isDiscrete() const { return mNumDiscreteStates!=-1; }
-		
-		int mNumDiscreteStates=-1;
-	};
-	
-	MetaParamInfo getMetaParamInfo( MetaParam ) const;
 	map<MetaParam,vec2> mLastSeenMetaParamLoc; // for better inter-frame coherence
-	
+	MetaParamInfo getMetaParamInfo( MetaParam p ) const;
+
 	//
 	vec2  mTimeVec;		// in world space, which way does time flow forward?
 	int	  mNoteCount=8;
@@ -70,65 +48,26 @@ private:
 	Scale mScale;
 	float mRootNote=60;
 	float mNumOctaves=5;
-	
+
 	int	  mScoreNoteVisionThresh=-1; // 0..255, or -1 for OTSU
 	float mScoreVisionTrimFrac=0.f;
-	
+
 	int   mScoreTrackRejectNumSamples=10;
 	float mScoreTrackRejectSuccessThresh=.2f;
 	float mScoreTrackMaxError=1.f;
 	float mScoreMaxInteriorAngleDeg=120.f;
 	float mScoreTrackTemporalBlendFrac=.5f; // 0 means off, so all new
 	float mScoreTrackTemporalBlendIfDiffFracLT=.1f; // only do blending if frames are similar enough; otherwise: fast no blend mode.
-	
+
 	// new tempo system
 	vector<float> mTempos; // what tempos do we support? 0 entry means free form, 1 means all are fixed.
 	float mTempoWorldUnitsPerSecond = 5.f;
 	float getNearestTempo( float ) const; // input -> closest mTempos[]
-	
-	// instrument info
-	class Instrument
-	{
-	public:
 
-		~Instrument();
-		
-		void setParams( XmlTree );
-		void setup();
 
-		int channelForNote(int note);
-		
-		// colors!
-		ColorA mPlayheadColor;
-		ColorA mScoreColor;
-		ColorA mNoteOffColor, mNoteOnColor;
-		
-		//
-		string mName;
-
-		//
-		enum class SynthType
-		{
-			Additive = 1,
-			MIDI	 = 2,
-			Meta	 = 3  // controls global params
-		};
-		
-		SynthType mSynthType;
-		MetaParam mMetaParam; // only matters if mSynthType==Meta
-		
-		// midi
-		int  mPort=0;
-		int  mChannel=0;
-		int  mMapNotesToChannels=0; // for KORG Volca Sample
-		RtMidiOutRef mMidiOut;
-		
-	};
-	typedef std::shared_ptr<Instrument> InstrumentRef;
-	
 	map<string,InstrumentRef> mInstruments;
 	vector<Scale> mScales;
-	
+
 	vector< pair<PolyLine2,InstrumentRef> > mInstrumentRegions;
 	void generateInstrumentRegions();
 	int  getScoreOctaveShift( const Score& s, const PolyLine2& wrtRegion ) const;
@@ -141,89 +80,19 @@ private:
 
 	void updateMetaParameter(MetaParam metaParam, float value);
 	void updateScoresWithMetaParams();
-	
-	// scores
-	class Score
-	{
-	public:
-		void draw( MusicWorld& world, GameWorld::DrawType ) const;
-		
-		// shape
-		vec2  mQuad[4];
-		/*  Vertices are played back like so:
-		
-			0---1
-			|   |
-			3---2
-			
-			 --> time		*/
 
-		// detection meta-data
-		bool mIsZombie=false;
-		bool mDoesZombieTouchOtherZombies=false;
-		
-		// image data
-		cv::Mat		mImage;				// thresholded image
-		cv::Mat		mQuantizedImagePreThreshold; // (for inter-frame smoothing)
-		cv::Mat		mQuantizedImage;	// quantized image data for midi playback
-		float		mMetaParamSliderValue=-1.f; // 0..1
-		
-		// synth parameters
-		string		mInstrumentName; // which synth
-		
-		float		mPhase=0;
-		float		mDurationFrac=1;
-		void tickPhase(float globalPhase);
-		
-		int			mOctave;
-		float		mRootNote;
-		int			mNoteCount;
-		int         mBeatCount;
-		int			mNoteInstrument;
-		
-		float		mPan;
-		//float		mVolume;
-		
-		// constructing shape
-		bool		setQuadFromPolyLine( PolyLine2, vec2 timeVec );
-		
-		// getting stuff
-		PolyLine2	getPolyLine() const;
-		float		getPlayheadFrac() const;
-		void		getPlayheadLine( vec2 line[2] ) const; // line goes from [3..2] >> [0..1]
-		vec2		getSizeInWorldSpace() const;
-			// if not a perfect rect, then it's approximate (measures two bisecting axes)
-			// x is axis along which playhead moves; y is perp to it (parallel to playhead)
-		vec2		fracToQuad( vec2 frac ) const; // frac.x = time[0,1], frac.y = note_space[0,1]
-		vec2		getCentroid() const { return fracToQuad(vec2(.5,.5)); }
-		float		getQuadMaxInteriorAngle() const; // looking for concave-ish shapes...
-		
-		Scale mScale;
-		int noteForY( InstrumentRef instr, int y ) const;
 
-		// score vision
-		bool  isScoreValueHigh( uchar ) const;
-		float getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const;
-		int   getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const;
-		
-	private:
-		void drawNotes		( InstrumentRef instr, MusicWorld& world, GameWorld::DrawType drawType ) const;
-		void drawScoreLines	( InstrumentRef instr, MusicWorld& world, GameWorld::DrawType drawType ) const;
-		void drawPlayhead	( InstrumentRef instr, MusicWorld& world, GameWorld::DrawType drawType ) const;
-		void drawMetaParam	( InstrumentRef instr, MusicWorld& world, GameWorld::DrawType drawType ) const;
-
-	};
 	vector<Score> mScores;
-	
+
 	InstrumentRef	getInstrumentForScore( const Score& ) const;
-	
+
 	Score* matchOldScoreToNewScore( const Score& old, float maxErr, float* matchError=0 ); // can return 0 if no match; returns new score (in mScores)
 	float  scoreFractionInContours( const Score& old, const ContourVector &contours, int numSamples ) const;
 	bool   doesZombieScoreIntersectZombieScores( const Score& old ); // marks other zombies if so
 	bool   shouldPersistOldScore  ( const Score& old, const ContourVector &contours );
 		// match failed; do we want to keep it?
 		// any intersecting zombie scores are marked for removal (mDoesZombieTouchOtherZombies)
-	
+
 	Score* getScoreForMetaParam( MetaParam );
 
 	// image processing helper code
@@ -237,46 +106,9 @@ private:
 		// resizes score.mImage => mQuantizedImage + mQuantizedImagePreThreshold,
 		// and does temporal smoothing (optionally)
 		// if you pass -1 for cols or rows then it isn't resized in that dimension
-	
-	// midi note playing and management
-	struct tOnNoteKey
-	{
-		tOnNoteKey();
-		tOnNoteKey( InstrumentRef i, int n ) : mInstrument(i), mNote(n){}
-		
-		InstrumentRef mInstrument;
-		int mNote;
-		
-	};
 
-	struct cmpOnNoteKey {
-		bool operator()(const tOnNoteKey& a, const tOnNoteKey& b) const {
-			return pair<InstrumentRef,int>(a.mInstrument,a.mNote) > pair<InstrumentRef,int>(b.mInstrument,b.mNote);
-		}
-	};
 
-	struct tOnNoteInfo
-	{
-		float mStartTime;
-		float mDuration;
-	};
-	
-	map < tOnNoteKey, tOnNoteInfo, cmpOnNoteKey > mOnNotes ;
-		// (instrument,note) -> (start time, duration)
-	
-	bool isNoteInFlight( InstrumentRef instr, int note ) const;
-	void updateNoteOffs();
-	void doNoteOn( InstrumentRef instr, int note, float duration ); // start time is now
 
-	void sendNoteOffForInstr( InstrumentRef instr, int note);
-
-	// midi convenience methods
-	void sendMidi( RtMidiOutRef, uchar, uchar, uchar );
-	void sendNoteOn ( RtMidiOutRef midiOut, uchar channel, uchar note, uchar velocity );
-	void sendNoteOff ( RtMidiOutRef midiOut, uchar channel, uchar note );
-
-	void killAllNotes(); // sends a note off for all MIDI notes (0-127)
-	
 	// synthesis
 	cipd::PureDataNodeRef	mPureDataNode;	// synth engine
 	cipd::PatchRef			mPatch;			// music patch
@@ -284,7 +116,7 @@ private:
 	void setupSynthesis();
 	void updateAdditiveScoreSynthesis();
 
-
+	void killAllNotes(); // sends a note off for all MIDI notes (0-127)
 
 	// DT calculation
 	float mLastFrameTime;
@@ -299,7 +131,7 @@ private:
 
 	// Shaders
 	FileWatch mFileWatch; // hotload our shaders; in this class so when class dies all the callbacks expire.
-	
+
 	gl::GlslProgRef mAdditiveShader;
 };
 
