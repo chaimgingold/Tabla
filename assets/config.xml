@@ -51,52 +51,39 @@
 	<!-- Projector <> Camera <> World mapping
 			This just gives initial values for user configuration.
 			Configuration you do in app is saved and loaded from ~Documents/PaperES/.
-	-->
+		-->
+	
+	<!-- Defaults for our YCR-OAK office setup -->
 	<LightLink>
-
-		<CameraIndex>-1</CameraIndex>
-		<!-- Which camera to use? 0 indexed. -1 means last. -->
-
-		<!-- px -->
-		<CaptureSize> 640 480 </CaptureSize>
-
-		<CaptureCoords>
-			136 78
-			459 71
-			468 403
-			125 397
-		</CaptureCoords>
-		
-		
-		<!-- cm (i measured my table) -->
-		<CaptureWorldSpaceCoords>
-			0 0
-			69 0
-			69 69
-			0 69
-		</CaptureWorldSpaceCoords>
-
-		<ProjectorWorldSpaceCoords>
-			0 0
-			69 0
-			69 69
-			0 69
-		</ProjectorWorldSpaceCoords>
-
-
-		<!-- px -->
-		<ProjectorCoords>
-			60 20
-			1170 20
-			1170 1130
-			60 1130
-		</ProjectorCoords>
-
-		<ProjectorSize>
-			1280 800
-		</ProjectorSize>
-		
+		<CameraIndex>0</CameraIndex>
+		<CaptureSize>640 480</CaptureSize>
+		<CaptureCoords>638.961792 311.788391
+	18.4234161 392.981323
+	-2.9909668 41.035408
+	581.611816 9.00953865
+	</CaptureCoords>
+		<CaptureWorldSpaceCoords>0 0
+	126 0
+	126 69.5
+	0 69.5
+	</CaptureWorldSpaceCoords>
+		<ProjectorCoords>1228.57959 642.460632
+	175.379608 772.453308
+	-53.7026215 5.9238472
+	1216.71448 -30.7076797
+	</ProjectorCoords>
+		<ProjectorWorldSpaceCoords>0 0
+	121.463959 -0.303260803
+	130.19603 75.1454391
+	-0.606506348 73.5489044
+	</ProjectorWorldSpaceCoords>
+		<ProjectorSize>1280 800</ProjectorSize>
+		<DistCoeffs>[-1, -4.0226412, 0.0079270257, -0.0037597809, 30.936378]</DistCoeffs>
+		<CameraMatrix>[1072.3177, 0, 314.25284;
+	 0, 1062.8184, 234.11261;
+	 0, 0, 1]</CameraMatrix>
 	</LightLink>
+
 	
 
 	<Games>
