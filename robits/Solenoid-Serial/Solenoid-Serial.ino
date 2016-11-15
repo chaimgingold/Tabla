@@ -27,7 +27,11 @@ void serialEvent() { // event listener
       if (command[0] == 'H') {
         ++command; // advance the pointer 
         digitalWrite(13, HIGH);   // send HIGH to pin 13 - ON.
-        delay(100);              
+       
+      }  
+      if (command[0] == 'L') {
+        ++command; // advance the pointer 
+         
         digitalWrite(13, LOW);    // send LOW
       }  
     command = strtok(0, "&"); //goes to next substring 
