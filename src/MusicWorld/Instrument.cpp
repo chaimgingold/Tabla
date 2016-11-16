@@ -298,7 +298,7 @@ void Instrument::sendMidi( RtMidiOutRef midiOut, uchar a, uchar b, uchar c )
 	message[1] = b;
 	message[2] = c;
 
-	midiOut->sendMessage( &message );
+	if (midiOut) midiOut->sendMessage( &message );
 
 }
 

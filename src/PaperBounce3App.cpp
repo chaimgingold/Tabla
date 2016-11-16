@@ -201,7 +201,7 @@ void PaperBounce3App::setup()
 	// default pipeline image to query
 	// (after loading xml)
 	// (we query before making the pipeline because we only store the image requested :P!)
-	if ( mPipeline.getQuery().empty() ) mPipeline.setQuery("input");
+	if ( mPipeline.getQuery().empty() ) mPipeline.setQuery("undistorted");
 	mPipeline.setCaptureAllStageImages(mDrawPipeline);
 	
 	// load the games and the game

@@ -218,12 +218,39 @@ void PolyEditView::draw()
 
 	if ( isEditable() )
 	{
-		if ( getHasRollover() ) gl::color(1,0,0);
-		else gl::color(.8,.2,1);
-
-		for( vec2 p : poly )
+		if (1)
 		{
-			gl::drawStrokedRect( getPointControlRect(p), 2.f );
+			// new style, indicate orientation and indexing
+			Colorf c[4] = {
+				Colorf(1,1,1),
+				Colorf(1,0,0),
+				Colorf(0,1,0),
+				Colorf(0,0,1)
+			};
+			
+			for( int i=0; i<poly.size(); ++i )
+			{
+				vec2 p = poly.getPoints()[i];
+
+				gl::color( ColorA( c[min(i,3)], getHasRollover() ? 1.f : .5f) );
+				
+				if (i==0)
+				{
+					gl::drawStrokedCircle( p, kRadius, 2.f );
+				}
+				else
+				{
+					gl::drawStrokedRect( getPointControlRect(p), 2.f );
+				}
+			}
+		}
+		else
+		{
+			// old style
+			if ( getHasRollover() ) gl::color(1,0,0);
+			else gl::color(.8,.2,1);
+
+			for( vec2 p : poly ) gl::drawStrokedRect( getPointControlRect(p), 2.f );
 		}
 	}
 }

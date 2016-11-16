@@ -8,7 +8,7 @@
 <!--	This could use a cleanup since we refactored into two windows	-->
 		<AutoFullScreenProjector>	1 </AutoFullScreenProjector>
 		<DrawCameraImage>			1 </DrawCameraImage>
-		<DrawContours>				1 </DrawContours>
+		<DrawContours>				0 </DrawContours>
 		<DrawContoursFilled>		0 </DrawContoursFilled>
 		<DrawMouseDebugInfo>		1 </DrawMouseDebugInfo>
 		<DrawContourMousePick>		1 </DrawContourMousePick>
@@ -57,20 +57,20 @@
 	<LightLink>
 		<CameraIndex>0</CameraIndex>
 		<CaptureSize>640 480</CaptureSize>
-		<CaptureCoords>638.961792 311.788391
-	18.4234161 392.981323
-	-2.9909668 41.035408
-	581.611816 9.00953865
+		<CaptureCoords>6.5316391 45.3232346
+	586.585632 10.777317
+	645.64386 313.25528
+	23.0192261 393.965973
 	</CaptureCoords>
 		<CaptureWorldSpaceCoords>0 0
 	126 0
 	126 69.5
 	0 69.5
 	</CaptureWorldSpaceCoords>
-		<ProjectorCoords>1228.57959 642.460632
-	175.379608 772.453308
-	-53.7026215 5.9238472
-	1216.71448 -30.7076797
+		<ProjectorCoords>6.96487427 67.3494034
+	1172.8219 7.93299866
+	1261.01233 689.416931
+	129.178772 817.460876
 	</ProjectorCoords>
 		<ProjectorWorldSpaceCoords>0 0
 	121.463959 -0.303260803
@@ -98,7 +98,7 @@
 
 			<!-- cm -->
 			<Vision>
-				<ContourMinRadius>			1	</ContourMinRadius>
+				<ContourMinRadius>			.5	</ContourMinRadius>
 				<ContourMinArea>			1	</ContourMinArea>
 				<ContourDPEpsilon>			1	</ContourDPEpsilon>
 				<ContourMinWidth>			2	</ContourMinWidth>
@@ -195,7 +195,7 @@
 			<TempoWorldUnitsPerSecond>5</TempoWorldUnitsPerSecond>
 				<!-- how many cm become 1 second? -->
 
-			<TimeVec>1 0</TimeVec> <!-- Vector in world space time moves along -->
+			<TimeVec>-1 0</TimeVec> <!-- Vector in world space time moves along -->
 			<NoteCount>13</NoteCount>
 			<BeatCount>32</BeatCount>
 			<NumOctaves>5</NumOctaves> <!-- Number of octaves available for shifting when moving scores in zone along Y -->
