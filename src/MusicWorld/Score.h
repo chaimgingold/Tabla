@@ -15,7 +15,6 @@ class Score
 {
 public:
 	InstrumentRef mInstrument;
-	MetaParamInfo mMetaParamInfo;
 	gl::GlslProgRef mAdditiveShader;
 
 	void draw( GameWorld::DrawType ) const;
@@ -45,18 +44,17 @@ public:
 	string		mInstrumentName; // which synth
 
 
-	MetaParamInfo getMetaParamInfo( MetaParam ) const;
-
 	float		mPhase=0;
 	float		mDurationFrac=1;
 	void tickPhase(float globalPhase);
 
-	int			mOctave;
-	float		mRootNote;
-	int			mNoteCount;
-	int         mBeatCount;
-	int			mNoteInstrument;
-	int         mNumOctaves;
+	int			mOctave=-1; // controlled by mOctaveFrac
+	float		mOctaveFrac=0.5f;
+	float		mRootNote=0.f;
+	int			mNoteCount=-1;
+	int         mBeatCount=-1;
+	int			mNoteInstrument=-1;
+	int         mNumOctaves=-1;
 
 	float		mPan;
 	//float		mVolume;

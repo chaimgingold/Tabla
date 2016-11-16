@@ -31,7 +31,7 @@ void CalibrateWorld::update()
 {
 }
 
-void CalibrateWorld::updateCustomVision( Pipeline& pipeline )
+void CalibrateWorld::updateVision( const ContourVector&, Pipeline& pipeline )
 {
 	// too many boards?
 	if ( mKnownBoards.size() >= mNumBoardsToSolve ) return;

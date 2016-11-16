@@ -58,8 +58,9 @@ enum class MetaParam
 class MetaParamInfo
 {
 public:
-	bool isDiscrete() const { return mNumDiscreteStates!=-1; }
-
+	bool  isDiscrete() const { return mNumDiscreteStates!=-1; }
+	float discretize( float ) const; // still a fractional value, but rounded off to # of discrete states
+	
 	int mNumDiscreteStates=-1;
 };
 
@@ -112,6 +113,7 @@ public:
 
 	SynthType mSynthType;
 	MetaParam mMetaParam; // only matters if mSynthType==Meta
+	MetaParamInfo mMetaParamInfo;
 
 	// Arpeggiator
 	void tickArpeggiator();

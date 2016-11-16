@@ -8,7 +8,7 @@
 <!--	This could use a cleanup since we refactored into two windows	-->
 		<AutoFullScreenProjector>	1 </AutoFullScreenProjector>
 		<DrawCameraImage>			1 </DrawCameraImage>
-		<DrawContours>				0 </DrawContours>
+		<DrawContours>				1 </DrawContours>
 		<DrawContoursFilled>		0 </DrawContoursFilled>
 		<DrawMouseDebugInfo>		1 </DrawMouseDebugInfo>
 		<DrawContourMousePick>		1 </DrawContourMousePick>
@@ -150,7 +150,7 @@
 		
 				<!-- Vision -->
 				
-			<!-- Vision settings -->
+			<!-- General GameWorld Vision settings -->
 			<!-- cm -->
 			<Vision>
 				<ContourMinRadius>			5	</ContourMinRadius>
@@ -160,26 +160,30 @@
 				<CaptureAllPipelineStages>1</CaptureAllPipelineStages> <!-- So we can extract bitmaps -->
 			</Vision>
 
-			<!-- Custom vision settings... Probably shouldn't change unless you know what you are doing!-->
-			
-			<ScoreNoteVisionThresh>220</ScoreNoteVisionThresh>
-			<!-- 0..255, -1 for OTSU (adaptive) -->
-			<ScoreVisionTrimFrac>.07</ScoreVisionTrimFrac>
-			<!-- When sampling image for each score, what amount to trim the corners (% push towards the center) -->
-			<ScoreMaxInteriorAngleDeg>110</ScoreMaxInteriorAngleDeg>
+			<!-- Custom MusicVision tuning -->
+			<MusicVision>
+				<!-- Custom vision settings... Probably shouldn't change unless you know what you are doing!-->
+				
+				<ScoreNoteVisionThresh>220</ScoreNoteVisionThresh>
+				<!-- 0..255, -1 for OTSU (adaptive) -->
+				<ScoreVisionTrimFrac>.07</ScoreVisionTrimFrac>
+				<!-- When sampling image for each score, what amount to trim the corners (% push towards the center) -->
+				<ScoreMaxInteriorAngleDeg>110</ScoreMaxInteriorAngleDeg>
 
-			<!-- Inter-frame score tracking tuning... -->
-			<ScoreTrackRejectNumSamples>10</ScoreTrackRejectNumSamples> <!-- How many random samples to try when testing for rejection?-->
-			<ScoreTrackRejectSuccessThresh>.2</ScoreTrackRejectSuccessThresh> <!-- What % need to be valid to continue tracking? -->
-			<ScoreTrackMaxError>.5</ScoreTrackMaxError> <!-- How much can scores drift between frames to count as the same score? (world space cumulative error (over each corner) -->
-			<ScoreTrackTemporalBlendFrac>.7</ScoreTrackTemporalBlendFrac>
-				<!-- Only for discrete (MIDI) scores; how much inter-frame temporal blending to do?
-					0 for none.
-					Numbers in between make sense. :-)
-					1 kind of doesn't make sense, since it's 100% old, but might be useful for testing.
-				-->
-			<ScoreTrackTemporalBlendIfDiffFracLT>.02</ScoreTrackTemporalBlendIfDiffFracLT>
-				<!--	Only do temporal blending if frame difference is less than this amount; so fast motion is still fast -->
+				<!-- Inter-frame score tracking tuning... -->
+				<ScoreTrackRejectNumSamples>10</ScoreTrackRejectNumSamples> <!-- How many random samples to try when testing for rejection?-->
+				<ScoreTrackRejectSuccessThresh>.2</ScoreTrackRejectSuccessThresh> <!-- What % need to be valid to continue tracking? -->
+				<ScoreTrackMaxError>.5</ScoreTrackMaxError> <!-- How much can scores drift between frames to count as the same score? (world space cumulative error (over each corner) -->
+				<ScoreTrackTemporalBlendFrac>.7</ScoreTrackTemporalBlendFrac>
+					<!-- Only for discrete (MIDI) scores; how much inter-frame temporal blending to do?
+						0 for none.
+						Numbers in between make sense. :-)
+						1 kind of doesn't make sense, since it's 100% old, but might be useful for testing.
+					-->
+				<ScoreTrackTemporalBlendIfDiffFracLT>.02</ScoreTrackTemporalBlendIfDiffFracLT>
+					<!--	Only do temporal blending if frame difference is less than this amount; so fast motion is still fast -->
+			</MusicVision>
+			
 
 				<!-- Music -->
 
@@ -191,7 +195,7 @@
 			<TempoWorldUnitsPerSecond>5</TempoWorldUnitsPerSecond>
 				<!-- how many cm become 1 second? -->
 
-			<TimeVec>0 -1</TimeVec> <!-- Vector in world space time moves along -->
+			<TimeVec>1 0</TimeVec> <!-- Vector in world space time moves along -->
 			<NoteCount>13</NoteCount>
 			<BeatCount>32</BeatCount>
 			<NumOctaves>5</NumOctaves> <!-- Number of octaves available for shifting when moving scores in zone along Y -->
