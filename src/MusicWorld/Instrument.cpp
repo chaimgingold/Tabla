@@ -124,15 +124,15 @@ void Instrument::setupSerial() {
 	// iterate through ports
 	auto ports = SerialPort::getPorts();
 	for (auto port : ports) {
-		console() << "SERIAL DEVICE" << endl;
-		console() << "\tNAME: " << port->getName() << endl;
-		console() << "\tDESCRIPTION: " << port->getDescription() << endl;
-		console() << "\tHARDWARE IDENTIFIER: " << port->getHardwareIdentifier() << endl;
+		cout << "SERIAL DEVICE" << endl;
+		cout << "\tNAME: " << port->getName() << endl;
+		cout << "\tDESCRIPTION: " << port->getDescription() << endl;
+		cout << "\tHARDWARE IDENTIFIER: " << port->getHardwareIdentifier() << endl;
 	}
 
 	// grab a port and create a device
 	if (!ports.empty()) {
-		SerialPortRef port = SerialPort::findPortByNameMatching(std::regex("\\/dev\\/cu\\.usbmodem.*"));
+		SerialPortRef port = SerialPort::findPortByNameMatching(std::regex("\\/dev\\/cu\\.usbserial.*"));
 		if (!port) {
 			port = ports.back();
 		}
@@ -141,7 +141,6 @@ void Instrument::setupSerial() {
 			mDevice = SerialDevice::create(port, 115200);
 		} catch (serial::IOException& e) {
 			cout << "Failed to create serial device : ( " << e.what() << endl;
-			mDevice = nullptr;
 		}
 
 		// NB: device is opened on creation
