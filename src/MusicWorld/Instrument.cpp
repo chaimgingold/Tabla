@@ -37,6 +37,7 @@ void Instrument::setParams( XmlTree xml )
 		map<string,SynthType> synths;
 		synths["Additive"] = SynthType::Additive;
 		synths["MIDI"] = SynthType::MIDI;
+		synths["Striker"] = SynthType::Striker;
 		synths["Meta"] = SynthType::Meta;
 		auto i = synths.find(t);
 		mSynthType = (i!=synths.end()) ? i->second : SynthType::MIDI ; // default to MIDI
@@ -73,34 +74,76 @@ void Instrument::setup()
 {
 	assert(!mMidiOut);
 
-	if (mSynthType == SynthType::MIDI) {
-		cout << "Opening port " << mPort << " for '" << mName << "'" << endl;
+	switch (mSynthType) {
+        case SynthType::MIDI:
+			setupMIDI();
+			break;
+		case SynthType::Striker:
+			setupSerial();
+			break;
+		default:
+			break;
+	}
+}
 
-		// RtMidiOut can throw an OSError if it has trouble initializing CoreMIDI.
+bool Instrument::isNoteType() const {
+	return mSynthType==Instrument::SynthType::MIDI || mSynthType==Instrument::SynthType::Striker;
+}
+
+void Instrument::setupMIDI() {
+	cout << "Opening port " << mPort << " for '" << mName << "'" << endl;
+
+	// RtMidiOut can throw an OSError if it has trouble initializing CoreMIDI.
+	try {
+		mMidiOut = make_shared<RtMidiOut>();
+	} catch (std::exception) {
+		cout << "Error creating RtMidiOut " << mPort << " for '" << mName << "'" << endl;
+	}
+
+	if (mMidiOut) {
+
+		mMidiOut->setErrorCallback(midiErrorCallback, NULL);
+		if (mPort < mMidiOut->getPortCount()) {
+			mMidiOut->openPort( mPort );
+		} else {
+			cout << "...Opening virtual port for '" << mName << "'" << endl;
+			mMidiOut->openVirtualPort(mName);
+		}
+	}
+}
+
+void Instrument::setupSerial() {
+	// iterate through ports
+	auto ports = SerialPort::getPorts();
+	for (auto port : ports) {
+		console() << "SERIAL DEVICE" << endl;
+		console() << "\tNAME: " << port->getName() << endl;
+		console() << "\tDESCRIPTION: " << port->getDescription() << endl;
+		console() << "\tHARDWARE IDENTIFIER: " << port->getHardwareIdentifier() << endl;
+	}
+
+	// grab a port and create a device
+	if (!ports.empty()) {
+		SerialPortRef port = SerialPort::findPortByNameMatching(std::regex("\\/dev\\/cu\\.usbmodem.*"));
+		if (!port) {
+			port = ports.back();
+		}
+
 		try {
-			mMidiOut = make_shared<RtMidiOut>();
-		} catch (std::exception) {
-			cout << "Error creating RtMidiOut " << mPort << " for '" << mName << "'" << endl;
+			mDevice = SerialDevice::create(port, 115200);
+		} catch (serial::IOException& e) {
+			cout << "Failed to create serial device : ( " << e.what() << endl;
+			mDevice = nullptr;
 		}
 
-		if (mMidiOut) {
-
-			mMidiOut->setErrorCallback(midiErrorCallback, NULL);
-			if (mPort < mMidiOut->getPortCount()) {
-				mMidiOut->openPort( mPort );
-			} else {
-				cout << "...Opening virtual port for '" << mName << "'" << endl;
-				mMidiOut->openVirtualPort(mName);
-			}
-		}
-
+		// NB: device is opened on creation
 	}
 }
 
 // For most synths this is just the assigned channel,
 // but in the case of the Volca Sample we want to
 // send each note to a different channel as per its MIDI implementation.
-int Instrument::channelForNote(int note) {
+int Instrument::channelForNote(int note) const {
 	if (mMapNotesToChannels > 0) {
 		return note % mMapNotesToChannels;
 	}
@@ -126,6 +169,12 @@ void Instrument::updateNoteOffs()
 
 		int note = it->first;
 
+		// HACK: this is a hack to test super-short pulses
+		if (mSynthType == SynthType::Striker) {
+			bool off = now > it->second.mStartTime + 0.01;
+			if (off) doNoteOff(note);
+		}
+
 		if (off)
 		{
 			doNoteOff(note);
@@ -138,13 +187,27 @@ void Instrument::updateNoteOffs()
 
 void Instrument::doNoteOn( int note, float duration )
 {
-	if ( !isNoteInFlight(note) && mMidiOut )
+	if ( !isNoteInFlight(note) )
 	{
 		uchar velocity = 100; // 0-127
 
 		uchar channel = channelForNote(note);
 
-		sendNoteOn( mMidiOut, channel, note, velocity );
+
+		switch (mSynthType)
+		{
+			case SynthType::Striker:
+				sendSerialByte('H');
+				break;
+
+			case SynthType::MIDI:
+				sendNoteOn( mMidiOut, channel, note, velocity );
+				break;
+
+			default:
+				break;
+		}
+
 
 		tOnNoteInfo i;
 		i.mStartTime = ci::app::getElapsedSeconds();
@@ -154,12 +217,54 @@ void Instrument::doNoteOn( int note, float duration )
 	}
 }
 
-void Instrument::doNoteOff( int note ) {
-	sendNoteOff( mMidiOut, channelForNote(note), note);
+void Instrument::sendSerialByte(const uint8_t charByte) {
+	if (!mDevice) {
+		return;
+	}
+
+	// outgoing message is 5 bytes
+	uint8_t buffer[2] = {
+		charByte,
+		'Q' // Q == message terminator
+	};
+
+	size_t size = mDevice->writeBytes(buffer, 2);
+
+	if (size != 2) {
+		printf("only sent %i bytes, should have sent 2!\n", (int)size);
+		return;
+	}
+}
+
+void Instrument::tickArpeggiator()
+{
+	if (arpeggiator.Mode != ArpMode::None) {
+
+	}
+}
+
+void Instrument::doNoteOff( int note )
+{
+	switch (mSynthType)
+	{
+		case SynthType::Striker:
+			sendSerialByte('L');
+			break;
+
+		case SynthType::MIDI:
+			sendNoteOff( mMidiOut, channelForNote(note), note);
+			break;
+
+		default:
+			break;
+	}
 }
 
 void Instrument::sendNoteOn ( RtMidiOutRef midiOut, uchar channel, uchar note, uchar velocity )
 {
+	if (!midiOut) {
+		return;
+	}
 	const uchar noteOnBits = 9;
 
 	uchar channelBits = channel & 0xF;

@@ -1,29 +1,30 @@
-
+11/14/2016 - 11/18/2016
+* Began refactoring MusicWorld into smaller files
 
 
 10/31/2016 - 11/4/2016
 * Clock system for synced variable tempos
 * Disable sleep
 * Metaparameter sliders (tempo/scale/root-note/beats-per-measure)
-* Discrete sliders for scales 
+* Discrete sliders for scales
 * Sliders easier to see
 * Calibration game world WIP
 * Better slider value persistence; root note slider is discrete.
 * Improved slider graphics; improved FPS, refactored Score::draw().
 * Meta-sliders have much more solid inter-frame coherency.
 * RFID tag -> game loading works
-* alt-tab to cycle cameras; setting is locally persisted. 
+* alt-tab to cycle cameras; setting is locally persisted.
 
 10/24/2016 - 10/28/2016
 * Danceability! Fix off-by-one errors in gridlines and number of beats during playback.
 * Persistent scores!
     Can now dynamically move hands through scores without disrupting playback.
 * Adaptive temporal blending/stabilization!
-    keeps slow/un-moving objects more spatially stable 
+    keeps slow/un-moving objects more spatially stable
     while still allowing fast-moving objects
 * Finally fix AdditiveSynth stability
    (by passing active column as a list rather than an array, which was causing Pd thread contention)
-* Added internal global parameter support for switching root note, beat length, scale 
+* Added internal global parameter support for switching root note, beat length, scale
 * Added more scales
 * WIP first pass at global parameter UIs
 * Hotload speed improvement
@@ -46,5 +47,5 @@
 * Drawing performance improvements
 
 10/10/2016 - 10/14/2016
-* Music world is born 
+* Music world is born
 * Additive synths

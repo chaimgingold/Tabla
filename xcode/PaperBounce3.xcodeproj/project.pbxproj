@@ -79,6 +79,14 @@
 		B82FE516E59446FB928ED0B8 /* b2Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 474731D0E50948D4B9522AA0 /* b2Timer.cpp */; };
 		BF8EA3BC1AE14D83A5112094 /* b2Contact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D9B3511148F4C0DB5FE5C5C /* b2Contact.cpp */; };
 		C267F7531DDA4CEF006B8672 /* Instrument.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C267F7511DDA4CEF006B8672 /* Instrument.cpp */; };
+		C267F7571DDA8933006B8672 /* Refactorings.md in Sources */ = {isa = PBXBuildFile; fileRef = C267F7561DDA8932006B8672 /* Refactorings.md */; };
+		C2C8748F1DDBB2D40067E07D /* list_ports_linux.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2C874871DDBB2D40067E07D /* list_ports_linux.cc */; };
+		C2C874901DDBB2D40067E07D /* list_ports_osx.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2C874881DDBB2D40067E07D /* list_ports_osx.cc */; };
+		C2C874911DDBB2D40067E07D /* list_ports_win.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2C874891DDBB2D40067E07D /* list_ports_win.cc */; };
+		C2C874921DDBB2D40067E07D /* unix.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2C8748A1DDBB2D40067E07D /* unix.cc */; };
+		C2C874931DDBB2D40067E07D /* win.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2C8748B1DDBB2D40067E07D /* win.cc */; };
+		C2C874941DDBB2D40067E07D /* serial.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2C8748C1DDBB2D40067E07D /* serial.cc */; };
+		C2C874951DDBB2D40067E07D /* SerialDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2C8748E1DDBB2D40067E07D /* SerialDevice.cpp */; };
 		C2EC76FC1DA7157F00DB39C8 /* PureDataNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EC76401DA7157E00DB39C8 /* PureDataNode.cpp */; };
 		C2EC76FD1DA7157F00DB39C8 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = C2EC76441DA7157E00DB39C8 /* LICENSE.txt */; };
 		C2EC76FE1DA7157F00DB39C8 /* PdBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2EC76451DA7157E00DB39C8 /* PdBase.cpp */; };
@@ -247,6 +255,20 @@
 		C267F7511DDA4CEF006B8672 /* Instrument.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Instrument.cpp; path = ../src/MusicWorld/Instrument.cpp; sourceTree = "<group>"; };
 		C267F7521DDA4CEF006B8672 /* Instrument.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Instrument.h; path = ../src/MusicWorld/Instrument.h; sourceTree = "<group>"; };
 		C267F7551DDA4E0D006B8672 /* Score.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Score.h; path = ../src/MusicWorld/Score.h; sourceTree = "<group>"; };
+		C267F7561DDA8932006B8672 /* Refactorings.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = Refactorings.md; path = ../Refactorings.md; sourceTree = "<group>"; };
+		C2C874791DDBB2D40067E07D /* Cinder-Serial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Cinder-Serial.h"; sourceTree = "<group>"; };
+		C2C8747A1DDBB2D40067E07D /* SerialDevice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SerialDevice.h; sourceTree = "<group>"; };
+		C2C874801DDBB2D40067E07D /* unix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = unix.h; sourceTree = "<group>"; };
+		C2C874811DDBB2D40067E07D /* win.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = win.h; sourceTree = "<group>"; };
+		C2C874821DDBB2D40067E07D /* serial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = serial.h; sourceTree = "<group>"; };
+		C2C874831DDBB2D40067E07D /* v8stdint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = v8stdint.h; sourceTree = "<group>"; };
+		C2C874871DDBB2D40067E07D /* list_ports_linux.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = list_ports_linux.cc; sourceTree = "<group>"; };
+		C2C874881DDBB2D40067E07D /* list_ports_osx.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = list_ports_osx.cc; sourceTree = "<group>"; };
+		C2C874891DDBB2D40067E07D /* list_ports_win.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = list_ports_win.cc; sourceTree = "<group>"; };
+		C2C8748A1DDBB2D40067E07D /* unix.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = unix.cc; sourceTree = "<group>"; };
+		C2C8748B1DDBB2D40067E07D /* win.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = win.cc; sourceTree = "<group>"; };
+		C2C8748C1DDBB2D40067E07D /* serial.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = serial.cc; sourceTree = "<group>"; };
+		C2C8748E1DDBB2D40067E07D /* SerialDevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SerialDevice.cpp; sourceTree = "<group>"; };
 		C2EC76401DA7157E00DB39C8 /* PureDataNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PureDataNode.cpp; sourceTree = "<group>"; };
 		C2EC76411DA7157E00DB39C8 /* PureDataNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PureDataNode.h; sourceTree = "<group>"; };
 		C2EC76441DA7157E00DB39C8 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
@@ -311,6 +333,7 @@
 		01B97315FEAEA392516A2CEA /* Blocks */ = {
 			isa = PBXGroup;
 			children = (
+				C2C874771DDBB2D40067E07D /* Cinder-Serial */,
 				C2EC763E1DA7157E00DB39C8 /* PureData */,
 				3BA24452A4BE4625A810020B /* Box2D */,
 				BC3D44BD779D48C6980C3280 /* OpenCV3 */,
@@ -500,6 +523,7 @@
 				19C28FACFE9D520D11CA2CBB /* Products */,
 				26FA36401D4A7D5300C64A00 /* todo */,
 				C24197A61DC42959005AE51F /* ChangeLog.md */,
+				C267F7561DDA8932006B8672 /* Refactorings.md */,
 				26FA36421D53C05700C64A00 /* research */,
 				26FA364F1D5519DA00C64A00 /* assets */,
 			);
@@ -661,6 +685,107 @@
 			name = OpenCV3;
 			sourceTree = "<group>";
 		};
+		C2C874771DDBB2D40067E07D /* Cinder-Serial */ = {
+			isa = PBXGroup;
+			children = (
+				C2C874781DDBB2D40067E07D /* include */,
+				C2C8747B1DDBB2D40067E07D /* lib */,
+				C2C8748D1DDBB2D40067E07D /* src */,
+			);
+			name = "Cinder-Serial";
+			path = "../blocks/Cinder-Serial";
+			sourceTree = "<group>";
+		};
+		C2C874781DDBB2D40067E07D /* include */ = {
+			isa = PBXGroup;
+			children = (
+				C2C874791DDBB2D40067E07D /* Cinder-Serial.h */,
+				C2C8747A1DDBB2D40067E07D /* SerialDevice.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		C2C8747B1DDBB2D40067E07D /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				C2C8747C1DDBB2D40067E07D /* serial */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
+		C2C8747C1DDBB2D40067E07D /* serial */ = {
+			isa = PBXGroup;
+			children = (
+				C2C8747D1DDBB2D40067E07D /* include */,
+				C2C874841DDBB2D40067E07D /* src */,
+			);
+			path = serial;
+			sourceTree = "<group>";
+		};
+		C2C8747D1DDBB2D40067E07D /* include */ = {
+			isa = PBXGroup;
+			children = (
+				C2C8747E1DDBB2D40067E07D /* serial */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		C2C8747E1DDBB2D40067E07D /* serial */ = {
+			isa = PBXGroup;
+			children = (
+				C2C8747F1DDBB2D40067E07D /* impl */,
+				C2C874821DDBB2D40067E07D /* serial.h */,
+				C2C874831DDBB2D40067E07D /* v8stdint.h */,
+			);
+			path = serial;
+			sourceTree = "<group>";
+		};
+		C2C8747F1DDBB2D40067E07D /* impl */ = {
+			isa = PBXGroup;
+			children = (
+				C2C874801DDBB2D40067E07D /* unix.h */,
+				C2C874811DDBB2D40067E07D /* win.h */,
+			);
+			path = impl;
+			sourceTree = "<group>";
+		};
+		C2C874841DDBB2D40067E07D /* src */ = {
+			isa = PBXGroup;
+			children = (
+				C2C874851DDBB2D40067E07D /* impl */,
+				C2C8748C1DDBB2D40067E07D /* serial.cc */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		C2C874851DDBB2D40067E07D /* impl */ = {
+			isa = PBXGroup;
+			children = (
+				C2C874861DDBB2D40067E07D /* list_ports */,
+				C2C8748A1DDBB2D40067E07D /* unix.cc */,
+				C2C8748B1DDBB2D40067E07D /* win.cc */,
+			);
+			path = impl;
+			sourceTree = "<group>";
+		};
+		C2C874861DDBB2D40067E07D /* list_ports */ = {
+			isa = PBXGroup;
+			children = (
+				C2C874871DDBB2D40067E07D /* list_ports_linux.cc */,
+				C2C874881DDBB2D40067E07D /* list_ports_osx.cc */,
+				C2C874891DDBB2D40067E07D /* list_ports_win.cc */,
+			);
+			path = list_ports;
+			sourceTree = "<group>";
+		};
+		C2C8748D1DDBB2D40067E07D /* src */ = {
+			isa = PBXGroup;
+			children = (
+				C2C8748E1DDBB2D40067E07D /* SerialDevice.cpp */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
 		C2EC763E1DA7157E00DB39C8 /* PureData */ = {
 			isa = PBXGroup;
 			children = (
@@ -813,9 +938,13 @@
 				741A16EB71BE4A308C86D708 /* b2CollidePolygon.cpp in Sources */,
 				26FD3CD21D91E01E00B20327 /* PongWorld.cpp in Sources */,
 				509D1EB4420C46A3BB6D751D /* b2Collision.cpp in Sources */,
+				C2C874911DDBB2D40067E07D /* list_ports_win.cc in Sources */,
+				C2C874921DDBB2D40067E07D /* unix.cc in Sources */,
 				26FA36571D592CE700C64A00 /* FileWatch.cpp in Sources */,
+				C2C874931DDBB2D40067E07D /* win.cc in Sources */,
 				2635C8D01D8768C900DF30BE /* WindowData.cpp in Sources */,
 				26FA36461D53C31A00C64A00 /* BallWorld.cpp in Sources */,
+				C2C874901DDBB2D40067E07D /* list_ports_osx.cc in Sources */,
 				58F3F572E622458BA5EA9B45 /* b2Distance.cpp in Sources */,
 				FE95B791332E4B49916DF787 /* b2DynamicTree.cpp in Sources */,
 				7D4B6A1410EE43358255E704 /* b2TimeOfImpact.cpp in Sources */,
@@ -836,12 +965,14 @@
 				79D90302F4CB4826B60D2A4D /* b2Fixture.cpp in Sources */,
 				8E2F70EF3C5D4609A2286FD3 /* b2Island.cpp in Sources */,
 				93B67C671E2D48FA99301AE1 /* b2World.cpp in Sources */,
+				C2C874941DDBB2D40067E07D /* serial.cc in Sources */,
 				592BF86CF6B441DD954AA794 /* b2WorldCallbacks.cpp in Sources */,
 				985F9999D6EC4BAE8A3E317B /* b2ChainAndCircleContact.cpp in Sources */,
 				E5E02FC84C1B4061A672D169 /* b2ChainAndPolygonContact.cpp in Sources */,
 				26FA36541D55365800C64A00 /* LightLink.cpp in Sources */,
 				065D029E5180471999C3E354 /* b2CircleContact.cpp in Sources */,
 				26BC84B31D80DF89006001DC /* PipelineStageView.cpp in Sources */,
+				C267F7571DDA8933006B8672 /* Refactorings.md in Sources */,
 				262A88701DB58D7D00FE2336 /* RtMidi.cpp in Sources */,
 				BF8EA3BC1AE14D83A5112094 /* b2Contact.cpp in Sources */,
 				9E53F22939EC46629ECD511A /* b2ContactSolver.cpp in Sources */,
@@ -854,6 +985,7 @@
 				C267F7531DDA4CEF006B8672 /* Instrument.cpp in Sources */,
 				5BB8C5F56F5943658CC78ED8 /* b2DistanceJoint.cpp in Sources */,
 				E63AB3EAB9064A24A06D7722 /* b2FrictionJoint.cpp in Sources */,
+				C2C8748F1DDBB2D40067E07D /* list_ports_linux.cc in Sources */,
 				C2EC76FC1DA7157F00DB39C8 /* PureDataNode.cpp in Sources */,
 				0CA79800755547E89E33867D /* b2GearJoint.cpp in Sources */,
 				26FA36491D53C5D300C64A00 /* Contour.cpp in Sources */,
@@ -863,6 +995,7 @@
 				7F4A62BDF6884C7AAAA1EC5E /* b2PrismaticJoint.cpp in Sources */,
 				41A24915A6FF4993982FF46F /* b2PulleyJoint.cpp in Sources */,
 				2050180D31BC4DA480370416 /* b2RevoluteJoint.cpp in Sources */,
+				C2C874951DDBB2D40067E07D /* SerialDevice.cpp in Sources */,
 				368A4C049D4240A9A2AB6B0B /* b2RopeJoint.cpp in Sources */,
 				26FA364D1D53CBDA00C64A00 /* Vision.cpp in Sources */,
 				E3E1015154A147BC9674C8ED /* b2WeldJoint.cpp in Sources */,
@@ -993,6 +1126,8 @@
 					../blocks/Box2D/src,
 					"../blocks/PureData/libpd/pure-data/src",
 					"../blocks/PureData/libpd/libpd_wrapper/**",
+					"../blocks/Cinder-Serial/lib/serial/include",
+					"../blocks/Cinder-Serial/include",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				ONLY_ACTIVE_ARCH = YES;
@@ -1015,6 +1150,8 @@
 					../blocks/Box2D/src,
 					"../blocks/PureData/libpd/pure-data/src",
 					"../blocks/PureData/libpd/libpd_wrapper/**",
+					"../blocks/Cinder-Serial/lib/serial/include",
+					"../blocks/Cinder-Serial/include",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				SDKROOT = macosx;

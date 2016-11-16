@@ -345,9 +345,9 @@ void Score::draw( GameWorld::DrawType drawType ) const
 		// meta
 		drawMetaParam(drawType);
 	}
-	else if ( mInstrument->mSynthType==Instrument::SynthType::MIDI )
+	else if ( mInstrument->isNoteType() )
 	{
-		// midi
+		// midi or striker
 		if ( drawType != GameWorld::DrawType::UIPipelineThumb ) // optimization
 		{
 			drawScoreLines(drawType);

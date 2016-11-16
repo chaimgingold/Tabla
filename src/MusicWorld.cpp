@@ -596,7 +596,7 @@ void MusicWorld::updateContours( const ContourVector &contours )
 				score.mScale = mScale;
 
 				// MIDI synth params
-				if ( instr && instr->mSynthType==Instrument::SynthType::MIDI )
+				if ( instr && (instr->mSynthType==Instrument::SynthType::MIDI || instr->mSynthType==Instrument::SynthType::Striker) )
 				{
 					score.mNoteCount = mNoteCount;
 					score.mBeatCount = mBeatCount;
@@ -804,7 +804,7 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		const auto instr = getInstrumentForScore(s);
 
 		cv::Mat oldTemporalBlendImage;
-		const bool doTemporalBlend = instr && instr->mSynthType==Instrument::SynthType::MIDI && mScoreTrackTemporalBlendFrac>0.f;
+		const bool doTemporalBlend = instr && instr->isNoteType() && mScoreTrackTemporalBlendFrac>0.f;
 		if ( doTemporalBlend ) oldTemporalBlendImage = s.mQuantizedImagePreThreshold.clone(); // must clone to work!
 
 		// get src points
@@ -845,7 +845,7 @@ void MusicWorld::updateCustomVision( Pipeline& pipeline )
 		pipeline.getStages().back()->mLayoutHintOrtho = true;
 
 		// quantize
-		if ( instr && instr->mSynthType==Instrument::SynthType::MIDI )
+		if ( instr && instr->isNoteType() )
 		{
 			// midi
 			quantizeImage(pipeline,s,scoreName,doTemporalBlend,oldTemporalBlendImage, mBeatCount, s.mNoteCount );
@@ -930,7 +930,7 @@ void MusicWorld::update()
 	}
 
 
-	int synthNum=0;
+	int additiveSynthNum=0;
 
 	for( const auto &score : mScores )
 	{
@@ -943,14 +943,15 @@ void MusicWorld::update()
 			case Instrument::SynthType::Additive:
 			{
 				// Update time
-				mPureDataNode->sendFloat(toString(synthNum)+string("phase"),
+				mPureDataNode->sendFloat(toString(additiveSynthNum)+string("phase"),
 										 score.getPlayheadFrac() );
-				synthNum++;
+				additiveSynthNum++;
 			}
 			break;
 
 			// MIDI
 			case Instrument::SynthType::MIDI:
+			case Instrument::SynthType::Striker:
 			{
 				// send midi notes
 				int x = score.getPlayheadFrac() * (float)(score.mQuantizedImage.cols);
@@ -983,6 +984,8 @@ void MusicWorld::update()
 						instr->doNoteOff( note );
 					}
 				}
+
+				instr->tickArpeggiator();
 			}
 			break;
 

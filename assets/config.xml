@@ -246,12 +246,12 @@
 
 				<Instrument>
 					<PlayheadColor>00FFFF</PlayheadColor>
-					<ScoreColor>993377</ScoreColor>
+					<ScoreColor>11AA33</ScoreColor>
 					<NoteOffColor>00FF00</NoteOffColor>
 					<NoteOnColor>FF0000</NoteOnColor>
 					
-					<Name>1Additive</Name>
-					<SynthType>Additive</SynthType>
+					<Name>1Striker</Name>
+					<SynthType>Striker</SynthType>
 					
 					<Port>0</Port>
 					<Channel>0</Channel>

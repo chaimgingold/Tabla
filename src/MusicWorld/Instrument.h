@@ -14,8 +14,35 @@
 #include "FileWatch.h"
 #include "PureDataNode.h"
 #include "RtMidi.h"
+#include "Cinder-Serial.h"
 
-typedef vector<int> Scale;
+using namespace Cinder::Serial;
+
+typedef int NoteNum;
+
+typedef vector<NoteNum> Scale;
+
+
+// Arpeggiator
+enum class ArpMode
+{
+	None,
+	Up,
+	Down,
+	UpDown,
+	Random
+};
+
+struct Arpeggiator
+{
+	ArpMode Mode=ArpMode::None;
+	int Step=0;
+	NoteNum RootNote=0;
+	float LastNoteTime=0;
+	float NoteDuration=0;
+};
+
+
 
 
 // meta-params
@@ -36,6 +63,19 @@ public:
 	int mNumDiscreteStates=-1;
 };
 
+
+// MIDI
+struct tOnNoteInfo
+{
+	float mStartTime;
+	float mDuration;
+};
+
+
+
+// (note) -> (start time, duration)
+
+
 typedef std::shared_ptr<RtMidiOut> RtMidiOutRef;
 
 
@@ -49,7 +89,9 @@ public:
 	void setParams( XmlTree );
 	void setup();
 
-	int channelForNote(int note);
+	bool isNoteType() const;
+
+	Arpeggiator arpeggiator;
 
 	// colors!
 	ColorA mPlayheadColor;
@@ -64,29 +106,26 @@ public:
 	{
 		Additive = 1,
 		MIDI	 = 2,
-		Meta	 = 3  // controls global params
+		Striker  = 3,
+		Meta	 = 4  // controls global params
 	};
 
 	SynthType mSynthType;
 	MetaParam mMetaParam; // only matters if mSynthType==Meta
 
-
+	// Arpeggiator
+	void tickArpeggiator();
 
 	// midi
-	int  mPort=0;
-	int  mChannel=0;
-	int  mMapNotesToChannels=0; // for KORG Volca Sample
 	RtMidiOutRef mMidiOut;
 
+	int  mPort=0;
+	int  mChannel=0;
+	int  mMapNotesToChannels=0; // for KORG Volca Sample (0 == off, N>0 == map notes across N channels)
 
-	struct tOnNoteInfo
-	{
-		float mStartTime;
-		float mDuration;
-	};
+	void setupMIDI();
 
-	map < int , tOnNoteInfo > mOnNotes ;
-	// (instrument,note) -> (start time, duration)
+	int channelForNote(int note) const;
 
 	bool isNoteInFlight( int note ) const;
 	void updateNoteOffs();
@@ -94,13 +133,21 @@ public:
 	void doNoteOff( int note );
 
 	void killAllNotes();
+
+	map <NoteNum, tOnNoteInfo> mOnNotes;
+
+
+	// serial (arduino/robits)
+	SerialDeviceRef mDevice;
+
+	void setupSerial();
+	void sendSerialByte(const uint8_t charByte);
+
 private:
 	// midi convenience methods
 	void sendMidi( RtMidiOutRef, uchar, uchar, uchar );
 	void sendNoteOn ( RtMidiOutRef midiOut, uchar channel, uchar note, uchar velocity );
 	void sendNoteOff ( RtMidiOutRef midiOut, uchar channel, uchar note );
-
-
 
 };
 
