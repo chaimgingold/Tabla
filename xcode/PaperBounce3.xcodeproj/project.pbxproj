@@ -32,6 +32,7 @@
 		2632320F1DC8166500CB2048 /* Score.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2632320E1DC8166500CB2048 /* Score.cpp */; };
 		263232141DC91F8900CB2048 /* CalibrateWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 263232121DC91F8900CB2048 /* CalibrateWorld.cpp */; };
 		2635C8D01D8768C900DF30BE /* WindowData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2635C8CE1D8768C900DF30BE /* WindowData.cpp */; };
+		263DBA191DDB990B002356F0 /* MusicVision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 263DBA171DDB990B002356F0 /* MusicVision.cpp */; };
 		26BC84B31D80DF89006001DC /* PipelineStageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26BC84B11D80DF89006001DC /* PipelineStageView.cpp */; };
 		26FA36411D4A7D5300C64A00 /* todo in Resources */ = {isa = PBXBuildFile; fileRef = 26FA36401D4A7D5300C64A00 /* todo */; };
 		26FA36431D53C05700C64A00 /* research in Resources */ = {isa = PBXBuildFile; fileRef = 26FA36421D53C05700C64A00 /* research */; };
@@ -148,6 +149,8 @@
 		2635C8CE1D8768C900DF30BE /* WindowData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = WindowData.cpp; path = ../src/WindowData.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		2635C8CF1D8768C900DF30BE /* WindowData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WindowData.h; path = ../src/WindowData.h; sourceTree = "<group>"; };
 		2635C8D11D87695000DF30BE /* PaperBounce3App.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = PaperBounce3App.h; path = ../src/PaperBounce3App.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		263DBA171DDB990B002356F0 /* MusicVision.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MusicVision.cpp; path = ../src/MusicWorld/MusicVision.cpp; sourceTree = "<group>"; };
+		263DBA181DDB990B002356F0 /* MusicVision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MusicVision.h; path = ../src/MusicWorld/MusicVision.h; sourceTree = "<group>"; };
 		26BC84B11D80DF89006001DC /* PipelineStageView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PipelineStageView.cpp; path = ../src/PipelineStageView.cpp; sourceTree = "<group>"; };
 		26BC84B21D80DF89006001DC /* PipelineStageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PipelineStageView.h; path = ../src/PipelineStageView.h; sourceTree = "<group>"; };
 		26FA36401D4A7D5300C64A00 /* todo */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = todo; path = ../design/todo; sourceTree = "<group>"; };
@@ -444,6 +447,8 @@
 				C267F7521DDA4CEF006B8672 /* Instrument.h */,
 				2632320E1DC8166500CB2048 /* Score.cpp */,
 				C267F7551DDA4E0D006B8672 /* Score.h */,
+				263DBA171DDB990B002356F0 /* MusicVision.cpp */,
+				263DBA181DDB990B002356F0 /* MusicVision.h */,
 			);
 			name = MusicWorld;
 			sourceTree = "<group>";
@@ -806,6 +811,7 @@
 				5BA876CF7D3E422AA6E36FBF /* PaperBounce3App.cpp in Sources */,
 				CB13ED488BF746B1BE951350 /* b2BroadPhase.cpp in Sources */,
 				3A09A46A8AF949E89CBDD5B5 /* b2CollideCircle.cpp in Sources */,
+				263DBA191DDB990B002356F0 /* MusicVision.cpp in Sources */,
 				26FA365A1D5BDBC300C64A00 /* Pipeline.cpp in Sources */,
 				C84DC4502D0A4C2384BE60F8 /* b2CollideEdge.cpp in Sources */,
 				262A886B1DB011FF00FE2336 /* MusicWorld.cpp in Sources */,

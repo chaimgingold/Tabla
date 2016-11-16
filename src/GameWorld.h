@@ -29,8 +29,7 @@ public:
 	// it then gets them when they are needed.
 	
 	virtual void setParams( XmlTree ){}
-	virtual void updateContours( const ContourVector &c ){} // called 1st
-	virtual void updateCustomVision( Pipeline& ){} // called 2nd
+	virtual void updateVision( const ContourVector &c, Pipeline& ){} // probably lower freq than update()
 	
 	void		setWorldBoundsPoly( PolyLine2 p ) { mWorldBoundsPoly=p; worldBoundsPolyDidChange(); }
 	PolyLine2	getWorldBoundsPoly() const { return mWorldBoundsPoly; }
@@ -49,7 +48,7 @@ public:
 	};
 	
 	virtual void gameWillLoad(){}
-	virtual void update(){}
+	virtual void update(){} // called each frame
 	virtual void draw( DrawType ){}
 	
 	// because mice, etc... do sometimes touch these worlds...

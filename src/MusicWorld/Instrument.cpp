@@ -21,6 +21,14 @@ using namespace ci::gl;
 
 #include "Instrument.h"
 
+float MetaParamInfo::discretize( float v ) const
+{
+	v = roundf( (float)mNumDiscreteStates * v );
+	v = min( v, (float)mNumDiscreteStates-1 );
+	v /= (float)mNumDiscreteStates;
+	return v;
+}
+
 void Instrument::setParams( XmlTree xml )
 {
 	getXml(xml,"PlayheadColor",mPlayheadColor);

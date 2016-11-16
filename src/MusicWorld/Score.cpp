@@ -243,15 +243,15 @@ void Score::drawMetaParam( GameWorld::DrawType drawType ) const
 
 	// level
 	float y1, y2;
-	if ( mMetaParamInfo.isDiscrete() )
+	if ( mInstrument->mMetaParamInfo.isDiscrete() )
 	{
 		if ( drawType != GameWorld::DrawType::UIPipelineThumb ) // optimization
 		{
 			vector<vec2> lines;
 
-			for( int i=0; i<mMetaParamInfo.mNumDiscreteStates; ++i )
+			for( int i=0; i<mInstrument->mMetaParamInfo.mNumDiscreteStates; ++i )
 			{
-				float y = (float)i/(float)(mMetaParamInfo.mNumDiscreteStates);
+				float y = (float)i/(float)(mInstrument->mMetaParamInfo.mNumDiscreteStates);
 				lines.push_back( fracToQuad(vec2(0.f,y)) );
 				lines.push_back( fracToQuad(vec2(1.f,y)) );
 			}
@@ -259,8 +259,11 @@ void Score::drawMetaParam( GameWorld::DrawType drawType ) const
 			drawLines(lines);
 		}
 
-		y1=mMetaParamSliderValue;
-		y2=mMetaParamSliderValue + 1.f / (float)mMetaParamInfo.mNumDiscreteStates;
+//		y1=mInstrument->mMetaParamInfo.discretize(mMetaParamSliderValue);
+//		y2=y1 + 1.f / (float)mInstrument->mMetaParamInfo.mNumDiscreteStates;
+
+		y1=mInstrument->mMetaParamInfo.discretize(mMetaParamSliderValue);
+		y2=y1 + 1.f / (float)mInstrument->mMetaParamInfo.mNumDiscreteStates;
 	}
 	else
 	{
@@ -299,69 +302,80 @@ void Score::draw( GameWorld::DrawType drawType ) const
 		gl::drawSolid(getPolyLine());
 	}
 
-	if ( mInstrument->mSynthType==Instrument::SynthType::Additive )
+	if (mInstrument)
 	{
-		if ( mAdditiveShader )
+		switch( mInstrument->mSynthType )
 		{
-			auto tex = gl::Texture::create( ImageSourceRef( new ImageSourceCvMat(mImage)) );
-			gl::ScopedGlslProg glslScp( mAdditiveShader );
-			gl::ScopedTextureBind texScp( tex );
+			case Instrument::SynthType::Additive:
+			{
+				if ( mAdditiveShader )
+				{
+					auto tex = gl::Texture::create( ImageSourceRef( new ImageSourceCvMat(mImage)) );
+					gl::ScopedGlslProg glslScp( mAdditiveShader );
+					gl::ScopedTextureBind texScp( tex );
 
-			mAdditiveShader->uniform( "uTex0", 0 );
-			mAdditiveShader->uniform( "uTime", (float)ci::app::getElapsedSeconds() );
-			mAdditiveShader->uniform( "uPhase", getPlayheadFrac());
-			mAdditiveShader->uniform( "uAspectRatio", getWindowAspectRatio() );
+					mAdditiveShader->uniform( "uTex0", 0 );
+					mAdditiveShader->uniform( "uTime", (float)ci::app::getElapsedSeconds() );
+					mAdditiveShader->uniform( "uPhase", getPlayheadFrac());
+					mAdditiveShader->uniform( "uAspectRatio", getWindowAspectRatio() );
 
-			vec2 v[6];
-			vec2 uv[6];
+					vec2 v[6];
+					vec2 uv[6];
 
-			v[0] = mQuad[0];
-			v[1] = mQuad[1];
-			v[2] = mQuad[3];
-			v[3] = mQuad[3];
-			v[4] = mQuad[1];
-			v[5] = mQuad[2];
+					v[0] = mQuad[0];
+					v[1] = mQuad[1];
+					v[2] = mQuad[3];
+					v[3] = mQuad[3];
+					v[4] = mQuad[1];
+					v[5] = mQuad[2];
 
-			float y0=1.f, y1=0.f; // y is inverted to get to texture space; do it here, not in shader.
-			uv[0] = vec2(0,y0);
-			uv[1] = vec2(1,y0);
-			uv[2] = vec2(0,y1);
-			uv[3] = vec2(0,y1);
-			uv[4] = vec2(1,y0);
-			uv[5] = vec2(1,y1);
+					float y0=1.f, y1=0.f; // y is inverted to get to texture space; do it here, not in shader.
+					uv[0] = vec2(0,y0);
+					uv[1] = vec2(1,y0);
+					uv[2] = vec2(0,y1);
+					uv[3] = vec2(0,y1);
+					uv[4] = vec2(1,y0);
+					uv[5] = vec2(1,y1);
 
-			gl::drawSolidTriangle(v,uv);
-			gl::drawSolidTriangle(v+3,uv+3);
-			// TODO: be less dumb and draw as tri strip or quad
-		}
-		else
-		{
-			gl::color(mInstrument->mScoreColor);
-			gl::draw( getPolyLine() );
-		}
-	}
-	else if ( mInstrument->mSynthType==Instrument::SynthType::Meta )
-	{
-		// meta
-		drawMetaParam(drawType);
-	}
-	else if ( mInstrument->mSynthType==Instrument::SynthType::MIDI )
-	{
-		// midi
-		if ( drawType != GameWorld::DrawType::UIPipelineThumb ) // optimization
-		{
-			drawScoreLines(drawType);
-			drawNotes(drawType);
-		}
-		else
-		{
-			gl::color(mInstrument->mScoreColor);
-			gl::draw( getPolyLine() );
-		}
+					gl::drawSolidTriangle(v,uv);
+					gl::drawSolidTriangle(v+3,uv+3);
+					// TODO: be less dumb and draw as tri strip or quad
+				}
+				else
+				{
+					gl::color(mInstrument->mScoreColor);
+					gl::draw( getPolyLine() );
+				}
+			}
+			break;
+			
+			case Instrument::SynthType::Meta:
+			{
+				// meta
+				drawMetaParam(drawType);
+			}
+			break;
+			
+			case Instrument::SynthType::MIDI:
+			{
+				// midi
+				if ( drawType != GameWorld::DrawType::UIPipelineThumb ) // optimization
+				{
+					drawScoreLines(drawType);
+					drawNotes(drawType);
+				}
+				else
+				{
+					gl::color(mInstrument->mScoreColor);
+					gl::draw( getPolyLine() );
+				}
 
-		// playhead
-		drawPlayhead(drawType);
-	}
+				// playhead
+				drawPlayhead(drawType);
+			}
+			break;
+		} // switch
+	} // if
 
 	// quad debug
 	if (0)
@@ -371,7 +385,6 @@ void Score::draw( GameWorld::DrawType drawType ) const
 		gl::color( 0,1,0 );
 		gl::drawSolidCircle(mQuad[1], 1);
 	}
-
 }
 
 bool Score::setQuadFromPolyLine( PolyLine2 poly, vec2 timeVec )

@@ -416,8 +416,7 @@ void PaperBounce3App::update()
 		
 		if (mGameWorld)
 		{
-			mGameWorld->updateContours( mContours );
-			mGameWorld->updateCustomVision( mPipeline );
+			mGameWorld->updateVision( mContours, mPipeline );
 		}
 		
 		// update pipeline visualization
