@@ -41,7 +41,7 @@ private:
 	int   mPlayerScore[2];
 	
 	// field layout
-	void computeFieldLayout();
+	void computeFieldLayout( int orientation=-1 ); // -1 picks it for you; can run recursively
 	
 	int  mFieldPlayer0LeftCornerIndex=0;
 		// it could be 0 or 1 (higher numbers would be equivalent)

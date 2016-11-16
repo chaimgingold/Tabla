@@ -272,11 +272,12 @@ void PongWorld::worldBoundsPolyDidChange()
 	computeFieldLayout();
 }
 
-void PongWorld::computeFieldLayout()
+void PongWorld::computeFieldLayout( int orientation )
 {
 	assert( getWorldBoundsPoly().size()==4 );
 	
-	mFieldPlayer0LeftCornerIndex=1;
+	if (orientation==-1) mFieldPlayer0LeftCornerIndex=1;
+	else mFieldPlayer0LeftCornerIndex=orientation;
 		// hard code this for now, since it is just right
 		// we should probably want to move this to xml :P
 		// whatever, it's all hacky.
@@ -314,6 +315,12 @@ void PongWorld::computeFieldLayout()
 		
 //		mScoreDotStart[0] = mCenterLine[1] + mPlayerVec[0] * mScoreDotStep[0].x + mCenterVec * mScoreDotStep[0].y;
 //		mScoreDotStart[1] = mCenterLine[1] + mPlayerVec[1] * mScoreDotStep[1].x + mCenterVec * mScoreDotStep[1].y;
+	}
+	
+	// wrong field direction?
+	if ( orientation==-1 && distance(mPlayerGoal[0],mPlayerGoal[1]) < distance(mCenterLine[0],mCenterLine[1]) )
+	{
+		computeFieldLayout( (mFieldPlayer0LeftCornerIndex+1) % 2 );
 	}
 }
 
