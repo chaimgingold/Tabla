@@ -184,7 +184,7 @@ void MusicWorld::update()
 			}
 			break;
 
-			// MIDI
+			// Notes
 			case Instrument::SynthType::MIDI:
 			case Instrument::SynthType::Striker:
 			{
