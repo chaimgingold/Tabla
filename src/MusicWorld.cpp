@@ -126,6 +126,8 @@ void MusicWorld::setParams( XmlTree xml )
 	mVision.mNoteCount = mNoteCount;
 	mVision.mBeatCount = mBeatCount;
 	mVision.generateInstrumentRegions(mInstruments,getWorldBoundsPoly());
+
+	killAllNotes();
 }
 
 void MusicWorld::worldBoundsPolyDidChange()
@@ -371,11 +373,16 @@ void MusicWorld::setupSynthesis()
 	mFileWatch.load( PaperBounce3App::get()->hotloadableAssetPath("synths/music-osc.pd"), reloadPdLambda);
 }
 
-MusicWorld::~MusicWorld() {
-	cout << "~MusicWorld" << endl;
-
+void MusicWorld::cleanup() {
 	killAllNotes();
 
 	// Clean up synth engine
 	mPureDataNode->closePatch(mPatch);
 }
+
+MusicWorld::~MusicWorld() {
+	cout << "~MusicWorld" << endl;
+
+	cleanup();
+}
+

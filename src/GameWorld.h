@@ -50,6 +50,8 @@ public:
 	virtual void gameWillLoad(){}
 	virtual void update(){} // called each frame
 	virtual void draw( DrawType ){}
+
+	virtual void cleanup(){}
 	
 	// because mice, etc... do sometimes touch these worlds...
 	// all positions in world space

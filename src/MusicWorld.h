@@ -35,6 +35,8 @@ public:
 
 	void draw( GameWorld::DrawType ) override;
 
+	void cleanup() override;
+
 private:
 
 	//

@@ -54,6 +54,7 @@ class PaperBounce3App : public App {
 	void draw() override;
 	void resize() override;
 	void keyDown( KeyEvent event ) override;
+	void cleanup() override;
 	
 	void drawWorld( GameWorld::DrawType );
 	

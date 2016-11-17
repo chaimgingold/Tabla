@@ -449,6 +449,10 @@ void PaperBounce3App::update()
 	if (mGameWorld) mGameWorld->update();
 }
 
+void PaperBounce3App::cleanup() {
+	if (mGameWorld) mGameWorld->cleanup();
+}
+
 void PaperBounce3App::updateMainImageTransform( WindowRef w )
 {
 	if (w)

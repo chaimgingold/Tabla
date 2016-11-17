@@ -29,3 +29,20 @@
 [ ] Clock.cpp
 
 [ ] AdditiveSynth.cpp
+
+
+[ ] Before Arp:
+      Instrument::setNotes(vector<Notes> newNotes) {
+ 
+ 
+     NoteSender
+     vector<Note> mOnNotes
+     void NoteSender::triggerNotes(vector<Notes> newNotes) {
+         let noteOns  = newNotes `diff` mOnNotes
+			 noteOffs = mOnNotes `diff` newNotes;
+         sendNoteOns <$> noteOns;
+         sendNoteOffs <$> noteOffs;
+         mOnNotes = newNotes;
+     }
+
+     can also add scheduleNote with old behavior of note+duration
