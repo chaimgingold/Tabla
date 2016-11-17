@@ -290,6 +290,7 @@
 					<NoteOnColor>FF0000</NoteOnColor>
 
 					<Name>3Additive</Name>
+					<IconFileName>additive.png</IconFileName>
 					<SynthType>Additive</SynthType>
 
 					<Port>0</Port>
@@ -305,6 +306,7 @@
 					<NoteOnColor>FF0000</NoteOnColor>
 
 					<Name>4Additive</Name>
+					<IconFileName>additive.png</IconFileName>
 					<SynthType>Additive</SynthType>
 
 					<Port>0</Port>
@@ -320,6 +322,7 @@
 					<NoteOnColor>FF0000</NoteOnColor>
 
 					<Name>5Additive</Name>
+					<IconFileName>additive.png</IconFileName>
 					<SynthType>Additive</SynthType>
 
 					<Port>0</Port>
@@ -349,6 +352,7 @@
 					<NoteOnColor>FF0000</NoteOnColor>
 
 					<Name>7Additive</Name>
+					<IconFileName>additive.png</IconFileName>
 					<SynthType>Additive</SynthType>
 
 					<Port>0</Port>
