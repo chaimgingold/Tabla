@@ -80,7 +80,6 @@
 		B82FE516E59446FB928ED0B8 /* b2Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 474731D0E50948D4B9522AA0 /* b2Timer.cpp */; };
 		BF8EA3BC1AE14D83A5112094 /* b2Contact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D9B3511148F4C0DB5FE5C5C /* b2Contact.cpp */; };
 		C267F7531DDA4CEF006B8672 /* Instrument.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C267F7511DDA4CEF006B8672 /* Instrument.cpp */; };
-		C267F7571DDA8933006B8672 /* Refactorings.md in Sources */ = {isa = PBXBuildFile; fileRef = C267F7561DDA8932006B8672 /* Refactorings.md */; };
 		C2C8748F1DDBB2D40067E07D /* list_ports_linux.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2C874871DDBB2D40067E07D /* list_ports_linux.cc */; };
 		C2C874901DDBB2D40067E07D /* list_ports_osx.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2C874881DDBB2D40067E07D /* list_ports_osx.cc */; };
 		C2C874911DDBB2D40067E07D /* list_ports_win.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2C874891DDBB2D40067E07D /* list_ports_win.cc */; };
@@ -978,7 +977,6 @@
 				26FA36541D55365800C64A00 /* LightLink.cpp in Sources */,
 				065D029E5180471999C3E354 /* b2CircleContact.cpp in Sources */,
 				26BC84B31D80DF89006001DC /* PipelineStageView.cpp in Sources */,
-				C267F7571DDA8933006B8672 /* Refactorings.md in Sources */,
 				262A88701DB58D7D00FE2336 /* RtMidi.cpp in Sources */,
 				BF8EA3BC1AE14D83A5112094 /* b2Contact.cpp in Sources */,
 				9E53F22939EC46629ECD511A /* b2ContactSolver.cpp in Sources */,

@@ -8,7 +8,7 @@
 #X text 92 199 note-root;
 #X obj 53 102 / \$2;
 #X obj 53 151 * 100;
-#X obj 53 201 + 30;
+#X obj 53 201 + 20;
 #X connect 1 0 0 0;
 #X connect 2 0 4 0;
 #X connect 3 0 1 0;

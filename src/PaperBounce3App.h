@@ -70,8 +70,7 @@ class PaperBounce3App : public App {
 	
 	Pipeline			mPipeline; // traces processing
 
-	Surface mDebugFrame; // a static debug frame
-	bool mUseDebugFrame;
+	SurfaceRef mDebugFrame; // a static debug frame
 	
 	// game library
 	void setupGameLibrary();
