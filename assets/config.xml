@@ -271,6 +271,8 @@
 					<NoteOnColor>00FF00</NoteOnColor>
 
 					<Name>2Volca Sample</Name>
+					<IconFileName>drumkit.png</IconFileName>
+
 					<SynthType>MIDI</SynthType>
 
 					<Port>1</Port>

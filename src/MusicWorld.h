@@ -61,7 +61,6 @@ private:
 
 	vector<Score> mScores;
 
-//	InstrumentRef	getInstrumentForScore( const Score& ) const;
 	Score*			getScoreForMetaParam( MetaParam );
 
 	// vision
@@ -87,9 +86,11 @@ private:
 	void tickGlobalClock(float dt);
 	float getBeatDuration() const;
 
-	// Shaders
+	//
 	FileWatch mFileWatch; // hotload our shaders; in this class so when class dies all the callbacks expire.
+	void loadInstrumentIcons();
 
+	// Shaders
 	gl::GlslProgRef mAdditiveShader;
 };
 

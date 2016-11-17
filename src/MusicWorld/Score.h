@@ -17,7 +17,6 @@ class Score
 public:
 	InstrumentRef mInstrument;
 	gl::GlslProgRef mAdditiveShader;
-	
 
 	void draw( GameWorld::DrawType ) const;
 
@@ -68,6 +67,7 @@ public:
 	PolyLine2	getPolyLine() const;
 	float		getPlayheadFrac() const;
 	void		getPlayheadLine( vec2 line[2] ) const; // line goes from [3..2] >> [0..1]
+	vec2		getPlayheadVec() const; // effectively approximates MusicWorld's mTimeVec
 	vec2		getSizeInWorldSpace() const;
 	// if not a perfect rect, then it's approximate (measures two bisecting axes)
 	// x is axis along which playhead moves; y is perp to it (parallel to playhead)
@@ -87,10 +87,11 @@ public:
 	void updateAdditiveSynthesis();
 
 private:
-	void drawNotes		( GameWorld::DrawType drawType ) const;
+	int  drawNotes		( GameWorld::DrawType drawType ) const; // returns # on notes
 	void drawScoreLines	( GameWorld::DrawType drawType ) const;
 	void drawPlayhead	( GameWorld::DrawType drawType ) const;
 	void drawMetaParam	( GameWorld::DrawType drawType ) const;
+	void drawInstrumentIcon( int numOnNotes=0 ) const;
 };
 
 #endif /* Score_h */
