@@ -23,7 +23,6 @@ using namespace std::chrono;
 using namespace ci::gl;
 
 
-
 MusicWorld::MusicWorld()
 {
 	mFileWatch.loadShader(
@@ -287,16 +286,30 @@ void MusicWorld::updateMetaParameter(MetaParam metaParam, float value)
 	{
 		switch (metaParam) {
 			case MetaParam::Scale:
+			{
 				mScale = mScales[ constrain( (int)(value * mScales.size()), 0, (int)mScales.size()-1 ) ];
+
+				auto scaleDegrees = pd::List();
+				for (int i = 0; i < mScale.size(); i++) {
+					scaleDegrees.addFloat(mScale[i]);
+				}
+				mPureDataNode->sendList("global-scale", scaleDegrees);
 				break;
+			}
 			case MetaParam::RootNote:
+			{
 				// this could also be "root degree", and stay locked to the scale (or that could be separate slider)
-				mRootNote = value * 12 + 48;
+				mRootNote = (int)(value * 12) + 48;
+
+				mPureDataNode->sendFloat("global-root-note", mRootNote);
 				break;
+			}
 			case MetaParam::Tempo:
+			{
 				mTempo = value * 120;
 				assert(mTempo>=0.f);
 				break;
+			}
 			default:
 				break;
 		}
