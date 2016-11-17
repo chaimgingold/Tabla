@@ -1,6 +1,7 @@
 #include "MusicWorld.h"
 #include "cinder/gl/Context.h"
 #include "CinderOpenCV.h"
+#include "geom.h"
 
 using namespace ci::gl;
 
@@ -102,8 +103,10 @@ float Score::getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const
 	return (float)getNoteLengthAsImageCols(image,x,y) / (float)image.cols;
 }
 
-void Score::drawNotes( GameWorld::DrawType drawType ) const
+int Score::drawNotes( GameWorld::DrawType drawType ) const
 {
+	int numOnNotes=0;
+	
 	// collect notes into a batch
 	// (probably wise to extract this geometry/data when processing vision data,
 	// then use it for both playback and drawing).
@@ -139,7 +142,8 @@ void Score::drawNotes( GameWorld::DrawType drawType ) const
 				vec2 end2   = fracToQuad( vec2( x2frac, y2frac) ) ;
 
 				const bool isInFlight = playheadFrac > x1frac && playheadFrac < x2frac;
-
+				if (isInFlight) numOnNotes++;
+				
 				vector<vec2>& tris = isInFlight ? onNoteTris : offNoteTris ;
 
 				tris.push_back( start1 );
@@ -166,6 +170,8 @@ void Score::drawNotes( GameWorld::DrawType drawType ) const
 		gl::color(mInstrument->mNoteOffColor);
 		drawSolidTriangles(offNoteTris);
 	}
+	
+	return numOnNotes;
 }
 
 void Score::drawScoreLines( GameWorld::DrawType drawType ) const
@@ -291,6 +297,45 @@ void Score::drawMetaParam( GameWorld::DrawType drawType ) const
 	}
 }
 
+void Score::drawInstrumentIcon( int numOnNotes ) const
+{
+	if ( mInstrument->mIcon )
+	{
+		const float kIconWidth  = 5.f ;
+		const float kIconGutter = 1.f ;
+		// in world space
+		
+		//
+		const vec2 playheadVec = getPlayheadVec();
+		
+		vec2 iconLoc = fracToQuad(vec2(0,.5f));
+		iconLoc -= playheadVec * (kIconGutter + kIconWidth*.5f);
+		
+		//
+		Rectf r(-.5f,-.5f,.5f,.5f);
+		
+		gl::pushModelMatrix();
+		gl::translate( iconLoc - r.getCenter() );
+		gl::scale( vec2(1,1)*kIconWidth * ( numOnNotes ? 1.1f : 1.f ) );
+		
+		gl::multModelMatrix( mat4( ci::mat3(
+			vec3( playheadVec,0),
+			vec3( perp(playheadVec),0),
+			vec3( cross(vec3(playheadVec,0),vec3(perp(playheadVec),0)) )
+			)) );
+		
+	//	gl::color(1,1,1);
+	//	gl::color(mInstrument->mScoreColor);
+		if (numOnNotes) gl::color(mInstrument->mNoteOnColor);
+		else gl::color(mInstrument->mNoteOffColor);
+		
+		if (mInstrument && mInstrument->mIcon) gl::draw( mInstrument->mIcon, r );
+		else gl::drawSolidRect(r);
+		
+		gl::popModelMatrix();
+	}
+}
+
 void Score::draw( GameWorld::DrawType drawType ) const
 {
 	bool drawSolidColorBlocks = drawType == GameWorld::DrawType::Projector;
@@ -302,6 +347,8 @@ void Score::draw( GameWorld::DrawType drawType ) const
 		gl::drawSolid(getPolyLine());
 	}
 
+	int numOnNotes=0;
+	
 	if (mInstrument)
 	{
 		switch( mInstrument->mSynthType )
@@ -363,7 +410,7 @@ void Score::draw( GameWorld::DrawType drawType ) const
 				if ( drawType != GameWorld::DrawType::UIPipelineThumb ) // optimization
 				{
 					drawScoreLines(drawType);
-					drawNotes(drawType);
+					numOnNotes = drawNotes(drawType);
 				}
 				else
 				{
@@ -391,6 +438,9 @@ void Score::draw( GameWorld::DrawType drawType ) const
 		gl::color( 0,0,1 );
 		gl::drawSolidCircle(mQuad[3], kR);
 	}
+	
+	// instrument icon
+	drawInstrumentIcon(numOnNotes);
 }
 
 bool Score::setQuadFromPolyLine( PolyLine2 poly, vec2 timeVec )
@@ -598,6 +648,11 @@ void Score::getPlayheadLine( vec2 line[2] ) const
 
 	line[0] = lerp(mQuad[3],mQuad[2],t); // bottom
 	line[1] = lerp(mQuad[0],mQuad[1],t); // top
+}
+
+vec2 Score::getPlayheadVec() const
+{
+	return normalize( fracToQuad(vec2(1.f,.5f)) - fracToQuad(vec2(0.f,.5f)) );
 }
 
 vec2 Score::getSizeInWorldSpace() const

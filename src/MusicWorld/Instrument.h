@@ -100,6 +100,9 @@ public:
 	ColorA mScoreColor;
 	ColorA mNoteOffColor, mNoteOnColor;
 
+	gl::TextureRef mIcon;
+	string mIconFileName;
+
 	//
 	string mName;
 

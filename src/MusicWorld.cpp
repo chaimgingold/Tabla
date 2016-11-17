@@ -75,12 +75,11 @@ void MusicWorld::setParams( XmlTree xml )
 	mScale = mScales[0];
 
 	// instruments
-	const bool kVerbose = true;
+	mInstruments.clear();
 	
+	const bool kVerbose = true;
 	if (kVerbose) cout << "Instruments:" << endl;
-
-	map<string,InstrumentRef> newInstr;
-
+	
 	int nextAdditiveSynthID = 0;
 	for( auto i = xml.begin( "Instruments/Instrument" ); i != xml.end(); ++i )
 	{
@@ -98,17 +97,16 @@ void MusicWorld::setParams( XmlTree xml )
 		}
 		instr.mPureDataNode = mPureDataNode;
 
-		newInstr[instr.mName] = std::make_shared<Instrument>(instr);
+		// store it
+		mInstruments[instr.mName] = std::make_shared<Instrument>(instr);
 
+		// log it
 		if (kVerbose) cout << "\t" << instr.mName << endl;
 	}
 
-	// bind new instruments
-	auto oldInstr = mInstruments;
-	mInstruments.clear();
-
-	mInstruments = newInstr;
+	// set them up
 	for( auto i : mInstruments ) i.second->setup();
+	loadInstrumentIcons();
 
 	// rebind scores to instruments
 	for( auto s : mScores )
@@ -117,17 +115,60 @@ void MusicWorld::setParams( XmlTree xml )
 		if (i==mInstruments.end()) s.mInstrument=0; // nil it!
 		else s.mInstrument = i->second;
 	}
-
+	
 	// update vision
 	mVision.mTimeVec = mTimeVec;
 	mVision.mTempos  = mTempos;
-//	mVision.mScales  = mScales;
 	mVision.mInstruments = mInstruments;
 	mVision.mNoteCount = mNoteCount;
 	mVision.mBeatCount = mBeatCount;
 	mVision.generateInstrumentRegions(mInstruments,getWorldBoundsPoly());
 
 	killAllNotes();
+}
+
+void
+MusicWorld::loadInstrumentIcons()
+{
+	// Note: This code is a little weird to properly support hot-loading. Bear with me.
+	// 1. We need mInstruments to be fully in place
+	// 2. All file reload callbacks search mInstruments for the place to put the icon (needs 1).
+	//	This is to ensure we don't force any deleted instruments to stick around by holding a shared pointer to them.
+
+	// load icons
+	for( auto &i : mInstruments )
+	{
+		if (!i.second) continue; // !!
+		Instrument& instr = *i.second;
+		
+		// load icon
+		if ( !instr.mIconFileName.empty() )
+		{
+			string fileName = instr.mIconFileName;
+			
+			fs::path path = PaperBounce3App::get()->hotloadableAssetPath( fs::path("music-icons") / fileName );
+			
+			mFileWatch.load( path, [this,fileName]( fs::path path )
+			{
+				// load the texture
+				gl::Texture::Format format;
+				format.loadTopDown(false);
+				format.mipmap(true);
+				gl::TextureRef icon = Texture2d::create( loadImage(path), format );
+
+				// Find the instrument...
+				for( auto &j : mInstruments )
+				{
+					if ( j.second->mIconFileName == fileName )
+					{
+						if (icon) j.second->mIcon = icon;
+						else cout << "Failed to load icon '" << fileName << "'" << endl;
+					}
+				}
+			});
+		}
+	}
+
 }
 
 void MusicWorld::worldBoundsPolyDidChange()
