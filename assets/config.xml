@@ -57,20 +57,20 @@
 	<LightLink>
 		<CameraIndex>0</CameraIndex>
 		<CaptureSize>640 480</CaptureSize>
-		<CaptureCoords>6.5316391 45.3232346
-	586.585632 10.777317
-	645.64386 313.25528
-	23.0192261 393.965973
+		<CaptureCoords>5.06933975 6.20670891
+	599.746338 6.75599194
+	631.386475 316.545441
+	8.39622116 361.42981
 	</CaptureCoords>
 		<CaptureWorldSpaceCoords>0 0
 	126 0
 	126 69.5
 	0 69.5
 	</CaptureWorldSpaceCoords>
-		<ProjectorCoords>6.96487427 67.3494034
-	1172.8219 7.93299866
-	1261.01233 689.416931
-	129.178772 817.460876
+		<ProjectorCoords>41.4290657 85.9600754
+	1199.01465 1.04016113
+	1288.58374 683.213379
+	157.439407 827.11084
 	</ProjectorCoords>
 		<ProjectorWorldSpaceCoords>0 0
 	121.463959 -0.303260803
@@ -78,11 +78,13 @@
 	-0.606506348 73.5489044
 	</ProjectorWorldSpaceCoords>
 		<ProjectorSize>1280 800</ProjectorSize>
-		<DistCoeffs>[-1, -4.0226412, 0.0079270257, -0.0037597809, 30.936378]</DistCoeffs>
+		<DistCoeffs>[-1.05, -4.1999998, 0.0079270257, -0.0037597809, 30.936378]</DistCoeffs>
 		<CameraMatrix>[1072.3177, 0, 314.25284;
 	 0, 1062.8184, 234.11261;
 	 0, 0, 1]</CameraMatrix>
 	</LightLink>
+
+
 
 	
 
@@ -173,7 +175,7 @@
 				<!-- Inter-frame score tracking tuning... -->
 				<ScoreTrackRejectNumSamples>10</ScoreTrackRejectNumSamples> <!-- How many random samples to try when testing for rejection?-->
 				<ScoreTrackRejectSuccessThresh>.2</ScoreTrackRejectSuccessThresh> <!-- What % need to be valid to continue tracking? -->
-				<ScoreTrackMaxError>.5</ScoreTrackMaxError> <!-- How much can scores drift between frames to count as the same score? (world space cumulative error (over each corner) -->
+				<ScoreTrackMaxError>1</ScoreTrackMaxError> <!-- How much can scores drift between frames to count as the same score? (world space cumulative error (over each corner) -->
 				<ScoreTrackTemporalBlendFrac>.7</ScoreTrackTemporalBlendFrac>
 					<!-- Only for discrete (MIDI) scores; how much inter-frame temporal blending to do?
 						0 for none.

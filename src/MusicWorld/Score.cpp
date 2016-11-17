@@ -381,10 +381,15 @@ void Score::draw( GameWorld::DrawType drawType ) const
 	// quad debug
 	if (0)
 	{
+		const float kR = 1.f;
+		gl::color( 1,1,1 );
+		gl::drawSolidCircle(mQuad[0], kR);
 		gl::color( 1,0,0 );
-		gl::drawSolidCircle(mQuad[0], 1);
+		gl::drawSolidCircle(mQuad[1], kR);
 		gl::color( 0,1,0 );
-		gl::drawSolidCircle(mQuad[1], 1);
+		gl::drawSolidCircle(mQuad[2], kR);
+		gl::color( 0,0,1 );
+		gl::drawSolidCircle(mQuad[3], kR);
 	}
 }
 

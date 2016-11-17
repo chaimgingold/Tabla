@@ -312,10 +312,13 @@ void WindowData::updatePipelineViews()
 		// configure it
 		if (view)
 		{
-			// update its location
-			vec2 size = s->mImageSize;
+			// compute size
+			vec2 size = s->mImageSize * ((mApp.mConfigWindowPipelineWidth * s->mLayoutHintScale) / s->mImageSize.x) ;
 			
-			size *= (mApp.mConfigWindowPipelineWidth * s->mLayoutHintScale) / size.x ;
+			// too tall?
+			const float kMaxHeight = mApp.mConfigWindowPipelineWidth*2.f*s->mLayoutHintScale;
+			
+			if (size.y > kMaxHeight) size = s->mImageSize * (kMaxHeight / s->mImageSize.y) ;
 			
 			vec2 usepos = pos;
 			

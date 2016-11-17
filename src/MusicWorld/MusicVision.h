@@ -24,7 +24,6 @@ public:
 
 	vec2 mTimeVec;
 	vector<float> mTempos; // what tempos do we support? 0 entry means free form, 1 means all are fixed.
-//	vector<Scale> mScales;
 	map<string,InstrumentRef> mInstruments;
 	int	  mNoteCount;
 	int	  mBeatCount;
@@ -85,12 +84,21 @@ private:
 	// we do them all at once to get uniqueness.
 	// TODO: kill/replace with stamp system
 
-	//
+	// find matching scores
+	// can return 0 if no match; returns new score (in hay)
+	// - findScoreMatch: (original) looks for permuted matches (a rotated quad with same verts will match)
+	// - findExactScoreMatch: (new) no permuted matches allowed (must have same orientation)
 	Score* findScoreMatch(
 		const Score& needle,
 		ScoreVector& hay,
 		float maxErr,
-		float* matchError=0 ) const; // can return 0 if no match; returns new score (in mScores)
+		float* matchError=0 ) const;
+
+	Score* findExactScoreMatch(
+		const Score& needle,
+		ScoreVector& hay,
+		float maxErr,
+		float* matchError=0 ) const;
 	
 	float  scoreFractionInContours( const Score& old, const ContourVector &contours, int numSamples ) const;
 	bool   doesZombieScoreIntersectZombieScores( const Score& old, ScoreVector& scores ) const; // marks other zombies if so

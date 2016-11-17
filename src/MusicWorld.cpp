@@ -10,6 +10,7 @@
 #include "MusicWorld.h"
 #include "geom.h"
 #include "cinder/rand.h"
+#include "cinder/CinderMath.h"
 #include "cinder/audio/Context.h"
 #include "cinder/audio/Source.h"
 #include "xml.h"
@@ -279,25 +280,29 @@ void MusicWorld::updateMetaParameter(MetaParam metaParam, float value)
 {
 	if ( value < 0 || value > 1.f )
 	{
-		cout << "updateMetaParameter: param is out of bounds (" << value << ")" << endl;
+		if (0) cout << "updateMetaParameter: param is out of bounds (" << value << ")" << endl;
+		// ignore it, as it's probably just an empty, unitialized value/slider.
 	}
-	
-	switch (metaParam) {
-		case MetaParam::Scale:
-			mScale = mScales[ max( 0, min( (int)(value * mScales.size()), (int)mScales.size()-1 ) ) ];
-			break;
-		case MetaParam::RootNote:
-			// this could also be "root degree", and stay locked to the scale (or that could be separate slider)
-			mRootNote = value * 12 + 48;
-			break;
-		case MetaParam::Tempo:
-			mTempo = value * 120;
-			break;
-		default:
-			break;
-	}
+	else
+	{
+		switch (metaParam) {
+			case MetaParam::Scale:
+				mScale = mScales[ constrain( (int)(value * mScales.size()), 0, (int)mScales.size()-1 ) ];
+				break;
+			case MetaParam::RootNote:
+				// this could also be "root degree", and stay locked to the scale (or that could be separate slider)
+				mRootNote = value * 12 + 48;
+				break;
+			case MetaParam::Tempo:
+				mTempo = value * 120;
+				assert(mTempo>=0.f);
+				break;
+			default:
+				break;
+		}
 
-	updateScoresWithMetaParams();
+		updateScoresWithMetaParams();
+	}
 }
 
 void MusicWorld::updateAdditiveScoreSynthesis()

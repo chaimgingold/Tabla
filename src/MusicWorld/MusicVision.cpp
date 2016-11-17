@@ -31,7 +31,7 @@ Score*
 MusicVision::findScoreMatch( const Score& needle, ScoreVector& hay, float maxErr, float* outError ) const
 {
 	Score* best   = 0;
-	float  bestErr = MAXFLOAT;
+	float  bestErr = maxErr;
 
 	auto closestCorner = []( vec2 pt, const vec2 quad[4], float& err, float maxerr=MAXFLOAT ) -> int
 	{
@@ -82,6 +82,38 @@ MusicVision::findScoreMatch( const Score& needle, ScoreVector& hay, float maxErr
 		float err = scoreError( needle.mQuad, hay[i].mQuad, maxErr ) ;
 //		cout << "err " << err << endl;
 		if (err<bestErr)
+		{
+			bestErr=err;
+			best=&hay[i];
+		}
+	}
+
+	if (outError) *outError=bestErr;
+	return best;
+}
+
+Score*
+MusicVision::findExactScoreMatch( const Score& needle, ScoreVector& hay, float maxErr, float* outError ) const
+{
+	Score* best   = 0;
+	float  bestErr = maxErr;
+
+	auto getError = []( const vec2 a[4], const vec2 b[4] ) -> float
+	{
+		float sumerr=0.f;
+		for( int i=0; i<4; ++i )
+		{
+			float d = distance( a[i], b[i] );
+			sumerr += d ;
+		}
+		return sumerr;
+	};
+
+	for( size_t i=0; i<hay.size(); ++i )
+	{
+		float err = getError( needle.mQuad, hay[i].mQuad ) ;
+//		cout << "err " << err << endl;
+		if ( err<bestErr )
 		{
 			bestErr=err;
 			best=&hay[i];
@@ -510,7 +542,7 @@ MusicVision::mergeOldAndNewScores(
 	for ( const auto &oldScore : oldScores )
 	{
 		float matchError;
-		Score* newScore = findScoreMatch(oldScore,output,mScoreTrackMaxError,&matchError);
+		Score* newScore = findExactScoreMatch(oldScore,output,mScoreTrackMaxError,&matchError);
 
 		if ( newScore )
 		{

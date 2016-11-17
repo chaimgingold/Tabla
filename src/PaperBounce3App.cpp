@@ -387,8 +387,8 @@ void PaperBounce3App::fileDrop( FileDropEvent event )
 	auto files = event.getFiles();
 	if (files.size() > 0) {
 		auto file = files.front();
-		debugFrame = loadImage(file);
-		useDebugFrame = true;
+		mDebugFrame = loadImage(file);
+		mUseDebugFrame = true;
 	}
 }
 
@@ -407,7 +407,7 @@ void PaperBounce3App::update()
 {
 	mFileWatch.update();
 	
-	if ( (mCapture && mCapture->checkNewFrame()) || useDebugFrame )
+	if ( (mCapture && mCapture->checkNewFrame()) || mUseDebugFrame )
 	{
 		// start pipeline
 		mPipeline.start();
@@ -415,8 +415,8 @@ void PaperBounce3App::update()
 
 		// get image
 		Surface frame;
-		if (useDebugFrame) {
-			frame = debugFrame;
+		if (mUseDebugFrame) {
+			frame = mDebugFrame;
 		} else {
 			frame = *mCapture->getSurface();
 		}
@@ -649,8 +649,8 @@ void PaperBounce3App::keyDown( KeyEvent event )
 				loadAdjacentGame(1);
 				break;
 			case KeyEvent::KEY_ESCAPE:
-				useDebugFrame = false;
-				debugFrame = Surface();
+				mUseDebugFrame = false;
+				mDebugFrame = Surface();
 				break;
 			
 			default:
