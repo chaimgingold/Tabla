@@ -366,7 +366,7 @@ void MusicWorld::updateAdditiveScoreSynthesis()
 	}
 
 	// send scores to Pd
-	int synthNum=0;
+	int additiveSynthID=0;
 
 	for( const auto &score : mScores )
 	{
@@ -381,22 +381,22 @@ void MusicWorld::updateAdditiveScoreSynthesis()
 			int cols = score.mImage.cols;
 
 			// Update pan
-//			mPureDataNode->sendFloat(toString(scoreNum)+string("pan"),
-//									 score.mPan);
-//
-//			// Update per-score pitch
-//			mPureDataNode->sendFloat(toString(scoreNum)+string("note-root"),
-//									 20 );
-//
-//			// Update range of notes covered by additive synthesis
-//			mPureDataNode->sendFloat(toString(scoreNum)+string("note-range"),
-//									 100 );
+			mPureDataNode->sendFloat(toString(additiveSynthID)+string("pan"),
+									 score.mPan);
+
+			// Update per-score pitch
+			mPureDataNode->sendFloat(toString(additiveSynthID)+string("note-root"),
+									 20 );
+
+			// Update range of notes covered by additive synthesis
+			mPureDataNode->sendFloat(toString(additiveSynthID)+string("note-range"),
+									 100 );
 
 			// Update resolution
-			mPureDataNode->sendFloat(toString(synthNum)+string("resolution-x"),
+			mPureDataNode->sendFloat(toString(additiveSynthID)+string("resolution-x"),
 									 cols);
 
-			mPureDataNode->sendFloat(toString(synthNum)+string("resolution-y"),
+			mPureDataNode->sendFloat(toString(additiveSynthID)+string("resolution-y"),
 									 rows);
 
 			// Create a float version of the image
@@ -421,12 +421,12 @@ void MusicWorld::updateAdditiveScoreSynthesis()
 				list.addFloat(columnMat.at<float>(i, 0));
 			}
 
-			mPureDataNode->sendList(toString(synthNum)+string("vals"), list);
+			mPureDataNode->sendList(toString(additiveSynthID)+string("vals"), list);
 
 			// Turn the synth on
-			mPureDataNode->sendFloat(toString(synthNum)+string("volume"), 1);
+			mPureDataNode->sendFloat(toString(additiveSynthID)+string("volume"), 1);
 
-			synthNum++;
+			additiveSynthID++;
 		}
 	}
 }
@@ -473,10 +473,18 @@ void MusicWorld::setupSynthesis()
 	// Lets us use lists to set arrays, which seems to cause less thread contention
 	mPureDataNode->setMaxMessageLength(1024);
 
-	mFileWatch.load( PaperBounce3App::get()->hotloadableAssetPath("synths/music.pd"), [this]( fs::path path ){
+	auto reloadPdLambda = [this]( fs::path path ){
+		// Ignore the passed-in path, we only want to reload the root patch
+		auto rootPatch = PaperBounce3App::get()->hotloadableAssetPath("synths/music.pd");
 		mPureDataNode->closePatch(mPatch);
-		mPatch = mPureDataNode->loadPatch( DataSourcePath::create(path) );
-	});
+		mPatch = mPureDataNode->loadPatch( DataSourcePath::create(rootPatch) );
+	};
+
+	// Register file-watchers for all the major pd patch components
+	mFileWatch.load( PaperBounce3App::get()->hotloadableAssetPath("synths/music.pd"), reloadPdLambda);
+	mFileWatch.load( PaperBounce3App::get()->hotloadableAssetPath("synths/music-image.pd"), reloadPdLambda);
+	mFileWatch.load( PaperBounce3App::get()->hotloadableAssetPath("synths/music-grain.pd"), reloadPdLambda);
+	mFileWatch.load( PaperBounce3App::get()->hotloadableAssetPath("synths/music-osc.pd"), reloadPdLambda);
 }
 
 MusicWorld::~MusicWorld() {

@@ -170,15 +170,18 @@ void Instrument::updateNoteOffs()
 
 	// search for "expired" notes and send them their note-off MIDI message,
 	// then remove them from the mOnNotes map
-	for ( auto it = mOnNotes.begin(); it != mOnNotes.end(); /*manually...*/ )
-	{
-		bool off = now > it->second.mStartTime + it->second.mDuration;
 
-		int note = it->first;
+	auto currentNotes = mOnNotes; // copy so we can mutate while iterating
+
+	for ( auto it : currentNotes )
+	{
+		bool off = now > it.second.mStartTime + it.second.mDuration;
+
+		int note = it.first;
 
 		// HACK: this is a hack to test super-short pulses
 		if (mSynthType == SynthType::Striker) {
-			bool off = now > it->second.mStartTime + 0.01;
+			bool off = now > it.second.mStartTime + 0.02;
 			if (off) doNoteOff(note);
 		}
 
@@ -186,9 +189,6 @@ void Instrument::updateNoteOffs()
 		{
 			doNoteOff(note);
 		}
-
-		if (off) mOnNotes.erase(it++);
-		else ++it;
 	}
 }
 
@@ -265,6 +265,8 @@ void Instrument::doNoteOff( int note )
 		default:
 			break;
 	}
+
+	mOnNotes.erase(note);
 }
 
 void Instrument::sendNoteOn ( RtMidiOutRef midiOut, uchar channel, uchar note, uchar velocity )
