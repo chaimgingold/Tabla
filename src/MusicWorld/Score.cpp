@@ -453,9 +453,133 @@ PolyLine2 Score::getPolyLine() const
 	return p;
 }
 
-void Score::tickPhase(float globalPhase)
+void Score::tick(float globalPhase, float beatDuration)
 {
 	mPhase = fmod(globalPhase, mDurationFrac) / mDurationFrac;
+
+	if (!mInstrument) return;
+
+	switch( mInstrument->mSynthType )
+	{
+		// Additive
+		case Instrument::SynthType::Additive:
+		{
+			// Update time
+			mInstrument->mPureDataNode->sendFloat(toString(mInstrument->mAdditiveSynthID)+string("phase"),
+												  getPlayheadFrac() );
+		}
+		break;
+
+		// Notes
+		case Instrument::SynthType::MIDI:
+		case Instrument::SynthType::Striker:
+		{
+			// send midi notes
+			if (!mQuantizedImage.empty())
+			{
+				int x = getPlayheadFrac() * (float)(mQuantizedImage.cols);
+
+				for ( int y=0; y<mNoteCount; ++y )
+				{
+					unsigned char value = mQuantizedImage.at<unsigned char>(mNoteCount-1-y,x);
+
+					int note = noteForY(y);
+
+					if ( isScoreValueHigh(value) )
+					{
+						float duration =
+						beatDuration *
+						mDurationFrac *
+						getNoteLengthAsScoreFrac(mQuantizedImage,x,y);
+
+						if (duration>0)
+						{
+							mInstrument->doNoteOn( note, duration );
+						}
+					}
+					// See if the note was previously triggered but no longer exists, and turn it off if so
+					else if (mInstrument->isNoteInFlight( note ))
+					{
+						// TODO: this should work as long a there isn't >1 score per instrument. In that case,
+						// this will start to behave weirdly. Proper solution is to scan all scores and
+						// aggregate all the on notes, and then join the list of desired on notes to actual on notes
+						// in a single pass, taking action to on/off them as needed.
+						mInstrument->doNoteOff( note );
+					}
+				}
+			}
+
+			mInstrument->tickArpeggiator();
+		}
+		break;
+
+		default:
+		break;
+	}
+
+	// retire notes
+	mInstrument->updateNoteOffs();
+}
+
+void Score::updateAdditiveSynthesis() {
+	InstrumentRef instr = mInstrument;
+	if (!instr) return;
+
+	// send image for additive synthesis
+	if ( instr->mSynthType==Instrument::SynthType::Additive && !mImage.empty() )
+	{
+		PureDataNodeRef pd = instr->mPureDataNode;
+		int additiveSynthID = mInstrument->mAdditiveSynthID;
+
+		int rows = mImage.rows;
+		int cols = mImage.cols;
+
+		// Update pan
+		pd->sendFloat(toString(additiveSynthID)+string("pan"),
+							     mPan);
+
+		// Update per-score pitch
+		pd->sendFloat(toString(additiveSynthID)+string("note-root"),
+								 20 );
+
+		// Update range of notes covered by additive synthesis
+		pd->sendFloat(toString(additiveSynthID)+string("note-range"),
+								 100 );
+
+		// Update resolution
+		pd->sendFloat(toString(additiveSynthID)+string("resolution-x"),
+								 cols);
+
+		pd->sendFloat(toString(additiveSynthID)+string("resolution-y"),
+								 rows);
+
+		// Create a float version of the image
+		cv::Mat imageFloatMat;
+
+		// Copy the uchar version scaled 0-1
+		mImage.convertTo(imageFloatMat, CV_32FC1, 1/255.0);
+
+		// Convert to a vector to pass to Pd
+
+		// Grab the current column at the playhead. We send updates even if the
+		// phase doesn't change enough to change the colIndex,
+		// as the pixels might have changed instead.
+		float phase = getPlayheadFrac();
+		int colIndex = imageFloatMat.cols * phase;
+
+		cv::Mat columnMat = imageFloatMat.col(colIndex);
+
+		// We use a list message rather than writeArray as it causes less contention with Pd's execution thread
+		auto ampsByFreq = pd::List();
+		for (int i = 0; i < columnMat.rows; i++) {
+			ampsByFreq.addFloat(columnMat.at<float>(i, 0));
+		}
+
+		pd->sendList(toString(additiveSynthID)+string("vals"), ampsByFreq);
+
+		// Turn the synth on
+		pd->sendFloat(toString(additiveSynthID)+string("volume"), 1);
+	}
 }
 
 float Score::getPlayheadFrac() const

@@ -16,6 +16,7 @@
 #include "RtMidi.h"
 #include "Cinder-Serial.h"
 
+using namespace cipd;
 using namespace Cinder::Serial;
 
 typedef int NoteNum;
@@ -115,6 +116,9 @@ public:
 	MetaParam mMetaParam; // only matters if mSynthType==Meta
 	MetaParamInfo mMetaParamInfo;
 
+	int mAdditiveSynthID;
+	PureDataNodeRef mPureDataNode;
+	
 	// Arpeggiator
 	void tickArpeggiator();
 
@@ -140,7 +144,7 @@ public:
 
 
 	// serial (arduino/robits)
-	SerialDeviceRef mDevice;
+	SerialDeviceRef mSerialDevice;
 
 	void setupSerial();
 	void sendSerialByte(const uint8_t charByte);

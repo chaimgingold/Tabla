@@ -11,7 +11,7 @@
 
 #include "GameWorld.h"
 #include "FileWatch.h"
-#include "PureDataNode.h"
+
 #include "RtMidi.h"
 #include "Instrument.h"
 #include "Score.h"
@@ -66,8 +66,8 @@ private:
 	MusicVision mVision;
 
 	// synthesis
-	cipd::PureDataNodeRef	mPureDataNode;	// synth engine
-	cipd::PatchRef			mPatch;			// music patch
+	PureDataNodeRef	mPureDataNode;	// synth engine
+	PatchRef			mPatch;			// music patch
 
 	void setupSynthesis();
 	void updateAdditiveScoreSynthesis();

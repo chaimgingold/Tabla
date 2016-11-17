@@ -10,12 +10,14 @@
 #define Score_h
 #include "Instrument.h"
 
+
 // scores
 class Score
 {
 public:
 	InstrumentRef mInstrument;
 	gl::GlslProgRef mAdditiveShader;
+	
 
 	void draw( GameWorld::DrawType ) const;
 
@@ -46,7 +48,7 @@ public:
 
 	float		mPhase=0;
 	float		mDurationFrac=1;
-	void tickPhase(float globalPhase);
+	void        tick(float globalPhase, float beatDuration);
 
 	int			mOctave=-1; // controlled by mOctaveFrac
 	float		mOctaveFrac=0.5f;
@@ -80,6 +82,9 @@ public:
 	bool  isScoreValueHigh( uchar ) const;
 	float getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const;
 	int   getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const;
+
+	// additive synth
+	void updateAdditiveSynthesis();
 
 private:
 	void drawNotes		( GameWorld::DrawType drawType ) const;

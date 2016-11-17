@@ -138,7 +138,7 @@ void Instrument::setupSerial() {
 		}
 
 		try {
-			mDevice = SerialDevice::create(port, 115200);
+			mSerialDevice = SerialDevice::create(port, 115200);
 		} catch (serial::IOException& e) {
 			cout << "Failed to create serial device : ( " << e.what() << endl;
 		}
@@ -225,7 +225,7 @@ void Instrument::doNoteOn( int note, float duration )
 }
 
 void Instrument::sendSerialByte(const uint8_t charByte) {
-	if (!mDevice) {
+	if (!mSerialDevice) {
 		return;
 	}
 
@@ -235,7 +235,7 @@ void Instrument::sendSerialByte(const uint8_t charByte) {
 		'Q' // Q == message terminator
 	};
 
-	size_t size = mDevice->writeBytes(buffer, 2);
+	size_t size = mSerialDevice->writeBytes(buffer, 2);
 
 	if (size != 2) {
 		printf("only sent %i bytes, should have sent 2!\n", (int)size);
@@ -271,9 +271,6 @@ void Instrument::doNoteOff( int note )
 
 void Instrument::sendNoteOn ( RtMidiOutRef midiOut, uchar channel, uchar note, uchar velocity )
 {
-	if (!midiOut) {
-		return;
-	}
 	const uchar noteOnBits = 9;
 
 	uchar channelBits = channel & 0xF;

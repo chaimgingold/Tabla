@@ -81,6 +81,7 @@ void MusicWorld::setParams( XmlTree xml )
 
 	map<string,InstrumentRef> newInstr;
 
+	int nextAdditiveSynthID = 0;
 	for( auto i = xml.begin( "Instruments/Instrument" ); i != xml.end(); ++i )
 	{
 		Instrument instr;
@@ -90,6 +91,12 @@ void MusicWorld::setParams( XmlTree xml )
 		{
 			instr.mMetaParamInfo = getMetaParamInfo(instr.mMetaParam);
 		}
+		else if (instr.mSynthType == Instrument::SynthType::Additive)
+		{
+			instr.mAdditiveSynthID = nextAdditiveSynthID;
+			nextAdditiveSynthID++;
+		}
+		instr.mPureDataNode = mPureDataNode;
 
 		newInstr[instr.mName] = std::make_shared<Instrument>(instr);
 
@@ -155,91 +162,27 @@ void MusicWorld::updateScoresWithMetaParams() {
 
 void MusicWorld::update()
 {
+	// Advance time
 	const float dt = getDT();
-
 	tickGlobalClock(dt);
 
+	// Advance each score
 	for( auto &score : mScores )
 	{
-		score.tickPhase(mPhaseInBeats);
+		score.tick(mPhaseInBeats, getBeatDuration());
 	}
 
-
-	int additiveSynthNum=0;
-
+	// Record last meta-parameter locations
 	for( const auto &score : mScores )
 	{
-		auto instr = score.mInstrument; // getInstrumentForScore(score);
-		if (!instr) continue;
+		auto instr = score.mInstrument;
 
-		switch( instr->mSynthType )
+		if( instr && instr->mSynthType==Instrument::SynthType::Meta)
 		{
-			// Additive
-			case Instrument::SynthType::Additive:
-			{
-				// Update time
-				mPureDataNode->sendFloat(toString(additiveSynthNum)+string("phase"),
-										 score.getPlayheadFrac() );
-				additiveSynthNum++;
-			}
-			break;
-
-			// Notes
-			case Instrument::SynthType::MIDI:
-			case Instrument::SynthType::Striker:
-			{
-				// send midi notes
-				if (!score.mQuantizedImage.empty())
-				{
-					int x = score.getPlayheadFrac() * (float)(score.mQuantizedImage.cols);
-
-					for ( int y=0; y<score.mNoteCount; ++y )
-					{
-						unsigned char value = score.mQuantizedImage.at<unsigned char>(score.mNoteCount-1-y,x);
-
-						int note = score.noteForY(y);
-
-						if ( score.isScoreValueHigh(value) )
-						{
-							float duration =
-								getBeatDuration() *
-								score.mDurationFrac *
-								score.getNoteLengthAsScoreFrac(score.mQuantizedImage,x,y);
-
-							if (duration>0)
-							{
-								instr->doNoteOn( note, duration );
-							}
-						}
-						// See if the note was previously triggered but no longer exists, and turn it off if so
-						else if (instr->isNoteInFlight( note ))
-						{
-							// TODO: this should work as long a there isn't >1 score per instrument. In that case,
-							// this will start to behave weirdly. Proper solution is to scan all scores and
-							// aggregate all the on notes, and then join the list of desired on notes to actual on notes
-							// in a single pass, taking action to on/off them as needed.
-							instr->doNoteOff( note );
-						}
-					}
-				}
-
-				instr->tickArpeggiator();
-			}
-			break;
-
-			// Meta
-			case Instrument::SynthType::Meta:
-			{
-				mVision.mLastSeenMetaParamLoc[instr->mMetaParam] = score.getCentroid();
-			}
-			break;
+			mVision.mLastSeenMetaParamLoc[instr->mMetaParam] = score.getCentroid();
 		}
 
-        // retire notes
-        instr->updateNoteOffs();
 	}
-
-
 
 	// file watch
 	mFileWatch.scanFiles();
@@ -359,75 +302,16 @@ void MusicWorld::updateAdditiveScoreSynthesis()
 {
 	const int kMaxSynths = 8; // This corresponds to [clone 8 music-voice] in music.pd
 
-	// Mute all synths
-	for( int synthNum=0; synthNum<kMaxSynths; ++synthNum )
+	// Mute all additive synths, in case their score has disappeared (FIXME: do this in ~Score() ?)
+	for( int additiveSynthID=0; additiveSynthID<kMaxSynths; ++additiveSynthID )
 	{
-		mPureDataNode->sendFloat(toString(synthNum)+string("volume"), 0);
+		mPureDataNode->sendFloat(toString(additiveSynthID)+string("volume"), 0);
 	}
 
 	// send scores to Pd
-	int additiveSynthID=0;
-
-	for( const auto &score : mScores )
+	for( auto &score : mScores )
 	{
-		InstrumentRef instr = score.mInstrument;
-		if (!instr) continue;
-
-		// send image for additive synthesis
-		if ( instr->mSynthType==Instrument::SynthType::Additive && !score.mImage.empty() )
-		{
-
-			int rows = score.mImage.rows;
-			int cols = score.mImage.cols;
-
-			// Update pan
-			mPureDataNode->sendFloat(toString(additiveSynthID)+string("pan"),
-									 score.mPan);
-
-			// Update per-score pitch
-			mPureDataNode->sendFloat(toString(additiveSynthID)+string("note-root"),
-									 20 );
-
-			// Update range of notes covered by additive synthesis
-			mPureDataNode->sendFloat(toString(additiveSynthID)+string("note-range"),
-									 100 );
-
-			// Update resolution
-			mPureDataNode->sendFloat(toString(additiveSynthID)+string("resolution-x"),
-									 cols);
-
-			mPureDataNode->sendFloat(toString(additiveSynthID)+string("resolution-y"),
-									 rows);
-
-			// Create a float version of the image
-			cv::Mat imageFloatMat;
-
-			// Copy the uchar version scaled 0-1
-			score.mImage.convertTo(imageFloatMat, CV_32FC1, 1/255.0);
-
-			// Convert to a vector to pass to Pd
-
-			// Grab the current column at the playhead. We send updates even if the
-			// phase doesn't change enough to change the colIndex,
-			// as the pixels might have changed instead.
-			float phase = score.getPlayheadFrac();
-			int colIndex = imageFloatMat.cols * phase;
-
-			cv::Mat columnMat = imageFloatMat.col(colIndex);
-
-			// We use a list message rather than writeArray as it causes less contention with Pd's execution thread
-			auto list = pd::List();
-			for (int i = 0; i < columnMat.rows; i++) {
-				list.addFloat(columnMat.at<float>(i, 0));
-			}
-
-			mPureDataNode->sendList(toString(additiveSynthID)+string("vals"), list);
-
-			// Turn the synth on
-			mPureDataNode->sendFloat(toString(additiveSynthID)+string("volume"), 1);
-
-			additiveSynthID++;
-		}
+		score.updateAdditiveSynthesis();
 	}
 }
 
@@ -468,7 +352,7 @@ void MusicWorld::setupSynthesis()
 	killAllNotes();
 
 	// Create the synth engine
-	mPureDataNode = cipd::PureDataNode::Global();
+	mPureDataNode = PureDataNode::Global();
 
 	// Lets us use lists to set arrays, which seems to cause less thread contention
 	mPureDataNode->setMaxMessageLength(1024);
