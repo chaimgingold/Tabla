@@ -257,6 +257,7 @@
 					<NoteOnColor>FF0000</NoteOnColor>
 					
 					<Name>1Striker</Name>
+					<IconFileName>striker.png</IconFileName>
 					<SynthType>Striker</SynthType>
 					
 					<Port>0</Port>
@@ -402,6 +403,7 @@
 					<NoteOnColor>00FF00</NoteOnColor>
 					
 					<Name>Tempo</Name>
+					<IconFileName>tempo.png</IconFileName>
 					<SynthType>Meta</SynthType>
 					<MetaParam>Tempo</MetaParam>
 				</Instrument>
