@@ -382,6 +382,16 @@ void PaperBounce3App::mouseDrag( MouseEvent event )
 	if (getWindowData()) getWindowData()->mouseDrag(event);
 }
 
+void PaperBounce3App::fileDrop( FileDropEvent event )
+{
+	auto files = event.getFiles();
+	if (files.size() > 0) {
+		auto file = files.front();
+		debugFrame = loadImage(file);
+		useDebugFrame = true;
+	}
+}
+
 void PaperBounce3App::addProjectorPipelineStages()
 {
 	// set that image
@@ -397,13 +407,20 @@ void PaperBounce3App::update()
 {
 	mFileWatch.update();
 	
-	if ( mCapture && mCapture->checkNewFrame() )
+	if ( (mCapture && mCapture->checkNewFrame()) || useDebugFrame )
 	{
 		// start pipeline
 		mPipeline.start();
 
+
 		// get image
-		Surface frame( *mCapture->getSurface() ) ;
+		Surface frame;
+		if (useDebugFrame) {
+			frame = debugFrame;
+		} else {
+			frame = *mCapture->getSurface();
+		}
+
 		
 		// vision it
 		mVision.processFrame(frame,mPipeline) ;
@@ -626,6 +643,10 @@ void PaperBounce3App::keyDown( KeyEvent event )
 			
 			case KeyEvent::KEY_RIGHT:
 				loadAdjacentGame(1);
+				break;
+			case KeyEvent::KEY_ESCAPE:
+				useDebugFrame = false;
+				debugFrame = Surface();
 				break;
 			
 			default:

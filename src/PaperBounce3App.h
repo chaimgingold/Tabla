@@ -49,6 +49,7 @@ class PaperBounce3App : public App {
 	void mouseUp( MouseEvent event ) override;
 	void mouseMove( MouseEvent event ) override;
 	void mouseDrag( MouseEvent event ) override;
+	void fileDrop( FileDropEvent event ) override;
 	void update() override;
 	void draw() override;
 	void resize() override;
@@ -67,6 +68,9 @@ class PaperBounce3App : public App {
 	std::shared_ptr<GameWorld> mGameWorld ;// world simulation
 	
 	Pipeline			mPipeline; // traces processing
+
+	Surface debugFrame; // a static debug frame
+	bool useDebugFrame;
 	
 	// game library
 	void setupGameLibrary();

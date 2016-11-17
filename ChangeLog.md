@@ -1,5 +1,8 @@
 11/14/2016 - 11/18/2016
-* Began refactoring MusicWorld into smaller files
+* Barrel distortion correction!
+* Robits V1!
+* Drag-and-drop image onto config window to use it as a faux camera. Escape to clear.
+* Refactored MusicWorld into smaller files
 
 
 10/31/2016 - 11/4/2016
