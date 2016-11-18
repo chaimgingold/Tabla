@@ -81,6 +81,15 @@ bool Score::isScoreValueHigh( uchar value ) const
 	// else low
 }
 
+bool Score::isNoteOn( float playheadFrac, int note ) const
+{
+	int x = constrain( (int)(playheadFrac * (float)(mQuantizedImage.cols)), 0, mQuantizedImage.cols-1 );
+	
+	bool isOn = isScoreValueHigh(mQuantizedImage.at<unsigned char>(mNoteCount-1-note,x));
+	
+	return isOn;
+}
+
 int Score::getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const
 {
 	int x2;
@@ -297,9 +306,59 @@ void Score::drawMetaParam( GameWorld::DrawType drawType ) const
 	}
 }
 
-void Score::drawInstrumentIcon( int numOnNotes ) const
+void Score::drawInstrumentIcon() const
 {
-	if ( mInstrument->mIcon )
+	// instrument?
+	if ( !mInstrument || !mInstrument->mIcon ) return;
+	
+	// get anim state
+	tInstrumentIconAnimState state;
+
+	vec4 poses[13] =
+	{
+		vec4(  .25, 0.f, 1.f, -30 ),
+		vec4( -.25, 0.f, 1.f,  30 ),
+		vec4( 0, 0, 1, 0 ),
+		vec4( 0, .4, 1, 0 ),
+		vec4( 0, 0, 1, 0 ),
+		vec4(  .25, 0.f, 1.f, -30 ),
+		vec4( -.25, 0.f, 1.f,  30 ),
+		vec4( 0, 0, 1, 20 ),
+		vec4( 0, 0, 1, -20 ),
+		vec4( 0, .2, 1.2, 0 ),
+		vec4( 0, .2, 1.2, 0 ),
+		vec4( 0, -.3, 1, 0 ),
+		vec4( 0, 0, 1.2, 0 )
+	};
+	
+	{
+		// gather
+		int numOnNotes=0;
+		float playheadFrac = getPlayheadFrac();
+		vec4 pose;
+		vec4 poseNormSum;
+		
+		for( int note=0; note<mNoteCount; note++ )
+		{
+			if ( isNoteOn(playheadFrac,note) )
+			{
+				numOnNotes++;
+				pose += poses[note%13];
+				poseNormSum += vec4(1,1,1,1);
+			}
+		}
+		
+		// set
+//		state = pose;
+		state = pose / poseNormSum;
+//		state = poseNormSum;
+//		state.mScale /= poseNormSum.z;
+//		state.mRotate=0.f;
+		
+		state.mColor = (numOnNotes>0) ? mInstrument->mNoteOnColor : mInstrument->mNoteOffColor;
+	}
+	
+	// draw
 	{
 		const float kIconWidth  = 5.f ;
 		const float kIconGutter = 1.f ;
@@ -310,24 +369,23 @@ void Score::drawInstrumentIcon( int numOnNotes ) const
 		
 		vec2 iconLoc = fracToQuad(vec2(0,.5f));
 		iconLoc -= playheadVec * (kIconGutter + kIconWidth*.5f);
+		iconLoc += state.mTranslate * vec2(kIconWidth,kIconWidth) ;
 		
 		//
 		Rectf r(-.5f,-.5f,.5f,.5f);
 		
 		gl::pushModelMatrix();
 		gl::translate( iconLoc - r.getCenter() );
-		gl::scale( vec2(1,1)*kIconWidth * ( numOnNotes ? 1.1f : 1.f ) );
+		gl::scale( vec2(1,1)*kIconWidth * state.mScale );
 		
 		gl::multModelMatrix( mat4( ci::mat3(
 			vec3( playheadVec,0),
 			vec3( perp(playheadVec),0),
 			vec3( cross(vec3(playheadVec,0),vec3(perp(playheadVec),0)) )
 			)) );
+		gl::rotate( state.mRotate );
 		
-	//	gl::color(1,1,1);
-	//	gl::color(mInstrument->mScoreColor);
-		if (numOnNotes) gl::color(mInstrument->mNoteOnColor);
-		else gl::color(mInstrument->mNoteOffColor);
+		gl::color( state.mColor );
 		
 		if (mInstrument && mInstrument->mIcon) gl::draw( mInstrument->mIcon, r );
 		else gl::drawSolidRect(r);
@@ -347,8 +405,6 @@ void Score::draw( GameWorld::DrawType drawType ) const
 		gl::drawSolid(getPolyLine());
 	}
 
-	int numOnNotes=0;
-	
 	if (mInstrument)
 	{
 		switch( mInstrument->mSynthType )
@@ -410,7 +466,7 @@ void Score::draw( GameWorld::DrawType drawType ) const
 				if ( drawType != GameWorld::DrawType::UIPipelineThumb ) // optimization
 				{
 					drawScoreLines(drawType);
-					numOnNotes = drawNotes(drawType);
+					drawNotes(drawType);
 				}
 				else
 				{
@@ -440,7 +496,7 @@ void Score::draw( GameWorld::DrawType drawType ) const
 	}
 	
 	// instrument icon
-	drawInstrumentIcon(numOnNotes);
+	drawInstrumentIcon();
 }
 
 bool Score::setQuadFromPolyLine( PolyLine2 poly, vec2 timeVec )
