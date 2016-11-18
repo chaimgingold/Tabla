@@ -84,8 +84,11 @@ bool Score::isScoreValueHigh( uchar value ) const
 bool Score::isNoteOn( float playheadFrac, int note ) const
 {
 	int x = constrain( (int)(playheadFrac * (float)(mQuantizedImage.cols)), 0, mQuantizedImage.cols-1 );
-	
-	bool isOn = isScoreValueHigh(mQuantizedImage.at<unsigned char>(mNoteCount-1-note,x));
+	int y = mNoteCount-1-note;
+	if (y >= mQuantizedImage.rows || y < 0 || x < 0) {
+		return false;
+	}
+	bool isOn = isScoreValueHigh(mQuantizedImage.at<unsigned char>(y,x));
 	
 	return isOn;
 }
