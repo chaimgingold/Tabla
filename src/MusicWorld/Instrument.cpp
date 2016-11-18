@@ -188,7 +188,9 @@ void Instrument::updateNoteOffs()
 			if (off) {
 				// stash noteInfo since it gets cleared in doNoteOff,
 				// send a "fake" super-short note
-				// and then restore it to make sure we wait til "real" note is over before retriggering
+				// and then restore it to make sure we continue
+				// waiting til "real" note
+				// is over before retriggering
 				auto noteInfo = mOnNotes[note];
 				doNoteOff(note);
 				mOnNotes[note] = noteInfo;
