@@ -259,6 +259,7 @@
 					<NoteOnColor>FF0000</NoteOnColor>
 					
 					<Name>1RobitPokie</Name>
+                    <IconFileName>striker.png</IconFileName>
 					<SynthType>RobitPokie</SynthType>
 					
 					<Port>0</Port>
@@ -291,6 +292,7 @@
 					<NoteOnColor>FF0000</NoteOnColor>
 
 					<Name>3Additive</Name>
+					<IconFileName>additive.png</IconFileName>
 					<SynthType>Additive</SynthType>
 
 					<Port>0</Port>
@@ -306,6 +308,7 @@
 					<NoteOnColor>FF0000</NoteOnColor>
 
 					<Name>4Additive</Name>
+					<IconFileName>additive.png</IconFileName>
 					<SynthType>Additive</SynthType>
 
 					<Port>0</Port>
@@ -321,6 +324,7 @@
 					<NoteOnColor>FF0000</NoteOnColor>
 
 					<Name>5Additive</Name>
+					<IconFileName>additive.png</IconFileName>
 					<SynthType>Additive</SynthType>
 
 					<Port>0</Port>
@@ -350,6 +354,7 @@
 					<NoteOnColor>FF0000</NoteOnColor>
 
 					<Name>7Additive</Name>
+					<IconFileName>additive.png</IconFileName>
 					<SynthType>Additive</SynthType>
 
 					<Port>0</Port>
@@ -404,6 +409,7 @@
 					<NoteOnColor>00FF00</NoteOnColor>
 					
 					<Name>Tempo</Name>
+					<IconFileName>tempo.png</IconFileName>
 					<SynthType>Meta</SynthType>
 					<MetaParam>Tempo</MetaParam>
 				</Instrument>
