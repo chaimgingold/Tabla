@@ -353,7 +353,12 @@ void Score::drawInstrumentIcon() const
 		
 		// set
 //		state = pose;
-		state = pose / poseNormSum;
+		if (numOnNotes > 0) {
+			pose /= poseNormSum;
+		} else {
+			pose = vec4( 0, 0, 1, 0); // default pose
+		}
+		state = pose;
 //		state = poseNormSum;
 //		state.mScale /= poseNormSum.z;
 //		state.mRotate=0.f;
