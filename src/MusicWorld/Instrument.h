@@ -50,9 +50,10 @@ struct Arpeggiator
 enum class MetaParam
 {
 	Scale=0,
-	RootNote,
+	RootNote, // Global transposition
 	Tempo,
-	//		BeatCount,
+	//		BeatCount, // Score Resolution in X (i.e. number of beat divisions)
+	//      NoteCount  // Score Resolution in Y (i.e. number of notes accessible)
 	kNumMetaParams
 };
 
@@ -109,10 +110,10 @@ public:
 	//
 	enum class SynthType
 	{
-		Additive = 1,
-		MIDI	 = 2,
+		Additive    = 1,
+		MIDI	    = 2,
 		RobitPokie  = 3,
-		Meta	 = 4  // controls global params
+		Meta	    = 4  // controls global params
 	};
 
 	SynthType mSynthType;
@@ -130,11 +131,11 @@ public:
 
 	int  mPort=0;
 	int  mChannel=0;
-	int  mMapNotesToChannels=0; // for KORG Volca Sample (0 == off, N>0 == map notes across N channels)
 
 	void setupMIDI();
 
-	int channelForNote(int note) const;
+	int  mMapNotesToChannels=0; // for KORG Volca Sample (0 == off, N>0 == map notes across N channels)
+	int  channelForNote( int note ) const;
 
 	bool isNoteInFlight( int note ) const;
 	void updateNoteOffs();
@@ -143,7 +144,7 @@ public:
 
 	void killAllNotes();
 
-	map <NoteNum, tOnNoteInfo> mOnNotes;
+	map<NoteNum, tOnNoteInfo> mOnNotes;
 
 
 	// serial (arduino/robits)

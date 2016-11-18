@@ -25,6 +25,8 @@
 [ ] MetaParams.cpp
 [ ] MetaParams.h
 
+[ ] MetaParam struct that carries them in a bundle so they can be passed wholesale down to Score from MusicWorld
+ 
 [ ] Clock.h
 [ ] Clock.cpp
 
@@ -50,4 +52,4 @@
  
      then Instrument has its own mOnNotes and the arpeggiator sends rhythmic cyclings of those notes 
 
-[x] Striker->Pokie
+[x] Striker->RobitPokie
