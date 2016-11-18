@@ -46,3 +46,8 @@
      }
 
      can also add scheduleNote with old behavior of note+duration
+ 
+ 
+     then Instrument has its own mOnNotes and the arpeggiator sends rhythmic cyclings of those notes 
+
+[x] Striker->Pokie

@@ -47,7 +47,7 @@ void Instrument::setParams( XmlTree xml )
 		map<string,SynthType> synths;
 		synths["Additive"] = SynthType::Additive;
 		synths["MIDI"] = SynthType::MIDI;
-		synths["Striker"] = SynthType::Striker;
+		synths["RobitPokie"] = SynthType::RobitPokie;
 		synths["Meta"] = SynthType::Meta;
 		auto i = synths.find(t);
 		mSynthType = (i!=synths.end()) ? i->second : SynthType::MIDI ; // default to MIDI
@@ -88,7 +88,7 @@ void Instrument::setup()
         case SynthType::MIDI:
 			setupMIDI();
 			break;
-		case SynthType::Striker:
+		case SynthType::RobitPokie:
 			setupSerial();
 			break;
 		default:
@@ -97,7 +97,7 @@ void Instrument::setup()
 }
 
 bool Instrument::isNoteType() const {
-	return mSynthType==Instrument::SynthType::MIDI || mSynthType==Instrument::SynthType::Striker;
+	return mSynthType==Instrument::SynthType::MIDI || mSynthType==Instrument::SynthType::RobitPokie;
 }
 
 void Instrument::setupMIDI() {
@@ -182,9 +182,13 @@ void Instrument::updateNoteOffs()
 		int note = it.first;
 
 		// HACK: this is a hack to test super-short pulses
-		if (mSynthType == SynthType::Striker) {
-			bool off = now > it.second.mStartTime + 0.02;
-			if (off) doNoteOff(note);
+		if (mSynthType == SynthType::RobitPokie) {
+			bool off = now > it.second.mStartTime + mPokieRobitPulseTime;
+			if (off) {
+				auto noteInfo = mOnNotes[note];
+				doNoteOff(note);
+				mOnNotes[note] = noteInfo;
+			}
 		}
 
 		if (off)
@@ -205,8 +209,8 @@ void Instrument::doNoteOn( int note, float duration )
 
 		switch (mSynthType)
 		{
-			case SynthType::Striker:
-				sendSerialByte('H');
+			case SynthType::RobitPokie:
+				sendSerialByte(serialCharForNote(note), '1');
 				break;
 
 			case SynthType::MIDI:
@@ -226,21 +230,23 @@ void Instrument::doNoteOn( int note, float duration )
 	}
 }
 
-void Instrument::sendSerialByte(const uint8_t charByte) {
+void Instrument::sendSerialByte(const uint8_t charByte, const uint8_t hiLowByte) {
 	if (!mSerialDevice) {
 		return;
 	}
 
 	// outgoing message is 5 bytes
-	uint8_t buffer[2] = {
+	const size_t bufSize = 3;
+	uint8_t buffer[bufSize] = {
 		charByte,
+		hiLowByte,
 		'Q' // Q == message terminator
 	};
 
-	size_t size = mSerialDevice->writeBytes(buffer, 2);
+	size_t size = mSerialDevice->writeBytes(buffer, bufSize);
 
-	if (size != 2) {
-		printf("only sent %i bytes, should have sent 2!\n", (int)size);
+	if (size != bufSize) {
+		printf("only sent %i bytes, should have sent %i!\n", (int)size, (int)bufSize);
 		return;
 	}
 }
@@ -256,8 +262,8 @@ void Instrument::doNoteOff( int note )
 {
 	switch (mSynthType)
 	{
-		case SynthType::Striker:
-			sendSerialByte('L');
+		case SynthType::RobitPokie:
+			sendSerialByte(serialCharForNote(note), '0');
 			break;
 
 		case SynthType::MIDI:
@@ -269,6 +275,11 @@ void Instrument::doNoteOff( int note )
 	}
 
 	mOnNotes.erase(note);
+}
+
+// We use 'A' to denote Pokie #1, 'B' to denote Pokie #2, etc.
+uint8_t Instrument::serialCharForNote(int note) {
+	return 'A' + note % mMapNotesToChannels;
 }
 
 void Instrument::sendNoteOn ( RtMidiOutRef midiOut, uchar channel, uchar note, uchar velocity )

@@ -111,7 +111,7 @@ public:
 	{
 		Additive = 1,
 		MIDI	 = 2,
-		Striker  = 3,
+		RobitPokie  = 3,
 		Meta	 = 4  // controls global params
 	};
 
@@ -150,7 +150,11 @@ public:
 	SerialDeviceRef mSerialDevice;
 
 	void setupSerial();
-	void sendSerialByte(const uint8_t charByte);
+	void sendSerialByte(const uint8_t charByte, const uint8_t hiLowByte);
+
+	float mPokieRobitPulseTime=0.01;
+
+	uint8_t serialCharForNote(int note);
 
 private:
 	// midi convenience methods

@@ -54,6 +54,7 @@ void MusicWorld::setParams( XmlTree xml )
 	getXml(xml,"BeatCount",mBeatCount);
 	getXml(xml,"NumOctaves",mNumOctaves);
 	getXml(xml,"RootNote",mRootNote);
+	getXml(xml,"PokieRobitPulseTime",mPokieRobitPulseTime);
 
 	if ( xml.hasChild("MusicVision") )
 	{
@@ -96,7 +97,8 @@ void MusicWorld::setParams( XmlTree xml )
 			nextAdditiveSynthID++;
 		}
 		instr.mPureDataNode = mPureDataNode;
-
+		instr.mPokieRobitPulseTime = mPokieRobitPulseTime;
+		cout << mPokieRobitPulseTime << endl;
 		// store it
 		mInstruments[instr.mName] = std::make_shared<Instrument>(instr);
 

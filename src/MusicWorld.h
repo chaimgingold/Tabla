@@ -46,7 +46,7 @@ private:
 	Scale mScale;
 	float mRootNote=60;
 	float mNumOctaves=5;
-
+	float mPokieRobitPulseTime;
 
 	// new tempo system
 	vector<float> mTempos; // what tempos do we support? 0 entry means free form, 1 means all are fixed.

@@ -404,7 +404,7 @@ void Score::draw( GameWorld::DrawType drawType ) const
 			break;
 			
 			case Instrument::SynthType::MIDI:
-			case Instrument::SynthType::Striker:
+			case Instrument::SynthType::RobitPokie:
 			{
 				// "Note-type" synth (midi or robit)
 				if ( drawType != GameWorld::DrawType::UIPipelineThumb ) // optimization
@@ -527,7 +527,7 @@ void Score::tick(float globalPhase, float beatDuration)
 
 		// Notes
 		case Instrument::SynthType::MIDI:
-		case Instrument::SynthType::Striker:
+		case Instrument::SynthType::RobitPokie:
 		{
 			// send midi notes
 			if (!mQuantizedImage.empty())

@@ -202,6 +202,8 @@
 			<BeatCount>32</BeatCount>
 			<NumOctaves>5</NumOctaves> <!-- Number of octaves available for shifting when moving scores in zone along Y -->
 			<RootNote>60</RootNote>
+
+			<PokieRobitPulseTime>0.01</PokieRobitPulseTime>
 			
 			<!--	Musical Scales	-->
 
@@ -256,12 +258,12 @@
 					<NoteOffColor>00FF00</NoteOffColor>
 					<NoteOnColor>FF0000</NoteOnColor>
 					
-					<Name>1Striker</Name>
-					<SynthType>Striker</SynthType>
+					<Name>1RobitPokie</Name>
+					<SynthType>RobitPokie</SynthType>
 					
 					<Port>0</Port>
 					<Channel>0</Channel>
-					<MapNotesToChannels>0</MapNotesToChannels>
+					<MapNotesToChannels>2</MapNotesToChannels>
 				</Instrument>
 
 				<Instrument>
