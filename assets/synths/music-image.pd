@@ -1,4 +1,4 @@
-#N canvas 1541 628 742 665 10;
+#N canvas 1337 472 742 665 10;
 #X obj 299 272 outlet~;
 #X obj 329 234 pan~;
 #X obj 376 272 outlet~;
@@ -15,7 +15,6 @@
 #X obj 281 602 s \$1phase-res-x;
 #X obj 281 574 int;
 #X obj 317 540 r \$1resolution-x-change;
-#X obj 329 128 /~ 75;
 #X obj 329 164 *~;
 #X obj 392 174 line~;
 #X msg 392 149 \$1 10;
@@ -62,6 +61,7 @@
 #X obj 22 296 array define \$1image-column 200;
 #X obj 153 416 array set \$1image-column;
 #X obj 329 93 clone \$2 music-grain \$1 \$2;
+#X obj 329 128 /~ 25;
 #X connect 1 0 0 0;
 #X connect 1 1 2 0;
 #X connect 3 0 10 0;
@@ -74,13 +74,13 @@
 #X connect 12 0 11 0;
 #X connect 14 0 13 0;
 #X connect 15 0 11 1;
-#X connect 16 0 17 0;
-#X connect 17 0 1 0;
-#X connect 18 0 17 1;
+#X connect 16 0 1 0;
+#X connect 17 0 16 1;
+#X connect 18 0 17 0;
 #X connect 19 0 18 0;
-#X connect 20 0 19 0;
-#X connect 22 0 21 0;
-#X connect 23 0 5 0;
-#X connect 23 0 7 0;
-#X connect 24 0 26 0;
+#X connect 21 0 20 0;
+#X connect 22 0 5 0;
+#X connect 22 0 7 0;
+#X connect 23 0 25 0;
+#X connect 26 0 27 0;
 #X connect 27 0 16 0;

@@ -96,7 +96,8 @@ void Instrument::setup()
 	}
 }
 
-bool Instrument::isNoteType() const {
+bool Instrument::isNoteType() const
+{
 	return mSynthType==Instrument::SynthType::MIDI || mSynthType==Instrument::SynthType::RobitPokie;
 }
 
@@ -185,6 +186,11 @@ void Instrument::updateNoteOffs()
 		if (mSynthType == SynthType::RobitPokie) {
 			bool off = now > it.second.mStartTime + mPokieRobitPulseTime;
 			if (off) {
+				// stash noteInfo since it gets cleared in doNoteOff,
+				// send a "fake" super-short note
+				// and then restore it to make sure we continue
+				// waiting til "real" note
+				// is over before retriggering
 				auto noteInfo = mOnNotes[note];
 				doNoteOff(note);
 				mOnNotes[note] = noteInfo;

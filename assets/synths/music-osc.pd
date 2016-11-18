@@ -16,11 +16,6 @@
 #X obj 117 179 list;
 #X obj 366 269 t b a;
 #X obj 117 515 + 0;
-#X obj 542 86 list;
-#X obj 533 126 print;
-#X msg 548 45 1 2 3 4;
-#X obj 600 72 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
--1;
 #X obj 117 152 t b a;
 #X obj 366 237 - 24;
 #X connect 1 0 11 0;
@@ -33,16 +28,13 @@
 #X connect 9 0 3 0;
 #X connect 9 1 6 1;
 #X connect 10 0 0 0;
-#X connect 11 0 21 0;
-#X connect 12 0 21 0;
-#X connect 13 0 22 0;
+#X connect 11 0 17 0;
+#X connect 12 0 17 0;
+#X connect 13 0 18 0;
 #X connect 14 0 9 0;
 #X connect 15 0 14 0;
 #X connect 15 1 16 1;
 #X connect 16 0 2 0;
-#X connect 17 0 18 0;
-#X connect 19 0 17 0;
-#X connect 20 0 17 0;
-#X connect 21 0 14 0;
-#X connect 21 1 14 1;
-#X connect 22 0 15 0;
+#X connect 17 0 14 0;
+#X connect 17 1 14 1;
+#X connect 18 0 15 0;
