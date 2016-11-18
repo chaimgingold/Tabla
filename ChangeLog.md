@@ -1,9 +1,14 @@
 11/14/2016 - 11/18/2016
 * Barrel distortion correction!
+* New table!
+* Robits V2! Now with 2 Robits!!
 * Robits V1!
+* Paula Icons!
+* New "Tuned Additive Synth" that adapts to tuning and scale of rest of song
+* ClearMIDINotes exe for killing midi when force-killing the app via Xcode stop button.
+    Use Xcode>Preferences>Behaviors>Running>Completes>"Run" and choose xcode/scripts/ClearMIDINotes
 * Drag-and-drop image onto config window to use it as a faux camera. Escape to clear.
 * Refactored MusicWorld into smaller files
-
 
 10/31/2016 - 11/4/2016
 * Clock system for synced variable tempos
