@@ -44,8 +44,6 @@ struct Arpeggiator
 };
 
 
-
-
 // meta-params
 enum class MetaParam
 {
@@ -79,6 +77,26 @@ struct tOnNoteInfo
 
 
 typedef std::shared_ptr<RtMidiOut> RtMidiOutRef;
+
+
+// animation
+struct tInstrumentIconAnimState
+{
+	tInstrumentIconAnimState(){}
+	tInstrumentIconAnimState( vec4 v )
+	{
+		mTranslate = vec2(v.x,v.y); // normalized to icon size
+		mScale  = v.z;
+		mRotate = toRadians(v.w);
+	}
+	
+	vec2	mTranslate;
+	float	mScale =1.f;
+	float	mRotate=0.f; // radians
+	ColorA  mColor = ColorA(1,1,1,1);
+	
+};
+
 
 
 // instrument info

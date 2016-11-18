@@ -87,11 +87,13 @@ public:
 	void updateAdditiveSynthesis();
 
 private:
+	bool isNoteOn( float playheadFrac, int note ) const;
+	
 	int  drawNotes		( GameWorld::DrawType drawType ) const; // returns # on notes
 	void drawScoreLines	( GameWorld::DrawType drawType ) const;
 	void drawPlayhead	( GameWorld::DrawType drawType ) const;
 	void drawMetaParam	( GameWorld::DrawType drawType ) const;
-	void drawInstrumentIcon( int numOnNotes=0 ) const;
+	void drawInstrumentIcon() const;
 };
 
 #endif /* Score_h */
