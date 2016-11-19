@@ -111,11 +111,11 @@ void MusicWorld::setParams( XmlTree xml )
 	loadInstrumentIcons();
 
 	// rebind scores to instruments
-	for( auto s : mScores )
+	for( auto &s : mScores )
 	{
 		auto i = mInstruments.find( s.mInstrumentName );
 		if (i==mInstruments.end()) s.mInstrument=0; // nil it!
-		else s.mInstrument = i->second;
+		else s.mInstrument = i->second; // rebind
 	}
 	
 	// update vision
