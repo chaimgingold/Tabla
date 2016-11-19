@@ -93,7 +93,9 @@ private:
 	void drawScoreLines	( GameWorld::DrawType drawType ) const;
 	void drawPlayhead	( GameWorld::DrawType drawType ) const;
 	void drawMetaParam	( GameWorld::DrawType drawType ) const;
-	void drawInstrumentIcon() const;
+	
+	void drawInstrumentIcon( tInstrumentIconAnimState pose ) const;
+	tInstrumentIconAnimState getInstrumentIconPoseFromScore( float playheadFrac ) const;
 };
 
 #endif /* Score_h */
