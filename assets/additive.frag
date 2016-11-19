@@ -38,6 +38,8 @@ void main() {
 	bkgnd.g = vertTexCoord0.y;
 	bkgnd.b = 1.;
 	bkgnd.a = 1.;
+	bkgnd = vec4(0,0,0,017317412
+	);
 	
 	//
 	float playhead = uPhase;

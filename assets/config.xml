@@ -244,6 +244,7 @@
 					<NoteOnColor>00FF00</NoteOnColor>
 
 					<Name>0Volca FM</Name>
+                    <IconFileName>board.png</IconFileName>
 					<SynthType>MIDI</SynthType>
 
 					<Port>2</Port>
@@ -256,10 +257,10 @@
 					<PlayheadColor>00FFFF</PlayheadColor>
 					<ScoreColor>11AA33</ScoreColor>
 					<NoteOffColor>00FF00</NoteOffColor>
-					<NoteOnColor>FF0000</NoteOnColor>
+					<NoteOnColor>FF8800</NoteOnColor>
 					
 					<Name>1RobitPokie</Name>
-                    <IconFileName>striker.png</IconFileName>
+                    <IconFileName>robit-pokie.png</IconFileName>
 					<SynthType>RobitPokie</SynthType>
 					
 					<Port>0</Port>
@@ -275,7 +276,6 @@
 
 					<Name>2Volca Sample</Name>
 					<IconFileName>drumkit.png</IconFileName>
-
 					<SynthType>MIDI</SynthType>
 
 					<Port>1</Port>
@@ -339,6 +339,7 @@
 					<NoteOnColor>00FF00</NoteOnColor>
 
 					<Name>6Volca Bass</Name>
+                    <IconFileName>keyboard2.png</IconFileName>
 					<SynthType>MIDI</SynthType>
 
 					<Port>3</Port>
@@ -371,6 +372,7 @@
 					<NoteOnColor>00FF00</NoteOnColor>
 					
 					<Name>8Volca Keys</Name>
+                    <IconFileName>keyboard.png</IconFileName>
 					<SynthType>MIDI</SynthType>
 					
 					<Port>0</Port>
@@ -387,6 +389,7 @@
 					<NoteOnColor>00FF00</NoteOnColor>
 					
 					<Name>Scale</Name>
+                    <IconFileName>scale.png</IconFileName>
 					<SynthType>Meta</SynthType>
 					<MetaParam>Scale</MetaParam>
 				</Instrument>
@@ -398,6 +401,7 @@
 					<NoteOnColor>00FF00</NoteOnColor>
 					
 					<Name>RootNote</Name>
+                    <IconFileName>transpose.png</IconFileName>
 					<SynthType>Meta</SynthType>
 					<MetaParam>RootNote</MetaParam>
 				</Instrument>
