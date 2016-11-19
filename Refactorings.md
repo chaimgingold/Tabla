@@ -53,3 +53,8 @@
      then Instrument has its own mOnNotes and the arpeggiator sends rhythmic cyclings of those notes 
 
 [x] Striker->RobitPokie
+
+
+[ ] Vocoder!!!!!!
+
+[ ] Support hotswapping arduino

@@ -265,7 +265,7 @@
 					
 					<Port>0</Port>
 					<Channel>0</Channel>
-					<MapNotesToChannels>2</MapNotesToChannels>
+					<MapNotesToChannels>12</MapNotesToChannels>
 				</Instrument>
 
 				<Instrument>
