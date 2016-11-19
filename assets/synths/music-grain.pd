@@ -8,8 +8,8 @@
 #X obj 222 213 / \$3;
 #X obj 308 194 t b a;
 #X obj 308 173 r \$2resolution-y-change;
-#X obj 197 479 -;
-#X msg 197 442 1 \$1;
+#X obj 197 519 -;
+#X msg 197 482 1 \$1;
 #X obj 222 170 \$3;
 #X obj 222 191 - \$1;
 #X msg 197 565 \$1 10;
@@ -17,11 +17,10 @@
 #X obj 197 71 r \$2phase-res-x;
 #X text 233 333 add x-coordinate along row;
 #X obj 197 331 f;
-#X obj 197 401 change;
+#X obj 197 441 change;
 #X obj 197 121 t b;
-#X obj 197 373 tabread \$2image-column;
 #X obj 424 489 print-if \$1 == 50 foo;
-#X obj 302 403 array get \$2image-column \$1 1;
+#X obj 197 403 array get \$2image-column \$1 1;
 #X connect 1 0 0 0;
 #X connect 2 0 1 1;
 #X connect 3 0 4 0;
@@ -38,8 +37,7 @@
 #X connect 13 0 2 0;
 #X connect 14 0 1 0;
 #X connect 15 0 19 0;
-#X connect 17 0 22 0;
+#X connect 17 0 21 0;
 #X connect 18 0 10 0;
 #X connect 19 0 17 0;
-#X connect 20 0 18 0;
-#X connect 22 0 18 0;
+#X connect 21 0 18 0;

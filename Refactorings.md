@@ -54,7 +54,3 @@
 
 [x] Striker->RobitPokie
 
-
-[ ] Vocoder!!!!!!
-
-[ ] Support hotswapping arduino

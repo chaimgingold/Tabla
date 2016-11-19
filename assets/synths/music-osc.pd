@@ -12,12 +12,12 @@
 #X obj 117 593 osc~;
 #X obj 117 104 array get pentatonic;
 #X obj 203 65 r global-scale;
-#X obj 366 201 r global-root-note;
+#X obj 416 251 r global-root-note;
 #X obj 117 179 list;
-#X obj 366 269 t b a;
+#X obj 416 319 t b a;
 #X obj 117 515 + 0;
 #X obj 117 152 t b a;
-#X obj 366 237 - 24;
+#X obj 416 287 - 24;
 #X connect 1 0 11 0;
 #X connect 2 0 10 0;
 #X connect 3 0 5 0;
