@@ -12,6 +12,7 @@
 #include "cinder/Xml.h"
 #include "Score.h"
 #include "Contour.h"
+#include "MusicStamp.h"
 
 class MusicVision
 {
@@ -27,22 +28,10 @@ public:
 	map<string,InstrumentRef> mInstruments;
 	int	  mNoteCount;
 	int	  mBeatCount;
+	PolyLine2 mWorldBoundsPoly;
 
 	// do it
-	ScoreVector updateVision( const ContourVector &c, Pipeline&, const ScoreVector& oldScores ) const;
-	
-	// mutable state information ... to be redesigned with stamp/icon/token system
-	typedef vector< pair<PolyLine2,InstrumentRef> > tInstrRegions;
-	
-	void generateInstrumentRegions(
-		map<string,InstrumentRef> &instruments,
-		const PolyLine2& worldBounds ); // TODO: kill/replace with stamp system
-
-	tInstrRegions getInstrRegions() const { return mInstrumentRegions; }
-	
-	map<MetaParam,vec2> mLastSeenMetaParamLoc;
-	// for better inter-frame coherence
-	// set by MusicWorld, to keep updateVision purely functional
+	ScoreVector updateVision( const ContourVector &c, Pipeline&, const ScoreVector& oldScores, const vector<MusicStamp>& ) const;
 	
 private:
 
@@ -62,8 +51,8 @@ private:
 	float mTempoWorldUnitsPerSecond = 5.f;
 
 	// helpers
-	ScoreVector getScores( const ContourVector&, const ScoreVector& oldScores ) const;
-	ScoreVector getScoresFromContours( const ContourVector& ) const;
+	ScoreVector getScores( const ContourVector&, const ScoreVector& oldScores, const vector<MusicStamp>& stamps ) const;
+	ScoreVector getScoresFromContours( const ContourVector&, const vector<MusicStamp>& stamps ) const;
 	ScoreVector mergeOldAndNewScores(
 		const ScoreVector& oldScores,
 		const ScoreVector& newScores,
@@ -74,15 +63,9 @@ private:
 	
 	//
 	float		  decideDurationForScore  ( const Score& ) const;
+	InstrumentRef decideInstrumentForScore( const Score&, const vector<MusicStamp>& ) const;
 
-	tInstrRegions mInstrumentRegions;
-	int  getScoreOctaveShift( const Score& s, const PolyLine2& wrtRegion ) const;
-	InstrumentRef decideInstrumentForScore( const Score&, int* octaveShift=0 ) const;
-	InstrumentRef getInstrumentForMetaParam( MetaParam ) const;
-
-	void		  assignUnassignedMetaParams( ScoreVector& ) const;
-	// we do them all at once to get uniqueness.
-	// TODO: kill/replace with stamp system
+	float getScoreOctaveShift( const Score& s, const PolyLine2& wrtRegion ) const;
 
 	// find matching scores
 	// can return 0 if no match; returns new score (in hay)

@@ -392,7 +392,11 @@ tInstrumentIconAnimState Score::getInstrumentIconPoseFromScore( float playheadFr
 	// pose
 	tInstrumentIconAnimState state = pose;
 	
-	state.mColor = (numOnNotes>0) ? mInstrument->mNoteOnColor : mInstrument->mNoteOffColor;
+	if (mInstrument) {
+		state.mColor = (numOnNotes>0) ? mInstrument->mNoteOnColor : mInstrument->mNoteOffColor;
+	} else {
+		state.mColor = ColorA(1,1,1,1);
+	}
 	
 	return state;
 }

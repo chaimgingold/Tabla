@@ -166,7 +166,7 @@
 			<MusicVision>
 				<!-- Custom vision settings... Probably shouldn't change unless you know what you are doing!-->
 				
-				<ScoreNoteVisionThresh>220</ScoreNoteVisionThresh>
+				<ScoreNoteVisionThresh>240</ScoreNoteVisionThresh>
 				<!-- 0..255, -1 for OTSU (adaptive) -->
 				<ScoreVisionTrimFrac>.07</ScoreVisionTrimFrac>
 				<!-- When sampling image for each score, what amount to trim the corners (% push towards the center) -->
@@ -300,38 +300,6 @@
 					<MapNotesToChannels>0</MapNotesToChannels>
 				</Instrument>
 
-
-				<Instrument>
-					<PlayheadColor>00FFFF</PlayheadColor>
-					<ScoreColor>993377</ScoreColor>
-					<NoteOffColor>00FF00</NoteOffColor>
-					<NoteOnColor>FF0000</NoteOnColor>
-
-					<Name>4Additive</Name>
-					<IconFileName>additive.png</IconFileName>
-					<SynthType>Additive</SynthType>
-
-					<Port>0</Port>
-					<Channel>0</Channel>
-					<MapNotesToChannels>0</MapNotesToChannels>
-				</Instrument>
-
-
-				<Instrument>
-					<PlayheadColor>00FFFF</PlayheadColor>
-					<ScoreColor>993377</ScoreColor>
-					<NoteOffColor>00FF00</NoteOffColor>
-					<NoteOnColor>FF0000</NoteOnColor>
-
-					<Name>5Additive</Name>
-					<IconFileName>additive.png</IconFileName>
-					<SynthType>Additive</SynthType>
-
-					<Port>0</Port>
-					<Channel>0</Channel>
-					<MapNotesToChannels>0</MapNotesToChannels>
-				</Instrument>
-
 				<Instrument>
 					<PlayheadColor>00FF00</PlayheadColor>
 					<ScoreColor>443377</ScoreColor>
@@ -346,24 +314,6 @@
 					<Channel>0</Channel>
 					<MapNotesToChannels>0</MapNotesToChannels>
 				</Instrument>
-
-
-				<Instrument>
-					<PlayheadColor>00FFFF</PlayheadColor>
-					<ScoreColor>993377</ScoreColor>
-					<NoteOffColor>00FF00</NoteOffColor>
-					<NoteOnColor>FF0000</NoteOnColor>
-
-					<Name>7Additive</Name>
-					<IconFileName>additive.png</IconFileName>
-					<SynthType>Additive</SynthType>
-
-					<Port>0</Port>
-					<Channel>0</Channel>
-					<MapNotesToChannels>0</MapNotesToChannels>
-				</Instrument>
-
-
 
 				<Instrument>
 					<PlayheadColor>00FF00</PlayheadColor>
