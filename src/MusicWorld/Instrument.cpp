@@ -76,7 +76,8 @@ Instrument::~Instrument()
 }
 
 // Setting this keeps RtMidi from throwing exceptions when something goes wrong talking to the MIDI system.
-void midiErrorCallback(RtMidiError::Type type, const std::string &errorText, void *userData) {
+void midiErrorCallback(RtMidiError::Type type, const std::string &errorText, void *userData)
+{
 	cout << "MIDI out error: " << type << errorText << endl;
 }
 
@@ -84,7 +85,8 @@ void Instrument::setup()
 {
 	assert(!mMidiOut);
 
-	switch (mSynthType) {
+	switch (mSynthType)
+	{
         case SynthType::MIDI:
 			setupMIDI();
 			break;
@@ -101,29 +103,37 @@ bool Instrument::isNoteType() const
 	return mSynthType==Instrument::SynthType::MIDI || mSynthType==Instrument::SynthType::RobitPokie;
 }
 
-void Instrument::setupMIDI() {
+void Instrument::setupMIDI()
+{
 	cout << "Opening port " << mPort << " for '" << mName << "'" << endl;
 
 	// RtMidiOut can throw an OSError if it has trouble initializing CoreMIDI.
-	try {
+	try
+	{
 		mMidiOut = make_shared<RtMidiOut>();
-	} catch (std::exception) {
+	}
+	catch (std::exception)
+	{
 		cout << "Error creating RtMidiOut " << mPort << " for '" << mName << "'" << endl;
 	}
 
-	if (mMidiOut) {
-
+	if (mMidiOut)
+	{
 		mMidiOut->setErrorCallback(midiErrorCallback, NULL);
-		if (mPort < mMidiOut->getPortCount()) {
+		if (mPort < mMidiOut->getPortCount())
+		{
 			mMidiOut->openPort( mPort );
-		} else {
+		}
+		else
+		{
 			cout << "...Opening virtual port for '" << mName << "'" << endl;
 			mMidiOut->openVirtualPort(mName);
 		}
 	}
 }
 
-void Instrument::setupSerial() {
+void Instrument::setupSerial()
+{
 	// iterate through ports
 	auto ports = SerialPort::getPorts();
 	for (auto port : ports) {
@@ -134,15 +144,20 @@ void Instrument::setupSerial() {
 	}
 
 	// grab a port and create a device
-	if (!ports.empty()) {
+	if (!ports.empty())
+	{
 		SerialPortRef port = SerialPort::findPortByNameMatching(std::regex("\\/dev\\/cu\\.usbserial.*"));
-		if (!port) {
+		if (!port)
+		{
 			port = ports.back();
 		}
 
-		try {
+		try
+		{
 			mSerialDevice = SerialDevice::create(port, 115200);
-		} catch (serial::IOException& e) {
+		}
+		catch (serial::IOException& e)
+		{
 			cout << "Failed to create serial device : ( " << e.what() << endl;
 		}
 
@@ -154,7 +169,8 @@ void Instrument::setupSerial() {
 // but in the case of the Volca Sample we want to
 // send each note to a different channel as per its MIDI implementation.
 int Instrument::channelForNote(int note) const {
-	if (mMapNotesToChannels > 0) {
+	if (mMapNotesToChannels > 0)
+	{
 		return note % mMapNotesToChannels;
 	}
 	return mChannel;
@@ -183,9 +199,11 @@ void Instrument::updateNoteOffs()
 		int note = it.first;
 
 		// HACK: this is a hack to test super-short pulses
-		if (mSynthType == SynthType::RobitPokie) {
+		if (mSynthType == SynthType::RobitPokie)
+		{
 			bool off = now > it.second.mStartTime + mPokieRobitPulseTime;
-			if (off) {
+			if (off)
+			{
 				// stash noteInfo since it gets cleared in doNoteOff,
 				// send a "fake" super-short note
 				// and then restore it to make sure we continue
@@ -236,14 +254,17 @@ void Instrument::doNoteOn( int note, float duration )
 	}
 }
 
-void Instrument::sendSerialByte(const uint8_t charByte, const uint8_t hiLowByte) {
-	if (!mSerialDevice) {
+void Instrument::sendSerialByte(const uint8_t charByte, const uint8_t hiLowByte)
+{
+	if (!mSerialDevice)
+	{
 		return;
 	}
 
 	// outgoing message is 5 bytes
 	const size_t bufSize = 3;
-	uint8_t buffer[bufSize] = {
+	uint8_t buffer[bufSize] =
+	{
 		charByte,
 		hiLowByte,
 		'Q' // Q == message terminator
@@ -284,7 +305,8 @@ void Instrument::doNoteOff( int note )
 }
 
 // We use 'A' to denote Pokie #1, 'B' to denote Pokie #2, etc.
-uint8_t Instrument::serialCharForNote(int note) {
+uint8_t Instrument::serialCharForNote(int note)
+{
 	return 'A' + note % mMapNotesToChannels;
 }
 
@@ -319,7 +341,8 @@ void Instrument::sendMidi( RtMidiOutRef midiOut, uchar a, uchar b, uchar c )
 
 }
 
-void Instrument::killAllNotes() {
+void Instrument::killAllNotes()
+{
 	if (mMidiOut)
 	{
 		for (int channel = 0; channel < 16; channel++)

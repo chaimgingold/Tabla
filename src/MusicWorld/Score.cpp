@@ -735,7 +735,8 @@ vec2 Score::fracToQuad( vec2 frac ) const
 int Score::noteForY( int y ) const {
 
 	if (mInstrument && mInstrument->mMapNotesToChannels) {
-		return y;
+		int noteShift = mOctave; // Reinterpret octave shift as note shift when using NotesToChannelsMode
+		return y + noteShift;
 	}
 
 	int numNotes = mScale.size();
@@ -768,3 +769,8 @@ float Score::getQuadMaxInteriorAngle() const
 	return mang;
 }
 
+Score::~Score() {
+	// NOTE: this will kill all notes even if other scores are still playing.
+	// Needs a multi-score-aware implementation, but better than stuck notes for now!
+	mInstrument->killAllNotes();
+}

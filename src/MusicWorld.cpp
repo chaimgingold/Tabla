@@ -428,10 +428,10 @@ void MusicWorld::setupSynthesis()
 	};
 
 	// Register file-watchers for all the major pd patch components
-	mFileWatch.load( PaperBounce3App::get()->hotloadableAssetPath("synths/music.pd"), reloadPdLambda);
+	mFileWatch.load( PaperBounce3App::get()->hotloadableAssetPath("synths/music.pd"),       reloadPdLambda);
 	mFileWatch.load( PaperBounce3App::get()->hotloadableAssetPath("synths/music-image.pd"), reloadPdLambda);
 	mFileWatch.load( PaperBounce3App::get()->hotloadableAssetPath("synths/music-grain.pd"), reloadPdLambda);
-	mFileWatch.load( PaperBounce3App::get()->hotloadableAssetPath("synths/music-osc.pd"), reloadPdLambda);
+	mFileWatch.load( PaperBounce3App::get()->hotloadableAssetPath("synths/music-osc.pd"),   reloadPdLambda);
 }
 
 void MusicWorld::cleanup() {

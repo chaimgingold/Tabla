@@ -15,6 +15,8 @@
 class Score
 {
 public:
+	~Score();
+
 	InstrumentRef mInstrument;
 	gl::GlslProgRef mAdditiveShader;
 
