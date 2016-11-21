@@ -16,6 +16,7 @@
 #include "Instrument.h"
 #include "Score.h"
 #include "MusicVision.h"
+#include "MusicStamp.h"
 
 class MusicWorld : public GameWorld
 {
@@ -48,27 +49,27 @@ private:
 	float mNumOctaves=5;
 	float mPokieRobitPulseTime;
 
-	// new tempo system
-	vector<float> mTempos; // what tempos do we support? 0 entry means free form, 1 means all are fixed.
-
+	vector<float> mTempos; // what tempos do we support? 0 entries means free form, 1 entry means all are fixed.
 	map<string,InstrumentRef> mInstruments;
 	vector<Scale> mScales;
-
+	vector<Score> mScores;
+	vector<MusicStamp> mStamps;
+	
+	void setupStamps();
+	MusicStamp* getStampByInstrument( InstrumentRef );
+	
+	// meta params
 	MetaParamInfo getMetaParamInfo( MetaParam ) const;
 	void updateMetaParameter(MetaParam metaParam, float value);
 	void updateScoresWithMetaParams();
-
-
-	vector<Score> mScores;
-
-	Score*			getScoreForMetaParam( MetaParam );
+	Score* getScoreForMetaParam( MetaParam );
 
 	// vision
 	MusicVision mVision;
 
 	// synthesis
 	PureDataNodeRef	mPureDataNode;	// synth engine
-	PatchRef			mPatch;			// music patch
+	PatchRef		mPatch;			// music patch
 
 	void setupSynthesis();
 	void updateAdditiveScoreSynthesis();
@@ -83,7 +84,7 @@ private:
 	float mPhaseInBeats=0;
 	float mDurationInBeats=16;
 	float mTempo=120;
-	void tickGlobalClock(float dt);
+	void  tickGlobalClock(float dt);
 	float getBeatDuration() const;
 
 	//

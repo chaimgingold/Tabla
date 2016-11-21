@@ -26,6 +26,7 @@
 		22088F63A8874EB4BAA43888 /* b2BlockAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 591FA7613BF840AF83A5482A /* b2BlockAllocator.cpp */; };
 		23756771BB404A04991A26CB /* b2PolygonAndCircleContact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6B648D73A5D453781A11E34 /* b2PolygonAndCircleContact.cpp */; };
 		24F2003E479C4BC49D1F7374 /* b2WheelJoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 627E59F1B82E4F36ABF0DE48 /* b2WheelJoint.cpp */; };
+		260C9B6D1DE37A1A008A2A03 /* MusicStamp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 260C9B6B1DE37A1A008A2A03 /* MusicStamp.cpp */; };
 		262A886B1DB011FF00FE2336 /* MusicWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 262A88691DB011FF00FE2336 /* MusicWorld.cpp */; };
 		262A88701DB58D7D00FE2336 /* RtMidi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 262A886E1DB58D7D00FE2336 /* RtMidi.cpp */; };
 		262A88751DB594B700FE2336 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 262A88741DB594B700FE2336 /* CoreMIDI.framework */; };
@@ -144,6 +145,8 @@
 		1329BFF5C8084A8E9BB37921 /* b2Collision.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2Collision.cpp; path = ../blocks/Box2D/src/Box2D/Collision/b2Collision.cpp; sourceTree = "<group>"; };
 		1967F5787DB34245B2B91CBA /* b2EdgeAndCircleContact.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = b2EdgeAndCircleContact.h; path = ../blocks/Box2D/src/Box2D/Dynamics/Contacts/b2EdgeAndCircleContact.h; sourceTree = "<group>"; };
 		1DCA2C3FD6C84A6DAB24027E /* b2DistanceJoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2DistanceJoint.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Joints/b2DistanceJoint.cpp; sourceTree = "<group>"; };
+		260C9B6B1DE37A1A008A2A03 /* MusicStamp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MusicStamp.cpp; path = ../src/MusicWorld/MusicStamp.cpp; sourceTree = "<group>"; };
+		260C9B6C1DE37A1A008A2A03 /* MusicStamp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MusicStamp.h; path = ../src/MusicWorld/MusicStamp.h; sourceTree = "<group>"; };
 		262A88691DB011FF00FE2336 /* MusicWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MusicWorld.cpp; path = ../src/MusicWorld.cpp; sourceTree = "<group>"; };
 		262A886A1DB011FF00FE2336 /* MusicWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MusicWorld.h; path = ../src/MusicWorld.h; sourceTree = "<group>"; };
 		262A886E1DB58D7D00FE2336 /* RtMidi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RtMidi.cpp; path = ../src/rtmidi/RtMidi.cpp; sourceTree = "<group>"; };
@@ -472,6 +475,8 @@
 				C267F7551DDA4E0D006B8672 /* Score.h */,
 				263DBA171DDB990B002356F0 /* MusicVision.cpp */,
 				263DBA181DDB990B002356F0 /* MusicVision.h */,
+				260C9B6B1DE37A1A008A2A03 /* MusicStamp.cpp */,
+				260C9B6C1DE37A1A008A2A03 /* MusicStamp.h */,
 			);
 			name = MusicWorld;
 			sourceTree = "<group>";
@@ -981,6 +986,7 @@
 				26BC84B31D80DF89006001DC /* PipelineStageView.cpp in Sources */,
 				262A88701DB58D7D00FE2336 /* RtMidi.cpp in Sources */,
 				BF8EA3BC1AE14D83A5112094 /* b2Contact.cpp in Sources */,
+				260C9B6D1DE37A1A008A2A03 /* MusicStamp.cpp in Sources */,
 				9E53F22939EC46629ECD511A /* b2ContactSolver.cpp in Sources */,
 				3F51BFBD57064C0FBBDC06D5 /* b2EdgeAndCircleContact.cpp in Sources */,
 				C2EC76FE1DA7157F00DB39C8 /* PdBase.cpp in Sources */,

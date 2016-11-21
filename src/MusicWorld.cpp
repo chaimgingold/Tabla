@@ -47,14 +47,14 @@ void MusicWorld::setParams( XmlTree xml )
 	mTempos.clear();
 	mScale.clear();
 
-	getXml(xml,"Tempos",mTempos);
-
 	getXml(xml,"TimeVec",mTimeVec);
 	getXml(xml,"NoteCount",mNoteCount);
 	getXml(xml,"BeatCount",mBeatCount);
-	getXml(xml,"NumOctaves",mNumOctaves);
 	getXml(xml,"RootNote",mRootNote);
+	getXml(xml,"NumOctaves",mNumOctaves);
 	getXml(xml,"PokieRobitPulseTime",mPokieRobitPulseTime);
+
+	getXml(xml,"Tempos",mTempos);
 
 	if ( xml.hasChild("MusicVision") )
 	{
@@ -124,9 +124,67 @@ void MusicWorld::setParams( XmlTree xml )
 	mVision.mInstruments = mInstruments;
 	mVision.mNoteCount = mNoteCount;
 	mVision.mBeatCount = mBeatCount;
-	mVision.generateInstrumentRegions(mInstruments,getWorldBoundsPoly());
 
+	// update stamps
+	setupStamps();
+
+	// kill notes
 	killAllNotes();
+}
+
+void MusicWorld::setupStamps()
+{
+	mStamps.clear();
+	
+	const float kStampSize = 5.f;
+	const float kStampGutter = 1.f;
+	
+	// get info about shape of world
+	vec2 c = getWorldBoundsPoly().calcCentroid();
+	float minr = MAXFLOAT, maxr = 0.f;
+	
+	for( auto p : getWorldBoundsPoly() )
+	{
+		float d = distance(c,p);
+		minr = min( minr, d );
+		maxr = max( maxr, d );
+	}
+	
+	// compute layout info
+	float stampDist = kStampSize + kStampGutter ;
+	float circum = stampDist * (float) mInstruments.size();
+	float r = circum / (2.f * M_PI); // 2πr
+	r = min(r,minr-10.f); // what r to put them at?
+	// this could be based on the number of stamps we want in the ring
+	
+	// make stamps
+	float angle=0.f;
+	float anglestep = M_PI*2.f / (float)mInstruments.size() ;
+	
+	for( auto i : mInstruments )
+	{
+		MusicStamp s;
+		
+		s.mTimeVec = mTimeVec;
+		s.mLoc = c + vec2(glm::rotate( vec3(r,0,0), angle, vec3(0,0,1) ));
+		s.mIcon = i.second->mIcon;
+		s.mIconWidth = kStampSize;
+		s.mInstrument = i.second;
+		
+		angle += anglestep;
+		
+		mStamps.push_back(s);
+	}
+}
+
+MusicStamp*
+MusicWorld::getStampByInstrument( InstrumentRef instr )
+{
+	for( auto &i : mStamps )
+	{
+		if (i.mInstrument==instr) return &i;
+	}
+	return 0;
 }
 
 void
@@ -175,7 +233,8 @@ MusicWorld::loadInstrumentIcons()
 
 void MusicWorld::worldBoundsPolyDidChange()
 {
-	mVision.generateInstrumentRegions(mInstruments,getWorldBoundsPoly());
+	mVision.mWorldBoundsPoly = getWorldBoundsPoly();
+	setupStamps();
 }
 
 Score* MusicWorld::getScoreForMetaParam( MetaParam p )
@@ -220,13 +279,13 @@ void MusicWorld::update()
 	// Record last meta-parameter locations
 	for( const auto &score : mScores )
 	{
-		auto instr = score.mInstrument;
+		MusicStamp* stamp = getStampByInstrument( score.mInstrument );
 
-		if( instr && instr->mSynthType==Instrument::SynthType::Meta)
+		if (stamp)
 		{
-			mVision.mLastSeenMetaParamLoc[instr->mMetaParam] = score.getCentroid();
+			stamp->mLoc = score.getCentroid();
+			// TODO: make it invisible!
 		}
-
 	}
 
 	// file watch
@@ -235,7 +294,7 @@ void MusicWorld::update()
 
 void MusicWorld::updateVision( const ContourVector &c, Pipeline &p )
 {
-	mScores = mVision.updateVision(c,p,mScores);
+	mScores = mVision.updateVision(c,p,mScores,mStamps);
 	
 	updateScoresWithMetaParams();
 	updateAdditiveScoreSynthesis(); // update additive synths based on new image data
@@ -380,26 +439,9 @@ void MusicWorld::updateAdditiveScoreSynthesis()
 
 void MusicWorld::draw( GameWorld::DrawType drawType )
 {
-//	return;
-	bool drawSolidColorBlocks = drawType == GameWorld::DrawType::Projector;
-	// otherwise we can't see score contents in the UI view...
-
-	// instrument regions
-	if (0&&drawSolidColorBlocks)
-	{
-		for( auto &r : mVision.getInstrRegions() )
-		{
-			gl::color( r.second->mScoreColor );
-			gl::drawSolid( r.first ) ;
-		}
-	}
-
-	// scores
-	for( const auto &score : mScores )
-	{
-		score.draw(drawType);
-	}
-
+	// scores, stamps
+	for( const auto &s : mScores ) s.draw(drawType);
+	for( const auto &s : mStamps ) s.draw();
 
 	// draw time direction (for debugging score generation)
 	if (0)

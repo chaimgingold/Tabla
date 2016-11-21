@@ -16,7 +16,8 @@ void MusicVision::setParams( XmlTree xml )
 {
 	cout << "MusicVision::setParams( XmlTree xml )" << endl;
 
-	getXml(xml,"TempoWorldUnitsPerSecond",mTempoWorldUnitsPerSecond);
+	getXml(xml,"ScoreVisionTrimFrac",mScoreVisionTrimFrac);
+	getXml(xml,"ScoreNoteVisionThresh",mScoreNoteVisionThresh);
 	
 	getXml(xml,"ScoreTrackRejectNumSamples",mScoreTrackRejectNumSamples);
 	getXml(xml,"ScoreTrackRejectSuccessThresh",mScoreTrackRejectSuccessThresh);
@@ -24,7 +25,8 @@ void MusicVision::setParams( XmlTree xml )
 	getXml(xml,"ScoreMaxInteriorAngleDeg",mScoreMaxInteriorAngleDeg);
 	getXml(xml,"ScoreTrackTemporalBlendFrac",mScoreTrackTemporalBlendFrac);
 	getXml(xml,"ScoreTrackTemporalBlendIfDiffFracLT",mScoreTrackTemporalBlendIfDiffFracLT);
-	getXml(xml,"ScoreVisionTrimFrac",mScoreVisionTrimFrac);
+
+	getXml(xml,"TempoWorldUnitsPerSecond",mTempoWorldUnitsPerSecond);
 }
 
 Score*
@@ -198,77 +200,6 @@ MusicVision::shouldBeMetaParamScore( const Score& s ) const
 	return min(scoreSize.x,scoreSize.y) < 10.f ;
 }
 
-void MusicVision::assignUnassignedMetaParams( ScoreVector& scores ) const
-{
-	// what do we have?
-	vector<int> sliders((int)MetaParam::kNumMetaParams);
-	for( auto &s : sliders ) s=0;
-
-	for ( const auto &s : scores )
-	{
-		if ( s.mInstrument && s.mInstrument->mSynthType==Instrument::SynthType::Meta )
-		{
-			sliders[(int)s.mInstrument->mMetaParam]++;
-		}
-	}
-
-	// which ones do we want?
-	set<MetaParam> unassignedParams;
-
-	for( int i=0; i<sliders.size(); ++i )
-	{
-		if (sliders[i]==0) unassignedParams.insert( (MetaParam)i );
-	}
-
-	// assign
-	for ( auto &s : scores )
-	{
-		if ( s.mInstrumentName == "_meta-slider" )
-		{
-			MetaParam param;
-
-			if ( unassignedParams.empty() ) param = (MetaParam)(rand() % (int)MetaParam::kNumMetaParams);
-			else
-			{
-				// choose param, closest distance from score to last place we saw unassigned param
-				MetaParam bestParam = *unassignedParams.begin();
-				float bestScore = MAXFLOAT;
-				vec2 scoreLoc = s.getCentroid();
-
-				for( auto i : unassignedParams )
-				{
-					auto j = mLastSeenMetaParamLoc.find(i);
-					float score;
-
-					if ( j == mLastSeenMetaParamLoc.end() ) {
-						// never seen
-						score = MAXFLOAT - 100.f; // slightly better than nothing
-					} else {
-						score = distance( scoreLoc, j->second );
-					}
-
-					// best?
-					if ( score < bestScore )
-					{
-						bestScore = score;
-						bestParam = j->first;
-					}
-				}
-
-				// remove from list of options
-				unassignedParams.erase( unassignedParams.find(bestParam) ); // should be in there!
-
-				// pick it (bestParam redundant to param, but this naming makes algorithm clearer)
-				param = bestParam;
-			}
-
-			// assign
-			s.mInstrument = getInstrumentForMetaParam( param );
-			if (s.mInstrument) s.mInstrumentName = s.mInstrument->mName;
-		}
-	}
-}
-
 float
 MusicVision::getNearestTempo( float t ) const
 {
@@ -319,6 +250,28 @@ MusicVision::decideDurationForScore ( const Score& score ) const
 	return t;
 }
 
+InstrumentRef
+MusicVision::decideInstrumentForScore( const Score& score, const vector<MusicStamp>& stamps ) const
+{
+	InstrumentRef best;
+	float bestScore=MAXFLOAT;
+	
+	for( const auto &s : stamps )
+	{
+		if ( score.getPolyLine().contains(s.mLoc) )
+		{
+			float sscore = distance( score.getCentroid(), s.mLoc );
+			if (sscore<bestScore)
+			{
+				bestScore = sscore;
+				best = s.mInstrument;
+			}
+		}
+	}
+	
+	return best;
+}
+
 pair<float,float> getShapeRange( const vec2* pts, int npts, vec2 lookVec )
 {
 	float worldy1=MAXFLOAT, worldy2=-MAXFLOAT;
@@ -336,54 +289,7 @@ pair<float,float> getShapeRange( const vec2* pts, int npts, vec2 lookVec )
 	return pair<float,float>(worldy1,worldy2);
 }
 
-void MusicVision::generateInstrumentRegions( map<string,InstrumentRef> &instruments, const PolyLine2& worldBounds )
-{
-	mInstrumentRegions.clear();
-
-	Rectf worldRect( worldBounds.getPoints() );
-
-	int ninstr=0;
-	for( auto i : instruments )
-	{
-		if ( i.second->mSynthType!=Instrument::SynthType::Meta ) ninstr++;
-	}
-
-//	instruments.size();
-
-	int dim = ceil( sqrt(ninstr) );
-
-	vec2 scale = worldRect.getSize() / vec2(dim,dim);
-
-	int x=0, y=0;
-
-	for( auto i : instruments )
-	{
-		if ( i.second->mSynthType==Instrument::SynthType::Meta ) continue;
-
-		Rectf r(0,0,1,1);
-		r.offset( vec2(x,y) );
-		r.scale(scale);
-
-		PolyLine2 p;
-		p.push_back( r.getUpperLeft() );
-		p.push_back( r.getUpperRight() );
-		p.push_back( r.getLowerRight() );
-		p.push_back( r.getLowerLeft() );
-		p.setClosed();
-
-		mInstrumentRegions.push_back( pair<PolyLine2,InstrumentRef>(p,i.second) );
-
-		//
-		x++;
-		if (x>=dim)
-		{
-			x=0;
-			y++;
-		}
-	}
-}
-
-int MusicVision::getScoreOctaveShift( const Score& score, const PolyLine2& wrtRegion ) const
+float MusicVision::getScoreOctaveShift( const Score& score, const PolyLine2& wrtRegion ) const
 {
 	const vec2 lookVec = perp(mTimeVec);
 
@@ -396,8 +302,13 @@ int MusicVision::getScoreOctaveShift( const Score& score, const PolyLine2& wrtRe
 
 	scoreYs = getShapeRange( score.mQuad, 4, lookVec );
 
+	float scoreHeight = scoreYs.second - scoreYs.first;
 	float scorey = lerp(scoreYs.first,scoreYs.second,.5f);
-
+	
+	// inset world
+	worldYs.second -= scoreHeight/2.f;
+	worldYs.first  += scoreHeight/2.f;
+	
 	float f = 1.f - (scorey - worldYs.first) / (worldYs.second - worldYs.first);
 	// don't understand why i need 1-, but it works.
 
@@ -425,53 +336,10 @@ int MusicVision::getScoreOctaveShift( const Score& score, const PolyLine2& wrtRe
 	return f;
 }
 
-InstrumentRef
-MusicVision::decideInstrumentForScore( const Score& s, int* octaveShift ) const
-{
-	// do instrument by world region
-	vec2 c = s.getPolyLine().calcCentroid();
-
-	// find
-	for( auto i : mInstrumentRegions )
-	{
-		if ( i.first.contains(c) )
-		{
-			if (octaveShift) *octaveShift = getScoreOctaveShift(s,i.first);
-			return i.second;
-		}
-	}
-
-	// default to first
-	auto i = mInstrumentRegions.begin();
-	if (i!=mInstrumentRegions.end())
-	{
-//		if (octaveShift) *octaveShift = getScoreOctaveShift(s,getWorldBoundsPoly());
-			// and do octave wrt world bounds
-//		return i->second;
-		return 0; // just whatever, none for now.
-	}
-
-	// none
-	return 0;
-}
-
-InstrumentRef
-MusicVision::getInstrumentForMetaParam( MetaParam p ) const
-{
-	for ( auto i : mInstruments )
-	{
-		if ( i.second->mSynthType == Instrument::SynthType::Meta && i.second->mMetaParam==p )
-		{
-			return i.second;
-		}
-	}
-	return 0;
-}
-
 MusicVision::ScoreVector
-MusicVision::updateVision( const ContourVector &contours, Pipeline& pipeline, const ScoreVector& oldScores ) const
+MusicVision::updateVision( const ContourVector &contours, Pipeline& pipeline, const ScoreVector& oldScores, const vector<MusicStamp>& stamps ) const
 {
-	ScoreVector v = getScores(contours,oldScores);
+	ScoreVector v = getScores(contours,oldScores,stamps);
 	
 	updateScoresWithImageData(pipeline,v);
 	
@@ -479,7 +347,7 @@ MusicVision::updateVision( const ContourVector &contours, Pipeline& pipeline, co
 }
 
 MusicVision::ScoreVector
-MusicVision::getScoresFromContours( const ContourVector& contours ) const
+MusicVision::getScoresFromContours( const ContourVector& contours, const vector<MusicStamp>& stamps ) const
 {
 	ScoreVector scores;
 	
@@ -497,29 +365,23 @@ MusicVision::getScoresFromContours( const ContourVector& contours ) const
 			score.mDurationFrac = decideDurationForScore(score); // inherit, but it could be custom based on shape or something
 
 
-			// meta param?
-			if ( shouldBeMetaParamScore(score) )
+			// instrument
+			InstrumentRef instr = decideInstrumentForScore(score,stamps);
+			if (instr)
 			{
-				score.mInstrumentName = "_meta-slider";
-			}
-			else
-			{
-				// instrument
-				int octaveShift = 0;
-				InstrumentRef instr = decideInstrumentForScore(score,&octaveShift);
-				if (instr)
-				{
-					score.mInstrumentName = instr->mName ;
-					score.mInstrument = instr;
-				}
-
-				// Choose octave based on up<>down
-				score.mOctave	= octaveShift;
-				score.mPan		= .5f ;
-				score.mBeatCount = mBeatCount;
-				score.mNoteCount = mNoteCount;
+				score.mInstrumentName = instr->mName ;
+				score.mInstrument = instr;
 			}
 
+			// Choose octave based on up<>down
+			score.mOctaveFrac = (mWorldBoundsPoly.size()>0) ? getScoreOctaveShift(score,mWorldBoundsPoly) : .5f;
+			score.mOctave	= 0; // will be set wrt mOctaveFrac by MusicWorld
+			
+			score.mPan		= .5f ;
+			score.mBeatCount = mBeatCount;
+			score.mNoteCount = mNoteCount;
+			
+			// save
 			scores.push_back(score);
 		}
 	}
@@ -598,17 +460,14 @@ MusicVision::mergeOldAndNewScores(
 }
 
 MusicVision::ScoreVector
-MusicVision::getScores( const ContourVector& contours, const ScoreVector& oldScores ) const
+MusicVision::getScores( const ContourVector& contours, const ScoreVector& oldScores, const vector<MusicStamp>& stamps ) const
 {
 	// get new ones
-	ScoreVector newScores = getScoresFromContours(contours);
+	ScoreVector newScores = getScoresFromContours(contours,stamps);
 
 	// merge with old
 	newScores = mergeOldAndNewScores(oldScores,newScores,contours);
 	
-	// finally, assign any unassigned meta-params
-	assignUnassignedMetaParams(newScores);
-
 	// return
 	return newScores;
 }
