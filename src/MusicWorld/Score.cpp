@@ -135,10 +135,16 @@ static void appendQuad( TriMesh& mesh, ColorA color, vec2 v[4] )
 
 int Score::drawNotes( GameWorld::DrawType drawType ) const
 {
+	const float kNoteFadeOutTimeFrac = .2f;
+	const float kInflateOnHitFrac = .25f;
+	
+	const vec2 xvec = getPlayheadVec();
+	const vec2 yvec = perp(xvec);
+	
 	int numOnNotes=0;
 	
 	// collect notes into a batch
-	// (probably wise to extract this geometry/data when processing vision data,
+	// (probably wise to extract this geometry/data once when processing vision data,
 	// then use it for both playback and drawing).
 	const float invcols = 1.f / (float)(mQuantizedImage.cols);
 
@@ -173,14 +179,44 @@ int Score::drawNotes( GameWorld::DrawType drawType ) const
 				const bool isInFlight = playheadFrac > x1frac && playheadFrac < x2frac;
 				if (isInFlight) numOnNotes++;
 
+				float inflate;
+				if (isInFlight)
+				{
+					inflate = 1.f - (playheadFrac - x1frac) / (x2frac - x1frac);
+					inflate *= inflate;
+					inflate *= kInflateOnHitFrac;
+				}
+				else inflate = 0.f;
+				
+
 				/*	0--1 .. 2
 				    |  |
-					2--3 .. 1
+					3--2 .. 1
 					.  .
 					s  e
 				*/
+				float strikeColor;
+				{
+					float t = playheadFrac;
+					if (t<x1frac) t += 1.f; // make sure t is always >= x1frac (wrap it)
+					strikeColor = 1.f - constrain( (t - x2frac)/kNoteFadeOutTimeFrac, 0.f, 1.f );
+				}
+				
 				vec2 v[4] = {start2,end2,end1,start1};
-				ColorA color = isInFlight ? mInstrument->mNoteOnColor : mInstrument->mNoteOffColor;
+				ColorA color = lerp( mInstrument->mNoteOffColor, mInstrument->mNoteOnColor, strikeColor );
+				
+				// stretch it out
+				if (isInFlight) // this conditional is redundant to inflate==0.f
+				{
+					vec2 xd = xvec * inflate;
+					vec2 yd = -yvec * inflate; // don't get why this needs to be negative, but it does. :P
+					
+					v[0] += -xd +yd;
+					v[1] +=  xd +yd;
+					v[2] +=  xd -yd;
+					v[3] += -xd -yd;
+				}
+
 				appendQuad(mesh, color, v);
 				
 				// skip ahead
