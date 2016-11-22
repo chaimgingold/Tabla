@@ -85,8 +85,7 @@ private:
 	float getDT();
 
 	// Global clock
-	float mPhaseInBeats=0;
-	float mDurationInBeats=16;
+	float mPhase=0;
 	float mTempo=120;
 	void  tickGlobalClock(float dt);
 	float getBeatDuration() const;

@@ -270,7 +270,7 @@ void MusicWorld::update()
 	tickGlobalClock(dt);
 
 	// Advance each score
-	for( auto &score : mScores ) score.tick(mPhaseInBeats, getBeatDuration());
+	for( auto &score : mScores ) score.tick(mPhase, getBeatDuration());
 
 	tickStamps();
 	
@@ -309,7 +309,7 @@ void MusicWorld::tickStamps()
 	// tick stamps
 	tIconAnimState idlesway;
 	float duration = getBeatDuration() * 4.f;
-	float f = fmod(mPhaseInBeats,duration) / duration;
+	float f = fmod(mPhase, duration) / duration;
 	idlesway.mRotate = cos( f * M_PI*2.f ) * toRadians(25.);
 //			float jump = sin( score.getPlayheadFrac()*4.f * M_PI*2.f );
 //			sway.mTranslate.y = jump * .1f;
@@ -376,9 +376,7 @@ void MusicWorld::tickGlobalClock(float dt) {
 
 	const float elapsedBeats = beatsPerSec * dt;
 
-	const float newPhase = mPhaseInBeats + elapsedBeats;
-
-	mPhaseInBeats = fmod(newPhase, mDurationInBeats);
+	mPhase += elapsedBeats;
 }
 
 

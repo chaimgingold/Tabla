@@ -651,7 +651,7 @@ PolyLine2 Score::getPolyLine() const
 
 void Score::tick(float globalPhase, float beatDuration)
 {
-	mPhase = fmod(globalPhase, mDurationFrac) / mDurationFrac;
+	mPosition = fmod(globalPhase, mDuration);
 
 	if (!mInstrument) return;
 
@@ -685,7 +685,7 @@ void Score::tick(float globalPhase, float beatDuration)
 					{
 						float duration =
 						beatDuration *
-						mDurationFrac *
+						mDuration *
 						getNoteLengthAsScoreFrac(mQuantizedImage,x,y);
 
 						if (duration>0)
@@ -780,7 +780,7 @@ void Score::updateAdditiveSynthesis() {
 
 float Score::getPlayheadFrac() const
 {
-	return mPhase;
+	return mPosition / mDuration;
 }
 
 void Score::getPlayheadLine( vec2 line[2] ) const
