@@ -71,32 +71,9 @@ struct tOnNoteInfo
 	float mStartTime;
 	float mDuration;
 };
-
-
-
 // (note) -> (start time, duration)
 
-
 typedef std::shared_ptr<RtMidiOut> RtMidiOutRef;
-
-
-// animation
-struct tInstrumentIconAnimState
-{
-	tInstrumentIconAnimState(){}
-	tInstrumentIconAnimState( vec4 v )
-	{
-		mTranslate = vec2(v.x,v.y); // normalized to icon size
-		mScale  = v.z;
-		mRotate = toRadians(v.w);
-	}
-	
-	vec2	mTranslate;
-	float	mScale =1.f;
-	float	mRotate=0.f; // radians
-	ColorA  mColor = ColorA(1,1,1,1);
-	
-};
 
 
 
@@ -116,7 +93,7 @@ public:
 
 	// colors!
 	ColorA mPlayheadColor;
-	ColorA mScoreColor;
+	ColorA mScoreColor, mScoreColorDownLines;
 	ColorA mNoteOffColor, mNoteOnColor;
 
 	gl::TextureRef mIcon;

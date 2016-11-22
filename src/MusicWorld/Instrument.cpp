@@ -33,9 +33,10 @@ void Instrument::setParams( XmlTree xml )
 {
 	getXml(xml,"PlayheadColor",mPlayheadColor);
 	getXml(xml,"ScoreColor",mScoreColor);
+	getXml(xml,"ScoreColorDownLines",mScoreColorDownLines);
 	getXml(xml,"NoteOffColor",mNoteOffColor);
 	getXml(xml,"NoteOnColor",mNoteOnColor);
-
+	
 	getXml(xml,"Name",mName);
 
 	getXml(xml,"IconFileName",mIconFileName);

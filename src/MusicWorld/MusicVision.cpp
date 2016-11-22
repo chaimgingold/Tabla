@@ -239,15 +239,22 @@ MusicVision::getNearestTempo( float t ) const
 float
 MusicVision::decideDurationForScore ( const Score& score ) const
 {
-	vec2 size = score.getSizeInWorldSpace();
+	if ( score.mInstrument && score.mInstrument->mSynthType == Instrument::SynthType::Meta )
+	{
+		return getNearestTempo(MAXFLOAT); // slowest tempo
+	}
+	else
+	{
+		vec2 size = score.getSizeInWorldSpace();
 
-	float d = size.x / mTempoWorldUnitsPerSecond;
+		float d = size.x / mTempoWorldUnitsPerSecond;
 
-	float t = getNearestTempo(d);
+		float t = getNearestTempo(d);
 
-	if (0) cout << size.x << "cm = " << d << "sec => " << t << "sec" << endl;
+		if (0) cout << size.x << "cm = " << d << "sec => " << t << "sec" << endl;
 
-	return t;
+		return t;
+	}
 }
 
 InstrumentRef
@@ -361,10 +368,6 @@ MusicVision::getScoresFromContours( const ContourVector& contours, const vector<
 			score.setQuadFromPolyLine(c.mPolyLine,mTimeVec);
 			if ( score.getQuadMaxInteriorAngle() > toRadians(mScoreMaxInteriorAngleDeg) ) continue;
 
-			// timing
-			score.mDurationFrac = decideDurationForScore(score); // inherit, but it could be custom based on shape or something
-
-
 			// instrument
 			InstrumentRef instr = decideInstrumentForScore(score,stamps);
 			if (instr)
@@ -372,6 +375,9 @@ MusicVision::getScoresFromContours( const ContourVector& contours, const vector<
 				score.mInstrumentName = instr->mName ;
 				score.mInstrument = instr;
 			}
+
+			// timing
+			score.mDurationFrac = decideDurationForScore(score); // inherit, but it could be custom based on shape or something
 
 			// Choose octave based on up<>down
 			score.mOctaveFrac = (mWorldBoundsPoly.size()>0) ? getScoreOctaveShift(score,mWorldBoundsPoly) : .5f;
@@ -412,14 +418,6 @@ MusicVision::mergeOldAndNewScores(
 
 			// new <= old
 			*newScore = oldScore;
-			
-			// any exceptions introduce here
-//			if (newScore->mMetaParamSliderValue==-1.f)
-//			{
-				// maybe we lost a slider value
-//				newScore->mMetaParamSliderValue = oldScore.mMetaParamSliderValue;
-//			}
-			
 		}
 		else // zombie! (c has no match)
 		{

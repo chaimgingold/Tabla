@@ -115,6 +115,24 @@ float Score::getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const
 	return (float)getNoteLengthAsImageCols(image,x,y) / (float)image.cols;
 }
 
+static void appendQuad( TriMesh& mesh, ColorA color, vec2 v[4] )
+{
+	/*  0--1
+	    |  |
+		3--2
+	*/
+	
+	int i = mesh.getNumVertices();
+
+	ColorA colors[4] = {color,color,color,color};
+	
+	mesh.appendPositions(v,4);
+	mesh.appendColors(colors,4);
+	
+	mesh.appendTriangle(i+0,i+1,i+3);
+	mesh.appendTriangle(i+3,i+1,i+2);
+}
+
 int Score::drawNotes( GameWorld::DrawType drawType ) const
 {
 	int numOnNotes=0;
@@ -127,9 +145,8 @@ int Score::drawNotes( GameWorld::DrawType drawType ) const
 	const float yheight = 1.f / (float)mNoteCount;
 
 
-	vector<vec2> onNoteTris;
-	vector<vec2> offNoteTris;
-
+	TriMesh mesh( TriMesh::Format().positions(2).colors(4) );
+	
 	const float playheadFrac = getPlayheadFrac();
 
 	for ( int y=0; y<mNoteCount; ++y )
@@ -155,16 +172,17 @@ int Score::drawNotes( GameWorld::DrawType drawType ) const
 
 				const bool isInFlight = playheadFrac > x1frac && playheadFrac < x2frac;
 				if (isInFlight) numOnNotes++;
+
+				/*	0--1 .. 2
+				    |  |
+					2--3 .. 1
+					.  .
+					s  e
+				*/
+				vec2 v[4] = {start2,end2,end1,start1};
+				ColorA color = isInFlight ? mInstrument->mNoteOnColor : mInstrument->mNoteOffColor;
+				appendQuad(mesh, color, v);
 				
-				vector<vec2>& tris = isInFlight ? onNoteTris : offNoteTris ;
-
-				tris.push_back( start1 );
-				tris.push_back( start2 );
-				tris.push_back( end2 );
-				tris.push_back( start1 );
-				tris.push_back( end2 );
-				tris.push_back( end1 );
-
 				// skip ahead
 				x = x + length+1;
 			}
@@ -172,16 +190,7 @@ int Score::drawNotes( GameWorld::DrawType drawType ) const
 	}
 
 	// draw batched notes
-	if (!onNoteTris.empty())
-	{
-		gl::color(mInstrument->mNoteOnColor);
-		drawSolidTriangles(onNoteTris);
-	}
-	if (!offNoteTris.empty())
-	{
-		gl::color(mInstrument->mNoteOffColor);
-		drawSolidTriangles(offNoteTris);
-	}
+	gl::draw(mesh);
 	
 	return numOnNotes;
 }
@@ -230,9 +239,10 @@ void Score::drawScoreLines( GameWorld::DrawType drawType ) const
 		pts.push_back( lerp(mQuad[1], mQuad[0],f) );
 		pts.push_back( lerp(mQuad[2], mQuad[3],f) );
 	}
-	vec3 scoreColorHSV = rgbToHsv(mInstrument->mScoreColor);
-	scoreColorHSV.x = fmod(scoreColorHSV.x + 0.5, 1.0);
-	gl::color( hsvToRgb(scoreColorHSV)  );
+//	vec3 scoreColorHSV = rgbToHsv(mInstrument->mScoreColor);
+//	scoreColorHSV.x = fmod(scoreColorHSV.x + 0.5, 1.0);
+//	gl::color( hsvToRgb(scoreColorHSV)  );
+	gl::color( mInstrument->mScoreColorDownLines  );
 	drawLines(pts);
 
 }
@@ -309,60 +319,21 @@ void Score::drawMetaParam( GameWorld::DrawType drawType ) const
 	}
 }
 
-void Score::drawInstrumentIcon( tInstrumentIconAnimState pose ) const
-{
-	// instrument?
-	if ( !mInstrument || !mInstrument->mIcon ) return;
-	
-	// draw
-	const float kIconWidth  = 5.f ;
-	const float kIconGutter = 1.f ;
-	// in world space
-	
-	//
-	const vec2 playheadVec = getPlayheadVec();
-	
-	vec2 iconLoc = fracToQuad(vec2(0,.5f));
-	iconLoc -= playheadVec * (kIconGutter + kIconWidth*.5f);
-	iconLoc += pose.mTranslate * vec2(kIconWidth,kIconWidth) ;
-	
-	//
-	Rectf r(-.5f,-.5f,.5f,.5f);
-	
-	gl::pushModelMatrix();
-	gl::translate( iconLoc - r.getCenter() );
-	gl::scale( vec2(1,1)*kIconWidth * pose.mScale );
-	
-	gl::multModelMatrix( mat4( ci::mat3(
-		vec3( playheadVec,0),
-		vec3( perp(playheadVec),0),
-		vec3( cross(vec3(playheadVec,0),vec3(perp(playheadVec),0)) )
-		)) );
-	gl::rotate( pose.mRotate );
-	
-	gl::color( pose.mColor );
-	
-	if (mInstrument && mInstrument->mIcon) gl::draw( mInstrument->mIcon, r );
-	else gl::drawSolidRect(r);
-	
-	gl::popModelMatrix();
-}
-
-tInstrumentIconAnimState Score::getInstrumentIconPoseFromScore( float playheadFrac ) const
+tIconAnimState Score::getIconPoseFromScore_Percussive( float playheadFrac ) const
 {
 	const vec4 poses[13] =
 	{
 		vec4(  .25, 0.f, 1.f, -30 ),
 		vec4( -.25, 0.f, 1.f,  30 ),
-		vec4( 0, 0, 1, 0 ),
+		vec4( .3, 0, 1, 20 ),
 		vec4( 0, .4, 1, 0 ),
-		vec4( 0, 0, 1, 0 ),
+		vec4( -.3, 0, 1, -20 ),
 		vec4(  .25, 0.f, 1.f, -30 ),
 		vec4( -.25, 0.f, 1.f,  30 ),
-		vec4( 0, 0, 1, 20 ),
-		vec4( 0, 0, 1, -20 ),
+		vec4( 0, 0, 1.1, 20 ),
+		vec4( 0, 0, 1.1, -20 ),
 		vec4( 0, .2, 1.2, 0 ),
-		vec4( 0, .2, 1.2, 0 ),
+		vec4( .2, 0, 1.2, 0 ),
 		vec4( 0, -.3, 1, 0 ),
 		vec4( 0, 0, 1.2, 0 )
 	};
@@ -390,7 +361,7 @@ tInstrumentIconAnimState Score::getInstrumentIconPoseFromScore( float playheadFr
 	}
 	
 	// pose
-	tInstrumentIconAnimState state = pose;
+	tIconAnimState state = pose;
 	
 	if (mInstrument) {
 		state.mColor = (numOnNotes>0) ? mInstrument->mNoteOnColor : mInstrument->mNoteOffColor;
@@ -399,6 +370,113 @@ tInstrumentIconAnimState Score::getInstrumentIconPoseFromScore( float playheadFr
 	}
 	
 	return state;
+}
+
+tIconAnimState Score::getIconPoseFromScore_Melodic( float playheadFrac ) const
+{
+	// gather
+	int numOnNotes=0;
+	
+	int noteIndexSum=0;
+	
+	for( int note=0; note<mNoteCount; note++ )
+	{
+		if ( isNoteOn(playheadFrac,note) )
+		{
+			noteIndexSum += note;
+			numOnNotes++;
+		}
+	}
+	
+	// blend
+	float avgNote = .5f; // since we translate with this, use the median for none.
+	
+	if (numOnNotes > 0) {
+		avgNote = (float)(noteIndexSum/(float)mNoteCount) / (float)numOnNotes;
+	}
+	
+	// pose
+	tIconAnimState state;
+	
+	if (mInstrument) {
+		state.mColor = (numOnNotes>0) ? mInstrument->mNoteOnColor : mInstrument->mNoteOffColor;
+	} else {
+		state.mColor = ColorA(1,1,1,1);
+	}
+	
+	// new anim inspired by additive
+	state.mTranslate.y = lerp( -.5f, .5f, avgNote );
+	state.mScale = vec2(1,1) * lerp( 1.f, 1.5f, min( 1.f, ((float)numOnNotes / (float)mNoteCount)*2.f ) ) ;
+	
+	return state;
+}
+
+tIconAnimState Score::getIconPoseFromScore( float playheadFrac ) const
+{
+	// no instrument?
+	if ( !mInstrument ) return tIconAnimState();
+
+	// synth type
+	switch( mInstrument->mSynthType )
+	{
+		case Instrument::SynthType::MIDI:
+		{
+			return getIconPoseFromScore_Melodic(playheadFrac);
+		}
+		break;
+		
+		case Instrument::SynthType::RobitPokie:
+		{
+			return getIconPoseFromScore_Percussive(playheadFrac);
+		}
+		break;
+		
+		case Instrument::SynthType::Additive:
+		{
+			if (!mImage.empty())
+			{
+				// Create a float version of the image
+				cv::Mat imageFloatMat;
+
+				// Copy the uchar version scaled 0-1
+				mImage.convertTo(imageFloatMat, CV_32FC1, 1/255.0);
+				
+				int colIndex = imageFloatMat.cols * getPlayheadFrac();
+
+				cv::Mat columnMat = imageFloatMat.col(colIndex);
+
+				// We use a list message rather than writeArray as it causes less contention with Pd's execution thread
+				float sum=0;
+				float weightedy=0;
+				
+				for (int i = 0; i < columnMat.rows; i++)
+				{
+					float y = (float)i/(float)(columnMat.rows-1); // 0..1
+					float v = 1.f - columnMat.at<float>(i,0);
+					
+					weightedy += y*v;
+					sum += v;
+				}
+
+				if (sum>0) weightedy /= sum ; // normalize
+				else weightedy = .5f; // move to center if empty, since that will mean no vertical translation
+
+				float scaleDegree = (sum/(float)columnMat.rows) / .5f ; // what % of keys on count as 100% scale?
+				
+				tIconAnimState pose;
+				pose.mColor = sum>0.f ? mInstrument->mNoteOnColor : mInstrument->mNoteOffColor;
+				pose.mScale = vec2(1,1) * lerp( 1.f, 1.4f, scaleDegree*scaleDegree );
+				pose.mTranslate.y = lerp( .5f, -.5f, weightedy ) ; // low values means up
+				return pose;
+			}
+		}
+		break;
+		
+		default: break;
+	} // switch
+	
+	// nada
+	return tIconAnimState();
 }
 
 void Score::draw( GameWorld::DrawType drawType ) const
@@ -503,7 +581,7 @@ void Score::draw( GameWorld::DrawType drawType ) const
 	}
 	
 	// instrument icon
-	drawInstrumentIcon( getInstrumentIconPoseFromScore(getPlayheadFrac()) );
+	//drawInstrumentIcon( getIconPoseFromScore(getPlayheadFrac()) );
 }
 
 bool Score::setQuadFromPolyLine( PolyLine2 poly, vec2 timeVec )
@@ -776,5 +854,7 @@ float Score::getQuadMaxInteriorAngle() const
 Score::~Score() {
 	// NOTE: this will kill all notes even if other scores are still playing.
 	// Needs a multi-score-aware implementation, but better than stuck notes for now!
-	mInstrument->killAllNotes();
+	// mInstrument->killAllNotes();
+	// TODO: Move this to a place where we know that there are no more Scores for this Instrument.
+	// It just turns off all notes all the time, since Scores are created and destroyed internally constantly.
 }
