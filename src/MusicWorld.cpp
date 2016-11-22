@@ -280,9 +280,10 @@ void MusicWorld::update()
 
 void MusicWorld::tickStamps()
 {
+	// Forget stamps' scores
 	for( auto &stamp : mStamps ) stamp.mHasScore = false;
 
-	// Record last meta-parameter locations
+	// Note scores => stamps
 	for( const auto &score : mScores )
 	{
 		MusicStamp* stamp = getStampByInstrument( score.mInstrument );
@@ -294,44 +295,37 @@ void MusicWorld::tickStamps()
 			stamp->mLoc = lerp( stamp->mLoc, score.getCentroid(), .5f );
 			stamp->mIconPoseTarget = score.getIconPoseFromScore(score.getPlayheadFrac());
 			
-			//
-			tIconAnimState sway;
-			sway.mRotate = powf( cos( score.getPlayheadFrac() * M_PI*2.f ), 3.f ) * toRadians(25.);
-			float jump = sin( score.getPlayheadFrac()*4.f * M_PI*2.f );
-			sway.mTranslate.y = jump * .1f;
-			sway.mScale = vec2(0,0);
-			sway.mColor = ColorA(0,0,0,0);
-			stamp->mIconPoseTarget = stamp->mIconPoseTarget + sway;
-//			stamp->mIconPoseTarget.mScale.y *= lerp(.8f,1.f,jump);
+			stamp->mIconPoseTarget += tIconAnimState::getSwayForScore(score.getPlayheadFrac()); // blend in sway
 		}
 	}
 
-	// tick stamps
-	tIconAnimState idlesway;
-	float duration = getBeatDuration() * 4.f;
-	float f = fmod(mPhaseInBeats,duration) / duration;
-	idlesway.mRotate = cos( f * M_PI*2.f ) * toRadians(25.);
-//			float jump = sin( score.getPlayheadFrac()*4.f * M_PI*2.f );
-//			sway.mTranslate.y = jump * .1f;
-	idlesway.mScale = vec2(1,1);
-	
+	// Update stamps with no scores
 	for( auto &stamp : mStamps )
 	{
-		// idle sway
-		if (!stamp.mHasScore)
-		{
-			stamp.mXAxis = mTimeVec;
-			stamp.mIconPoseTarget = idlesway;
-			if (stamp.mInstrument) stamp.mIconPoseTarget.mColor = stamp.mInstrument->mNoteOffColor;
-		}
+		// filter
+		if (stamp.mHasScore) continue;
+
+		// idle sway animation
+		stamp.mXAxis = mTimeVec;
+		stamp.mIconPoseTarget = tIconAnimState() + tIconAnimState::getIdleSway(mPhaseInBeats, getBeatDuration());
+		if (stamp.mInstrument) stamp.mIconPoseTarget.mColor = stamp.mInstrument->mNoteOffColor;
 		
-		// tick
-		stamp.tick();
+		// move towards an intersecting contour?
+		const Contour* contains = mContours.findLeafContourContainingPoint(stamp.mLoc);
+		
+		if ( contains && !contains->mIsHole && contains->mPolyLine.contains(contains->mCenter) )
+		{
+			stamp.mLoc = lerp( stamp.mLoc, contains->mCenter, .5f );
+		}
 	}
+	
+	// Tick stamps
+	for( auto &stamp : mStamps ) stamp.tick();
 }
 
 void MusicWorld::updateVision( const ContourVector &c, Pipeline &p )
 {
+	mContours = c;
 	mScores = mVision.updateVision(c,p,mScores,mStamps);
 	
 	updateScoresWithMetaParams();

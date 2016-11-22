@@ -40,8 +40,9 @@ struct tIconAnimState
 		s.mColor     = mColor     + rhs.mColor;
 		return s;
 	}
-	tIconAnimState operator-( tIconAnimState rhs ) const { return *this + (rhs*-1.f); }
-	tIconAnimState operator*( tIconAnimState rhs ) const
+	tIconAnimState& operator+=( tIconAnimState rhs ) { *this = *this + rhs; return *this; }
+	tIconAnimState  operator- ( tIconAnimState rhs ) const { return *this + (rhs*-1.f); }
+	tIconAnimState  operator* ( tIconAnimState rhs ) const
 	{
 		tIconAnimState s;
 		s.mTranslate = mTranslate * rhs.mTranslate;
@@ -60,6 +61,11 @@ struct tIconAnimState
 		return s;
 	}
 
+	// intended as additive blend-ins
+	//   scale is 0,0; color is 0,0,0,0
+	static tIconAnimState getSwayForScore( float playheadFrac );
+	static tIconAnimState getIdleSway( float phaseInBeats, float beatDuration );
+	
 };
 tIconAnimState operator*( float lhs, tIconAnimState rhs ) { return rhs*lhs; }
 

@@ -70,7 +70,8 @@ private:
 
 	// vision
 	MusicVision mVision;
-
+	ContourVector mContours;
+	
 	// synthesis
 	PureDataNodeRef	mPureDataNode;	// synth engine
 	PatchRef		mPatch;			// music patch
