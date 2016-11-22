@@ -165,7 +165,7 @@ void MusicWorld::setupStamps()
 	{
 		MusicStamp s;
 		
-		s.mTimeVec = mTimeVec;
+		s.mXAxis = mTimeVec;
 		s.mLoc = c + vec2(glm::rotate( vec3(r,0,0), angle, vec3(0,0,1) ));
 		s.mIconWidth = mStampIconWidth;
 		s.mInstrument = i.second;
@@ -289,6 +289,7 @@ void MusicWorld::tickStamps()
 
 		if (stamp)
 		{
+			stamp->mXAxis = score.getPlayheadVec();
 			stamp->mHasScore = true;
 			stamp->mLoc = lerp( stamp->mLoc, score.getCentroid(), .5f );
 			stamp->mIconPoseTarget = score.getIconPoseFromScore(score.getPlayheadFrac());
@@ -319,6 +320,7 @@ void MusicWorld::tickStamps()
 		// idle sway
 		if (!stamp.mHasScore)
 		{
+			stamp.mXAxis = mTimeVec;
 			stamp.mIconPoseTarget = idlesway;
 			if (stamp.mInstrument) stamp.mIconPoseTarget.mColor = stamp.mInstrument->mNoteOffColor;
 		}

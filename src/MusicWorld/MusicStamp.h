@@ -82,7 +82,7 @@ public:
 	void draw() const;
 	void tick();
 	
-	vec2 mTimeVec = vec2(1,0);
+	vec2 mXAxis = vec2(1,0);
 	vec2 mLoc;
 	float mIconWidth = 10.f;
 

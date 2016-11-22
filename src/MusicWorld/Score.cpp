@@ -310,6 +310,98 @@ void Score::drawMetaParam( GameWorld::DrawType drawType ) const
 	}
 }
 
+tIconAnimState Score::getIconPoseFromScore_Percussive( float playheadFrac ) const
+{
+	const vec4 poses[13] =
+	{
+		vec4(  .25, 0.f, 1.f, -30 ),
+		vec4( -.25, 0.f, 1.f,  30 ),
+		vec4( .3, 0, 1, 20 ),
+		vec4( 0, .4, 1, 0 ),
+		vec4( -.3, 0, 1, -20 ),
+		vec4(  .25, 0.f, 1.f, -30 ),
+		vec4( -.25, 0.f, 1.f,  30 ),
+		vec4( 0, 0, 1.1, 20 ),
+		vec4( 0, 0, 1.1, -20 ),
+		vec4( 0, .2, 1.2, 0 ),
+		vec4( .2, 0, 1.2, 0 ),
+		vec4( 0, -.3, 1, 0 ),
+		vec4( 0, 0, 1.2, 0 )
+	};
+	
+	// gather
+	int numOnNotes=0;
+	vec4 pose;
+	vec4 poseNormSum;
+	
+	for( int note=0; note<mNoteCount; note++ )
+	{
+		if ( isNoteOn(playheadFrac,note) )
+		{
+			numOnNotes++;
+			pose += poses[note%13];
+			poseNormSum += vec4(1,1,1,1);
+		}
+	}
+	
+	// blend
+	if (numOnNotes > 0) {
+		pose /= poseNormSum;
+	} else {
+		pose = vec4( 0, 0, 1, 0); // default pose
+	}
+	
+	// pose
+	tIconAnimState state = pose;
+	
+	if (mInstrument) {
+		state.mColor = (numOnNotes>0) ? mInstrument->mNoteOnColor : mInstrument->mNoteOffColor;
+	} else {
+		state.mColor = ColorA(1,1,1,1);
+	}
+	
+	return state;
+}
+
+tIconAnimState Score::getIconPoseFromScore_Melodic( float playheadFrac ) const
+{
+	// gather
+	int numOnNotes=0;
+	
+	int noteIndexSum=0;
+	
+	for( int note=0; note<mNoteCount; note++ )
+	{
+		if ( isNoteOn(playheadFrac,note) )
+		{
+			noteIndexSum += note;
+			numOnNotes++;
+		}
+	}
+	
+	// blend
+	float avgNote = .5f; // since we translate with this, use the median for none.
+	
+	if (numOnNotes > 0) {
+		avgNote = (float)(noteIndexSum/(float)mNoteCount) / (float)numOnNotes;
+	}
+	
+	// pose
+	tIconAnimState state;
+	
+	if (mInstrument) {
+		state.mColor = (numOnNotes>0) ? mInstrument->mNoteOnColor : mInstrument->mNoteOffColor;
+	} else {
+		state.mColor = ColorA(1,1,1,1);
+	}
+	
+	// new anim inspired by additive
+	state.mTranslate.y = lerp( -.5f, .5f, avgNote );
+	state.mScale = vec2(1,1) * lerp( 1.f, 1.5f, min( 1.f, ((float)numOnNotes / (float)mNoteCount)*2.f ) ) ;
+	
+	return state;
+}
+
 tIconAnimState Score::getIconPoseFromScore( float playheadFrac ) const
 {
 	// no instrument?
@@ -319,57 +411,14 @@ tIconAnimState Score::getIconPoseFromScore( float playheadFrac ) const
 	switch( mInstrument->mSynthType )
 	{
 		case Instrument::SynthType::MIDI:
+		{
+			return getIconPoseFromScore_Melodic(playheadFrac);
+		}
+		break;
+		
 		case Instrument::SynthType::RobitPokie:
 		{
-			const vec4 poses[13] =
-			{
-				vec4(  .25, 0.f, 1.f, -30 ),
-				vec4( -.25, 0.f, 1.f,  30 ),
-				vec4( .3, 0, 1, 20 ),
-				vec4( 0, .4, 1, 0 ),
-				vec4( -.3, 0, 1, -20 ),
-				vec4(  .25, 0.f, 1.f, -30 ),
-				vec4( -.25, 0.f, 1.f,  30 ),
-				vec4( 0, 0, 1.1, 20 ),
-				vec4( 0, 0, 1.1, -20 ),
-				vec4( 0, .2, 1.2, 0 ),
-				vec4( .2, 0, 1.2, 0 ),
-				vec4( 0, -.3, 1, 0 ),
-				vec4( 0, 0, 1.2, 0 )
-			};
-			
-			// gather
-			int numOnNotes=0;
-			vec4 pose;
-			vec4 poseNormSum;
-			
-			for( int note=0; note<mNoteCount; note++ )
-			{
-				if ( isNoteOn(playheadFrac,note) )
-				{
-					numOnNotes++;
-					pose += poses[note%13];
-					poseNormSum += vec4(1,1,1,1);
-				}
-			}
-			
-			// blend
-			if (numOnNotes > 0) {
-				pose /= poseNormSum;
-			} else {
-				pose = vec4( 0, 0, 1, 0); // default pose
-			}
-			
-			// pose
-			tIconAnimState state = pose;
-			
-			if (mInstrument) {
-				state.mColor = (numOnNotes>0) ? mInstrument->mNoteOnColor : mInstrument->mNoteOffColor;
-			} else {
-				state.mColor = ColorA(1,1,1,1);
-			}
-			
-			return state;
+			return getIconPoseFromScore_Percussive(playheadFrac);
 		}
 		break;
 		

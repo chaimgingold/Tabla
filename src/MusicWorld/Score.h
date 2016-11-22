@@ -93,6 +93,9 @@ public:
 	tIconAnimState getIconPoseFromScore( float playheadFrac ) const;
 
 private:
+	tIconAnimState getIconPoseFromScore_Melodic( float playheadFrac ) const;
+	tIconAnimState getIconPoseFromScore_Percussive( float playheadFrac ) const;
+
 	bool isNoteOn( float playheadFrac, int note ) const;
 	
 	int  drawNotes		( GameWorld::DrawType drawType ) const; // returns # on notes
