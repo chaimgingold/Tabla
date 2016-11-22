@@ -270,7 +270,7 @@ void MusicWorld::update()
 	tickGlobalClock(dt);
 
 	// Advance each score
-	for( auto &score : mScores ) score.tick(mPhaseInBeats, getBeatDuration());
+	for( auto &score : mScores ) score.tick(mPhase, getBeatDuration());
 
 	tickStamps();
 	
@@ -299,7 +299,6 @@ void MusicWorld::tickStamps()
 		}
 	}
 
-	// Update stamps with no scores
 	for( auto &stamp : mStamps )
 	{
 		// filter
@@ -307,7 +306,7 @@ void MusicWorld::tickStamps()
 
 		// idle sway animation
 		stamp.mXAxis = mTimeVec;
-		stamp.mIconPoseTarget = tIconAnimState() + tIconAnimState::getIdleSway(mPhaseInBeats, getBeatDuration());
+		stamp.mIconPoseTarget = tIconAnimState() + tIconAnimState::getIdleSway(mPhase, getBeatDuration());
 		if (stamp.mInstrument) stamp.mIconPoseTarget.mColor = stamp.mInstrument->mNoteOffColor;
 		
 		// move towards an intersecting contour?
@@ -370,9 +369,7 @@ void MusicWorld::tickGlobalClock(float dt) {
 
 	const float elapsedBeats = beatsPerSec * dt;
 
-	const float newPhase = mPhaseInBeats + elapsedBeats;
-
-	mPhaseInBeats = fmod(newPhase, mDurationInBeats);
+	mPhase += elapsedBeats;
 }
 
 

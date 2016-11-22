@@ -377,7 +377,7 @@ MusicVision::getScoresFromContours( const ContourVector& contours, const vector<
 			}
 
 			// timing
-			score.mDurationFrac = decideDurationForScore(score); // inherit, but it could be custom based on shape or something
+			score.mDuration = decideDurationForScore(score); // inherit, but it could be custom based on shape or something
 
 			// Choose octave based on up<>down
 			score.mOctaveFrac = (mWorldBoundsPoly.size()>0) ? getScoreOctaveShift(score,mWorldBoundsPoly) : .5f;

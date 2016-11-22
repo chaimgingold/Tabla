@@ -48,8 +48,8 @@ public:
 	string		mInstrumentName; // which synth
 
 
-	float		mPhase=0;
-	float		mDurationFrac=1;
+	float		mPosition=0; // progress from 0-mDuration
+	float		mDuration=1;
 	void        tick(float globalPhase, float beatDuration);
 
 	int			mOctave=-1; // controlled by mOctaveFrac
