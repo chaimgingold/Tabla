@@ -437,7 +437,7 @@ void MusicWorld::updateMetaParameter(MetaParam metaParam, float value)
 			}
 			case MetaParam::Tempo:
 			{
-				mTempo = value * 120;
+				mTempo = value * mMaxTempo;
 				assert(mTempo>=0.f);
 				break;
 			}
