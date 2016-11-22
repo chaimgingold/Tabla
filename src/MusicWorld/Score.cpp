@@ -115,6 +115,24 @@ float Score::getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const
 	return (float)getNoteLengthAsImageCols(image,x,y) / (float)image.cols;
 }
 
+static void appendQuad( TriMesh& mesh, ColorA color, vec2 v[4] )
+{
+	/*  0--1
+	    |  |
+		3--2
+	*/
+	
+	int i = mesh.getNumVertices();
+
+	ColorA colors[4] = {color,color,color,color};
+	
+	mesh.appendPositions(v,4);
+	mesh.appendColors(colors,4);
+	
+	mesh.appendTriangle(i+0,i+1,i+3);
+	mesh.appendTriangle(i+3,i+1,i+2);
+}
+
 int Score::drawNotes( GameWorld::DrawType drawType ) const
 {
 	int numOnNotes=0;
@@ -127,9 +145,8 @@ int Score::drawNotes( GameWorld::DrawType drawType ) const
 	const float yheight = 1.f / (float)mNoteCount;
 
 
-	vector<vec2> onNoteTris;
-	vector<vec2> offNoteTris;
-
+	TriMesh mesh( TriMesh::Format().positions(2).colors(4) );
+	
 	const float playheadFrac = getPlayheadFrac();
 
 	for ( int y=0; y<mNoteCount; ++y )
@@ -155,16 +172,17 @@ int Score::drawNotes( GameWorld::DrawType drawType ) const
 
 				const bool isInFlight = playheadFrac > x1frac && playheadFrac < x2frac;
 				if (isInFlight) numOnNotes++;
+
+				/*	0--1 .. 2
+				    |  |
+					2--3 .. 1
+					.  .
+					s  e
+				*/
+				vec2 v[4] = {start2,end2,end1,start1};
+				ColorA color = isInFlight ? mInstrument->mNoteOnColor : mInstrument->mNoteOffColor;
+				appendQuad(mesh, color, v);
 				
-				vector<vec2>& tris = isInFlight ? onNoteTris : offNoteTris ;
-
-				tris.push_back( start1 );
-				tris.push_back( start2 );
-				tris.push_back( end2 );
-				tris.push_back( start1 );
-				tris.push_back( end2 );
-				tris.push_back( end1 );
-
 				// skip ahead
 				x = x + length+1;
 			}
@@ -172,16 +190,7 @@ int Score::drawNotes( GameWorld::DrawType drawType ) const
 	}
 
 	// draw batched notes
-	if (!onNoteTris.empty())
-	{
-		gl::color(mInstrument->mNoteOnColor);
-		drawSolidTriangles(onNoteTris);
-	}
-	if (!offNoteTris.empty())
-	{
-		gl::color(mInstrument->mNoteOffColor);
-		drawSolidTriangles(offNoteTris);
-	}
+	gl::draw(mesh);
 	
 	return numOnNotes;
 }
