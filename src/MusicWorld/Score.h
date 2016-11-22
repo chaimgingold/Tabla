@@ -8,8 +8,9 @@
 
 #ifndef Score_h
 #define Score_h
-#include "Instrument.h"
 
+#include "Instrument.h"
+#include "MusicStamp.h"
 
 // scores
 class Score
@@ -88,6 +89,9 @@ public:
 	// additive synth
 	void updateAdditiveSynthesis();
 
+	// icon animation
+	tIconAnimState getIconPoseFromScore( float playheadFrac ) const;
+
 private:
 	bool isNoteOn( float playheadFrac, int note ) const;
 	
@@ -96,8 +100,7 @@ private:
 	void drawPlayhead	( GameWorld::DrawType drawType ) const;
 	void drawMetaParam	( GameWorld::DrawType drawType ) const;
 	
-	void drawInstrumentIcon( tInstrumentIconAnimState pose ) const;
-	tInstrumentIconAnimState getInstrumentIconPoseFromScore( float playheadFrac ) const;
+	//void drawInstrumentIcon( tIconAnimState pose ) const;
 };
 
 #endif /* Score_h */

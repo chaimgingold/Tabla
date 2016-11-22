@@ -61,6 +61,9 @@ void MusicWorld::setParams( XmlTree xml )
 		mVision.setParams(xml.getChild("MusicVision"));
 	}
 	
+	getXml(xml,"StampIconWidth",mStampIconWidth);
+	getXml(xml,"StampPaletteGutter",mStampPaletteGutter);
+	
 	// scales
 	mScales.clear();
 	for( auto i = xml.begin( "Scales/Scale" ); i != xml.end(); ++i )
@@ -98,7 +101,7 @@ void MusicWorld::setParams( XmlTree xml )
 		}
 		instr.mPureDataNode = mPureDataNode;
 		instr.mPokieRobitPulseTime = mPokieRobitPulseTime;
-		cout << mPokieRobitPulseTime << endl;
+		
 		// store it
 		mInstruments[instr.mName] = std::make_shared<Instrument>(instr);
 
@@ -136,9 +139,6 @@ void MusicWorld::setupStamps()
 {
 	mStamps.clear();
 	
-	const float kStampSize = 5.f;
-	const float kStampGutter = 1.f;
-	
 	// get info about shape of world
 	vec2 c = getWorldBoundsPoly().calcCentroid();
 	float minr = MAXFLOAT, maxr = 0.f;
@@ -151,7 +151,7 @@ void MusicWorld::setupStamps()
 	}
 	
 	// compute layout info
-	float stampDist = kStampSize + kStampGutter ;
+	float stampDist = mStampPaletteGutter + mStampIconWidth ;
 	float circum = stampDist * (float) mInstruments.size();
 	float r = circum / (2.f * M_PI); // 2πr
 	r = min(r,minr-10.f); // what r to put them at?
@@ -167,8 +167,7 @@ void MusicWorld::setupStamps()
 		
 		s.mTimeVec = mTimeVec;
 		s.mLoc = c + vec2(glm::rotate( vec3(r,0,0), angle, vec3(0,0,1) ));
-		s.mIcon = i.second->mIcon;
-		s.mIconWidth = kStampSize;
+		s.mIconWidth = mStampIconWidth;
 		s.mInstrument = i.second;
 		
 		angle += anglestep;
@@ -271,10 +270,17 @@ void MusicWorld::update()
 	tickGlobalClock(dt);
 
 	// Advance each score
-	for( auto &score : mScores )
-	{
-		score.tick(mPhaseInBeats, getBeatDuration());
-	}
+	for( auto &score : mScores ) score.tick(mPhaseInBeats, getBeatDuration());
+
+	tickStamps();
+	
+	// file watch
+	mFileWatch.scanFiles();
+}
+
+void MusicWorld::tickStamps()
+{
+	for( auto &stamp : mStamps ) stamp.mHasScore = false;
 
 	// Record last meta-parameter locations
 	for( const auto &score : mScores )
@@ -283,13 +289,41 @@ void MusicWorld::update()
 
 		if (stamp)
 		{
-			stamp->mLoc = score.getCentroid();
-			// TODO: make it invisible!
+			stamp->mHasScore = true;
+			stamp->mLoc = lerp( stamp->mLoc, score.getCentroid(), .5f );
+			stamp->mIconPoseTarget = score.getIconPoseFromScore(score.getPlayheadFrac());
+
+			//
+			tIconAnimState sway;
+			sway.mRotate = powf( cos( score.getPlayheadFrac() * M_PI*2.f ), 3.f ) * toRadians(25.);
+			float jump = sin( score.getPlayheadFrac()*4.f * M_PI*2.f );
+			sway.mTranslate.y = jump * .1f;
+			sway.mScale = vec2(0,0);
+			stamp->mIconPoseTarget = stamp->mIconPoseTarget + sway;
+//			stamp->mIconPoseTarget.mScale.y *= lerp(.8f,1.f,jump);
 		}
 	}
 
-	// file watch
-	mFileWatch.scanFiles();
+	// tick stamps
+	tIconAnimState idlesway;
+	float duration = getBeatDuration() * 4.f;
+	float f = fmod(mPhaseInBeats,duration) / duration;
+	idlesway.mRotate = cos( f * M_PI*2.f ) * toRadians(25.);
+//			float jump = sin( score.getPlayheadFrac()*4.f * M_PI*2.f );
+//			sway.mTranslate.y = jump * .1f;
+	idlesway.mScale = vec2(1,1);
+	
+	for( auto &stamp : mStamps )
+	{
+		// idle sway
+		if (!stamp.mHasScore)
+		{
+			stamp.mIconPoseTarget = idlesway;
+		}
+		
+		// tick
+		stamp.tick();
+	}
 }
 
 void MusicWorld::updateVision( const ContourVector &c, Pipeline &p )

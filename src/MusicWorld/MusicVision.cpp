@@ -412,14 +412,6 @@ MusicVision::mergeOldAndNewScores(
 
 			// new <= old
 			*newScore = oldScore;
-			
-			// any exceptions introduce here
-//			if (newScore->mMetaParamSliderValue==-1.f)
-//			{
-				// maybe we lost a slider value
-//				newScore->mMetaParamSliderValue = oldScore.mMetaParamSliderValue;
-//			}
-			
 		}
 		else // zombie! (c has no match)
 		{

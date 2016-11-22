@@ -57,6 +57,10 @@ private:
 	
 	void setupStamps();
 	MusicStamp* getStampByInstrument( InstrumentRef );
+	void tickStamps();
+	
+	float mStampIconWidth=5.f;
+	float mStampPaletteGutter=1.f;
 	
 	// meta params
 	MetaParamInfo getMetaParamInfo( MetaParam ) const;

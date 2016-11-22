@@ -230,9 +230,10 @@ void Score::drawScoreLines( GameWorld::DrawType drawType ) const
 		pts.push_back( lerp(mQuad[1], mQuad[0],f) );
 		pts.push_back( lerp(mQuad[2], mQuad[3],f) );
 	}
-	vec3 scoreColorHSV = rgbToHsv(mInstrument->mScoreColor);
-	scoreColorHSV.x = fmod(scoreColorHSV.x + 0.5, 1.0);
-	gl::color( hsvToRgb(scoreColorHSV)  );
+//	vec3 scoreColorHSV = rgbToHsv(mInstrument->mScoreColor);
+//	scoreColorHSV.x = fmod(scoreColorHSV.x + 0.5, 1.0);
+//	gl::color( hsvToRgb(scoreColorHSV)  );
+	gl::color( mInstrument->mScoreColorDownLines  );
 	drawLines(pts);
 
 }
@@ -309,46 +310,7 @@ void Score::drawMetaParam( GameWorld::DrawType drawType ) const
 	}
 }
 
-void Score::drawInstrumentIcon( tInstrumentIconAnimState pose ) const
-{
-	// instrument?
-	if ( !mInstrument || !mInstrument->mIcon ) return;
-	
-	// draw
-	const float kIconWidth  = 5.f ;
-	const float kIconGutter = 1.f ;
-	// in world space
-	
-	//
-	const vec2 playheadVec = getPlayheadVec();
-	
-	vec2 iconLoc = fracToQuad(vec2(0,.5f));
-	iconLoc -= playheadVec * (kIconGutter + kIconWidth*.5f);
-	iconLoc += pose.mTranslate * vec2(kIconWidth,kIconWidth) ;
-	
-	//
-	Rectf r(-.5f,-.5f,.5f,.5f);
-	
-	gl::pushModelMatrix();
-	gl::translate( iconLoc - r.getCenter() );
-	gl::scale( vec2(1,1)*kIconWidth * pose.mScale );
-	
-	gl::multModelMatrix( mat4( ci::mat3(
-		vec3( playheadVec,0),
-		vec3( perp(playheadVec),0),
-		vec3( cross(vec3(playheadVec,0),vec3(perp(playheadVec),0)) )
-		)) );
-	gl::rotate( pose.mRotate );
-	
-	gl::color( pose.mColor );
-	
-	if (mInstrument && mInstrument->mIcon) gl::draw( mInstrument->mIcon, r );
-	else gl::drawSolidRect(r);
-	
-	gl::popModelMatrix();
-}
-
-tInstrumentIconAnimState Score::getInstrumentIconPoseFromScore( float playheadFrac ) const
+tIconAnimState Score::getIconPoseFromScore( float playheadFrac ) const
 {
 	const vec4 poses[13] =
 	{
@@ -390,7 +352,7 @@ tInstrumentIconAnimState Score::getInstrumentIconPoseFromScore( float playheadFr
 	}
 	
 	// pose
-	tInstrumentIconAnimState state = pose;
+	tIconAnimState state = pose;
 	
 	if (mInstrument) {
 		state.mColor = (numOnNotes>0) ? mInstrument->mNoteOnColor : mInstrument->mNoteOffColor;
@@ -503,7 +465,7 @@ void Score::draw( GameWorld::DrawType drawType ) const
 	}
 	
 	// instrument icon
-	drawInstrumentIcon( getInstrumentIconPoseFromScore(getPlayheadFrac()) );
+	//drawInstrumentIcon( getIconPoseFromScore(getPlayheadFrac()) );
 }
 
 bool Score::setQuadFromPolyLine( PolyLine2 poly, vec2 timeVec )
@@ -776,5 +738,7 @@ float Score::getQuadMaxInteriorAngle() const
 Score::~Score() {
 	// NOTE: this will kill all notes even if other scores are still playing.
 	// Needs a multi-score-aware implementation, but better than stuck notes for now!
-	mInstrument->killAllNotes();
+	// mInstrument->killAllNotes();
+	// TODO: Move this to a place where we know that there are no more Scores for this Instrument.
+	// It just turns off all notes all the time, since Scores are created and destroyed internally constantly.
 }

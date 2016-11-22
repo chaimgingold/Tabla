@@ -186,6 +186,11 @@
 					<!--	Only do temporal blending if frame difference is less than this amount; so fast motion is still fast -->
 			</MusicVision>
 			
+			
+			<!-- Graphics/UI Layout -->
+			<StampIconWidth>5</StampIconWidth>
+			<StampPaletteGutter>1</StampPaletteGutter>
+			
 
 				<!-- Music -->
 
@@ -238,10 +243,11 @@
 			<Instruments>
 
 				<Instrument>
-					<PlayheadColor>00FF00</PlayheadColor>
+					<PlayheadColor>00DD85</PlayheadColor>
 					<ScoreColor>332288</ScoreColor>
-					<NoteOffColor>FFFF00</NoteOffColor>
-					<NoteOnColor>00FF00</NoteOnColor>
+					<ScoreColorDownLines>007777</ScoreColorDownLines>
+					<NoteOffColor>009797</NoteOffColor>
+					<NoteOnColor>FF9999</NoteOnColor>
 
 					<Name>0Volca FM</Name>
                     <IconFileName>board.png</IconFileName>
@@ -255,8 +261,9 @@
 
 				<Instrument>
 					<PlayheadColor>00FFFF</PlayheadColor>
-					<ScoreColor>11AA33</ScoreColor>
-					<NoteOffColor>00FF00</NoteOffColor>
+					<ScoreColor>115433</ScoreColor>
+					<ScoreColorDownLines>118888</ScoreColorDownLines>
+					<NoteOffColor>00CCCC</NoteOffColor>
 					<NoteOnColor>FF8800</NoteOnColor>
 					
 					<Name>1RobitPokie</Name>
@@ -269,12 +276,13 @@
 				</Instrument>
 
 				<Instrument>
-					<PlayheadColor>00FF00</PlayheadColor>
+					<PlayheadColor>FF9900</PlayheadColor>
 					<ScoreColor>112266</ScoreColor>
-					<NoteOffColor>FFFF00</NoteOffColor>
-					<NoteOnColor>00FF00</NoteOnColor>
+					<ScoreColorDownLines>755500</ScoreColorDownLines>
+					<NoteOffColor>B59540</NoteOffColor>
+					<NoteOnColor>00DD85</NoteOnColor>
 
-					<Name>2Volca Sample</Name>
+					<Name>2Volca Sample (Drums)</Name>
 					<IconFileName>drumkit.png</IconFileName>
 					<SynthType>MIDI</SynthType>
 
@@ -288,6 +296,7 @@
 				<Instrument>
 					<PlayheadColor>00FFFF</PlayheadColor>
 					<ScoreColor>993377</ScoreColor>
+					<ScoreColorDownLines>003377</ScoreColorDownLines>
 					<NoteOffColor>00FF00</NoteOffColor>
 					<NoteOnColor>FF0000</NoteOnColor>
 
@@ -301,10 +310,11 @@
 				</Instrument>
 
 				<Instrument>
-					<PlayheadColor>00FF00</PlayheadColor>
-					<ScoreColor>443377</ScoreColor>
-					<NoteOffColor>FFFF00</NoteOffColor>
-					<NoteOnColor>00FF00</NoteOnColor>
+					<PlayheadColor>FF8844</PlayheadColor>
+					<ScoreColor>005566</ScoreColor>
+					<ScoreColorDownLines>884400</ScoreColorDownLines>
+					<NoteOffColor>BBBBFF</NoteOffColor>
+					<NoteOnColor>FF8844</NoteOnColor>
 
 					<Name>6Volca Bass</Name>
                     <IconFileName>keyboard2.png</IconFileName>
@@ -316,10 +326,11 @@
 				</Instrument>
 
 				<Instrument>
-					<PlayheadColor>00FF00</PlayheadColor>
-					<ScoreColor>005566</ScoreColor>
-					<NoteOffColor>FFFF00</NoteOffColor>
-					<NoteOnColor>00FF00</NoteOnColor>
+					<PlayheadColor>BBFF44</PlayheadColor>
+					<ScoreColor>443377</ScoreColor>
+					<ScoreColorDownLines>777799</ScoreColorDownLines>
+					<NoteOffColor>77AA77</NoteOffColor>
+					<NoteOnColor>BBFF44</NoteOnColor>
 					
 					<Name>8Volca Keys</Name>
                     <IconFileName>keyboard.png</IconFileName>
@@ -334,7 +345,7 @@
 
 				<Instrument>
 					<PlayheadColor>00FF00</PlayheadColor>
-					<ScoreColor>0066FF</ScoreColor>
+					<ScoreColor>B02012</ScoreColor>
 					<NoteOffColor>FFFF00</NoteOffColor>
 					<NoteOnColor>00FF00</NoteOnColor>
 					
@@ -346,7 +357,7 @@
 
 				<Instrument>
 					<PlayheadColor>00FF00</PlayheadColor>
-					<ScoreColor>CC2211</ScoreColor>
+					<ScoreColor>007777</ScoreColor>
 					<NoteOffColor>FFFF00</NoteOffColor>
 					<NoteOnColor>00FF00</NoteOnColor>
 					
@@ -358,7 +369,7 @@
 				
 				<Instrument>
 					<PlayheadColor>00FF00</PlayheadColor>
-					<ScoreColor>66FF33</ScoreColor>
+					<ScoreColor>AAAA00</ScoreColor>
 					<NoteOffColor>FFFF00</NoteOffColor>
 					<NoteOnColor>00FF00</NoteOnColor>
 					
