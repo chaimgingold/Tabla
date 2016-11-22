@@ -289,9 +289,16 @@ void MusicWorld::tickStamps()
 
 		if (stamp)
 		{
+			int numOnNotes=0;
+			
 			stamp->mHasScore = true;
 			stamp->mLoc = lerp( stamp->mLoc, score.getCentroid(), .5f );
-			stamp->mIconPoseTarget = score.getIconPoseFromScore(score.getPlayheadFrac());
+			stamp->mIconPoseTarget = score.getIconPoseFromScore(score.getPlayheadFrac(),&numOnNotes);
+			
+			if (stamp->mInstrument)
+			{
+				stamp->mIconPoseTarget.mColor = numOnNotes ? stamp->mInstrument->mNoteOnColor : stamp->mInstrument->mNoteOffColor;
+			}
 
 			//
 			tIconAnimState sway;
@@ -299,6 +306,7 @@ void MusicWorld::tickStamps()
 			float jump = sin( score.getPlayheadFrac()*4.f * M_PI*2.f );
 			sway.mTranslate.y = jump * .1f;
 			sway.mScale = vec2(0,0);
+			sway.mColor = ColorA(0,0,0,0);
 			stamp->mIconPoseTarget = stamp->mIconPoseTarget + sway;
 //			stamp->mIconPoseTarget.mScale.y *= lerp(.8f,1.f,jump);
 		}
@@ -319,6 +327,7 @@ void MusicWorld::tickStamps()
 		if (!stamp.mHasScore)
 		{
 			stamp.mIconPoseTarget = idlesway;
+			if (stamp.mInstrument) stamp.mIconPoseTarget.mColor = stamp.mInstrument->mNoteOffColor;
 		}
 		
 		// tick

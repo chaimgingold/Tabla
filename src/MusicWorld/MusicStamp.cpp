@@ -12,7 +12,7 @@
 void MusicStamp::draw() const
 {
 	tIconAnimState pose = mIconPose;
-	pose.mColor = ColorA(1,1,1,1);
+//	pose.mColor = ColorA(1,1,1,1);
 	
 	drawInstrumentIcon(mTimeVec, pose );
 }

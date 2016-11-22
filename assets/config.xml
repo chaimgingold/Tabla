@@ -370,8 +370,8 @@
 				<Instrument>
 					<PlayheadColor>00FF00</PlayheadColor>
 					<ScoreColor>AAAA00</ScoreColor>
-					<NoteOffColor>FFFF00</NoteOffColor>
-					<NoteOnColor>00FF00</NoteOnColor>
+					<NoteOffColor>FFDD00</NoteOffColor>
+					<NoteOnColor>FFFFFF</NoteOnColor>
 					
 					<Name>Tempo</Name>
 					<IconFileName>tempo.png</IconFileName>

@@ -310,21 +310,21 @@ void Score::drawMetaParam( GameWorld::DrawType drawType ) const
 	}
 }
 
-tIconAnimState Score::getIconPoseFromScore( float playheadFrac ) const
+tIconAnimState Score::getIconPoseFromScore( float playheadFrac, int* _numOnNotes ) const
 {
 	const vec4 poses[13] =
 	{
 		vec4(  .25, 0.f, 1.f, -30 ),
 		vec4( -.25, 0.f, 1.f,  30 ),
-		vec4( 0, 0, 1, 0 ),
+		vec4( .3, 0, 1, 20 ),
 		vec4( 0, .4, 1, 0 ),
-		vec4( 0, 0, 1, 0 ),
+		vec4( -.3, 0, 1, -20 ),
 		vec4(  .25, 0.f, 1.f, -30 ),
 		vec4( -.25, 0.f, 1.f,  30 ),
-		vec4( 0, 0, 1, 20 ),
-		vec4( 0, 0, 1, -20 ),
+		vec4( 0, 0, 1.1, 20 ),
+		vec4( 0, 0, 1.1, -20 ),
 		vec4( 0, .2, 1.2, 0 ),
-		vec4( 0, .2, 1.2, 0 ),
+		vec4( .2, 0, 1.2, 0 ),
 		vec4( 0, -.3, 1, 0 ),
 		vec4( 0, 0, 1.2, 0 )
 	};
@@ -360,6 +360,7 @@ tIconAnimState Score::getIconPoseFromScore( float playheadFrac ) const
 		state.mColor = ColorA(1,1,1,1);
 	}
 	
+	if (_numOnNotes) *_numOnNotes = numOnNotes;
 	return state;
 }
 
