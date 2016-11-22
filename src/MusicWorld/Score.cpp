@@ -310,58 +310,115 @@ void Score::drawMetaParam( GameWorld::DrawType drawType ) const
 	}
 }
 
-tIconAnimState Score::getIconPoseFromScore( float playheadFrac, int* _numOnNotes ) const
+tIconAnimState Score::getIconPoseFromScore( float playheadFrac ) const
 {
-	const vec4 poses[13] =
+	// no instrument?
+	if ( !mInstrument ) return tIconAnimState();
+
+	// synth type
+	switch( mInstrument->mSynthType )
 	{
-		vec4(  .25, 0.f, 1.f, -30 ),
-		vec4( -.25, 0.f, 1.f,  30 ),
-		vec4( .3, 0, 1, 20 ),
-		vec4( 0, .4, 1, 0 ),
-		vec4( -.3, 0, 1, -20 ),
-		vec4(  .25, 0.f, 1.f, -30 ),
-		vec4( -.25, 0.f, 1.f,  30 ),
-		vec4( 0, 0, 1.1, 20 ),
-		vec4( 0, 0, 1.1, -20 ),
-		vec4( 0, .2, 1.2, 0 ),
-		vec4( .2, 0, 1.2, 0 ),
-		vec4( 0, -.3, 1, 0 ),
-		vec4( 0, 0, 1.2, 0 )
-	};
-	
-	// gather
-	int numOnNotes=0;
-	vec4 pose;
-	vec4 poseNormSum;
-	
-	for( int note=0; note<mNoteCount; note++ )
-	{
-		if ( isNoteOn(playheadFrac,note) )
+		case Instrument::SynthType::MIDI:
+		case Instrument::SynthType::RobitPokie:
 		{
-			numOnNotes++;
-			pose += poses[note%13];
-			poseNormSum += vec4(1,1,1,1);
+			const vec4 poses[13] =
+			{
+				vec4(  .25, 0.f, 1.f, -30 ),
+				vec4( -.25, 0.f, 1.f,  30 ),
+				vec4( .3, 0, 1, 20 ),
+				vec4( 0, .4, 1, 0 ),
+				vec4( -.3, 0, 1, -20 ),
+				vec4(  .25, 0.f, 1.f, -30 ),
+				vec4( -.25, 0.f, 1.f,  30 ),
+				vec4( 0, 0, 1.1, 20 ),
+				vec4( 0, 0, 1.1, -20 ),
+				vec4( 0, .2, 1.2, 0 ),
+				vec4( .2, 0, 1.2, 0 ),
+				vec4( 0, -.3, 1, 0 ),
+				vec4( 0, 0, 1.2, 0 )
+			};
+			
+			// gather
+			int numOnNotes=0;
+			vec4 pose;
+			vec4 poseNormSum;
+			
+			for( int note=0; note<mNoteCount; note++ )
+			{
+				if ( isNoteOn(playheadFrac,note) )
+				{
+					numOnNotes++;
+					pose += poses[note%13];
+					poseNormSum += vec4(1,1,1,1);
+				}
+			}
+			
+			// blend
+			if (numOnNotes > 0) {
+				pose /= poseNormSum;
+			} else {
+				pose = vec4( 0, 0, 1, 0); // default pose
+			}
+			
+			// pose
+			tIconAnimState state = pose;
+			
+			if (mInstrument) {
+				state.mColor = (numOnNotes>0) ? mInstrument->mNoteOnColor : mInstrument->mNoteOffColor;
+			} else {
+				state.mColor = ColorA(1,1,1,1);
+			}
+			
+			return state;
 		}
-	}
+		break;
+		
+		case Instrument::SynthType::Additive:
+		{
+			if (!mImage.empty())
+			{
+				// Create a float version of the image
+				cv::Mat imageFloatMat;
+
+				// Copy the uchar version scaled 0-1
+				mImage.convertTo(imageFloatMat, CV_32FC1, 1/255.0);
+				
+				int colIndex = imageFloatMat.cols * getPlayheadFrac();
+
+				cv::Mat columnMat = imageFloatMat.col(colIndex);
+
+				// We use a list message rather than writeArray as it causes less contention with Pd's execution thread
+				float sum=0;
+				float weightedy=0;
+				
+				for (int i = 0; i < columnMat.rows; i++)
+				{
+					float y = (float)i/(float)(columnMat.rows-1); // 0..1
+					float v = 1.f - columnMat.at<float>(i,0);
+					
+					weightedy += y*v;
+					sum += v;
+				}
+
+				if (sum>0) weightedy /= sum ; // normalize
+				else weightedy = .5f; // move to center if empty, since that will mean no vertical translation
+
+				float scaleDegree = (sum/(float)columnMat.rows) / .5f ; // what % of keys on count as 100% scale?
+				
+				tIconAnimState pose;
+				pose.mColor = sum>0.f ? mInstrument->mNoteOnColor : mInstrument->mNoteOffColor;
+				pose.mScale = vec2(1,1) * lerp( 1.f, 1.4f, scaleDegree*scaleDegree );
+				pose.mTranslate.y = lerp( .5f, -.5f, weightedy ) ; // low values means up
+				return pose;
+			}
+		}
+		break;
+		
+		default: break;
+	} // switch
 	
-	// blend
-	if (numOnNotes > 0) {
-		pose /= poseNormSum;
-	} else {
-		pose = vec4( 0, 0, 1, 0); // default pose
-	}
-	
-	// pose
-	tIconAnimState state = pose;
-	
-	if (mInstrument) {
-		state.mColor = (numOnNotes>0) ? mInstrument->mNoteOnColor : mInstrument->mNoteOffColor;
-	} else {
-		state.mColor = ColorA(1,1,1,1);
-	}
-	
-	if (_numOnNotes) *_numOnNotes = numOnNotes;
-	return state;
+	// nada
+	return tIconAnimState();
 }
 
 void Score::draw( GameWorld::DrawType drawType ) const

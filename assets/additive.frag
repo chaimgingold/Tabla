@@ -34,12 +34,12 @@ vec3 colorfield(vec2 xy) {
 void main() {
 
 	vec4 bkgnd;
-	bkgnd.r = vertTexCoord0.x;
-	bkgnd.g = vertTexCoord0.y;
-	bkgnd.b = 1.;
-	bkgnd.a = 1.;
-	bkgnd = vec4(0,0,0,017317412
-	);
+//	bkgnd.r = vertTexCoord0.x;
+//	bkgnd.g = vertTexCoord0.y;
+//	bkgnd.b = 1.;
+//	bkgnd.a = 1.;
+// ...nice gradient, but alpha makes more sense overall.
+	bkgnd = vec4(0,0,0,0);
 	
 	//
 	float playhead = uPhase;

@@ -90,7 +90,7 @@ public:
 	void updateAdditiveSynthesis();
 
 	// icon animation
-	tIconAnimState getIconPoseFromScore( float playheadFrac, int* numOnNotes=0 ) const;
+	tIconAnimState getIconPoseFromScore( float playheadFrac ) const;
 
 private:
 	bool isNoteOn( float playheadFrac, int note ) const;

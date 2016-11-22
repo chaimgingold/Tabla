@@ -195,7 +195,7 @@
 				<!-- Music -->
 
 			<!--	Tempo	-->
-			<Tempos>.25 .5 1 1.5 2 4</Tempos>
+			<Tempos>.25 .5 1 1.5 2 4 8</Tempos>
 <!--			<Tempos>.5 1.5 3 6 9 12</Tempos>-->
 				<!-- 0 entries means no global tempo, 1 entry means all are fixed.
 					 in practice 0 entries--freeform--produces temporally jittery results.-->
@@ -297,8 +297,8 @@
 					<PlayheadColor>00FFFF</PlayheadColor>
 					<ScoreColor>993377</ScoreColor>
 					<ScoreColorDownLines>003377</ScoreColorDownLines>
-					<NoteOffColor>00FF00</NoteOffColor>
-					<NoteOnColor>FF0000</NoteOnColor>
+					<NoteOffColor>FFFFFF</NoteOffColor>
+					<NoteOnColor>00FFFF</NoteOnColor>
 
 					<Name>3Additive</Name>
 					<IconFileName>additive.png</IconFileName>
