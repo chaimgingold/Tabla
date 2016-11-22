@@ -739,7 +739,7 @@ vec2 Score::fracToQuad( vec2 frac ) const
 int Score::noteForY( int y ) const {
 
 	if (mInstrument && mInstrument->mMapNotesToChannels) {
-		int noteShift = mOctave; // Reinterpret octave shift as note shift when using NotesToChannelsMode
+		int noteShift = mOctave + mNumOctaves/2; // Reinterpret octave shift as note shift when using NotesToChannelsMode (and don't go negative)
 		return y + noteShift;
 	}
 
