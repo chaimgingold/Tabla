@@ -168,7 +168,7 @@
 				
 				<ScoreNoteVisionThresh>240</ScoreNoteVisionThresh>
 				<!-- 0..255, -1 for OTSU (adaptive) -->
-				<ScoreVisionTrimFrac>.07</ScoreVisionTrimFrac>
+				<ScoreVisionTrimFrac>0</ScoreVisionTrimFrac>
 				<!-- When sampling image for each score, what amount to trim the corners (% push towards the center) -->
 				<ScoreMaxInteriorAngleDeg>110</ScoreMaxInteriorAngleDeg>
 
