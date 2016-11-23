@@ -384,7 +384,7 @@ MusicVision::getScoresFromContours( const ContourVector& contours, const vector<
 			score.mOctave	= 0; // will be set wrt mOctaveFrac by MusicWorld
 			
 			score.mPan		= .5f ;
-			score.mBeatCount = mBeatCount;
+			score.mBeatCount = mBeatCount * score.mDuration;
 			score.mNoteCount = mNoteCount;
 			
 			// save
