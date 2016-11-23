@@ -623,6 +623,25 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVector& sc
 		pipeline.setImageToWorldTransform( getOcvPerspectiveTransform(dstpt,s.mQuad) );
 		pipeline.getStages().back()->mLayoutHintScale = .5f;
 		pipeline.getStages().back()->mLayoutHintOrtho = true;
+
+		// white out edges
+		{
+			for( int x=0; x<s.mImage.cols; ++x )
+			{
+				s.mImage.at<unsigned char>(0,x) = 255;
+				s.mImage.at<unsigned char>(s.mImage.rows-1,x) = 255;
+			}
+
+			for( int y=0; y<s.mImage.rows; ++y )
+			{
+				s.mImage.at<unsigned char>(y,0) = 255;
+				s.mImage.at<unsigned char>(y,s.mImage.cols-1) = 255;
+			}
+			
+			pipeline.then( scoreName + " blanked edges", s.mImage );
+			pipeline.getStages().back()->mLayoutHintScale = .5f;
+			pipeline.getStages().back()->mLayoutHintOrtho = true;
+		}
 		
 		// quantize
 		if ( instr && instr->isNoteType() )
