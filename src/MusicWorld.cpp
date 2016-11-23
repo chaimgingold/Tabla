@@ -278,6 +278,9 @@ void MusicWorld::update()
 	// Advance each score
 	for( auto &score : mScores ) score.tick(mPhase, getBeatDuration());
 
+	// retire notes (do this outside of scores to handle instruments that no longer have scores)
+	for( auto pair : mInstruments) pair.second->updateNoteOffs();
+
 	tickStamps();
 	
 	// file watch

@@ -704,9 +704,6 @@ void Score::tick(float globalPhase, float beatDuration)
 		default:
 		break;
 	}
-
-	// retire notes
-	mInstrument->updateNoteOffs();
 }
 
 void Score::updateAdditiveSynthesis() {
@@ -841,12 +838,4 @@ float Score::getQuadMaxInteriorAngle() const
 	}
 
 	return mang;
-}
-
-Score::~Score() {
-	// NOTE: this will kill all notes even if other scores are still playing.
-	// Needs a multi-score-aware implementation, but better than stuck notes for now!
-	// mInstrument->killAllNotes();
-	// TODO: Move this to a place where we know that there are no more Scores for this Instrument.
-	// It just turns off all notes all the time, since Scores are created and destroyed internally constantly.
 }
