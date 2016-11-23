@@ -742,9 +742,6 @@ void Score::tick(float globalPhase, float beatDuration)
 		default:
 		break;
 	}
-
-	// retire notes
-	mInstrument->updateNoteOffs();
 }
 
 void Score::updateAdditiveSynthesis() {
