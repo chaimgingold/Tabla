@@ -48,7 +48,8 @@ private:
 	float mRootNote=60;
 	float mNumOctaves=5;
 	float mPokieRobitPulseTime;
-
+	float mMaxTempo=160;
+	
 	vector<float> mTempos; // what tempos do we support? 0 entries means free form, 1 entry means all are fixed.
 	map<string,InstrumentRef> mInstruments;
 	vector<Scale> mScales;
@@ -70,7 +71,8 @@ private:
 
 	// vision
 	MusicVision mVision;
-
+	ContourVector mContours;
+	
 	// synthesis
 	PureDataNodeRef	mPureDataNode;	// synth engine
 	PatchRef		mPatch;			// music patch

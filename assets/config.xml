@@ -195,7 +195,7 @@
 				<!-- Music -->
 
 			<!--	Tempo	-->
-			<Tempos>.25 .5 1 1.5 2 4 8</Tempos>
+			<Tempos>.25 .5 1 1.5 2 4 8 12</Tempos>
 <!--			<Tempos>.5 1.5 3 6 9 12</Tempos>-->
 				<!-- 0 entries means no global tempo, 1 entry means all are fixed.
 					 in practice 0 entries--freeform--produces temporally jittery results.-->
@@ -207,6 +207,7 @@
 			<BeatCount>32</BeatCount>
 			<NumOctaves>5</NumOctaves> <!-- Number of octaves available for shifting when moving scores in zone along Y -->
 			<RootNote>60</RootNote>
+			<MaxTempo>400</MaxTempo>
 
 			<PokieRobitPulseTime>0.01</PokieRobitPulseTime>
 			

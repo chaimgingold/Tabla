@@ -9,6 +9,42 @@
 #include "MusicStamp.h"
 #include "geom.h"
 
+tIconAnimState
+tIconAnimState::getSwayForScore( float playheadFrac )
+{
+	tIconAnimState sway;
+	
+	float jump = sin( playheadFrac*4.f * M_PI*2.f );
+
+	sway.mRotate = powf( cos( playheadFrac * M_PI*2.f ), 3.f ) * toRadians(25.);
+	sway.mTranslate.y = jump * .1f;
+	
+	// zero so we can be added
+	sway.mScale = vec2(0,0);
+	sway.mColor = ColorA(0,0,0,0);
+	
+	return sway;
+}
+
+tIconAnimState
+tIconAnimState::getIdleSway( float phaseInBeats, float beatDuration )
+{
+	tIconAnimState sway;
+	
+	float duration = beatDuration * 4.f;
+	float f = fmod(phaseInBeats,duration) / duration;
+	
+	sway.mRotate = cos( f * M_PI*2.f ) * toRadians(25.);
+//			float jump = sin( score.getPlayheadFrac()*4.f * M_PI*2.f );
+//			sway.mTranslate.y = jump * .1f;
+
+	// zero so we can be added
+	sway.mScale = vec2(0,0);
+	sway.mColor = ColorA(0,0,0,0);
+	
+	return sway;
+}
+
 void MusicStamp::draw() const
 {
 	tIconAnimState pose = mIconPose;
