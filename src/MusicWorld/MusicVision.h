@@ -24,10 +24,13 @@ public:
 	void setParams( XmlTree );
 
 	vec2 mTimeVec;
-	vector<float> mTempos; // what tempos do we support? 0 entry means free form, 1 means all are fixed.
+	vector<float> mMeasureCounts; // what tempos do we support? 0 entry means free form, 1 means all are fixed.
 	map<string,InstrumentRef> mInstruments;
 	int	  mNoteCount;
-	int	  mBeatCount;
+	
+	int	  mBeatsPerMeasure;
+	int	  mBeatQuantization;
+	
 	PolyLine2 mWorldBoundsPoly;
 
 	// do it
@@ -48,7 +51,7 @@ private:
 	float mScoreTrackTemporalBlendFrac=.5f; // 0 means off, so all new
 	float mScoreTrackTemporalBlendIfDiffFracLT=.1f; // only do blending if frames are similar enough; otherwise: fast no blend mode.
 
-	float mTempoWorldUnitsPerSecond = 5.f;
+	float mWorldUnitsPerMeasure = 5.f;
 
 	// helpers
 	ScoreVector getScores( const ContourVector&, const ScoreVector& oldScores, const vector<MusicStamp>& stamps ) const;
@@ -59,10 +62,10 @@ private:
 		const ContourVector& contours ) const;
 	void updateScoresWithImageData( Pipeline& pipeline, ScoreVector& scores ) const;
 	
-	float getNearestTempo( float ) const; // input -> closest mTempos[]
+	float getNearestTempo( float ) const; // input -> closest mMeasureCounts[]
 	
 	//
-	float		  decideDurationForScore  ( const Score& ) const;
+	float		  decideMeasureCountForScore( const Score& ) const;
 	InstrumentRef decideInstrumentForScore( const Score&, const vector<MusicStamp>& ) const;
 
 	float getScoreOctaveShift( const Score& s, const PolyLine2& wrtRegion ) const;

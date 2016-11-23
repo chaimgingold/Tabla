@@ -49,17 +49,22 @@ public:
 
 
 	float		mPosition=0; // progress from 0-mDuration
-	float		mDuration=1;
 	void        tick(float globalPhase, float beatDuration);
 
 	int			mOctave=-1; // controlled by mOctaveFrac
 	float		mOctaveFrac=0.5f;
 	float		mRootNote=0.f;
 	int			mNoteCount=-1;
-	int         mBeatCount=-1;
 	int			mNoteInstrument=-1;
 	int         mNumOctaves=-1;
 
+	float       mMeasureCount=-1;
+	int			mBeatsPerMeasure=-1;
+	int			mBeatQuantization=-1;
+	
+	int			getQuantizedBeatCount() const { return mMeasureCount * mBeatsPerMeasure * mBeatQuantization; }
+	int			getBeatCount()			const { return mMeasureCount * mBeatsPerMeasure; }
+	
 	float		mPan;
 	//float		mVolume;
 

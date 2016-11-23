@@ -43,14 +43,18 @@ private:
 	//
 	vec2  mTimeVec;		// in world space, which way does time flow forward?
 	int	  mNoteCount=8;
-	int	  mBeatCount=32;
 	Scale mScale;
 	float mRootNote=60;
 	float mNumOctaves=5;
 	float mPokieRobitPulseTime;
 	float mMaxTempo=160;
+
+	int	  mBeatsPerMeasure=4;
+	int   mBeatQuantization=4;
 	
-	vector<float> mTempos; // what tempos do we support? 0 entries means free form, 1 entry means all are fixed.
+	vector<float> mMeasureCounts; // what tempos do we support? 0 entries means free form, 1 entry means all are fixed.
+	// TODO: rename me something about measure counts
+	
 	map<string,InstrumentRef> mInstruments;
 	vector<Scale> mScales;
 	vector<Score> mScores;

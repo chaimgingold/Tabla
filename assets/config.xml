@@ -184,6 +184,11 @@
 					-->
 				<ScoreTrackTemporalBlendIfDiffFracLT>.02</ScoreTrackTemporalBlendIfDiffFracLT>
 					<!--	Only do temporal blending if frame difference is less than this amount; so fast motion is still fast -->
+
+				<WorldUnitsPerMeasure>27.94</WorldUnitsPerMeasure>
+					<!-- how many cm become 1 second? -->
+					<!--	11" = 27.94cm	-->
+
 			</MusicVision>
 			
 			
@@ -195,16 +200,14 @@
 				<!-- Music -->
 
 			<!--	Tempo	-->
-			<Tempos>.25 .5 1 1.5 2 4 8 12</Tempos>
-<!--			<Tempos>.5 1.5 3 6 9 12</Tempos>-->
-				<!-- 0 entries means no global tempo, 1 entry means all are fixed.
-					 in practice 0 entries--freeform--produces temporally jittery results.-->
-			<TempoWorldUnitsPerSecond>5</TempoWorldUnitsPerSecond>
-				<!-- how many cm become 1 second? -->
+			<MeasureCounts>.25 .5 1 2 3 4 5 6 7 8 9</MeasureCounts>
 
 			<TimeVec>-1 0</TimeVec> <!-- Vector in world space time moves along -->
 			<NoteCount>13</NoteCount>
-			<BeatCount>32</BeatCount>
+			
+			<BeatsPerMeasure>4</BeatsPerMeasure>
+			<BeatQuantization>8</BeatQuantization>
+			
 			<NumOctaves>5</NumOctaves> <!-- Number of octaves available for shifting when moving scores in zone along Y -->
 			<RootNote>60</RootNote>
 			<MaxTempo>400</MaxTempo>

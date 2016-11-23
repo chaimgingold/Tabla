@@ -44,18 +44,20 @@ void MusicWorld::setParams( XmlTree xml )
 {
 	killAllNotes();
 
-	mTempos.clear();
+	mMeasureCounts.clear();
 	mScale.clear();
 
 	getXml(xml,"TimeVec",mTimeVec);
 	getXml(xml,"NoteCount",mNoteCount);
-	getXml(xml,"BeatCount",mBeatCount);
 	getXml(xml,"RootNote",mRootNote);
 	getXml(xml,"NumOctaves",mNumOctaves);
 	getXml(xml,"PokieRobitPulseTime",mPokieRobitPulseTime);
 	getXml(xml,"MaxTempo",mMaxTempo);
 	
-	getXml(xml,"Tempos",mTempos);
+	getXml(xml,"BeatsPerMeasure",mBeatsPerMeasure);
+	getXml(xml,"BeatQuantization",mBeatQuantization);
+	
+	getXml(xml,"MeasureCounts",mMeasureCounts);
 
 	if ( xml.hasChild("MusicVision") )
 	{
@@ -124,11 +126,12 @@ void MusicWorld::setParams( XmlTree xml )
 	
 	// update vision
 	mVision.mTimeVec = mTimeVec;
-	mVision.mTempos  = mTempos;
+	mVision.mMeasureCounts  = mMeasureCounts;
 	mVision.mInstruments = mInstruments;
 	mVision.mNoteCount = mNoteCount;
-	mVision.mBeatCount = mBeatCount;
-
+	mVision.mBeatsPerMeasure = mBeatsPerMeasure;
+	mVision.mBeatQuantization = mBeatQuantization;
+	
 	// update stamps
 	setupStamps();
 
@@ -257,7 +260,8 @@ void MusicWorld::updateScoresWithMetaParams() {
 		s.mRootNote = mRootNote;
 		s.mNoteCount = mNoteCount;
 		s.mScale = mScale;
-		s.mBeatCount = mBeatCount;
+		s.mBeatsPerMeasure = mBeatsPerMeasure;
+		s.mBeatQuantization = mBeatQuantization;
         s.mNumOctaves = mNumOctaves;
 		s.mOctave = roundf( (s.mOctaveFrac-.5f) * (float)mNumOctaves ) ;
 	}

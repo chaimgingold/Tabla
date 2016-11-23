@@ -233,9 +233,6 @@ int Score::drawNotes( GameWorld::DrawType drawType ) const
 
 void Score::drawScoreLines( GameWorld::DrawType drawType ) const
 {
-	// TODO: Make this configurable for 5/4 time, etc.
-	const int drawBeatDivision = 4;
-
 	vector<vec2> pts;
 
 	gl::color(mInstrument->mScoreColor);
@@ -251,11 +248,11 @@ void Score::drawScoreLines( GameWorld::DrawType drawType ) const
 	}
 
 	// Off-beat lines
-	for( int i=0; i<mBeatCount; ++i )
+	for( int i=0; i<getQuantizedBeatCount(); ++i )
 	{
-		if (i % drawBeatDivision == 0) continue;
+		if (i % mBeatQuantization == 0) continue;
 
-		float f = (float)i / (float)mBeatCount;
+		float f = (float)i / (float)getQuantizedBeatCount();
 
 		pts.push_back( lerp(mQuad[1], mQuad[0],f) );
 		pts.push_back( lerp(mQuad[2], mQuad[3],f) );
@@ -266,18 +263,15 @@ void Score::drawScoreLines( GameWorld::DrawType drawType ) const
 	// New points for new colors
 	pts.clear();
 	// Down-beat lines
-	for( int i=0; i<mBeatCount; ++i )
+	for( int i=0; i<getQuantizedBeatCount(); ++i )
 	{
-		if (i % drawBeatDivision != 0) continue;
+		if (i % mBeatQuantization != 0) continue;
 
-		float f = (float)i / (float)mBeatCount;
+		float f = (float)i / (float)getQuantizedBeatCount();
 
 		pts.push_back( lerp(mQuad[1], mQuad[0],f) );
 		pts.push_back( lerp(mQuad[2], mQuad[3],f) );
 	}
-//	vec3 scoreColorHSV = rgbToHsv(mInstrument->mScoreColor);
-//	scoreColorHSV.x = fmod(scoreColorHSV.x + 0.5, 1.0);
-//	gl::color( hsvToRgb(scoreColorHSV)  );
 	gl::color( mInstrument->mScoreColorDownLines  );
 	drawLines(pts);
 
@@ -687,7 +681,7 @@ PolyLine2 Score::getPolyLine() const
 
 void Score::tick(float globalPhase, float beatDuration)
 {
-	mPosition = fmod(globalPhase, mDuration);
+	mPosition = fmod(globalPhase, (float)getBeatCount() );
 
 	if (!mInstrument) return;
 
@@ -721,7 +715,7 @@ void Score::tick(float globalPhase, float beatDuration)
 					{
 						float duration =
 						beatDuration *
-						mDuration *
+						(float)getQuantizedBeatCount() *
 						getNoteLengthAsScoreFrac(mQuantizedImage,x,y);
 
 						if (duration>0)
@@ -816,7 +810,7 @@ void Score::updateAdditiveSynthesis() {
 
 float Score::getPlayheadFrac() const
 {
-	return mPosition / mDuration;
+	return mPosition / (float)getBeatCount();
 }
 
 void Score::getPlayheadLine( vec2 line[2] ) const

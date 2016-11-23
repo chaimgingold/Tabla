@@ -26,7 +26,7 @@ void MusicVision::setParams( XmlTree xml )
 	getXml(xml,"ScoreTrackTemporalBlendFrac",mScoreTrackTemporalBlendFrac);
 	getXml(xml,"ScoreTrackTemporalBlendIfDiffFracLT",mScoreTrackTemporalBlendIfDiffFracLT);
 
-	getXml(xml,"TempoWorldUnitsPerSecond",mTempoWorldUnitsPerSecond);
+	getXml(xml,"WorldUnitsPerMeasure",mWorldUnitsPerMeasure);
 }
 
 Score*
@@ -203,7 +203,7 @@ MusicVision::shouldBeMetaParamScore( const Score& s ) const
 float
 MusicVision::getNearestTempo( float t ) const
 {
-	if (mTempos.empty())
+	if (mMeasureCounts.empty())
 	{
 		// free-form
 		if (1)
@@ -217,41 +217,41 @@ MusicVision::getNearestTempo( float t ) const
 
 		return t;
 	}
-	if (mTempos.size()==1) return mTempos[0]; // globally fixed
-	if (mTempos[0]>=t) return mTempos[0]; // minimum
+	if (mMeasureCounts.size()==1) return mMeasureCounts[0]; // globally fixed
+	if (mMeasureCounts[0]>=t) return mMeasureCounts[0]; // minimum
 
 	// find nearest in between two tempos
-	for( size_t i=0; i<mTempos.size()-1; ++i )
+	for( size_t i=0; i<mMeasureCounts.size()-1; ++i )
 	{
-		if ( t >= mTempos[i] && t <= mTempos[i+1] )
+		if ( t >= mMeasureCounts[i] && t <= mMeasureCounts[i+1] )
 		{
-			float mid = lerp(mTempos[i],mTempos[i+1],.5f);
+			float mid = lerp(mMeasureCounts[i],mMeasureCounts[i+1],.5f);
 
-			if ( t < mid ) return mTempos[i];
-			else return mTempos[i+1];
+			if ( t < mid ) return mMeasureCounts[i];
+			else return mMeasureCounts[i+1];
 		}
 	}
 
 	// maximum
-	return mTempos.back();
+	return mMeasureCounts.back();
 }
 
 float
-MusicVision::decideDurationForScore ( const Score& score ) const
+MusicVision::decideMeasureCountForScore ( const Score& score ) const
 {
 	if ( score.mInstrument && score.mInstrument->mSynthType == Instrument::SynthType::Meta )
 	{
-		return getNearestTempo(MAXFLOAT); // slowest tempo
+		return 1; // 1 measure
 	}
 	else
 	{
 		vec2 size = score.getSizeInWorldSpace();
 
-		float d = size.x / mTempoWorldUnitsPerSecond;
+		float d = size.x / mWorldUnitsPerMeasure;
 
 		float t = getNearestTempo(d);
 
-		if (0) cout << size.x << "cm = " << d << "sec => " << t << "sec" << endl;
+		if (0) cout << size.x << "cm = " << d << "measures => " << t << "measures" << endl;
 
 		return t;
 	}
@@ -377,14 +377,16 @@ MusicVision::getScoresFromContours( const ContourVector& contours, const vector<
 			}
 
 			// timing
-			score.mDuration = decideDurationForScore(score); // inherit, but it could be custom based on shape or something
-
 			// Choose octave based on up<>down
 			score.mOctaveFrac = (mWorldBoundsPoly.size()>0) ? getScoreOctaveShift(score,mWorldBoundsPoly) : .5f;
 			score.mOctave	= 0; // will be set wrt mOctaveFrac by MusicWorld
 			
 			score.mPan		= .5f ;
-			score.mBeatCount = mBeatCount * score.mDuration;
+			
+			score.mMeasureCount = decideMeasureCountForScore(score);
+			score.mBeatQuantization = mBeatQuantization;
+			score.mBeatsPerMeasure = mBeatsPerMeasure;
+			
 			score.mNoteCount = mNoteCount;
 			
 			// save
@@ -626,7 +628,7 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVector& sc
 		if ( instr && instr->isNoteType() )
 		{
 			// notes
-			quantizeImage(pipeline,s,scoreName,doTemporalBlend,oldTemporalBlendImage, s.mBeatCount, s.mNoteCount );
+			quantizeImage(pipeline,s,scoreName,doTemporalBlend,oldTemporalBlendImage, s.getQuantizedBeatCount(), s.mNoteCount );
 		}
 		else if ( instr && instr->mSynthType==Instrument::SynthType::Meta )
 		{
