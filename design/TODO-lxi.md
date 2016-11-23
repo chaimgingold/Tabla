@@ -9,7 +9,7 @@
 
 
 BUGS
-[ ] Fix stuck notes on paper removal
+[x] Fix stuck notes on paper removal
 [ ] Fix crashes on exit (try newer branch of LibPd-Cinder from Ryan)
 [ ] Fix losing MIDI when switching cartridges
      (something to do with not closing ports properly?)
