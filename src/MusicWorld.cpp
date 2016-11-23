@@ -279,6 +279,15 @@ void MusicWorld::update()
 	mFileWatch.scanFiles();
 }
 
+const Score* MusicWorld::pickScore( vec2 p ) const
+{
+	for( auto &s : mScores )
+	{
+		if (s.getPolyLine().contains(p)) return &s;
+	}
+	return 0;
+}
+
 void MusicWorld::tickStamps()
 {
 	// Forget stamps' scores
@@ -300,6 +309,8 @@ void MusicWorld::tickStamps()
 		}
 	}
 
+	set<int> contoursUsed;
+	
 	for( auto &stamp : mStamps )
 	{
 		// filter
@@ -315,7 +326,16 @@ void MusicWorld::tickStamps()
 		
 		if ( contains && !contains->mIsHole && contains->mPolyLine.contains(contains->mCenter) )
 		{
-			stamp.mLoc = lerp( stamp.mLoc, contains->mCenter, .5f );
+			// ensure:
+			// 1. the centroid is still in the polygon!, and
+			// 2. it isn't in a score
+			// 3. we aren't reusing an ocv contour >1x
+			
+			if ( !pickScore(contains->mCenter) && contoursUsed.find(contains->mOcvContourIndex) == contoursUsed.end() )
+			{
+				stamp.mLoc = lerp( stamp.mLoc, contains->mCenter, .5f );
+				contoursUsed.insert(contains->mOcvContourIndex);
+			}
 		}
 	}
 	

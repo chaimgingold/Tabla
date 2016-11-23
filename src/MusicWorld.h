@@ -56,6 +56,8 @@ private:
 	vector<Score> mScores;
 	vector<MusicStamp> mStamps;
 	
+	const Score* pickScore( vec2 ) const;
+	
 	void setupStamps();
 	MusicStamp* getStampByInstrument( InstrumentRef );
 	void tickStamps();
