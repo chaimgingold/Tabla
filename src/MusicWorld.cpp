@@ -53,7 +53,8 @@ void MusicWorld::setParams( XmlTree xml )
 	getXml(xml,"RootNote",mRootNote);
 	getXml(xml,"NumOctaves",mNumOctaves);
 	getXml(xml,"PokieRobitPulseTime",mPokieRobitPulseTime);
-
+	getXml(xml,"MaxTempo",mMaxTempo);
+	
 	getXml(xml,"Tempos",mTempos);
 
 	if ( xml.hasChild("MusicVision") )

@@ -207,7 +207,7 @@
 			<BeatCount>32</BeatCount>
 			<NumOctaves>5</NumOctaves> <!-- Number of octaves available for shifting when moving scores in zone along Y -->
 			<RootNote>60</RootNote>
-			<MaxTempo>160</MaxTempo>
+			<MaxTempo>400</MaxTempo>
 
 			<PokieRobitPulseTime>0.01</PokieRobitPulseTime>
 			
