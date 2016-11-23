@@ -89,13 +89,15 @@ public:
 	void tick();
 	
 	vec2 mXAxis = vec2(1,0);
-	vec2 mLoc;
+	vec2 mLoc; // drawn loc
+	vec2 mSearchForPaperLoc; // the secret location that tracks paper; we pop to here if we lose our score
 	float mIconWidth = 10.f;
 
 	InstrumentRef mInstrument;
 	tIconAnimState mIconPose, mIconPoseTarget;
 
 	bool mHasScore=false;
+	bool mLastHasScore=false;
 	
 private:
 	void drawInstrumentIcon( vec2 worldx, tIconAnimState pose ) const;

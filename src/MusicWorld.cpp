@@ -171,6 +171,7 @@ void MusicWorld::setupStamps()
 		
 		s.mXAxis = mTimeVec;
 		s.mLoc = c + vec2(glm::rotate( vec3(r,0,0), angle, vec3(0,0,1) ));
+		s.mSearchForPaperLoc = s.mLoc;
 		s.mIconWidth = mStampIconWidth;
 		s.mInstrument = i.second;
 		
@@ -294,8 +295,20 @@ const Score* MusicWorld::pickScore( vec2 p ) const
 
 void MusicWorld::tickStamps()
 {
+	auto findContour = [this]( vec2 p ) -> const Contour*
+	{
+		const Contour* contains = mContours.findLeafContourContainingPoint(p);
+		
+		if ( contains && !contains->mIsHole && contains->mPolyLine.contains(contains->mCenter) ) return contains;
+		else return (const Contour*)0;
+	};
+	
 	// Forget stamps' scores
-	for( auto &stamp : mStamps ) stamp.mHasScore = false;
+	for( auto &stamp : mStamps )
+	{
+		stamp.mLastHasScore = stamp.mHasScore;
+		stamp.mHasScore = false;
+	}
 
 	// Note scores => stamps
 	for( const auto &score : mScores )
@@ -310,36 +323,47 @@ void MusicWorld::tickStamps()
 			stamp->mIconPoseTarget = score.getIconPoseFromScore(score.getPlayheadFrac());
 			
 			stamp->mIconPoseTarget += tIconAnimState::getSwayForScore(score.getPlayheadFrac()); // blend in sway
+			
+			// new score to attach to?
+			if ( !stamp->mLastHasScore && findContour(score.getCentroid()) )
+			{
+				stamp->mSearchForPaperLoc = score.getCentroid();
+			}
 		}
 	}
 
+	// stamps: search for contours, sway
 	set<int> contoursUsed;
 	
 	for( auto &stamp : mStamps )
 	{
-		// filter
-		if (stamp.mHasScore) continue;
-
-		// idle sway animation
-		stamp.mXAxis = mTimeVec;
-		stamp.mIconPoseTarget = tIconAnimState() + tIconAnimState::getIdleSway(mPhase, getBeatDuration());
-		if (stamp.mInstrument) stamp.mIconPoseTarget.mColor = stamp.mInstrument->mNoteOffColor;
+		// update search loc
+		const Contour* contains = findContour(stamp.mSearchForPaperLoc);
 		
-		// move towards an intersecting contour?
-		const Contour* contains = mContours.findLeafContourContainingPoint(stamp.mLoc);
-		
-		if ( contains && !contains->mIsHole && contains->mPolyLine.contains(contains->mCenter) )
+		if ( contains )
 		{
 			// ensure:
 			// 1. the centroid is still in the polygon!, and
 			// 2. it isn't in a score
 			// 3. we aren't reusing an ocv contour >1x
 			
-			if ( !pickScore(contains->mCenter) && contoursUsed.find(contains->mOcvContourIndex) == contoursUsed.end() )
+			if ( /*!pickScore(contains->mCenter) &&*/ contoursUsed.find(contains->mOcvContourIndex) == contoursUsed.end() )
 			{
-				stamp.mLoc = lerp( stamp.mLoc, contains->mCenter, .5f );
+				stamp.mSearchForPaperLoc = contains->mCenter;
 				contoursUsed.insert(contains->mOcvContourIndex);
 			}
+		}
+		
+		// filter
+		if ( !stamp.mHasScore )
+		{
+			// idle sway animation
+			stamp.mXAxis = mTimeVec;
+			stamp.mIconPoseTarget = tIconAnimState() + tIconAnimState::getIdleSway(mPhase, getBeatDuration());
+			if (stamp.mInstrument) stamp.mIconPoseTarget.mColor = stamp.mInstrument->mNoteOffColor;
+			
+			// go to search location
+			stamp.mLoc = lerp( stamp.mLoc, stamp.mSearchForPaperLoc, .5f );
 		}
 	}
 	

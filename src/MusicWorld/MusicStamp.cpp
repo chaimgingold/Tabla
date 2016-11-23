@@ -47,10 +47,16 @@ tIconAnimState::getIdleSway( float phaseInBeats, float beatDuration )
 
 void MusicStamp::draw() const
 {
-	tIconAnimState pose = mIconPose;
-//	pose.mColor = ColorA(1,1,1,1);
+	drawInstrumentIcon( mXAxis, mIconPose );
 	
-	drawInstrumentIcon(mXAxis, pose );
+	if (0)
+	{
+		// debug search
+		gl::color(0,0,1);
+		gl::drawSolidCircle(mSearchForPaperLoc, 1.f);
+		gl::color(1,0,0);
+		gl::drawLine(mLoc, mSearchForPaperLoc);
+	}
 }
 
 void MusicStamp::tick()

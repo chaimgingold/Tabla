@@ -34,44 +34,6 @@ void drawLines( vector<vec2> points )
 	ctx->popVao();
 }
 
-void drawSolidTriangles( vector<vec2> pts )
-{
-	auto ctx = context();
-	const GlslProg* curGlslProg = ctx->getGlslProg();
-	if( ! curGlslProg ) {
-//		CI_LOG_E( "No GLSL program bound" );
-		return;
-	}
-
-//	GLfloat data[3*2+3*2]; // both verts and texCoords
-//	memcpy( data, pts, sizeof(float) * pts.size() * 2 );
-//	if( texCoord )
-//		memcpy( data + 3 * 2, texCoord, sizeof(float) * 3 * 2 );
-
-	ctx->pushVao();
-	ctx->getDefaultVao()->replacementBindBegin();
-	VboRef defaultVbo = ctx->getDefaultArrayVbo( sizeof(float)*pts.size()*2 );
-	ScopedBuffer bufferBindScp( defaultVbo );
-	defaultVbo->bufferSubData( 0, sizeof(float) * pts.size() * 2, &pts[0] );
-
-	int posLoc = curGlslProg->getAttribSemanticLocation( geom::Attrib::POSITION );
-	if( posLoc >= 0 ) {
-		enableVertexAttribArray( posLoc );
-		vertexAttribPointer( posLoc, 2, GL_FLOAT, GL_FALSE, 0, (void*)0 );
-	}
-//	if( texCoord ) {
-//		int texLoc = curGlslProg->getAttribSemanticLocation( geom::Attrib::TEX_COORD_0 );
-//		if( texLoc >= 0 ) {
-//			enableVertexAttribArray( texLoc );
-//			vertexAttribPointer( texLoc, 2, GL_FLOAT, GL_FALSE, 0, (void*)(sizeof(float)*6) );
-//		}
-//	}
-	ctx->getDefaultVao()->replacementBindEnd();
-	ctx->setDefaultShaderVars();
-	ctx->drawArrays( GL_TRIANGLES, 0, pts.size() );
-	ctx->popVao();
-}
-
 bool Score::isScoreValueHigh( uchar value ) const
 {
 	const int kValueThresh = 100;

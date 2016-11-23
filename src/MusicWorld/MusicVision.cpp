@@ -591,6 +591,7 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVector& sc
 		vec2		srcpt[4];
 		cv::Point2f srcpt_cv[4];
 		{
+			// NOTE: trimto is deprecated (because of blank out edges)
 			vec2  trimto; // average of corners
 			for ( int i=0; i<4; ++i )
 			{
@@ -624,7 +625,7 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVector& sc
 		pipeline.getStages().back()->mLayoutHintScale = .5f;
 		pipeline.getStages().back()->mLayoutHintOrtho = true;
 
-		// white out edges
+		// blank out edges
 		{
 			for( int x=0; x<s.mImage.cols; ++x )
 			{
