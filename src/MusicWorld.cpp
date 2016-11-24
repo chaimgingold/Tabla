@@ -313,6 +313,9 @@ void MusicWorld::tickStamps()
 	{
 		stamp.mLastHasScore = stamp.mHasScore;
 		stamp.mHasScore = false;
+		
+		stamp.mLastHasContour = stamp.mHasContour;
+		stamp.mHasContour = false;
 	}
 
 	// Note scores => stamps
@@ -358,6 +361,7 @@ void MusicWorld::tickStamps()
 				
 				if ( /*!pickScore(contains->mCenter) &&*/ contoursUsed.find(contains->mOcvContourIndex) == contoursUsed.end() )
 				{
+					stamp.mHasContour = true;
 					stamp.mSearchForPaperLoc = contains->mCenter;
 					contoursUsed.insert(contains->mOcvContourIndex);
 				}
@@ -380,8 +384,42 @@ void MusicWorld::tickStamps()
 	
 	// update stamps, but first do ones that have scores, then those that do not.
 	// because: we want ones with scores to have priority when binding to contours
+	// (we should also prioritize based on if it has a contour and had a contour!, so maybe organize into a heap) 
 	for( auto &stamp : mStamps ) { if ( stamp.mHasScore) updateStamp(stamp); }
 	for( auto &stamp : mStamps ) { if (!stamp.mHasScore) updateStamp(stamp); }
+	
+	// De-collide them
+	const float decollideFrac = .5f;  
+
+	for( int i=0  ; i<mStamps.size(); ++i )
+	for( int j=i+1; j<mStamps.size(); ++j )
+	{
+		auto &s1 = mStamps[i];
+		auto &s2 = mStamps[j];
+		
+		float d = distance(s1.mSearchForPaperLoc,s2.mSearchForPaperLoc);
+		float mind = (s1.mIconWidth + s2.mIconWidth) * .5f;
+		float overlap = mind - d ;
+		
+		if ( overlap>0 )
+		{
+			vec2 v = s1.mSearchForPaperLoc - s2.mSearchForPaperLoc;
+			
+			float df1 = decollideFrac ;
+			float df2 = decollideFrac ;
+			
+			// prioritize them
+			int p1 = (s1.mHasScore ? 3 : ( s1.mHasContour ? 2 : 1 ) ); 
+			int p2 = (s2.mHasScore ? 3 : ( s2.mHasContour ? 2 : 1 ) ); 
+			
+			if (p1>p2) df1 = 0.f;
+			else if (p1<p2) df2 = 0.f;
+			
+			// move
+			s1.mSearchForPaperLoc += v * df1 * overlap * .5f;
+			s2.mSearchForPaperLoc -= v * df2 * overlap * .5f; 
+		}
+	}
 	
 	// Tick stamps
 	for( auto &stamp : mStamps ) stamp.tick();

@@ -101,6 +101,9 @@ public:
 	bool mHasScore=false;
 	bool mLastHasScore=false;
 	
+	bool mHasContour=false;
+	bool mLastHasContour=false;
+	
 private:
 	void drawInstrumentIcon( vec2 worldx, tIconAnimState pose ) const;
 	
