@@ -338,7 +338,7 @@ void MusicWorld::tickStamps()
 	// stamps: search for contours, sway
 	set<int> contoursUsed;
 	
-	for( auto &stamp : mStamps )
+	auto updateStamp = [&]( MusicStamp& stamp )
 	{
 		// update search loc
 		const Contour* contains = findContour(stamp.mSearchForPaperLoc);
@@ -368,7 +368,12 @@ void MusicWorld::tickStamps()
 			// go to search location
 			stamp.mLoc = lerp( stamp.mLoc, stamp.mSearchForPaperLoc, .5f );
 		}
-	}
+	};
+	
+	// update stamps, but first do ones that have scores, then those that do not.
+	// because: we want ones with scores to have priority when binding to contours
+	for( auto &stamp : mStamps ) { if ( stamp.mHasScore) updateStamp(stamp); }
+	for( auto &stamp : mStamps ) { if (!stamp.mHasScore) updateStamp(stamp); }
 	
 	// Tick stamps
 	for( auto &stamp : mStamps ) stamp.tick();

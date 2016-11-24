@@ -98,7 +98,7 @@ static void appendQuad( TriMesh& mesh, ColorA color, vec2 v[4] )
 int Score::drawNotes( GameWorld::DrawType drawType ) const
 {
 	const float kNoteFadeOutTimeFrac = .2f;
-	const float kInflateOnHitFrac = .25f;
+	const float kInflateOnHitFrac = .25f; // cm (world units)
 	
 	const vec2 xvec = getPlayheadVec();
 	const vec2 yvec = perp(xvec);
@@ -109,13 +109,10 @@ int Score::drawNotes( GameWorld::DrawType drawType ) const
 	// (probably wise to extract this geometry/data once when processing vision data,
 	// then use it for both playback and drawing).
 	const float invcols = 1.f / (float)(mQuantizedImage.cols);
-
 	const float yheight = 1.f / (float)mNoteCount;
-
-
-	TriMesh mesh( TriMesh::Format().positions(2).colors(4) );
-	
 	const float playheadFrac = getPlayheadFrac();
+
+	TriMesh mesh( TriMesh::Format().positions(2).colors(4) );	
 
 	for ( int y=0; y<mNoteCount; ++y )
 	{
@@ -140,15 +137,6 @@ int Score::drawNotes( GameWorld::DrawType drawType ) const
 
 				const bool isInFlight = playheadFrac > x1frac && playheadFrac < x2frac;
 				if (isInFlight) numOnNotes++;
-
-				float inflate;
-				if (isInFlight)
-				{
-					inflate = 1.f - (playheadFrac - x1frac) / (x2frac - x1frac);
-					inflate *= inflate;
-					inflate *= kInflateOnHitFrac;
-				}
-				else inflate = 0.f;
 				
 
 				/*	0--1 .. 2
@@ -170,6 +158,12 @@ int Score::drawNotes( GameWorld::DrawType drawType ) const
 				// stretch it out
 				if (isInFlight) // this conditional is redundant to inflate==0.f
 				{
+					float inflate;
+					
+					inflate = 1.f - (playheadFrac - x1frac) / (x2frac - x1frac);
+					inflate *= inflate;
+					inflate *= kInflateOnHitFrac;
+
 					vec2 xd = xvec * inflate;
 					vec2 yd = -yvec * inflate; // don't get why this needs to be negative, but it does. :P
 					
