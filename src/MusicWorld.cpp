@@ -404,6 +404,8 @@ void MusicWorld::tickStamps()
 		if ( overlap>0 )
 		{
 			vec2 v = s1.mSearchForPaperLoc - s2.mSearchForPaperLoc;
+			if (v==vec2(0,0)) v = randVec2();
+			else v = normalize(v);
 			
 			float df1 = decollideFrac ;
 			float df2 = decollideFrac ;
