@@ -265,7 +265,7 @@ MusicVision::decideInstrumentForScore( const Score& score, const vector<MusicSta
 	
 	for( const auto &s : stamps )
 	{
-		if ( score.getPolyLine().contains(s.mLoc) )
+		if ( s.isInstrumentAvailable() && score.getPolyLine().contains(s.mLoc) )
 		{
 			float sscore = distance( score.getCentroid(), s.mLoc );
 			if (sscore<bestScore)

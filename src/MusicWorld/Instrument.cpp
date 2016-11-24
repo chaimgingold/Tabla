@@ -104,6 +104,22 @@ bool Instrument::isNoteType() const
 	return mSynthType==Instrument::SynthType::MIDI || mSynthType==Instrument::SynthType::RobitPokie;
 }
 
+bool Instrument::isAvailable() const
+{
+	switch( mSynthType )
+	{
+        case SynthType::MIDI:
+			return mMidiOut.get();
+			break;
+		case SynthType::RobitPokie:
+			return mSerialDevice.get();
+			break;
+		default:
+			return true;
+			break;
+	}
+}
+
 void Instrument::setupMIDI()
 {
 	cout << "Opening port " << mPort << " for '" << mName << "'" << endl;

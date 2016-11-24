@@ -169,9 +169,11 @@ void MusicWorld::setupStamps()
 	{
 		MusicStamp s;
 		
-		s.mXAxis = mTimeVec;
 		s.mLoc = c + vec2(glm::rotate( vec3(r,0,0), angle, vec3(0,0,1) ));
+		s.mHomeLoc = s.mLoc;
 		s.mSearchForPaperLoc = s.mLoc;
+
+		s.mXAxis = mTimeVec;
 		s.mIconWidth = mStampIconWidth;
 		s.mInstrument = i.second;
 		
@@ -340,20 +342,25 @@ void MusicWorld::tickStamps()
 	
 	auto updateStamp = [&]( MusicStamp& stamp )
 	{
+		bool isAvailable = stamp.isInstrumentAvailable();
+
 		// update search loc
-		const Contour* contains = findContour(stamp.mSearchForPaperLoc);
-		
-		if ( contains )
+		if ( isAvailable || stamp.mHasScore )
 		{
-			// ensure:
-			// 1. the centroid is still in the polygon!, and
-			// 2. it isn't in a score
-			// 3. we aren't reusing an ocv contour >1x
+			const Contour* contains = findContour(stamp.mSearchForPaperLoc);
 			
-			if ( /*!pickScore(contains->mCenter) &&*/ contoursUsed.find(contains->mOcvContourIndex) == contoursUsed.end() )
+			if ( contains )
 			{
-				stamp.mSearchForPaperLoc = contains->mCenter;
-				contoursUsed.insert(contains->mOcvContourIndex);
+				// ensure:
+				// 1. the centroid is still in the polygon!, and
+				// 2. it isn't in a score
+				// 3. we aren't reusing an ocv contour >1x
+				
+				if ( /*!pickScore(contains->mCenter) &&*/ contoursUsed.find(contains->mOcvContourIndex) == contoursUsed.end() )
+				{
+					stamp.mSearchForPaperLoc = contains->mCenter;
+					contoursUsed.insert(contains->mOcvContourIndex);
+				}
 			}
 		}
 		
@@ -363,6 +370,7 @@ void MusicWorld::tickStamps()
 			// idle sway animation
 			stamp.mXAxis = mTimeVec;
 			stamp.mIconPoseTarget = tIconAnimState() + tIconAnimState::getIdleSway(mPhase, getBeatDuration());
+			if (!isAvailable) stamp.mIconPoseTarget.mScale = vec2(0,0);
 			if (stamp.mInstrument) stamp.mIconPoseTarget.mColor = stamp.mInstrument->mNoteOffColor;
 			
 			// go to search location

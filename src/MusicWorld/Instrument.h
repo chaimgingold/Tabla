@@ -88,7 +88,8 @@ public:
 	void setup();
 
 	bool isNoteType() const;
-
+	bool isAvailable() const; // e.g. couldn't connect to device
+	
 	Arpeggiator arpeggiator;
 
 	// colors!

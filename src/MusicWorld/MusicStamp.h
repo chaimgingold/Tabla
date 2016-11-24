@@ -87,9 +87,11 @@ public:
 
 	void draw() const;
 	void tick();
+	bool isInstrumentAvailable() const { return mInstrument && mInstrument->isAvailable(); }
 	
 	vec2 mXAxis = vec2(1,0);
 	vec2 mLoc; // drawn loc
+	vec2 mHomeLoc;
 	vec2 mSearchForPaperLoc; // the secret location that tracks paper; we pop to here if we lose our score
 	float mIconWidth = 10.f;
 
