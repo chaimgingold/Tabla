@@ -14,6 +14,8 @@
 
 using namespace ci;
 
+class Score;
+
 // animation pose
 struct tIconAnimState
 {
@@ -107,6 +109,26 @@ public:
 private:
 	void drawInstrumentIcon( vec2 worldx, tIconAnimState pose ) const;
 	
+};
+
+class MusicStampVec : public vector<MusicStamp>
+{
+public:
+
+	void setParams( XmlTree& );
+	void setup( const map<string,InstrumentRef>&, PolyLine2 worldBounds, vec2 timeVec );
+	
+	void tick( const vector<Score>&, const ContourVector&, float globalPhase, float globalBeatDuration );
+
+private:
+	MusicStamp* getStampByInstrument( InstrumentRef );
+
+	vec2  mTimeVec;	
+	PolyLine2 mWorldBoundsPoly;
+	float mStampIconWidth=5.f;
+	float mStampPaletteGutter=1.f;
+	
+
 };
 
 #endif /* MusicStamp_hpp */

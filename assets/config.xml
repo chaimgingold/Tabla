@@ -193,8 +193,10 @@
 			
 			
 			<!-- Graphics/UI Layout -->
-			<StampIconWidth>5</StampIconWidth>
-			<StampPaletteGutter>1</StampPaletteGutter>
+			<Stamps>
+				<IconWidth>5</IconWidth>
+				<PaletteGutter>1</PaletteGutter>
+			</Stamps>
 			
 
 				<!-- Music -->

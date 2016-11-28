@@ -23,7 +23,7 @@ public:
 
 	// shape
 	vec2  mQuad[4];
-	/*  Vertices are played back like so:17317412
+	/*  Vertices are played back like so:
 
 
 	 0---1

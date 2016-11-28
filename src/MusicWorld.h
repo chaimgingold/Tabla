@@ -53,21 +53,13 @@ private:
 	int   mBeatQuantization=4;
 	
 	vector<float> mMeasureCounts; // what tempos do we support? 0 entries means free form, 1 entry means all are fixed.
-	// TODO: rename me something about measure counts
 	
 	map<string,InstrumentRef> mInstruments;
 	vector<Scale> mScales;
 	vector<Score> mScores;
-	vector<MusicStamp> mStamps;
+	MusicStampVec mStamps;
 	
 	const Score* pickScore( vec2 ) const;
-	
-	void setupStamps();
-	MusicStamp* getStampByInstrument( InstrumentRef );
-	void tickStamps();
-	
-	float mStampIconWidth=5.f;
-	float mStampPaletteGutter=1.f;
 	
 	// meta params
 	MetaParamInfo getMetaParamInfo( MetaParam ) const;
