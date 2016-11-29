@@ -1,3 +1,12 @@
+11/28/2016 - 12/05/2016
+* Stamp tracking much more solid, controllabe.
+* Multi-measure stamp tracking much better.
+* Bug fix to new stamp/instrument->score assignment.
+
+11/21/2016 - 11/26/2016
+* Multi-measure tracks (and short tracks) works properly now.
+* New stamp system for instrument assignment.
+
 11/14/2016 - 11/18/2016
 * Barrel distortion correction!
 * New table!
