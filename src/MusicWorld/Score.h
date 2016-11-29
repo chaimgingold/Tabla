@@ -109,4 +109,12 @@ private:
 	//void drawInstrumentIcon( tIconAnimState pose ) const;
 };
 
+class ScoreVec : public vector<Score>
+{
+public:
+	const Score* pick( vec2 ) const;
+	Score* pick( vec2 );
+	
+};
+
 #endif /* Score_h */

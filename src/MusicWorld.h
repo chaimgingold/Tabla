@@ -56,10 +56,8 @@ private:
 	
 	map<string,InstrumentRef> mInstruments;
 	vector<Scale> mScales;
-	vector<Score> mScores;
+	ScoreVec	  mScores;
 	MusicStampVec mStamps;
-	
-	const Score* pickScore( vec2 ) const;
 	
 	// meta params
 	MetaParamInfo getMetaParamInfo( MetaParam ) const;

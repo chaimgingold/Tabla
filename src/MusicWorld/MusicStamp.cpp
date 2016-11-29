@@ -6,6 +6,7 @@
 //
 //
 
+#include <queue>
 #include "cinder/Rand.h"
 
 #include "MusicStamp.h"
@@ -165,16 +166,8 @@ MusicStampVec::getStampByInstrument( InstrumentRef instr )
 	return 0;
 }
 
-void MusicStampVec::tick( const vector<Score>& scores, const ContourVector& contours, float globalPhase, float globalBeatDuration )
+void MusicStampVec::tick( const ScoreVec& scores, const ContourVector& contours, float globalPhase, float globalBeatDuration )
 {
-	auto findContour = [contours]( vec2 p ) -> const Contour*
-	{
-		const Contour* contains = contours.findLeafContourContainingPoint(p);
-		
-		if ( contains && !contains->mIsHole && contains->mPolyLine.contains(contains->mCenter) ) return contains;
-		else return (const Contour*)0;
-	};
-	
 	// Forget stamps' scores
 	for( auto &stamp : *this )
 	{
@@ -192,41 +185,117 @@ void MusicStampVec::tick( const vector<Score>& scores, const ContourVector& cont
 
 		if (stamp)
 		{
-			stamp->mXAxis = score.getPlayheadVec();
+			// mark it
 			stamp->mHasScore = true;
-			stamp->mLoc = lerp( stamp->mLoc, score.getCentroid(), .5f );
-			stamp->mIconPoseTarget = score.getIconPoseFromScore(score.getPlayheadFrac());
 			
-			stamp->mIconPoseTarget += tIconAnimState::getSwayForScore(score.getPlayheadFrac()); // blend in sway
-			
-			// new score to attach to?
-			if ( !stamp->mLastHasScore && findContour(score.getCentroid()) )
+			// update search: new score to attach to?
+			if ( !stamp->mLastHasScore /* new! */ && findContour(contours,score.getCentroid()) /* not a zombie */ )
 			{
 				stamp->mSearchForPaperLoc = score.getCentroid();
 			}
+
+			// anim
+			updateAnimWithScore(*stamp,score);
 		}
 	}
 
-	// stamps: search for contours, sway
-	set<int> contoursUsed;
+	// update search loc
+	updateSearch(contours);
 	
-	auto updateStamp = [&]( MusicStamp& stamp )
-	{
-		bool isAvailable = stamp.isInstrumentAvailable();
+	// idle dance
+	updateIdleAnims(globalPhase, globalBeatDuration);
+	
+	// De-collide them
+	decollide();
+	decollideScores(scores);
+	
+	// Tick stamps
+	for( auto &stamp : *this ) stamp.tick();
+}
 
-		// update search loc
-		if ( isAvailable || stamp.mHasScore )
+void MusicStampVec::updateAnimWithScore( MusicStamp& stamp, const Score& score ) const
+{
+	stamp.mXAxis = score.getPlayheadVec();
+	stamp.mLoc = lerp( stamp.mLoc, score.getCentroid(), .5f );
+	stamp.mIconPoseTarget = score.getIconPoseFromScore(score.getPlayheadFrac());
+	stamp.mIconPoseTarget += tIconAnimState::getSwayForScore(score.getPlayheadFrac()); // blend in sway
+}
+
+void MusicStampVec::updateIdleAnims( float globalPhase, float globalBeatDuration )
+{
+	for( auto &stamp : *this )
+	{
+		if ( !stamp.mHasScore )
 		{
-			const Contour* contains = findContour(stamp.mSearchForPaperLoc);
+			// idle sway animation
+			stamp.mXAxis = mTimeVec;
+			stamp.mIconPoseTarget = tIconAnimState() + tIconAnimState::getIdleSway(globalPhase,globalBeatDuration);
 			
+			// shrink away?
+			if ( !stamp.mInstrument || !stamp.mInstrument->isAvailable() )
+			{
+				stamp.mIconPoseTarget.mScale = vec2(0,0);
+			}
+			
+			// color: same as note-off
+			if (stamp.mInstrument) stamp.mIconPoseTarget.mColor = stamp.mInstrument->mNoteOffColor;
+		}
+	}
+}
+
+void MusicStampVec::updateSearch( const ContourVector& contours )
+{
+	// sort stamps by priority when binding to and chasing contours
+	auto cmp = [](MusicStamp* left, MusicStamp* right)
+	{
+		auto priority = []( MusicStamp& s ) -> int
+		{
+			if (s.mHasScore)		return 5;
+			if (s.mLastHasScore)	return 4;
+			if (s.mLastHasContour)	return 3;
+			if (s.mHasContour)		return 2;
+			return 0;
+		};
+		
+		return priority(*left) < priority(*right);
+	};
+	priority_queue<MusicStamp*, std::vector<MusicStamp*>, decltype(cmp)> updateQueue(cmp);
+
+	for( auto &s : *this ) updateQueue.push(&s);
+	
+	
+	// update
+	set<int> contoursUsed; // prevent stamps from doubling up by marking them as used
+
+	while ( !updateQueue.empty() )
+	{
+		// get next
+		MusicStamp& stamp = *(updateQueue.top());
+		updateQueue.pop();
+		
+		// update search loc
+		if ( stamp.isInstrumentAvailable() || stamp.mHasScore ) // very rare we don't ever try
+		{
+			// find  a contour to latch on to
+			const Contour* contains = findContour(contours,stamp.mSearchForPaperLoc);
+			
+			// failed? find a close one instead...
+			if ( !contains )
+			{
+				float dist;
+				contains = contours.findClosestContour(stamp.mSearchForPaperLoc,0,&dist);
+				if (dist>stamp.mIconWidth) contains=0;
+			}
+			
+			// check it and bind
 			if ( contains )
 			{
 				// ensure:
 				// 1. the centroid is still in the polygon!, and
-				// 2. it isn't in a score
+				// 2. it isn't in a score [Not doing this; Should we?]
 				// 3. we aren't reusing an ocv contour >1x
 				
-				if ( /*!pickScore(contains->mCenter) &&*/ contoursUsed.find(contains->mOcvContourIndex) == contoursUsed.end() )
+				if ( contains->contains(contains->mCenter) && contoursUsed.find(contains->mOcvContourIndex) == contoursUsed.end() )
 				{
 					stamp.mHasContour = true;
 					stamp.mSearchForPaperLoc = contains->mCenter;
@@ -235,27 +304,27 @@ void MusicStampVec::tick( const vector<Score>& scores, const ContourVector& cont
 			}
 		}
 		
-		// filter
+		// go to search location?
 		if ( !stamp.mHasScore )
 		{
-			// idle sway animation
-			stamp.mXAxis = mTimeVec;
-			stamp.mIconPoseTarget = tIconAnimState() + tIconAnimState::getIdleSway(globalPhase,globalBeatDuration);
-			if (!isAvailable) stamp.mIconPoseTarget.mScale = vec2(0,0);
-			if (stamp.mInstrument) stamp.mIconPoseTarget.mColor = stamp.mInstrument->mNoteOffColor;
-			
-			// go to search location
 			stamp.mLoc = lerp( stamp.mLoc, stamp.mSearchForPaperLoc, .5f );
 		}
-	};
+	}
+}
+
+const Contour* MusicStampVec::findContour( const ContourVector& contours, vec2 p ) const
+{
+	const Contour* contains = contours.findLeafContourContainingPoint(p);
 	
-	// update stamps, but first do ones that have scores, then those that do not.
-	// because: we want ones with scores to have priority when binding to contours
-	// (we should also prioritize based on if it has a contour and had a contour!, so maybe organize into a heap) 
-	for( auto &stamp : *this ) { if ( stamp.mHasScore) updateStamp(stamp); }
-	for( auto &stamp : *this ) { if (!stamp.mHasScore) updateStamp(stamp); }
-	
-	// De-collide them
+	if ( contains && !contains->mIsHole && contains->mPolyLine.contains(contains->mCenter) )
+	{
+		return contains;
+	}
+	else return 0;
+}
+
+void MusicStampVec::decollide()
+{
 	const float decollideFrac = .5f;  
 
 	for( int i=0  ; i<this->size(); ++i )
@@ -289,7 +358,26 @@ void MusicStampVec::tick( const vector<Score>& scores, const ContourVector& cont
 			s2.mSearchForPaperLoc -= v * df2 * overlap * .5f; 
 		}
 	}
-	
-	// Tick stamps
-	for( auto &stamp : *this ) stamp.tick();
+}
+
+void MusicStampVec::decollideScores( const ScoreVec& scores )
+{
+	for( auto &stamp : *this )
+	{
+		if ( !stamp.mHasScore )
+		{
+			// did we collide with an active (has an instrument) score?
+			const Score* s = scores.pick(stamp.mLoc);
+			
+			if ( s && s->mInstrument )
+			{
+	//			stamp.mLoc = lerp( stamp.mLoc, stamp.mHomeLoc, .5f );
+				// problem: this doesn't complete properly, it works, but stamp just goes to the edge...
+
+				// just do it all the way
+				stamp.mLoc = stamp.mHomeLoc;
+				stamp.mSearchForPaperLoc = stamp.mLoc;
+			}
+		}
+	}
 }

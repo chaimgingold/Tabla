@@ -18,8 +18,6 @@ class MusicVision
 {
 public:
 
-	typedef vector<Score> ScoreVector;
-	
 	// tuning
 	void setParams( XmlTree );
 
@@ -34,7 +32,7 @@ public:
 	PolyLine2 mWorldBoundsPoly;
 
 	// do it
-	ScoreVector updateVision( const ContourVector &c, Pipeline&, const ScoreVector& oldScores, const vector<MusicStamp>& ) const;
+	ScoreVec updateVision( const ContourVector &c, Pipeline&, const ScoreVec& oldScores, const vector<MusicStamp>& ) const;
 	
 private:
 
@@ -54,13 +52,13 @@ private:
 	float mWorldUnitsPerMeasure = 5.f;
 
 	// helpers
-	ScoreVector getScores( const ContourVector&, const ScoreVector& oldScores, const vector<MusicStamp>& stamps ) const;
-	ScoreVector getScoresFromContours( const ContourVector&, const vector<MusicStamp>& stamps ) const;
-	ScoreVector mergeOldAndNewScores(
-		const ScoreVector& oldScores,
-		const ScoreVector& newScores,
+	ScoreVec getScores( const ContourVector&, const ScoreVec& oldScores, const vector<MusicStamp>& stamps ) const;
+	ScoreVec getScoresFromContours( const ContourVector&, const vector<MusicStamp>& stamps ) const;
+	ScoreVec mergeOldAndNewScores(
+		const ScoreVec& oldScores,
+		const ScoreVec& newScores,
 		const ContourVector& contours ) const;
-	void updateScoresWithImageData( Pipeline& pipeline, ScoreVector& scores ) const;
+	void updateScoresWithImageData( Pipeline& pipeline, ScoreVec& scores ) const;
 	
 	float getNearestTempo( float ) const; // input -> closest mMeasureCounts[]
 	
@@ -76,19 +74,19 @@ private:
 	// - findExactScoreMatch: (new) no permuted matches allowed (must have same orientation)
 	Score* findScoreMatch(
 		const Score& needle,
-		ScoreVector& hay,
+		ScoreVec& hay,
 		float maxErr,
 		float* matchError=0 ) const;
 
 	Score* findExactScoreMatch(
 		const Score& needle,
-		ScoreVector& hay,
+		ScoreVec& hay,
 		float maxErr,
 		float* matchError=0 ) const;
 	
 	float  scoreFractionInContours( const Score& old, const ContourVector &contours, int numSamples ) const;
-	bool   doesZombieScoreIntersectZombieScores( const Score& old, ScoreVector& scores ) const; // marks other zombies if so
-	bool   shouldPersistOldScore  ( const Score& old, ScoreVector& scores, const ContourVector &contours ) const;
+	bool   doesZombieScoreIntersectZombieScores( const Score& old, ScoreVec& scores ) const; // marks other zombies if so
+	bool   shouldPersistOldScore  ( const Score& old, ScoreVec& scores, const ContourVector &contours ) const;
 		// match failed; do we want to keep it?
 		// any intersecting zombie scores are marked for removal (mDoesZombieTouchOtherZombies)
 	bool	shouldBeMetaParamScore( const Score& ) const;

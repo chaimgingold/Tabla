@@ -30,7 +30,7 @@ void MusicVision::setParams( XmlTree xml )
 }
 
 Score*
-MusicVision::findScoreMatch( const Score& needle, ScoreVector& hay, float maxErr, float* outError ) const
+MusicVision::findScoreMatch( const Score& needle, ScoreVec& hay, float maxErr, float* outError ) const
 {
 	Score* best   = 0;
 	float  bestErr = maxErr;
@@ -95,7 +95,7 @@ MusicVision::findScoreMatch( const Score& needle, ScoreVector& hay, float maxErr
 }
 
 Score*
-MusicVision::findExactScoreMatch( const Score& needle, ScoreVector& hay, float maxErr, float* outError ) const
+MusicVision::findExactScoreMatch( const Score& needle, ScoreVec& hay, float maxErr, float* outError ) const
 {
 	Score* best   = 0;
 	float  bestErr = maxErr;
@@ -127,7 +127,7 @@ MusicVision::findExactScoreMatch( const Score& needle, ScoreVector& hay, float m
 }
 
 bool
-MusicVision::doesZombieScoreIntersectZombieScores( const Score& old, ScoreVector& scores ) const
+MusicVision::doesZombieScoreIntersectZombieScores( const Score& old, ScoreVec& scores ) const
 {
 	bool r=false;
 
@@ -160,7 +160,7 @@ MusicVision::doesZombieScoreIntersectZombieScores( const Score& old, ScoreVector
 }
 
 bool
-MusicVision::shouldPersistOldScore ( const Score& old, ScoreVector& scores, const ContourVector &contours ) const
+MusicVision::shouldPersistOldScore ( const Score& old, ScoreVec& scores, const ContourVector &contours ) const
 {
 	// did we go dark?
 	if ( scoreFractionInContours(old, contours, mScoreTrackRejectNumSamples) < mScoreTrackRejectSuccessThresh ) return false;
@@ -343,20 +343,20 @@ float MusicVision::getScoreOctaveShift( const Score& score, const PolyLine2& wrt
 	return f;
 }
 
-MusicVision::ScoreVector
-MusicVision::updateVision( const ContourVector &contours, Pipeline& pipeline, const ScoreVector& oldScores, const vector<MusicStamp>& stamps ) const
+ScoreVec
+MusicVision::updateVision( const ContourVector &contours, Pipeline& pipeline, const ScoreVec& oldScores, const vector<MusicStamp>& stamps ) const
 {
-	ScoreVector v = getScores(contours,oldScores,stamps);
+	ScoreVec v = getScores(contours,oldScores,stamps);
 	
 	updateScoresWithImageData(pipeline,v);
 	
 	return v;
 }
 
-MusicVision::ScoreVector
+ScoreVec
 MusicVision::getScoresFromContours( const ContourVector& contours, const vector<MusicStamp>& stamps ) const
 {
-	ScoreVector scores;
+	ScoreVec scores;
 	
 	for( const auto &c : contours )
 	{
@@ -397,16 +397,15 @@ MusicVision::getScoresFromContours( const ContourVector& contours, const vector<
 	return scores;
 }
 
-MusicVision::ScoreVector
-MusicVision::mergeOldAndNewScores(
-	const ScoreVector& oldScores,
-	const ScoreVector& newScores,
+ScoreVec MusicVision::mergeOldAndNewScores(
+	const ScoreVec& oldScores,
+	const ScoreVec& newScores,
 	const ContourVector& contours ) const
 {
 	const bool kVerbose = false;
 	
 	// output is new scores
-	ScoreVector output = newScores;
+	ScoreVec output = newScores;
 	
 	// update output with old scores
 	for ( const auto &oldScore : oldScores )
@@ -419,7 +418,11 @@ MusicVision::mergeOldAndNewScores(
 			if (kVerbose) cout << "match" << endl;
 
 			// new <= old
-			*newScore = oldScore;
+			if (oldScore.mInstrument)
+			{
+				// overwrite new score with old, but not if old score had no instrument
+				*newScore = oldScore;
+			}
 		}
 		else // zombie! (c has no match)
 		{
@@ -438,9 +441,9 @@ MusicVision::mergeOldAndNewScores(
 	}
 
 	// 2nd pass eliminate intersecting zombie (anything flagged)
-	auto filterVector = []( ScoreVector& vec, function<bool(const Score&)> iffunc ) -> ScoreVector
+	auto filterVector = []( ScoreVec& vec, function<bool(const Score&)> iffunc ) -> ScoreVec
 	{
-		ScoreVector out;
+		ScoreVec out;
 		
 		for( auto &s : vec )
 		{
@@ -459,11 +462,10 @@ MusicVision::mergeOldAndNewScores(
 	return output;
 }
 
-MusicVision::ScoreVector
-MusicVision::getScores( const ContourVector& contours, const ScoreVector& oldScores, const vector<MusicStamp>& stamps ) const
+ScoreVec MusicVision::getScores( const ContourVector& contours, const ScoreVec& oldScores, const vector<MusicStamp>& stamps ) const
 {
 	// get new ones
-	ScoreVector newScores = getScoresFromContours(contours,stamps);
+	ScoreVec newScores = getScoresFromContours(contours,stamps);
 
 	// merge with old
 	newScores = mergeOldAndNewScores(oldScores,newScores,contours);
@@ -568,7 +570,7 @@ void MusicVision::quantizeImage( Pipeline& pipeline,
 	s.mQuantizedImage = thresholded;
 }
 
-void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVector& scores ) const
+void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& scores ) const
 {
 	// this function grabs the bitmaps for each score
 

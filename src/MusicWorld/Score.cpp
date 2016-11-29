@@ -334,7 +334,7 @@ tIconAnimState Score::getIconPoseFromScore_Percussive( float playheadFrac ) cons
 		if ( isNoteOn(playheadFrac,note) )
 		{
 			numOnNotes++;
-			pose += poses[note%13];
+			pose += poses[ (note*3)%13 ]; // separate similar adjacent anim frames (in note space)
 			poseNormSum += vec4(1,1,1,1);
 		}
 	}
@@ -832,4 +832,22 @@ float Score::getQuadMaxInteriorAngle() const
 	}
 
 	return mang;
+}
+
+const Score* ScoreVec::pick( vec2 p ) const
+{
+	for( auto &s : *this )
+	{
+		if (s.getPolyLine().contains(p)) return &s;
+	}
+	return 0;
+}
+
+Score* ScoreVec::pick( vec2 p )
+{
+	for( auto &s : *this )
+	{
+		if (s.getPolyLine().contains(p)) return &s;
+	}
+	return 0;
 }

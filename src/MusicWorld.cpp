@@ -237,15 +237,6 @@ void MusicWorld::update()
 	mFileWatch.scanFiles();
 }
 
-const Score* MusicWorld::pickScore( vec2 p ) const
-{
-	for( auto &s : mScores )
-	{
-		if (s.getPolyLine().contains(p)) return &s;
-	}
-	return 0;
-}
-
 void MusicWorld::updateVision( const ContourVector &c, Pipeline &p )
 {
 	mContours = c;

@@ -15,6 +15,7 @@
 using namespace ci;
 
 class Score;
+class ScoreVec;
 
 // animation pose
 struct tIconAnimState
@@ -118,11 +119,18 @@ public:
 	void setParams( XmlTree& );
 	void setup( const map<string,InstrumentRef>&, PolyLine2 worldBounds, vec2 timeVec );
 	
-	void tick( const vector<Score>&, const ContourVector&, float globalPhase, float globalBeatDuration );
+	void tick( const ScoreVec&, const ContourVector&, float globalPhase, float globalBeatDuration );
 
 private:
 	MusicStamp* getStampByInstrument( InstrumentRef );
-
+	
+	void decollide();
+	void decollideScores( const ScoreVec& );
+	void updateAnimWithScore( MusicStamp&, const Score& ) const;
+	void updateIdleAnims( float globalPhase, float globalBeatDuration );
+	void updateSearch( const ContourVector& );
+	const Contour* findContour( const ContourVector&, vec2 ) const;
+	
 	vec2  mTimeVec;	
 	PolyLine2 mWorldBoundsPoly;
 	float mStampIconWidth=5.f;
