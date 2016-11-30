@@ -218,7 +218,9 @@ void MusicStampVec::updateAnimWithScore( MusicStamp& stamp, const Score& score )
 	stamp.mXAxis = score.getPlayheadVec();
 	stamp.mLoc = lerp( stamp.mLoc, score.getCentroid(), .5f );
 	stamp.mIconPoseTarget = score.getIconPoseFromScore(score.getPlayheadFrac());
-	stamp.mIconPoseTarget += tIconAnimState::getSwayForScore(score.getPlayheadFrac()); // blend in sway
+	stamp.mIconPoseTarget += tIconAnimState::getSwayForScore(
+		fmod( score.getPlayheadFrac() * score.mMeasureCount, 1.f )
+		); // blend in sway
 }
 
 void MusicStampVec::updateIdleAnims( float globalPhase, float globalBeatDuration )
