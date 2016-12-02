@@ -578,6 +578,12 @@ void PaperBounce3App::drawWorld( GameWorld::DrawType drawType )
 
 void PaperBounce3App::draw()
 {
+	// this, unfortunately, still happens 2x more than needed,
+	// since it will happen once per window.
+	// but not worrying about that minor performance point right now.
+	if (mGameWorld) mGameWorld->prepareToDraw();
+	
+	// draw window
 	WindowData* win = getWindow()->getUserData<WindowData>() ;
 	
 	if (win) win->draw();

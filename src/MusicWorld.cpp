@@ -26,8 +26,8 @@ using namespace ci::gl;
 MusicWorld::MusicWorld()
 {
 	mFileWatch.loadShader(
-		PaperBounce3App::get()->hotloadableAssetPath("additive.vert"),
-		PaperBounce3App::get()->hotloadableAssetPath("additive.frag"),
+		PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / "additive.vert" ),
+		PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / "additive.frag" ),
 		[this](gl::GlslProgRef prog)
 	{
 		mAdditiveShader = prog; // allows null, so we can easily see if we broke it

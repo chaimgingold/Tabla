@@ -6,10 +6,22 @@
 //
 //
 
+#include "PaperBounce3App.h"
 #include "BallWorld.h"
 #include "geom.h"
 #include "cinder/Rand.h"
 #include "xml.h"
+
+BallWorld::BallWorld()
+{
+	mFileWatch.loadShader(
+		PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / "circle.vert" ),
+		PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / "circle.frag" ),
+		[this](gl::GlslProgRef prog)
+	{
+		mCircleShader = prog; // allows null, so we can easily see if we broke it
+	});
+}
 
 void BallWorld::setParams( XmlTree xml )
 {
@@ -20,7 +32,103 @@ void BallWorld::setParams( XmlTree xml )
 	getXml(xml,"BallMaxVel",mBallMaxVel);
 }
 
-void BallWorld::draw( DrawType drawType )
+static void appendQuad( TriMesh& mesh, ColorA color, const vec2 v[4], const vec2 uv[4] )
+{
+	/*  0--1
+	    |  |
+		3--2
+	*/
+	
+	int i = mesh.getNumVertices();
+
+	ColorA colors[4] = {color,color,color,color};
+	
+	mesh.appendPositions(v,4);
+	mesh.appendColors(colors,4);
+	mesh.appendTexCoords0(uv,4);
+	
+	mesh.appendTriangle(i+0,i+1,i+3);
+	mesh.appendTriangle(i+3,i+1,i+2);
+}
+
+TriMeshRef BallWorld::getTriMeshForBalls() const
+{
+	TriMeshRef mesh = TriMesh::create( TriMesh::Format().positions(2).colors(4).texCoords0(2) );
+
+	const vec2 uv[4] = {
+		vec2(0,1),
+		vec2(1,1),
+		vec2(1,0),
+		vec2(0,0)
+	};
+
+	for( const auto &b : mBalls )
+	{
+		if (0)
+		{
+			// just a circle
+			vec2 v[4];
+
+			Rectf r( b.mLoc - vec2(1,1)*b.mRadius,
+					 b.mLoc + vec2(1,1)*b.mRadius );
+
+			v[0] = r.getUpperLeft();
+			v[1] = r.getUpperRight();
+			v[2] = r.getLowerRight();
+			v[3] = r.getLowerLeft();
+			
+			appendQuad(*mesh, b.mColor, v, uv );
+		}
+		else
+		{
+			// squash and stretch
+			mat4 x;
+			
+			float f;
+			vec2 stretch;
+			{
+				vec2  vel = b.getVel() ;
+				
+				float squashLen = min( length(b.mSquash) * 10.f, b.mRadius * .5f ) ;
+				float velLen    = length(vel) ;
+				
+				float l ;
+				
+				if ( squashLen > velLen ) stretch = perp(b.mSquash), l=squashLen ;
+				else stretch = vel, l = velLen ;
+				
+				f = .25f * (l / b.mRadius) ;
+			}
+			
+			x *= glm::translate( vec3(b.mLoc,0) ) ;
+			x *= glm::scale( vec3(b.mRadius,b.mRadius,1.f) );
+			
+			x *= glm::rotate( glm::atan( stretch.y, stretch.x ), vec3(0,0,1) );
+			x *= glm::scale( vec3(1.f+f,1.f-f,1) );
+			
+			// just a circle
+			vec2 v[4] = {
+				vec2(-1,1),
+				vec2(1,1),
+				vec2(1,-1),
+				vec2(-1,-1)
+			};
+			
+			for( int i=0; i<4; ++i ) v[i] = vec2( x * vec4(v[i],0,1) );
+			
+			appendQuad(*mesh, b.mColor, v, uv);
+		}
+	}
+	
+	return mesh;
+}
+
+void BallWorld::prepareToDraw()
+{
+	mBallMesh = getTriMeshForBalls();
+}
+
+void BallWorld::drawImmediate( bool lowPoly ) const
 {
 	for( auto b : mBalls )
 	{
@@ -33,8 +141,9 @@ void BallWorld::draw( DrawType drawType )
 		}
 		else
 		{
-			int numSegments = -1 ; // should resolve to a small #
-			if ( drawType==DrawType::Projector || drawType==DrawType::UIMain ) numSegments = 20;
+			int numSegments;
+			if ( lowPoly ) numSegments = -1 ; // should resolve to a small #
+			else numSegments = 20;
 			
 			// squash + stretch
 			gl::pushModelView() ;
@@ -61,6 +170,24 @@ void BallWorld::draw( DrawType drawType )
 	}
 }
 
+void BallWorld::draw( DrawType drawType )
+{
+	if (1)
+	{
+		// draw using graphics we setup in prepareToDraw().
+		if (mBallMesh && mCircleShader)
+		{
+			gl::ScopedGlslProg glslScp( mCircleShader );
+			gl::draw(*mBallMesh);
+		}
+	}
+	else
+	{
+		// draw immediate mode
+		drawImmediate( drawType==DrawType::UIPipelineThumb );
+	}
+}
+
 void BallWorld::gameWillLoad()
 {
 	for ( int i=0; i<mDefaultNumBalls; ++i )
@@ -70,6 +197,12 @@ void BallWorld::gameWillLoad()
 }
 
 void BallWorld::update()
+{
+	mFileWatch.update();
+	updatePhysics();
+}
+
+void BallWorld::updatePhysics()
 {
 	int   steps = 1 ;
 	float delta = 1.f / (float)steps ;

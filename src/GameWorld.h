@@ -49,7 +49,8 @@ public:
 	
 	virtual void gameWillLoad(){}
 	virtual void update(){} // called each frame
-	virtual void draw( DrawType ){}
+	virtual void prepareToDraw() {} // called once per frame, before all draw calls.
+	virtual void draw( DrawType ){} // might be called many times per frame
 
 	virtual void cleanup(){}
 	
@@ -70,7 +71,7 @@ class GameCartridge
 {
 public:
 	virtual string getSystemName() const { return "GameWorld"; } // should match GameWorld name
-	virtual shared_ptr<GameWorld> load() const { return 0; }
+	virtual std::shared_ptr<GameWorld> load() const { return 0; }
 	
 };
 typedef std::shared_ptr<GameCartridge> GameCartridgeRef;
