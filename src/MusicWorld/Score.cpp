@@ -77,24 +77,6 @@ float Score::getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const
 	return (float)getNoteLengthAsImageCols(image,x,y) / (float)image.cols;
 }
 
-static void appendQuad( TriMesh& mesh, ColorA color, vec2 v[4] )
-{
-	/*  0--1
-	    |  |
-		3--2
-	*/
-	
-	int i = mesh.getNumVertices();
-
-	ColorA colors[4] = {color,color,color,color};
-	
-	mesh.appendPositions(v,4);
-	mesh.appendColors(colors,4);
-	
-	mesh.appendTriangle(i+0,i+1,i+3);
-	mesh.appendTriangle(i+3,i+1,i+2);
-}
-
 int Score::drawNotes( GameWorld::DrawType drawType ) const
 {
 	const float kNoteFadeOutTimeFrac = .2f;
@@ -393,6 +375,8 @@ tIconAnimState Score::getIconPoseFromScore_Melodic( float playheadFrac ) const
 	// new anim inspired by additive
 	state.mTranslate.y = lerp( -.5f, .5f, avgNote );
 	state.mScale = vec2(1,1) * lerp( 1.f, 1.5f, min( 1.f, ((float)numOnNotes / (float)mNoteCount)*2.f ) ) ;
+//	state.mGradientCenter = vec2( playheadFrac, avgNote );
+	state.mGradientSpeed = lerp( 8.f, 16.f, (float)numOnNotes/(float)mNoteCount );
 	
 	return state;
 }

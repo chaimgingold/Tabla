@@ -33,6 +33,9 @@ struct tIconAnimState
 	float	mRotate=0.f; // radians
 	ColorA  mColor = ColorA(1,1,1,1);
 
+	float	mGradientSpeed=1.f;
+	vec2	mGradientCenter;
+	
 	// some math so we can lerp, blend, etc...
 	tIconAnimState operator+( tIconAnimState rhs ) const
 	{
@@ -41,6 +44,8 @@ struct tIconAnimState
 		s.mScale     = mScale     + rhs.mScale;
 		s.mRotate    = mRotate    + rhs.mRotate;
 		s.mColor     = mColor     + rhs.mColor;
+		s.mGradientSpeed  = mGradientSpeed  + rhs.mGradientSpeed;
+		s.mGradientCenter = mGradientCenter + rhs.mGradientCenter;
 		return s;
 	}
 	tIconAnimState& operator+=( tIconAnimState rhs ) { *this = *this + rhs; return *this; }
@@ -52,6 +57,8 @@ struct tIconAnimState
 		s.mScale     = mScale     * rhs.mScale;
 		s.mRotate    = mRotate    * rhs.mRotate;
 		s.mColor     = mColor     * rhs.mColor;
+		s.mGradientSpeed  = mGradientSpeed  + rhs.mGradientSpeed;
+		s.mGradientCenter = mGradientCenter + rhs.mGradientCenter;
 		return s;
 	}
 	tIconAnimState operator*( float rhs ) const
@@ -61,6 +68,8 @@ struct tIconAnimState
 		s.mScale     = mScale     * rhs;
 		s.mRotate    = mRotate    * rhs;
 		s.mColor     = mColor     * rhs;
+		s.mGradientSpeed  = mGradientSpeed  * rhs;
+		s.mGradientCenter = mGradientCenter * rhs;
 		return s;
 	}
 
@@ -78,6 +87,8 @@ inline std::ostream &operator<<(std::ostream &os, tIconAnimState const &m) {
 	os << "\tmScale: " << m.mScale << endl;
 	os << "\tmRotate: " << m.mRotate << endl;
 	os << "\tmColor: " << m.mColor << endl;
+	os << "\tmGradientCenter: " << m.mGradientCenter << endl;
+	os << "\tmGradientSpeed: " << m.mGradientSpeed << endl;
 	
 	return os;
 }
@@ -88,6 +99,8 @@ class MusicStamp
 {
 public:
 
+	gl::GlslProgRef mRainbowShader;
+	
 	void draw() const;
 	void tick();
 	bool isInstrumentAvailable() const { return mInstrument && mInstrument->isAvailable(); }
@@ -117,7 +130,7 @@ class MusicStampVec : public vector<MusicStamp>
 public:
 
 	void setParams( XmlTree& );
-	void setup( const map<string,InstrumentRef>&, PolyLine2 worldBounds, vec2 timeVec );
+	void setup( const map<string,InstrumentRef>&, PolyLine2 worldBounds, vec2 timeVec, gl::GlslProgRef rainbowShader );
 	
 	void tick( const ScoreVec&, const ContourVector&, float globalPhase, float globalBeatDuration );
 

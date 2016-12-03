@@ -96,10 +96,27 @@ void MusicStamp::drawInstrumentIcon( vec2 worldx, tIconAnimState pose ) const
 	gl::rotate( pose.mRotate );
 	
 	
-	gl::color( pose.mColor );
-	
-	if (mInstrument && mInstrument->mIcon) gl::draw( mInstrument->mIcon, r );
-	else gl::drawSolidRect(r);
+	if (mRainbowShader && mInstrument && mInstrument->mIcon)
+	{
+		gl::ScopedGlslProg glslScp( mRainbowShader );
+		gl::ScopedTextureBind texScp( mInstrument->mIcon );
+		
+		mRainbowShader->uniform( "uTex0", 0 );
+		mRainbowShader->uniform( "uResolution", vec2(mIconWidth,mIconWidth) ); // ???
+		mRainbowShader->uniform( "uTime", (float)ci::app::getElapsedSeconds() );
+		mRainbowShader->uniform( "uSeed", (float)0.f ); // should be unique
+		mRainbowShader->uniform( "uSpeed", (float)pose.mGradientSpeed );
+		mRainbowShader->uniform( "uGradientCenter", pose.mGradientCenter );
+		
+		gl::drawSolidRect(r,vec2(0,1),vec2(1,0));
+	}
+	else
+	{
+		gl::color( pose.mColor );
+		
+		if (mInstrument && mInstrument->mIcon) gl::draw( mInstrument->mIcon, r );
+		else gl::drawSolidRect(r);
+	}
 	
 	gl::popModelMatrix();
 }
@@ -110,7 +127,7 @@ void MusicStampVec::setParams( XmlTree& xml )
 	getXml(xml,"PaletteGutter",mStampPaletteGutter);
 }
 
-void MusicStampVec::setup( const map<string,InstrumentRef>& instruments, PolyLine2 worldBounds, vec2 timeVec )
+void MusicStampVec::setup( const map<string,InstrumentRef>& instruments, PolyLine2 worldBounds, vec2 timeVec, gl::GlslProgRef rainbowShader )
 {
 	mTimeVec = timeVec;
 	mWorldBoundsPoly = worldBounds;
@@ -142,6 +159,7 @@ void MusicStampVec::setup( const map<string,InstrumentRef>& instruments, PolyLin
 	{
 		MusicStamp s;
 		
+		s.mRainbowShader = rainbowShader;
 		s.mLoc = c + vec2(glm::rotate( vec3(r,0,0), angle, vec3(0,0,1) ));
 		s.mHomeLoc = s.mLoc;
 		s.mSearchForPaperLoc = s.mLoc;
