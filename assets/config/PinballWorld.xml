@@ -14,5 +14,17 @@
 		<ContourMinWidth>			2	</ContourMinWidth>
 	</Vision>
 
-</PinballWorld>
 
+	<KeyMap>
+		<Key>
+			<char>n</char>
+			<input>flippers-left</input>
+		</Key>
+
+		<Key>
+			<char>m</char>
+			<input>flippers-right</input>
+		</Key>
+	</KeyMap>
+	
+</PinballWorld>

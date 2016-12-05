@@ -18,6 +18,8 @@ public:
 
 	PinballWorld();
 	~PinballWorld();
+
+	void setParams( XmlTree ) override;
 	
 	string getSystemName() const override { return "PinballWorld"; }
 
@@ -27,6 +29,8 @@ public:
 	
 	void worldBoundsPolyDidChange() override;
 
+	void keyDown( KeyEvent ) override;
+
 protected:
 	virtual void onBallBallCollide   ( const Ball&, const Ball& ) override;
 	virtual void onBallContourCollide( const Ball&, const Contour& ) override;
@@ -34,6 +38,9 @@ protected:
 
 private:
 	
+	// keymap
+	map<char,string> mKeyToInput; // maps keystrokes to input names
+	map<string,function<void()>> mInputToFunction; // maps input names to code handlers
 
 	// synthesis
 	cipd::PureDataNodeRef	mPureDataNode;	// synth engine

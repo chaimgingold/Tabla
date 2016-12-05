@@ -63,6 +63,10 @@ void FileWatch::loadXml( fs::path path, tXmlCallback func )
 			XmlTree xml( DataSourcePath::create(path) );
 			func(xml) ;
 		}
+		catch(cinder::Exception e)
+		{
+			cout << "loadXml, failed to load: " << e.what() << endl;
+		}
 		catch( ... )
 		{
 			cout << "loadXml, failed to load " << path << endl ;
@@ -98,7 +102,7 @@ void FileWatch::loadShader( fs::path vert, fs::path frag, tGlslProgCallback func
 
 void FileWatch::doLoad( fs::path path, tCallback func )
 {
-	cout << "FileWatch::doLoad '" << path << "'" << endl;
+	cout << "FileWatch::doLoad " << path << endl;
 	
 	if ( boost::filesystem::exists(path) )
 	{

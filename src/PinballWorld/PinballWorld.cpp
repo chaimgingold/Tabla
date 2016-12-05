@@ -14,8 +14,43 @@
 
 PinballWorld::PinballWorld()
 {
-	
 	setupSynthesis();
+	
+	// inputs
+	mInputToFunction["flippers-left"] = []()
+	{
+		cout << "flippers-left" << endl;
+	};
+
+	mInputToFunction["flippers-right"] = []()
+	{
+		cout << "flippers-right" << endl;
+	};
+}
+
+void PinballWorld::setParams( XmlTree xml )
+{
+	BallWorld::setParams(xml);
+	
+	if (xml.hasChild("KeyMap"))
+	{
+		XmlTree keys = xml.getChild("KeyMap");
+		
+		for( auto item = keys.begin("Key"); item != keys.end(); ++item )
+		{
+			if ( item->hasChild("char") && item->hasChild("input") )
+			{
+				string	charkey	= item->getChild("char").getValue<string>();
+				string	input	= item->getChild("input").getValue();
+				
+				char ckey = charkey.front();
+				
+				cout << ckey << ", " << input << endl;
+
+				mKeyToInput[ckey] = input;
+			}
+		}
+	}
 }
 
 void PinballWorld::gameWillLoad()
@@ -66,6 +101,22 @@ void PinballWorld::draw( DrawType drawType )
 
 void PinballWorld::worldBoundsPolyDidChange()
 {
+}
+
+void PinballWorld::keyDown( KeyEvent event )
+{
+	char c = event.getChar();
+	
+	auto i = mKeyToInput.find(c);
+	
+	if (i!=mKeyToInput.end())
+	{
+		auto j = mInputToFunction.find(i->second);
+		if (j!=mInputToFunction.end())
+		{
+			j->second();
+		}
+	}
 }
 
 // Synthesis
