@@ -1,0 +1,241 @@
+<MusicWorld>
+
+
+		<!-- Vision -->
+		
+	<!-- General GameWorld Vision settings -->
+	<!-- cm -->
+	<Vision>
+		<ContourMinRadius>			5	</ContourMinRadius>
+		<ContourMinArea>			100	</ContourMinArea>
+		<ContourDPEpsilon>			5	</ContourDPEpsilon>
+		<ContourMinWidth>			12	</ContourMinWidth>
+		<CaptureAllPipelineStages>1</CaptureAllPipelineStages> <!-- So we can extract bitmaps -->
+	</Vision>
+
+	<!-- Custom MusicVision tuning -->
+	<MusicVision>
+		<!-- Custom vision settings... Probably shouldn't change unless you know what you are doing!-->
+		
+		<ScoreNoteVisionThresh>240</ScoreNoteVisionThresh>
+		<!-- 0..255, -1 for OTSU (adaptive) -->
+		<ScoreVisionTrimFrac>0</ScoreVisionTrimFrac>
+		<!-- When sampling image for each score, what amount to trim the corners (% push towards the center) -->
+		<ScoreMaxInteriorAngleDeg>110</ScoreMaxInteriorAngleDeg>
+
+		<!-- Inter-frame score tracking tuning... -->
+		<ScoreTrackRejectNumSamples>10</ScoreTrackRejectNumSamples> <!-- How many random samples to try when testing for rejection?-->
+		<ScoreTrackRejectSuccessThresh>.2</ScoreTrackRejectSuccessThresh> <!-- What % need to be valid to continue tracking? -->
+		<ScoreTrackMaxError>1</ScoreTrackMaxError> <!-- How much can scores drift between frames to count as the same score? (world space cumulative error (over each corner) -->
+		<ScoreTrackTemporalBlendFrac>.7</ScoreTrackTemporalBlendFrac>
+			<!-- Only for discrete (MIDI) scores; how much inter-frame temporal blending to do?
+				0 for none.
+				Numbers in between make sense. :-)
+				1 kind of doesn't make sense, since it's 100% old, but might be useful for testing.
+			-->
+		<ScoreTrackTemporalBlendIfDiffFracLT>.02</ScoreTrackTemporalBlendIfDiffFracLT>
+			<!--	Only do temporal blending if frame difference is less than this amount; so fast motion is still fast -->
+
+		<WorldUnitsPerMeasure>27.94</WorldUnitsPerMeasure>
+			<!-- how many cm become 1 second? -->
+			<!--	11" = 27.94cm	-->
+
+	</MusicVision>
+	
+	
+	<!-- Graphics/UI Layout -->
+	<Stamps>
+		<IconWidth>5</IconWidth>
+		<PaletteGutter>1</PaletteGutter>
+	</Stamps>
+	
+
+		<!-- Music -->
+
+	<!--	Tempo	-->
+	<MeasureCounts>.25 .5 1 2 3 4 5 6 7 8 9</MeasureCounts>
+
+	<TimeVec>-1 0</TimeVec> <!-- Vector in world space time moves along -->
+	<NoteCount>13</NoteCount>
+	
+	<BeatsPerMeasure>4</BeatsPerMeasure>
+	<BeatQuantization>8</BeatQuantization>
+	
+	<NumOctaves>5</NumOctaves> <!-- Number of octaves available for shifting when moving scores in zone along Y -->
+	<RootNote>60</RootNote>
+	<MaxTempo>400</MaxTempo>
+
+	<PokieRobitPulseTime>0.01</PokieRobitPulseTime>
+	
+	<!--	Musical Scales	-->
+
+	<Scales>
+		<Scale>
+			<Name>Pentatonic</Name>
+			<Notes>1 3 6 8 10</Notes>
+		</Scale>
+
+		<Scale>
+			<Name>Major</Name>
+			<Notes>0 2 4 5 7 9</Notes>
+		</Scale>
+
+		<Scale>
+			<Name>Minor</Name>
+			<Notes>0 2 3 5 6 8</Notes>
+		</Scale>
+
+<!--				<Scale>-->
+<!--					<Name>Whole Tone</Name>-->
+<!--					<Notes>0 2 4 6 8 10</Notes>-->
+<!--				</Scale>-->
+<!---->
+<!--				<Scale>-->
+<!--					<Name>Chromatic</Name>-->
+<!--					<Notes>0 1 2 3 4 5 6 7 8 9 10 11</Notes>-->
+<!--				</Scale>-->
+	</Scales>
+
+	<!--	Instruments -->
+	<Instruments>
+
+		<Instrument>
+			<PlayheadColor>00DD85</PlayheadColor>
+			<ScoreColor>332288</ScoreColor>
+			<ScoreColorDownLines>007777</ScoreColorDownLines>
+			<NoteOffColor>009797</NoteOffColor>
+			<NoteOnColor>FF9999</NoteOnColor>
+
+			<Name>0Volca FM</Name>
+			<IconFileName>board.png</IconFileName>
+			<SynthType>MIDI</SynthType>
+
+			<Port>2</Port>
+			<Channel>0</Channel>
+			<MapNotesToChannels>0</MapNotesToChannels>
+		</Instrument>
+
+
+		<Instrument>
+			<PlayheadColor>00FFFF</PlayheadColor>
+			<ScoreColor>115433</ScoreColor>
+			<ScoreColorDownLines>118888</ScoreColorDownLines>
+			<NoteOffColor>00CCCC</NoteOffColor>
+			<NoteOnColor>FF8800</NoteOnColor>
+			
+			<Name>1RobitPokie</Name>
+			<IconFileName>robit-pokie.png</IconFileName>
+			<SynthType>RobitPokie</SynthType>
+			
+			<Port>0</Port>
+			<Channel>0</Channel>
+			<MapNotesToChannels>12</MapNotesToChannels>
+		</Instrument>
+
+		<Instrument>
+			<PlayheadColor>FF9900</PlayheadColor>
+			<ScoreColor>112266</ScoreColor>
+			<ScoreColorDownLines>755500</ScoreColorDownLines>
+			<NoteOffColor>B59540</NoteOffColor>
+			<NoteOnColor>00DD85</NoteOnColor>
+
+			<Name>2Volca Sample (Drums)</Name>
+			<IconFileName>drumkit.png</IconFileName>
+			<SynthType>MIDI</SynthType>
+
+			<Port>1</Port>
+			<Channel>0</Channel>
+			<MapNotesToChannels>10</MapNotesToChannels>
+		</Instrument>
+
+
+
+		<Instrument>
+			<PlayheadColor>00FFFF</PlayheadColor>
+			<ScoreColor>993377</ScoreColor>
+			<ScoreColorDownLines>003377</ScoreColorDownLines>
+			<NoteOffColor>FFFFFF</NoteOffColor>
+			<NoteOnColor>00FFFF</NoteOnColor>
+
+			<Name>3Additive</Name>
+			<IconFileName>additive.png</IconFileName>
+			<SynthType>Additive</SynthType>
+
+			<Port>0</Port>
+			<Channel>0</Channel>
+			<MapNotesToChannels>0</MapNotesToChannels>
+		</Instrument>
+
+		<Instrument>
+			<PlayheadColor>FF8844</PlayheadColor>
+			<ScoreColor>005566</ScoreColor>
+			<ScoreColorDownLines>884400</ScoreColorDownLines>
+			<NoteOffColor>BBBBFF</NoteOffColor>
+			<NoteOnColor>FF8844</NoteOnColor>
+
+			<Name>6Volca Bass</Name>
+			<IconFileName>keyboard2.png</IconFileName>
+			<SynthType>MIDI</SynthType>
+
+			<Port>3</Port>
+			<Channel>0</Channel>
+			<MapNotesToChannels>0</MapNotesToChannels>
+		</Instrument>
+
+		<Instrument>
+			<PlayheadColor>BBFF44</PlayheadColor>
+			<ScoreColor>443377</ScoreColor>
+			<ScoreColorDownLines>777799</ScoreColorDownLines>
+			<NoteOffColor>77AA77</NoteOffColor>
+			<NoteOnColor>BBFF44</NoteOnColor>
+			
+			<Name>8Volca Keys</Name>
+			<IconFileName>keyboard.png</IconFileName>
+			<SynthType>MIDI</SynthType>
+			
+			<Port>0</Port>
+			<Channel>0</Channel>
+			<MapNotesToChannels>0</MapNotesToChannels>
+		</Instrument>
+
+		<!-- Meta Param Instruments -->
+
+		<Instrument>
+			<PlayheadColor>00FF00</PlayheadColor>
+			<ScoreColor>B02012</ScoreColor>
+			<NoteOffColor>FFFF00</NoteOffColor>
+			<NoteOnColor>00FF00</NoteOnColor>
+			
+			<Name>Scale</Name>
+			<IconFileName>scale.png</IconFileName>
+			<SynthType>Meta</SynthType>
+			<MetaParam>Scale</MetaParam>
+		</Instrument>
+
+		<Instrument>
+			<PlayheadColor>00FF00</PlayheadColor>
+			<ScoreColor>007777</ScoreColor>
+			<NoteOffColor>FFFF00</NoteOffColor>
+			<NoteOnColor>00FF00</NoteOnColor>
+			
+			<Name>RootNote</Name>
+			<IconFileName>transpose.png</IconFileName>
+			<SynthType>Meta</SynthType>
+			<MetaParam>RootNote</MetaParam>
+		</Instrument>
+		
+		<Instrument>
+			<PlayheadColor>00FF00</PlayheadColor>
+			<ScoreColor>AAAA00</ScoreColor>
+			<NoteOffColor>FFDD00</NoteOffColor>
+			<NoteOnColor>FFFFFF</NoteOnColor>
+			
+			<Name>Tempo</Name>
+			<IconFileName>tempo.png</IconFileName>
+			<SynthType>Meta</SynthType>
+			<MetaParam>Tempo</MetaParam>
+		</Instrument>
+		
+	</Instruments>
+
+</MusicWorld>

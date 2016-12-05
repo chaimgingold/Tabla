@@ -83,9 +83,10 @@ class PaperBounce3App : public App {
 	int mGameWorldCartridgeIndex=-1; // what index of mGameLibrary did mGameWorld come from?
 
 	// game xml params
-	XmlTree				mGameXmlParams; // right now for all games
+	map<fs::path,XmlTree> mGameConfigXml;
 	void				setGameWorldXmlParams(); // sets mGameWorld params from mGameXmlParams
-
+	fs::path			getXmlConfigPathForGame( string );
+	
 	// world info
 	PolyLine2 getWorldBoundsPoly() const;
 		// This is actually the camera world polygon mapping.

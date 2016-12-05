@@ -1,0 +1,87 @@
+<PaperBounce3>
+
+	<!-- I guess the use of cm is arbitrary, and it could be inches or whatever, but you 
+	have to be consistent across all these parameters. -->
+
+	<App>
+	
+<!--	This could use a cleanup since we refactored into two windows	-->
+		<AutoFullScreenProjector>	1 </AutoFullScreenProjector>
+		<DrawCameraImage>			1 </DrawCameraImage>
+		<DrawContours>				0 </DrawContours>
+		<DrawContoursFilled>		0 </DrawContoursFilled>
+		<DrawMouseDebugInfo>		1 </DrawMouseDebugInfo>
+		<DrawContourMousePick>		1 </DrawContourMousePick>
+		<DrawPolyBoundingRect>		0 </DrawPolyBoundingRect>
+		<DrawContourTree>			0 </DrawContourTree>
+		<DrawPipeline>				1 </DrawPipeline>
+		
+		<ConfigWindowMainImageMargin> 32 </ConfigWindowMainImageMargin>
+		<ConfigWindowPipelineGutter> 8 </ConfigWindowPipelineGutter>
+		<ConfigWindowPipelineWidth> 64 </ConfigWindowPipelineWidth>
+		
+		<KeyboardStringTimeout>.2</KeyboardStringTimeout>
+	</App>
+
+	<RFID>
+	<!-- Expects RFID reader to be a USB keyboard that emits digits + a newline char -->
+		<tag>
+			<id>17317668</id>
+			<value>cartridge/BallWorld</value>
+		</tag>
+
+		<tag>
+			<id>17308708</id>
+			<value>cartridge/PongWorld</value>
+		</tag>
+
+		<tag>
+			<id>17317412</id>
+			<value>cartridge/MusicWorld</value>
+		</tag>
+
+		<tag>
+			<id>17325860</id>
+			<value>cartridge/CalibrateWorld</value>
+		</tag>
+		
+	</RFID>
+
+
+	<!-- Projector <> Camera <> World mapping
+			This just gives initial values for user configuration.
+			Configuration you do in app is saved and loaded from ~Documents/PaperES/.
+		-->
+	
+	<!-- Defaults for our YCR-OAK office setup -->
+	<LightLink>
+		<CameraIndex>0</CameraIndex>
+		<CaptureSize>640 480</CaptureSize>
+		<CaptureCoords>5.06933975 6.20670891
+	599.746338 6.75599194
+	631.386475 316.545441
+	8.39622116 361.42981
+	</CaptureCoords>
+		<CaptureWorldSpaceCoords>0 0
+	126 0
+	126 69.5
+	0 69.5
+	</CaptureWorldSpaceCoords>
+		<ProjectorCoords>41.4290657 85.9600754
+	1199.01465 1.04016113
+	1288.58374 683.213379
+	157.439407 827.11084
+	</ProjectorCoords>
+		<ProjectorWorldSpaceCoords>0 0
+	121.463959 -0.303260803
+	130.19603 75.1454391
+	-0.606506348 73.5489044
+	</ProjectorWorldSpaceCoords>
+		<ProjectorSize>1280 800</ProjectorSize>
+		<DistCoeffs>[-1.05, -4.1999998, 0.0079270257, -0.0037597809, 30.936378]</DistCoeffs>
+		<CameraMatrix>[1072.3177, 0, 314.25284;
+	 0, 1062.8184, 234.11261;
+	 0, 0, 1]</CameraMatrix>
+	</LightLink>
+
+</PaperBounce3>

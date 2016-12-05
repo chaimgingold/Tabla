@@ -89,15 +89,9 @@ void PaperBounce3App::setup()
 	if ( !fs::exists(getDocsPath()) ) fs::create_directory(getDocsPath());
 	
 	// configuration
-	mFileWatch.loadXml( hotloadableAssetPath("config.xml"), [this]( XmlTree xml )
+	mFileWatch.loadXml( hotloadableAssetPath("config") / "app.xml", [this]( XmlTree xml )
 	{
 		// 1. get params
-		if ( xml.hasChild("PaperBounce3/Games") )
-		{
-			mGameXmlParams = xml.getChild("PaperBounce3/Games");
-			setGameWorldXmlParams();
-		}
-		
 		if (xml.hasChild("PaperBounce3/LightLink") && !fs::exists(getUserLightLinkFilePath()) )
 		{
 			mLightLink.setParams(xml.getChild("PaperBounce3/LightLink"));
@@ -145,7 +139,7 @@ void PaperBounce3App::setup()
 
 		
 		// TODO:
-		// - get a new camera capture object so that resolution can change live
+		// - get a new camera capture object so that resolution can change live (I think I do that now)
 		// - respond to fullscreen projector flag
 		// - aux display config
 	});
@@ -298,14 +292,26 @@ void PaperBounce3App::loadGame( int libraryIndex )
 	{
 		cout << "loadGame: " << mGameWorld->getSystemName() << endl;
 		
-		setGameWorldXmlParams();
-		mVision.setParams( mGameWorld->getVisionParams() );
-		mPipeline.setCaptureAllStageImages( mDrawPipeline || mGameWorld->getVisionParams().mCaptureAllPipelineStages );
-			// this won't quite hotload right with mDrawPipeline,
-			// but it never did.
-			// we might just want to switch pipeline to always capturing everything.
+		// get config xml
+		fs::path xmlConfigPath = getXmlConfigPathForGame(mGameWorld->getSystemName()) ;
 		
+		mFileWatch.loadXml( xmlConfigPath, [xmlConfigPath,this]( XmlTree xml )
+		{
+			mGameConfigXml[xmlConfigPath] = xml;
+
+			// set params from xml
+			setGameWorldXmlParams();
+			mVision.setParams( mGameWorld->getVisionParams() ); // (move mVision.* and mPipeline.* calls to setGameWorldXmlParams()?)
+			mPipeline.setCaptureAllStageImages( mDrawPipeline || mGameWorld->getVisionParams().mCaptureAllPipelineStages );
+				// this won't quite hotload right with mDrawPipeline,
+				// but it never did.
+				// we might just want to switch pipeline to always capturing everything.
+		});
+		
+		// set world bounds
 		mGameWorld->setWorldBoundsPoly( getWorldBoundsPoly() );
+		
+		// notify
 		mGameWorld->gameWillLoad();
 	}
 }
@@ -332,15 +338,23 @@ int PaperBounce3App::findCartridgeByName( string name )
 	return -1;
 }
 
+fs::path
+PaperBounce3App::getXmlConfigPathForGame( string name )
+{
+	return hotloadableAssetPath("config") / (name + ".xml") ;
+}
+
 void PaperBounce3App::setGameWorldXmlParams()
 {
 	if ( mGameWorld )
 	{
-		string xmlNodeName = mGameWorld->getSystemName();
+		string name = mGameWorld->getSystemName();
 		
-		if ( mGameXmlParams.hasChild(xmlNodeName) )
+		auto i = mGameConfigXml.find(getXmlConfigPathForGame(name));
+		
+		if ( i != mGameConfigXml.end() && i->second.hasChild(name) )
 		{
-			XmlTree gameParams = mGameXmlParams.getChild(xmlNodeName);
+			XmlTree gameParams = i->second.getChild(name);
 			
 			// load game specific params
 			mGameWorld->setParams( gameParams );
@@ -622,6 +636,11 @@ void PaperBounce3App::keyDown( KeyEvent event )
 				chooseNextCaptureDevice();
 				lightLinkDidChange();
 				break;
+				
+			case KeyEvent::KEY_c:
+				mDrawContours = !mDrawContours;
+				handled=true;
+				break;
 		}
 	}
 	
@@ -635,9 +654,19 @@ void PaperBounce3App::keyDown( KeyEvent event )
 				break ;
 
 			case KeyEvent::KEY_x:
-				::system( (string("open \"") + hotloadableAssetPath("config.xml").string() + "\"").c_str() );
+				{
+					fs::path path;
+					
+					if ( mGameWorld && !event.isControlDown() )
+					{
+						path = getXmlConfigPathForGame( mGameWorld->getSystemName() );
+					}
+					else path = hotloadableAssetPath( fs::path("config") / "app.xml" );
+					
+					::system( (string("open \"") + path.string() + string("\"")).c_str() );
+				}
 				break ;
-				
+			
 			case KeyEvent::KEY_UP:
 				if (event.isMetaDown()) mPipeline.setQuery( mPipeline.getFirstStageName() );
 				else mPipeline.setQuery( mPipeline.getPrevStageName(mPipeline.getQuery() ) );
