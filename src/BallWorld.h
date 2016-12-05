@@ -70,7 +70,7 @@ public:
 	void prepareToDraw() override;
 	void draw( DrawType ) override;
 	
-	void newRandomBall( vec2 loc );
+	Ball& newRandomBall( vec2 loc ); // returns it, too, if you want to modify it.
 	void clearBalls() { mBalls.clear(); }
 	
 	float getBallDefaultRadius() const { return mBallDefaultRadius ; }

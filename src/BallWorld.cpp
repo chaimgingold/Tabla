@@ -262,7 +262,7 @@ void BallWorld::updatePhysics()
 	}
 }
 
-void BallWorld::newRandomBall ( vec2 loc )
+Ball& BallWorld::newRandomBall ( vec2 loc )
 {
 	Ball ball ;
 	
@@ -284,6 +284,8 @@ void BallWorld::newRandomBall ( vec2 loc )
 	ball.setVel( Rand::randVec2() * mBallDefaultRadius/2.f ) ;
 	
 	mBalls.push_back( ball ) ;
+	
+	return mBalls.back();
 }
 
 vec2 BallWorld::resolveCollisionWithBalls ( vec2 p, float r, Ball* ignore, float correctionFraction ) const

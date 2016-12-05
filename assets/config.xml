@@ -125,6 +125,24 @@
 
 		</PongWorld>
 
+		<PinballWorld>
+			<!-- cm -->
+			<DefaultNumBalls>			100 </DefaultNumBalls>
+			<BallDefaultRadius>			.5 </BallDefaultRadius>
+			<BallDefaultMaxRadius>		2 </BallDefaultMaxRadius>
+			<BallMaxVel>				.2 </BallMaxVel>
+			<BallDefaultColor>			C62D41 </BallDefaultColor>
+
+			<!-- cm -->
+			<Vision>
+				<ContourMinRadius>			.5	</ContourMinRadius>
+				<ContourMinArea>			1	</ContourMinArea>
+				<ContourDPEpsilon>			1	</ContourDPEpsilon>
+				<ContourMinWidth>			2	</ContourMinWidth>
+			</Vision>
+
+		</PinballWorld>
+		
 		<CalibrateWorld>
 
 			<BoardCols>8</BoardCols>
