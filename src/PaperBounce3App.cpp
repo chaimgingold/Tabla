@@ -297,15 +297,20 @@ void PaperBounce3App::loadGame( int libraryIndex )
 		
 		mFileWatch.loadXml( xmlConfigPath, [xmlConfigPath,this]( XmlTree xml )
 		{
-			mGameConfigXml[xmlConfigPath] = xml;
-
-			// set params from xml
-			setGameWorldXmlParams();
-			mVision.setParams( mGameWorld->getVisionParams() ); // (move mVision.* and mPipeline.* calls to setGameWorldXmlParams()?)
-			mPipeline.setCaptureAllStageImages( mDrawPipeline || mGameWorld->getVisionParams().mCaptureAllPipelineStages );
-				// this won't quite hotload right with mDrawPipeline,
-				// but it never did.
-				// we might just want to switch pipeline to always capturing everything.
+			// if we had already loaded this once, we stomp that old lambda and force a reload now.
+			
+			// why conditional?
+			// make sure we aren't hotloading xml from game we aren't running anymore
+			if ( xmlConfigPath == getXmlConfigPathForGame(mGameWorld->getSystemName()) )
+			{
+				// set params from xml
+				setGameWorldXmlParams(xml);
+				mVision.setParams( mGameWorld->getVisionParams() ); // (move mVision.* and mPipeline.* calls to setGameWorldXmlParams()?)
+				mPipeline.setCaptureAllStageImages( mDrawPipeline || mGameWorld->getVisionParams().mCaptureAllPipelineStages );
+					// this won't quite hotload right with mDrawPipeline,
+					// but it never did.
+					// we might just want to switch pipeline to always capturing everything.
+			}
 		});
 		
 		// set world bounds
@@ -344,17 +349,15 @@ PaperBounce3App::getXmlConfigPathForGame( string name )
 	return hotloadableAssetPath("config") / (name + ".xml") ;
 }
 
-void PaperBounce3App::setGameWorldXmlParams()
+void PaperBounce3App::setGameWorldXmlParams( XmlTree xml )
 {
 	if ( mGameWorld )
 	{
 		string name = mGameWorld->getSystemName();
 		
-		auto i = mGameConfigXml.find(getXmlConfigPathForGame(name));
-		
-		if ( i != mGameConfigXml.end() && i->second.hasChild(name) )
+		if ( xml.hasChild(name) )
 		{
-			XmlTree gameParams = i->second.getChild(name);
+			XmlTree gameParams = xml.getChild(name);
 			
 			// load game specific params
 			mGameWorld->setParams( gameParams );

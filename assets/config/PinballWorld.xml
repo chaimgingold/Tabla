@@ -1,8 +1,8 @@
 <PinballWorld>
 	<!-- cm -->
-	<DefaultNumBalls>			100 </DefaultNumBalls>
-	<BallDefaultRadius>			.5 </BallDefaultRadius>
-	<BallDefaultMaxRadius>		2 </BallDefaultMaxRadius>
+	<DefaultNumBalls>			0 </DefaultNumBalls>
+	<BallDefaultRadius>			1.5 </BallDefaultRadius>
+	<BallDefaultMaxRadius>		1.5 </BallDefaultMaxRadius>
 	<BallMaxVel>				.2 </BallMaxVel>
 	<BallDefaultColor>			C62D41 </BallDefaultColor>
 

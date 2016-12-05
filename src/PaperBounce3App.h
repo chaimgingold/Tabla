@@ -83,8 +83,7 @@ class PaperBounce3App : public App {
 	int mGameWorldCartridgeIndex=-1; // what index of mGameLibrary did mGameWorld come from?
 
 	// game xml params
-	map<fs::path,XmlTree> mGameConfigXml;
-	void				setGameWorldXmlParams(); // sets mGameWorld params from mGameXmlParams
+	void				setGameWorldXmlParams( XmlTree );
 	fs::path			getXmlConfigPathForGame( string );
 	
 	// world info
