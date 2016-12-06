@@ -11,6 +11,7 @@
 
 #include "BallWorld.h"
 #include "PureDataNode.h"
+#include "GamepadManager.h"
 
 class PinballWorld : public BallWorld
 {
@@ -42,11 +43,15 @@ private:
 	map<char,string> mKeyToInput; // maps keystrokes to input names
 	map<string,function<void()>> mInputToFunction; // maps input names to code handlers
 
+	// game pad
+	GamepadManager mGamepadManager;
+	
 	// synthesis
 	cipd::PureDataNodeRef	mPureDataNode;	// synth engine
 	cipd::PatchRef			mPatch;			// pong patch
 	
 	void setupSynthesis();
+	void shutdownSynthesis();
 
 };
 

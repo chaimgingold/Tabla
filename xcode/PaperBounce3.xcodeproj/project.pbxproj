@@ -36,6 +36,9 @@
 		2635C8D01D8768C900DF30BE /* WindowData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2635C8CE1D8768C900DF30BE /* WindowData.cpp */; };
 		263DBA191DDB990B002356F0 /* MusicVision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 263DBA171DDB990B002356F0 /* MusicVision.cpp */; };
 		26BC84B31D80DF89006001DC /* PipelineStageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26BC84B11D80DF89006001DC /* PipelineStageView.cpp */; };
+		26F3234B1DF74D8900EC9559 /* Gamepad_macosx.c in Sources */ = {isa = PBXBuildFile; fileRef = 26F323491DF74D8900EC9559 /* Gamepad_macosx.c */; };
+		26F3234C1DF74D8900EC9559 /* Gamepad_private.c in Sources */ = {isa = PBXBuildFile; fileRef = 26F3234A1DF74D8900EC9559 /* Gamepad_private.c */; };
+		26F323511DF7621B00EC9559 /* GamepadManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26F3234F1DF7621B00EC9559 /* GamepadManager.cpp */; };
 		26FA36411D4A7D5300C64A00 /* todo in Resources */ = {isa = PBXBuildFile; fileRef = 26FA36401D4A7D5300C64A00 /* todo */; };
 		26FA36431D53C05700C64A00 /* research in Resources */ = {isa = PBXBuildFile; fileRef = 26FA36421D53C05700C64A00 /* research */; };
 		26FA36461D53C31A00C64A00 /* BallWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26FA36441D53C31A00C64A00 /* BallWorld.cpp */; };
@@ -213,6 +216,12 @@
 		263DBA181DDB990B002356F0 /* MusicVision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MusicVision.h; path = ../src/MusicWorld/MusicVision.h; sourceTree = "<group>"; };
 		26BC84B11D80DF89006001DC /* PipelineStageView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PipelineStageView.cpp; path = ../src/PipelineStageView.cpp; sourceTree = "<group>"; };
 		26BC84B21D80DF89006001DC /* PipelineStageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PipelineStageView.h; path = ../src/PipelineStageView.h; sourceTree = "<group>"; };
+		26F323491DF74D8900EC9559 /* Gamepad_macosx.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Gamepad_macosx.c; path = "../blocks/Cinder-Gamepad/src/Gamepad_macosx.c"; sourceTree = "<group>"; };
+		26F3234A1DF74D8900EC9559 /* Gamepad_private.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Gamepad_private.c; path = "../blocks/Cinder-Gamepad/src/Gamepad_private.c"; sourceTree = "<group>"; };
+		26F3234D1DF74D9500EC9559 /* Gamepad.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Gamepad.h; path = "../blocks/Cinder-Gamepad/include/Gamepad.h"; sourceTree = "<group>"; };
+		26F3234E1DF74D9F00EC9559 /* Gamepad_private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Gamepad_private.h; path = "../blocks/Cinder-Gamepad/src/Gamepad_private.h"; sourceTree = "<group>"; };
+		26F3234F1DF7621B00EC9559 /* GamepadManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GamepadManager.cpp; path = ../src/GamepadManager/GamepadManager.cpp; sourceTree = "<group>"; };
+		26F323501DF7621B00EC9559 /* GamepadManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GamepadManager.h; path = ../src/GamepadManager/GamepadManager.h; sourceTree = "<group>"; };
 		26FA36401D4A7D5300C64A00 /* todo */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = todo; path = ../design/todo; sourceTree = "<group>"; };
 		26FA36421D53C05700C64A00 /* research */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = research; path = ../design/research; sourceTree = "<group>"; };
 		26FA36441D53C31A00C64A00 /* BallWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BallWorld.cpp; path = ../src/BallWorld.cpp; sourceTree = "<group>"; };
@@ -641,6 +650,7 @@
 		01B97315FEAEA392516A2CEA /* Blocks */ = {
 			isa = PBXGroup;
 			children = (
+				26F323471DF74D5700EC9559 /* Gamepad */,
 				C29A0AD31DF1FE16008A26A1 /* OpenCV3-Contrib */,
 				C2C874771DDBB2D40067E07D /* Cinder-Serial */,
 				C2EC763E1DA7157E00DB39C8 /* PureData */,
@@ -829,6 +839,44 @@
 			name = CalibrateWorld;
 			sourceTree = "<group>";
 		};
+		26F323471DF74D5700EC9559 /* Gamepad */ = {
+			isa = PBXGroup;
+			children = (
+				26F3234D1DF74D9500EC9559 /* Gamepad.h */,
+				26F3234E1DF74D9F00EC9559 /* Gamepad_private.h */,
+				26F323491DF74D8900EC9559 /* Gamepad_macosx.c */,
+				26F3234A1DF74D8900EC9559 /* Gamepad_private.c */,
+			);
+			name = Gamepad;
+			sourceTree = "<group>";
+		};
+		26F323521DF7622000EC9559 /* GamepadManager */ = {
+			isa = PBXGroup;
+			children = (
+				26F3234F1DF7621B00EC9559 /* GamepadManager.cpp */,
+				26F323501DF7621B00EC9559 /* GamepadManager.h */,
+			);
+			name = GamepadManager;
+			sourceTree = "<group>";
+		};
+		26F323531DF7622900EC9559 /* RtMidi */ = {
+			isa = PBXGroup;
+			children = (
+				262A886E1DB58D7D00FE2336 /* RtMidi.cpp */,
+				262A886F1DB58D7D00FE2336 /* RtMidi.h */,
+			);
+			name = RtMidi;
+			sourceTree = "<group>";
+		};
+		26F323541DF7623100EC9559 /* FileWatch */ = {
+			isa = PBXGroup;
+			children = (
+				26FA36561D592CE700C64A00 /* FileWatch.h */,
+				26FA36551D592CE700C64A00 /* FileWatch.cpp */,
+			);
+			name = FileWatch;
+			sourceTree = "<group>";
+		};
 		26FD3CCC1D88745800B20327 /* App */ = {
 			isa = PBXGroup;
 			children = (
@@ -887,10 +935,9 @@
 				26FA364A1D53C78D00C64A00 /* geom.h */,
 				26FA36511D551F8900C64A00 /* xml.h */,
 				26FA365B1D5BDC8000C64A00 /* ocv.h */,
-				26FA36561D592CE700C64A00 /* FileWatch.h */,
-				26FA36551D592CE700C64A00 /* FileWatch.cpp */,
-				262A886E1DB58D7D00FE2336 /* RtMidi.cpp */,
-				262A886F1DB58D7D00FE2336 /* RtMidi.h */,
+				26F323541DF7623100EC9559 /* FileWatch */,
+				26F323531DF7622900EC9559 /* RtMidi */,
+				26F323521DF7622000EC9559 /* GamepadManager */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -2480,6 +2527,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				26F3234B1DF74D8900EC9559 /* Gamepad_macosx.c in Sources */,
 				5BA876CF7D3E422AA6E36FBF /* PaperBounce3App.cpp in Sources */,
 				CB13ED488BF746B1BE951350 /* b2BroadPhase.cpp in Sources */,
 				3A09A46A8AF949E89CBDD5B5 /* b2CollideCircle.cpp in Sources */,
@@ -2496,6 +2544,7 @@
 				26FA36571D592CE700C64A00 /* FileWatch.cpp in Sources */,
 				C2C874931DDBB2D40067E07D /* win.cc in Sources */,
 				2635C8D01D8768C900DF30BE /* WindowData.cpp in Sources */,
+				26F323511DF7621B00EC9559 /* GamepadManager.cpp in Sources */,
 				26FA36461D53C31A00C64A00 /* BallWorld.cpp in Sources */,
 				C2C874901DDBB2D40067E07D /* list_ports_osx.cc in Sources */,
 				58F3F572E622458BA5EA9B45 /* b2Distance.cpp in Sources */,
@@ -2512,6 +2561,7 @@
 				4B0FADE8EBFD4032BD327749 /* b2Math.cpp in Sources */,
 				7BE72FC026004D6E8DD1439D /* b2Settings.cpp in Sources */,
 				148CF21F16044275A8C29BD4 /* b2StackAllocator.cpp in Sources */,
+				26F3234C1DF74D8900EC9559 /* Gamepad_private.c in Sources */,
 				2606D37B1DF60CB80018C8B8 /* PinballWorld.cpp in Sources */,
 				26FA365E1D77673500C64A00 /* View.cpp in Sources */,
 				B82FE516E59446FB928ED0B8 /* b2Timer.cpp in Sources */,

@@ -111,7 +111,7 @@ void MusicStamp::drawInstrumentIcon( vec2 worldx, tIconAnimState pose ) const
 		gl::ScopedTextureBind texScp( mInstrument->mIcon );
 		
 		mRainbowShader->uniform( "uTex0", 0 );
-		mRainbowShader->uniform( "uResolution", vec2(mIconWidth,mIconWidth) ); // ???
+//		mRainbowShader->uniform( "uResolution", vec2(mIconWidth,mIconWidth) ); // ???
 		mRainbowShader->uniform( "uTime", mGradientClock );
 		mRainbowShader->uniform( "uSeed", (float)0.f ); // should be unique
 		mRainbowShader->uniform( "uGradientCenter", pose.mGradientCenter );

@@ -16,15 +16,27 @@
 
 
 	<KeyMap>
+	
+<!-- Left flipper	-->
 		<Key>
 			<char>n</char>
 			<input>flippers-left</input>
 		</Key>
+		<Key>
+			<char>l</char>
+			<input>flippers-left</input>
+		</Key>
 
+<!-- Right flipper -->
 		<Key>
 			<char>m</char>
 			<input>flippers-right</input>
 		</Key>
+		<Key>
+			<char>r</char>
+			<input>flippers-right</input>
+		</Key>
+		
 	</KeyMap>
 	
 </PinballWorld>

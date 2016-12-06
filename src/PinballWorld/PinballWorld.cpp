@@ -11,10 +11,22 @@
 #include "cinder/rand.h"
 #include "cinder/audio/Context.h"
 #include "cinder/audio/Source.h"
+#include "Gamepad.h"
+
 
 PinballWorld::PinballWorld()
 {
 	setupSynthesis();
+	
+	mGamepadManager.mOnButtonDown = []( const GamepadManager::Event& event )
+	{
+		cout << "down" << endl;
+	};
+
+	mGamepadManager.mOnButtonUp = []( const GamepadManager::Event& event )
+	{
+		cout << "up" << endl;
+	};
 	
 	// inputs
 	mInputToFunction["flippers-left"] = []()
@@ -26,6 +38,11 @@ PinballWorld::PinballWorld()
 	{
 		cout << "flippers-right" << endl;
 	};
+}
+
+PinballWorld::~PinballWorld()
+{
+	shutdownSynthesis();
 }
 
 void PinballWorld::setParams( XmlTree xml )
@@ -60,6 +77,8 @@ void PinballWorld::gameWillLoad()
 
 void PinballWorld::update()
 {
+	mGamepadManager.tick();
+
 	BallWorld::update();
 	
 	if ( getBalls().size() < 2 )
@@ -128,7 +147,7 @@ void PinballWorld::setupSynthesis()
 	mPatch = mPureDataNode->loadPatch( DataSourcePath::create(getAssetPath("synths/pong.pd")) );
 }
 
-PinballWorld::~PinballWorld() {
+void PinballWorld::shutdownSynthesis() {
 	// Close pong synthesis patch
 	mPureDataNode->closePatch(mPatch);
 }

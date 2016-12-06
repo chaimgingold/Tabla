@@ -157,8 +157,9 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 //	pipeline.then( gray, "gray" );
 
 	// threshold
-//	cv::threshold( gray, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
 	cv::threshold( clipped, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
+//	cv::adaptiveThreshold(clipped, thresholded, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 10, 10);
+//	cv::adaptiveThreshold(clipped, thresholded, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 32, -10);
 	pipeline.then( "thresholded", thresholded );
 	
 	// contour detect
