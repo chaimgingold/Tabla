@@ -376,7 +376,7 @@ tIconAnimState Score::getIconPoseFromScore_Melodic( float playheadFrac ) const
 	state.mTranslate.y = lerp( -.5f, .5f, avgNote );
 	state.mScale = vec2(1,1) * lerp( 1.f, 1.5f, min( 1.f, ((float)numOnNotes / (float)mNoteCount)*2.f ) ) ;
 	state.mGradientCenter = vec2( playheadFrac, avgNote );
-	state.mGradientSpeed = lerp( 8.f, 16.f, (float)numOnNotes/(float)mNoteCount );
+	state.mGradientSpeed = lerp( 0.f, 1.f, (float)numOnNotes/(float)mNoteCount );
 	
 	return state;
 }
