@@ -67,6 +67,15 @@ void MusicStamp::draw() const
 
 void MusicStamp::tick()
 {
+	const float now = ci::app::getElapsedSeconds();
+	const float dt = now - mLastFrameTime;
+	mLastFrameTime = now;
+
+	// Advance gradient based on how many notes are on
+	if (mInstrument) {
+		mGradientClock += dt * (float)mInstrument->mOnNotes.size() ;
+	}
+
 	mIconPose = lerp( mIconPose, mIconPoseTarget, .5f );
 }
 
@@ -103,10 +112,12 @@ void MusicStamp::drawInstrumentIcon( vec2 worldx, tIconAnimState pose ) const
 		
 		mRainbowShader->uniform( "uTex0", 0 );
 		mRainbowShader->uniform( "uResolution", vec2(mIconWidth,mIconWidth) ); // ???
-		mRainbowShader->uniform( "uTime", (float)ci::app::getElapsedSeconds() );
+		mRainbowShader->uniform( "uTime", mGradientClock );
 		mRainbowShader->uniform( "uSeed", (float)0.f ); // should be unique
-		mRainbowShader->uniform( "uSpeed", (float)pose.mGradientSpeed );
 		mRainbowShader->uniform( "uGradientCenter", pose.mGradientCenter );
+		mRainbowShader->uniform( "uSeed", mGradientSeed );
+		mRainbowShader->uniform( "uGradientFreq", (float)mInstrument->mOnNotes.size() );
+
 		
 		gl::drawSolidRect(r,vec2(0,1),vec2(1,0));
 	}
@@ -154,7 +165,8 @@ void MusicStampVec::setup( const map<string,InstrumentRef>& instruments, PolyLin
 	// make stamps
 	float angle=0.f;
 	float anglestep = M_PI*2.f / (float)instruments.size() ;
-	
+
+	int index = 0;
 	for( auto i : instruments )
 	{
 		MusicStamp s;
@@ -167,6 +179,7 @@ void MusicStampVec::setup( const map<string,InstrumentRef>& instruments, PolyLin
 		s.mXAxis = mTimeVec;
 		s.mIconWidth = mStampIconWidth;
 		s.mInstrument = i.second;
+		s.mGradientSeed = index++;
 		
 		angle += anglestep;
 		

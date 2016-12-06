@@ -110,6 +110,9 @@ public:
 	vec2 mHomeLoc;
 	vec2 mSearchForPaperLoc; // the secret location that tracks paper; we pop to here if we lose our score
 	float mIconWidth = 10.f;
+	float mGradientSeed;
+	float mGradientClock;
+	float mLastFrameTime;
 
 	InstrumentRef mInstrument;
 	tIconAnimState mIconPose, mIconPoseTarget;

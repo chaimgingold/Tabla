@@ -15,8 +15,9 @@ uniform sampler2D uTex0;
 
 uniform float uTime;
 uniform float uSeed;
-uniform float uSpeed;
+uniform float uGradientFreq;
 uniform vec2  uGradientCenter;
+
 
 //float smoothedge(float v) {
 //    return smoothstep(0.0, 1.0 / uResolution.x, v);
@@ -39,9 +40,11 @@ vec3 replace(vec3 color, float mask, vec3 maskColor) {
 float cos01(float phase) {
     return cos(phase) * 0.5 + 0.5;
 }
+
 float rescale01(float low, float high, float value) {
     return low + value*(high - low);
 }
+
 // Dave Hoskins Hash without Sine
 // https://www.shadertoy.com/view/4djSRW
 #define HASHSCALE1 .1031
@@ -64,8 +67,7 @@ void main() {
     
     // Radial gradient
     float theta = distance(st, uGradientCenter);
-    float freq = 2.;
-	float phase = theta * PI*2. * freq + uTime*uSpeed;
+	float phase = theta * PI*2. * uGradientFreq + uTime*8.;
     
     // Phase-shifted cosine gradients
 	float minScale = .5;
