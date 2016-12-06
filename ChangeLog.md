@@ -1,7 +1,8 @@
 11/28/2016 - 12/05/2016
-* Stamp tracking much more solid, controllabe.
+* Stamp tracking much more solid, controllable.
 * Multi-measure stamp tracking much better.
 * Bug fix to new stamp/instrument->score assignment.
+* Rippling shaders for dancing robit icons
 
 11/21/2016 - 11/26/2016
 * Multi-measure tracks (and short tracks) works properly now.

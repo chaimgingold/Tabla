@@ -127,6 +127,7 @@
 		C29A0ACE1DF1FE12008A26A1 /* .clang-format in Resources */ = {isa = PBXBuildFile; fileRef = C29A09D91DF1FE12008A26A1 /* .clang-format */; };
 		C29A0ACF1DF1FE12008A26A1 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = C29A09DA1DF1FE12008A26A1 /* .gitignore */; };
 		C29A0AD01DF1FE12008A26A1 /* CMakeLists.txt in Resources */ = {isa = PBXBuildFile; fileRef = C29A0A091DF1FE12008A26A1 /* CMakeLists.txt */; };
+		C29A0AD61DF61A15008A26A1 /* TokenWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29A0AD41DF61A15008A26A1 /* TokenWorld.cpp */; };
 		C2C8748F1DDBB2D40067E07D /* list_ports_linux.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2C874871DDBB2D40067E07D /* list_ports_linux.cc */; };
 		C2C874901DDBB2D40067E07D /* list_ports_osx.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2C874881DDBB2D40067E07D /* list_ports_osx.cc */; };
 		C2C874911DDBB2D40067E07D /* list_ports_win.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2C874891DDBB2D40067E07D /* list_ports_win.cc */; };
@@ -515,6 +516,8 @@
 		C29A0ACB1DF1FE12008A26A1 /* inpainting.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = inpainting.hpp; sourceTree = "<group>"; };
 		C29A0ACC1DF1FE12008A26A1 /* white_balance.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = white_balance.hpp; sourceTree = "<group>"; };
 		C29A0ACD1DF1FE12008A26A1 /* xphoto.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = xphoto.hpp; sourceTree = "<group>"; };
+		C29A0AD41DF61A15008A26A1 /* TokenWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TokenWorld.cpp; path = ../src/TokenWorld/TokenWorld.cpp; sourceTree = "<group>"; };
+		C29A0AD51DF61A15008A26A1 /* TokenWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TokenWorld.h; path = ../src/TokenWorld/TokenWorld.h; sourceTree = "<group>"; };
 		C2C874791DDBB2D40067E07D /* Cinder-Serial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Cinder-Serial.h"; sourceTree = "<group>"; };
 		C2C8747A1DDBB2D40067E07D /* SerialDevice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SerialDevice.h; sourceTree = "<group>"; };
 		C2C874801DDBB2D40067E07D /* unix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = unix.h; sourceTree = "<group>"; };
@@ -764,16 +767,16 @@
 		263232111DC8167000CB2048 /* MusicWorld */ = {
 			isa = PBXGroup;
 			children = (
-				262A88691DB011FF00FE2336 /* MusicWorld.cpp */,
 				262A886A1DB011FF00FE2336 /* MusicWorld.h */,
-				C267F7511DDA4CEF006B8672 /* Instrument.cpp */,
+				262A88691DB011FF00FE2336 /* MusicWorld.cpp */,
 				C267F7521DDA4CEF006B8672 /* Instrument.h */,
-				2632320E1DC8166500CB2048 /* Score.cpp */,
+				C267F7511DDA4CEF006B8672 /* Instrument.cpp */,
 				C267F7551DDA4E0D006B8672 /* Score.h */,
-				263DBA171DDB990B002356F0 /* MusicVision.cpp */,
+				2632320E1DC8166500CB2048 /* Score.cpp */,
 				263DBA181DDB990B002356F0 /* MusicVision.h */,
-				260C9B6B1DE37A1A008A2A03 /* MusicStamp.cpp */,
+				263DBA171DDB990B002356F0 /* MusicVision.cpp */,
 				260C9B6C1DE37A1A008A2A03 /* MusicStamp.h */,
+				260C9B6B1DE37A1A008A2A03 /* MusicStamp.cpp */,
 			);
 			name = MusicWorld;
 			sourceTree = "<group>";
@@ -781,8 +784,8 @@
 		263232151DC91F9D00CB2048 /* CalibrateWorld */ = {
 			isa = PBXGroup;
 			children = (
-				263232121DC91F8900CB2048 /* CalibrateWorld.cpp */,
 				263232131DC91F8900CB2048 /* CalibrateWorld.h */,
+				263232121DC91F8900CB2048 /* CalibrateWorld.cpp */,
 			);
 			name = CalibrateWorld;
 			sourceTree = "<group>";
@@ -812,6 +815,7 @@
 				26FA36441D53C31A00C64A00 /* BallWorld.cpp */,
 				26FD3CD11D91E01E00B20327 /* PongWorld.h */,
 				26FD3CD01D91E01E00B20327 /* PongWorld.cpp */,
+				C29A0AD71DF61A1A008A26A1 /* TokenWorld */,
 				263232151DC91F9D00CB2048 /* CalibrateWorld */,
 			);
 			name = World;
@@ -2184,6 +2188,15 @@
 			name = "OpenCV3-Contrib";
 			sourceTree = "<group>";
 		};
+		C29A0AD71DF61A1A008A26A1 /* TokenWorld */ = {
+			isa = PBXGroup;
+			children = (
+				C29A0AD51DF61A15008A26A1 /* TokenWorld.h */,
+				C29A0AD41DF61A15008A26A1 /* TokenWorld.cpp */,
+			);
+			name = TokenWorld;
+			sourceTree = "<group>";
+		};
 		C2C874771DDBB2D40067E07D /* Cinder-Serial */ = {
 			isa = PBXGroup;
 			children = (
@@ -2450,6 +2463,7 @@
 				C2C874901DDBB2D40067E07D /* list_ports_osx.cc in Sources */,
 				58F3F572E622458BA5EA9B45 /* b2Distance.cpp in Sources */,
 				FE95B791332E4B49916DF787 /* b2DynamicTree.cpp in Sources */,
+				C29A0AD61DF61A15008A26A1 /* TokenWorld.cpp in Sources */,
 				7D4B6A1410EE43358255E704 /* b2TimeOfImpact.cpp in Sources */,
 				36991D11792C4997967FCEC7 /* b2ChainShape.cpp in Sources */,
 				819C4FF415DF49DCAEA34DC7 /* b2CircleShape.cpp in Sources */,
