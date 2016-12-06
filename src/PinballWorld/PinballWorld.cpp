@@ -18,14 +18,33 @@ PinballWorld::PinballWorld()
 {
 	setupSynthesis();
 	
-	mGamepadManager.mOnButtonDown = []( const GamepadManager::Event& event )
+	auto button = [this]( unsigned int id, string postfix )
 	{
-		cout << "down" << endl;
+		auto i = mGamepadButtons.find(id);
+		if (i!=mGamepadButtons.end())
+		{
+			string key = i->second + postfix;
+			
+			cout << "-> " << key << endl;
+			
+			auto j = mGamepadFunctions.find(key);
+			if (j!=mGamepadFunctions.end())
+			{
+				j->second();
+			}
+		}
+	};
+	
+	mGamepadManager.mOnButtonDown = [this,button]( const GamepadManager::Event& event )
+	{
+		cout << "down " << event.mId << endl;
+		button(event.mId,"-down");
 	};
 
-	mGamepadManager.mOnButtonUp = []( const GamepadManager::Event& event )
+	mGamepadManager.mOnButtonUp = [this,button]( const GamepadManager::Event& event )
 	{
-		cout << "up" << endl;
+		cout << "up "  << event.mId << endl;
+		button(event.mId,"-up");
 	};
 	
 	// inputs
@@ -38,6 +57,11 @@ PinballWorld::PinballWorld()
 	{
 		cout << "flippers-right" << endl;
 	};
+	
+	mGamepadFunctions["flippers-left-down"]  = [this]() { mIsFlipperDown[0] = true; cout << "boo" << endl; };
+	mGamepadFunctions["flippers-left-up"]    = [this]() { mIsFlipperDown[0] = false; };
+	mGamepadFunctions["flippers-right-down"] = [this]() { mIsFlipperDown[1] = true; };
+	mGamepadFunctions["flippers-right-up"]   = [this]() { mIsFlipperDown[1] = false; };
 }
 
 PinballWorld::~PinballWorld()
@@ -49,6 +73,26 @@ void PinballWorld::setParams( XmlTree xml )
 {
 	BallWorld::setParams(xml);
 	
+	// gamepad
+	if (xml.hasChild("Gamepad"))
+	{
+		XmlTree keys = xml.getChild("Gamepad");
+		
+		for( auto item = keys.begin("button"); item != keys.end(); ++item )
+		{
+			if (item->hasAttribute("id") && item->hasAttribute("do"))
+			{
+				unsigned int id = item->getAttributeValue<unsigned int>("id");
+				string _do = item->getAttributeValue<string>("do");
+				
+				cout << id << " -> " << _do << endl;
+				
+				mGamepadButtons[id] = _do;
+			}
+		}
+	}
+	
+	// keyboard
 	if (xml.hasChild("KeyMap"))
 	{
 		XmlTree keys = xml.getChild("KeyMap");

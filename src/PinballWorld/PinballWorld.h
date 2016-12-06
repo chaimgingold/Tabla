@@ -38,13 +38,18 @@ protected:
 	virtual void onBallWorldBoundaryCollide	( const Ball& ) override;
 
 private:
+
+	// are flippers depressed
+	bool mIsFlipperDown[2];
 	
-	// keymap
+	// keymap (deprecated)
 	map<char,string> mKeyToInput; // maps keystrokes to input names
 	map<string,function<void()>> mInputToFunction; // maps input names to code handlers
 
 	// game pad
 	GamepadManager mGamepadManager;
+	map<unsigned int,string> mGamepadButtons;
+	map<string,function<void()>> mGamepadFunctions;
 	
 	// synthesis
 	cipd::PureDataNodeRef	mPureDataNode;	// synth engine

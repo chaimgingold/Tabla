@@ -15,6 +15,16 @@
 	</Vision>
 
 
+	<Gamepad>
+		<button id="4" do="flippers-left"/>
+		<button id="6" do="flippers-left"/>
+		<button id="5" do="flippers-right"/>
+		<button id="7" do="flippers-right"/>
+	</Gamepad>
+
+
+
+<!-- Keyboard deprecated... -->
 	<KeyMap>
 	
 <!-- Left flipper	-->
