@@ -14,6 +14,7 @@
 #include "cinder/Xml.h"
 #include "cinder/Color.h"
 
+#include "FileWatch.h"
 #include "GameWorld.h"
 #include "Contour.h"
 
@@ -57,6 +58,8 @@ class BallWorld : public GameWorld
 {
 public:
 	
+	BallWorld();
+	
 	string getSystemName() const override { return "BallWorld"; }
 	
 	void setParams( XmlTree ) override;
@@ -64,9 +67,10 @@ public:
 	
 	void gameWillLoad() override; // make some balls by default
 	void update() override;
+	void prepareToDraw() override;
 	void draw( DrawType ) override;
 	
-	void newRandomBall( vec2 loc );
+	Ball& newRandomBall( vec2 loc ); // returns it, too, if you want to modify it.
 	void clearBalls() { mBalls.clear(); }
 	
 	float getBallDefaultRadius() const { return mBallDefaultRadius ; }
@@ -102,6 +106,9 @@ protected:
 	
 private:
 
+	// simulation
+	void updatePhysics();
+
 	vec2 unlapEdge( vec2 p, float r, const Contour& poly, const Ball* b=0 );
 	vec2 unlapHoles( vec2 p, float r, ContourKind kind, const Ball* b=0 );
 	
@@ -115,6 +122,16 @@ private:
 
 	ContourVector		mContours;
 	vector<Ball>		mBalls ;
+
+	// drawing
+	void drawImmediate( bool lowPoly ) const;
+	TriMeshRef getTriMeshForBalls() const;
+	TriMeshRef mBallMesh; // Make into a Batch for even more performance (that we don't need)
+
+	gl::GlslProgRef mCircleShader;
+	
+	// asset loading
+	FileWatch mFileWatch; // hotload our shaders; in this class so when class dies all the callbacks expire.
 	
 } ;
 

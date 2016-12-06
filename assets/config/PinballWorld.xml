@@ -1,0 +1,30 @@
+<PinballWorld>
+	<!-- cm -->
+	<DefaultNumBalls>			0 </DefaultNumBalls>
+	<BallDefaultRadius>			1.5 </BallDefaultRadius>
+	<BallDefaultMaxRadius>		1.5 </BallDefaultMaxRadius>
+	<BallMaxVel>				.2 </BallMaxVel>
+	<BallDefaultColor>			C62D41 </BallDefaultColor>
+
+	<!-- cm -->
+	<Vision>
+		<ContourMinRadius>			.5	</ContourMinRadius>
+		<ContourMinArea>			1	</ContourMinArea>
+		<ContourDPEpsilon>			1	</ContourDPEpsilon>
+		<ContourMinWidth>			2	</ContourMinWidth>
+	</Vision>
+
+
+	<KeyMap>
+		<Key>
+			<char>n</char>
+			<input>flippers-left</input>
+		</Key>
+
+		<Key>
+			<char>m</char>
+			<input>flippers-right</input>
+		</Key>
+	</KeyMap>
+	
+</PinballWorld>

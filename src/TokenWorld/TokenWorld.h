@@ -45,7 +45,6 @@ public:
 
 	void mouseClick( vec2 p ) override {  }
 	void keyDown( KeyEvent ) override;
-	void drawMouseDebugInfo( vec2 ) override;
 
 protected:
 

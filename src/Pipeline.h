@@ -14,6 +14,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 using namespace ci;
 using namespace std;
@@ -63,7 +64,7 @@ public:
 		bool			mLayoutHintOrtho=false; // keep laying out in the same row?
 	};
 
-	typedef shared_ptr<Stage> StageRef;
+	typedef std::shared_ptr<Stage> StageRef;
 
 
 	void start();

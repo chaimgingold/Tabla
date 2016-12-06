@@ -94,6 +94,7 @@ private:
 
 	// Shaders
 	gl::GlslProgRef mAdditiveShader;
+	gl::GlslProgRef mRainbowShader;
 };
 
 class MusicWorldCartridge : public GameCartridge

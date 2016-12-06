@@ -1,0 +1,16 @@
+<PongWorld>
+	<!-- cm -->
+	<BallDefaultRadius>			2 </BallDefaultRadius>
+	<BallDefaultMaxRadius>		2 </BallDefaultMaxRadius>
+	<BallMaxVel>				1 </BallMaxVel>
+	<BallDefaultColor>			C62D41 </BallDefaultColor>
+
+	<!-- cm -->
+	<Vision>
+		<ContourMinRadius>			1	</ContourMinRadius>
+		<ContourMinArea>			1	</ContourMinArea>
+		<ContourDPEpsilon>			1	</ContourDPEpsilon>
+		<ContourMinWidth>			2	</ContourMinWidth>
+	</Vision>
+
+</PongWorld>

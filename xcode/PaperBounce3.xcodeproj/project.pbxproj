@@ -26,6 +26,7 @@
 		22088F63A8874EB4BAA43888 /* b2BlockAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 591FA7613BF840AF83A5482A /* b2BlockAllocator.cpp */; };
 		23756771BB404A04991A26CB /* b2PolygonAndCircleContact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6B648D73A5D453781A11E34 /* b2PolygonAndCircleContact.cpp */; };
 		24F2003E479C4BC49D1F7374 /* b2WheelJoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 627E59F1B82E4F36ABF0DE48 /* b2WheelJoint.cpp */; };
+		2606D37B1DF60CB80018C8B8 /* PinballWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2606D3791DF60CB80018C8B8 /* PinballWorld.cpp */; };
 		260C9B6D1DE37A1A008A2A03 /* MusicStamp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 260C9B6B1DE37A1A008A2A03 /* MusicStamp.cpp */; };
 		262A886B1DB011FF00FE2336 /* MusicWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 262A88691DB011FF00FE2336 /* MusicWorld.cpp */; };
 		262A88701DB58D7D00FE2336 /* RtMidi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 262A886E1DB58D7D00FE2336 /* RtMidi.cpp */; };
@@ -192,6 +193,8 @@
 		1329BFF5C8084A8E9BB37921 /* b2Collision.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2Collision.cpp; path = ../blocks/Box2D/src/Box2D/Collision/b2Collision.cpp; sourceTree = "<group>"; };
 		1967F5787DB34245B2B91CBA /* b2EdgeAndCircleContact.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = b2EdgeAndCircleContact.h; path = ../blocks/Box2D/src/Box2D/Dynamics/Contacts/b2EdgeAndCircleContact.h; sourceTree = "<group>"; };
 		1DCA2C3FD6C84A6DAB24027E /* b2DistanceJoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2DistanceJoint.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Joints/b2DistanceJoint.cpp; sourceTree = "<group>"; };
+		2606D3791DF60CB80018C8B8 /* PinballWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PinballWorld.cpp; path = ../src/PinballWorld/PinballWorld.cpp; sourceTree = "<group>"; };
+		2606D37A1DF60CB80018C8B8 /* PinballWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PinballWorld.h; path = ../src/PinballWorld/PinballWorld.h; sourceTree = "<group>"; };
 		260C9B6B1DE37A1A008A2A03 /* MusicStamp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MusicStamp.cpp; path = ../src/MusicWorld/MusicStamp.cpp; sourceTree = "<group>"; };
 		260C9B6C1DE37A1A008A2A03 /* MusicStamp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MusicStamp.h; path = ../src/MusicWorld/MusicStamp.h; sourceTree = "<group>"; };
 		262A88691DB011FF00FE2336 /* MusicWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MusicWorld.cpp; path = ../src/MusicWorld.cpp; sourceTree = "<group>"; };
@@ -764,6 +767,42 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		2606D37D1DF60CBF0018C8B8 /* PinballWorld */ = {
+			isa = PBXGroup;
+			children = (
+				2606D3791DF60CB80018C8B8 /* PinballWorld.cpp */,
+				2606D37A1DF60CB80018C8B8 /* PinballWorld.h */,
+			);
+			name = PinballWorld;
+			sourceTree = "<group>";
+		};
+		2606D37E1DF60CC80018C8B8 /* PongWorld */ = {
+			isa = PBXGroup;
+			children = (
+				26FD3CD11D91E01E00B20327 /* PongWorld.h */,
+				26FD3CD01D91E01E00B20327 /* PongWorld.cpp */,
+			);
+			name = PongWorld;
+			sourceTree = "<group>";
+		};
+		2606D37F1DF60CD10018C8B8 /* BallWorld */ = {
+			isa = PBXGroup;
+			children = (
+				26FA36451D53C31A00C64A00 /* BallWorld.h */,
+				26FA36441D53C31A00C64A00 /* BallWorld.cpp */,
+			);
+			name = BallWorld;
+			sourceTree = "<group>";
+		};
+		2606D3801DF60CE30018C8B8 /* GameWorld */ = {
+			isa = PBXGroup;
+			children = (
+				2635C8CD1D83245400DF30BE /* GameWorld.h */,
+				26FD3CCE1D90A12B00B20327 /* GameWorld.cpp */,
+			);
+			name = GameWorld;
+			sourceTree = "<group>";
+		};
 		263232111DC8167000CB2048 /* MusicWorld */ = {
 			isa = PBXGroup;
 			children = (
@@ -808,14 +847,12 @@
 		26FD3CCD1D88746D00B20327 /* World */ = {
 			isa = PBXGroup;
 			children = (
+				2606D3801DF60CE30018C8B8 /* GameWorld */,
+				2606D37F1DF60CD10018C8B8 /* BallWorld */,
 				263232111DC8167000CB2048 /* MusicWorld */,
-				2635C8CD1D83245400DF30BE /* GameWorld.h */,
-				26FD3CCE1D90A12B00B20327 /* GameWorld.cpp */,
-				26FA36451D53C31A00C64A00 /* BallWorld.h */,
-				26FA36441D53C31A00C64A00 /* BallWorld.cpp */,
-				26FD3CD11D91E01E00B20327 /* PongWorld.h */,
-				26FD3CD01D91E01E00B20327 /* PongWorld.cpp */,
 				C29A0AD71DF61A1A008A26A1 /* TokenWorld */,
+				2606D37E1DF60CC80018C8B8 /* PongWorld */,
+				2606D37D1DF60CBF0018C8B8 /* PinballWorld */,
 				263232151DC91F9D00CB2048 /* CalibrateWorld */,
 			);
 			name = World;
@@ -2475,6 +2512,7 @@
 				4B0FADE8EBFD4032BD327749 /* b2Math.cpp in Sources */,
 				7BE72FC026004D6E8DD1439D /* b2Settings.cpp in Sources */,
 				148CF21F16044275A8C29BD4 /* b2StackAllocator.cpp in Sources */,
+				2606D37B1DF60CB80018C8B8 /* PinballWorld.cpp in Sources */,
 				26FA365E1D77673500C64A00 /* View.cpp in Sources */,
 				B82FE516E59446FB928ED0B8 /* b2Timer.cpp in Sources */,
 				E1F68EE0EF96421CAF0C6B52 /* b2Body.cpp in Sources */,

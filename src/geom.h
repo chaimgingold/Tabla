@@ -74,5 +74,35 @@ inline void setPointsFromPoly( vec2* v, int n, PolyLine2 vv )
 	for( int i=0; i<n; ++i ) v[i] = vv.getPoints()[i];
 };
 
+inline void getRectCorners( Rectf r, vec2 v[4] )
+{
+	// clockwise order
+	// 0-1
+	// | |
+	// 3-2
+	v[0] = r.getUpperLeft();
+	v[1] = r.getUpperRight();
+	v[2] = r.getLowerRight();
+	v[3] = r.getLowerLeft();
+}
+
+inline void appendQuad( TriMesh& mesh, ColorA color, const vec2 v[4], const vec2 uv[4]=0 )
+{
+	/*  0--1
+	    |  |
+		3--2
+	*/
+	
+	int i = mesh.getNumVertices();
+
+	ColorA colors[4] = {color,color,color,color};
+	
+	mesh.appendPositions(v,4);
+	mesh.appendColors(colors,4);
+	if (uv) mesh.appendTexCoords0(uv,4);
+	
+	mesh.appendTriangle(i+0,i+1,i+3);
+	mesh.appendTriangle(i+3,i+1,i+2);
+}
 
 #endif /* geom_h */

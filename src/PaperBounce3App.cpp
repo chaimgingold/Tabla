@@ -4,6 +4,8 @@
 #include "PongWorld.h"
 #include "MusicWorld.h"
 #include "CalibrateWorld.h"
+#include "PinballWorld.h"
+#include "TokenWorld.h"
 
 #include "geom.h"
 #include "xml.h"
@@ -88,15 +90,9 @@ void PaperBounce3App::setup()
 	if ( !fs::exists(getDocsPath()) ) fs::create_directory(getDocsPath());
 	
 	// configuration
-	mFileWatch.loadXml( hotloadableAssetPath("config.xml"), [this]( XmlTree xml )
+	mFileWatch.loadXml( hotloadableAssetPath("config") / "app.xml", [this]( XmlTree xml )
 	{
 		// 1. get params
-		if ( xml.hasChild("PaperBounce3/Games") )
-		{
-			mGameXmlParams = xml.getChild("PaperBounce3/Games");
-			setGameWorldXmlParams();
-		}
-		
 		if (xml.hasChild("PaperBounce3/LightLink") && !fs::exists(getUserLightLinkFilePath()) )
 		{
 			mLightLink.setParams(xml.getChild("PaperBounce3/LightLink"));
@@ -144,7 +140,7 @@ void PaperBounce3App::setup()
 
 		
 		// TODO:
-		// - get a new camera capture object so that resolution can change live
+		// - get a new camera capture object so that resolution can change live (I think I do that now)
 		// - respond to fullscreen projector flag
 		// - aux display config
 	});
@@ -215,9 +211,11 @@ void PaperBounce3App::setup()
 void PaperBounce3App::setupGameLibrary()
 {
 	mGameLibrary.push_back( make_shared<BallWorldCartridge>() );
+	mGameLibrary.push_back( make_shared<PinballWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<PongWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<CalibrateWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<MusicWorldCartridge>() );
+	mGameLibrary.push_back( make_shared<TokenWorldCartridge>() );
 }
 
 void PaperBounce3App::setupRFIDValueToFunction()
@@ -296,14 +294,31 @@ void PaperBounce3App::loadGame( int libraryIndex )
 	{
 		cout << "loadGame: " << mGameWorld->getSystemName() << endl;
 		
-		setGameWorldXmlParams();
-		mVision.setParams( mGameWorld->getVisionParams() );
-		mPipeline.setCaptureAllStageImages( mDrawPipeline || mGameWorld->getVisionParams().mCaptureAllPipelineStages );
-			// this won't quite hotload right with mDrawPipeline,
-			// but it never did.
-			// we might just want to switch pipeline to always capturing everything.
+		// get config xml
+		fs::path xmlConfigPath = getXmlConfigPathForGame(mGameWorld->getSystemName()) ;
 		
+		mFileWatch.loadXml( xmlConfigPath, [xmlConfigPath,this]( XmlTree xml )
+		{
+			// if we had already loaded this once, we stomp that old lambda and force a reload now.
+			
+			// why conditional?
+			// make sure we aren't hotloading xml from game we aren't running anymore
+			if ( xmlConfigPath == getXmlConfigPathForGame(mGameWorld->getSystemName()) )
+			{
+				// set params from xml
+				setGameWorldXmlParams(xml);
+				mVision.setParams( mGameWorld->getVisionParams() ); // (move mVision.* and mPipeline.* calls to setGameWorldXmlParams()?)
+				mPipeline.setCaptureAllStageImages( mDrawPipeline || mGameWorld->getVisionParams().mCaptureAllPipelineStages );
+					// this won't quite hotload right with mDrawPipeline,
+					// but it never did.
+					// we might just want to switch pipeline to always capturing everything.
+			}
+		});
+		
+		// set world bounds
 		mGameWorld->setWorldBoundsPoly( getWorldBoundsPoly() );
+		
+		// notify
 		mGameWorld->gameWillLoad();
 	}
 }
@@ -330,15 +345,21 @@ int PaperBounce3App::findCartridgeByName( string name )
 	return -1;
 }
 
-void PaperBounce3App::setGameWorldXmlParams()
+fs::path
+PaperBounce3App::getXmlConfigPathForGame( string name )
+{
+	return hotloadableAssetPath("config") / (name + ".xml") ;
+}
+
+void PaperBounce3App::setGameWorldXmlParams( XmlTree xml )
 {
 	if ( mGameWorld )
 	{
-		string xmlNodeName = mGameWorld->getSystemName();
+		string name = mGameWorld->getSystemName();
 		
-		if ( mGameXmlParams.hasChild(xmlNodeName) )
+		if ( xml.hasChild(name) )
 		{
-			XmlTree gameParams = mGameXmlParams.getChild(xmlNodeName);
+			XmlTree gameParams = xml.getChild(name);
 			
 			// load game specific params
 			mGameWorld->setParams( gameParams );
@@ -578,6 +599,12 @@ void PaperBounce3App::drawWorld( GameWorld::DrawType drawType )
 
 void PaperBounce3App::draw()
 {
+	// this, unfortunately, still happens 2x more than needed,
+	// since it will happen once per window.
+	// but not worrying about that minor performance point right now.
+	if (mGameWorld) mGameWorld->prepareToDraw();
+	
+	// draw window
 	WindowData* win = getWindow()->getUserData<WindowData>() ;
 	
 	if (win) win->draw();
@@ -614,6 +641,11 @@ void PaperBounce3App::keyDown( KeyEvent event )
 				chooseNextCaptureDevice();
 				lightLinkDidChange();
 				break;
+				
+			case KeyEvent::KEY_c:
+				mDrawContours = !mDrawContours;
+				handled=true;
+				break;
 		}
 	}
 	
@@ -627,9 +659,19 @@ void PaperBounce3App::keyDown( KeyEvent event )
 				break ;
 
 			case KeyEvent::KEY_x:
-				::system( (string("open \"") + hotloadableAssetPath("config.xml").string() + "\"").c_str() );
+				{
+					fs::path path;
+					
+					if ( mGameWorld && !event.isControlDown() )
+					{
+						path = getXmlConfigPathForGame( mGameWorld->getSystemName() );
+					}
+					else path = hotloadableAssetPath( fs::path("config") / "app.xml" );
+					
+					::system( (string("open \"") + path.string() + string("\"")).c_str() );
+				}
 				break ;
-				
+			
 			case KeyEvent::KEY_UP:
 				if (event.isMetaDown()) mPipeline.setQuery( mPipeline.getFirstStageName() );
 				else mPipeline.setQuery( mPipeline.getPrevStageName(mPipeline.getQuery() ) );

@@ -26,14 +26,27 @@ using namespace ci::gl;
 
 MusicWorld::MusicWorld()
 {
+	// TODO: refactor so easy to load more
 	mFileWatch.loadShader(
-		PaperBounce3App::get()->hotloadableAssetPath("additive.vert"),
-		PaperBounce3App::get()->hotloadableAssetPath("additive.frag"),
+		PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / "additive.vert" ),
+		PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / "additive.frag" ),
 		[this](gl::GlslProgRef prog)
 	{
 		mAdditiveShader = prog; // allows null, so we can easily see if we broke it
 	});
 
+	mFileWatch.loadShader(
+		PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / "rainbow.vert" ),
+		PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / "rainbow.frag" ),
+		[this](gl::GlslProgRef prog)
+	{
+		mRainbowShader = prog; // allows null, so we can easily see if we broke it
+		
+		// update stamps
+		for( auto &s : mStamps ) s.mRainbowShader = mRainbowShader;
+	});
+
+	//
 	mLastFrameTime = ci::app::getElapsedSeconds();
 
 	mTimeVec = vec2(0,-1);
@@ -139,7 +152,7 @@ void MusicWorld::setParams( XmlTree xml )
 	mVision.mBeatQuantization = mBeatQuantization;
 	
 	// update stamps
-	mStamps.setup( mInstruments, getWorldBoundsPoly(), mTimeVec );
+	mStamps.setup( mInstruments, getWorldBoundsPoly(), mTimeVec, mRainbowShader );
 
 	// kill notes
 	killAllNotes();
@@ -192,7 +205,7 @@ MusicWorld::loadInstrumentIcons()
 void MusicWorld::worldBoundsPolyDidChange()
 {
 	mVision.mWorldBoundsPoly = getWorldBoundsPoly();
-	mStamps.setup( mInstruments, getWorldBoundsPoly(), mTimeVec );
+	mStamps.setup( mInstruments, getWorldBoundsPoly(), mTimeVec, mRainbowShader );
 }
 
 Score* MusicWorld::getScoreForMetaParam( MetaParam p )
