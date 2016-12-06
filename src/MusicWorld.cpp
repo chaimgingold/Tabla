@@ -18,8 +18,6 @@
 #include "ocv.h"
 #include "RtMidi.h"
 
-#include "xfeatures2d.hpp"
-
 using namespace std::chrono;
 using namespace ci::gl;
 
@@ -51,10 +49,7 @@ MusicWorld::MusicWorld()
 
 	mTimeVec = vec2(0,-1);
 
-	setupSynthesis();
-
-	auto freak = cv::xfeatures2d::FREAK::create();
-	
+	setupSynthesis();	
 }
 
 void MusicWorld::setParams( XmlTree xml )

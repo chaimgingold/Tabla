@@ -18,9 +18,12 @@
 #include "GameWorld.h"
 #include "Contour.h"
 
+#include "xfeatures2d.hpp"
+
 using namespace ci;
 using namespace ci::app;
 using namespace std;
+using namespace cv::xfeatures2d;
 
 class Token {
 
@@ -32,25 +35,28 @@ public:
 class TokenWorld : public GameWorld
 {
 public:
+	TokenWorld();
 
 	string getSystemName() const override { return "TokenWorld"; }
 
 	void setParams( XmlTree ) override;
-	void updateVision( const ContourVector &c, Pipeline& ) override {  }
+	void updateVision( const ContourVector &c, Pipeline& ) override;
 
-	void gameWillLoad() override;
 	void update() override;
 	void draw( DrawType ) override;
 
 
 	void mouseClick( vec2 p ) override {  }
-	void keyDown( KeyEvent ) override;
+//	void keyDown( KeyEvent ) override;
 
 protected:
 
 
 private:
+	cv::Ptr<cv::Feature2D> mFeatureDetector;
+	std::vector<cv::KeyPoint> mKeypoints;
 
+	Pipeline::StageRef mWorld;
 
 };
 
