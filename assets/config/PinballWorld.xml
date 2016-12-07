@@ -15,16 +15,38 @@
 	</Vision>
 
 
+	<Gamepad>
+		<button id="4" do="flippers-left"/>
+		<button id="6" do="flippers-left"/>
+		<button id="5" do="flippers-right"/>
+		<button id="7" do="flippers-right"/>
+	</Gamepad>
+
+
+
+<!-- Keyboard deprecated... -->
 	<KeyMap>
+	
+<!-- Left flipper	-->
 		<Key>
 			<char>n</char>
 			<input>flippers-left</input>
 		</Key>
+		<Key>
+			<char>l</char>
+			<input>flippers-left</input>
+		</Key>
 
+<!-- Right flipper -->
 		<Key>
 			<char>m</char>
 			<input>flippers-right</input>
 		</Key>
+		<Key>
+			<char>r</char>
+			<input>flippers-right</input>
+		</Key>
+		
 	</KeyMap>
 	
 </PinballWorld>

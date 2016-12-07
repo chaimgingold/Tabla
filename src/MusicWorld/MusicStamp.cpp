@@ -72,8 +72,9 @@ void MusicStamp::tick()
 	mLastFrameTime = now;
 
 	// Advance gradient based on how many notes are on
+	// TODO: modulate by tempo?
 	if (mInstrument) {
-		mGradientClock += dt * (float)mInstrument->mOnNotes.size() ;
+		mGradientClock += dt * mIconPose.mGradientSpeed*mIconPose.mGradientFreq;
 	}
 
 	mIconPose = lerp( mIconPose, mIconPoseTarget, .5f );
@@ -111,13 +112,10 @@ void MusicStamp::drawInstrumentIcon( vec2 worldx, tIconAnimState pose ) const
 		gl::ScopedTextureBind texScp( mInstrument->mIcon );
 		
 		mRainbowShader->uniform( "uTex0", 0 );
-		mRainbowShader->uniform( "uResolution", vec2(mIconWidth,mIconWidth) ); // ???
 		mRainbowShader->uniform( "uTime", mGradientClock );
-		mRainbowShader->uniform( "uSeed", (float)0.f ); // should be unique
 		mRainbowShader->uniform( "uGradientCenter", pose.mGradientCenter );
 		mRainbowShader->uniform( "uSeed", mGradientSeed );
-		mRainbowShader->uniform( "uGradientFreq", (float)mInstrument->mOnNotes.size() );
-
+		mRainbowShader->uniform( "uGradientFreq", pose.mGradientFreq );
 		
 		gl::drawSolidRect(r,vec2(0,1),vec2(1,0));
 	}

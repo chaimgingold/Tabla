@@ -336,6 +336,9 @@ tIconAnimState Score::getIconPoseFromScore_Percussive( float playheadFrac ) cons
 	} else {
 		state.mColor = ColorA(1,1,1,1);
 	}
+
+	state.mGradientSpeed = (float)numOnNotes/(float)mNoteCount;
+	state.mGradientFreq  = numOnNotes;
 	
 	return state;
 }
@@ -375,10 +378,66 @@ tIconAnimState Score::getIconPoseFromScore_Melodic( float playheadFrac ) const
 	// new anim inspired by additive
 	state.mTranslate.y = lerp( -.5f, .5f, avgNote );
 	state.mScale = vec2(1,1) * lerp( 1.f, 1.5f, min( 1.f, ((float)numOnNotes / (float)mNoteCount)*2.f ) ) ;
-	state.mGradientCenter = vec2( playheadFrac, avgNote );
-	state.mGradientSpeed = lerp( 8.f, 16.f, (float)numOnNotes/(float)mNoteCount );
+	
+	state.mGradientCenter = vec2( fmod( avgNote * 3.27, 1.f ) , avgNote );
+	
+	float onNoteFrac = (float)numOnNotes/(float)mNoteCount;
+	state.mGradientSpeed = powf( onNoteFrac, 3 );
+	state.mGradientFreq = onNoteFrac * 5.f;
 	
 	return state;
+}
+
+tIconAnimState Score::getIconPoseFromScore_Additive( float playheadFrac ) const
+{
+	if (!mImage.empty())
+	{
+		// Create a float version of the image
+		cv::Mat imageFloatMat;
+
+		// Copy the uchar version scaled 0-1
+		mImage.convertTo(imageFloatMat, CV_32FC1, 1/255.0);
+		
+		int colIndex = imageFloatMat.cols * getPlayheadFrac();
+
+		cv::Mat columnMat = imageFloatMat.col(colIndex);
+
+		// We use a list message rather than writeArray as it causes less contention with Pd's execution thread
+		float sum=0;
+		float weightedy=0;
+		
+		for (int i = 0; i < columnMat.rows; i++)
+		{
+			float y = (float)i/(float)(columnMat.rows-1); // 0..1
+			float v = 1.f - columnMat.at<float>(i,0);
+			
+			weightedy += y*v;
+			sum += v;
+		}
+
+		if (sum>0) weightedy /= sum ; // normalize
+		else weightedy = .5f; // move to center if empty, since that will mean no vertical translation
+
+		float fracOn = (sum/(float)columnMat.rows);
+		float scaleDegree = fracOn / .5f ; // what % of keys on count as 100% scale?
+		
+		tIconAnimState pose;
+		pose.mColor = sum>0.f ? mInstrument->mNoteOnColor : mInstrument->mNoteOffColor;
+		pose.mScale = vec2(1,1) * lerp( 1.f, 1.4f, scaleDegree*scaleDegree );
+		pose.mTranslate.y = lerp( .5f, -.5f, weightedy ) ; // low values means up
+		pose.mGradientSpeed = fracOn*fracOn*fracOn;
+		pose.mGradientFreq = lerp( 1.f, 5.f, fracOn );
+		return pose;
+	}
+	else return tIconAnimState();
+}
+
+tIconAnimState Score::getIconPoseFromScore_Meta( float playheadFrac ) const
+{
+	tIconAnimState pose;
+	pose.mGradientSpeed = constrain( mMetaParamSliderValue*mMetaParamSliderValue*mMetaParamSliderValue, 0.f, 1.f );
+	pose.mGradientFreq = mMetaParamSliderValue * 5.f;
+	return pose;
 }
 
 tIconAnimState Score::getIconPoseFromScore( float playheadFrac ) const
@@ -403,42 +462,13 @@ tIconAnimState Score::getIconPoseFromScore( float playheadFrac ) const
 		
 		case Instrument::SynthType::Additive:
 		{
-			if (!mImage.empty())
-			{
-				// Create a float version of the image
-				cv::Mat imageFloatMat;
-
-				// Copy the uchar version scaled 0-1
-				mImage.convertTo(imageFloatMat, CV_32FC1, 1/255.0);
-				
-				int colIndex = imageFloatMat.cols * getPlayheadFrac();
-
-				cv::Mat columnMat = imageFloatMat.col(colIndex);
-
-				// We use a list message rather than writeArray as it causes less contention with Pd's execution thread
-				float sum=0;
-				float weightedy=0;
-				
-				for (int i = 0; i < columnMat.rows; i++)
-				{
-					float y = (float)i/(float)(columnMat.rows-1); // 0..1
-					float v = 1.f - columnMat.at<float>(i,0);
-					
-					weightedy += y*v;
-					sum += v;
-				}
-
-				if (sum>0) weightedy /= sum ; // normalize
-				else weightedy = .5f; // move to center if empty, since that will mean no vertical translation
-
-				float scaleDegree = (sum/(float)columnMat.rows) / .5f ; // what % of keys on count as 100% scale?
-				
-				tIconAnimState pose;
-				pose.mColor = sum>0.f ? mInstrument->mNoteOnColor : mInstrument->mNoteOffColor;
-				pose.mScale = vec2(1,1) * lerp( 1.f, 1.4f, scaleDegree*scaleDegree );
-				pose.mTranslate.y = lerp( .5f, -.5f, weightedy ) ; // low values means up
-				return pose;
-			}
+			return getIconPoseFromScore_Additive(playheadFrac);
+		}
+		break;
+		
+		case Instrument::SynthType::Meta:
+		{
+			return getIconPoseFromScore_Meta(playheadFrac);
 		}
 		break;
 		
