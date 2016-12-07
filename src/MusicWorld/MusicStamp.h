@@ -35,6 +35,7 @@ struct tIconAnimState
 
 	float	mGradientSpeed=1.f;
 	vec2	mGradientCenter;
+	float   mGradientFreq=1.f;
 	
 	// some math so we can lerp, blend, etc...
 	tIconAnimState operator+( tIconAnimState rhs ) const
@@ -46,6 +47,7 @@ struct tIconAnimState
 		s.mColor     = mColor     + rhs.mColor;
 		s.mGradientSpeed  = mGradientSpeed  + rhs.mGradientSpeed;
 		s.mGradientCenter = mGradientCenter + rhs.mGradientCenter;
+		s.mGradientFreq   = mGradientFreq   + rhs.mGradientFreq;
 		return s;
 	}
 	tIconAnimState& operator+=( tIconAnimState rhs ) { *this = *this + rhs; return *this; }
@@ -57,8 +59,9 @@ struct tIconAnimState
 		s.mScale     = mScale     * rhs.mScale;
 		s.mRotate    = mRotate    * rhs.mRotate;
 		s.mColor     = mColor     * rhs.mColor;
-		s.mGradientSpeed  = mGradientSpeed  + rhs.mGradientSpeed;
-		s.mGradientCenter = mGradientCenter + rhs.mGradientCenter;
+		s.mGradientSpeed  = mGradientSpeed  * rhs.mGradientSpeed;
+		s.mGradientCenter = mGradientCenter * rhs.mGradientCenter;
+		s.mGradientFreq   = mGradientFreq   * rhs.mGradientFreq;
 		return s;
 	}
 	tIconAnimState operator*( float rhs ) const
@@ -70,6 +73,7 @@ struct tIconAnimState
 		s.mColor     = mColor     * rhs;
 		s.mGradientSpeed  = mGradientSpeed  * rhs;
 		s.mGradientCenter = mGradientCenter * rhs;
+		s.mGradientFreq   = mGradientFreq   * rhs;
 		return s;
 	}
 
@@ -89,7 +93,7 @@ inline std::ostream &operator<<(std::ostream &os, tIconAnimState const &m) {
 	os << "\tmColor: " << m.mColor << endl;
 	os << "\tmGradientCenter: " << m.mGradientCenter << endl;
 	os << "\tmGradientSpeed: " << m.mGradientSpeed << endl;
-	
+	os << "\tmGradientFreq: " << m.mGradientFreq << endl;
 	return os;
 }
 

@@ -98,6 +98,8 @@ public:
 private:
 	tIconAnimState getIconPoseFromScore_Melodic( float playheadFrac ) const;
 	tIconAnimState getIconPoseFromScore_Percussive( float playheadFrac ) const;
+	tIconAnimState getIconPoseFromScore_Additive( float playheadFrac ) const;
+	tIconAnimState getIconPoseFromScore_Meta( float playheadFrac ) const;
 
 	bool isNoteOn( float playheadFrac, int note ) const;
 	
