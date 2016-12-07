@@ -1,6 +1,7 @@
 12/05/2016 - 12/11/2016
 * New TokenWorld CV tracking playground for testing out OpenCV's library of techniques
 * Game Controller support for Pinball
+* Further work
 
 11/28/2016 - 12/05/2016
 * Stamp tracking much more solid, controllable.

@@ -1,14 +1,22 @@
+QUALITY OF LIFE
+[ ] Integrate FluidSynth & sample library
 
-[ ] Vocoder!!!!!!
-
-[ ] Autotune! This can be separate from vocoder, since we can use pitch of voice
+[ ] Ball world synthesis
 
 [ ] Support hotswapping arduino
 		Wrap mSerialDevice->writeBytes in sendSerialByte in try/catch, null mSerialDevice in catch.
 		Periodically run SerialPort::getPorts(); if mSerialDevice is null and setup when one is found.
 
+ 
+SYNTH IDEAS
+[ ] Vocoder!!!!!!
+
+[ ] Autotune! This can be separate from vocoder, since we can use pitch of voice
 
 BUGS
+ 
+[ ] Additive synth rendering is very slow; maybe texture transfer phase? 
+ 
 [x] Fix stuck notes on paper removal
 [ ] Fix crashes on exit (try newer branch of LibPd-Cinder from Ryan)
 [ ] Fix losing MIDI when switching cartridges
