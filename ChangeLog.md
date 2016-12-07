@@ -1,3 +1,7 @@
+12/05/2016 - 12/11/2016
+* New TokenWorld CV tracking playground for testing out OpenCV's library of techniques
+* Game Controller support for Pinball
+
 11/28/2016 - 12/05/2016
 * Stamp tracking much more solid, controllable.
 * Multi-measure stamp tracking much better.
@@ -11,6 +15,7 @@
 * New stamp system for instrument assignment.
 * More awesome character animation.
 * New Sharp Crab character
+* Robits V3, now with 12-solenoid robit
 
 11/14/2016 - 11/18/2016
 * Barrel distortion correction!

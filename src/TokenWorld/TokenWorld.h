@@ -18,12 +18,15 @@
 #include "GameWorld.h"
 #include "Contour.h"
 
+#include "opencv2/features2d.hpp"
 #include "xfeatures2d.hpp"
 
 using namespace ci;
 using namespace ci::app;
 using namespace std;
 using namespace cv::xfeatures2d;
+
+typedef cv::Ptr<cv::Feature2D> Feature2DRef;
 
 class Token {
 
@@ -47,14 +50,16 @@ public:
 
 
 	void mouseClick( vec2 p ) override {  }
-//	void keyDown( KeyEvent ) override;
+	void keyDown( KeyEvent ) override;
 
 protected:
 
 
 private:
-	cv::Ptr<cv::Feature2D> mFeatureDetector;
-	std::vector<cv::KeyPoint> mKeypoints;
+	int mCurrentDetector=0;
+	vector<pair<string, Feature2DRef>> mFeatureDetectors;
+//	cv::Ptr<cv::Feature2D> mFeatureDetector;
+	vector<cv::KeyPoint> mKeypoints;
 
 	Pipeline::StageRef mWorld;
 
