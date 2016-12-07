@@ -105,6 +105,11 @@ public:
 
 	gl::GlslProgRef mRainbowShader;
 	
+	MusicStamp()
+	{
+		mLastFrameTime = ci::app::getElapsedSeconds();
+	}
+	
 	void draw() const;
 	void tick();
 	bool isInstrumentAvailable() const { return mInstrument && mInstrument->isAvailable(); }
