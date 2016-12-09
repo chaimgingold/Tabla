@@ -53,6 +53,8 @@ void PaperBounce3App::setup()
 	cout << getAppPath() << endl;
 	
 	// command line args
+	string defaultGameName; // empty means 0th, by default
+	
 	auto args = getCommandLineArgs();
 	
 	for( size_t a=0; a<args.size(); ++a )
@@ -63,6 +65,11 @@ void PaperBounce3App::setup()
 			if ( fs::exists(overloadedAssetPath) ) {
 				mOverloadedAssetPath = overloadedAssetPath;
 			}
+		}
+
+		if ( args[a]=="-gameworld" && args.size()>a )
+		{
+			defaultGameName = args[a+1];
 		}
 	}
 	
@@ -202,7 +209,7 @@ void PaperBounce3App::setup()
 	
 	// load the games and the game
 	setupGameLibrary();
-	loadDefaultGame();
+	loadDefaultGame(defaultGameName);
 	setupRFIDValueToFunction();
 }
 
@@ -210,12 +217,12 @@ void PaperBounce3App::setup()
 
 void PaperBounce3App::setupGameLibrary()
 {
-	mGameLibrary.push_back( make_shared<TokenWorldCartridge>() );
-	mGameLibrary.push_back( make_shared<MusicWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<BallWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<PinballWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<PongWorldCartridge>() );
+	mGameLibrary.push_back( make_shared<TokenWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<CalibrateWorldCartridge>() );
+	mGameLibrary.push_back( make_shared<MusicWorldCartridge>() );
 }
 
 void PaperBounce3App::setupRFIDValueToFunction()
@@ -274,11 +281,19 @@ void PaperBounce3App::chooseNextCaptureDevice()
 	mLightLink.mCameraIndex = (mLightLink.mCameraIndex+1) % Capture::getDevices().size();
 }
 
-void PaperBounce3App::loadDefaultGame()
+void PaperBounce3App::loadDefaultGame( string byName )
 {
 	if ( !mGameLibrary.empty() )
 	{
-		loadGame(0);
+		int index=0;
+		
+		if (!byName.empty())
+		{
+			int i = findCartridgeByName(byName);
+			if (i!=-1) index=i;
+		}
+		
+		loadGame(index);
 	}
 }
 

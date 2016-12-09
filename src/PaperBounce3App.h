@@ -74,7 +74,7 @@ class PaperBounce3App : public App {
 	
 	// game library
 	void setupGameLibrary();
-	void loadDefaultGame();
+	void loadDefaultGame( string byName="" );
 	void loadGame( int libraryIndex );
 	void loadAdjacentGame( int libraryIndexDelta );
 	int  findCartridgeByName( string ); // -1 for fail

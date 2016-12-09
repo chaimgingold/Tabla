@@ -66,6 +66,10 @@
             argument = "-assets /Users/$USER/Documents/PaperBounce3/assets"
             isEnabled = "YES">
          </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-gameworld PinballWorld"
+            isEnabled = "YES">
+         </CommandLineArgument>
       </CommandLineArguments>
       <AdditionalOptions>
       </AdditionalOptions>
