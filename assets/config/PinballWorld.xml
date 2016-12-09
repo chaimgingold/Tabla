@@ -15,6 +15,9 @@
 	</Vision>
 
 
+	<UpVec>-1 0</UpVec>
+	<PartMaxContourRadius>5</PartMaxContourRadius>
+	
 	<Gamepad>
 		<button id="4" do="flippers-left"/>
 		<button id="6" do="flippers-left"/>

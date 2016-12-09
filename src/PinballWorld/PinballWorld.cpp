@@ -12,6 +12,7 @@
 #include "cinder/audio/Context.h"
 #include "cinder/audio/Source.h"
 #include "Gamepad.h"
+#include "xml.h"
 
 
 PinballWorld::PinballWorld()
@@ -72,6 +73,8 @@ PinballWorld::~PinballWorld()
 void PinballWorld::setParams( XmlTree xml )
 {
 	BallWorld::setParams(xml);
+	
+	getXml(xml, "UpVec", mUpVec );
 	
 	// gamepad
 	if (xml.hasChild("Gamepad"))
@@ -154,13 +157,47 @@ void PinballWorld::onBallWorldBoundaryCollide	( const Ball& b )
 
 void PinballWorld::draw( DrawType drawType )
 {
-
-	//
-	// Draw world
-	//
+	// balls
 	BallWorld::draw(drawType);
 	
+	// flippers, etc...
+	drawParts();
+
+	// world orientation debug info
+	if (0)
+	{
+		vec2 c = getWorldBoundsPoly().calcCentroid();
+		float l = 10.f;
+
+		gl::color(1,0,0);
+		gl::drawLine( c, c + getRightVec() * l );
+
+		gl::color(0,1,0);
+		gl::drawLine( c, c + getLeftVec() * l );
+
+		gl::color(0,0,1);
+		gl::drawLine( c, c + getUpVec() * l );
+	}
+	
+	// test ray line seg...
+	drawFlipperOrientationRays();
 }
+
+void PinballWorld::drawFlipperOrientationRays() const
+{
+	for( auto &p : mParts )
+	{
+		pair<float,float> space = getAdjacentLeftRightSpace(p.mLoc, getContours());
+		
+		gl::color(1,0,0);
+		gl::drawLine(p.mLoc, p.mLoc + getRightVec() * space.second );
+
+		gl::color(0,1,0);
+		gl::drawLine(p.mLoc, p.mLoc + getLeftVec() * space.first );
+	}
+}
+
+
 
 void PinballWorld::worldBoundsPolyDidChange()
 {
@@ -180,6 +217,83 @@ void PinballWorld::keyDown( KeyEvent event )
 			j->second();
 		}
 	}
+}
+
+void PinballWorld::drawParts() const
+{
+	const float kFlipperLength = 5.f;
+	
+	for( const auto &p : mParts )
+	{
+		bool isDown = false;
+		vec2 f2;
+		
+		if      (p.mType==Part::Type::FlipperLeft )
+		{
+			isDown = mIsFlipperDown[0];
+			f2 = p.mLoc + getRightVec() * kFlipperLength;
+		}
+		else if (p.mType==Part::Type::FlipperRight)
+		{
+			isDown = mIsFlipperDown[1];
+			f2 = p.mLoc + getLeftVec() * kFlipperLength;
+		}
+		
+		if (isDown) f2 += getUpVec() * kFlipperLength;
+		
+		gl::color( ColorA(0,1,1,1) );
+		gl::drawSolidCircle(p.mLoc, 1.f);
+		gl::drawLine(p.mLoc,f2);
+	}
+}
+
+// Vision
+void PinballWorld::updateVision( const ContourVector &c, Pipeline& p )
+{
+	BallWorld::updateVision(c,p);
+	
+	mParts = getPartsFromContours(c);
+}
+
+pair<float,float> PinballWorld::getAdjacentLeftRightSpace( vec2 loc, const ContourVector& cs ) const
+{
+	const Contour* c = cs.findLeafContourContainingPoint(loc);
+
+	if (c&&c->mIsHole) c = cs.getParent(c); // make sure we aren't the hole contour
+	
+	pair<float,float> result(0.f,0.f);
+	
+	if (c)
+	{
+		c->rayIntersection(loc,getRightVec(),&result.second);
+		c->rayIntersection(loc,getLeftVec(),&result.first);
+		// 0.f result remains if hit fails
+	}
+	
+	return result;
+}
+
+PinballWorld::PartVec PinballWorld::getPartsFromContours( const ContourVector& contours ) const
+{
+	PinballWorld::PartVec parts;
+	
+	for( const auto &c : contours )
+	{
+		if ( c.mRadius < mPartMaxContourRadius )
+		{
+			Part p;
+			
+			p.mLoc = c.mCenter;
+
+//			pair<float,float>
+			
+			p.mType = Part::Type::FlipperLeft;
+			
+			parts.push_back(p);
+		}
+	}
+	
+	return parts;
 }
 
 // Synthesis

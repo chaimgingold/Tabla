@@ -26,6 +26,7 @@ public:
 
 	void gameWillLoad() override;
 	void update() override;
+	void updateVision( const ContourVector &c, Pipeline& ) override;
 	void draw( DrawType ) override;
 	
 	void worldBoundsPolyDidChange() override;
@@ -39,8 +40,44 @@ protected:
 
 private:
 
+	// params
+	vec2  mUpVec = vec2(0,1);
+	float mPartMaxContourRadius = 5.f; // contour radius lt => part
+	
+	// world orientation
+	vec2 getUpVec() const { return mUpVec; }
+	vec2 getLeftVec() const { return vec2(cross(vec3(mUpVec,0),vec3(0,0,1))); }
+	vec2 getRightVec() const { return -getLeftVec(); }
+	vec2 getGravityVec() const { return -mUpVec; }
+	
+	class Part
+	{
+	public:
+		enum class Type
+		{
+			FlipperLeft,
+			FlipperRight
+		};
+		
+		Type mType;
+		vec2 mLoc;
+		
+	};
+	typedef vector<Part> PartVec;
+	
+	PartVec getPartsFromContours( const ContourVector& ) const;
+	
+	PartVec mParts;
+	void drawParts() const;
+	
 	// are flippers depressed
-	bool mIsFlipperDown[2];
+	bool mIsFlipperDown[2]; // left, right
+	
+	// drawing
+	void drawFlipperOrientationRays() const;
+	
+	// vision
+	pair<float,float> getAdjacentLeftRightSpace( vec2, const ContourVector& ) const ; // how much adjacent space is to the left, right?
 	
 	// keymap (deprecated)
 	map<char,string> mKeyToInput; // maps keystrokes to input names

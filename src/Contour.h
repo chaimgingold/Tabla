@@ -54,6 +54,8 @@ public:
 	{
 		return mBoundingRect.contains(point) && mPolyLine.contains(point) ;
 	}
+
+	bool rayIntersection( vec2 rayOrigin, vec2 rayVec, float *rayt=0 ) const; // returns first rayt, if any
 	
 };
 
@@ -66,6 +68,16 @@ public:
 
 	const Contour* findLeafContourContainingPoint( vec2 point ) const ;
 
+	const Contour* getParent( const Contour* c ) const {
+		if (c->mParent!=-1) return &((*this)[c->mParent]);
+		else return 0;
+	}
+
+	Contour* getParent( const Contour* c ) {
+		if (c->mParent!=-1) return &((*this)[c->mParent]);
+		else return 0;
+	}
+	
 };
 
 
