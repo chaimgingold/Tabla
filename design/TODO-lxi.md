@@ -1,4 +1,6 @@
 QUALITY OF LIFE
+[ ] Use last cartidge-world on next startup
+
 [ ] Integrate FluidSynth & sample library
 
 [ ] Ball world synthesis
@@ -8,6 +10,8 @@ QUALITY OF LIFE
 		Periodically run SerialPort::getPorts(); if mSerialDevice is null and setup when one is found.
 
  
+[ ] Tempo-sync gradients by using multiples of PI for the cosine waves and for the speeds at which time progresses (which should also be multiplied by tempo)
+
 SYNTH IDEAS
 [ ] Vocoder!!!!!!
 
@@ -23,5 +27,7 @@ BUGS
      (something to do with not closing ports properly?)
 
 
+ 
+ 
 DONE
 [x] Harmonic additive synth

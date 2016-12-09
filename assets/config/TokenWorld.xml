@@ -1,0 +1,14 @@
+<TokenWorld>
+	<!-- cm -->
+	<InlierThreshold>			2.5 </InlierThreshold>
+	<NNMatchRatio>			    0.8 </NNMatchRatio>
+
+	<!-- cm -->
+	<Vision>
+		<ContourMinRadius>			.5	</ContourMinRadius>
+		<ContourMinArea>			7	</ContourMinArea>
+		<ContourDPEpsilon>			1	</ContourDPEpsilon>
+		<ContourMinWidth>			3	</ContourMinWidth>
+	</Vision>
+
+</TokenWorld>

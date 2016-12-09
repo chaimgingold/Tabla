@@ -83,7 +83,7 @@ struct tIconAnimState
 	static tIconAnimState getIdleSway( float phaseInBeats, float beatDuration );
 	
 };
-tIconAnimState operator*( float lhs, tIconAnimState rhs ) { return rhs*lhs; }
+inline tIconAnimState operator*( float lhs, tIconAnimState rhs ) { return rhs*lhs; }
 
 inline std::ostream &operator<<(std::ostream &os, tIconAnimState const &m) {
 	os << "tIconAnimState" << endl;
