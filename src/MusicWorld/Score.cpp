@@ -496,11 +496,10 @@ void Score::draw( GameWorld::DrawType drawType ) const
 		{
 			case Instrument::SynthType::Additive:
 			{
-				if ( mAdditiveShader )
+				if ( mAdditiveShader && mTexture )
 				{
-					auto tex = gl::Texture::create( ImageSourceRef( new ImageSourceCvMat(mImage)) );
 					gl::ScopedGlslProg glslScp( mAdditiveShader );
-					gl::ScopedTextureBind texScp( tex );
+					gl::ScopedTextureBind texScp( mTexture );
 
 					mAdditiveShader->uniform( "uTex0", 0 );
 					mAdditiveShader->uniform( "uTime", (float)ci::app::getElapsedSeconds() );

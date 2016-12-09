@@ -70,6 +70,7 @@ private:
 	typedef vector<Part> PartVec;
 	
 	PartVec getPartsFromContours( const ContourVector& ) const;
+	void getContoursFromParts( const PartVec&, ContourVec& contours ) const;
 	
 	PartVec mParts;
 	void drawParts() const;

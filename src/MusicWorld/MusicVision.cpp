@@ -684,5 +684,8 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& score
 			
 //			cout << "slider: " << s.mMetaParamSliderValue << endl;
 		}
+		
+		// additive texture grab
+		s.mTexture = gl::Texture::create( ImageSourceRef( new ImageSourceCvMat(s.mImage)) );
 	}
 }

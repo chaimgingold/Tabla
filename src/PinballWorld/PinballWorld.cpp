@@ -186,6 +186,25 @@ void PinballWorld::draw( DrawType drawType )
 	
 	// test ray line seg...
 //	drawFlipperOrientationRays();
+
+	// test contour generation
+	{
+		ContourVec cs = getContours();
+		int i = cs.size(); // only start loop at new contours we append
+		
+		getContoursFromParts(mParts,cs);
+		
+		for( ; i<cs.size(); ++i )
+		{
+			const auto &c = cs[i];
+			
+			gl::color(0,.5,.5);
+			gl::drawStrokedRect(c.mBoundingRect);
+
+			gl::color(0,1,0);
+			gl::draw(c.mPolyLine);
+		}
+	}
 }
 
 void PinballWorld::drawFlipperOrientationRays() const
@@ -263,16 +282,22 @@ void PinballWorld::drawParts() const
 			}
 			break;
 		}
-		
 	}
 }
 
 // Vision
-void PinballWorld::updateVision( const ContourVector &c, Pipeline& p )
+void PinballWorld::updateVision( const ContourVec &c, Pipeline& p )
 {
-	BallWorld::updateVision(c,p);
-	
+	// generate parts
 	mParts = getPartsFromContours(c);
+
+	//
+	ContourVec contours = c;
+	
+	getContoursFromParts(mParts,contours);
+	
+	// tell ball world
+	BallWorld::updateVision(contours,p);
 }
 
 pair<float,float> PinballWorld::getAdjacentLeftRightSpace( vec2 loc, const ContourVector& cs ) const
@@ -301,7 +326,7 @@ PinballWorld::PartVec PinballWorld::getPartsFromContours( const ContourVector& c
 	
 	for( const auto &c : contours )
 	{
-		if ( c.mIsHole && c.mRadius < mPartMaxContourRadius )
+		if ( c.mTreeDepth>0 && c.mIsHole /*&& c.mRadius < mPartMaxContourRadius*/ )
 		{
 			Part p;
 			
@@ -354,6 +379,46 @@ PinballWorld::PartVec PinballWorld::getPartsFromContours( const ContourVector& c
 	}
 	
 	return parts;
+}
+
+void PinballWorld::getContoursFromParts( const PinballWorld::PartVec& parts, ContourVec& contours ) const
+{
+	for( const Part &p : parts )
+	{
+		if (p.mType == Part::Type::Bumper)
+		{
+			PolyLine2 poly;
+			
+			const int n=10;
+			
+			for( int i=0; i<n; ++i )
+			{
+				float t = ((float)i/(float)(n-1)) * M_PI*2;
+				poly.push_back( vec2(cos(t),sin(t)) );
+			}
+			
+			poly.scale( vec2(1,1) * p.mRadius );
+			poly.offset(p.mLoc);
+			poly.setClosed();
+			
+			//
+			Contour c;
+			c.mPolyLine = poly;
+			c.mCenter = p.mLoc;
+			c.mBoundingRect = Rectf( poly.getPoints() );
+			c.mRadius = p.mRadius;
+			c.mArea = M_PI * p.mRadius * p.mRadius;
+			
+			// stitch into polygon hierarchy
+			c.mIsHole = true;
+			Contour* parent = contours.findLeafContourContainingPoint(c.mCenter); // uh... a bit sloppy, but it should work enough
+			if (parent) {
+				c.mParent = parent - &contours[0]; // point to parent
+				parent->mChild.push_back(contours.size()); // have parent point to where we will be
+				contours.push_back(c);
+			}
+		}
+	}
 }
 
 // Synthesis

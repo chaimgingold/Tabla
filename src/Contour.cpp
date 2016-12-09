@@ -93,3 +93,50 @@ const Contour* ContourVector::findLeafContourContainingPoint( vec2 point ) const
 	
 	return 0 ;
 }
+
+// same as above, just without const...
+Contour* ContourVector::findLeafContourContainingPoint( vec2 point )
+{
+	function<Contour*(Contour&)> search = [&]( Contour& at ) -> Contour*
+	{
+		if ( at.contains(point) )
+		{
+			for( auto childIndex : at.mChild )
+			{
+				Contour* x = search( (*this)[childIndex] ) ;
+				
+				if (x) return x ;
+			}
+			
+			return &at ;
+		}
+		
+		return 0 ;
+	} ;
+
+	for( auto &c : *this )
+	{
+		if ( c.mTreeDepth == 0 )
+		{
+			Contour* x = search(c) ;
+			
+			if (x) return x ;
+		}
+	}
+	
+	return 0 ;
+}
+
+ContourVector& ContourVector::operator+=(const ContourVector& rhs)
+{
+	int offset = size();
+	
+	for( auto c : rhs )
+	{
+		if (c.mParent != -1) c.mParent += offset;
+		for ( auto &ch : c.mChild ) ch += offset;
+		push_back(c);
+	}
+	
+	return *this;
+}
