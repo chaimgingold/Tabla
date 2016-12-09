@@ -11,6 +11,9 @@
 
 #include "cinder/PolyLine.h"
 
+using namespace cinder;
+using namespace std;
+
 inline vec2 perp( vec2 p )
 {
 	vec3 cross = glm::cross( vec3(p,0), -vec3(0,0,1) ) ;
@@ -122,6 +125,23 @@ inline void appendQuad( TriMesh& mesh, ColorA color, const vec2 v[4], const vec2
 	
 	mesh.appendTriangle(i+0,i+1,i+3);
 	mesh.appendTriangle(i+3,i+1,i+2);
+}
+
+inline vec2 transformPoint(mat4 transform, vec2 point) {
+	return vec2(transform * vec4(point,0,1));
+}
+
+inline mat4 getRectMappingAsMatrix( Rectf from, Rectf to )
+{
+	mat4 m;
+
+	m *= glm::translate( vec3(  to.getUpperLeft(), 0.f ) );
+
+	m *= glm::scale( vec3(to.getWidth() / from.getWidth(), to.getHeight() / from.getHeight(), 1.f ) );
+
+	m *= glm::translate( vec3( -from.getUpperLeft(), 0.f ) );
+
+	return m;
 }
 
 #endif /* geom_h */

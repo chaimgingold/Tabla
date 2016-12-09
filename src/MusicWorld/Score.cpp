@@ -813,8 +813,11 @@ vec2 Score::fracToQuad( vec2 frac ) const
 
 int Score::noteForY( int y ) const {
 
-	if (mInstrument && mInstrument->mMapNotesToChannels) {
-		int noteShift = mOctave + mNumOctaves/2; // Reinterpret octave shift as note shift when using NotesToChannelsMode (and don't go negative)
+	
+	bool isPokie = mInstrument->mSynthType == Instrument::SynthType::RobitPokie;
+	if (mInstrument && mInstrument->mMapNotesToChannels && !isPokie) {
+		// Reinterpret octave shift as note shift when using NotesToChannelsMode (and don't go negative)
+		int noteShift = mOctave + mNumOctaves/2;
 		return y + noteShift;
 	}
 

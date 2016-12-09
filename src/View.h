@@ -15,23 +15,11 @@
 
 #include "cinder/Rect.h"
 #include "cinder/gl/gl.h"
+#include "geom.h"
 
 using namespace ci;
 using namespace ci::app;
 using namespace std;
-
-inline mat4 getRectMappingAsMatrix( Rectf from, Rectf to )
-{
-	mat4 m;
-
-	m *= glm::translate( vec3(  to.getUpperLeft(), 0.f ) );
-	
-	m *= glm::scale( vec3(to.getWidth() / from.getWidth(), to.getHeight() / from.getHeight(), 1.f ) );
-	
-	m *= glm::translate( vec3( -from.getUpperLeft(), 0.f ) );
-	
-	return m;
-}
 
 class View;
 typedef std::shared_ptr<View> ViewRef;

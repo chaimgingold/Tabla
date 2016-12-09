@@ -1,0 +1,9 @@
+#N canvas 1134 248 450 300 10;
+#X obj 96 88 r ball-collision;
+#X obj 96 156 clone ball-collide 100;
+#X obj 88 242 dac~;
+#X obj 96 206 /~ 100;
+#X connect 0 0 1 0;
+#X connect 1 0 3 0;
+#X connect 3 0 2 0;
+#X connect 3 0 2 1;

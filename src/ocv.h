@@ -69,7 +69,30 @@ namespace cinder {
 		
 		return o;
 	}
-	
+
+	inline mat3 mat4to3 ( mat4 i )
+	{
+		mat3 o;
+
+		// copy upper left 2x2
+		for( int x=0; x<2; ++x )
+		for( int y=0; y<2; ++y )
+		{
+			o[x][y] = i[x][y];
+		}
+
+		o[0][2] = i[0][3];
+		o[1][2] = i[1][3];
+
+		o[2][0] = i[3][0];
+		o[2][1] = i[3][1];
+
+		o[2][2] = i[3][3];
+
+		return o;
+	}
+
+
 	inline mat4 getOcvPerspectiveTransform( const vec2 from[4], const vec2 to[4] )
 	{
 		cv::Point2f srcpt[4], dstpt[4];

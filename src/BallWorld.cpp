@@ -616,3 +616,17 @@ void BallWorld::drawMouseDebugInfo( vec2 mouseInWorld )
 	gl::color( ColorAf(0.f,1.f,0.f) ) ;
 	gl::drawLine(mouseInWorld, fixed);
 }
+
+// Synthesis
+void onBallBallCollide			( const Ball&, const Ball& )
+{
+
+}
+void onBallContourCollide		( const Ball&, const Contour& )
+{
+
+}
+void onBallWorldBoundaryCollide	( const Ball& )
+{
+
+}

@@ -780,8 +780,8 @@
 		2606D37D1DF60CBF0018C8B8 /* PinballWorld */ = {
 			isa = PBXGroup;
 			children = (
-				2606D3791DF60CB80018C8B8 /* PinballWorld.cpp */,
 				2606D37A1DF60CB80018C8B8 /* PinballWorld.h */,
+				2606D3791DF60CB80018C8B8 /* PinballWorld.cpp */,
 			);
 			name = PinballWorld;
 			sourceTree = "<group>";
