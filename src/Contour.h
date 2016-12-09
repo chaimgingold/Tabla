@@ -54,10 +54,12 @@ public:
 	{
 		return mBoundingRect.contains(point) && mPolyLine.contains(point) ;
 	}
+
+	bool rayIntersection( vec2 rayOrigin, vec2 rayVec, float *rayt=0 ) const; // returns first rayt, if any
 	
 };
 
-class ContourVector : public vector<Contour>
+class ContourVec : public vector<Contour>
 {
 public:
 
@@ -65,8 +67,22 @@ public:
 	const Contour* findClosestContour ( vec2 point, vec2* closestPoint=0, float* closestDist=0, ContourKind kind = ContourKind::Any ) const ; // assumes findLeafContourContainingPoint failed
 
 	const Contour* findLeafContourContainingPoint( vec2 point ) const ;
+	Contour* findLeafContourContainingPoint( vec2 point );
 
+	const Contour* getParent( const Contour* c ) const {
+		if (c->mParent!=-1) return &((*this)[c->mParent]);
+		else return 0;
+	}
+
+	Contour* getParent( const Contour* c ) {
+		if (c->mParent!=-1) return &((*this)[c->mParent]);
+		else return 0;
+	}
+
+	ContourVec& operator+=(const ContourVec& rhs);
+	ContourVec operator+(const ContourVec& rhs) const { ContourVec c = *this; c += rhs; return c; }
+	
 };
-
+typedef ContourVec ContourVector;
 
 #endif /* Contour_hpp */

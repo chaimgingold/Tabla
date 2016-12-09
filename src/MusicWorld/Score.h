@@ -41,7 +41,8 @@ public:
 	cv::Mat		mQuantizedImagePreThreshold; // (for inter-frame smoothing)
 	cv::Mat		mQuantizedImage;	// quantized image data for midi playback
 	float		mMetaParamSliderValue=-1.f; // 0..1
-
+	gl::TextureRef mTexture; // used for additive, so we don't do it per frame
+	
 	// synth parameters
 	string		mInstrumentName; // which synth
 

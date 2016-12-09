@@ -87,6 +87,10 @@ public:
 	void drawMouseDebugInfo( vec2 ) override;
 	
 	vector<Ball>& getBalls() { return mBalls; }
+	const vector<Ball>& getBalls() const { return mBalls; }
+	
+	ContourVector& getContours() { return mContours; }
+	const ContourVector& getContours() const { return mContours; }
 	
 protected:
 	virtual void onBallBallCollide			( const Ball&, const Ball& ){}

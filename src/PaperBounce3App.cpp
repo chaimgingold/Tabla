@@ -47,12 +47,18 @@ fs::path PaperBounce3App::getUserLightLinkFilePath() const
 	return getDocsPath() / "LightLink.xml" ;
 }
 
+fs::path PaperBounce3App::getUserSettingsFilePath() const
+{
+	return getDocsPath() / "settings.xml" ;
+}
+
 void PaperBounce3App::setup()
 {
-
 	cout << getAppPath() << endl;
 	
 	// command line args
+	string cmdLineArgGameName; // empty means 0th, by default
+	
 	auto args = getCommandLineArgs();
 	
 	for( size_t a=0; a<args.size(); ++a )
@@ -63,6 +69,11 @@ void PaperBounce3App::setup()
 			if ( fs::exists(overloadedAssetPath) ) {
 				mOverloadedAssetPath = overloadedAssetPath;
 			}
+		}
+
+		if ( args[a]=="-gameworld" && args.size()>a )
+		{
+			cmdLineArgGameName = args[a+1];
 		}
 	}
 	
@@ -155,7 +166,7 @@ void PaperBounce3App::setup()
 			lightLinkDidChange(false); // and don't save, since we are responding to a load.
 		}
 	});
-	
+
 	// ui stuff (do before making windows)
 	mTextureFont = gl::TextureFont::create( Font("Avenir",12) );
 	
@@ -200,22 +211,36 @@ void PaperBounce3App::setup()
 	if ( mPipeline.getQuery().empty() ) mPipeline.setQuery("undistorted");
 	mPipeline.setCaptureAllStageImages(mDrawPipeline);
 	
-	// load the games and the game
+	// load the games, rfid functions
 	setupGameLibrary();
-	loadDefaultGame();
 	setupRFIDValueToFunction();
+
+	// settings (generic)
+	mFileWatch.loadXml( getUserSettingsFilePath(), [this]( XmlTree xml )
+	{
+		// this overloads the one in config.xml
+		if ( xml.hasChild("settings") )
+		{
+			loadUserSettingsFromXml(xml.getChild("settings"));
+		}
+	});
+
+	// load default game (or command line arg)
+	if ( !mGameWorld || !cmdLineArgGameName.empty() ) { // because loadUserSettingsFromXml might have done it
+		loadDefaultGame(cmdLineArgGameName);
+	}
 }
 
 
 
 void PaperBounce3App::setupGameLibrary()
 {
-	mGameLibrary.push_back( make_shared<TokenWorldCartridge>() );
-	mGameLibrary.push_back( make_shared<MusicWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<BallWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<PinballWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<PongWorldCartridge>() );
+	mGameLibrary.push_back( make_shared<TokenWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<CalibrateWorldCartridge>() );
+	mGameLibrary.push_back( make_shared<MusicWorldCartridge>() );
 }
 
 void PaperBounce3App::setupRFIDValueToFunction()
@@ -274,11 +299,19 @@ void PaperBounce3App::chooseNextCaptureDevice()
 	mLightLink.mCameraIndex = (mLightLink.mCameraIndex+1) % Capture::getDevices().size();
 }
 
-void PaperBounce3App::loadDefaultGame()
+void PaperBounce3App::loadDefaultGame( string byName )
 {
 	if ( !mGameLibrary.empty() )
 	{
-		loadGame(0);
+		int index=0;
+		
+		if (!byName.empty())
+		{
+			int i = findCartridgeByName(byName);
+			if (i!=-1) index=i;
+		}
+		
+		loadGame(index);
 	}
 }
 
@@ -321,6 +354,9 @@ void PaperBounce3App::loadGame( int libraryIndex )
 		// notify
 		mGameWorld->gameWillLoad();
 	}
+	
+	// save settings
+	saveUserSettings();
 }
 
 void PaperBounce3App::loadAdjacentGame( int libraryIndexDelta )
@@ -745,6 +781,46 @@ bool PaperBounce3App::parseKeyboardString( string str )
 	}
 
 	return handled;
+}
+
+void PaperBounce3App::loadUserSettingsFromXml( XmlTree xml )
+{
+	cout << "loadUserSettingsFromXml." << endl;
+	
+	if ( xml.hasChild("GameWorld") )
+	{
+		string name = xml.getChild("GameWorld").getValue();
+		
+		if ( !mGameWorld || mGameWorld->getSystemName() != name )
+		{
+			int i = findCartridgeByName(name);
+			
+			if (i!=-1)
+			{
+				cout << "loadUserSettingsFromXml: going to game world " << name << endl;
+				loadGame(i);
+			}
+			else cout << "loadUserSettingsFromXml: unknown game world " << name << endl;
+		}
+	}
+}
+
+XmlTree PaperBounce3App::getUserSettingsXml() const
+{
+	XmlTree xml("settings","");
+	
+	if (mGameWorld)
+	{
+		xml.push_back( XmlTree("GameWorld",mGameWorld->getSystemName()) );
+	}
+	
+	return xml;
+}
+
+void PaperBounce3App::saveUserSettings()
+{
+	XmlTree t = getUserSettingsXml();
+	t.write( writeFile(getUserSettingsFilePath()) );
 }
 
 CINDER_APP( PaperBounce3App, RendererGl(RendererGl::Options().msaa(8)), [&]( App::Settings *settings ) {

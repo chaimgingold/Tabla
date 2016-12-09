@@ -74,7 +74,7 @@ class PaperBounce3App : public App {
 	
 	// game library
 	void setupGameLibrary();
-	void loadDefaultGame();
+	void loadDefaultGame( string byName="" );
 	void loadGame( int libraryIndex );
 	void loadAdjacentGame( int libraryIndexDelta );
 	int  findCartridgeByName( string ); // -1 for fail
@@ -167,6 +167,12 @@ class PaperBounce3App : public App {
 
 	fs::path getDocsPath() const;
 	fs::path getUserLightLinkFilePath() const;
+	fs::path getUserSettingsFilePath() const;
+	
+	//
+	void loadUserSettingsFromXml( XmlTree );
+	XmlTree getUserSettingsXml() const;
+	void saveUserSettings();
 };
 
 #endif /* PaperBounce3App_h */

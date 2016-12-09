@@ -12,11 +12,15 @@
 #include "cinder/audio/Context.h"
 #include "cinder/audio/Source.h"
 #include "Gamepad.h"
+#include "xml.h"
 
 
 PinballWorld::PinballWorld()
 {
 	setupSynthesis();
+
+	mIsFlipperDown[0] = false;
+	mIsFlipperDown[1] = false;
 	
 	auto button = [this]( unsigned int id, string postfix )
 	{
@@ -72,6 +76,10 @@ PinballWorld::~PinballWorld()
 void PinballWorld::setParams( XmlTree xml )
 {
 	BallWorld::setParams(xml);
+	
+	getXml(xml, "UpVec", mUpVec );
+	getXml(xml, "FlipperDistToEdge", mFlipperDistToEdge );
+	getXml(xml, "BumperRadius", mBumperRadius );
 	
 	// gamepad
 	if (xml.hasChild("Gamepad"))
@@ -154,12 +162,63 @@ void PinballWorld::onBallWorldBoundaryCollide	( const Ball& b )
 
 void PinballWorld::draw( DrawType drawType )
 {
-
-	//
-	// Draw world
-	//
+	// balls
 	BallWorld::draw(drawType);
 	
+	// flippers, etc...
+	drawParts();
+
+	// world orientation debug info
+	if (0)
+	{
+		vec2 c = getWorldBoundsPoly().calcCentroid();
+		float l = 10.f;
+
+		gl::color(1,0,0);
+		gl::drawLine( c, c + getRightVec() * l );
+
+		gl::color(0,1,0);
+		gl::drawLine( c, c + getLeftVec() * l );
+
+		gl::color(0,0,1);
+		gl::drawLine( c, c + getUpVec() * l );
+	}
+	
+	// test ray line seg...
+//	drawFlipperOrientationRays();
+
+	// test contour generation
+	{
+		ContourVec cs = getContours();
+		int i = cs.size(); // only start loop at new contours we append
+		
+		getContoursFromParts(mParts,cs);
+		
+		for( ; i<cs.size(); ++i )
+		{
+			const auto &c = cs[i];
+			
+			gl::color(0,.5,.5);
+			gl::drawStrokedRect(c.mBoundingRect);
+
+			gl::color(0,1,0);
+			gl::draw(c.mPolyLine);
+		}
+	}
+}
+
+void PinballWorld::drawFlipperOrientationRays() const
+{
+	for( auto &p : mParts )
+	{
+		pair<float,float> space = getAdjacentLeftRightSpace(p.mLoc, getContours());
+		
+		gl::color(1,0,0);
+		gl::drawLine(p.mLoc, p.mLoc + getRightVec() * space.second );
+
+		gl::color(0,1,0);
+		gl::drawLine(p.mLoc, p.mLoc + getLeftVec() * space.first );
+	}
 }
 
 void PinballWorld::worldBoundsPolyDidChange()
@@ -178,6 +237,186 @@ void PinballWorld::keyDown( KeyEvent event )
 		if (j!=mInputToFunction.end())
 		{
 			j->second();
+		}
+	}
+}
+
+void PinballWorld::drawParts() const
+{
+	const float kFlipperLength = 5.f;
+	
+	for( const auto &p : mParts )
+	{
+		switch(p.mType)
+		{
+			case Part::Type::FlipperLeft:
+			case Part::Type::FlipperRight:
+			{
+				bool isDown = false;
+				vec2 f2;
+				float flipperLength = max( p.mRadius*2.f, kFlipperLength );
+				
+				if ( p.mType == Part::Type::FlipperLeft)
+				{
+					isDown = mIsFlipperDown[0];
+					f2 = p.mLoc + getRightVec() * flipperLength;
+				}
+				else
+				{
+					isDown = mIsFlipperDown[1];
+					f2 = p.mLoc + getLeftVec() * flipperLength;
+				}
+
+				if (isDown) f2 += getUpVec() * flipperLength;
+				
+				gl::color( ColorA(0,1,1,1) );
+				gl::drawSolidCircle(p.mLoc, p.mRadius);
+				gl::drawLine(p.mLoc,f2);
+			}
+			break;
+			
+			case Part::Type::Bumper:
+			{
+				gl::color(1,0,0);
+				gl::drawStrokedCircle(p.mLoc,p.mRadius);
+			}
+			break;
+		}
+	}
+}
+
+// Vision
+void PinballWorld::updateVision( const ContourVec &c, Pipeline& p )
+{
+	// generate parts
+	mParts = getPartsFromContours(c);
+
+	//
+	ContourVec contours = c;
+	
+	getContoursFromParts(mParts,contours);
+	
+	// tell ball world
+	BallWorld::updateVision(contours,p);
+}
+
+pair<float,float> PinballWorld::getAdjacentLeftRightSpace( vec2 loc, const ContourVector& cs ) const
+{
+	const Contour* c = cs.findLeafContourContainingPoint(loc);
+
+	if (c&&c->mIsHole) c = cs.getParent(c); // make sure we aren't the hole contour
+	
+	pair<float,float> result(0.f,0.f);
+	
+	if (c)
+	{
+		c->rayIntersection(loc,getRightVec(),&result.second);
+		c->rayIntersection(loc,getLeftVec(),&result.first);
+		// 0.f result remains if hit fails
+	}
+	
+	return result;
+}
+
+PinballWorld::PartVec PinballWorld::getPartsFromContours( const ContourVector& contours ) const
+{
+	const float kFlipperMinRadius = 1.f;
+	
+	PinballWorld::PartVec parts;
+	
+	for( const auto &c : contours )
+	{
+		if ( c.mTreeDepth>0 && c.mIsHole /*&& c.mRadius < mPartMaxContourRadius*/ )
+		{
+			Part p;
+			
+			// location
+			p.mLoc = c.mCenter;
+			p.mRadius = c.mRadius;
+			
+			// flipper orientation
+			pair<float,float> adjSpace = getAdjacentLeftRightSpace(p.mLoc,contours);
+			adjSpace.first -= c.mRadius;
+			adjSpace.second -= c.mRadius;
+			
+			if      (adjSpace.second < adjSpace.first  && adjSpace.second < mFlipperDistToEdge)
+			{
+				p.mType = Part::Type::FlipperRight;
+				p.mRadius = max( p.mRadius, kFlipperMinRadius );
+//				p.mRadius = kFlipperMinRadius;
+			}
+			else if (adjSpace.first  < adjSpace.second && adjSpace.first  < mFlipperDistToEdge)
+			{
+				p.mType = Part::Type::FlipperLeft;
+//				p.mRadius = max( p.mRadius, kFlipperMinRadius );
+//				p.mRadius = kFlipperMinRadius;
+			}
+//			else if (adjSpace.first  < 1.f) // < epsilon
+//			{
+				// zero!
+				// plunger?
+				// something else?
+//				p.mType = Part::Type::FlipperLeft;
+//			}
+			else
+			{
+				p.mType = Part::Type::Bumper;
+				p.mRadius = min( max(p.mRadius,mBumperRadius),
+								 min(adjSpace.first,adjSpace.second)
+								 );
+				
+				// equal, and there really is space, so just pick something.
+//				p.mType = Part::Type::FlipperLeft;
+				
+				// we could have a fuzzier sense of equal (left > right + kDelta),
+				// which would allow us to have something different at the center of a space (where distance is equal-ish)
+				// (like a bumper!)
+				// or even a rule that said left is only when a left edge is within x space at left (eg), so very tight proximity rules.
+			}
+			
+			parts.push_back(p);
+		}
+	}
+	
+	return parts;
+}
+
+void PinballWorld::getContoursFromParts( const PinballWorld::PartVec& parts, ContourVec& contours ) const
+{
+	for( const Part &p : parts )
+	{
+		if (p.mType == Part::Type::Bumper)
+		{
+			PolyLine2 poly;
+			
+			const int n=10;
+			
+			for( int i=0; i<n; ++i )
+			{
+				float t = ((float)i/(float)(n-1)) * M_PI*2;
+				poly.push_back( vec2(cos(t),sin(t)) );
+			}
+			
+			poly.scale( vec2(1,1) * p.mRadius );
+			poly.offset(p.mLoc);
+			poly.setClosed();
+			
+			//
+			Contour c;
+			c.mPolyLine = poly;
+			c.mCenter = p.mLoc;
+			c.mBoundingRect = Rectf( poly.getPoints() );
+			c.mRadius = p.mRadius;
+			c.mArea = M_PI * p.mRadius * p.mRadius;
+			
+			// stitch into polygon hierarchy
+			c.mIsHole = true;
+			Contour* parent = contours.findLeafContourContainingPoint(c.mCenter); // uh... a bit sloppy, but it should work enough
+			if (parent) {
+				c.mParent = parent - &contours[0]; // point to parent
+				parent->mChild.push_back(contours.size()); // have parent point to where we will be
+				contours.push_back(c);
+			}
 		}
 	}
 }

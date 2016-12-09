@@ -34,7 +34,7 @@ struct tIconAnimState
 	ColorA  mColor = ColorA(1,1,1,1);
 
 	float	mGradientSpeed=1.f;
-	vec2	mGradientCenter;
+	vec2	mGradientCenter=vec2(.5,.5);
 	float   mGradientFreq=1.f;
 	
 	// some math so we can lerp, blend, etc...

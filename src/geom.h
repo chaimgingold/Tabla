@@ -66,16 +66,35 @@ inline vec2 closestPointOnPoly( vec2 pt, const PolyLine2& poly, size_t *ai=0, si
 	return result ;
 }
 
+inline bool rayLineSegIntersection( vec2 rayOrigin, vec2 rayVec, vec2 line0, vec2 line1, float *rayt=0 )
+{
+	rayVec *= -1.f;
+	// this negative sign is not what the recipe calls for, but recipe
+	// seems to return bogus results.
+	
+	// https://rootllama.wordpress.com/2014/06/20/ray-line-segment-intersection-test-in-2d/
+	vec2 v1 = rayOrigin - line0;
+	vec2 v2 = line1 - line0;
+	vec2 v3( -rayVec.y, rayVec.x );
+	
+	float t1 = length( glm::cross(vec3(v2,0),vec3(v1,0)) ) / dot(v2,v3);
+	float t2 = dot(v1,v3) / dot(v2,v3);
+	
+	if (rayt) *rayt = t1;
+	
+	return (t2 >= 0.f && t2 <= 1.f) && t1>=0 ;
+}
+
 inline PolyLine2 getPointsAsPoly( const vec2* v, int n )
 {
 	return PolyLine2( vector<vec2>(v,v+n) );
-};
+}
 
 inline void setPointsFromPoly( vec2* v, int n, PolyLine2 vv )
 {
 	assert( vv.getPoints().size()==n );
 	for( int i=0; i<n; ++i ) v[i] = vv.getPoints()[i];
-};
+}
 
 inline void getRectCorners( Rectf r, vec2 v[4] )
 {
