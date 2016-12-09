@@ -18,7 +18,9 @@ SYNTH IDEAS
 [ ] Autotune! This can be separate from vocoder, since we can use pitch of voice
 
 BUGS
- 
+
+[ ] Update the audio device when switching
+
 [ ] Additive synth rendering is very slow; maybe texture transfer phase? 
  
 [x] Fix stuck notes on paper removal

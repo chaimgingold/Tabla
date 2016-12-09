@@ -45,6 +45,13 @@ struct Token {
 	vector<DMatch>   good_matches;
 };
 
+enum class TokenVisionMode
+{
+	Global=0,
+	Matching,
+	kNumModes
+};
+
 class TokenWorld : public GameWorld
 {
 public:
@@ -66,6 +73,8 @@ protected:
 
 
 private:
+	TokenVisionMode mMode=TokenVisionMode::Matching;
+
 	int mCurrentDetector=0;
 	vector<pair<string, Feature2DRef>> mFeatureDetectors;
 	
@@ -89,6 +98,11 @@ private:
 	float mInlierThreshold=2.5;
 	// Nearest neighbor matching ratio
 	float mNNMatchRatio=0.8;
+
+	void drawMatchingKeypoints();
+	void drawGlobalKeypoints();
+	void globalVision( const ContourVector &contours, Pipeline&pipeline );
+	void matchingVision( const ContourVector &contours, Pipeline&pipeline );
 };
 
 class TokenWorldCartridge : public GameCartridge
