@@ -167,6 +167,12 @@ class PaperBounce3App : public App {
 
 	fs::path getDocsPath() const;
 	fs::path getUserLightLinkFilePath() const;
+	fs::path getUserSettingsFilePath() const;
+	
+	//
+	void loadUserSettingsFromXml( XmlTree );
+	XmlTree getUserSettingsXml() const;
+	void saveUserSettings();
 };
 
 #endif /* PaperBounce3App_h */

@@ -47,13 +47,17 @@ fs::path PaperBounce3App::getUserLightLinkFilePath() const
 	return getDocsPath() / "LightLink.xml" ;
 }
 
+fs::path PaperBounce3App::getUserSettingsFilePath() const
+{
+	return getDocsPath() / "settings.xml" ;
+}
+
 void PaperBounce3App::setup()
 {
-
 	cout << getAppPath() << endl;
 	
 	// command line args
-	string defaultGameName; // empty means 0th, by default
+	string cmdLineArgGameName; // empty means 0th, by default
 	
 	auto args = getCommandLineArgs();
 	
@@ -69,7 +73,7 @@ void PaperBounce3App::setup()
 
 		if ( args[a]=="-gameworld" && args.size()>a )
 		{
-			defaultGameName = args[a+1];
+			cmdLineArgGameName = args[a+1];
 		}
 	}
 	
@@ -162,7 +166,7 @@ void PaperBounce3App::setup()
 			lightLinkDidChange(false); // and don't save, since we are responding to a load.
 		}
 	});
-	
+
 	// ui stuff (do before making windows)
 	mTextureFont = gl::TextureFont::create( Font("Avenir",12) );
 	
@@ -207,10 +211,24 @@ void PaperBounce3App::setup()
 	if ( mPipeline.getQuery().empty() ) mPipeline.setQuery("undistorted");
 	mPipeline.setCaptureAllStageImages(mDrawPipeline);
 	
-	// load the games and the game
+	// load the games, rfid functions
 	setupGameLibrary();
-	loadDefaultGame(defaultGameName);
 	setupRFIDValueToFunction();
+
+	// settings (generic)
+	mFileWatch.loadXml( getUserSettingsFilePath(), [this]( XmlTree xml )
+	{
+		// this overloads the one in config.xml
+		if ( xml.hasChild("settings") )
+		{
+			loadUserSettingsFromXml(xml.getChild("settings"));
+		}
+	});
+
+	// load default game (or command line arg)
+	if ( !mGameWorld || !cmdLineArgGameName.empty() ) { // because loadUserSettingsFromXml might have done it
+		loadDefaultGame(cmdLineArgGameName);
+	}
 }
 
 
@@ -336,6 +354,9 @@ void PaperBounce3App::loadGame( int libraryIndex )
 		// notify
 		mGameWorld->gameWillLoad();
 	}
+	
+	// save settings
+	saveUserSettings();
 }
 
 void PaperBounce3App::loadAdjacentGame( int libraryIndexDelta )
@@ -760,6 +781,46 @@ bool PaperBounce3App::parseKeyboardString( string str )
 	}
 
 	return handled;
+}
+
+void PaperBounce3App::loadUserSettingsFromXml( XmlTree xml )
+{
+	cout << "loadUserSettingsFromXml." << endl;
+	
+	if ( xml.hasChild("GameWorld") )
+	{
+		string name = xml.getChild("GameWorld").getValue();
+		
+		if ( !mGameWorld || mGameWorld->getSystemName() != name )
+		{
+			int i = findCartridgeByName(name);
+			
+			if (i!=-1)
+			{
+				cout << "loadUserSettingsFromXml: going to game world " << name << endl;
+				loadGame(i);
+			}
+			else cout << "loadUserSettingsFromXml: unknown game world " << name << endl;
+		}
+	}
+}
+
+XmlTree PaperBounce3App::getUserSettingsXml() const
+{
+	XmlTree xml("settings","");
+	
+	if (mGameWorld)
+	{
+		xml.push_back( XmlTree("GameWorld",mGameWorld->getSystemName()) );
+	}
+	
+	return xml;
+}
+
+void PaperBounce3App::saveUserSettings()
+{
+	XmlTree t = getUserSettingsXml();
+	t.write( writeFile(getUserSettingsFilePath()) );
 }
 
 CINDER_APP( PaperBounce3App, RendererGl(RendererGl::Options().msaa(8)), [&]( App::Settings *settings ) {
