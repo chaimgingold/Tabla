@@ -180,7 +180,7 @@ void PinballWorld::draw( DrawType drawType )
 	}
 	
 	// test ray line seg...
-	drawFlipperOrientationRays();
+//	drawFlipperOrientationRays();
 }
 
 void PinballWorld::drawFlipperOrientationRays() const
@@ -228,7 +228,7 @@ void PinballWorld::drawParts() const
 		bool isDown = false;
 		vec2 f2;
 		
-		if      (p.mType==Part::Type::FlipperLeft )
+		if (p.mType==Part::Type::FlipperLeft )
 		{
 			isDown = mIsFlipperDown[0];
 			f2 = p.mLoc + getRightVec() * kFlipperLength;
@@ -283,11 +283,30 @@ PinballWorld::PartVec PinballWorld::getPartsFromContours( const ContourVector& c
 		{
 			Part p;
 			
+			// location
 			p.mLoc = c.mCenter;
 
-//			pair<float,float>
+			// flipper orientation
+			pair<float,float> adjSpace = getAdjacentLeftRightSpace(p.mLoc,contours);
 			
-			p.mType = Part::Type::FlipperLeft;
+			if      (adjSpace.first > adjSpace.second) p.mType = Part::Type::FlipperRight;
+			else if (adjSpace.first < adjSpace.second) p.mType = Part::Type::FlipperLeft;
+			else if (adjSpace.first < 1.f) // < epsilon
+			{
+				// zero!
+				// plunger?
+				// something else?
+				p.mType = Part::Type::FlipperLeft;
+			}
+			else
+			{
+				// equal, and there really is space, so just pick something.
+				p.mType = Part::Type::FlipperLeft;
+				
+				// we could have a fuzzier sense of equal (left > right + kDelta),
+				// which would allow us to have something different at the center of a space.
+				// or even a rule that said left is only when a left edge is within x space at left (eg)
+			}
 			
 			parts.push_back(p);
 		}
