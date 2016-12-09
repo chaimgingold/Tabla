@@ -18,6 +18,9 @@
 PinballWorld::PinballWorld()
 {
 	setupSynthesis();
+
+	mIsFlipperDown[0] = false;
+	mIsFlipperDown[1] = false;
 	
 	auto button = [this]( unsigned int id, string postfix )
 	{
@@ -75,6 +78,8 @@ void PinballWorld::setParams( XmlTree xml )
 	BallWorld::setParams(xml);
 	
 	getXml(xml, "UpVec", mUpVec );
+	getXml(xml, "FlipperDistToEdge", mFlipperDistToEdge );
+	getXml(xml, "BumperRadius", mBumperRadius );
 	
 	// gamepad
 	if (xml.hasChild("Gamepad"))
@@ -197,8 +202,6 @@ void PinballWorld::drawFlipperOrientationRays() const
 	}
 }
 
-
-
 void PinballWorld::worldBoundsPolyDidChange()
 {
 }
@@ -225,25 +228,42 @@ void PinballWorld::drawParts() const
 	
 	for( const auto &p : mParts )
 	{
-		bool isDown = false;
-		vec2 f2;
-		
-		if (p.mType==Part::Type::FlipperLeft )
+		switch(p.mType)
 		{
-			isDown = mIsFlipperDown[0];
-			f2 = p.mLoc + getRightVec() * kFlipperLength;
-		}
-		else if (p.mType==Part::Type::FlipperRight)
-		{
-			isDown = mIsFlipperDown[1];
-			f2 = p.mLoc + getLeftVec() * kFlipperLength;
+			case Part::Type::FlipperLeft:
+			case Part::Type::FlipperRight:
+			{
+				bool isDown = false;
+				vec2 f2;
+				float flipperLength = max( p.mRadius*2.f, kFlipperLength );
+				
+				if ( p.mType == Part::Type::FlipperLeft)
+				{
+					isDown = mIsFlipperDown[0];
+					f2 = p.mLoc + getRightVec() * flipperLength;
+				}
+				else
+				{
+					isDown = mIsFlipperDown[1];
+					f2 = p.mLoc + getLeftVec() * flipperLength;
+				}
+
+				if (isDown) f2 += getUpVec() * flipperLength;
+				
+				gl::color( ColorA(0,1,1,1) );
+				gl::drawSolidCircle(p.mLoc, p.mRadius);
+				gl::drawLine(p.mLoc,f2);
+			}
+			break;
+			
+			case Part::Type::Bumper:
+			{
+				gl::color(1,0,0);
+				gl::drawStrokedCircle(p.mLoc,p.mRadius);
+			}
+			break;
 		}
 		
-		if (isDown) f2 += getUpVec() * kFlipperLength;
-		
-		gl::color( ColorA(0,1,1,1) );
-		gl::drawSolidCircle(p.mLoc, 1.f);
-		gl::drawLine(p.mLoc,f2);
 	}
 }
 
@@ -275,37 +295,58 @@ pair<float,float> PinballWorld::getAdjacentLeftRightSpace( vec2 loc, const Conto
 
 PinballWorld::PartVec PinballWorld::getPartsFromContours( const ContourVector& contours ) const
 {
+	const float kFlipperMinRadius = 1.f;
+	
 	PinballWorld::PartVec parts;
 	
 	for( const auto &c : contours )
 	{
-		if ( c.mRadius < mPartMaxContourRadius )
+		if ( c.mIsHole && c.mRadius < mPartMaxContourRadius )
 		{
 			Part p;
 			
 			// location
 			p.mLoc = c.mCenter;
-
+			p.mRadius = c.mRadius;
+			
 			// flipper orientation
 			pair<float,float> adjSpace = getAdjacentLeftRightSpace(p.mLoc,contours);
+			adjSpace.first -= c.mRadius;
+			adjSpace.second -= c.mRadius;
 			
-			if      (adjSpace.first > adjSpace.second) p.mType = Part::Type::FlipperRight;
-			else if (adjSpace.first < adjSpace.second) p.mType = Part::Type::FlipperLeft;
-			else if (adjSpace.first < 1.f) // < epsilon
+			if      (adjSpace.second < adjSpace.first  && adjSpace.second < mFlipperDistToEdge)
 			{
+				p.mType = Part::Type::FlipperRight;
+				p.mRadius = max( p.mRadius, kFlipperMinRadius );
+//				p.mRadius = kFlipperMinRadius;
+			}
+			else if (adjSpace.first  < adjSpace.second && adjSpace.first  < mFlipperDistToEdge)
+			{
+				p.mType = Part::Type::FlipperLeft;
+//				p.mRadius = max( p.mRadius, kFlipperMinRadius );
+//				p.mRadius = kFlipperMinRadius;
+			}
+//			else if (adjSpace.first  < 1.f) // < epsilon
+//			{
 				// zero!
 				// plunger?
 				// something else?
-				p.mType = Part::Type::FlipperLeft;
-			}
+//				p.mType = Part::Type::FlipperLeft;
+//			}
 			else
 			{
+				p.mType = Part::Type::Bumper;
+				p.mRadius = min( max(p.mRadius,mBumperRadius),
+								 min(adjSpace.first,adjSpace.second)
+								 );
+				
 				// equal, and there really is space, so just pick something.
-				p.mType = Part::Type::FlipperLeft;
+//				p.mType = Part::Type::FlipperLeft;
 				
 				// we could have a fuzzier sense of equal (left > right + kDelta),
-				// which would allow us to have something different at the center of a space.
-				// or even a rule that said left is only when a left edge is within x space at left (eg)
+				// which would allow us to have something different at the center of a space (where distance is equal-ish)
+				// (like a bumper!)
+				// or even a rule that said left is only when a left edge is within x space at left (eg), so very tight proximity rules.
 			}
 			
 			parts.push_back(p);

@@ -43,6 +43,8 @@ private:
 	// params
 	vec2  mUpVec = vec2(0,1);
 	float mPartMaxContourRadius = 5.f; // contour radius lt => part
+	float mFlipperDistToEdge = 10.f; // how close to the edge does a flipper appear?
+	float mBumperRadius = 5.f;
 	
 	// world orientation
 	vec2 getUpVec() const { return mUpVec; }
@@ -56,11 +58,13 @@ private:
 		enum class Type
 		{
 			FlipperLeft,
-			FlipperRight
+			FlipperRight,
+			Bumper
 		};
 		
-		Type mType;
-		vec2 mLoc;
+		Type  mType;
+		vec2  mLoc;
+		float mRadius;
 		
 	};
 	typedef vector<Part> PartVec;

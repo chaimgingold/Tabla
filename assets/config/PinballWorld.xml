@@ -15,9 +15,18 @@
 	</Vision>
 
 
+<!-- General -->
 	<UpVec>-1 0</UpVec>
-	<PartMaxContourRadius>5</PartMaxContourRadius>
 	
+<!-- Vision	-->
+	<PartMaxContourRadius>5</PartMaxContourRadius>
+	<FlipperDistToEdge>5</FlipperDistToEdge>
+
+<!-- Object Geometry -->
+	<BumperRadius>3</BumperRadius>
+	
+	
+<!-- Controls	-->
 	<Gamepad>
 		<button id="4" do="flippers-left"/>
 		<button id="6" do="flippers-left"/>
