@@ -17,11 +17,12 @@
 
 <!-- General -->
 	<UpVec>-1 0</UpVec>
+	<Gravity>.1</Gravity>
 	
 <!-- Vision	-->
 	<PartMaxContourRadius>5</PartMaxContourRadius>
 	<FlipperDistToEdge>5</FlipperDistToEdge>
-
+	
 <!-- Object Geometry -->
 	<BumperRadius>3</BumperRadius>
 	
