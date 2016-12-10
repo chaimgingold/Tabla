@@ -88,6 +88,7 @@ void PinballWorld::setParams( XmlTree xml )
 	getXml(xml, "FlipperDistToEdge", mFlipperDistToEdge );
 	getXml(xml, "BumperRadius", mBumperRadius );
 	getXml(xml, "PartMaxContourRadius", mPartMaxContourRadius );
+	getXml(xml, "Gravity", mGravity );
 	
 	// gamepad
 	if (xml.hasChild("Gamepad"))
@@ -137,15 +138,27 @@ void PinballWorld::gameWillLoad()
 
 void PinballWorld::update()
 {
+	// input
 	mGamepadManager.tick();
 
-	BallWorld::update();
+	// gravity
+	vector<Ball>& balls = getBalls();
+	for( Ball &b : balls )
+	{
+		b.mAccel += getGravityVec() * mGravity;
+//		b.mAccel = vec2(.5,0);
+	}
 	
+	// balls
+	BallWorld::update();
+
+	// new balls?
 	if ( getBalls().size() < 2 )
 	{
 		newRandomBall( getRandomPointInWorldBoundsPoly() ).mCollideWithContours = true;
 	}
 	
+	// flippers
 	tickFlippers();
 }
 

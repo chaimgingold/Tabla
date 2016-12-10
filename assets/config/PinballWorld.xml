@@ -17,6 +17,7 @@
 
 <!-- General -->
 	<UpVec>-1 0</UpVec>
+	<Gravity>.1</Gravity>
 	
 <!-- Vision	-->
 	<PartMaxContourRadius>5</PartMaxContourRadius>
