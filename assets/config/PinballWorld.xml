@@ -21,7 +21,7 @@
 <!-- Vision	-->
 	<PartMaxContourRadius>5</PartMaxContourRadius>
 	<FlipperDistToEdge>5</FlipperDistToEdge>
-
+	
 <!-- Object Geometry -->
 	<BumperRadius>3</BumperRadius>
 	

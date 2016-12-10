@@ -66,23 +66,44 @@ private:
 		vec2  mLoc;
 		float mRadius;
 		
+		vec2  mFlipperLoc2; // second point of capsule that forms flipper
+		float mFlipperLength;
+		
+		PolyLine2 mPoly;
 	};
 	typedef vector<Part> PartVec;
 	
+	struct tAdjSpace
+	{
+		float mLeft=0.f;
+		float mRight=0.f;
+	};
+	
 	PartVec getPartsFromContours( const ContourVector& ) const;
+	Part getFlipperPart( vec2 pin, float contourRadius, Part::Type type ) const; // type is left or right
+	Part getBumperPart ( vec2 pin, float contourRadius, tAdjSpace adjSpace ) const;
 	void getContoursFromParts( const PartVec&, ContourVec& contours ) const;
 	
 	PartVec mParts;
 	void drawParts() const;
 	
 	// are flippers depressed
-	bool mIsFlipperDown[2]; // left, right
+	bool  mIsFlipperDown[2]; // left, right
+	float mFlipperState[2]; // left, right; 0..1
+	
+	void tickFlippers();
 	
 	// drawing
 	void drawFlipperOrientationRays() const;
 	
 	// vision
-	pair<float,float> getAdjacentLeftRightSpace( vec2, const ContourVector& ) const ; // how much adjacent space is to the left, right?
+	tAdjSpace getAdjacentLeftRightSpace( vec2, const ContourVector& ) const ; // how much adjacent space is to the left, right?
+	
+	// geometry
+	PolyLine2 getCirclePoly ( vec2 c, float r ) const;
+	PolyLine2 getCapsulePoly( vec2 c[2], float r[2] ) const;
+	Contour contourFromPoly( PolyLine2 ) const; // area, radius, center, bounds, etc... is approximate
+	void addContourToVec( Contour, ContourVec& ) const;
 	
 	// keymap (deprecated)
 	map<char,string> mKeyToInput; // maps keystrokes to input names
