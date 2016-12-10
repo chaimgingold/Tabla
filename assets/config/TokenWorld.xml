@@ -1,7 +1,7 @@
 <TokenWorld>
 	<!-- cm -->
-	<InlierThreshold>			2.5 </InlierThreshold>
-	<NNMatchRatio>			    0.8 </NNMatchRatio>
+	<InlierThreshold>			1.5 </InlierThreshold>
+	<NNMatchRatio>			    0.9 </NNMatchRatio>
 
 	<!-- cm -->
 	<Vision>

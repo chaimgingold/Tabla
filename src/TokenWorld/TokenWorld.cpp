@@ -14,11 +14,6 @@
 using namespace std;
 
 
-
-
-
-
-
 // http://docs.opencv.org/2.4/doc/tutorials/features2d/feature_homography/feature_homography.html
 
 void TokenWorld::setParams( XmlTree xml )
@@ -115,14 +110,17 @@ void TokenWorld::matchingVision( const ContourVector &contours, Pipeline&pipelin
 	}
 
 	// Compare each token against every other for matches
+	// (first round starts with
+	// ab, ac .. af, then
+	// bc, bd.. bf,
+	// cd, ce.. cf
+	// and so on which handles all unique pairs.)
 	mMatches.clear();
-	for ( auto focusedToken: mTokens )
+	for ( int i=0; i < mTokens.size(); i++ )
 	{
-
-		for ( auto candidateToken : mTokens ) {
-			if ( candidateToken.index == focusedToken.index ) {
-				continue;
-			}
+		Token focusedToken = mTokens[i];
+		for ( int j=i+1; j < mTokens.size(); j++ ) {
+			Token candidateToken = mTokens[j];
 
 			vector<vector<DMatch>> nn_matches;
 			mMatcher.knnMatch(focusedToken.descriptors,
@@ -130,6 +128,47 @@ void TokenWorld::matchingVision( const ContourVector &contours, Pipeline&pipelin
 							  nn_matches,
 							  2);
 
+			// If way fewer keypoints in one token vs the other, skip
+			float smaller = (float)MIN(focusedToken.keypoints.size(), candidateToken.keypoints.size());
+			float larger = (float)MAX(focusedToken.keypoints.size(), candidateToken.keypoints.size());
+			float ratio = smaller / larger;
+			if (ratio < 0.7) {
+				continue;
+			}
+
+
+//			cout << focusedToken.descriptors.size() << endl;
+//			cout << candidateToken.descriptors.size() << endl;
+//			cout << nn_matches.size() << endl;
+
+			int numMatches = 0;
+			for (size_t i = 0; i < nn_matches.size(); i++) {
+				if (nn_matches[i].size() < 2) {
+					continue;
+				}
+
+//				DMatch first = nn_matches[i][0];
+				float dist1 = nn_matches[i][0].distance;
+				float dist2 = nn_matches[i][1].distance;
+
+				if(dist1 < mNNMatchRatio * dist2) {
+					numMatches++;
+//					focusedToken.matched.push_back(focusedToken.keypoints[first.queryIdx]);
+//					candidateToken.matched.push_back(candidateToken.keypoints[first.trainIdx]);
+				}
+
+
+			}
+//			cout << nn_matches.size() << endl;
+
+			// FIXME magic number here; find some logic for it...
+			if (numMatches > 20) {
+				mMatches.push_back(make_pair(focusedToken.index, candidateToken.index));
+			}
+
+
+			/*
+			// Find matching descriptors...
 			for (size_t i = 0; i < nn_matches.size(); i++) {
 				if (nn_matches[i].size() < 2) {
 					continue;
@@ -168,6 +207,7 @@ void TokenWorld::matchingVision( const ContourVector &contours, Pipeline&pipelin
 					mMatches.push_back(make_pair(focusedToken.index, candidateToken.index));
 				}
 			}
+			 */
 		}
 	}
 }
