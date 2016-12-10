@@ -37,13 +37,12 @@ TokenWorld::TokenWorld()
 
 	mFeatureDetectors.push_back(make_pair("AKAZE", cv::AKAZE::create()));
 
-	/*
+
 
 	mFeatureDetectors.push_back(make_pair("ORB", cv::ORB::create()));
 	mFeatureDetectors.push_back(make_pair("BRISK", cv::BRISK::create()));
 
 	mFeatureDetectors.push_back(make_pair("KAZE", cv::KAZE::create()));
-	mFeatureDetectors.push_back(make_pair("AKAZE", cv::AKAZE::create()));
 
 	// Corner detectors
 	mFeatureDetectors.push_back(make_pair("FAST", cv::FastFeatureDetector::create()));
@@ -55,7 +54,7 @@ TokenWorld::TokenWorld()
 
 	// Only implements compute() - figure this out
 //	mFeatureDetectors.push_back(make_pair("FREAK", cv::xfeatures2d::FREAK::create()));
-	
+
 	mFeatureDetectors.push_back(make_pair("Star", cv::xfeatures2d::StarDetector::create()));
 //	mFeatureDetectors.push_back(make_pair("LUCID", cv::xfeatures2d::LUCID::create(  1 // 3x3 lucid descriptor kernel
 //															   , 1 // 3x3 blur kernel
@@ -66,24 +65,15 @@ TokenWorld::TokenWorld()
 	// But might be good for something/worth checking param tweaks...
 //	mFeatureDetectors.push_back(make_pair("GFFT", cv::GFTTDetector::create())); // "Good Features to Track"
 //	mFeatureDetectors.push_back(make_pair("SimpleBlob", cv::SimpleBlobDetector::create()));
-	 
-	 */
+
 }
 
+void TokenWorld::globalVision( const ContourVector &contours, Pipeline&pipeline ) {
+	getFeatureDetector()->detect(mWorld->mImageCV,
+							     mGlobalKeypoints);
+}
 
-void TokenWorld::updateVision( const ContourVector &contours, Pipeline&pipeline )
-{
-	mContours = contours;
-
-	mWorld = pipeline.getStage("clipped");
-	if ( !mWorld || mWorld->mImageCV.empty() ) return;
-
-//	getFeatureDetector()->detectAndCompute(mWorld->mImageCV,
-//										   noArray(),
-//										   mGlobalKeypoints,
-//										   mGlobalDescriptors);
-
-
+void TokenWorld::matchingVision( const ContourVector &contours, Pipeline&pipeline ) {
 	// Detect features for each region and create Token objects from them
 	mTokens.clear();
 	for ( auto c: contours )
@@ -123,7 +113,7 @@ void TokenWorld::updateVision( const ContourVector &contours, Pipeline&pipeline 
 											   token.descriptors);
 		mTokens.push_back(token);
 	}
-	
+
 	// Compare each token against every other for matches
 	mMatches.clear();
 	for ( auto focusedToken: mTokens )
@@ -166,7 +156,7 @@ void TokenWorld::updateVision( const ContourVector &contours, Pipeline&pipeline 
 
 				col /= col.at<double>(2);
 				double dist = sqrt( pow(col.at<double>(0) - candidateToken.matched[i].pt.x, 2) +
-								    pow(col.at<double>(1) - candidateToken.matched[i].pt.y, 2)
+								   pow(col.at<double>(1) - candidateToken.matched[i].pt.y, 2)
 								   );
 
 				if(dist < mInlierThreshold) {
@@ -176,23 +166,38 @@ void TokenWorld::updateVision( const ContourVector &contours, Pipeline&pipeline 
 					focusedToken.good_matches.push_back(DMatch(new_i, new_i, 0));
 
 					mMatches.push_back(make_pair(focusedToken.index, candidateToken.index));
-//					cout << "MATCH MADE IN HEAVEN!!!" << endl;
 				}
 			}
-
-//			Mat res;
-//			drawMatches(focusedToken, inliers1, candidateToken, inliers2, good_matches, res);
 		}
 	}
+}
+
+void TokenWorld::updateVision( const ContourVector &contours, Pipeline&pipeline )
+{
+	mContours = contours;
+
+	mWorld = pipeline.getStage("clipped");
+	if ( !mWorld || mWorld->mImageCV.empty() ) return;
+
+	switch (mMode) {
+		case TokenVisionMode::Global:
+			globalVision(contours, pipeline);
+			break;
+		case TokenVisionMode::Matching:
+			matchingVision(contours, pipeline);
+			break;
+		default:
+			break;
+	}
+
+
+
 }
 
 
 Feature2DRef TokenWorld::getFeatureDetector() {
 	return mFeatureDetectors[mCurrentDetector].second;
 }
-
-
-
 
 
 
@@ -206,6 +211,34 @@ void TokenWorld::draw( DrawType drawType )
 
 	if ( !mWorld || mWorld->mImageCV.empty() ) return;
 
+
+	switch (mMode) {
+		case TokenVisionMode::Global:
+			drawGlobalKeypoints();
+			break;
+		case TokenVisionMode::Matching:
+			drawMatchingKeypoints();
+			break;
+		default:
+			break;
+	}
+}
+
+
+
+void TokenWorld::drawGlobalKeypoints() {
+	float hue = (float)mCurrentDetector / mFeatureDetectors.size();
+	auto color = cinder::hsvToRgb(vec3(hue, 0.7, 0.9));
+	gl::color(color);
+
+	for (auto keypoint : mGlobalKeypoints)
+	{
+		gl::drawSolidCircle(transformPoint(mWorld->mImageToWorld, fromOcv(keypoint.pt)),
+							keypoint.size * 0.01);
+	}
+}
+
+void TokenWorld::drawMatchingKeypoints() {
 	// DEBUG: Drawing contours
 	{
 		for ( auto token: mTokens )
@@ -265,21 +298,6 @@ void TokenWorld::draw( DrawType drawType )
 		gl::color(cinder::hsvToRgb(vec3(hue, 0.7, 0.9)));
 		gl::drawLine(token1.boundingRect.getCenter(), token2.boundingRect.getCenter());
 	}
-
-
-
-	// Drawing keypoints
-//	{
-//		float hue = (float)mCurrentDetector / mFeatureDetectors.size();
-//		auto color = cinder::hsvToRgb(vec3(hue, 0.7, 0.9));
-//		gl::color(color);
-//
-//		for (auto keypoint : mGlobalKeypoints)
-//		{
-//			gl::drawSolidCircle(transformPoint(mWorld->mImageToWorld, fromOcv(keypoint.pt)),
-//								keypoint.size * 0.01);
-//		}
-//	}
 }
 
 void TokenWorld::keyDown( KeyEvent event )
@@ -288,6 +306,9 @@ void TokenWorld::keyDown( KeyEvent event )
 	{
 		case KeyEvent::KEY_TAB:
 		{
+			if (mMode == TokenVisionMode::Matching) {
+				break;
+			}
 			if (event.isShiftDown()) {
 				if (mCurrentDetector == 0) {
 					mCurrentDetector = mFeatureDetectors.size() - 1;
@@ -301,7 +322,11 @@ void TokenWorld::keyDown( KeyEvent event )
 			cout << mFeatureDetectors[mCurrentDetector].first << endl;
 		}
 		break;
-
+		case KeyEvent::KEY_BACKQUOTE:
+			mMode = TokenVisionMode(((int)mMode + 1) % (int)TokenVisionMode::kNumModes);
+			if (mMode == TokenVisionMode::Matching) {
+				mCurrentDetector = 0; // AKAZE
+			}
 		default:
 			break;
 	}
