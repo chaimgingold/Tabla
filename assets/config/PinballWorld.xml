@@ -3,7 +3,7 @@
 	<DefaultNumBalls>			0 </DefaultNumBalls>
 	<BallDefaultRadius>			1.5 </BallDefaultRadius>
 	<BallDefaultMaxRadius>		1.5 </BallDefaultMaxRadius>
-	<BallMaxVel>				.2 </BallMaxVel>
+	<BallMaxVel>				.5 </BallMaxVel>
 	<BallDefaultColor>			C62D41 </BallDefaultColor>
 
 	<!-- cm -->

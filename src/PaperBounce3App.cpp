@@ -682,6 +682,11 @@ void PaperBounce3App::keyDown( KeyEvent event )
 				mDrawContours = !mDrawContours;
 				handled=true;
 				break;
+
+			case KeyEvent::KEY_t:
+				mDrawPipeline = !mDrawPipeline;
+				handled=true;
+				break;
 		}
 	}
 	

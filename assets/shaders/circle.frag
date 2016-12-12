@@ -13,7 +13,7 @@ void main()
 
 	vec4 c = color;
 
-	c.a = smoothstep( 1.0, 1.0 - aaConstant, r);
+	c.a *= smoothstep( 1.0, 1.0 - aaConstant, r);
 	
 	fragColor = c;
 }
