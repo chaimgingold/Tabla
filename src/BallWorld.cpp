@@ -30,6 +30,7 @@ void BallWorld::setParams( XmlTree xml )
 	getXml(xml,"BallDefaultMaxRadius",mBallDefaultMaxRadius);
 	getXml(xml,"BallDefaultColor",mBallDefaultColor);
 	getXml(xml,"BallMaxVel",mBallMaxVel);
+	getXml(xml,"BallContourImpactNormalVelImpulse",mBallContourImpactNormalVelImpulse);
 }
 
 TriMeshRef BallWorld::getTriMeshForBalls() const
@@ -213,14 +214,16 @@ void BallWorld::updatePhysics()
 				
 				// update vel
 				vec2 surfaceNormal = glm::normalize( newLoc - oldLoc ) ;
+					// not as accurate as it might be, but seems to work fine.
+					// also, this gets an approximate normal for collision with >1 edges
 				
-				b.setVel(
-					  glm::reflect( oldVel, surfaceNormal ) // transfer old velocity, but reflected
-//						+ normalize(newLoc - oldLoc) * max( distance(newLoc,oldLoc), b.mRadius * .1f )
-					+ normalize(newLoc - oldLoc) * .1f
-						// accumulate energy from impact
-						// would be cool to use optic flow for this, and each contour can have a velocity
-					) ;
+				vec2 newVel = glm::reflect( oldVel, surfaceNormal ); // transfer old velocity, but reflected
+				
+				newVel += surfaceNormal * mBallContourImpactNormalVelImpulse;
+					// accumulate energy from impact
+					// would be cool to use optic flow for this, and each contour can have a velocity
+				
+				b.setVel(newVel);
 
 				// squash?
 				b.noteSquashImpact( surfaceNormal * length(b.getVel()) ) ; //newLoc - oldLoc ) ;

@@ -3,6 +3,7 @@
 	<BallDefaultRadius>			2 </BallDefaultRadius>
 	<BallDefaultMaxRadius>		2 </BallDefaultMaxRadius>
 	<BallMaxVel>				1 </BallMaxVel>
+	<BallContourImpactNormalVelImpulse>.1</BallContourImpactNormalVelImpulse>
 	<BallDefaultColor>			C62D41 </BallDefaultColor>
 
 	<!-- cm -->

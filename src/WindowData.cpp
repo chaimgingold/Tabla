@@ -170,8 +170,17 @@ void WindowData::draw()
 	if (mApp.mDrawContourTree)
 	{
 		const float k = 16.f ;
+		Color inc(0,0,0);
 		
-		for ( size_t i=0; i<mApp.mContours.size(); ++i )
+		auto color = [inc]( Color c )
+		{
+			gl::color(
+				fmod( c.r + inc.r, 1.f ),
+				fmod( c.g + inc.g, 1.f ),
+				fmod( c.b + inc.b, 1.f ) );
+		};
+		
+		for ( size_t i=0; i<mApp.mContours.size(); ++i, inc += .1f )
 		{
 			const auto& c = mApp.mContours[i] ;
 			
@@ -184,8 +193,8 @@ void WindowData::draw()
 			r.y1 = ( c.mTreeDepth + 1 ) * k ;
 			r.y2 = r.y1 + k ;
 			
-			if (c.mIsHole) gl::color(0,0,.3);
-			else gl::color(0,.3,.4);
+			if (c.mIsHole) color(Color(0,0,.3));
+			else color(Color(0,.3,.4));
 			
 			gl::drawSolidRect(r) ;
 			

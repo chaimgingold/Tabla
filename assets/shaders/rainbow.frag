@@ -66,7 +66,7 @@ void main() {
     
     // Radial gradient
     float theta = distance(st, uGradientCenter);
-	float phase = theta * PI*2. * uGradientFreq + uTime*8.;
+	float phase = theta * PI*2. * uGradientFreq - uTime*8. - uGradientFreq;
     
     // Phase-shifted cosine gradients
 	float minScale = .5;

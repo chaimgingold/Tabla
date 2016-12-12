@@ -9,7 +9,7 @@
 		<ContourMinRadius>			5	</ContourMinRadius>
 		<ContourMinArea>			100	</ContourMinArea>
 		<ContourDPEpsilon>			5	</ContourDPEpsilon>
-		<ContourMinWidth>			12	</ContourMinWidth>
+		<ContourMinWidth>			5	</ContourMinWidth>
 		<CaptureAllPipelineStages>1</CaptureAllPipelineStages> <!-- So we can extract bitmaps -->
 
 
@@ -147,7 +147,8 @@
 			<ScoreColorDownLines>755500</ScoreColorDownLines>
 			<NoteOffColor>B59540</NoteOffColor>
 			<NoteOnColor>00DD85</NoteOnColor>
-
+			<IconGradientCenter>.5 .2</IconGradientCenter>
+			
 			<Name>2Volca Sample (Drums)</Name>
 			<IconFileName>drumkit.png</IconFileName>
 			<SynthType>MIDI</SynthType>
@@ -165,6 +166,7 @@
 			<ScoreColorDownLines>003377</ScoreColorDownLines>
 			<NoteOffColor>FFFFFF</NoteOffColor>
 			<NoteOnColor>00FFFF</NoteOnColor>
+			<IconGradientCenter>.4 .35</IconGradientCenter>
 
 			<Name>3Additive</Name>
 			<IconFileName>additive.png</IconFileName>

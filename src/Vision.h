@@ -41,6 +41,7 @@ public:
 		float mContourMinArea	=	100;
 		float mContourDPEpsilon	=	5;
 		float mContourMinWidth	=	5;
+		bool  mContourGetExactMinCircle = false; // otherwise, we'll approximate with min bounding box
 		
 		bool mCaptureAllPipelineStages = false; // this is OR'd in
 	};
