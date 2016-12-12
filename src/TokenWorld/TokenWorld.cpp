@@ -20,6 +20,7 @@ void TokenWorld::setParams( XmlTree xml )
 {
 	getXml(xml,"InlierThreshold",mInlierThreshold);
 	getXml(xml,"NNMatchRatio",mNNMatchRatio);
+	getXml(xml,"NNMatchPercentage",mNNMatchPercentage);
 }
 
 
@@ -161,8 +162,10 @@ void TokenWorld::matchingVision( const ContourVector &contours, Pipeline&pipelin
 			}
 //			cout << nn_matches.size() << endl;
 
-			// FIXME magic number here; find some logic for it...
-			if (numMatches > 20) {
+
+			// Check if the number of matches with minimum distance is a reasonable percentage
+			// of the total number of matches
+			if (numMatches > nn_matches.size() * mNNMatchPercentage) {
 				mMatches.push_back(make_pair(focusedToken.index, candidateToken.index));
 			}
 

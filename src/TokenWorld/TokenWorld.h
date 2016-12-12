@@ -98,6 +98,7 @@ private:
 	float mInlierThreshold=2.5;
 	// Nearest neighbor matching ratio
 	float mNNMatchRatio=0.8;
+	float mNNMatchPercentage=0.8;
 
 	void drawMatchingKeypoints();
 	void drawGlobalKeypoints();
