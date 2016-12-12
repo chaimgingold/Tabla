@@ -40,7 +40,8 @@ void Instrument::setParams( XmlTree xml )
 	getXml(xml,"Name",mName);
 
 	getXml(xml,"IconFileName",mIconFileName);
-	
+	getXml(xml,"IconGradientCenter",mIconGradientCenter);
+
 	if ( xml.hasChild("SynthType") )
 	{
 		string t = xml.getChild("SynthType").getValue();

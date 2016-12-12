@@ -99,7 +99,8 @@ public:
 
 	gl::TextureRef mIcon;
 	string mIconFileName;
-
+	vec2 mIconGradientCenter;
+	
 	//
 	string mName;
 

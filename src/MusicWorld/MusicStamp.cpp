@@ -28,6 +28,9 @@ tIconAnimState::getSwayForScore( float playheadFrac )
 	// zero so we can be added
 	sway.mScale = vec2(0,0);
 	sway.mColor = ColorA(0,0,0,0);
+	sway.mGradientFreq = 0;
+	sway.mGradientSpeed = 0;
+	sway.mGradientCenter = vec2(0,0);
 	
 	return sway;
 }
@@ -47,6 +50,9 @@ tIconAnimState::getIdleSway( float phaseInBeats, float beatDuration )
 	// zero so we can be added
 	sway.mScale = vec2(0,0);
 	sway.mColor = ColorA(0,0,0,0);
+	sway.mGradientFreq = 0;
+	sway.mGradientSpeed = 0;
+	sway.mGradientCenter = vec2(0,0);
 	
 	return sway;
 }
@@ -77,7 +83,19 @@ void MusicStamp::tick()
 		mGradientClock += dt * mIconPose.mGradientSpeed*mIconPose.mGradientFreq;
 	}
 
+	tIconAnimState oldPose = mIconPose;
 	mIconPose = lerp( mIconPose, mIconPoseTarget, .5f );
+	
+	// slow decay of gradient params
+	auto slowDecay = []( float old, float newv ) -> float
+	{
+		float f = .5f;
+		if ( old > newv ) f = .05f;
+		return lerp( old, newv, f );
+	};
+	
+	mIconPose.mGradientSpeed = slowDecay( oldPose.mGradientSpeed, mIconPoseTarget.mGradientSpeed );
+	mIconPose.mGradientFreq  = slowDecay( oldPose.mGradientFreq, mIconPoseTarget.mGradientFreq );
 }
 
 void MusicStamp::drawInstrumentIcon( vec2 worldx, tIconAnimState pose ) const

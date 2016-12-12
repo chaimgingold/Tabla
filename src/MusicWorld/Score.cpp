@@ -5,6 +5,11 @@
 
 using namespace ci::gl;
 
+const float kMinGradientFreq=2.f;
+const float kMaxGradientFreq=15.f;
+const float kMinGradientSpeed=0.1f;
+const float kMaxGradientSpeed=.5f;
+
 void drawLines( vector<vec2> points )
 {
 	const int dims = 2;
@@ -337,8 +342,11 @@ tIconAnimState Score::getIconPoseFromScore_Percussive( float playheadFrac ) cons
 		state.mColor = ColorA(1,1,1,1);
 	}
 
-	state.mGradientSpeed = (float)numOnNotes/(float)mNoteCount;
-	state.mGradientFreq  = numOnNotes;
+	float fracOnNote = (float)numOnNotes/(float)mNoteCount;
+	
+	state.mGradientSpeed = lerp( kMinGradientSpeed, kMaxGradientSpeed, fracOnNote );
+	state.mGradientFreq  = lerp( kMinGradientFreq, kMaxGradientFreq, fracOnNote );
+	if (mInstrument) state.mGradientCenter = mInstrument->mIconGradientCenter;
 	
 	return state;
 }
@@ -379,11 +387,12 @@ tIconAnimState Score::getIconPoseFromScore_Melodic( float playheadFrac ) const
 	state.mTranslate.y = lerp( -.5f, .5f, avgNote );
 	state.mScale = vec2(1,1) * lerp( 1.f, 1.5f, min( 1.f, ((float)numOnNotes / (float)mNoteCount)*2.f ) ) ;
 	
-	state.mGradientCenter = vec2( fmod( avgNote * 3.27, 1.f ) , avgNote );
+//	state.mGradientCenter = vec2( fmod( avgNote * 3.27, 1.f ) , avgNote );
 	
 	float onNoteFrac = (float)numOnNotes/(float)mNoteCount;
-	state.mGradientSpeed = powf( onNoteFrac, 3 );
-	state.mGradientFreq = onNoteFrac * 5.f;
+	state.mGradientSpeed = lerp( kMinGradientSpeed, kMaxGradientSpeed, powf( onNoteFrac, 3 ) );
+	state.mGradientFreq = lerp( kMinGradientFreq, kMaxGradientFreq, onNoteFrac );
+	if (mInstrument) state.mGradientCenter = mInstrument->mIconGradientCenter;
 	
 	return state;
 }
@@ -425,8 +434,9 @@ tIconAnimState Score::getIconPoseFromScore_Additive( float playheadFrac ) const
 		pose.mColor = sum>0.f ? mInstrument->mNoteOnColor : mInstrument->mNoteOffColor;
 		pose.mScale = vec2(1,1) * lerp( 1.f, 1.4f, scaleDegree*scaleDegree );
 		pose.mTranslate.y = lerp( .5f, -.5f, weightedy ) ; // low values means up
-		pose.mGradientSpeed = fracOn*fracOn*fracOn;
-		pose.mGradientFreq = lerp( 1.f, 5.f, fracOn );
+		pose.mGradientSpeed = lerp( kMinGradientSpeed, kMaxGradientSpeed, powf(fracOn,.5) );
+		pose.mGradientFreq = lerp( kMinGradientFreq, kMaxGradientFreq, powf(fracOn,.5) );
+		if (mInstrument) pose.mGradientCenter = mInstrument->mIconGradientCenter;
 		return pose;
 	}
 	else return tIconAnimState();
@@ -435,8 +445,9 @@ tIconAnimState Score::getIconPoseFromScore_Additive( float playheadFrac ) const
 tIconAnimState Score::getIconPoseFromScore_Meta( float playheadFrac ) const
 {
 	tIconAnimState pose;
-	pose.mGradientSpeed = constrain( mMetaParamSliderValue*mMetaParamSliderValue*mMetaParamSliderValue, 0.f, 1.f );
-	pose.mGradientFreq = mMetaParamSliderValue * 5.f;
+	pose.mGradientSpeed = lerp( kMinGradientSpeed, kMaxGradientSpeed, powf(constrain(mMetaParamSliderValue,0.f,1.f),3.f) );
+	pose.mGradientFreq = lerp( kMinGradientFreq, kMaxGradientFreq, mMetaParamSliderValue );
+	if (mInstrument) pose.mGradientCenter = mInstrument->mIconGradientCenter;
 	return pose;
 }
 
