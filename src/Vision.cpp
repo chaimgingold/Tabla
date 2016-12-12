@@ -17,6 +17,7 @@ void Vision::Params::set( XmlTree xml )
 	getXml(xml,"ContourDPEpsilon",mContourDPEpsilon);
 	getXml(xml,"ContourMinWidth",mContourMinWidth);
 	getXml(xml,"CaptureAllPipelineStages",mCaptureAllPipelineStages);
+	getXml(xml,"ContourGetExactMinCircle",mContourGetExactMinCircle);
 }
 
 template<class T>
@@ -184,21 +185,33 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 	{
 		const auto &c = contours[i] ;
 		
-		cv::Point2f center ;
-		float		radius ;
-		
-		cv::minEnclosingCircle( c, center, radius ) ;
-		
-		radius *= contourPixelToWorld ;
-		center *= contourPixelToWorld ;
-		
 		float		area = cv::contourArea(c) * contourPixelToWorld ;
 		
-		cv::RotatedRect rotatedRect = minAreaRect(c) ; // TODO: output this
+		cv::RotatedRect ocvMinRotatedRect = minAreaRect(c) ;
+		Contour::tRotatedRect minRotatedRect;
+		minRotatedRect.mCenter = fromOcv(ocvMinRotatedRect.center) * contourPixelToWorld;
+		minRotatedRect.mSize   = vec2(ocvMinRotatedRect.size.width,ocvMinRotatedRect.size.height) * contourPixelToWorld;
+		minRotatedRect.mAngle  = ocvMinRotatedRect.angle;
+		const float minWidth = (float)(min( minRotatedRect.mSize.x, minRotatedRect.mSize.y ));
+		const float maxWidth = (float)(max( minRotatedRect.mSize.x, minRotatedRect.mSize.y ));
+
+		vec2  center ;
+		float radius ;
+		{
+			if (mParams.mContourGetExactMinCircle) {
+				cv::Point2f ocvcenter;
+				cv::minEnclosingCircle( c, ocvcenter, radius ) ;
+				center  = fromOcv(ocvcenter) * contourPixelToWorld;
+				radius *= contourPixelToWorld;
+			} else {
+				center = minRotatedRect.mCenter;
+				radius = maxWidth/2.f;
+			}
+		}
 		
-		if (	radius > mParams.mContourMinRadius &&
-				area   > mParams.mContourMinArea   &&
-				min( rotatedRect.size.width, rotatedRect.size.height ) > mParams.mContourMinWidth )
+		if (	radius   > mParams.mContourMinRadius &&
+				area     > mParams.mContourMinArea   &&
+				minWidth > mParams.mContourMinWidth )
 		{
 			auto addContour = [&]( const vector<cv::Point>& c )
 			{
@@ -211,9 +224,10 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 				for( auto &p : myc.mPolyLine.getPoints() ) p *= contourPixelToWorld ;
 
 				myc.mRadius = radius ;
-				myc.mCenter = fromOcv(center) ;
+				myc.mCenter = center ;
 				myc.mArea   = area ;
 				myc.mBoundingRect = Rectf( myc.mPolyLine.getPoints() ); // after scaling points!
+				myc.mRotatedBoundingRect = minRotatedRect;
 				myc.mOcvContourIndex = i ;
 
 				

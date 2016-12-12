@@ -3,7 +3,8 @@
 	<DefaultNumBalls>			0 </DefaultNumBalls>
 	<BallDefaultRadius>			1.5 </BallDefaultRadius>
 	<BallDefaultMaxRadius>		1.5 </BallDefaultMaxRadius>
-	<BallMaxVel>				.5 </BallMaxVel>
+	<BallContourImpactNormalVelImpulse>-.1</BallContourImpactNormalVelImpulse>
+	<BallMaxVel>				2 </BallMaxVel>
 	<BallDefaultColor>			C62D41 </BallDefaultColor>
 
 	<!-- cm -->
@@ -17,7 +18,7 @@
 
 <!-- General -->
 	<UpVec>-1 0</UpVec>
-	<Gravity>.1</Gravity>
+	<Gravity>.05</Gravity>
 	
 <!-- Vision	-->
 	<PartMaxContourRadius>5</PartMaxContourRadius>

@@ -29,7 +29,13 @@ public:
 	Rectf		mBoundingRect ;
 	float		mRadius ;
 	float		mArea ;
-	// TODO: rotated rect
+	
+	struct tRotatedRect
+	{
+		vec2  mCenter;
+		vec2  mSize;
+		float mAngle; // same semantics as ocv
+	} mRotatedBoundingRect;
 	
 	bool		mIsHole = false ;
 	bool		mIsLeaf = true ;

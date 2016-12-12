@@ -5,9 +5,11 @@
 	<BallDefaultMaxRadius>		2 </BallDefaultMaxRadius>
 	<BallMaxVel>				.2 </BallMaxVel>
 	<BallDefaultColor>			C62D41 </BallDefaultColor>
-
+	<BallContourImpactNormalVelImpulse>.1</BallContourImpactNormalVelImpulse>
+	
 	<!-- cm -->
 	<Vision>
+		<ContourGetExactMinCircle>	0	</ContourGetExactMinCircle>
 		<ContourMinRadius>			.5	</ContourMinRadius>
 		<ContourMinArea>			1	</ContourMinArea>
 		<ContourDPEpsilon>			1	</ContourDPEpsilon>

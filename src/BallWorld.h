@@ -107,6 +107,7 @@ protected:
 	float	mBallDefaultMaxRadius	= 8.f * 4.f ;
 	float	mBallMaxVel				= 8.f ;
 	ColorAf mBallDefaultColor		= ColorAf::hex(0xC62D41);
+	float   mBallContourImpactNormalVelImpulse = .0f; // for added excitement. if zero, then max vel matters less.
 	
 private:
 
