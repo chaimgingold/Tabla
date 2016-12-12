@@ -234,7 +234,7 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 				myc.mTreeDepth = 0 ;
 				{
 					int n = i ;
-					while ( (n = hierarchy[n][3]) > 0 )
+					while ( (n = hierarchy[n][3]) >= 0 )
 					{
 						myc.mTreeDepth++ ;
 					}
