@@ -85,14 +85,18 @@ Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 	// ---- Input ----
 	
 	// make cv frame
-	cv::UMat input_color = toOcv(surface).getUMat(cv::ACCESS_READ);
+	cv::UMat input_color = toOcvRef((Surface &)surface).getUMat(cv::ACCESS_READ); // we type-cast to non-const so this works. :P
 	cv::UMat input;
 	cv::UMat gray, clipped;
-
+		// toOcvRef is much, much faster than toOcv, which does a lot of dumb bit twiddling.
+		// this requires a cast to non-const, but hopefully cv::ACCESS_READ semantics makes this kosher enough.
+		// Just noting this inconsistency.
+ 
 	cv::cvtColor(input_color, input, CV_BGR2GRAY);
 	// net performance of doing color -> grey conversion on CPU vs GPU is negligible.
 	// the main impact is downloading the data, which we may be able to do faster if we rewrite toOcv.
 	// but at least we now have color frame in the pipeline at the same total performance cost, so that's a net gain.
+	// might want to make it a setting, whether to do it on CPU or GPU.
 	
 	pipeline.then( "input_color", input_color );
 	
