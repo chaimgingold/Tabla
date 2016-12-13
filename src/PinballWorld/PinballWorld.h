@@ -59,8 +59,8 @@ private:
 	vec2  fromPlayfieldSpace( vec2 p ) const { return getRightVec() * p.x + getUpVec() * p.y ; }
 		// could make this into two matrices
 	
-	Rectf toPlayfieldBoundingBox ( const PolyLine2& ) const; // min/max of all points in playfield space
-	Rectf getPlayfieldBoundingBox( const ContourVec& ) const;
+	Rectf getPlayfieldBoundingBox( const ContourVec& ) const; // min/max of all points in playfield space
+	Rectf toPlayfieldBoundingBox ( const PolyLine2& ) const; // just for one poly
 	
 	Rectf mPlayfieldBoundingBox; // min/max of non-hole contours in playfield coordinate space (up/right vectors)
 	
@@ -76,6 +76,8 @@ private:
 			FlipperRight,
 			Bumper
 		};
+		
+		Color mColor;
 		
 		Type  mType;
 		vec2  mLoc;
@@ -94,10 +96,9 @@ private:
 		float mRight=0.f;
 	};
 	
-	PartVec getPartsFromContours( const ContourVector& ) const;
 	Part getFlipperPart( vec2 pin, float contourRadius, Part::Type type ) const; // type is left or right
 	Part getBumperPart ( vec2 pin, float contourRadius, tAdjSpace adjSpace ) const;
-	void getContoursFromParts( const PartVec&, ContourVec& contours ) const;
+	void getContoursFromParts( const PartVec&, ContourVec& contours ) const; // for physics simulation
 	
 	PartVec mParts;
 	void drawParts() const;
@@ -116,6 +117,8 @@ private:
 	void drawFlipperOrientationRays() const;
 	
 	// vision
+	PartVec getPartsFromContours( const ContourVector& ) const;
+	PartVec mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const;
 	tAdjSpace getAdjacentLeftRightSpace( vec2, const ContourVector& ) const ; // how much adjacent space is to the left, right?
 	
 	// geometry

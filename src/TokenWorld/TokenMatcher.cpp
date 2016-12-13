@@ -94,7 +94,13 @@ vector<Token> TokenMatcher::findTokens( const Pipeline::StageRef world,
 		pipeline.getStages().back()->mLayoutHintScale = .5f;
 		pipeline.getStages().back()->mLayoutHintOrtho = true;
 
-		getFeatureDetector()->detectAndCompute(tokenContourImage,
+		Mat tokenContourImageEqualized;
+		equalizeHist(tokenContourImage, tokenContourImageEqualized);
+		pipeline.then(string("ContourImage equalized")+token.index, tokenContourImageEqualized );
+		pipeline.getStages().back()->mLayoutHintScale = .5f;
+		pipeline.getStages().back()->mLayoutHintOrtho = true;
+
+		getFeatureDetector()->detectAndCompute(tokenContourImageEqualized,
 											   noArray(),
 											   token.keypoints,
 											   token.descriptors);

@@ -380,11 +380,11 @@ void PinballWorld::updateVision( const ContourVec &c, Pipeline& p )
 	// playfield layout
 	mPlayfieldBoundingBox = getPlayfieldBoundingBox(c);
 //	cout << "min/max y: " << mPlayfieldBoundingBox.y1 << " " << mPlayfieldBoundingBox.y2 << endl;
-	
 	mPlayfieldBallReclaimY = mPlayfieldBoundingBox.y1 + mBallReclaimAreaHeight;
 	
 	// generate parts
-	mParts = getPartsFromContours(c);
+	PartVec newParts = getPartsFromContours(c);
+	mParts = mergeOldAndNewParts(mParts, newParts);
 
 	//
 	ContourVec contours = c;
@@ -444,6 +444,22 @@ PinballWorld::getFlipperPart( vec2 pin, float contourRadius, Part::Type type ) c
 	return p;
 }
 
+PinballWorld::Part
+PinballWorld::getBumperPart( vec2 pin, float contourRadius, tAdjSpace adjSpace ) const
+{
+	Part p;
+
+	p.mLoc = pin;
+	p.mType = Part::Type::Bumper;
+	p.mRadius = min( max(contourRadius,mBumperRadius),
+					 min(adjSpace.mLeft,adjSpace.mRight)
+					 );
+	
+	p.mPoly = getCirclePoly(pin, p.mRadius);
+	
+	return p;
+}
+
 PinballWorld::PartVec PinballWorld::getPartsFromContours( const ContourVector& contours ) const
 {
 	PinballWorld::PartVec parts;
@@ -452,24 +468,25 @@ PinballWorld::PartVec PinballWorld::getPartsFromContours( const ContourVector& c
 	{
 		if ( c.mTreeDepth>0 && c.mIsHole && c.mRadius < mPartMaxContourRadius )
 		{
-			Part p;
-			
-			// location
-			p.mLoc = c.mCenter;
-			p.mRadius = c.mRadius;
-			
 			// flipper orientation
-			tAdjSpace adjSpace = getAdjacentLeftRightSpace(p.mLoc,contours);
+			tAdjSpace adjSpace = getAdjacentLeftRightSpace(c.mCenter,contours);
+			
 			adjSpace.mLeft -= c.mRadius;
 			adjSpace.mRight -= c.mRadius;
+//			adjSpace.mLeft = max( adjSpace.mLeft, 0.f );
+//			adjSpace.mRight = max( adjSpace.mRight, 0.f );
 			
 			if      (adjSpace.mRight < adjSpace.mLeft  && adjSpace.mRight < mFlipperDistToEdge)
 			{
-				p = getFlipperPart(c.mCenter, c.mRadius, Part::Type::FlipperRight);
+				parts.push_back(
+					getFlipperPart(c.mCenter, c.mRadius, Part::Type::FlipperRight)
+				);
 			}
 			else if (adjSpace.mLeft  < adjSpace.mRight && adjSpace.mLeft  < mFlipperDistToEdge)
 			{
-				p = getFlipperPart(c.mCenter, c.mRadius, Part::Type::FlipperLeft);
+				parts.push_back(
+					getFlipperPart(c.mCenter, c.mRadius, Part::Type::FlipperLeft)
+				);
 			}
 //			else if (adjSpace.mLeft  < 1.f) // < epsilon
 //			{
@@ -480,12 +497,9 @@ PinballWorld::PartVec PinballWorld::getPartsFromContours( const ContourVector& c
 //			}
 			else
 			{
-				p.mType = Part::Type::Bumper;
-				p.mRadius = min( max(p.mRadius,mBumperRadius),
-								 min(adjSpace.mLeft,adjSpace.mRight)
-								 );
-				
-				p.mPoly = getCirclePoly(p.mLoc, p.mRadius);
+				parts.push_back(
+					getBumperPart( c.mCenter, c.mRadius, adjSpace )
+				);
 				
 				// equal, and there really is space, so just pick something.
 //				p.mType = Part::Type::FlipperLeft;
@@ -495,12 +509,16 @@ PinballWorld::PartVec PinballWorld::getPartsFromContours( const ContourVector& c
 				// (like a bumper!)
 				// or even a rule that said left is only when a left edge is within x space at left (eg), so very tight proximity rules.
 			}
-			
-			parts.push_back(p);
 		}
 	}
 	
 	return parts;
+}
+
+PinballWorld::PartVec
+PinballWorld::mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const
+{
+	return newParts;
 }
 
 void PinballWorld::getContoursFromParts( const PinballWorld::PartVec& parts, ContourVec& contours ) const
