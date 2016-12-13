@@ -19,6 +19,7 @@
 <!-- General -->
 	<UpVec>-1 0</UpVec>
 	<Gravity>.05</Gravity>
+	<BallReclaimAreaHeight>3</BallReclaimAreaHeight>
 	
 <!-- Vision	-->
 	<PartMaxContourRadius>5</PartMaxContourRadius>
