@@ -79,13 +79,14 @@ void Vision::setLightLink( const LightLink &ll )
 	}
 }
 
-void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
+Vision::Output
+Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 {
 	// ---- Input ----
 	
 	// make cv frame
 	cv::Mat input( toOcv( Channel( surface ) ) );
-	cv::Mat output, gray, clipped;
+	cv::Mat /*output,*/ gray, clipped;
 
 	pipeline.then( "input", input );
 	
@@ -161,7 +162,7 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 	}
 	
 	// find contours
-	Output output;
+	Vision::Output output;
 	
 	output.mContours = mContourVision.findContours( pipeline.getStages().back(), pipeline, contourPixelToWorld );
 	// TODO: tokens
