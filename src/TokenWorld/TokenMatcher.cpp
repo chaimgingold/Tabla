@@ -54,16 +54,15 @@ Feature2DRef TokenMatcher::getFeatureDetector() {
 	return mFeatureDetectors[mCurrentDetector].second;
 }
 
-
-
-void TokenMatcher::updateMatches( const Pipeline::StageRef world,
-								  const ContourVector &contours,
-								  Pipeline&pipeline )
+vector<Token> TokenMatcher::findTokens( const Pipeline::StageRef world,
+										const ContourVector &contours,
+										Pipeline&pipeline )
 {
-	if ( !world || world->mImageCV.empty() ) return;
-
 	// Detect features for each region and create Token objects from them
-	mTokens.clear();
+	vector<Token> tokens;
+
+	if ( !world || world->mImageCV.empty() ) return tokens;
+
 	for ( auto c: contours )
 	{
 		if (c.mIsHole||c.mTreeDepth>0) {
@@ -71,7 +70,7 @@ void TokenMatcher::updateMatches( const Pipeline::StageRef world,
 		}
 
 		Token token;
-		token.index = mTokens.size();
+		token.index = tokens.size();
 		token.polyLine = c.mPolyLine;
 		token.boundingRect = c.mBoundingRect;
 
@@ -99,8 +98,15 @@ void TokenMatcher::updateMatches( const Pipeline::StageRef world,
 											   noArray(),
 											   token.keypoints,
 											   token.descriptors);
-		mTokens.push_back(token);
+		tokens.push_back(token);
 	}
+	return tokens;
+}
+
+vector<MatchingTokenIndexPair> TokenMatcher::matchTokens( vector<Token> tokenLibrary,
+														  vector<Token> candidates )
+{
+	vector<MatchingTokenIndexPair> matches;
 
 	// Compare each token against every other for matches
 	// (first round starts with
@@ -108,12 +114,17 @@ void TokenMatcher::updateMatches( const Pipeline::StageRef world,
 	// bc, bd.. bf,
 	// cd, ce.. cf
 	// and so on which handles all unique pairs.)
-	mMatches.clear();
-	for ( int i=0; i < mTokens.size(); i++ )
+	for ( int i=0; i < tokenLibrary.size(); i++ )
 	{
-		Token focusedToken = mTokens[i];
-		for ( int j=i+1; j < mTokens.size(); j++ ) {
-			Token candidateToken = mTokens[j];
+		Token focusedToken = tokenLibrary[i];
+		for ( int j=0; j < candidates.size(); j++ ) {
+
+			Token candidateToken = candidates[j];
+
+			// FIXME just for testing
+			if (focusedToken.index == candidateToken.index) {
+				continue;
+			}
 
 			// nn_matches will be same size as focusedToken.keypoints.
 			vector<vector<DMatch>> nn_matches;
@@ -123,6 +134,7 @@ void TokenMatcher::updateMatches( const Pipeline::StageRef world,
 							  2);
 
 			// If way fewer keypoints in one token vs the other, skip
+
 //			float smaller = (float)MIN(focusedToken.keypoints.size(), candidateToken.keypoints.size());
 //			float larger = (float)MAX(focusedToken.keypoints.size(), candidateToken.keypoints.size());
 //			float ratio = smaller / larger;
@@ -146,17 +158,18 @@ void TokenMatcher::updateMatches( const Pipeline::StageRef world,
 				float dist1 = nn_matches[i][0].distance;
 				float dist2 = nn_matches[i][1].distance;
 
-				if(dist1 < mNNMatchRatio * dist2) {
+				if(dist1 < (dist2 * mNNMatchRatio)) {
 					numMatches++;
 				}
 			}
-			//			cout << nn_matches.size() << endl;
+			cout << "# Keypoints: " << nn_matches.size() << endl;
+			cout << "# Matches: " << numMatches << endl;
 
 
 			// Check if the number of matches with minimum distance is a reasonable percentage
 			// of the total number of matches
 			if (numMatches > nn_matches.size() * mNNMatchPercentage) {
-				mMatches.push_back(make_pair(focusedToken.index, candidateToken.index));
+				matches.push_back(make_pair(focusedToken.index, candidateToken.index));
 			}
 
 
@@ -203,4 +216,5 @@ void TokenMatcher::updateMatches( const Pipeline::StageRef world,
 			 */
 		}
 	}
+	return matches;
 }

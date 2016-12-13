@@ -26,7 +26,7 @@ using namespace cv;
 
 typedef cv::Ptr<cv::Feature2D> Feature2DRef;
 
-
+typedef pair<int, int> MatchingTokenIndexPair;
 
 struct Token {
 	// Set during feature detection
@@ -48,11 +48,6 @@ public:
 	int mCurrentDetector=0;
 	vector<pair<string, Feature2DRef>> mFeatureDetectors;
 
-	void updateMatches( const Pipeline::StageRef world,
-					    const ContourVector &contours,
-					    Pipeline&pipeline
-					   );
-
 	BFMatcher mMatcher;
 
 	// Distance threshold to identify inliers
@@ -61,14 +56,17 @@ public:
 	float mNNMatchRatio=0.8;
 	float mNNMatchPercentage=0.8;
 
-	vector<Token> mTokens;
-
-	vector<pair<int, int>> mMatches;
-
 	Feature2DRef getFeatureDetector();
 
 	void setParams( XmlTree xml );
 	TokenMatcher();
+
+	vector<Token> findTokens(  const Pipeline::StageRef world,
+							   const ContourVector &contours,
+							   Pipeline&pipeline );
+
+	vector<MatchingTokenIndexPair> matchTokens( vector<Token> tokenLibrary,
+												vector<Token> candidates );
 };
 
 #endif /* TokenMatcher_h */

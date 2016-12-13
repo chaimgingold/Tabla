@@ -37,7 +37,14 @@ void TokenWorld::updateVision( const ContourVector &contours, Pipeline&pipeline 
 													   mGlobalKeypoints);
 			break;
 		case TokenVisionMode::Matching:
-			mTokenMatcher.updateMatches(mWorld, contours, pipeline);
+		{
+
+			mTokens = mTokenMatcher.findTokens(mWorld, contours, pipeline);
+
+			// N-to-N matching:
+			// we want to match each found token with every other found token.
+			mMatches = mTokenMatcher.matchTokens(mTokens, mTokens);
+		}
 			break;
 		default:
 			break;
@@ -78,7 +85,7 @@ void TokenWorld::drawGlobalKeypoints() {
 void TokenWorld::drawMatchingKeypoints() {
 	// DEBUG: Drawing contours
 	{
-		for ( auto token: mTokenMatcher.mTokens )
+		for ( auto token: mTokens )
 		{
 			// Draw bounding box
 			{
@@ -99,7 +106,7 @@ void TokenWorld::drawMatchingKeypoints() {
 
 
 			// Draw keypoints
-			float hue = (float)token.index / mTokenMatcher.mTokens.size();
+			float hue = (float)token.index / mTokens.size();
 			gl::color(cinder::hsvToRgb(vec3(hue, 0.7, 0.9)));
 			for (auto keypoint : token.keypoints)
 			{
@@ -126,12 +133,12 @@ void TokenWorld::drawMatchingKeypoints() {
 		}
 	}
 
-	for (auto matchingPair : mTokenMatcher.mMatches ) {
+	for (auto matchingPair : mMatches ) {
 
-		Token &token1 = mTokenMatcher.mTokens[matchingPair.first];
-		Token &token2 = mTokenMatcher.mTokens[matchingPair.second];
+		Token &token1 = mTokens[matchingPair.first];
+		Token &token2 = mTokens[matchingPair.second];
 
-		float hue = (float)token1.index / mTokenMatcher.mTokens.size();
+		float hue = (float)token1.index / mTokens.size();
 		gl::color(cinder::hsvToRgb(vec3(hue, 0.7, 0.9)));
 		gl::drawLine(token1.boundingRect.getCenter(), token2.boundingRect.getCenter());
 	}
