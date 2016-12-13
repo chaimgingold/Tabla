@@ -11,6 +11,15 @@
 		<ContourDPEpsilon>			5	</ContourDPEpsilon>
 		<ContourMinWidth>			5	</ContourMinWidth>
 		<CaptureAllPipelineStages>1</CaptureAllPipelineStages> <!-- So we can extract bitmaps -->
+
+
+		<Tokens>
+				<Token>
+					<Image>Token123.png</Image>
+					<Name>Look Who's Token</Name>
+				</Token>
+		</Tokens>
+
 	</Vision>
 
 	<!-- Custom MusicVision tuning -->
