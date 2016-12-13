@@ -33,8 +33,10 @@ void TokenWorld::updateVision( const ContourVector &contours, Pipeline&pipeline 
 
 	switch (mMode) {
 		case TokenVisionMode::Global:
-			mTokenMatcher.getFeatureDetector()->detect(mWorld->mImageCV,
-													   mGlobalKeypoints);
+			mTokenMatcher.getFeatureDetector()->detectAndCompute(mWorld->mImageCV,
+																 noArray(),
+													    		 mGlobalKeypoints,
+																 noArray());
 			break;
 		case TokenVisionMode::Matching:
 		{
@@ -154,9 +156,9 @@ void TokenWorld::keyDown( KeyEvent event )
 	{
 		case KeyEvent::KEY_TAB:
 		{
-			if (mMode == TokenVisionMode::Matching) {
-				break;
-			}
+//			if (mMode == TokenVisionMode::Matching) {
+//				break;
+//			}
 			if (event.isShiftDown()) {
 				if (mTokenMatcher.mCurrentDetector == 0) {
 					mTokenMatcher.mCurrentDetector = mTokenMatcher.mFeatureDetectors.size() - 1;
@@ -172,9 +174,9 @@ void TokenWorld::keyDown( KeyEvent event )
 		break;
 		case KeyEvent::KEY_BACKQUOTE:
 			mMode = TokenVisionMode(((int)mMode + 1) % (int)TokenVisionMode::kNumModes);
-			if (mMode == TokenVisionMode::Matching) {
-				mTokenMatcher.mCurrentDetector = 0; // AKAZE
-			}
+//			if (mMode == TokenVisionMode::Matching) {
+//				mTokenMatcher.mCurrentDetector = 0; // AKAZE
+//			}
 		default:
 			break;
 	}

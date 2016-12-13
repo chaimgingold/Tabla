@@ -25,29 +25,30 @@ TokenMatcher::TokenMatcher()
 	mMatcher = cv::BFMatcher(NORM_HAMMING);
 
 	mFeatureDetectors.push_back(make_pair("AKAZE", cv::AKAZE::create()));
-
-
-
 	mFeatureDetectors.push_back(make_pair("ORB", cv::ORB::create()));
 	mFeatureDetectors.push_back(make_pair("BRISK", cv::BRISK::create()));
 
-	mFeatureDetectors.push_back(make_pair("KAZE", cv::KAZE::create()));
+	// TODO: these want some different Mat type... figure out the conversion
+//	mFeatureDetectors.push_back(make_pair("KAZE", cv::KAZE::create()));
+//	mFeatureDetectors.push_back(make_pair("SURF", cv::xfeatures2d::SURF::create()));
+//	mFeatureDetectors.push_back(make_pair("SIFT", cv::xfeatures2d::SIFT::create()));
+
+	// Only implement detect:
 
 	// Corner detectors
-	mFeatureDetectors.push_back(make_pair("FAST", cv::FastFeatureDetector::create()));
-	mFeatureDetectors.push_back(make_pair("AGAST", cv::AgastFeatureDetector::create()));
+//	mFeatureDetectors.push_back(make_pair("FAST", cv::FastFeatureDetector::create()));
+//	mFeatureDetectors.push_back(make_pair("AGAST", cv::AgastFeatureDetector::create()));
+//	mFeatureDetectors.push_back(make_pair("Star", cv::xfeatures2d::StarDetector::create()));
 
 
-	mFeatureDetectors.push_back(make_pair("SURF", cv::xfeatures2d::SURF::create()));
-	mFeatureDetectors.push_back(make_pair("SIFT", cv::xfeatures2d::SIFT::create()));
+	// Only implements compute:
 
-	// Only implements compute() - figure this out
 	//	mFeatureDetectors.push_back(make_pair("FREAK", cv::xfeatures2d::FREAK::create()));
-
-	mFeatureDetectors.push_back(make_pair("Star", cv::xfeatures2d::StarDetector::create()));
 	//	mFeatureDetectors.push_back(make_pair("LUCID", cv::xfeatures2d::LUCID::create(  1 // 3x3 lucid descriptor kernel
 	//															   , 1 // 3x3 blur kernel
 	//															   )));
+
+	// (so, TODO: handle these and allow swapping detectors and computers separately
 }
 
 Feature2DRef TokenMatcher::getFeatureDetector() {
