@@ -46,6 +46,7 @@ private:
 	float mPartMaxContourRadius = 5.f; // contour radius lt => part
 	float mFlipperDistToEdge = 10.f; // how close to the edge does a flipper appear?
 	float mBumperRadius = 5.f;
+	float mBallReclaimAreaHeight = 10.f;
 	
 	// world orientation
 	vec2 getUpVec() const { return mUpVec; }
@@ -53,6 +54,19 @@ private:
 	vec2 getRightVec() const { return -getLeftVec(); }
 	vec2 getGravityVec() const { return -mUpVec; }
 	
+	// world layout
+	vec2  toPlayfieldSpace  ( vec2 p ) const { return vec2( dot(p,getRightVec()), dot(p,getUpVec()) ); }
+	vec2  fromPlayfieldSpace( vec2 p ) const { return getRightVec() * p.x + getUpVec() * p.y ; }
+		// could make this into two matrices
+	
+	Rectf toPlayfieldBoundingBox ( const PolyLine2& ) const; // min/max of all points in playfield space
+	Rectf getPlayfieldBoundingBox( const ContourVec& ) const;
+	
+	Rectf mPlayfieldBoundingBox; // min/max of non-hole contours in playfield coordinate space (up/right vectors)
+	
+	float mPlayfieldBallReclaimY; // at what playfield y do we reclaim balls?
+	
+	// Parts
 	class Part
 	{
 	public:
@@ -93,6 +107,10 @@ private:
 	float mFlipperState[2]; // left, right; 0..1
 	
 	void tickFlippers();
+	
+	// simulation
+	void serveBall();
+	void cullBalls(); // cull dropped balls
 	
 	// drawing
 	void drawFlipperOrientationRays() const;

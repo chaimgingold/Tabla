@@ -50,6 +50,8 @@ PinballWorld::PinballWorld()
 	{
 		cout << "down " << event.mId << endl;
 		button(event.mId,"-down");
+		
+		if (getBalls().empty()) serveBall();
 	};
 
 	mGamepadManager.mOnButtonUp = [this,button]( const GamepadManager::Event& event )
@@ -89,6 +91,7 @@ void PinballWorld::setParams( XmlTree xml )
 	getXml(xml, "BumperRadius", mBumperRadius );
 	getXml(xml, "PartMaxContourRadius", mPartMaxContourRadius );
 	getXml(xml, "Gravity", mGravity );
+	getXml(xml, "BallReclaimAreaHeight", mBallReclaimAreaHeight );
 	
 	// gamepad
 	if (xml.hasChild("Gamepad"))
@@ -131,6 +134,18 @@ void PinballWorld::setParams( XmlTree xml )
 	}
 }
 
+Rectf PinballWorld::toPlayfieldBoundingBox ( const PolyLine2 &poly ) const
+{
+	std::vector<vec2> pts = poly.getPoints();
+	
+	for( auto &p : pts )
+	{
+		p = toPlayfieldSpace(p);
+	}
+	
+	return Rectf(pts);
+}
+
 void PinballWorld::gameWillLoad()
 {
 	// most important thing is to prevent BallWorld from doing its default thing.
@@ -143,23 +158,50 @@ void PinballWorld::update()
 
 	// gravity
 	vector<Ball>& balls = getBalls();
-	for( Ball &b : balls )
-	{
+	for( Ball &b : balls ) {
 		b.mAccel += getGravityVec() * mGravity;
-//		b.mAccel = vec2(.5,0);
 	}
 	
 	// balls
+	cullBalls();
 	BallWorld::update();
-
-	// new balls?
-	if ( getBalls().size() < 2 )
-	{
-		newRandomBall( getRandomPointInWorldBoundsPoly() ).mCollideWithContours = true;
-	}
 	
 	// flippers
 	tickFlippers();
+}
+
+void PinballWorld::serveBall()
+{
+	// for now, from the top
+	float fx = Rand::randFloat();
+	
+	vec2 loc = fromPlayfieldSpace(
+		vec2( lerp(mPlayfieldBoundingBox.x1,mPlayfieldBoundingBox.x2,fx), mPlayfieldBoundingBox.y2 )
+		);
+	
+	newRandomBall(loc).mCollideWithContours = true;
+}
+
+void PinballWorld::cullBalls()
+{
+	// remove?
+	vector<Ball>& balls = getBalls();
+	vector<Ball> newBalls;
+	
+	for( const auto &b : balls )
+	{
+		if ( toPlayfieldSpace(b.mLoc).y + b.mRadius < mPlayfieldBallReclaimY )
+		{
+			// kill
+		}
+		else
+		{
+			// keep
+			newBalls.push_back(b);
+		}
+	}
+	
+	balls = newBalls;
 }
 
 void PinballWorld::tickFlippers()
@@ -196,6 +238,12 @@ void PinballWorld::onBallWorldBoundaryCollide	( const Ball& b )
 
 void PinballWorld::draw( DrawType drawType )
 {
+	// playfield markers
+	gl::color(1,0,0);
+	gl::drawLine(
+		fromPlayfieldSpace(vec2(mPlayfieldBoundingBox.x1,mPlayfieldBallReclaimY)),
+		fromPlayfieldSpace(vec2(mPlayfieldBoundingBox.x2,mPlayfieldBallReclaimY)) ) ;
+	
 	// balls
 	BallWorld::draw(drawType);
 	
@@ -307,8 +355,34 @@ void PinballWorld::drawParts() const
 }
 
 // Vision
+Rectf PinballWorld::getPlayfieldBoundingBox( const ContourVec& cs ) const
+{
+	vector<vec2> pts;
+	
+	for( const auto& c : cs )
+	{
+		if (c.mTreeDepth==0)
+		{
+			pts.insert(pts.end(),c.mPolyLine.getPoints().begin(), c.mPolyLine.end());
+		}
+	}
+	
+	for( auto &p : pts )
+	{
+		p = toPlayfieldSpace(p);
+	}
+	
+	return Rectf(pts);
+}
+
 void PinballWorld::updateVision( const ContourVec &c, Pipeline& p )
 {
+	// playfield layout
+	mPlayfieldBoundingBox = getPlayfieldBoundingBox(c);
+//	cout << "min/max y: " << mPlayfieldBoundingBox.y1 << " " << mPlayfieldBoundingBox.y2 << endl;
+	
+	mPlayfieldBallReclaimY = mPlayfieldBoundingBox.y1 + mBallReclaimAreaHeight;
+	
 	// generate parts
 	mParts = getPartsFromContours(c);
 
