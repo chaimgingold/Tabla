@@ -47,10 +47,10 @@ void Vision::setParams( Params p )
 
 void Vision::setLightLink( const LightLink &ll )
 {
-	//
-	bool updateRemap = !ll.mDistCoeffs.empty() && !ll.mCameraMatrix.empty();
 	// compute remap?
-	// (we could see if mCameraMatrix or mDistCoeffs have changed... but that code is buggy + unnecessary optimization)
+	bool updateRemap =
+		! isMatEqual<float>(ll.mDistCoeffs,mLightLink.mDistCoeffs)
+	||  ! isMatEqual<float>(ll.mCameraMatrix,mLightLink.mCameraMatrix);
 	
 	// update vars
 	mLightLink=ll;
