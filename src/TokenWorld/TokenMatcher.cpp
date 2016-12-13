@@ -11,11 +11,22 @@
 #include "geom.h"
 #include "xml.h"
 
-void TokenMatcher::setParams( XmlTree xml )
+void TokenMatcher::Params::set( XmlTree xml )
 {
 	getXml(xml,"InlierThreshold",mInlierThreshold);
 	getXml(xml,"NNMatchRatio",mNNMatchRatio);
 	getXml(xml,"NNMatchPercentage",mNNMatchPercentage);
+	
+	mTokenLibraryPaths.clear();
+	for( auto i = xml.begin( "Tokens" ); i != xml.end(); ++i )
+	{
+		if ( i->hasChild("Path") )
+		{
+			fs::path path = i->getChild("Path").getValue();
+			
+			mTokenLibraryPaths.push_back(path);
+		}
+	}
 }
 
 TokenMatcher::TokenMatcher()
@@ -55,12 +66,12 @@ Feature2DRef TokenMatcher::getFeatureDetector() {
 	return mFeatureDetectors[mCurrentDetector].second;
 }
 
-vector<Token> TokenMatcher::findTokens( const Pipeline::StageRef world,
+vector<TokenCandidate> TokenMatcher::findTokenCandidates( const Pipeline::StageRef world,
 										const ContourVector &contours,
 										Pipeline&pipeline )
 {
 	// Detect features for each region and create Token objects from them
-	vector<Token> tokens;
+	vector<TokenCandidate> tokens;
 
 	if ( !world || world->mImageCV.empty() ) return tokens;
 
@@ -71,7 +82,7 @@ vector<Token> TokenMatcher::findTokens( const Pipeline::StageRef world,
 		}
 
 		int tokenIndex = tokens.size();
-		Token token;
+		TokenCandidate token;
 
 		token.polyLine = c.mPolyLine;
 		token.boundingRect = c.mBoundingRect;
@@ -173,7 +184,7 @@ vector<MatchingTokenIndexPair> TokenMatcher::matchTokens( vector<TokenFeatures> 
 				float dist1 = nn_matches[i][0].distance;
 				float dist2 = nn_matches[i][1].distance;
 
-				if(dist1 < (dist2 * mNNMatchRatio)) {
+				if(dist1 < (dist2 * mParams.mNNMatchRatio)) {
 					numMatches++;
 				}
 			}
@@ -183,7 +194,7 @@ vector<MatchingTokenIndexPair> TokenMatcher::matchTokens( vector<TokenFeatures> 
 
 			// Check if the number of matches with minimum distance is a reasonable percentage
 			// of the total number of matches
-			if (numMatches > nn_matches.size() * mNNMatchPercentage) {
+			if (numMatches > nn_matches.size() * mParams.mNNMatchPercentage) {
 				matches.push_back(make_pair(focusedToken.index, candidateToken.index));
 			}
 
@@ -232,4 +243,27 @@ vector<MatchingTokenIndexPair> TokenMatcher::matchTokens( vector<TokenFeatures> 
 		}
 	}
 	return matches;
+}
+
+void TokenMatcher::setParams( Params p )
+{
+	mParams=p;
+	
+	for ( fs::path path : mParams.mTokenLibraryPaths )
+	{
+		cv::Mat input;
+		
+		try
+		{
+			input = Mat( toOcv( Channel( loadImage(path) ) ) );
+			
+			TokenFeatures features = featuresFromImage(input);
+			features.index = mTokenLibrary.size();
+			
+			mTokenLibrary.push_back( features );
+		}
+		catch (...) {
+			cout << "TokenMatcher failed to load library image " << path << endl;
+		} // try
+	} // for
 }
