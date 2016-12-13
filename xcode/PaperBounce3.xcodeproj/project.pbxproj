@@ -84,6 +84,7 @@
 		B66BF6020B6B4738AF2E400D /* b2PolygonContact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9E75530E63FA4EC397C0D1E2 /* b2PolygonContact.cpp */; };
 		B82FE516E59446FB928ED0B8 /* b2Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 474731D0E50948D4B9522AA0 /* b2Timer.cpp */; };
 		BF8EA3BC1AE14D83A5112094 /* b2Contact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D9B3511148F4C0DB5FE5C5C /* b2Contact.cpp */; };
+		C21D94541DFF6F610066A7DD /* TokenMatcher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21D94521DFF6F610066A7DD /* TokenMatcher.cpp */; };
 		C267F7531DDA4CEF006B8672 /* Instrument.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C267F7511DDA4CEF006B8672 /* Instrument.cpp */; };
 		C27757E51DF16AFB0030FDC9 /* libopencv_calib3d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C27757BB1DF16AFB0030FDC9 /* libopencv_calib3d.a */; };
 		C27757E71DF16AFB0030FDC9 /* libopencv_core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C27757BD1DF16AFB0030FDC9 /* libopencv_core.a */; };
@@ -315,6 +316,8 @@
 		C0B1C0F0E0A44565970E6E65 /* b2Body.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2Body.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/b2Body.cpp; sourceTree = "<group>"; };
 		C159A0020C244479B7849346 /* b2EdgeAndPolygonContact.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2EdgeAndPolygonContact.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Contacts/b2EdgeAndPolygonContact.cpp; sourceTree = "<group>"; };
 		C20E7BFEBC8645C79A3B1048 /* b2RopeJoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2RopeJoint.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Joints/b2RopeJoint.cpp; sourceTree = "<group>"; };
+		C21D94521DFF6F610066A7DD /* TokenMatcher.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TokenMatcher.cpp; path = ../src/TokenWorld/TokenMatcher.cpp; sourceTree = "<group>"; };
+		C21D94531DFF6F610066A7DD /* TokenMatcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TokenMatcher.h; path = ../src/TokenWorld/TokenMatcher.h; sourceTree = "<group>"; };
 		C227BF991DE00524008A8024 /* TODO-lxi.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = "TODO-lxi.md"; path = "../design/TODO-lxi.md"; sourceTree = "<group>"; };
 		C24197A61DC42959005AE51F /* ChangeLog.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = ChangeLog.md; path = ../ChangeLog.md; sourceTree = "<group>"; };
 		C267F7511DDA4CEF006B8672 /* Instrument.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Instrument.cpp; path = ../src/MusicWorld/Instrument.cpp; sourceTree = "<group>"; };
@@ -2277,6 +2280,8 @@
 			children = (
 				C29A0AD51DF61A15008A26A1 /* TokenWorld.h */,
 				C29A0AD41DF61A15008A26A1 /* TokenWorld.cpp */,
+				C21D94531DFF6F610066A7DD /* TokenMatcher.h */,
+				C21D94521DFF6F610066A7DD /* TokenMatcher.cpp */,
 			);
 			name = TokenWorld;
 			sourceTree = "<group>";
@@ -2597,6 +2602,7 @@
 				27FB686FA380493A8438C8BB /* b2Joint.cpp in Sources */,
 				2632320F1DC8166500CB2048 /* Score.cpp in Sources */,
 				0556478EA12F45A08565C50B /* b2MouseJoint.cpp in Sources */,
+				C21D94541DFF6F610066A7DD /* TokenMatcher.cpp in Sources */,
 				7F4A62BDF6884C7AAAA1EC5E /* b2PrismaticJoint.cpp in Sources */,
 				41A24915A6FF4993982FF46F /* b2PulleyJoint.cpp in Sources */,
 				2050180D31BC4DA480370416 /* b2RevoluteJoint.cpp in Sources */,
@@ -2638,7 +2644,10 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				OTHER_CFLAGS = "-D__MACOSX_CORE__";
+				OTHER_CFLAGS = (
+					"-D__MACOSX_CORE__",
+					"-DOBJC_SILENCE_GC_DEPRECATIONS",
+				);
 				OTHER_LDFLAGS = (
 					"\"$(CINDER_PATH)/lib/libcinder_d.a\"",
 					"\"-lz\"",
@@ -2669,7 +2678,10 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				OTHER_CFLAGS = "-D__MACOSX_CORE__";
+				OTHER_CFLAGS = (
+					"-D__MACOSX_CORE__",
+					"-DOBJC_SILENCE_GC_DEPRECATIONS",
+				);
 				OTHER_LDFLAGS = (
 					"\"$(CINDER_PATH)/lib/libcinder.a\"",
 					"\"-lz\"",
@@ -2704,7 +2716,7 @@
 					../blocks/OpenCV3/lib/macosx,
 					"../blocks/OpenCV3-Contrib/lib",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "\"$(CINDER_PATH)/include\" ../include ../blocks/OpenCV3-Contrib/include/** ../blocks/OpenCV3/include";
@@ -2732,7 +2744,7 @@
 					../blocks/OpenCV3/lib/macosx,
 					"../blocks/OpenCV3-Contrib/lib",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "\"$(CINDER_PATH)/include\" ../include ../blocks/OpenCV3-Contrib/include/** ../blocks/OpenCV3/include";
 			};

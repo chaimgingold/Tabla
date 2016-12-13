@@ -69,7 +69,7 @@ void PureDataNode::initialize()
 
 	lock_guard<mutex> lock( mMutex );
 
-	bool success = mPdBase.init( getNumChannels(), getNumChannels(), getSampleRate() );
+	__unused bool success = mPdBase.init( getNumChannels(), getNumChannels(), getSampleRate() );
 	CI_ASSERT( success );
 
 	mPdReceiver = PureDataPrintReceiver();

@@ -22,28 +22,16 @@
 #include "opencv2/opencv.hpp"
 #include "xfeatures2d.hpp"
 
+#include "TokenMatcher.h"
+
 using namespace ci;
 using namespace ci::app;
 using namespace std;
 using namespace cv::xfeatures2d;
 using namespace cv;
 
-typedef cv::Ptr<cv::Feature2D> Feature2DRef;
 
 
-struct Token {
-	// Set during feature detection
-	vector<KeyPoint> keypoints;
-	Mat              descriptors;
-	PolyLine2        polyLine;
-	Rectf            boundingRect;
-	int              index=0;
-	mat4             tokenToImage;
-	// Set on comparison
-	vector<KeyPoint> matched;
-	vector<KeyPoint> inliers;
-	vector<DMatch>   good_matches;
-};
 
 enum class TokenVisionMode
 {
@@ -75,35 +63,16 @@ protected:
 private:
 	TokenVisionMode mMode=TokenVisionMode::Matching;
 
-	int mCurrentDetector=0;
-	vector<pair<string, Feature2DRef>> mFeatureDetectors;
-	
-	BFMatcher mMatcher;
+	TokenMatcher mTokenMatcher;
+
+
+	Pipeline::StageRef mWorld;
 
 	vector<cv::KeyPoint> mGlobalKeypoints;
 	vector<cv::Mat>      mGlobalDescriptors;
-
-	Pipeline::StageRef   mWorld;
-	ContourVector		 mContours;
-
-	vector<Token> mTokens;
-
-	vector<pair<int, int>> mMatches;
-
-	void detectTokens();
-
-	Feature2DRef getFeatureDetector();
-
-	// Distance threshold to identify inliers
-	float mInlierThreshold=2.5;
-	// Nearest neighbor matching ratio
-	float mNNMatchRatio=0.8;
-	float mNNMatchPercentage=0.8;
-
+	
 	void drawMatchingKeypoints();
 	void drawGlobalKeypoints();
-	void globalVision( const ContourVector &contours, Pipeline&pipeline );
-	void matchingVision( const ContourVector &contours, Pipeline&pipeline );
 };
 
 class TokenWorldCartridge : public GameCartridge
