@@ -21,6 +21,8 @@
 #include "Contour.h"
 #include "Pipeline.h"
 
+#include "ContourVision.h"
+
 using namespace ci;
 using namespace ci::app;
 using namespace std;
@@ -36,18 +38,13 @@ public:
 	{
 	public:
 		void set( XmlTree );
-	
-		float mContourMinRadius	=	3;
-		float mContourMinArea	=	100;
-		float mContourDPEpsilon	=	5;
-		float mContourMinWidth	=	5;
-		bool  mContourGetExactMinCircle = false; // otherwise, we'll approximate with min bounding box
 		
 		bool mCaptureAllPipelineStages = false; // this is OR'd in
+	
+		ContourVision::Params mContourVisionParams;
 	};
 
-	void setParams( Params p ) { mParams=p; }
-
+	void setParams( Params );
 	void setLightLink( const LightLink& );
 	
 	// push input through
@@ -63,6 +60,9 @@ private:
 	// undistort params
 	cv::Mat mRemap[2]; // can be empty for none
 
+	// submodules
+	ContourVision mContourVision;
+	
 };
 
 #endif /* Vision_hpp */

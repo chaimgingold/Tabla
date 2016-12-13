@@ -8,10 +8,12 @@
 
 	<!-- cm -->
 	<Vision>
-		<ContourMinRadius>			.5	</ContourMinRadius>
-		<ContourMinArea>			7	</ContourMinArea>
-		<ContourDPEpsilon>			1	</ContourDPEpsilon>
-		<ContourMinWidth>			3	</ContourMinWidth>
+		<Contours>
+			<ContourMinRadius>			.5	</ContourMinRadius>
+			<ContourMinArea>			7	</ContourMinArea>
+			<ContourDPEpsilon>			1	</ContourDPEpsilon>
+			<ContourMinWidth>			3	</ContourMinWidth>
+		</Contours>
 	</Vision>
 
 </TokenWorld>

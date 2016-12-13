@@ -6,12 +6,15 @@
 	<!-- General GameWorld Vision settings -->
 	<!-- cm -->
 	<Vision>
-		<ContourMinRadius>			5	</ContourMinRadius>
-		<ContourMinArea>			100	</ContourMinArea>
-		<ContourDPEpsilon>			5	</ContourDPEpsilon>
-		<ContourMinWidth>			5	</ContourMinWidth>
+
 		<CaptureAllPipelineStages>1</CaptureAllPipelineStages> <!-- So we can extract bitmaps -->
 
+		<Contours>
+			<ContourMinRadius>			5	</ContourMinRadius>
+			<ContourMinArea>			100	</ContourMinArea>
+			<ContourDPEpsilon>			5	</ContourDPEpsilon>
+			<ContourMinWidth>			5	</ContourMinWidth>
+		</Contours>
 
 		<Tokens>
 				<Token>
