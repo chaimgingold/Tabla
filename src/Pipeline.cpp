@@ -16,7 +16,7 @@ gl::TextureRef Pipeline::Stage::getGLImage() const
 	{
 //		mImageGL = gl::Texture::create( fromOcv(mImageCV), gl::Texture::Format().loadTopDown() );
 		mImageGL = gl::Texture::create(
-			ImageSourceRef( new ImageSourceCvMat( mImageCV ) ),
+			ImageSourceRef( new ImageSourceCvMat( mImageCV.getMat(cv::ACCESS_READ) ) ),
 			gl::Texture::Format().loadTopDown() );
 	}
 	
@@ -44,8 +44,21 @@ Pipeline::StageRef Pipeline::then( string name, cv::Mat &img )
 
 	if ( getShouldCacheImage(s) )
 	{
-		s->mImageCV = img.clone(); // copy by value
+		s->mImageCV = img.getUMat(cv::ACCESS_READ); // copy by value
 		//s->mImageCV = img; // copy by ref (problematic)
+	}
+
+	return s;
+}
+
+Pipeline::StageRef Pipeline::then( string name, cv::UMat &img )
+{
+	StageRef s = then( name, vec2(img.cols,img.rows) );
+
+	if ( getShouldCacheImage(s) )
+	{
+		s->mImageCV = img.clone();
+//		img.copyTo(s->mImageCV); // copy by value
 	}
 
 	return s;

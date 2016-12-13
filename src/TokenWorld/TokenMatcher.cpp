@@ -97,7 +97,7 @@ vector<TokenCandidate> TokenMatcher::findTokenCandidates( const Pipeline::StageR
 			continue;
 		}
 
-		Mat tokenContourImage = world->mImageCV(cropRect);
+		UMat tokenContourImage = world->mImageCV(cropRect);
 
 		imageSpaceRect.offset(-imageSpaceRect.getUpperLeft());
 		token.tokenToWorld = getRectMappingAsMatrix(imageSpaceRect, boundingRect);

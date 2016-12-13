@@ -14,7 +14,7 @@
 			<ContourMinArea>			1	</ContourMinArea>
 			<ContourDPEpsilon>			1	</ContourDPEpsilon>
 			<ContourMinWidth>			2	</ContourMinWidth>
-		</Contours>		
+		</Contours>
 	</Vision>
 
 

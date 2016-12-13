@@ -85,17 +85,25 @@ Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 	// ---- Input ----
 	
 	// make cv frame
-	cv::Mat input( toOcv( Channel( surface ) ) );
-	cv::Mat /*output,*/ gray, clipped;
+	cv::UMat input_color = toOcv(surface).getUMat(cv::ACCESS_READ);
+	cv::UMat input;
+	cv::UMat gray, clipped;
 
-	pipeline.then( "input", input );
+	cv::cvtColor(input_color, input, CV_BGR2GRAY);
+	// net performance of doing color -> grey conversion on CPU vs GPU is negligible.
+	// the main impact is downloading the data, which we may be able to do faster if we rewrite toOcv.
+	// but at least we now have color frame in the pipeline at the same total performance cost, so that's a net gain.
+	
+	pipeline.then( "input_color", input_color );
 	
 	pipeline.setImageToWorldTransform( getOcvPerspectiveTransform(
 		mLightLink.mCaptureCoords,
 		mLightLink.mCaptureWorldSpaceCoords ) );
+
+	pipeline.then( "input", input );
 	
 	// undistort
-	cv::Mat undistorted;
+	cv::UMat undistorted;
 	
 	if ( !mRemap[0].empty() && !mRemap[1].empty() ) {
 		cv::remap(input,undistorted,mRemap[0],mRemap[1],cv::INTER_LINEAR);
@@ -152,6 +160,8 @@ Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 		// do it
 		cv::Mat xform = cv::getPerspectiveTransform( srcpt, dstpt_pixelspace ) ;
 		cv::warpPerspective( undistorted, clipped, xform, outputSize );
+		// To speed it up on CPU:
+		// http://romsteady.blogspot.com/2015/07/calculate-opencv-warpperspective-map.html
 		
 		// log to pipeline
 		pipeline.then( "clipped", clipped );
