@@ -65,7 +65,7 @@ class PaperBounce3App : public App {
 	LightLink			mLightLink; // calibration for camera <> world <> projector
 	CaptureRef			mCapture;	// input device		->
 	Vision				mVision ;	// edge detection	->
-	ContourVector		mContours;	// edges output		->
+	Vision::Output		mVisionOutput; // contours, tokens ->
 	std::shared_ptr<GameWorld> mGameWorld ;// world simulation
 	
 	Pipeline			mPipeline; // traces processing

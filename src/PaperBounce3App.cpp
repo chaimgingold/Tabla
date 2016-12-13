@@ -481,17 +481,15 @@ void PaperBounce3App::update()
 		
 		
 		// vision it
-		mVision.processFrame(frame,mPipeline);
+		mVisionOutput = mVision.processFrame(frame,mPipeline);
 		
 		// finish off the pipeline with draw stage
 		addProjectorPipelineStages();
 		
 		// pass contours to ballworld (probably don't need to store here)
-		mContours = mVision.mContourOutput ;
-		
 		if (mGameWorld)
 		{
-			mGameWorld->updateVision( mContours, mPipeline );
+			mGameWorld->updateVision( mVisionOutput.mContours, mPipeline );
 		}
 		
 		// update pipeline visualization

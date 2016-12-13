@@ -42,16 +42,23 @@ public:
 		bool mCaptureAllPipelineStages = false; // this is OR'd in
 	
 		ContourVision::Params mContourVisionParams;
+		// TODO: tokens
 	};
 
+	// output
+	class Output
+	{
+	public:
+		ContourVector mContours;
+		// TODO: tokens
+	};
+
+	// configure
 	void setParams( Params );
 	void setLightLink( const LightLink& );
-	
+
 	// push input through
-	void processFrame( const Surface &surface, Pipeline& tracePipeline );
-	
-	// output
-	ContourVector mContourOutput;
+	Output processFrame( const Surface &surface, Pipeline& tracePipeline );
 	
 private:
 	Params		mParams;

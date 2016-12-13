@@ -161,6 +161,11 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 	}
 	
 	// find contours
-	mContourOutput = mContourVision.findContours( pipeline.getStages().back(), pipeline, contourPixelToWorld );
+	Output output;
+	
+	output.mContours = mContourVision.findContours( pipeline.getStages().back(), pipeline, contourPixelToWorld );
+	// TODO: tokens
+	
+	// output
+	return output;
 }
-
