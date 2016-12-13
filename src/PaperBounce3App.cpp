@@ -477,6 +477,8 @@ void PaperBounce3App::update()
 			frame = *mCapture->getSurface();
 		}
 
+//		cout << "frame size: " << frame.getWidth() << ", " << frame.getHeight() << endl;
+		
 		
 		// vision it
 		mVision.processFrame(frame,mPipeline);
