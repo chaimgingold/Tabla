@@ -33,8 +33,10 @@ void TokenWorld::updateVision( const ContourVector &contours, Pipeline&pipeline 
 
 	switch (mMode) {
 		case TokenVisionMode::Global:
-			mTokenMatcher.getFeatureDetector()->detect(mWorld->mImageCV,
-													   mGlobalKeypoints);
+			mTokenMatcher.getFeatureDetector()->detectAndCompute(mWorld->mImageCV,
+																 noArray(),
+													    		 mGlobalKeypoints,
+																 noArray());
 			break;
 		case TokenVisionMode::Matching:
 		{
@@ -43,7 +45,11 @@ void TokenWorld::updateVision( const ContourVector &contours, Pipeline&pipeline 
 
 			// N-to-N matching:
 			// we want to match each found token with every other found token.
-			mMatches = mTokenMatcher.matchTokens(mTokens, mTokens);
+			vector <TokenFeatures> features;
+			for (Token &token : mTokens) {
+				features.push_back(token.features);
+			}
+			mMatches = mTokenMatcher.matchTokens(features, features);
 		}
 			break;
 		default:
@@ -106,11 +112,11 @@ void TokenWorld::drawMatchingKeypoints() {
 
 
 			// Draw keypoints
-			float hue = (float)token.index / mTokens.size();
+			float hue = (float)token.features.index / mTokens.size();
 			gl::color(cinder::hsvToRgb(vec3(hue, 0.7, 0.9)));
-			for (auto keypoint : token.keypoints)
+			for (auto keypoint : token.features.keypoints)
 			{
-				gl::drawSolidCircle(transformPoint(token.tokenToImage, fromOcv(keypoint.pt)),
+				gl::drawSolidCircle(transformPoint(token.tokenToWorld, fromOcv(keypoint.pt)),
 									//keypoint.size * 0.01);
 									0.8);
 			}
@@ -119,14 +125,14 @@ void TokenWorld::drawMatchingKeypoints() {
 			gl::color(cinder::hsvToRgb(vec3(hue + 0.03, 0.7, 0.9)));
 			for (auto keypoint : token.matched)
 			{
-				gl::drawSolidCircle(transformPoint(token.tokenToImage, fromOcv(keypoint.pt)),
+				gl::drawSolidCircle(transformPoint(token.tokenToWorld, fromOcv(keypoint.pt)),
 									0.6);
 			}
 
 			gl::color(cinder::hsvToRgb(vec3(hue + 0.06, 0.7, 0.9)));
 			for (auto keypoint : token.inliers)
 			{
-				gl::drawSolidCircle(transformPoint(token.tokenToImage, fromOcv(keypoint.pt)),
+				gl::drawSolidCircle(transformPoint(token.tokenToWorld, fromOcv(keypoint.pt)),
 									0.4);
 			}
 
@@ -138,7 +144,7 @@ void TokenWorld::drawMatchingKeypoints() {
 		Token &token1 = mTokens[matchingPair.first];
 		Token &token2 = mTokens[matchingPair.second];
 
-		float hue = (float)token1.index / mTokens.size();
+		float hue = (float)token1.features.index / mTokens.size();
 		gl::color(cinder::hsvToRgb(vec3(hue, 0.7, 0.9)));
 		gl::drawLine(token1.boundingRect.getCenter(), token2.boundingRect.getCenter());
 	}
@@ -150,9 +156,9 @@ void TokenWorld::keyDown( KeyEvent event )
 	{
 		case KeyEvent::KEY_TAB:
 		{
-			if (mMode == TokenVisionMode::Matching) {
-				break;
-			}
+//			if (mMode == TokenVisionMode::Matching) {
+//				break;
+//			}
 			if (event.isShiftDown()) {
 				if (mTokenMatcher.mCurrentDetector == 0) {
 					mTokenMatcher.mCurrentDetector = mTokenMatcher.mFeatureDetectors.size() - 1;
@@ -168,9 +174,9 @@ void TokenWorld::keyDown( KeyEvent event )
 		break;
 		case KeyEvent::KEY_BACKQUOTE:
 			mMode = TokenVisionMode(((int)mMode + 1) % (int)TokenVisionMode::kNumModes);
-			if (mMode == TokenVisionMode::Matching) {
-				mTokenMatcher.mCurrentDetector = 0; // AKAZE
-			}
+//			if (mMode == TokenVisionMode::Matching) {
+//				mTokenMatcher.mCurrentDetector = 0; // AKAZE
+//			}
 		default:
 			break;
 	}

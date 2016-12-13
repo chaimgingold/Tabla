@@ -28,14 +28,19 @@ typedef cv::Ptr<cv::Feature2D> Feature2DRef;
 
 typedef pair<int, int> MatchingTokenIndexPair;
 
-struct Token {
-	// Set during feature detection
+struct TokenFeatures {
 	vector<KeyPoint> keypoints;
 	Mat              descriptors;
+	int              index=0;
+};
+
+struct Token {
+	// Set during feature detection
+	TokenFeatures    features;
 	PolyLine2        polyLine;
 	Rectf            boundingRect;
-	int              index=0;
-	mat4             tokenToImage;
+
+	mat4             tokenToWorld;
 	// Set on comparison
 	vector<KeyPoint> matched;
 	vector<KeyPoint> inliers;
@@ -61,12 +66,14 @@ public:
 	void setParams( XmlTree xml );
 	TokenMatcher();
 
+	TokenFeatures featuresFromImage(Mat tokenImage);
+
 	vector<Token> findTokens(  const Pipeline::StageRef world,
 							   const ContourVector &contours,
 							   Pipeline&pipeline );
 
-	vector<MatchingTokenIndexPair> matchTokens( vector<Token> tokenLibrary,
-												vector<Token> candidates );
+	vector<MatchingTokenIndexPair> matchTokens( vector<TokenFeatures> tokenLibrary,
+												vector<TokenFeatures> candidates );
 };
 
 #endif /* TokenMatcher_h */

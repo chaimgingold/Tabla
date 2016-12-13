@@ -25,29 +25,30 @@ TokenMatcher::TokenMatcher()
 	mMatcher = cv::BFMatcher(NORM_HAMMING);
 
 	mFeatureDetectors.push_back(make_pair("AKAZE", cv::AKAZE::create()));
-
-
-
 	mFeatureDetectors.push_back(make_pair("ORB", cv::ORB::create()));
 	mFeatureDetectors.push_back(make_pair("BRISK", cv::BRISK::create()));
 
-	mFeatureDetectors.push_back(make_pair("KAZE", cv::KAZE::create()));
+	// TODO: these want some different Mat type... figure out the conversion
+//	mFeatureDetectors.push_back(make_pair("KAZE", cv::KAZE::create()));
+//	mFeatureDetectors.push_back(make_pair("SURF", cv::xfeatures2d::SURF::create()));
+//	mFeatureDetectors.push_back(make_pair("SIFT", cv::xfeatures2d::SIFT::create()));
+
+	// Only implement detect:
 
 	// Corner detectors
-	mFeatureDetectors.push_back(make_pair("FAST", cv::FastFeatureDetector::create()));
-	mFeatureDetectors.push_back(make_pair("AGAST", cv::AgastFeatureDetector::create()));
+//	mFeatureDetectors.push_back(make_pair("FAST", cv::FastFeatureDetector::create()));
+//	mFeatureDetectors.push_back(make_pair("AGAST", cv::AgastFeatureDetector::create()));
+//	mFeatureDetectors.push_back(make_pair("Star", cv::xfeatures2d::StarDetector::create()));
 
 
-	mFeatureDetectors.push_back(make_pair("SURF", cv::xfeatures2d::SURF::create()));
-	mFeatureDetectors.push_back(make_pair("SIFT", cv::xfeatures2d::SIFT::create()));
+	// Only implements compute:
 
-	// Only implements compute() - figure this out
 	//	mFeatureDetectors.push_back(make_pair("FREAK", cv::xfeatures2d::FREAK::create()));
-
-	mFeatureDetectors.push_back(make_pair("Star", cv::xfeatures2d::StarDetector::create()));
 	//	mFeatureDetectors.push_back(make_pair("LUCID", cv::xfeatures2d::LUCID::create(  1 // 3x3 lucid descriptor kernel
 	//															   , 1 // 3x3 blur kernel
 	//															   )));
+
+	// (so, TODO: handle these and allow swapping detectors and computers separately
 }
 
 Feature2DRef TokenMatcher::getFeatureDetector() {
@@ -69,8 +70,9 @@ vector<Token> TokenMatcher::findTokens( const Pipeline::StageRef world,
 			continue;
 		}
 
+		int tokenIndex = tokens.size();
 		Token token;
-		token.index = tokens.size();
+
 		token.polyLine = c.mPolyLine;
 		token.boundingRect = c.mBoundingRect;
 
@@ -87,30 +89,37 @@ vector<Token> TokenMatcher::findTokens( const Pipeline::StageRef world,
 		Mat tokenContourImage = world->mImageCV(cropRect);
 
 		imageSpaceRect.offset(-imageSpaceRect.getUpperLeft());
-		token.tokenToImage = getRectMappingAsMatrix(imageSpaceRect, boundingRect);
+		token.tokenToWorld = getRectMappingAsMatrix(imageSpaceRect, boundingRect);
 
-		pipeline.then(string("ContourImage")+token.index, tokenContourImage);
-		pipeline.setImageToWorldTransform( token.tokenToImage );
+		pipeline.then(string("ContourImage ") + tokenIndex, tokenContourImage);
+		pipeline.setImageToWorldTransform( token.tokenToWorld );
 		pipeline.getStages().back()->mLayoutHintScale = .5f;
 		pipeline.getStages().back()->mLayoutHintOrtho = true;
 
 		Mat tokenContourImageEqualized;
 		equalizeHist(tokenContourImage, tokenContourImageEqualized);
-		pipeline.then(string("ContourImage equalized")+token.index, tokenContourImageEqualized );
+		pipeline.then(string("ContourImage equalized ") + tokenIndex, tokenContourImageEqualized);
 		pipeline.getStages().back()->mLayoutHintScale = .5f;
 		pipeline.getStages().back()->mLayoutHintOrtho = true;
 
-		getFeatureDetector()->detectAndCompute(tokenContourImageEqualized,
-											   noArray(),
-											   token.keypoints,
-											   token.descriptors);
+		token.features = featuresFromImage(tokenContourImageEqualized);
+		token.features.index = tokens.size();
 		tokens.push_back(token);
 	}
 	return tokens;
 }
 
-vector<MatchingTokenIndexPair> TokenMatcher::matchTokens( vector<Token> tokenLibrary,
-														  vector<Token> candidates )
+TokenFeatures TokenMatcher::featuresFromImage(Mat tokenImage) {
+	TokenFeatures features;
+	getFeatureDetector()->detectAndCompute(tokenImage,
+										   noArray(),
+										   features.keypoints,
+										   features.descriptors);
+	return features;
+}
+
+vector<MatchingTokenIndexPair> TokenMatcher::matchTokens( vector<TokenFeatures> tokenLibrary,
+														  vector<TokenFeatures> candidates )
 {
 	vector<MatchingTokenIndexPair> matches;
 
@@ -122,10 +131,10 @@ vector<MatchingTokenIndexPair> TokenMatcher::matchTokens( vector<Token> tokenLib
 	// and so on which handles all unique pairs.)
 	for ( int i=0; i < tokenLibrary.size(); i++ )
 	{
-		Token focusedToken = tokenLibrary[i];
+		TokenFeatures focusedToken = tokenLibrary[i];
 		for ( int j=0; j < candidates.size(); j++ ) {
 
-			Token candidateToken = candidates[j];
+			TokenFeatures candidateToken = candidates[j];
 
 			// FIXME just for testing
 			if (focusedToken.index == candidateToken.index) {
