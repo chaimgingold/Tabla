@@ -114,6 +114,10 @@ class PaperBounce3App : public App {
 	// for front window
 	
 	double				mLastFrameTime = 0. ;
+	double				mLastFrameLength = 0.f ;
+	float				mFPS=0.f;
+	
+	void updateFPS();
 	
 	// to help us visualize
 	void addProjectorPipelineStages();

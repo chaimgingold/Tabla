@@ -8,6 +8,8 @@
 
 	<!-- cm -->
 	<Vision>
+		<CaptureAllPipelineStages>1</CaptureAllPipelineStages> <!-- So we can extract bitmaps -->
+
 		<Contours>
 			<ContourMinRadius>			.5	</ContourMinRadius>
 			<ContourMinArea>			7	</ContourMinArea>

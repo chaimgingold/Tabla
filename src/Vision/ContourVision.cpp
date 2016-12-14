@@ -20,7 +20,7 @@ void ContourVision::Params::set( XmlTree xml )
 
 ContourVec ContourVision::findContours( const Pipeline::StageRef input, Pipeline& pipeline, float contourPixelToWorld )
 {
-	cv::Mat thresholded;
+	cv::Mat thresholded; // if I make this a UMat, then threshold sometimes crashes (!)
 	ContourVec output;
 	
 	// blur

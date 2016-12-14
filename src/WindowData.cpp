@@ -166,6 +166,23 @@ void WindowData::draw()
 		}
 	}
 	
+	if ( mIsUIWindow )
+	{
+		float targetFPS = mApp.getFrameRate();
+		
+		if ( targetFPS - mApp.mFPS >= targetFPS*.1f )
+		{
+			string str = toString( mApp.mFPS - fmod(mApp.mFPS,1.f) ) + " fps";
+			
+			vec2 size = mApp.mTextureFont->measureString(str);
+			
+			vec2 loc( vec2(getWindowSize().x - size.x - 8.f, size.y + 8.f ) );
+
+			gl::color(1,1,1,.8);
+			mApp.mTextureFont->drawString( str, loc );
+		}
+	}
+	
 	// draw contour debug info
 	if (mApp.mDrawContourTree)
 	{

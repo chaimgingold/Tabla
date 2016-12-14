@@ -205,12 +205,6 @@ void PaperBounce3App::setup()
 		}
 	}
 	
-	// default pipeline image to query
-	// (after loading xml)
-	// (we query before making the pipeline because we only store the image requested :P!)
-	if ( mPipeline.getQuery().empty() ) mPipeline.setQuery("undistorted");
-	mPipeline.setCaptureAllStageImages(mDrawPipeline);
-	
 	// load the games, rfid functions
 	setupGameLibrary();
 	setupRFIDValueToFunction();
@@ -341,10 +335,6 @@ void PaperBounce3App::loadGame( int libraryIndex )
 				// set params from xml
 				setGameWorldXmlParams(xml);
 				mVision.setParams( mGameWorld->getVisionParams() ); // (move mVision.* and mPipeline.* calls to setGameWorldXmlParams()?)
-				mPipeline.setCaptureAllStageImages( mDrawPipeline || mGameWorld->getVisionParams().mCaptureAllPipelineStages );
-					// this won't quite hotload right with mDrawPipeline,
-					// but it never did.
-					// we might just want to switch pipeline to always capturing everything.
 			}
 		});
 		
@@ -459,13 +449,31 @@ void PaperBounce3App::addProjectorPipelineStages()
 			mLightLink.mProjectorWorldSpaceCoords ));
 }
 
+void PaperBounce3App::updateFPS()
+{
+	double now = ci::app::getElapsedSeconds();
+	
+	mLastFrameLength = now - mLastFrameTime ;
+	
+	mLastFrameTime = now;
+	
+	mFPS = 1.f / mLastFrameLength;
+}
+
 void PaperBounce3App::update()
 {
+	updateFPS();
+	
 	mFileWatch.update();
 	
 	if ( (mCapture && mCapture->checkNewFrame()) || mDebugFrame )
 	{
 		// start pipeline
+		if ( mPipeline.getQuery().empty() ) mPipeline.setQuery("undistorted");
+		mPipeline.setCaptureAllStageImages(
+			    mDrawPipeline
+			|| (!mGameWorld || mGameWorld->getVisionParams().mCaptureAllPipelineStages)
+		);
 		mPipeline.start();
 
 
