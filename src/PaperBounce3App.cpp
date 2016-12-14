@@ -481,17 +481,15 @@ void PaperBounce3App::update()
 		
 		
 		// vision it
-		mVision.processFrame(frame,mPipeline);
+		mVisionOutput = mVision.processFrame(frame,mPipeline);
 		
 		// finish off the pipeline with draw stage
 		addProjectorPipelineStages();
 		
 		// pass contours to ballworld (probably don't need to store here)
-		mContours = mVision.mContourOutput ;
-		
 		if (mGameWorld)
 		{
-			mGameWorld->updateVision( mContours, mPipeline );
+			mGameWorld->updateVision( mVisionOutput.mContours, mPipeline );
 		}
 		
 		// update pipeline visualization
@@ -547,7 +545,7 @@ void PaperBounce3App::drawWorld( GameWorld::DrawType drawType )
 	// draw contour bounding boxes, etc...
 	if (mDrawPolyBoundingRect)
 	{
-		for( auto c : mContours )
+		for( auto c : mVisionOutput.mContours )
 		{
 			if ( !c.mIsHole ) gl::color( 1.f, 1.f, 1.f, .2f ) ;
 			else gl::color( 1.f, 0.f, .3f, .3f ) ;
@@ -576,11 +574,11 @@ void PaperBounce3App::drawWorld( GameWorld::DrawType drawType )
 				
 				for( auto childIndex : c.mChild )
 				{
-					drawOne( mContours[childIndex] ) ;
+					drawOne( mVisionOutput.mContours[childIndex] ) ;
 				}
 			};
 			
-			for( auto const &c : mContours )
+			for( auto const &c : mVisionOutput.mContours )
 			{
 				if ( c.mTreeDepth==0 )
 				{
@@ -591,7 +589,7 @@ void PaperBounce3App::drawWorld( GameWorld::DrawType drawType )
 		// outlines
 		else
 		{
-			for( auto c : mContours )
+			for( auto c : mVisionOutput.mContours )
 			{
 				ColorAf color ;
 				
@@ -606,7 +604,7 @@ void PaperBounce3App::drawWorld( GameWorld::DrawType drawType )
 		if ( mDrawContourMousePick || isUIWindow )
 		{
 			// picked highlight
-			const Contour* picked = mContours.findLeafContourContainingPoint( mouseInWorld ) ;
+			const Contour* picked = mVisionOutput.mContours.findLeafContourContainingPoint( mouseInWorld ) ;
 			
 			if (picked)
 			{

@@ -16,14 +16,18 @@ using namespace std;
 
 // http://docs.opencv.org/2.4/doc/tutorials/features2d/feature_homography/feature_homography.html
 
-void TokenWorld::setParams( XmlTree xml )
-{
-	mTokenMatcher.setParams(xml);
-}
-
 TokenWorld::TokenWorld()
 {
 	mTokenMatcher = TokenMatcher();
+}
+
+void TokenWorld::setParams( XmlTree xml )
+{
+	// we're parsing the xml data as if the <TokenWorld> xml node contains the
+	// data that would normally be within Vision/Tokens
+	TokenMatcher::Params params;
+	params.set(xml);
+	mTokenMatcher.setParams(params);
 }
 
 void TokenWorld::updateVision( const ContourVector &contours, Pipeline&pipeline )
@@ -41,12 +45,12 @@ void TokenWorld::updateVision( const ContourVector &contours, Pipeline&pipeline 
 		case TokenVisionMode::Matching:
 		{
 
-			mTokens = mTokenMatcher.findTokens(mWorld, contours, pipeline);
+			mTokens = mTokenMatcher.findTokenCandidates(mWorld, contours, pipeline);
 
 			// N-to-N matching:
 			// we want to match each found token with every other found token.
 			vector <TokenFeatures> features;
-			for (Token &token : mTokens) {
+			for (TokenCandidate &token : mTokens) {
 				features.push_back(token.features);
 			}
 			mMatches = mTokenMatcher.matchTokens(features, features);
@@ -141,8 +145,8 @@ void TokenWorld::drawMatchingKeypoints() {
 
 	for (auto matchingPair : mMatches ) {
 
-		Token &token1 = mTokens[matchingPair.first];
-		Token &token2 = mTokens[matchingPair.second];
+		TokenCandidate &token1 = mTokens[matchingPair.first];
+		TokenCandidate &token2 = mTokens[matchingPair.second];
 
 		float hue = (float)token1.features.index / mTokens.size();
 		gl::color(cinder::hsvToRgb(vec3(hue, 0.7, 0.9)));

@@ -34,7 +34,7 @@ struct TokenFeatures {
 	int              index=0;
 };
 
-struct Token {
+struct TokenCandidate {
 	// Set during feature detection
 	TokenFeatures    features;
 	PolyLine2        polyLine;
@@ -56,25 +56,43 @@ public:
 
 	BFMatcher mMatcher;
 
-	// Distance threshold to identify inliers
-	float mInlierThreshold=2.5;
-	// Nearest neighbor matching ratio
-	float mNNMatchRatio=0.8;
-	float mNNMatchPercentage=0.8;
-
 	Feature2DRef getFeatureDetector();
 
-	void setParams( XmlTree xml );
+	class Params
+	{
+	public:
+	
+		void set( XmlTree );
+		
+		// Tuning
+		// Distance threshold to identify inliers
+		float mInlierThreshold=2.5;
+		// Nearest neighbor matching ratio
+		float mNNMatchRatio=0.8;
+		float mNNMatchPercentage=0.8;
+
+		// token library
+		vector<fs::path> mTokenLibraryPaths;
+	};
+	
+	void setParams( Params );
 	TokenMatcher();
 
 	TokenFeatures featuresFromImage(Mat tokenImage);
 
-	vector<Token> findTokens(  const Pipeline::StageRef world,
+	vector<TokenCandidate> findTokenCandidates(  const Pipeline::StageRef world,
 							   const ContourVector &contours,
 							   Pipeline&pipeline );
 
 	vector<MatchingTokenIndexPair> matchTokens( vector<TokenFeatures> tokenLibrary,
 												vector<TokenFeatures> candidates );
+
+	const vector<TokenFeatures>& getTokenLibrary() const { return mTokenLibrary; }
+	
+private:
+	Params mParams;
+	vector<TokenFeatures> mTokenLibrary;
+	
 };
 
 #endif /* TokenMatcher_h */

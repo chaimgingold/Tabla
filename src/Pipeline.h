@@ -54,7 +54,7 @@ public:
 		mat4			mWorldToImage;
 		vec2			mImageSize;
 		
-		cv::Mat			mImageCV;
+		cv::UMat			mImageCV;
 		mutable gl::TextureRef	mImageGL;
 		
 		gl::TextureRef getGLImage() const; // will convert mImageCV -> mImageGL if needed & possible.
@@ -74,6 +74,7 @@ public:
 
 	StageRef then( string name, Surface &img );
 	StageRef then( string name, cv::Mat &img );
+	StageRef then( string name, cv::UMat &img );
 	StageRef then( string name, gl::Texture2dRef ref );
 	
 	const vector<StageRef>& getStages() const { return mStages ; }

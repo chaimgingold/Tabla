@@ -26,6 +26,7 @@
 		22088F63A8874EB4BAA43888 /* b2BlockAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 591FA7613BF840AF83A5482A /* b2BlockAllocator.cpp */; };
 		23756771BB404A04991A26CB /* b2PolygonAndCircleContact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6B648D73A5D453781A11E34 /* b2PolygonAndCircleContact.cpp */; };
 		24F2003E479C4BC49D1F7374 /* b2WheelJoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 627E59F1B82E4F36ABF0DE48 /* b2WheelJoint.cpp */; };
+		260486D51E0089CC004E7396 /* ContourVision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 260486D31E0089CC004E7396 /* ContourVision.cpp */; };
 		2606D37B1DF60CB80018C8B8 /* PinballWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2606D3791DF60CB80018C8B8 /* PinballWorld.cpp */; };
 		260C9B6D1DE37A1A008A2A03 /* MusicStamp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 260C9B6B1DE37A1A008A2A03 /* MusicStamp.cpp */; };
 		262A886B1DB011FF00FE2336 /* MusicWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 262A88691DB011FF00FE2336 /* MusicWorld.cpp */; };
@@ -197,6 +198,8 @@
 		1329BFF5C8084A8E9BB37921 /* b2Collision.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2Collision.cpp; path = ../blocks/Box2D/src/Box2D/Collision/b2Collision.cpp; sourceTree = "<group>"; };
 		1967F5787DB34245B2B91CBA /* b2EdgeAndCircleContact.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = b2EdgeAndCircleContact.h; path = ../blocks/Box2D/src/Box2D/Dynamics/Contacts/b2EdgeAndCircleContact.h; sourceTree = "<group>"; };
 		1DCA2C3FD6C84A6DAB24027E /* b2DistanceJoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2DistanceJoint.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Joints/b2DistanceJoint.cpp; sourceTree = "<group>"; };
+		260486D31E0089CC004E7396 /* ContourVision.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContourVision.cpp; path = ../src/Vision/ContourVision.cpp; sourceTree = "<group>"; };
+		260486D41E0089CC004E7396 /* ContourVision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ContourVision.h; path = ../src/Vision/ContourVision.h; sourceTree = "<group>"; };
 		2606D3791DF60CB80018C8B8 /* PinballWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PinballWorld.cpp; path = ../src/PinballWorld/PinballWorld.cpp; sourceTree = "<group>"; };
 		2606D37A1DF60CB80018C8B8 /* PinballWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PinballWorld.h; path = ../src/PinballWorld/PinballWorld.h; sourceTree = "<group>"; };
 		260C9B6B1DE37A1A008A2A03 /* MusicStamp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MusicStamp.cpp; path = ../src/MusicWorld/MusicStamp.cpp; sourceTree = "<group>"; };
@@ -674,6 +677,8 @@
 				26FA36531D55365800C64A00 /* LightLink.cpp */,
 				26FA36591D5BDBC300C64A00 /* Pipeline.h */,
 				26FA36581D5BDBC300C64A00 /* Pipeline.cpp */,
+				260486D31E0089CC004E7396 /* ContourVision.cpp */,
+				260486D41E0089CC004E7396 /* ContourVision.h */,
 			);
 			name = Light;
 			sourceTree = "<group>";
@@ -2540,6 +2545,7 @@
 				26FA365A1D5BDBC300C64A00 /* Pipeline.cpp in Sources */,
 				C84DC4502D0A4C2384BE60F8 /* b2CollideEdge.cpp in Sources */,
 				262A886B1DB011FF00FE2336 /* MusicWorld.cpp in Sources */,
+				260486D51E0089CC004E7396 /* ContourVision.cpp in Sources */,
 				C2EC76FF1DA7157F00DB39C8 /* PdTypes.cpp in Sources */,
 				741A16EB71BE4A308C86D708 /* b2CollidePolygon.cpp in Sources */,
 				26FD3CD21D91E01E00B20327 /* PongWorld.cpp in Sources */,

@@ -37,6 +37,8 @@
 //    return ltrim(rtrim(s));
 //}
 
+using namespace ci;
+using namespace std;
 
 inline bool getXml( XmlTree &xml, string name, bool& var )
 {

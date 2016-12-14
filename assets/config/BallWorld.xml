@@ -9,11 +9,13 @@
 	
 	<!-- cm -->
 	<Vision>
-		<ContourGetExactMinCircle>	0	</ContourGetExactMinCircle>
-		<ContourMinRadius>			.5	</ContourMinRadius>
-		<ContourMinArea>			1	</ContourMinArea>
-		<ContourDPEpsilon>			1	</ContourDPEpsilon>
-		<ContourMinWidth>			2	</ContourMinWidth>
+		<Contours>
+			<ContourGetExactMinCircle>	0	</ContourGetExactMinCircle>
+			<ContourMinRadius>			.5	</ContourMinRadius>
+			<ContourMinArea>			1	</ContourMinArea>
+			<ContourDPEpsilon>			1	</ContourDPEpsilon>
+			<ContourMinWidth>			2	</ContourMinWidth>
+		</Contours>
 	</Vision>
 
 </BallWorld>

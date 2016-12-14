@@ -11,10 +11,12 @@
 	
 	<!-- cm -->
 	<Vision>
-		<ContourMinRadius>			1	</ContourMinRadius>
-		<ContourMinArea>			1	</ContourMinArea>
-		<ContourDPEpsilon>			1	</ContourDPEpsilon>
-		<ContourMinWidth>			2	</ContourMinWidth>
+		<Contours>
+			<ContourMinRadius>			1	</ContourMinRadius>
+			<ContourMinArea>			1	</ContourMinArea>
+			<ContourDPEpsilon>			1	</ContourDPEpsilon>
+			<ContourMinWidth>			2	</ContourMinWidth>
+		</Contours>
 	</Vision>
 
 </CalibrateWorld>

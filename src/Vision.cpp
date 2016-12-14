@@ -12,12 +12,13 @@
 
 void Vision::Params::set( XmlTree xml )
 {
-	getXml(xml,"ContourMinRadius",mContourMinRadius);
-	getXml(xml,"ContourMinArea",mContourMinArea);
-	getXml(xml,"ContourDPEpsilon",mContourDPEpsilon);
-	getXml(xml,"ContourMinWidth",mContourMinWidth);
 	getXml(xml,"CaptureAllPipelineStages",mCaptureAllPipelineStages);
-	getXml(xml,"ContourGetExactMinCircle",mContourGetExactMinCircle);
+
+	if ( xml.hasChild("Contours") )
+	{
+		mContourVisionParams.set( xml.getChild("Contours") );
+	}
+	// TODO: Token
 }
 
 template<class T>
@@ -37,12 +38,19 @@ Rectf asBoundingRect( vec2 pts[4] )
 	return Rectf(v);
 }
 
+void Vision::setParams( Params p )
+{
+	mParams=p;
+	mContourVision.setParams(mParams.mContourVisionParams);
+	// TODO: Token
+}
+
 void Vision::setLightLink( const LightLink &ll )
 {
-	//
-	bool updateRemap = !ll.mDistCoeffs.empty() && !ll.mCameraMatrix.empty();
 	// compute remap?
-	// (we could see if mCameraMatrix or mDistCoeffs have changed... but that code is buggy + unnecessary optimization)
+	bool updateRemap =
+		! isMatEqual<float>(ll.mDistCoeffs,mLightLink.mDistCoeffs)
+	||  ! isMatEqual<float>(ll.mCameraMatrix,mLightLink.mCameraMatrix);
 	
 	// update vars
 	mLightLink=ll;
@@ -71,22 +79,35 @@ void Vision::setLightLink( const LightLink &ll )
 	}
 }
 
-void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
+Vision::Output
+Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 {
 	// ---- Input ----
 	
 	// make cv frame
-	cv::Mat input( toOcv( Channel( surface ) ) );
-	cv::Mat clipped, output, gray, thresholded ;
-
-	pipeline.then( "input", input );
+	cv::UMat input_color = toOcvRef((Surface &)surface).getUMat(cv::ACCESS_READ); // we type-cast to non-const so this works. :P
+	cv::UMat input;
+	cv::UMat gray, clipped;
+		// toOcvRef is much, much faster than toOcv, which does a lot of dumb bit twiddling.
+		// this requires a cast to non-const, but hopefully cv::ACCESS_READ semantics makes this kosher enough.
+		// Just noting this inconsistency.
+ 
+	cv::cvtColor(input_color, input, CV_BGR2GRAY);
+	// net performance of doing color -> grey conversion on CPU vs GPU is negligible.
+	// the main impact is downloading the data, which we may be able to do faster if we rewrite toOcv.
+	// but at least we now have color frame in the pipeline at the same total performance cost, so that's a net gain.
+	// might want to make it a setting, whether to do it on CPU or GPU.
+	
+	pipeline.then( "input_color", input_color );
 	
 	pipeline.setImageToWorldTransform( getOcvPerspectiveTransform(
 		mLightLink.mCaptureCoords,
 		mLightLink.mCaptureWorldSpaceCoords ) );
+
+	pipeline.then( "input", input );
 	
 	// undistort
-	cv::Mat undistorted;
+	cv::UMat undistorted;
 	
 	if ( !mRemap[0].empty() && !mRemap[1].empty() ) {
 		cv::remap(input,undistorted,mRemap[0],mRemap[1],cv::INTER_LINEAR);
@@ -143,6 +164,8 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 		// do it
 		cv::Mat xform = cv::getPerspectiveTransform( srcpt, dstpt_pixelspace ) ;
 		cv::warpPerspective( undistorted, clipped, xform, outputSize );
+		// To speed it up on CPU:
+		// http://romsteady.blogspot.com/2015/07/calculate-opencv-warpperspective-map.html
 		
 		// log to pipeline
 		pipeline.then( "clipped", clipped );
@@ -152,134 +175,12 @@ void Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 		pipeline.setImageToWorldTransform( imageToWorld );
 	}
 	
+	// find contours
+	Vision::Output output;
 	
-	// blur
-//	cv::GaussianBlur( clipped, gray, cv::Size(5,5), 0 );
-//	pipeline.then( gray, "gray" );
-
-	// threshold
-	cv::threshold( clipped, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
-//	cv::adaptiveThreshold(clipped, thresholded, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 10, 10);
-//	cv::adaptiveThreshold(clipped, thresholded, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 32, -10);
-	pipeline.then( "thresholded", thresholded );
+	output.mContours = mContourVision.findContours( pipeline.getStages().back(), pipeline, contourPixelToWorld );
+	// TODO: tokens
 	
-	// contour detect
-	vector<vector<cv::Point> > contours;
-	vector<cv::Vec4i> hierarchy;
-	
-	cv::findContours( thresholded, contours, hierarchy, cv::RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
-	
-	// transform contours to world space...
-	// ideally we'd transform them in place, BUT since they are stored as integers
-	// we can't do this without aliasing along world unit boundaries.
-	// SO we need to keep the scaling ratio in mind as we go...
-	// also IDEALLY we'd use the transform matrix above and not just a single scaling factor,
-	// but this works.
-	
-	// filter and process contours into our format
-	mContourOutput.clear() ;
-	
-	map<int,int> ocvContourIdxToMyContourIdx ;
-	
-	for( int i=0; i<contours.size(); ++i )
-	{
-		const auto &c = contours[i] ;
-		
-		float		area = cv::contourArea(c) * contourPixelToWorld ;
-		
-		cv::RotatedRect ocvMinRotatedRect = minAreaRect(c) ;
-		Contour::tRotatedRect minRotatedRect;
-		minRotatedRect.mCenter = fromOcv(ocvMinRotatedRect.center) * contourPixelToWorld;
-		minRotatedRect.mSize   = vec2(ocvMinRotatedRect.size.width,ocvMinRotatedRect.size.height) * contourPixelToWorld;
-		minRotatedRect.mAngle  = ocvMinRotatedRect.angle;
-		const float minWidth = (float)(min( minRotatedRect.mSize.x, minRotatedRect.mSize.y ));
-		const float maxWidth = (float)(max( minRotatedRect.mSize.x, minRotatedRect.mSize.y ));
-
-		vec2  center ;
-		float radius ;
-		{
-			if (mParams.mContourGetExactMinCircle) {
-				cv::Point2f ocvcenter;
-				cv::minEnclosingCircle( c, ocvcenter, radius ) ;
-				center  = fromOcv(ocvcenter) * contourPixelToWorld;
-				radius *= contourPixelToWorld;
-			} else {
-				center = minRotatedRect.mCenter;
-				radius = maxWidth/2.f;
-			}
-		}
-		
-		if (	radius   > mParams.mContourMinRadius &&
-				area     > mParams.mContourMinArea   &&
-				minWidth > mParams.mContourMinWidth )
-		{
-			auto addContour = [&]( const vector<cv::Point>& c )
-			{
-				Contour myc ;
-				
-				myc.mPolyLine = PolyLine2( fromOcv(c) );
-				myc.mPolyLine.setClosed();
-
-				// scale polyline to world space (from pixel space)
-				for( auto &p : myc.mPolyLine.getPoints() ) p *= contourPixelToWorld ;
-
-				myc.mRadius = radius ;
-				myc.mCenter = center ;
-				myc.mArea   = area ;
-				myc.mBoundingRect = Rectf( myc.mPolyLine.getPoints() ); // after scaling points!
-				myc.mRotatedBoundingRect = minRotatedRect;
-				myc.mOcvContourIndex = i ;
-
-				
-				myc.mTreeDepth = 0 ;
-				{
-					int n = i ;
-					while ( (n = hierarchy[n][3]) >= 0 )
-					{
-						myc.mTreeDepth++ ;
-					}
-				}
-				myc.mIsHole = ( myc.mTreeDepth % 2 ) ; // odd depth # children are holes
-				myc.mIsLeaf = hierarchy[i][2] < 0 ;
-				
-				mContourOutput.push_back( myc );
-				
-				// store my index mapping
-				ocvContourIdxToMyContourIdx[i] = mContourOutput.size()-1 ;
-			} ;
-			
-			if ( mParams.mContourDPEpsilon > 0 )
-			{
-				// simplify
-				vector<cv::Point> approx ;
-				
-				cv::approxPolyDP( c, approx, mParams.mContourDPEpsilon, true ) ;
-				
-				addContour(approx);
-			}
-			else addContour(c) ;
-		}
-	}
-	
-	// add contour topology metadata
-	// (this might be screwed up because of how we cull contours;
-	// a simple fix might be to find orphaned contours--those with parents that don't exist anymore--
-	// and strip them, too. but this will, in turn, force us to rebuild indices.
-	// it might be simplest to just "hide" rejected contours, ignore them, but keep them around.
-	for ( size_t i=0; i<mContourOutput.size(); ++i )
-	{
-		Contour &c = mContourOutput[i] ;
-		
-		if ( hierarchy[c.mOcvContourIndex][3] >= 0 )
-		{
-			c.mParent = ocvContourIdxToMyContourIdx[ hierarchy[c.mOcvContourIndex][3] ] ;
-			
-//				assert( myc.mParent is valid ) ;
-			
-			assert( c.mParent >= 0 && c.mParent < mContourOutput.size() ) ;
-			
-			mContourOutput[c.mParent].mChild.push_back( i ) ;
-		}
-	}
+	// output
+	return output;
 }
-

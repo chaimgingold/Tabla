@@ -180,9 +180,9 @@ void WindowData::draw()
 				fmod( c.b + inc.b, 1.f ) );
 		};
 		
-		for ( size_t i=0; i<mApp.mContours.size(); ++i, inc += .1f )
+		for ( size_t i=0; i<mApp.mVisionOutput.mContours.size(); ++i, inc += .1f )
 		{
-			const auto& c = mApp.mContours[i] ;
+			const auto& c = mApp.mVisionOutput.mContours[i] ;
 			
 			Rectf rw = c.mBoundingRect ; // world space
 			Rectf r  = Rectf(
