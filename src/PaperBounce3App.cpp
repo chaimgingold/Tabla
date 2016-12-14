@@ -86,14 +86,14 @@ void PaperBounce3App::setup()
 		cout << displays.size() << " Displays" << endl ;
 		for ( auto d : displays )
 		{
-			cout << "\t" << d->getName() << " " << d->getBounds() << endl ;
+			cout << "\t '" << d->getName() << "' " << d->getBounds() << endl ;
 		}
 
 		auto cameras = Capture::getDevices() ;
 		cout << cameras.size() << " Cameras" << endl ;
 		for ( auto c : cameras )
 		{
-			cout << "\t" << c->getName() << endl ;
+			cout << "\t '" << c->getName() << "' '" << c->getUniqueId() << "'" << endl ;
 		}
 	}
 	
@@ -470,10 +470,14 @@ void PaperBounce3App::update()
 	{
 		// start pipeline
 		if ( mPipeline.getQuery().empty() ) mPipeline.setQuery("undistorted");
-		mPipeline.setCaptureAllStageImages(
-			    mDrawPipeline
-			|| (!mGameWorld || mGameWorld->getVisionParams().mCaptureAllPipelineStages)
-		);
+		mPipeline.setCaptureAllStageImages(true);
+			// reality is, we now need to capture all because even contour extraction
+			// relies on images captured in the pipeline.
+			// if we did need such an optimization, we could have everyone report the stages they want to capture,
+			// and have a list of stages to capture.
+//			    mDrawPipeline
+//			|| (!mGameWorld || mGameWorld->getVisionParams().mCaptureAllPipelineStages)
+//		);
 		mPipeline.start();
 
 
