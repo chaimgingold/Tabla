@@ -39,8 +39,9 @@ struct Token {
 	TokenFeatures    features;
 	PolyLine2        polyLine;
 	Rectf            boundingRect;
-
 	mat4             tokenToWorld;
+
+
 	// Set on comparison
 	vector<KeyPoint> matched;
 	vector<KeyPoint> inliers;
