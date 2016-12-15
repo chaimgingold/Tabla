@@ -107,7 +107,11 @@ void PaperBounce3App::setup()
 		if (xml.hasChild("PaperBounce3/LightLink") && !fs::exists(getUserLightLinkFilePath()) )
 		{
 			mLightLink.setParams(xml.getChild("PaperBounce3/LightLink"));
+			ensureLightLinkHasLocalDeviceProfiles();
 			lightLinkDidChange(); // allow saving, since user settings version doesn't exist yet
+			// Note: To simplify logic, we could just have this save the data to getUserLightLinkFilePath()
+			// and let the code below load it. (If somehow it was necessary to be so robust that we can't save
+			// user data it might be useful, but that's a questionable scenario.)
 		}
 		
 		if (xml.hasChild("PaperBounce3/App"))
@@ -163,6 +167,7 @@ void PaperBounce3App::setup()
 		if ( xml.hasChild("LightLink") )
 		{
 			mLightLink.setParams(xml.getChild("LightLink"));
+			ensureLightLinkHasLocalDeviceProfiles();
 			lightLinkDidChange(false); // and don't save, since we are responding to a load.
 		}
 	});
@@ -227,8 +232,6 @@ void PaperBounce3App::setup()
 	}
 }
 
-
-
 void PaperBounce3App::setupGameLibrary()
 {
 	mGameLibrary.push_back( make_shared<BallWorldCartridge>() );
@@ -258,24 +261,71 @@ void PaperBounce3App::setupRFIDValueToFunction()
 	}
 }
 
-// setupCaptureDevice now handles default population, too.
-//void PaperBounce3App::ensureLightLinkHasProfiles()
-//{
-//	// TODO: write this; doesn't matter since we always have data...
-//	assert( !mLightLink.mCaptureProfiles.empty() );
-//	assert( !mLightLink.mProjectorProfiles.empty() );
-//}
+void PaperBounce3App::ensureLightLinkHasLocalDeviceProfiles()
+{
+	// 1. Cameras
+
+	// Make sure all cameras on this computer have capture device profiles
+	if ( Capture::getDevices().empty() ) {
+		cout << "No camera devices!" << endl;
+	}
+	else
+	{
+		auto devices = Capture::getDevices();
+		
+		for( const auto &d : devices )
+		{
+			if ( mLightLink.getCaptureProfilesForDevice(d->getName()).empty() )
+			{
+				LightLink::CaptureProfile profile(
+					string("Default ") + d->getName(),
+					d->getName(),
+					vec2(640,480) );
+				
+				mLightLink.mCaptureProfiles[profile.mName] = profile;
+			} // make profile for device?
+		} // for
+	}
+	
+	// 2. Projectors
+	if ( mLightLink.mProjectorProfiles.empty() )
+	{
+		vec2 size(640,480);
+		const vec2 *coords=0;
+		
+		// base it off the capture profile
+		if ( !mLightLink.mCaptureProfiles.empty() )
+		{
+			mLightLink.ensureActiveProfilesAreValid(); // just in case we made it
+			const LightLink::CaptureProfile &ref = mLightLink.getCaptureProfile();
+			
+			size = ref.mCaptureSize;
+			coords = ref.mCaptureWorldSpaceCoords;
+		}
+		
+		// make
+		LightLink::ProjectorProfile p( "Default", size, coords );
+		
+		// insert
+		mLightLink.mProjectorProfiles[p.mName] = p;
+	}
+	
+	// what if the profile list was empty, and we added some profiles that will be used?
+	// so: if there is no active profile, then set it to one that we made.
+	mLightLink.ensureActiveProfilesAreValid();
+}
 
 void PaperBounce3App::lightLinkDidChange( bool saveToFile )
 {
+	// start-up (and maybe choose) a valid capture device
+	if ( !setupCaptureDevice() )
+	{
+		tryToSetupValidCaptureDevice();
+	}
+
 	// notify people
 	// might need to privatize mLightLink and make this a proper setter
 	// or rename it to be "notify" or "onChange" or "didChange" something
-	if (!setupCaptureDevice())
-	{
-		setupDefaultCaptureDevice();
-	}
-	
 	mVision.setCaptureProfile(mLightLink.getCaptureProfile());
 	if (mGameWorld) mGameWorld->setWorldBoundsPoly( getWorldBoundsPoly() );
 	
@@ -286,7 +336,7 @@ void PaperBounce3App::lightLinkDidChange( bool saveToFile )
 	}
 }
 
-bool PaperBounce3App::setupDefaultCaptureDevice()
+bool PaperBounce3App::tryToSetupValidCaptureDevice()
 {
 	// try other profiles...
 	for ( auto i : mLightLink.mCaptureProfiles )
@@ -294,27 +344,9 @@ bool PaperBounce3App::setupDefaultCaptureDevice()
 		mLightLink.setCaptureProfile(i.second.mName);
 		if ( setupCaptureDevice() ) return true;
 	}
-
-	// no dice, so make a default, and set it
-	if ( Capture::getDevices().empty() ) {
-		assert("No camera devices!");
-		return false;
-	}
-	else
-	{
-		string deviceName = Capture::getDevices()[0]->getName();
-		
-		LightLink::CaptureProfile profile(
-			string("Default ") + deviceName,
-			deviceName,
-			vec2(640,480) );
-		
-		mLightLink.mCaptureProfiles[profile.mName] = profile;
-		
-		mLightLink.setCaptureProfile(profile.mName);
-		
-		return setupCaptureDevice();
-	}
+	
+	// fail
+	return false;
 }
 
 bool PaperBounce3App::setupCaptureDevice()
@@ -351,9 +383,11 @@ bool PaperBounce3App::setupCaptureDevice()
 	else return false;
 }
 
-void PaperBounce3App::chooseNextCaptureProfile()
+void PaperBounce3App::setupNextValidCaptureProfile()
 {
-	if ( !mLightLink.mCaptureProfiles.empty() )
+	int n=0;
+	
+	while ( n++ < mLightLink.mCaptureProfiles.size() )
 	{
 		auto i = mLightLink.mCaptureProfiles.find( mLightLink.getCaptureProfile().mName );
 		
@@ -367,7 +401,15 @@ void PaperBounce3App::chooseNextCaptureProfile()
 		
 		// set
 		mLightLink.setCaptureProfile(i->second.mName);
+		
+		if ( setupCaptureDevice() ) {
+			lightLinkDidChange();
+			return; // success
+		}
+		// else: keep searching...
 	}
+	
+	// mega-fail
 }
 
 void PaperBounce3App::loadDefaultGame( string byName )
@@ -763,8 +805,7 @@ void PaperBounce3App::keyDown( KeyEvent event )
 		{
 			case KeyEvent::KEY_TAB:
 				handled=true;
-				chooseNextCaptureProfile();
-				lightLinkDidChange();
+				setupNextValidCaptureProfile();
 				break;
 				
 			case KeyEvent::KEY_c:

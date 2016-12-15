@@ -60,7 +60,7 @@ LightLink::CaptureProfile::CaptureProfile( string name, string deviceName, vec2 
 	mCaptureCoords[0] = vec2(0,1) * size;
 	mCaptureCoords[1] = vec2(1,1) * size;
 	mCaptureCoords[2] = vec2(1,0) * size;
-	mCaptureCoords[3] = vec2(0,1) * size;
+	mCaptureCoords[3] = vec2(0,0) * size;
 	
 	for( int i=0; i<4; ++i )
 	{
@@ -128,14 +128,14 @@ XmlTree LightLink::CaptureProfile::getParams() const
 	return t;
 }
 
-LightLink::ProjectorProfile::ProjectorProfile( string name, vec2 size, vec2 captureWorldSpaceCoords[4] )
+LightLink::ProjectorProfile::ProjectorProfile( string name, vec2 size, const vec2 captureWorldSpaceCoords[4] )
 	: mName(name)
 	, mProjectorSize(size)
 {
 	mProjectorCoords[0] = vec2(0,1) * size;
 	mProjectorCoords[1] = vec2(1,1) * size;
 	mProjectorCoords[2] = vec2(1,0) * size;
-	mProjectorCoords[3] = vec2(0,1) * size;
+	mProjectorCoords[3] = vec2(0,0) * size;
 	
 	if (captureWorldSpaceCoords)
 	{
@@ -247,6 +247,22 @@ LightLink::getProjectorProfile() const
 	auto i = mProjectorProfiles.find(mActiveProjectorProfileName);
 	assert( i != mProjectorProfiles.end() );
 	return i->second;
+}
+
+vector<const LightLink::CaptureProfile*>
+LightLink::getCaptureProfilesForDevice( string deviceName ) const
+{
+	vector<const CaptureProfile*> result;
+	
+	for( const auto &p : mCaptureProfiles )
+	{
+		if (p.second.mDeviceName==deviceName)
+		{
+			result.push_back( &(p.second) );
+		}
+	}
+	
+	return result;
 }
 
 void LightLink::ensureActiveProfilesAreValid()

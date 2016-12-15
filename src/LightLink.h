@@ -54,7 +54,7 @@ public:
 	{
 	public:
 		ProjectorProfile() {}
-		ProjectorProfile( string name, vec2 size, vec2 captureWorldSpaceCoords[4]=0 );
+		ProjectorProfile( string name, vec2 size, const vec2 captureWorldSpaceCoords[4]=0 );
 			// make a default
 			// last param is optional, but allows this default projector to use same world space as current camera
 		
@@ -78,6 +78,8 @@ public:
 	const CaptureProfile& getCaptureProfile() const;
 	const ProjectorProfile& getProjectorProfile() const;
 
+	vector<const CaptureProfile*> getCaptureProfilesForDevice( string deviceName ) const; // could return 0 if absent
+	
 	// all of them
 	map<string,CaptureProfile> mCaptureProfiles;
 	map<string,ProjectorProfile> mProjectorProfiles;
