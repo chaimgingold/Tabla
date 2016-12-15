@@ -1,11 +1,17 @@
 <PinballWorld>
+
+	<!-- Ball World Params -->
 	<!-- cm -->
-	<DefaultNumBalls>			0 </DefaultNumBalls>
-	<BallDefaultRadius>			1.5 </BallDefaultRadius>
-	<BallDefaultMaxRadius>		1.5 </BallDefaultMaxRadius>
-	<BallContourImpactNormalVelImpulse>-.1</BallContourImpactNormalVelImpulse>
-	<BallMaxVel>				2 </BallMaxVel>
-	<BallDefaultColor>			C62D41 </BallDefaultColor>
+	<BallWorld>
+		<DefaultNumBalls>			0 </DefaultNumBalls>
+		<BallDefaultRadius>			1.5 </BallDefaultRadius>
+		<BallDefaultMaxRadius>		1.5 </BallDefaultMaxRadius>
+		<BallMaxVel>				2 </BallMaxVel>
+		<BallDefaultColor>			C62D41 </BallDefaultColor>
+
+		<BallContourImpactNormalVelImpulse>0</BallContourImpactNormalVelImpulse>
+		<BallContourCoeffOfRestitution>.5</BallContourCoeffOfRestitution>
+	</BallWorld>
 
 	<!-- cm -->
 	<Vision>
@@ -13,7 +19,7 @@
 			<ContourMinRadius>			.5	</ContourMinRadius>
 			<ContourMinArea>			1	</ContourMinArea>
 			<ContourDPEpsilon>			1	</ContourDPEpsilon>
-			<ContourMinWidth>			2	</ContourMinWidth>
+			<ContourMinWidth>			1	</ContourMinWidth>
 		</Contours>
 	</Vision>
 
@@ -21,7 +27,7 @@
 <!-- General -->
 	<UpVec>-1 0</UpVec>
 	<Gravity>.05</Gravity>
-	<BallReclaimAreaHeight>3</BallReclaimAreaHeight>
+	<BallReclaimAreaHeight>4</BallReclaimAreaHeight>
 	
 <!-- Vision	-->
 	<PartMaxContourRadius>5</PartMaxContourRadius>
@@ -32,6 +38,7 @@
 	
 	
 <!-- Controls	-->
+<!-- TODO... Note manufacturer/model and support multiple profiles -->
 	<Gamepad>
 		<button id="4" do="flippers-left"/>
 		<button id="6" do="flippers-left"/>

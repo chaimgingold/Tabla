@@ -84,7 +84,9 @@ PinballWorld::~PinballWorld()
 
 void PinballWorld::setParams( XmlTree xml )
 {
-	BallWorld::setParams(xml);
+	if ( xml.hasChild("BallWorld") ) {
+		BallWorld::setParams( xml.getChild("BallWorld") );
+	}
 	
 	getXml(xml, "UpVec", mUpVec );
 	getXml(xml, "FlipperDistToEdge", mFlipperDistToEdge );
@@ -345,7 +347,8 @@ void PinballWorld::drawParts() const
 			case Part::Type::Bumper:
 			{
 				gl::color(1,0,0);
-				gl::drawSolidCircle(p.mLoc,p.mRadius);
+//				gl::drawSolidCircle(p.mLoc,p.mRadius);
+				gl::drawSolid( p.mPoly );
 				gl::color(1,.8,0);
 				gl::drawSolidCircle(p.mLoc,p.mRadius/2.f);
 			}
@@ -386,13 +389,14 @@ void PinballWorld::updateVision( const Vision::Output& visionOut, Pipeline& p )
 	PartVec newParts = getPartsFromContours(visionOut.mContours);
 	mParts = mergeOldAndNewParts(mParts, newParts);
 
-	//
-	ContourVec contours = visionOut.mContours;
-	
-	getContoursFromParts(mParts,contours);
+	// modify vision out for ball world
+	// (we add contours to convey the new shapes to simulate)
+	Vision::Output visionForBallWorld = visionOut;
+
+	getContoursFromParts(mParts,visionForBallWorld.mContours);
 	
 	// tell ball world
-	BallWorld::updateVision(visionOut,p);
+	BallWorld::updateVision(visionForBallWorld,p);
 }
 
 PinballWorld::tAdjSpace
@@ -604,16 +608,37 @@ Contour PinballWorld::contourFromPoly( PolyLine2 poly ) const
 	c.mBoundingRect = Rectf( poly.getPoints() );
 	c.mRadius = max( c.mBoundingRect.getWidth(), c.mBoundingRect.getHeight() ) * .5f ;
 	c.mArea = M_PI * c.mRadius * c.mRadius; // use circle approximation for area
+	
+	// TODO: rotated bounding box correctly
+	// just put in a coarse approximation for now in case it starts to matter
+	c.mRotatedBoundingRect.mCenter = c.mBoundingRect.getCenter();
+	c.mRotatedBoundingRect.mAngle  = 0.f;
+	c.mRotatedBoundingRect.mSize = c.mBoundingRect.getSize(); // not sure if i got rotation/size semantics right
+	
 	return c;
 }
 
 void PinballWorld::addContourToVec( Contour c, ContourVec& contours ) const
 {
+	// ideally, BallWorld has an intermediate input representation of shapes to simulate, and we add to that.
+	// but for now, we do this and use contour vec itself
+	
 	// stitch into polygon hierarchy
 	c.mIsHole = true;
 	Contour* parent = contours.findLeafContourContainingPoint(c.mCenter); // uh... a bit sloppy, but it should work enough
+	
+	// make sure we are putting a hole in a non-hole
+	// (e.g. flipper is made by a hole, and so we don't want to be a non-hole in that hole, but a sibling to it)
+	if (parent && parent->mIsHole) {
+		parent = contours.getParent(parent);
+	}
+
+	// link it in
 	if (parent) {
 		c.mParent = parent - &contours[0]; // point to parent
+		c.mIsHole = true;
+		c.mTreeDepth = parent->mTreeDepth + 1;
+		c.mIsLeaf = true;
 		parent->mChild.push_back(contours.size()); // have parent point to where we will be
 		contours.push_back(c);
 	}

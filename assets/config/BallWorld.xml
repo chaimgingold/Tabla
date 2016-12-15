@@ -6,6 +6,7 @@
 	<BallMaxVel>				.2 </BallMaxVel>
 	<BallDefaultColor>			C62D41 </BallDefaultColor>
 	<BallContourImpactNormalVelImpulse>.1</BallContourImpactNormalVelImpulse>
+	<BallContourCoeffOfRestitution>1</BallContourCoeffOfRestitution>
 	
 	<!-- cm -->
 	<Vision>

@@ -31,6 +31,7 @@ void BallWorld::setParams( XmlTree xml )
 	getXml(xml,"BallDefaultColor",mBallDefaultColor);
 	getXml(xml,"BallMaxVel",mBallMaxVel);
 	getXml(xml,"BallContourImpactNormalVelImpulse",mBallContourImpactNormalVelImpulse);
+	getXml(xml,"BallContourCoeffOfRestitution",mBallContourCoeffOfRestitution);
 }
 
 TriMeshRef BallWorld::getTriMeshForBalls() const
@@ -219,6 +220,14 @@ void BallWorld::updatePhysics()
 				
 				vec2 newVel = glm::reflect( oldVel, surfaceNormal ); // transfer old velocity, but reflected
 				
+				newVel *= lerp( 1.f, mBallContourCoeffOfRestitution,
+					powf( max(0.f,dot(surfaceNormal,-normalize(oldVel))), 3.f )
+					) ;
+					// ideally this would just be newVel *= mBallContourCoeffOfRestitution,
+					// but rolling friction kind of messes us up, so we only make the inelastic collision happen
+					// as the normal opposes the surface normal. In effect, if old velocity is tangent to the surface,
+					// then we don't take away velocity.
+					
 				newVel += surfaceNormal * mBallContourImpactNormalVelImpulse;
 					// accumulate energy from impact
 					// would be cool to use optic flow for this, and each contour can have a velocity

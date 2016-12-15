@@ -14,7 +14,7 @@
 		<DrawContourMousePick>		1 </DrawContourMousePick>
 		<DrawPolyBoundingRect>		0 </DrawPolyBoundingRect>
 		<DrawContourTree>			0 </DrawContourTree>
-		<DrawPipeline>				1 </DrawPipeline>
+		<DrawPipeline>				0 </DrawPipeline>
 		
 		<ConfigWindowMainImageMargin> 32 </ConfigWindowMainImageMargin>
 		<ConfigWindowPipelineGutter> 8 </ConfigWindowPipelineGutter>
