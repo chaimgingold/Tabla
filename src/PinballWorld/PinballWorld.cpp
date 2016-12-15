@@ -247,8 +247,8 @@ void PinballWorld::draw( DrawType drawType )
 	// playfield markers
 	gl::color(1,0,0);
 	gl::drawLine(
-		fromPlayfieldSpace(vec2(mPlayfieldBoundingBox.x1,mPlayfieldBallReclaimY)),
-		fromPlayfieldSpace(vec2(mPlayfieldBoundingBox.x2,mPlayfieldBallReclaimY)) ) ;
+		fromPlayfieldSpace(vec2(mPlayfieldBallReclaimX[0],mPlayfieldBallReclaimY)),
+		fromPlayfieldSpace(vec2(mPlayfieldBallReclaimX[1],mPlayfieldBallReclaimY)) ) ;
 	
 	// balls
 	BallWorld::draw(drawType);
@@ -382,12 +382,33 @@ Rectf PinballWorld::getPlayfieldBoundingBox( const ContourVec& cs ) const
 	return Rectf(pts);
 }
 
+void PinballWorld::updatePlayfieldLayout( const ContourVec& contours )
+{
+	mPlayfieldBoundingBox = getPlayfieldBoundingBox(contours);
+//	cout << "min/max y: " << mPlayfieldBoundingBox.y1 << " " << mPlayfieldBoundingBox.y2 << endl;
+	mPlayfieldBallReclaimY = mPlayfieldBoundingBox.y1 + mBallReclaimAreaHeight;
+	
+	mPlayfieldBallReclaimX[0] = mPlayfieldBoundingBox.x1;
+	mPlayfieldBallReclaimX[1] = mPlayfieldBoundingBox.x2;
+	
+	float t;
+	vec2 vleft  = vec2(mPlayfieldBallReclaimX[0],mPlayfieldBallReclaimY);
+	vec2 vright = vec2(mPlayfieldBallReclaimX[1],mPlayfieldBallReclaimY);
+	if ( contours.rayIntersection( fromPlayfieldSpace(vleft), getRightVec(), &t ) )
+	{
+		mPlayfieldBallReclaimX[0] = (vleft + toPlayfieldSpace(getRightVec() * t)).x;
+	}
+	
+	if ( contours.rayIntersection( fromPlayfieldSpace(vright), getLeftVec(), &t ) )
+	{
+		mPlayfieldBallReclaimX[1] = (vright + toPlayfieldSpace(getLeftVec() * t)).x;
+	}
+}
+
 void PinballWorld::updateVision( const Vision::Output& visionOut, Pipeline& p )
 {
 	// playfield layout
-	mPlayfieldBoundingBox = getPlayfieldBoundingBox(visionOut.mContours);
-//	cout << "min/max y: " << mPlayfieldBoundingBox.y1 << " " << mPlayfieldBoundingBox.y2 << endl;
-	mPlayfieldBallReclaimY = mPlayfieldBoundingBox.y1 + mBallReclaimAreaHeight;
+	updatePlayfieldLayout(visionOut.mContours);
 	
 	// generate parts
 	PartVec newParts = getPartsFromContours(visionOut.mContours);

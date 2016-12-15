@@ -140,3 +140,22 @@ ContourVector& ContourVector::operator+=(const ContourVector& rhs)
 	
 	return *this;
 }
+
+const Contour* ContourVector::rayIntersection( vec2 rayOrigin, vec2 rayVec, float *rayt ) const
+{
+	float m = MAXFLOAT;
+	const Contour* hit=0;
+	
+	for( const auto &c : *this )
+	{
+		float d;
+		if ( c.rayIntersection(rayOrigin,rayVec,&d) && d < m )
+		{
+			m=d;
+			hit=&c;
+		}
+	}
+	
+	if (hit&&rayt) *rayt = m;
+	return hit;
+}

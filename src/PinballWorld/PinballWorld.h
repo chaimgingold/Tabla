@@ -65,6 +65,9 @@ private:
 	Rectf mPlayfieldBoundingBox; // min/max of non-hole contours in playfield coordinate space (up/right vectors)
 	
 	float mPlayfieldBallReclaimY; // at what playfield y do we reclaim balls?
+	float mPlayfieldBallReclaimX[2]; // left, right edges for drawing...
+	
+	void updatePlayfieldLayout( const ContourVec& );
 	
 	// Parts
 	class Part

@@ -87,6 +87,8 @@ public:
 
 	ContourVec& operator+=(const ContourVec& rhs);
 	ContourVec operator+(const ContourVec& rhs) const { ContourVec c = *this; c += rhs; return c; }
+
+	const Contour* rayIntersection( vec2 rayOrigin, vec2 rayVec, float *rayt=0 ) const; // returns first rayt, if any
 	
 };
 typedef ContourVec ContourVector;
