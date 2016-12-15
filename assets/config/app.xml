@@ -65,10 +65,10 @@
 				<DeviceName>USB 2.0 Camera</DeviceName>
 				<CaptureSize>1280 720</CaptureSize>
 
-				<CaptureCoords>151.782211 49.2042084
-				1178.12817 96.7955551
-				1253.70618 660.763977
-				86.6620483 637.696045
+				<CaptureCoords>162.757828 63.472496
+				1185.81116 103.380928
+				1260.2915 670.642029
+				100.930344 647.574097
 				</CaptureCoords>
 				
 				<CaptureWorldSpaceCoords>0 0
@@ -138,10 +138,10 @@
 				<Name>Default</Name>
 				<ProjectorSize>1280 800</ProjectorSize>
 
-				<ProjectorCoords>41.4290657 85.9600754
-				1199.01465 1.04016113
-				1288.58374 683.213379
-				157.439407 827.11084
+				<ProjectorCoords>182.892456 210.350327
+				1045.86682 250.694092
+				1108.09595 767.35968
+				184.268646 755.159668
 				</ProjectorCoords>
 				
 				<ProjectorWorldSpaceCoords>0 0
