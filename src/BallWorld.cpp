@@ -32,6 +32,7 @@ void BallWorld::setParams( XmlTree xml )
 	getXml(xml,"BallMaxVel",mBallMaxVel);
 	getXml(xml,"BallContourImpactNormalVelImpulse",mBallContourImpactNormalVelImpulse);
 	getXml(xml,"BallContourCoeffOfRestitution",mBallContourCoeffOfRestitution);
+	getXml(xml,"BallContourFrictionlessCoeff",mBallContourFrictionlessCoeff);
 }
 
 TriMeshRef BallWorld::getTriMeshForBalls() const
@@ -218,15 +219,18 @@ void BallWorld::updatePhysics()
 					// not as accurate as it might be, but seems to work fine.
 					// also, this gets an approximate normal for collision with >1 edges
 				
-				vec2 newVel = glm::reflect( oldVel, surfaceNormal ); // transfer old velocity, but reflected
+				vec2 newVel = glm::reflect( oldVel, surfaceNormal );
 				
-				newVel *= lerp( 1.f, mBallContourCoeffOfRestitution,
-					powf( max(0.f,dot(surfaceNormal,-normalize(oldVel))), 3.f )
-					) ;
-					// ideally this would just be newVel *= mBallContourCoeffOfRestitution,
-					// but rolling friction kind of messes us up, so we only make the inelastic collision happen
-					// as the normal opposes the surface normal. In effect, if old velocity is tangent to the surface,
-					// then we don't take away velocity.
+				if (mBallContourCoeffOfRestitution < 1.f || mBallContourFrictionlessCoeff < 1.f)
+				{
+					// modulate it with inelastic collision + maybe friction
+					vec2 normalVel  = surfaceNormal * dot(newVel,surfaceNormal); // for inelastic
+					vec2 tangentVel = newVel - normalVel; // for friction
+					
+					tangentVel *= mBallContourFrictionlessCoeff;
+					
+					newVel = tangentVel + normalVel * mBallContourCoeffOfRestitution;
+				}
 					
 				newVel += surfaceNormal * mBallContourImpactNormalVelImpulse;
 					// accumulate energy from impact

@@ -10,7 +10,10 @@
 		<BallDefaultColor>			C62D41 </BallDefaultColor>
 
 		<BallContourImpactNormalVelImpulse>0</BallContourImpactNormalVelImpulse>
-		<BallContourCoeffOfRestitution>.5</BallContourCoeffOfRestitution>
+		<BallContourCoeffOfRestitution>.7</BallContourCoeffOfRestitution>
+		<BallContourFrictionlessCoeff>1</BallContourFrictionlessCoeff>
+			<!-- We	might want to make this a property of each ball, or of each ball<->contour interaction -->
+			
 	</BallWorld>
 
 	<!-- cm -->
@@ -19,7 +22,7 @@
 			<ContourMinRadius>			.5	</ContourMinRadius>
 			<ContourMinArea>			1	</ContourMinArea>
 			<ContourDPEpsilon>			1	</ContourDPEpsilon>
-			<ContourMinWidth>			1	</ContourMinWidth>
+			<ContourMinWidth>			.5	</ContourMinWidth>
 		</Contours>
 	</Vision>
 

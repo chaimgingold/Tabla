@@ -51,7 +51,11 @@ PinballWorld::PinballWorld()
 		cout << "down " << event.mId << endl;
 		button(event.mId,"-down");
 		
-		if (getBalls().empty()) serveBall();
+		if ( getBalls().empty() || mGamepadButtons.find(event.mId)==mGamepadButtons.end() )
+		{
+			// serve if no ball, or it isn't a mapped (eg flipper) button
+			serveBall();
+		}
 	};
 
 	mGamepadManager.mOnButtonUp = [this,button]( const GamepadManager::Event& event )
@@ -219,7 +223,7 @@ void PinballWorld::tickFlippers()
 
 void PinballWorld::onBallBallCollide   ( const Ball&, const Ball& )
 {
-	mPureDataNode->sendBang("new-game");
+//	mPureDataNode->sendBang("new-game");
 
 	if (0) cout << "ball ball collide" << endl;
 }

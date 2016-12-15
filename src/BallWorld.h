@@ -109,6 +109,7 @@ protected:
 	ColorAf mBallDefaultColor		= ColorAf::hex(0xC62D41);
 	float   mBallContourImpactNormalVelImpulse = .0f; // for added excitement. if zero, then max vel matters less.
 	float	mBallContourCoeffOfRestitution = 1.f; // [0,1] [elastic,inelastic]
+	float	mBallContourFrictionlessCoeff = 1.f;
 	
 private:
 
