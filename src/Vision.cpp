@@ -18,7 +18,11 @@ void Vision::Params::set( XmlTree xml )
 	{
 		mContourVisionParams.set( xml.getChild("Contours") );
 	}
-	// TODO: Token
+	
+	if ( xml.hasChild("Tokens") )
+	{
+		mTokenMatcherParams.set( xml.getChild("Tokens") );
+	}
 }
 
 template<class T>
@@ -178,8 +182,13 @@ Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 	// find contours
 	Vision::Output output;
 	
-	output.mContours = mContourVision.findContours( pipeline.getStages().back(), pipeline, contourPixelToWorld );
-	// TODO: tokens
+	auto clippedStage = pipeline.getStages().back();
+	
+	output.mContours = mContourVision.findContours( clippedStage, pipeline, contourPixelToWorld );
+	
+	if ( mTokenMatcher.getTokenLibrary().empty() ) output.mTokens = TokenMatches();
+	else output.mTokens   = mTokenMatcher.getMatches(
+		mTokenMatcher.findTokenCandidates( clippedStage, output.mContours, pipeline ));
 	
 	// output
 	return output;

@@ -249,10 +249,10 @@ void MusicWorld::update()
 	mFileWatch.scanFiles();
 }
 
-void MusicWorld::updateVision( const ContourVector &c, Pipeline &p )
+void MusicWorld::updateVision( const Vision::Output& visionOut, Pipeline &p )
 {
-	mContours = c;
-	mScores = mVision.updateVision(c,p,mScores,mStamps);
+	mContours = visionOut.mContours;
+	mScores = mVision.updateVision(visionOut,p,mScores,mStamps);
 	
 	updateScoresWithMetaParams();
 	updateAdditiveScoreSynthesis(); // update additive synths based on new image data

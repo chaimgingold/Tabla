@@ -29,7 +29,7 @@ public:
 	// it then gets them when they are needed.
 	
 	virtual void setParams( XmlTree ){}
-	virtual void updateVision( const ContourVector &c, Pipeline& ){} // probably lower freq than update()
+	virtual void updateVision( const Vision::Output&, Pipeline& ){} // probably lower freq than update()
 	
 	void		setWorldBoundsPoly( PolyLine2 p ) { mWorldBoundsPoly=p; worldBoundsPolyDidChange(); }
 	PolyLine2	getWorldBoundsPoly() const { return mWorldBoundsPoly; }

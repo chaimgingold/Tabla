@@ -11,7 +11,9 @@
 
 #include <stdio.h>
 
-#include "GameWorld.h"
+#include "cinder/Xml.h"
+
+#include "Pipeline.h"
 #include "Contour.h"
 
 #include "opencv2/features2d.hpp"
@@ -48,6 +50,12 @@ struct TokenCandidate {
 	vector<DMatch>   good_matches;
 };
 
+struct TokenMatch
+{
+	vec2   mLoc;
+	string mName;
+};
+typedef vector<TokenMatch> TokenMatches;
 
 class TokenMatcher {
 public:
@@ -87,6 +95,8 @@ public:
 	vector<MatchingTokenIndexPair> matchTokens( vector<TokenFeatures> tokenLibrary,
 												vector<TokenFeatures> candidates );
 
+	TokenMatches getMatches( vector<TokenCandidate> );
+	
 	const vector<TokenFeatures>& getTokenLibrary() const { return mTokenLibrary; }
 	
 private:

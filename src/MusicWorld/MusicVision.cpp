@@ -344,9 +344,13 @@ float MusicVision::getScoreOctaveShift( const Score& score, const PolyLine2& wrt
 }
 
 ScoreVec
-MusicVision::updateVision( const ContourVector &contours, Pipeline& pipeline, const ScoreVec& oldScores, const vector<MusicStamp>& stamps ) const
+MusicVision::updateVision(
+	const Vision::Output&	visionOut,
+	Pipeline&				pipeline,
+	const ScoreVec&			oldScores,
+	const vector<MusicStamp>& stamps ) const
 {
-	ScoreVec v = getScores(contours,oldScores,stamps);
+	ScoreVec v = getScores(visionOut.mContours,oldScores,stamps);
 	
 	updateScoresWithImageData(pipeline,v);
 	

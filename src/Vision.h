@@ -22,6 +22,7 @@
 #include "Pipeline.h"
 
 #include "ContourVision.h"
+#include "TokenMatcher.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -42,7 +43,7 @@ public:
 		bool mCaptureAllPipelineStages = false; // this is OR'd in
 	
 		ContourVision::Params mContourVisionParams;
-		// TODO: tokens
+		TokenMatcher::Params  mTokenMatcherParams;
 	};
 
 	// output
@@ -50,7 +51,7 @@ public:
 	{
 	public:
 		ContourVector mContours;
-		// TODO: tokens
+		TokenMatches  mTokens;
 	};
 
 	// configure
@@ -69,6 +70,7 @@ private:
 
 	// submodules
 	ContourVision mContourVision;
+	TokenMatcher  mTokenMatcher;
 	
 };
 

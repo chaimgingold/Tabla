@@ -6,6 +6,7 @@
 //
 //
 
+#include "PaperBounce3App.h"
 #include "TokenMatcher.h"
 #include "ocv.h"
 #include "geom.h"
@@ -23,6 +24,8 @@ void TokenMatcher::Params::set( XmlTree xml )
 		if ( i->hasChild("Path") )
 		{
 			fs::path path = i->getChild("Path").getValue();
+			
+			path = PaperBounce3App::get()->hotloadableAssetPath(path);
 			
 			mTokenLibraryPaths.push_back(path);
 		}
@@ -243,6 +246,12 @@ vector<MatchingTokenIndexPair> TokenMatcher::matchTokens( vector<TokenFeatures> 
 		}
 	}
 	return matches;
+}
+
+TokenMatches TokenMatcher::getMatches( vector<TokenCandidate> )
+{
+	TokenMatches r;
+	return r;
 }
 
 void TokenMatcher::setParams( Params p )

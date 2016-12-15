@@ -501,7 +501,7 @@ void PaperBounce3App::update()
 		// pass contours to ballworld (probably don't need to store here)
 		if (mGameWorld)
 		{
-			mGameWorld->updateVision( mVisionOutput.mContours, mPipeline );
+			mGameWorld->updateVision( mVisionOutput, mPipeline );
 		}
 		
 		// update pipeline visualization

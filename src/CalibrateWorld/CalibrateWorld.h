@@ -23,7 +23,7 @@ public:
 
 //	void gameWillLoad() override;
 	void update() override;
-	void updateVision( const ContourVector&, Pipeline& ) override;
+	void updateVision( const Vision::Output&, Pipeline& ) override;
 	
 	void draw( DrawType ) override;
 

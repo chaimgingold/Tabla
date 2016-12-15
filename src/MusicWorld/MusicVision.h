@@ -32,7 +32,7 @@ public:
 	PolyLine2 mWorldBoundsPoly;
 
 	// do it
-	ScoreVec updateVision( const ContourVector &c, Pipeline&, const ScoreVec& oldScores, const vector<MusicStamp>& ) const;
+	ScoreVec updateVision( const Vision::Output&, Pipeline&, const ScoreVec& oldScores, const vector<MusicStamp>& ) const;
 	
 private:
 

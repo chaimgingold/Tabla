@@ -679,6 +679,8 @@
 				26FA36581D5BDBC300C64A00 /* Pipeline.cpp */,
 				260486D31E0089CC004E7396 /* ContourVision.cpp */,
 				260486D41E0089CC004E7396 /* ContourVision.h */,
+				C21D94531DFF6F610066A7DD /* TokenMatcher.h */,
+				C21D94521DFF6F610066A7DD /* TokenMatcher.cpp */,
 			);
 			name = Light;
 			sourceTree = "<group>";
@@ -2285,8 +2287,6 @@
 			children = (
 				C29A0AD51DF61A15008A26A1 /* TokenWorld.h */,
 				C29A0AD41DF61A15008A26A1 /* TokenWorld.cpp */,
-				C21D94531DFF6F610066A7DD /* TokenMatcher.h */,
-				C21D94521DFF6F610066A7DD /* TokenMatcher.cpp */,
 			);
 			name = TokenWorld;
 			sourceTree = "<group>";

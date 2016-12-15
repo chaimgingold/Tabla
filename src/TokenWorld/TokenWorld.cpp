@@ -30,7 +30,7 @@ void TokenWorld::setParams( XmlTree xml )
 	mTokenMatcher.setParams(params);
 }
 
-void TokenWorld::updateVision( const ContourVector &contours, Pipeline&pipeline )
+void TokenWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeline )
 {
 	mWorld = pipeline.getStage("clipped");
 	if ( !mWorld || mWorld->mImageCV.empty() ) return;
@@ -45,7 +45,7 @@ void TokenWorld::updateVision( const ContourVector &contours, Pipeline&pipeline 
 		case TokenVisionMode::Matching:
 		{
 
-			mTokens = mTokenMatcher.findTokenCandidates(mWorld, contours, pipeline);
+			mTokens = mTokenMatcher.findTokenCandidates(mWorld, visionOut.mContours, pipeline);
 
 			// N-to-N matching:
 			// we want to match each found token with every other found token.

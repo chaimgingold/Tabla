@@ -26,7 +26,7 @@ public:
 
 	void gameWillLoad() override;
 	void update() override;
-	void updateVision( const ContourVector &c, Pipeline& ) override;
+	void updateVision( const Vision::Output&, Pipeline& ) override;
 	void draw( DrawType ) override;
 	
 	void worldBoundsPolyDidChange() override;

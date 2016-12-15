@@ -375,24 +375,24 @@ Rectf PinballWorld::getPlayfieldBoundingBox( const ContourVec& cs ) const
 	return Rectf(pts);
 }
 
-void PinballWorld::updateVision( const ContourVec &c, Pipeline& p )
+void PinballWorld::updateVision( const Vision::Output& visionOut, Pipeline& p )
 {
 	// playfield layout
-	mPlayfieldBoundingBox = getPlayfieldBoundingBox(c);
+	mPlayfieldBoundingBox = getPlayfieldBoundingBox(visionOut.mContours);
 //	cout << "min/max y: " << mPlayfieldBoundingBox.y1 << " " << mPlayfieldBoundingBox.y2 << endl;
 	mPlayfieldBallReclaimY = mPlayfieldBoundingBox.y1 + mBallReclaimAreaHeight;
 	
 	// generate parts
-	PartVec newParts = getPartsFromContours(c);
+	PartVec newParts = getPartsFromContours(visionOut.mContours);
 	mParts = mergeOldAndNewParts(mParts, newParts);
 
 	//
-	ContourVec contours = c;
+	ContourVec contours = visionOut.mContours;
 	
 	getContoursFromParts(mParts,contours);
 	
 	// tell ball world
-	BallWorld::updateVision(contours,p);
+	BallWorld::updateVision(visionOut,p);
 }
 
 PinballWorld::tAdjSpace
