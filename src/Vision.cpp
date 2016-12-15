@@ -46,7 +46,7 @@ void Vision::setParams( Params p )
 {
 	mParams=p;
 	mContourVision.setParams(mParams.mContourVisionParams);
-	// TODO: Token
+	mTokenMatcher.setParams(mParams.mTokenMatcherParams);
 }
 
 void Vision::setLightLink( const LightLink &ll )
