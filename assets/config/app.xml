@@ -55,58 +55,104 @@
 	
 	<!-- Defaults for our YCR-OAK office setup -->
 	<LightLink>
-		<CameraIndex>0</CameraIndex>
+		<CaptureProfile>ELP 1280 x 720</CaptureProfile>
+		<ProjectorProfile>Default</ProjectorProfile>
 
-<!--		<CaptureSize>640 480</CaptureSize>-->
-		<CaptureSize>1280 720</CaptureSize>
-		
-<!--		<CaptureCoords>5.06933975 6.20670891-->
-<!--	599.746338 6.75599194-->
-<!--	631.386475 316.545441-->
-<!--	8.39622116 361.42981-->
-<!--	</CaptureCoords>-->
-<!--	-->
-<!--		<CaptureWorldSpaceCoords>0 0-->
-<!--	126 0-->
-<!--	126 69.5-->
-<!--	0 69.5-->
-<!--	</CaptureWorldSpaceCoords>-->
+		<Capture>
+			
+			<Profile>
+				<Name>ELP 1280 x 720</Name>
+				<DeviceName>USB 2.0 Camera</DeviceName>
+				<CaptureSize>1280 720</CaptureSize>
 
-	<CaptureCoords>151.782211 49.2042084
-1178.12817 96.7955551
-1253.70618 660.763977
-86.6620483 637.696045
-</CaptureCoords>
-	<CaptureWorldSpaceCoords>0 0
-126 0
-126 69.5
-0 69.5
-</CaptureWorldSpaceCoords>
-	
-			<ProjectorCoords>41.4290657 85.9600754
-	1199.01465 1.04016113
-	1288.58374 683.213379
-	157.439407 827.11084
-	</ProjectorCoords>
-		<ProjectorWorldSpaceCoords>0 0
-	121.463959 -0.303260803
-	130.19603 75.1454391
-	-0.606506348 73.5489044
-	</ProjectorWorldSpaceCoords>
-		<ProjectorSize>1280 800</ProjectorSize>
+				<CaptureCoords>151.782211 49.2042084
+				1178.12817 96.7955551
+				1253.70618 660.763977
+				86.6620483 637.696045
+				</CaptureCoords>
+				
+				<CaptureWorldSpaceCoords>0 0
+				126 0
+				126 69.5
+				0 69.5
+				</CaptureWorldSpaceCoords>
 
-<!-- For 640x480 ELP -->
-<!--		<DistCoeffs>[-1.05, -4.1999998, 0.0079270257, -0.0037597809, 30.936378]</DistCoeffs>-->
-<!--		<CameraMatrix>[1072.3177, 0, 314.25284;-->
-<!--	 0, 1062.8184, 234.11261;-->
-<!--	 0, 0, 1]</CameraMatrix>-->
+				<!-- this calibration is pretty good -->
+				<DistCoeffs>[-0.64873862, 0.16279763, 0.020434588, -0.026295083, 0.87134349]</DistCoeffs>
+				<CameraMatrix>[1606.7295, 0, 656.4892;
+				 0, 1627.5187, 339.53409;
+				 0, 0, 1]
+				 </CameraMatrix>
+			
+			</Profile>
+			
+			<Profile>
+				<Name>ELP 640 x 480</Name>
+				<DeviceName>USB 2.0 Camera</DeviceName>
+				<CaptureSize>640 480</CaptureSize>
 
-<!-- For 1280 x 720 ELP-->
-	 	<DistCoeffs>[-0.64873862, 0.16279763, 0.020434588, -0.026295083, 0.87134349]</DistCoeffs>
-	<CameraMatrix>[1606.7295, 0, 656.4892;
- 0, 1627.5187, 339.53409;
- 0, 0, 1]</CameraMatrix>
- 
+				<CaptureCoords>5.06933975 6.20670891
+				599.746338 6.75599194
+				631.386475 316.545441
+				8.39622116 361.42981
+				</CaptureCoords>
+			
+				<CaptureWorldSpaceCoords>0 0
+				126 0
+				126 69.5
+				0 69.5
+				</CaptureWorldSpaceCoords>
+
+				<!-- this calibration is OK. I monkeyed with it manually a bit, so it could be better. -->
+				<DistCoeffs>[-1.05, -4.1999998, 0.0079270257, -0.0037597809, 30.936378]</DistCoeffs>
+				<CameraMatrix>[1072.3177, 0, 314.25284;
+				 0, 1062.8184, 234.11261;
+				 0, 0, 1]</CameraMatrix>
+			 
+			</Profile>
+
+			<Profile>
+				<Name>FaceTime built in</Name>
+				<DeviceName>FaceTime HD Camera (Built-in)</DeviceName>
+				<CaptureSize>640 480</CaptureSize>
+
+				<CaptureCoords>0 0
+				640 0
+				640 480
+				0 480
+				</CaptureCoords>
+			
+				<CaptureWorldSpaceCoords>0 0
+				126 0
+				126 69.5
+				0 69.5
+				</CaptureWorldSpaceCoords>
+			 
+			</Profile>
+			
+		</Capture>
+
+
+		<Projector>
+			<Profile>
+				<Name>Default</Name>
+				<ProjectorSize>1280 800</ProjectorSize>
+
+				<ProjectorCoords>41.4290657 85.9600754
+				1199.01465 1.04016113
+				1288.58374 683.213379
+				157.439407 827.11084
+				</ProjectorCoords>
+				
+				<ProjectorWorldSpaceCoords>0 0
+				121.463959 -0.303260803
+				130.19603 75.1454391
+				-0.606506348 73.5489044
+				</ProjectorWorldSpaceCoords>
+				
+			</Profile>
+		</Projector>
+
 	</LightLink>
 
 </PaperBounce3>

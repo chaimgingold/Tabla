@@ -34,7 +34,7 @@ PaperBounce3App::~PaperBounce3App()
 
 PolyLine2 PaperBounce3App::getWorldBoundsPoly() const
 {
-	return getPointsAsPoly( mLightLink.mCaptureWorldSpaceCoords, 4 );
+	return getPointsAsPoly( mLightLink.getCaptureProfile().mCaptureWorldSpaceCoords, 4 );
 }
 
 fs::path PaperBounce3App::getDocsPath() const
@@ -107,7 +107,7 @@ void PaperBounce3App::setup()
 		if (xml.hasChild("PaperBounce3/LightLink") && !fs::exists(getUserLightLinkFilePath()) )
 		{
 			mLightLink.setParams(xml.getChild("PaperBounce3/LightLink"));
-			lightLinkDidChange();
+			lightLinkDidChange(); // allow saving, since user settings version doesn't exist yet
 		}
 		
 		if (xml.hasChild("PaperBounce3/App"))
@@ -176,7 +176,7 @@ void PaperBounce3App::setup()
 	mMainWindow->setUserData( new WindowData(mMainWindow,false,*this) );
 
 	// resize window
-	setWindowSize( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y ) ;
+	setWindowSize( mLightLink.getCaptureProfile().mCaptureSize.x, mLightLink.getCaptureProfile().mCaptureSize.y ) ;
 
 	// Fullscreen main window in secondary display
 	auto displays = Display::getDisplays() ;
@@ -193,7 +193,9 @@ void PaperBounce3App::setup()
 	if (1)
 	{
 		// for some reason this seems to create three windows once we fullscreen the main window :P
-		mUIWindow = createWindow( Window::Format().size( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y ) );
+		mUIWindow = createWindow( Window::Format().size(
+			mLightLink.getCaptureProfile().mCaptureSize.x,
+			mLightLink.getCaptureProfile().mCaptureSize.y ) );
 		
 		mUIWindow->setTitle("Configuration");
 		mUIWindow->setUserData( new WindowData(mUIWindow,true,*this) );
@@ -256,13 +258,25 @@ void PaperBounce3App::setupRFIDValueToFunction()
 	}
 }
 
+// setupCaptureDevice now handles default population, too.
+//void PaperBounce3App::ensureLightLinkHasProfiles()
+//{
+//	// TODO: write this; doesn't matter since we always have data...
+//	assert( !mLightLink.mCaptureProfiles.empty() );
+//	assert( !mLightLink.mProjectorProfiles.empty() );
+//}
+
 void PaperBounce3App::lightLinkDidChange( bool saveToFile )
 {
 	// notify people
 	// might need to privatize mLightLink and make this a proper setter
 	// or rename it to be "notify" or "onChange" or "didChange" something
-	setupCaptureDevice();
-	mVision.setLightLink(mLightLink);
+	if (!setupCaptureDevice())
+	{
+		setupDefaultCaptureDevice();
+	}
+	
+	mVision.setCaptureProfile(mLightLink.getCaptureProfile());
 	if (mGameWorld) mGameWorld->setWorldBoundsPoly( getWorldBoundsPoly() );
 	
 	if (saveToFile)
@@ -272,25 +286,88 @@ void PaperBounce3App::lightLinkDidChange( bool saveToFile )
 	}
 }
 
-void PaperBounce3App::setupCaptureDevice()
+bool PaperBounce3App::setupDefaultCaptureDevice()
 {
-	auto cameras = Capture::getDevices();
-	
-	Capture::DeviceRef camera;
-	
-	if (mLightLink.mCameraIndex<0) camera = cameras.back();
-	else camera = cameras[ mLightLink.mCameraIndex % cameras.size() ];
-
-	if ( !mCapture || mCapture->getDevice() != camera )
+	// try other profiles...
+	for ( auto i : mLightLink.mCaptureProfiles )
 	{
-		mCapture = Capture::create( mLightLink.getCaptureSize().x, mLightLink.getCaptureSize().y, camera ) ; // get last camera
-		mCapture->start();
+		mLightLink.setCaptureProfile(i.second.mName);
+		if ( setupCaptureDevice() ) return true;
+	}
+
+	// no dice, so make a default, and set it
+	if ( Capture::getDevices().empty() ) {
+		assert("No camera devices!");
+		return false;
+	}
+	else
+	{
+		string deviceName = Capture::getDevices()[0]->getName();
+		
+		LightLink::CaptureProfile profile(
+			string("Default ") + deviceName,
+			deviceName,
+			vec2(640,480) );
+		
+		mLightLink.mCaptureProfiles[profile.mName] = profile;
+		
+		mLightLink.setCaptureProfile(profile.mName);
+		
+		return setupCaptureDevice();
 	}
 }
 
-void PaperBounce3App::chooseNextCaptureDevice()
+bool PaperBounce3App::setupCaptureDevice()
 {
-	mLightLink.mCameraIndex = (mLightLink.mCameraIndex+1) % Capture::getDevices().size();
+	if ( mLightLink.mCaptureProfiles.empty() ) {
+		return false;
+	}
+
+	const LightLink::CaptureProfile &profile = mLightLink.getCaptureProfile();
+	
+	cout << "Trying to load capture profile '" << profile.mName << "' for '" << profile.mDeviceName << "'" << endl;
+	
+	Capture::DeviceRef device = Capture::findDeviceByNameContains(profile.mDeviceName);
+
+	if ( device )
+	{
+		if ( !mCapture || mCapture->getDevice() != device
+			|| mCapture->getWidth () != (int32_t)profile.mCaptureSize.x
+			|| mCapture->getHeight() != (int32_t)profile.mCaptureSize.y
+			)
+		{
+			if (mCapture) {
+				// kill old one
+				mCapture->stop();
+				mCapture = 0;
+			}
+			
+			mCapture = Capture::create(profile.mCaptureSize.x, profile.mCaptureSize.y,device);
+			mCapture->start();
+			return true;
+		}
+		return true; // lazily true
+	}
+	else return false;
+}
+
+void PaperBounce3App::chooseNextCaptureProfile()
+{
+	if ( !mLightLink.mCaptureProfiles.empty() )
+	{
+		auto i = mLightLink.mCaptureProfiles.find( mLightLink.getCaptureProfile().mName );
+		
+		i = ++i;
+		
+		if ( i==mLightLink.mCaptureProfiles.end() )
+		{
+			// wrap
+			i = mLightLink.mCaptureProfiles.begin();
+		}
+		
+		// set
+		mLightLink.setCaptureProfile(i->second.mName);
+	}
 }
 
 void PaperBounce3App::loadDefaultGame( string byName )
@@ -441,12 +518,12 @@ void PaperBounce3App::fileDrop( FileDropEvent event )
 void PaperBounce3App::addProjectorPipelineStages()
 {
 	// set that image
-	mPipeline.then( "projector", mLightLink.mProjectorSize ) ;
+	mPipeline.then( "projector", mLightLink.getProjectorProfile().mProjectorSize ) ;
 	
 	mPipeline.setImageToWorldTransform(
 		getOcvPerspectiveTransform(
-			mLightLink.mProjectorCoords,
-			mLightLink.mProjectorWorldSpaceCoords ));
+			mLightLink.getProjectorProfile().mProjectorCoords,
+			mLightLink.getProjectorProfile().mProjectorWorldSpaceCoords ));
 }
 
 void PaperBounce3App::updateFPS()
@@ -686,7 +763,7 @@ void PaperBounce3App::keyDown( KeyEvent event )
 		{
 			case KeyEvent::KEY_TAB:
 				handled=true;
-				chooseNextCaptureDevice();
+				chooseNextCaptureProfile();
 				lightLinkDidChange();
 				break;
 				

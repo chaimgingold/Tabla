@@ -49,37 +49,47 @@ void Vision::setParams( Params p )
 	mTokenMatcher.setParams(mParams.mTokenMatcherParams);
 }
 
-void Vision::setLightLink( const LightLink &ll )
+void Vision::setCaptureProfile( const LightLink::CaptureProfile& profile )
 {
 	// compute remap?
-	bool updateRemap =
-		! isMatEqual<float>(ll.mDistCoeffs,mLightLink.mDistCoeffs)
-	||  ! isMatEqual<float>(ll.mCameraMatrix,mLightLink.mCameraMatrix);
+	bool remapChanged =
+		! isMatEqual<float>(profile.mDistCoeffs,mCaptureProfile.mDistCoeffs)
+	||  ! isMatEqual<float>(profile.mCameraMatrix,mCaptureProfile.mCameraMatrix);
 	
 	// update vars
-	mLightLink=ll;
+	mCaptureProfile=profile;
 	
 	// update remap
-	if ( updateRemap )
+	if ( remapChanged )
 	{
-		cout << "Vision:: computing remap " << endl;
-		
-		cv::Size imageSize(mLightLink.mCaptureSize.x,mLightLink.mCaptureSize.y);
-		
-		cout << "cv::initUndistortRectifyMap" << endl;
-		cout << "\tcameraMatrix: " << mLightLink.mCameraMatrix << endl;
-		cout << "\tmDistCoeffs: " << mLightLink.mDistCoeffs << endl;
-		cout << "\timageSize: " << imageSize << endl;
-		
-		cv::initUndistortRectifyMap(
-			mLightLink.mCameraMatrix,
-			mLightLink.mDistCoeffs,
-			cv::Mat(), // mono, so not needed
-			mLightLink.mCameraMatrix, // mono, so same as 1st param
-			imageSize,
-			CV_16SC2, // CV_32FC1 or CV_16SC2
-			mRemap[0],
-			mRemap[1]);
+		if ( mCaptureProfile.mCameraMatrix.empty() || mCaptureProfile.mDistCoeffs.empty() )
+		{
+			cout << "Vision:: no remap " << endl;
+
+			mRemap[0] = cv::Mat();
+			mRemap[1] = cv::Mat();
+		}
+		else
+		{
+			cout << "Vision:: computing remap " << endl;
+			
+			cv::Size imageSize(mCaptureProfile.mCaptureSize.x,mCaptureProfile.mCaptureSize.y);
+			
+			cout << "cv::initUndistortRectifyMap" << endl;
+			cout << "\tcameraMatrix: " << mCaptureProfile.mCameraMatrix << endl;
+			cout << "\tmDistCoeffs: " << mCaptureProfile.mDistCoeffs << endl;
+			cout << "\timageSize: " << imageSize << endl;
+			
+			cv::initUndistortRectifyMap(
+				mCaptureProfile.mCameraMatrix,
+				mCaptureProfile.mDistCoeffs,
+				cv::Mat(), // mono, so not needed
+				mCaptureProfile.mCameraMatrix, // mono, so same as 1st param
+				imageSize,
+				CV_16SC2, // CV_32FC1 or CV_16SC2
+				mRemap[0],
+				mRemap[1]);
+		}
 	}
 }
 
@@ -105,8 +115,8 @@ Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 	pipeline.then( "input_color", input_color );
 	
 	pipeline.setImageToWorldTransform( getOcvPerspectiveTransform(
-		mLightLink.mCaptureCoords,
-		mLightLink.mCaptureWorldSpaceCoords ) );
+		mCaptureProfile.mCaptureCoords,
+		mCaptureProfile.mCaptureWorldSpaceCoords ) );
 
 	pipeline.then( "input", input );
 	
@@ -141,13 +151,13 @@ Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 		
 		for( int i=0; i<4; ++i )
 		{
-			srcpt[i] = toOcv( mLightLink.mCaptureCoords[i] );
-			dstpt[i] = toOcv( mLightLink.mCaptureWorldSpaceCoords[i] );
+			srcpt[i] = toOcv( mCaptureProfile.mCaptureCoords[i] );
+			dstpt[i] = toOcv( mCaptureProfile.mCaptureWorldSpaceCoords[i] );
 		}
 
 		// compute output size pixel scaling factor
-		const Rectf inputBounds  = asBoundingRect( mLightLink.mCaptureCoords );
-		const Rectf outputBounds = asBoundingRect( mLightLink.mCaptureWorldSpaceCoords );
+		const Rectf inputBounds  = asBoundingRect( mCaptureProfile.mCaptureCoords );
+		const Rectf outputBounds = asBoundingRect( mCaptureProfile.mCaptureWorldSpaceCoords );
 
 		const float pixelScale
 			= max( inputBounds .getWidth(), inputBounds .getHeight() )

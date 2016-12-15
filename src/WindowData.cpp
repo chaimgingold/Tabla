@@ -59,13 +59,13 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 			std::shared_ptr<PolyEditView> cameraPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
 					mApp.mPipeline,
-					[this](){ return getPointsAsPoly(mApp.mLightLink.mCaptureCoords,4); },
+					[this](){ return getPointsAsPoly(mApp.mLightLink.getCaptureProfile().mCaptureCoords,4); },
 					"undistorted"
 					)
 				);
 			
 			cameraPolyEditView->setSetPolyFunc( [&]( const PolyLine2& poly ){
-				setPointsFromPoly( mApp.mLightLink.mCaptureCoords, 4, poly );
+				setPointsFromPoly( mApp.mLightLink.getCaptureProfile().mCaptureCoords, 4, poly );
 				updateLightLink(mApp);
 			});
 			
@@ -81,13 +81,13 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 			std::shared_ptr<PolyEditView> projPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
 					mApp.mPipeline,
-					[&](){ return getPointsAsPoly(mApp.mLightLink.mProjectorCoords,4); },
+					[&](){ return getPointsAsPoly(mApp.mLightLink.getProjectorProfile().mProjectorCoords,4); },
 					"projector"
 					)
 			);
 			
 			projPolyEditView->setSetPolyFunc( [&]( const PolyLine2& poly ){
-				setPointsFromPoly( mApp.mLightLink.mProjectorCoords, 4, poly );
+				setPointsFromPoly( mApp.mLightLink.getProjectorProfile().mProjectorCoords, 4, poly );
 				updateLightLink(mApp);
 			});
 			
@@ -103,14 +103,14 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 			std::shared_ptr<PolyEditView> projPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
 					mApp.mPipeline,
-					[&](){ return getPointsAsPoly(mApp.mLightLink.mCaptureWorldSpaceCoords,4); },
+					[&](){ return getPointsAsPoly(mApp.mLightLink.getCaptureProfile().mCaptureWorldSpaceCoords,4); },
 					"world-boundaries"
 					)
 			);
 			
 			projPolyEditView->setSetPolyFunc( [&]( const PolyLine2& poly ){
-				setPointsFromPoly( mApp.mLightLink.mCaptureWorldSpaceCoords  , 4, poly );
-				setPointsFromPoly( mApp.mLightLink.mProjectorWorldSpaceCoords, 4, poly );
+				setPointsFromPoly( mApp.mLightLink.getCaptureProfile().mCaptureWorldSpaceCoords  , 4, poly );
+				setPointsFromPoly( mApp.mLightLink.getProjectorProfile().mProjectorWorldSpaceCoords, 4, poly );
 				updateLightLink(mApp);
 			});
 			

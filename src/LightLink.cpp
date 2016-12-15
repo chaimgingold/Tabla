@@ -9,6 +9,24 @@
 #include "LightLink.h"
 #include "xml.h"
 
+static string vecToString( vec2 v )
+{
+	return toString(v.x) + " " + toString(v.y);
+};
+
+static string vecsToString( const vec2* a, int n )
+{
+	string s;
+	
+	for( int i=0; i<n; ++i )
+	{
+		s += vecToString(a[i]) + "\n";
+	}
+	
+	return s;
+};
+
+
 static vector<float> stringToFloatVec( string value )
 {
 	// clobber [], chars
@@ -34,18 +52,29 @@ static vector<float> stringToFloatVec( string value )
 	return f;
 }
 
-void LightLink::setParams( XmlTree xml )
+LightLink::CaptureProfile::CaptureProfile( string name, string deviceName, vec2 size )
+	: mName(name)
+	, mDeviceName(deviceName)
+	, mCaptureSize(size)
 {
-	getXml(xml,"CameraIndex",mCameraIndex);
-	getXml(xml,"CaptureSize",mCaptureSize);
+	mCaptureCoords[0] = vec2(0,1) * size;
+	mCaptureCoords[1] = vec2(1,1) * size;
+	mCaptureCoords[2] = vec2(1,0) * size;
+	mCaptureCoords[3] = vec2(0,1) * size;
 	
+	for( int i=0; i<4; ++i )
+	{
+		mCaptureWorldSpaceCoords[i] = mCaptureCoords[i] / 10.f ; // 10px per cm as a default...
+	}
+}
+
+void LightLink::CaptureProfile::setParams( XmlTree xml )
+{
+	getXml(xml, "Name",mName);
+	getXml(xml, "DeviceName",mDeviceName);
+	getXml(xml, "CaptureSize",mCaptureSize);
 	getXml(xml, "CaptureCoords", mCaptureCoords, 4 );
 	getXml(xml, "CaptureWorldSpaceCoords", mCaptureWorldSpaceCoords, 4 );
-
-	getXml(xml, "ProjectorCoords", mProjectorCoords, 4 );
-	getXml(xml, "ProjectorWorldSpaceCoords", mProjectorWorldSpaceCoords, 4 );
-	
-	getXml(xml, "ProjectorSize", mProjectorSize);
 
 	if ( xml.hasChild("DistCoeffs") )
 	{
@@ -72,37 +101,15 @@ void LightLink::setParams( XmlTree xml )
 	}
 }
 
-XmlTree LightLink::getParams() const
+XmlTree LightLink::CaptureProfile::getParams() const
 {
-	XmlTree t("LightLink","");
+	XmlTree t("Profile","");
 	
-	auto v = []( vec2 v )
-	{
-		return toString(v.x) + " " + toString(v.y);
-	};
-	
-	auto c = [v]( const vec2* a, int n )
-	{
-		string s;
-		
-		for( int i=0; i<n; ++i )
-		{
-			s += v(a[i]) + "\n";
-		}
-		
-		return s;
-	};
-	
-	t.push_back( XmlTree( "CameraIndex", toString(mCameraIndex) ) );
-	t.push_back( XmlTree( "CaptureSize", v(mCaptureSize) ) );
-	
-	t.push_back( XmlTree( "CaptureCoords", c(mCaptureCoords,4) ));
-	t.push_back( XmlTree( "CaptureWorldSpaceCoords", c(mCaptureWorldSpaceCoords,4) ));
-
-	t.push_back( XmlTree( "ProjectorCoords", c(mProjectorCoords,4) ));
-	t.push_back( XmlTree( "ProjectorWorldSpaceCoords", c(mProjectorWorldSpaceCoords,4) ));
-	
-	t.push_back( XmlTree( "ProjectorSize", v(mProjectorSize)) );
+	t.push_back( XmlTree( "Name", mName) );
+	t.push_back( XmlTree( "DeviceName", mDeviceName) );
+	t.push_back( XmlTree( "CaptureSize", vecToString(mCaptureSize) ) );
+	t.push_back( XmlTree( "CaptureCoords", vecsToString(mCaptureCoords,4) ));
+	t.push_back( XmlTree( "CaptureWorldSpaceCoords", vecsToString(mCaptureWorldSpaceCoords,4) ));
 
 	if ( mDistCoeffs.rows==1 )
 	{
@@ -119,4 +126,152 @@ XmlTree LightLink::getParams() const
 	}
 	
 	return t;
+}
+
+LightLink::ProjectorProfile::ProjectorProfile( string name, vec2 size, vec2 captureWorldSpaceCoords[4] )
+	: mName(name)
+	, mProjectorSize(size)
+{
+	mProjectorCoords[0] = vec2(0,1) * size;
+	mProjectorCoords[1] = vec2(1,1) * size;
+	mProjectorCoords[2] = vec2(1,0) * size;
+	mProjectorCoords[3] = vec2(0,1) * size;
+	
+	if (captureWorldSpaceCoords)
+	{
+		for( int i=0; i<4; ++i ) {
+			mProjectorWorldSpaceCoords[i] = captureWorldSpaceCoords[i];
+		}
+	}
+	else
+	{
+		for( int i=0; i<4; ++i ) {
+			mProjectorWorldSpaceCoords[i] = mProjectorCoords[i] / 10.f ; // 10px per cm as a default...
+		}
+	}
+}
+
+void LightLink::ProjectorProfile::setParams( XmlTree xml )
+{
+	getXml(xml, "Name",mName);
+	getXml(xml, "ProjectorWorldSpaceCoords", mProjectorWorldSpaceCoords, 4 );
+	getXml(xml, "ProjectorSize", mProjectorSize);
+	getXml(xml, "ProjectorCoords", mProjectorCoords, 4 );
+}
+
+XmlTree LightLink::ProjectorProfile::getParams() const
+{
+	XmlTree t("Profile","");
+	
+	t.push_back( XmlTree( "Name", mName) );
+	t.push_back( XmlTree( "ProjectorWorldSpaceCoords", vecsToString(mProjectorWorldSpaceCoords,4) ));
+	t.push_back( XmlTree( "ProjectorSize", vecToString(mProjectorSize)) );
+	t.push_back( XmlTree( "ProjectorCoords", vecsToString(mProjectorCoords,4) ));
+	
+	return t;
+}
+
+void LightLink::setParams( XmlTree xml )
+{
+	getXml(xml,"CaptureProfile",mActiveCaptureProfileName);
+	getXml(xml,"ProjectorProfile",mActiveProjectorProfileName);
+	
+	mCaptureProfiles.clear();
+	for( auto i = xml.begin( "Capture/Profile" ); i != xml.end(); ++i )
+	{
+		CaptureProfile p;
+		p.setParams(*i);
+		mCaptureProfiles[p.mName] = p;
+	}
+	
+	mProjectorProfiles.clear();
+	for( auto i = xml.begin( "Projector/Profile" ); i != xml.end(); ++i )
+	{
+		ProjectorProfile p;
+		p.setParams(*i);
+		mProjectorProfiles[p.mName] = p;
+	}
+	
+	ensureActiveProfilesAreValid();
+}
+
+XmlTree LightLink::getParams() const
+{
+	XmlTree t("LightLink","");
+	
+	t.push_back( XmlTree("CaptureProfile", mActiveCaptureProfileName) );
+	t.push_back( XmlTree("ProjectorProfile", mActiveProjectorProfileName) );
+	
+	XmlTree capture("Capture","");
+	for( const auto& p : mCaptureProfiles ) {
+		capture.push_back( p.second.getParams() );
+	}
+	t.push_back(capture);
+
+	XmlTree projector("Projector","");
+	for( const auto& p : mProjectorProfiles ) {
+		projector.push_back( p.second.getParams() );
+	}
+	t.push_back(projector);
+	
+	return t;
+}
+
+LightLink::CaptureProfile&
+LightLink::getCaptureProfile()
+{
+	auto i = mCaptureProfiles.find(mActiveCaptureProfileName);
+	assert( i != mCaptureProfiles.end() );
+	return i->second;
+}
+
+LightLink::ProjectorProfile&
+LightLink::getProjectorProfile()
+{
+	auto i = mProjectorProfiles.find(mActiveProjectorProfileName);
+	assert( i != mProjectorProfiles.end() );
+	return i->second;
+}
+
+const LightLink::CaptureProfile&
+LightLink::getCaptureProfile() const
+{
+	auto i = mCaptureProfiles.find(mActiveCaptureProfileName);
+	assert( i != mCaptureProfiles.end() );
+	return i->second;
+}
+
+const LightLink::ProjectorProfile&
+LightLink::getProjectorProfile() const
+{
+	auto i = mProjectorProfiles.find(mActiveProjectorProfileName);
+	assert( i != mProjectorProfiles.end() );
+	return i->second;
+}
+
+void LightLink::ensureActiveProfilesAreValid()
+{
+//	assert( !mProjectorProfiles.empty() );
+//	assert( !mCaptureProfiles.empty() );
+//  don't do this anymore
+
+	if ( !mCaptureProfiles.empty() && mCaptureProfiles.find(mActiveCaptureProfileName) == mCaptureProfiles.end() )
+	{
+		mActiveCaptureProfileName = mCaptureProfiles.begin()->second.mName;
+	}
+
+	if ( !mProjectorProfiles.empty() && mProjectorProfiles.find(mActiveProjectorProfileName) == mProjectorProfiles.end() )
+	{
+		mActiveProjectorProfileName = mProjectorProfiles.begin()->second.mName;
+	}
+}
+
+void LightLink::setCaptureProfile  ( string name ) {
+	mActiveCaptureProfileName=name;
+	assert(mCaptureProfiles.find(name)!=mCaptureProfiles.end());
+}
+
+void LightLink::setProjectorProfile( string name ) {
+	mActiveProjectorProfileName=name;
+	assert(mProjectorProfiles.find(name)!=mProjectorProfiles.end());
 }

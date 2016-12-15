@@ -170,8 +170,8 @@ void CalibrateWorld::tryToSolveWithKnownBoards( cv::Size imageSize )
 			auto app = PaperBounce3App::get();
 			if (app)
 			{
-				app->mLightLink.mDistCoeffs = distCoeffs;
-				app->mLightLink.mCameraMatrix = cameraMatrix;
+				app->mLightLink.getCaptureProfile().mDistCoeffs = distCoeffs;
+				app->mLightLink.getCaptureProfile().mCameraMatrix = cameraMatrix;
 				app->lightLinkDidChange();
 			}
 		}

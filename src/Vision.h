@@ -56,14 +56,14 @@ public:
 
 	// configure
 	void setParams( Params );
-	void setLightLink( const LightLink& );
+	void setCaptureProfile( const LightLink::CaptureProfile& );
 
 	// push input through
 	Output processFrame( const Surface &surface, Pipeline& tracePipeline );
 	
 private:
 	Params		mParams;
-	LightLink	mLightLink;
+	LightLink::CaptureProfile mCaptureProfile;
 
 	// undistort params
 	cv::Mat mRemap[2]; // can be empty for none
