@@ -94,10 +94,18 @@ void PinballWorld::setParams( XmlTree xml )
 	
 	getXml(xml, "UpVec", mUpVec );
 	getXml(xml, "FlipperDistToEdge", mFlipperDistToEdge );
-	getXml(xml, "BumperRadius", mBumperRadius );
+	
 	getXml(xml, "PartMaxContourRadius", mPartMaxContourRadius );
 	getXml(xml, "Gravity", mGravity );
 	getXml(xml, "BallReclaimAreaHeight", mBallReclaimAreaHeight );
+	
+	getXml(xml, "BumperMinRadius", mBumperMinRadius );
+	getXml(xml, "BumperContourRadiusScale", mBumperContourRadiusScale );
+	
+	getXml(xml, "CircleMinVerts", mCircleMinVerts );
+	getXml(xml, "CircleMaxVerts", mCircleMaxVerts );
+	getXml(xml, "CircleVertsPerPerimCm", mCircleVertsPerPerimCm );
+	
 	
 	// gamepad
 	if (xml.hasChild("Gamepad"))
@@ -480,7 +488,7 @@ PinballWorld::getBumperPart( vec2 pin, float contourRadius, tAdjSpace adjSpace )
 
 	p.mLoc = pin;
 	p.mType = Part::Type::Bumper;
-	p.mRadius = min( max(contourRadius,mBumperRadius),
+	p.mRadius = min( max(contourRadius*mBumperContourRadiusScale,mBumperMinRadius),
 					 min(adjSpace.mLeft,adjSpace.mRight)
 					 );
 	
@@ -561,13 +569,9 @@ void PinballWorld::getContoursFromParts( const PinballWorld::PartVec& parts, Con
 	}
 }
 
-static int getNumCircleVerts( float r )
+int PinballWorld::getNumCircleVerts( float r ) const
 {
-	const int kMinVerts=8;
-	const int kMaxVerts=100;
-	const float kVertPerPerimCm=2.f;
-	
-	return constrain( (int)(M_PI*r*r / kVertPerPerimCm), kMinVerts, kMaxVerts );
+	return constrain( (int)(M_PI*r*r / mCircleVertsPerPerimCm), mCircleMinVerts, mCircleMaxVerts );
 }
 
 PolyLine2 PinballWorld::getCirclePoly( vec2 c, float r ) const

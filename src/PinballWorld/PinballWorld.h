@@ -45,8 +45,14 @@ private:
 	float mGravity=0.1f;
 	float mPartMaxContourRadius = 5.f; // contour radius lt => part
 	float mFlipperDistToEdge = 10.f; // how close to the edge does a flipper appear?
-	float mBumperRadius = 5.f;
 	float mBallReclaimAreaHeight = 10.f;
+
+	float mBumperMinRadius = 5.f;
+	float mBumperContourRadiusScale = 1.5f;
+	
+	int mCircleMinVerts=8;
+	int mCircleMaxVerts=100;
+	float mCircleVertsPerPerimCm=1.f;
 	
 	// world orientation
 	vec2 getUpVec() const { return mUpVec; }
@@ -125,6 +131,8 @@ private:
 	tAdjSpace getAdjacentLeftRightSpace( vec2, const ContourVector& ) const ; // how much adjacent space is to the left, right?
 	
 	// geometry
+	int getNumCircleVerts( float r ) const;
+
 	PolyLine2 getCirclePoly ( vec2 c, float r ) const;
 	PolyLine2 getCapsulePoly( vec2 c[2], float r[2] ) const;
 	Contour contourFromPoly( PolyLine2 ) const; // area, radius, center, bounds, etc... is approximate
