@@ -30,7 +30,7 @@ public:
 	string getSystemName() const override { return "MusicWorld"; }
 
 	void update() override;
-	void updateVision( const Vision::Output&, Pipeline& ) override;
+	virtual void updateVision( const Vision::Output&, Pipeline& ) override;
 
 	void worldBoundsPolyDidChange() override;
 

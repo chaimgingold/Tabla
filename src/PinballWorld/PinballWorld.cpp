@@ -318,22 +318,22 @@ void PinballWorld::drawAdjSpaceRays() const
 {
 	for( auto &p : mParts )
 	{
-		const AdjSpace &space = p.mAdjSpace;
+		const AdjSpace &space = p->mAdjSpace;
 		
 		gl::color(1,0,0);
 		gl::drawLine(
-			p.mLoc + getRightVec() *  space.mWidthRight,
-			p.mLoc + getRightVec() * (space.mWidthRight + space.mRight) );
+			p->mLoc + getRightVec() *  space.mWidthRight,
+			p->mLoc + getRightVec() * (space.mWidthRight + space.mRight) );
 
 		gl::color(0,1,0);
 		gl::drawLine(
-			p.mLoc + getLeftVec()  *  space.mWidthLeft,
-			p.mLoc + getLeftVec()  * (space.mWidthLeft + space.mLeft) );
+			p->mLoc + getLeftVec()  *  space.mWidthLeft,
+			p->mLoc + getLeftVec()  * (space.mWidthLeft + space.mLeft) );
 
 		gl::color(0,0,1);
 		gl::drawLine(
-			p.mLoc + getLeftVec ()  * space.mWidthLeft,
-			p.mLoc + getRightVec()  * space.mWidthRight );
+			p->mLoc + getLeftVec ()  * space.mWidthLeft,
+			p->mLoc + getRightVec()  * space.mWidthRight );
 	}
 }
 
@@ -361,24 +361,24 @@ void PinballWorld::drawParts() const
 {
 	for( const auto &p : mParts )
 	{
-		switch(p.mType)
+		switch(p->mType)
 		{
 			case Part::Type::FlipperLeft:
 			case Part::Type::FlipperRight:
 			{
 				gl::color( ColorA(0,1,1,1) );
-				gl::drawSolid( p.mPoly );
+				gl::drawSolid( p->mPoly );
 			}
 			break;
 			
 			case Part::Type::Bumper:
 			{
 				//gl::color(1,0,0);
-				gl::color(p.mColor);
-//				gl::drawSolidCircle(p.mLoc,p.mRadius);
-				gl::drawSolid( p.mPoly );
+				gl::color(p->mColor);
+//				gl::drawSolidCircle(p->mLoc,p->mRadius);
+				gl::drawSolid( p->mPoly );
 				gl::color(1,.8,0);
-				gl::drawSolidCircle(p.mLoc,p.mRadius/2.f);
+				gl::drawSolidCircle(p->mLoc,p->mRadius/2.f);
 			}
 			break;
 		}
@@ -544,7 +544,7 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours ) cons
 		{
 			p.mContourLoc = c.mCenter;
 			p.mContourRadius = c.mRadius;
-			parts.push_back(p);
+			parts.push_back( std::make_shared<Part>(p) );
 		};
 
 		if ( c.mTreeDepth>0 && c.mIsHole && c.mRadius < mPartMaxContourRadius )
@@ -592,25 +592,26 @@ PinballWorld::mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newPa
 {
 	PartVec parts = newParts;
 	
-	for( Part& p : parts )
+	for( PartRef &p : parts )
 	{
 		// does it match an old part?
-		for( const auto& old : oldParts )
+		for( const PartRef& old : oldParts )
 		{
 			if ( //old.mType == p.mType &&
-				 distance( old.mContourLoc, p.mContourLoc ) < mPartTrackLocMaxDist &&
-				 fabs( old.mContourRadius - p.mContourRadius ) < mPartTrackRadiusMaxDist
+				 distance( old->mContourLoc, p->mContourLoc ) < mPartTrackLocMaxDist &&
+				 fabs( old->mContourRadius - p->mContourRadius ) < mPartTrackRadiusMaxDist
 				)
 			{
 				// matched.
 				bool replace=true;
 				
 				// but...
-				if ( old.isFlipper() ) replace=false; // flippers need to animate!
+				if ( old->isFlipper() ) replace=false; // flippers need to animate!
 					// ideally this would do replacement if there is no flipper animation happening
 					// between frames--basically we need to decouple the rotating shape from the rest of the state
 				
 				// replace with old.
+				// (we are simply shifting pointers rather than copying contents, but i think this is fine)
 				if (replace) p = old;
 			}
 		}
@@ -621,11 +622,11 @@ PinballWorld::mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newPa
 
 void PinballWorld::getContoursFromParts( const PartVec& parts, ContourVec& contours ) const
 {
-	for( const Part &p : parts )
+	for( const PartRef p : parts )
 	{
-		if (p.mPoly.size()>0)
+		if (p->mPoly.size()>0)
 		{
-			addContourToVec( contourFromPoly( p.mPoly ), contours );
+			addContourToVec( contourFromPoly( p->mPoly ), contours );
 		}
 	}
 }

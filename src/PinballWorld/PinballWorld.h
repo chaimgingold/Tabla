@@ -57,7 +57,8 @@ public:
 	
 	AdjSpace mAdjSpace;
 };
-typedef vector<Part> PartVec;
+typedef std::shared_ptr<Part> PartRef;
+typedef vector<PartRef> PartVec;
 
 
 class PinballWorld : public BallWorld
@@ -73,7 +74,7 @@ public:
 
 	void gameWillLoad() override;
 	void update() override;
-	void updateVision( const Vision::Output&, Pipeline& ) override;
+	virtual void updateVision( const Vision::Output&, Pipeline& ) override; // "virtual" shushes weird clang warning/error
 	void draw( DrawType ) override;
 	
 	void worldBoundsPolyDidChange() override;
