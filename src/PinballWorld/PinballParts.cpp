@@ -99,3 +99,10 @@ PolyLine2 Bumper::getCollisionPoly() const
 {
 	return mWorld.getCirclePoly( mLoc, mRadius );
 }
+
+void Bumper::onBallCollide( const Ball& )
+{
+//	mRadius /= 2.f;
+	mColor = Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat());
+//	mColor = Color(1,0,0);
+}

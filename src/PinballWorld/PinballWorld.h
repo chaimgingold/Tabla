@@ -100,10 +100,16 @@ private:
 	
 	void updatePlayfieldLayout( const ContourVec& );
 	
-	void getContoursFromParts( const PartVec&, ContourVec& contours ) const; // for physics simulation
+	// parts
+	typedef map<int,PartRef> ContourToPartMap;
 	
 	PartVec mParts;
+	ContourToPartMap mContoursToParts;
+
+	void getContoursFromParts( const PartVec&, ContourVec& contours, ContourToPartMap& ) const; // for physics simulation
 	void drawParts() const;
+	
+	PartRef findPartForContour( const Contour& ) const;
 	
 	// are flippers depressed
 	bool  mIsFlipperDown[2]; // left, right

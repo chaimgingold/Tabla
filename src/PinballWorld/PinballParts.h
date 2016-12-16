@@ -9,6 +9,8 @@
 #ifndef PinballParts_hpp
 #define PinballParts_hpp
 
+#include "BallWorld.h"
+
 using namespace ci;
 using namespace std;
 
@@ -45,6 +47,8 @@ public:
 	virtual void tick();
 	
 	bool isFlipper() const { return mType==PartType::FlipperLeft || mType==PartType::FlipperRight; }
+	
+	virtual void onBallCollide( const Ball& ) {}
 	
 	ColorA mColor=ColorA(1,1,1,1);
 	
@@ -89,6 +93,8 @@ public:
 
 	virtual void draw() override;
 	virtual void tick() override;
+
+	virtual void onBallCollide( const Ball& ) override;
 
 	virtual PolyLine2 getCollisionPoly() const override;
 	

@@ -209,7 +209,10 @@ void PinballWorld::serveBall()
 		vec2( lerp(mPlayfieldBoundingBox.x1,mPlayfieldBoundingBox.x2,fx), mPlayfieldBoundingBox.y2 )
 		);
 	
-	newRandomBall(loc).mCollideWithContours = true;
+	Ball& ball = newRandomBall(loc);
+	
+	ball.mCollideWithContours = true;
+	ball.mColor = mBallDefaultColor; // no random colors that are set entirely in code, i think. :P
 }
 
 void PinballWorld::cullBalls()
@@ -252,11 +255,21 @@ void PinballWorld::onBallBallCollide   ( const Ball&, const Ball& )
 	if (0) cout << "ball ball collide" << endl;
 }
 
-void PinballWorld::onBallContourCollide( const Ball&, const Contour& )
+void PinballWorld::onBallContourCollide( const Ball& b, const Contour& c )
 {
 	mPureDataNode->sendBang("hit-object");
 
 	if (0) cout << "ball contour collide" << endl;
+	
+	// tell part
+	PartRef p = findPartForContour(c);
+	if (p) {
+//		cout << "collide part" << endl;
+		p->onBallCollide(b);
+	}
+	else {
+//		cout << "collide wall" << endl;
+	}
 }
 
 void PinballWorld::onBallWorldBoundaryCollide	( const Ball& b )
@@ -309,7 +322,9 @@ void PinballWorld::draw( DrawType drawType )
 		ContourVec cs = getContours();
 		int i = cs.size(); // only start loop at new contours we append
 		
-		getContoursFromParts(mParts,cs);
+		ContourToPartMap c2pm; // don't care
+		
+		getContoursFromParts(mParts,cs,c2pm);
 		
 		for( ; i<cs.size(); ++i )
 		{
@@ -424,7 +439,7 @@ void PinballWorld::updateBallWorldContours()
 	// (we add contours to convey the new shapes to simulate)
 	ContourVec physicsContours = mVisionContours;
 
-	getContoursFromParts( mParts, physicsContours );
+	getContoursFromParts( mParts, physicsContours, mContoursToParts );
 	
 	// tell ball world
 	BallWorld::setContours(physicsContours);
@@ -534,6 +549,16 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 	return parts;
 }
 
+PartRef PinballWorld::findPartForContour( const Contour& c ) const
+{
+	int contouridx = getContours().getIndex(c);
+	
+	auto i = mContoursToParts.find(contouridx);
+	
+	if (i==mContoursToParts.end()) return 0;
+	else return i->second;
+}
+
 PartVec
 PinballWorld::mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const
 {
@@ -565,8 +590,10 @@ PinballWorld::mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newPa
 	return parts;
 }
 
-void PinballWorld::getContoursFromParts( const PartVec& parts, ContourVec& contours ) const
+void PinballWorld::getContoursFromParts( const PartVec& parts, ContourVec& contours, ContourToPartMap& c2p ) const
 {
+	c2p.clear();
+	
 	for( const PartRef p : parts )
 	{
 		PolyLine2 poly = p->getCollisionPoly();
@@ -574,6 +601,8 @@ void PinballWorld::getContoursFromParts( const PartVec& parts, ContourVec& conto
 		if (poly.size()>0)
 		{
 			addContourToVec( contourFromPoly(poly), contours );
+			
+			c2p[contours.size()-1] = p;
 		}
 	}
 }

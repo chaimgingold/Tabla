@@ -84,10 +84,16 @@ public:
 		if (c.mParent!=-1) return &((*this)[c.mParent]);
 		else return 0;
 	}
-
+	
+	int getIndex( const Contour& c ) const {
+		int i = &c - &( (*this)[0] );
+		if (i<0 || i>=size()) i=-1;
+		return i;
+	}
+	
 	ContourVec& operator+=(const ContourVec& rhs);
 	ContourVec operator+(const ContourVec& rhs) const { ContourVec c = *this; c += rhs; return c; }
-
+	
 	const Contour* rayIntersection( vec2 rayOrigin, vec2 rayVec,
 		float *rayt=0,
 		std::function<bool(const Contour&)> = 0 // optional filter function
