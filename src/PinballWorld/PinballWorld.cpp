@@ -183,7 +183,7 @@ void PinballWorld::update()
 	mGamepadManager.tick();
 	tickFlipperState();
 
-	// parts
+	// tick parts
 	for( auto p : mParts ) p->tick();
 
 	// update contours, merging in physics shapes from our parts
@@ -195,9 +195,12 @@ void PinballWorld::update()
 		b.mAccel += getGravityVec() * mGravity;
 	}
 	
-	// balls
+	// sim balls
 	cullBalls();
 	BallWorld::update();
+	
+	// respond to collisions
+	processCollisions();
 }
 
 void PinballWorld::serveBall()
@@ -248,35 +251,45 @@ void PinballWorld::tickFlipperState()
 	}
 }
 
-void PinballWorld::onBallBallCollide   ( const Ball&, const Ball& )
+void PinballWorld::processCollisions()
 {
-//	mPureDataNode->sendBang("new-game");
+	for( const auto &c : getBallBallCollisions() )
+	{
+	//	mPureDataNode->sendBang("new-game");
 
-	if (0) cout << "ball ball collide" << endl;
-}
-
-void PinballWorld::onBallContourCollide( const Ball& b, const Contour& c )
-{
-	mPureDataNode->sendBang("hit-object");
-
-	if (0) cout << "ball contour collide" << endl;
+		if (0) cout << "ball ball collide (" << c.mBallIndex[0] << ", " << c.mBallIndex[1] << ")" << endl;
+	}
 	
-	// tell part
-	PartRef p = findPartForContour(c);
-	if (p) {
-//		cout << "collide part" << endl;
-		p->onBallCollide(b);
-	}
-	else {
-//		cout << "collide wall" << endl;
-	}
-}
+	for( const auto &c : getBallWorldCollisions() )
+	{
+		mPureDataNode->sendBang("hit-wall");
 
-void PinballWorld::onBallWorldBoundaryCollide	( const Ball& b )
-{
-	mPureDataNode->sendBang("hit-wall");
+		if (0) cout << "ball world collide (" << c.mBallIndex << ")" << endl;
+	}
+	
+	for( const auto &c : getBallContourCollisions() )
+	{
+		mPureDataNode->sendBang("hit-object");
 
-	if (0) cout << "ball world collide" << endl;
+		if (0) cout << "ball contour collide (ball=" << c.mBallIndex << ", " << c.mContourIndex << ")" << endl;
+		
+		// tell part
+		PartRef p = findPartForContour(c.mContourIndex);
+		if (p) {
+			
+			Ball* ball=0;
+			if (c.mBallIndex>=0 && c.mBallIndex<=getBalls().size())
+			{
+				ball = &getBalls()[c.mBallIndex];
+			}
+			
+	//		cout << "collide part" << endl;
+			if (ball) p->onBallCollide(*ball);
+		}
+		else {
+	//		cout << "collide wall" << endl;
+		}
+	}
 }
 
 void PinballWorld::draw( DrawType drawType )
@@ -551,8 +564,11 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 
 PartRef PinballWorld::findPartForContour( const Contour& c ) const
 {
-	int contouridx = getContours().getIndex(c);
-	
+	return findPartForContour( getContours().getIndex(c) );
+}
+
+PartRef PinballWorld::findPartForContour( int contouridx ) const
+{
 	auto i = mContoursToParts.find(contouridx);
 	
 	if (i==mContoursToParts.end()) return 0;

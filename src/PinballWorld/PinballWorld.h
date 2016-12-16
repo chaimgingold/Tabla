@@ -37,11 +37,6 @@ public:
 
 	void keyDown( KeyEvent ) override;
 
-protected:
-	virtual void onBallBallCollide   ( const Ball&, const Ball& ) override;
-	virtual void onBallContourCollide( const Ball&, const Contour& ) override;
-	virtual void onBallWorldBoundaryCollide	( const Ball& ) override;
-
 public:
 
 	// world orientation
@@ -110,6 +105,7 @@ private:
 	void drawParts() const;
 	
 	PartRef findPartForContour( const Contour& ) const;
+	PartRef findPartForContour( int contourIndex ) const;
 	
 	// are flippers depressed
 	bool  mIsFlipperDown[2]; // left, right
@@ -119,6 +115,7 @@ private:
 	
 	// simulation
 	void updateBallWorldContours();
+	void processCollisions();
 	void serveBall();
 	void cullBalls(); // cull dropped balls
 	

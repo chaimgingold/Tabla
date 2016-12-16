@@ -45,6 +45,11 @@
 			<value>cartridge/CalibrateWorld</value>
 		</tag>
 		
+		<tag>
+			<id>17326116</id>
+			<value>cartridge/PinballWorld</value>
+		</tag>
+		
 	</RFID>
 
 

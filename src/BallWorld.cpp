@@ -183,8 +183,36 @@ void BallWorld::update()
 	updatePhysics();
 }
 
+int BallWorld::getBallIndex( const Ball& b ) const
+{
+	int i = &b - &mBalls[0];
+	if (i<0 || i>=mBalls.size()) i=-1;
+	return i;
+}
+
+void BallWorld::onBallBallCollide			( const Ball& a, const Ball& b )
+{
+	mBallBallCollisions.push_back( BallBallCollision(getBallIndex(a),getBallIndex(b)));
+}
+
+void BallWorld::onBallContourCollide		( const Ball& a, const Contour& b )
+{
+	mBallContourCollisions.push_back( BallContourCollision(getBallIndex(a),mContours.getIndex(b)));
+}
+
+void BallWorld::onBallWorldBoundaryCollide	( const Ball& a )
+{
+	mBallWorldCollisions.push_back( BallWorldCollision(getBallIndex(a)));
+}
+
 void BallWorld::updatePhysics()
 {
+	// wipe collisions
+	mBallBallCollisions.clear();
+	mBallContourCollisions.clear();
+	mBallWorldCollisions.clear();
+	
+	//
 	int   steps = 1 ;
 	float delta = 1.f / (float)steps ;
 	

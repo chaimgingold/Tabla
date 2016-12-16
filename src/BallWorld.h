@@ -92,16 +92,43 @@ public:
 	ContourVector& getContours() { return mContours; }
 	const ContourVector& getContours() const { return mContours; }
 	
+	// tracking collisions
+	struct BallBallCollision {
+	public:
+		BallBallCollision( int a=-1, int b=-1 ) { mBallIndex[0]=a; mBallIndex[1]=b; }
+		int mBallIndex[2];
+	};
+	typedef vector<BallBallCollision> BallBallCollisionVec;
+	
+	struct BallContourCollision {
+	public:
+		BallContourCollision( int a=-1, int b=-1 ) { mBallIndex=a; mContourIndex=b; }
+		int mBallIndex;
+		int mContourIndex;
+	};
+	typedef vector<BallContourCollision> BallContourCollisionVec;
+
+	struct BallWorldCollision {
+	public:
+		BallWorldCollision( int a=-1 ) { mBallIndex=a; }
+		int mBallIndex;
+	};
+	typedef vector<BallWorldCollision> BallWorldCollisionVec;
+
+	const BallBallCollisionVec&		getBallBallCollisions() const { return mBallBallCollisions; }
+	const BallContourCollisionVec&	getBallContourCollisions() const { return mBallContourCollisions; }
+	const BallWorldCollisionVec&	getBallWorldCollisions() const { return mBallWorldCollisions; }
+	
 protected:
 	void setContours( const ContourVec& contours ) { mContours = contours; }
 	
-	virtual void onBallBallCollide			( const Ball&, const Ball& ){}
-	virtual void onBallContourCollide		( const Ball&, const Contour& ){}
-	virtual void onBallWorldBoundaryCollide	( const Ball& ){}
-	// you probably want to just note this stuff and then transform Balls/Contours/etc... later
-	// ideally BallWorld would just provide a list of collisions to others.
-	// once we can uniquely id balls + contours with user data we'll switch to that model
-	// and make these functions non-virtual and then they can do the recording.
+	int getBallIndex( const Ball& b ) const;
+	
+	virtual void onBallBallCollide			( const Ball&, const Ball& );
+	virtual void onBallContourCollide		( const Ball&, const Contour& );
+	virtual void onBallWorldBoundaryCollide	( const Ball& );
+	// these functions record collisions. if you override, then make sure you call BallWorld::
+	// if you still want them returned in the collision lists.
 
 	// params
 	int		mDefaultNumBalls		= 5;
@@ -115,6 +142,11 @@ protected:
 	
 private:
 
+	// storing collisions
+	BallBallCollisionVec	mBallBallCollisions;
+	BallContourCollisionVec	mBallContourCollisions;
+	BallWorldCollisionVec	mBallWorldCollisions;
+	
 	// simulation
 	void updatePhysics();
 

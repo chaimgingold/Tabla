@@ -48,7 +48,7 @@ public:
 	
 	bool isFlipper() const { return mType==PartType::FlipperLeft || mType==PartType::FlipperRight; }
 	
-	virtual void onBallCollide( const Ball& ) {}
+	virtual void onBallCollide( Ball& ) {}
 	
 	ColorA mColor=ColorA(1,1,1,1);
 	
@@ -94,7 +94,7 @@ public:
 	virtual void draw() override;
 	virtual void tick() override;
 
-	virtual void onBallCollide( const Ball& ) override;
+	virtual void onBallCollide( Ball& ) override;
 
 	virtual PolyLine2 getCollisionPoly() const override;
 	
