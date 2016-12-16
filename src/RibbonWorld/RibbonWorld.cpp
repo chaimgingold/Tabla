@@ -25,38 +25,52 @@ void RibbonWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeli
 
 	mContours = visionOut.mContours;
 
-	cout << "**************************" << endl;
-	for (auto c : mContours ) {
+//	cout << "*****************" << endl;
+//	cout << "Checking " << mContours.size() << " contours" << endl;
+	for (auto &c : mContours) {
 		vec2 center = c.mPolyLine.calcCentroid();
 
-		float bestDistance = 9999.0;
-		Ribbon &bestRibbon = mRibbons.back();
+		float bestDistance = 999999.0;
+		Ribbon *bestRibbon;
 
-		for (auto &r : mRibbons) {
+//		cout << "Checking " << mRibbons.size() << " ribbons" << endl;
+//		cout << "Ribbons are now:" << endl;
+//		for (auto& r : mRibbons) {
+//			cout << "Ribbon " << r.ID << " size: " << r.points.size() << endl;
+//		}
 
+		for (auto it = mRibbons.begin(); it != mRibbons.end(); ++it) {
 
-			float pointDistance = distance(center, r.points.getPoints().back());
-
-			if (pointDistance < bestDistance) {
-				bestDistance = pointDistance;
-				bestRibbon = r;
+			// Compare to each ribbon's tip point and find the closest one.
+			float tipDistance = distance(center, it->points.getPoints().back());
+//			cout << "Tip distance: " << it->ID << ": " << tipDistance << endl;
+			if (tipDistance < bestDistance) {
+				bestDistance = tipDistance;
+				bestRibbon = &(*it);
 			}
 		}
+
 		// Don't create redundant points
 		if (bestDistance < 1) {
-			continue;;
+			continue;
 		}
+
+		// If tip of closest ribbon is within range, extend that ribbon
 		if (bestDistance < 10.0) {
-			bestRibbon.points.push_back(center);
+//			cout << "Extending ribbon " << bestRibbon->ID << endl;
+			bestRibbon->points.push_back(center);
 		} else {
+			// Otherwise, create a new one
 			Ribbon newRibbon;
 			newRibbon.ID = mRibbons.size();
 			newRibbon.points.push_back(center);
+//			cout << "Created ribbon with ID: " << newRibbon.ID << endl;
 			mRibbons.push_back(newRibbon);
 
-			for (auto &r : mRibbons) {
-				cout << "Ribbon " << r.ID << " size: " << r.points.size() << endl;
-			}
+//			cout << "Ribbons are now:" << endl;
+//			for (auto &r : mRibbons) {
+//				cout << "Ribbon " << r.ID << " size: " << r.points.size() << endl;
+//			}
 		}
 	}
 
