@@ -31,6 +31,7 @@ using namespace cv;
 
 struct Ribbon {
 	int ID=0;
+	TriMeshRef triMesh;
 	PolyLine2 points;
 };
 
