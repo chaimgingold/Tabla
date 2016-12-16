@@ -64,8 +64,6 @@ public:
 	vec2  mContourLoc;
 	float mContourRadius=0.f;
 	
-	AdjSpace mAdjSpace;
-	
 	PinballWorld& mWorld;
 };
 typedef std::shared_ptr<Part> PartRef;
@@ -196,7 +194,7 @@ private:
 	// vision
 	PartVec getPartsFromContours( const ContourVector& ); // only reason this is non-const is b/c parts point to the world
 	PartVec mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const;
-	AdjSpace getAdjacentLeftRightSpace( vec2, const ContourVector& ) const ; // how much adjacent space is to the left, right?
+	AdjSpace getAdjacentSpace( vec2, const ContourVector& ) const ; // how much adjacent space is to the left, right?
 	
 	ContourVec mVisionContours;
 	

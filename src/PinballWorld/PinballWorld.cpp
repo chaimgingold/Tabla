@@ -404,7 +404,7 @@ void PinballWorld::drawAdjSpaceRays() const
 {
 	for( auto &p : mParts )
 	{
-		const AdjSpace &space = p->mAdjSpace;
+		const AdjSpace space = getAdjacentSpace(p->mLoc,mVisionContours);
 		
 		gl::color(1,0,0);
 		gl::drawLine(
@@ -520,7 +520,7 @@ void PinballWorld::updateVision( const Vision::Output& visionOut, Pipeline& p )
 }
 
 AdjSpace
-PinballWorld::getAdjacentLeftRightSpace( vec2 loc, const ContourVector& cs ) const
+PinballWorld::getAdjacentSpace( vec2 loc, const ContourVector& cs ) const
 {
 	AdjSpace result;
 
@@ -563,17 +563,17 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 	
 	for( const auto &c : contours )
 	{
-		auto add = [&c,&parts]( Part* p )
-		{
-			p->mContourLoc = c.mCenter;
-			p->mContourRadius = c.mRadius;
-			parts.push_back( PartRef(p) );
-		};
-
 		if ( c.mTreeDepth>0 && c.mIsHole && c.mRadius < mPartMaxContourRadius )
 		{
 			// flipper orientation
-			AdjSpace adjSpace = getAdjacentLeftRightSpace(c.mCenter,contours);
+			AdjSpace adjSpace = getAdjacentSpace(c.mCenter,contours);
+
+			auto add = [&c,&parts,adjSpace]( Part* p )
+			{
+				p->mContourLoc = c.mCenter;
+				p->mContourRadius = c.mRadius;
+				parts.push_back( PartRef(p) );
+			};
 			
 			if      (adjSpace.mRight < adjSpace.mLeft  && adjSpace.mRight < mFlipperDistToEdge)
 			{
