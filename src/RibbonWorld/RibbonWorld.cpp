@@ -62,8 +62,6 @@ void RibbonWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeli
 
 			mat4 rotator = rotate(mat4(1), angle, vec3(0, 0, 1));
 
-
-
 			vec2 p1 = lastPoint + vec2(rotator * vec4(-width, -mag, 0, 1));
 			vec2 p2 = lastPoint + vec2(rotator * vec4( width, -mag, 0, 1));
 
@@ -87,6 +85,15 @@ void RibbonWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeli
 			bestRibbon->lastP1 = p1;
 			bestRibbon->lastP2 = p2;
 			bestRibbon->numPoints++;
+
+			// Erase oldest positions
+			if (bestRibbon->numPoints > 100) {
+				auto &positions = bestRibbon->triMesh->getBufferPositions();
+				positions.erase(positions.begin(), positions.begin() + 6);
+
+				auto &texCoords = bestRibbon->triMesh->getBufferTexCoords0();
+				texCoords.erase(texCoords.begin(), texCoords.begin() + 6);
+			}
 		} else {
 			// Otherwise, create a new one
 			Ribbon newRibbon;
