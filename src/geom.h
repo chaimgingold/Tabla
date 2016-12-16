@@ -66,23 +66,22 @@ inline vec2 closestPointOnPoly( vec2 pt, const PolyLine2& poly, size_t *ai=0, si
 	return result ;
 }
 
-inline bool rayLineSegIntersection( vec2 rayOrigin, vec2 rayVec, vec2 line0, vec2 line1, float *rayt=0 )
+inline bool rayLineSegIntersection( vec2 rayOrigin, vec2 rayDirection, vec2 point1, vec2 point2, float *rayt=0 )
 {
-	rayVec *= -1.f;
-	// this negative sign is not what the recipe calls for, but recipe
-	// seems to return bogus results.
+	// https://gist.github.com/danieljfarrell/faf7c4cafd683db13cbc
 	
-	// https://rootllama.wordpress.com/2014/06/20/ray-line-segment-intersection-test-in-2d/
-	vec2 v1 = rayOrigin - line0;
-	vec2 v2 = line1 - line0;
-	vec2 v3( -rayVec.y, rayVec.x );
+	vec2 v1 = rayOrigin - point1;
+    vec2 v2 = point2 - point1;
+    vec2 v3 = vec2(-rayDirection[1], rayDirection[0]) ;
+    float t1 = cross(vec3(v2,0), vec3(v1,0)).z / dot(v2, v3);
+    float t2 = dot(v1, v3) / dot(v2, v3);
 	
-	float t1 = length( glm::cross(vec3(v2,0),vec3(v1,0)) ) / dot(v2,v3);
-	float t2 = dot(v1,v3) / dot(v2,v3);
-	
-	if (rayt) *rayt = t1;
-	
-	return (t2 >= 0.f && t2 <= 1.f) && t1>=0 ;
+    if ( t1 >= 0.0 && t2 >= 0.0 && t2 <= 1.f )
+	{
+		if (rayt) *rayt = t1;
+		return true;
+	}
+	return false;
 }
 
 inline PolyLine2 getPointsAsPoly( const vec2* v, int n )

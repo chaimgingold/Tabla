@@ -54,6 +54,13 @@ private:
 	int mCircleMaxVerts=100;
 	float mCircleVertsPerPerimCm=1.f;
 	
+	bool mDebugDrawAdjSpaceRays=false;
+	bool mDebugDrawGeneratedContours=false;
+	
+	// more params, just for vision
+	float mPartTrackLocMaxDist = 1.f;
+	float mPartTrackRadiusMaxDist = .5f;
+	
 	// world orientation
 	vec2 getUpVec() const { return mUpVec; }
 	vec2 getLeftVec() const { return vec2(cross(vec3(mUpVec,0),vec3(0,0,1))); }
@@ -85,28 +92,39 @@ private:
 			FlipperRight,
 			Bumper
 		};
+		bool isFlipper() const { return mType==Type::FlipperLeft || mType==Type::FlipperRight; }
 		
-		Color mColor;
+		ColorA mColor=ColorA(1,1,1,1);
 		
 		Type  mType;
 		vec2  mLoc;
-		float mRadius;
+		float mRadius=0.f;
 		
 		vec2  mFlipperLoc2; // second point of capsule that forms flipper
-		float mFlipperLength;
+		float mFlipperLength=0.f;
 		
 		PolyLine2 mPoly;
+
+		// contour origin info (for inter-frame coherency)
+		vec2  mContourLoc;
+		float mContourRadius=0.f;
 	};
 	typedef vector<Part> PartVec;
 	
 	struct tAdjSpace
 	{
+		// amount of space at my left and right, from my edge (centroid + width-left/right)
 		float mLeft=0.f;
 		float mRight=0.f;
+		
+		// width of my contour, from its centroid
+		float mWidthLeft=0.f;
+		float mWidthRight=0.f;
 	};
 	
 	Part getFlipperPart( vec2 pin, float contourRadius, Part::Type type ) const; // type is left or right
 	Part getBumperPart ( vec2 pin, float contourRadius, tAdjSpace adjSpace ) const;
+	
 	void getContoursFromParts( const PartVec&, ContourVec& contours ) const; // for physics simulation
 	
 	PartVec mParts;
@@ -123,12 +141,14 @@ private:
 	void cullBalls(); // cull dropped balls
 	
 	// drawing
-	void drawFlipperOrientationRays() const;
+	void drawAdjSpaceRays() const;
 	
 	// vision
 	PartVec getPartsFromContours( const ContourVector& ) const;
 	PartVec mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const;
 	tAdjSpace getAdjacentLeftRightSpace( vec2, const ContourVector& ) const ; // how much adjacent space is to the left, right?
+	
+	Vision::Output mVisionOutput; // for debug drawing...
 	
 	// geometry
 	int getNumCircleVerts( float r ) const;
