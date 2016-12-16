@@ -18,6 +18,7 @@
 using namespace ci;
 using namespace ci::app;
 using namespace std;
+using namespace Pinball;
 
 PinballWorld::PinballWorld()
 {
@@ -317,7 +318,7 @@ void PinballWorld::drawAdjSpaceRays() const
 {
 	for( auto &p : mParts )
 	{
-		tAdjSpace space = getAdjacentLeftRightSpace(p.mLoc, mVisionOutput.mContours );
+		const AdjSpace &space = p.mAdjSpace;
 		
 		gl::color(1,0,0);
 		gl::drawLine(
@@ -430,8 +431,6 @@ void PinballWorld::updatePlayfieldLayout( const ContourVec& contours )
 
 void PinballWorld::updateVision( const Vision::Output& visionOut, Pipeline& p )
 {
-	mVisionOutput = visionOut;
-	
 	// playfield layout
 	updatePlayfieldLayout(visionOut.mContours);
 	
@@ -449,10 +448,10 @@ void PinballWorld::updateVision( const Vision::Output& visionOut, Pipeline& p )
 	BallWorld::updateVision(visionForBallWorld,p);
 }
 
-PinballWorld::tAdjSpace
+AdjSpace
 PinballWorld::getAdjacentLeftRightSpace( vec2 loc, const ContourVector& cs ) const
 {
-	tAdjSpace result;
+	AdjSpace result;
 
 	const Contour* leaf = cs.findLeafContourContainingPoint(loc);
 	
@@ -487,7 +486,7 @@ PinballWorld::getAdjacentLeftRightSpace( vec2 loc, const ContourVector& cs ) con
 	return result;
 }
 
-PinballWorld::Part
+Part
 PinballWorld::getFlipperPart( vec2 pin, float contourRadius, Part::Type type ) const
 {
 	const float kFlipperMinRadius = 1.f;
@@ -517,8 +516,8 @@ PinballWorld::getFlipperPart( vec2 pin, float contourRadius, Part::Type type ) c
 	return p;
 }
 
-PinballWorld::Part
-PinballWorld::getBumperPart( vec2 pin, float contourRadius, tAdjSpace adjSpace ) const
+Part
+PinballWorld::getBumperPart( vec2 pin, float contourRadius, AdjSpace adjSpace ) const
 {
 	Part p;
 	
@@ -535,9 +534,9 @@ PinballWorld::getBumperPart( vec2 pin, float contourRadius, tAdjSpace adjSpace )
 	return p;
 }
 
-PinballWorld::PartVec PinballWorld::getPartsFromContours( const ContourVector& contours ) const
+PartVec PinballWorld::getPartsFromContours( const ContourVector& contours ) const
 {
-	PinballWorld::PartVec parts;
+	PartVec parts;
 	
 	for( const auto &c : contours )
 	{
@@ -551,7 +550,7 @@ PinballWorld::PartVec PinballWorld::getPartsFromContours( const ContourVector& c
 		if ( c.mTreeDepth>0 && c.mIsHole && c.mRadius < mPartMaxContourRadius )
 		{
 			// flipper orientation
-			tAdjSpace adjSpace = getAdjacentLeftRightSpace(c.mCenter,contours);
+			AdjSpace adjSpace = getAdjacentLeftRightSpace(c.mCenter,contours);
 			
 			if      (adjSpace.mRight < adjSpace.mLeft  && adjSpace.mRight < mFlipperDistToEdge)
 			{
@@ -588,7 +587,7 @@ PinballWorld::PartVec PinballWorld::getPartsFromContours( const ContourVector& c
 	return parts;
 }
 
-PinballWorld::PartVec
+PartVec
 PinballWorld::mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const
 {
 	PartVec parts = newParts;
@@ -620,7 +619,7 @@ PinballWorld::mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newPa
 	return parts;
 }
 
-void PinballWorld::getContoursFromParts( const PinballWorld::PartVec& parts, ContourVec& contours ) const
+void PinballWorld::getContoursFromParts( const PartVec& parts, ContourVec& contours ) const
 {
 	for( const Part &p : parts )
 	{

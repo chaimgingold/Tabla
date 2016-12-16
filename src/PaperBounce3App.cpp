@@ -23,6 +23,22 @@ const vec2 kDefaultWindowSize( 640, 480 );
 
 const string kDocumentsDirectoryName = "PaperES";
 
+void PaperBounce3App::FPS::start()
+{
+	mLastFrameTime = ci::app::getElapsedSeconds();
+}
+
+void PaperBounce3App::FPS::mark()
+{
+	double now = ci::app::getElapsedSeconds();
+	
+	mLastFrameLength = now - mLastFrameTime ;
+	
+	mLastFrameTime = now;
+	
+	mFPS = 1.f / mLastFrameLength;
+}
+
 PaperBounce3App::~PaperBounce3App()
 {
 	cout << "Shutting down..." << endl;
@@ -78,7 +94,8 @@ void PaperBounce3App::setup()
 	}
 	
 	//
-	mLastFrameTime = getElapsedSeconds() ;
+	mAppFPS.start();
+	mCaptureFPS.start();
 
 	// enumerate hardware
 	{
@@ -568,25 +585,16 @@ void PaperBounce3App::addProjectorPipelineStages()
 			mLightLink.getProjectorProfile().mProjectorWorldSpaceCoords ));
 }
 
-void PaperBounce3App::updateFPS()
-{
-	double now = ci::app::getElapsedSeconds();
-	
-	mLastFrameLength = now - mLastFrameTime ;
-	
-	mLastFrameTime = now;
-	
-	mFPS = 1.f / mLastFrameLength;
-}
-
 void PaperBounce3App::update()
 {
-	updateFPS();
+	mAppFPS.mark();
 	
 	mFileWatch.update();
 	
 	if ( (mCapture && mCapture->checkNewFrame()) || mDebugFrame )
 	{
+		mCaptureFPS.mark();
+		
 		// start pipeline
 		if ( mPipeline.getQuery().empty() ) mPipeline.setQuery("undistorted");
 		mPipeline.setCaptureAllStageImages(true);

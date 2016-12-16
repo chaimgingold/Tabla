@@ -117,11 +117,19 @@ class PaperBounce3App : public App {
 	WindowData*			getWindowData() { return getWindow() ? getWindow()->getUserData<WindowData>() : 0 ; }
 	// for front window
 	
-	double				mLastFrameTime = 0. ;
-	double				mLastFrameLength = 0.f ;
-	float				mFPS=0.f;
-	
-	void updateFPS();
+	class FPS
+	{
+	public:
+		void start(); // sets mLastFrameTime to now
+		void mark();
+		
+		double				mLastFrameTime = 0. ;
+		double				mLastFrameLength = 0.f ;
+		float				mFPS=0.f;
+	};
+
+	FPS mAppFPS;
+	FPS mCaptureFPS;
 	
 	// to help us visualize
 	void addProjectorPipelineStages();

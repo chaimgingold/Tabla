@@ -13,6 +13,53 @@
 #include "PureDataNode.h"
 #include "GamepadManager.h"
 
+namespace Pinball
+{
+
+struct AdjSpace
+{
+	// amount of space at my left and right, from my contour's outer edge (centroid + my-width-left/right)
+	float mLeft=0.f;
+	float mRight=0.f;
+	
+	// width of my contour, from its centroid
+	float mWidthLeft=0.f;
+	float mWidthRight=0.f;
+};
+
+class Part
+{
+public:
+	enum class Type
+	{
+		FlipperLeft,
+		FlipperRight,
+		Bumper
+	};
+	bool isFlipper() const { return mType==Type::FlipperLeft || mType==Type::FlipperRight; }
+	
+	ColorA mColor=ColorA(1,1,1,1);
+	
+	Type  mType;
+	vec2  mLoc;
+	float mRadius=0.f;
+	
+	vec2  mFlipperLoc2; // second point of capsule that forms flipper
+	float mFlipperLength=0.f;
+	
+	PolyLine2 mPoly;
+
+	// contour origin info (for inter-frame coherency)
+	// (when we do composite parts--multiple bumpers combined into one, we'll want to make this into a vector with a particular ordering
+	// for easy comparisons)
+	vec2  mContourLoc;
+	float mContourRadius=0.f;
+	
+	AdjSpace mAdjSpace;
+};
+typedef vector<Part> PartVec;
+
+
 class PinballWorld : public BallWorld
 {
 public:
@@ -82,48 +129,8 @@ private:
 	
 	void updatePlayfieldLayout( const ContourVec& );
 	
-	// Parts
-	class Part
-	{
-	public:
-		enum class Type
-		{
-			FlipperLeft,
-			FlipperRight,
-			Bumper
-		};
-		bool isFlipper() const { return mType==Type::FlipperLeft || mType==Type::FlipperRight; }
-		
-		ColorA mColor=ColorA(1,1,1,1);
-		
-		Type  mType;
-		vec2  mLoc;
-		float mRadius=0.f;
-		
-		vec2  mFlipperLoc2; // second point of capsule that forms flipper
-		float mFlipperLength=0.f;
-		
-		PolyLine2 mPoly;
-
-		// contour origin info (for inter-frame coherency)
-		vec2  mContourLoc;
-		float mContourRadius=0.f;
-	};
-	typedef vector<Part> PartVec;
-	
-	struct tAdjSpace
-	{
-		// amount of space at my left and right, from my contour's outer edge (centroid + my-width-left/right)
-		float mLeft=0.f;
-		float mRight=0.f;
-		
-		// width of my contour, from its centroid
-		float mWidthLeft=0.f;
-		float mWidthRight=0.f;
-	};
-	
 	Part getFlipperPart( vec2 pin, float contourRadius, Part::Type type ) const; // type is left or right
-	Part getBumperPart ( vec2 pin, float contourRadius, tAdjSpace adjSpace ) const;
+	Part getBumperPart ( vec2 pin, float contourRadius, AdjSpace adjSpace ) const;
 	
 	void getContoursFromParts( const PartVec&, ContourVec& contours ) const; // for physics simulation
 	
@@ -146,9 +153,7 @@ private:
 	// vision
 	PartVec getPartsFromContours( const ContourVector& ) const;
 	PartVec mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const;
-	tAdjSpace getAdjacentLeftRightSpace( vec2, const ContourVector& ) const ; // how much adjacent space is to the left, right?
-	
-	Vision::Output mVisionOutput; // for debug drawing...
+	AdjSpace getAdjacentLeftRightSpace( vec2, const ContourVector& ) const ; // how much adjacent space is to the left, right?
 	
 	// geometry
 	int getNumCircleVerts( float r ) const;
@@ -176,6 +181,9 @@ private:
 
 };
 
+} // namespace Pinball
+
+
 class PinballWorldCartridge : public GameCartridge
 {
 public:
@@ -183,7 +191,7 @@ public:
 
 	virtual std::shared_ptr<GameWorld> load() const override
 	{
-		return std::make_shared<PinballWorld>();
+		return std::make_shared<Pinball::PinballWorld>();
 	}
 };
 

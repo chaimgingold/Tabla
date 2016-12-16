@@ -170,13 +170,24 @@ void WindowData::draw()
 	{
 		float targetFPS = mApp.getFrameRate();
 		
-		if ( targetFPS - mApp.mFPS >= targetFPS*.1f )
+		if ( targetFPS - mApp.mAppFPS.mFPS >= targetFPS*.1f )
 		{
-			string str = toString( mApp.mFPS - fmod(mApp.mFPS,1.f) ) + " fps";
+			string str = toString( (int)roundf(mApp.mAppFPS.mFPS) ) + " fps";
 			
 			vec2 size = mApp.mTextureFont->measureString(str);
 			
 			vec2 loc( vec2(getWindowSize().x - size.x - 8.f, size.y + 8.f ) );
+
+			gl::color(1,1,1,.8);
+			mApp.mTextureFont->drawString( str, loc );
+		}
+		
+		{
+			string str = toString( (int)roundf(mApp.mCaptureFPS.mFPS) ) + " capture fps";
+			
+			vec2 size = mApp.mTextureFont->measureString(str);
+			
+			vec2 loc( vec2(getWindowSize().x - size.x - 8.f, getWindowSize().y - 8.f ) );
 
 			gl::color(1,1,1,.8);
 			mApp.mTextureFont->drawString( str, loc );
