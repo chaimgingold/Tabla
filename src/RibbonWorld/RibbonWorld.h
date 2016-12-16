@@ -32,7 +32,10 @@ using namespace cv;
 struct Ribbon {
 	int ID=0;
 	TriMeshRef triMesh;
-	PolyLine2 points;
+	vec2 lastPoint;
+	vec2 lastP1;
+	vec2 lastP2;
+	int numPoints=0;
 };
 
 class RibbonWorld : public GameWorld
