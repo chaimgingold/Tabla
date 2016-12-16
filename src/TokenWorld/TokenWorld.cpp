@@ -45,15 +45,15 @@ void TokenWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipelin
 		case TokenVisionMode::Matching:
 		{
 
-			mTokens = mTokenMatcher.findTokenCandidates(mWorld, visionOut.mContours, pipeline);
+//			mTokens = mTokenMatcher.findTokenCandidates(mWorld, visionOut.mContours, pipeline);
 
 			// N-to-N matching:
 			// we want to match each found token with every other found token.
-			vector <TokenFeatures> features;
-			for (TokenCandidate &token : mTokens) {
-				features.push_back(token.features);
-			}
-			mMatches = mTokenMatcher.matchTokens(features, features);
+//			vector <TokenFeatures> features;
+//			for (TokenCandidate &token : mTokens) {
+//				features.push_back(token.features);
+//			}
+//			mMatches = mTokenMatcher.matchTokens(features, features);
 		}
 			break;
 		default:

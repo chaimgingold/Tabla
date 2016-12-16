@@ -6,6 +6,7 @@
 #include "CalibrateWorld.h"
 #include "PinballWorld.h"
 #include "TokenWorld.h"
+#include "RibbonWorld.h"
 
 #include "geom.h"
 #include "xml.h"
@@ -257,6 +258,7 @@ void PaperBounce3App::setupGameLibrary()
 	mGameLibrary.push_back( make_shared<TokenWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<CalibrateWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<MusicWorldCartridge>() );
+	mGameLibrary.push_back( make_shared<RibbonWorldCartridge>() );
 }
 
 void PaperBounce3App::setupRFIDValueToFunction()

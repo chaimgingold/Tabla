@@ -134,6 +134,7 @@
 		C29A0ACF1DF1FE12008A26A1 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = C29A09DA1DF1FE12008A26A1 /* .gitignore */; };
 		C29A0AD01DF1FE12008A26A1 /* CMakeLists.txt in Resources */ = {isa = PBXBuildFile; fileRef = C29A0A091DF1FE12008A26A1 /* CMakeLists.txt */; };
 		C29A0AD61DF61A15008A26A1 /* TokenWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C29A0AD41DF61A15008A26A1 /* TokenWorld.cpp */; };
+		C2A01EF41E022057006D389F /* RibbonWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2A01EF21E022057006D389F /* RibbonWorld.cpp */; };
 		C2C8748F1DDBB2D40067E07D /* list_ports_linux.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2C874871DDBB2D40067E07D /* list_ports_linux.cc */; };
 		C2C874901DDBB2D40067E07D /* list_ports_osx.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2C874881DDBB2D40067E07D /* list_ports_osx.cc */; };
 		C2C874911DDBB2D40067E07D /* list_ports_win.cc in Sources */ = {isa = PBXBuildFile; fileRef = C2C874891DDBB2D40067E07D /* list_ports_win.cc */; };
@@ -536,6 +537,8 @@
 		C29A0ACD1DF1FE12008A26A1 /* xphoto.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = xphoto.hpp; sourceTree = "<group>"; };
 		C29A0AD41DF61A15008A26A1 /* TokenWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TokenWorld.cpp; path = ../src/TokenWorld/TokenWorld.cpp; sourceTree = "<group>"; };
 		C29A0AD51DF61A15008A26A1 /* TokenWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TokenWorld.h; path = ../src/TokenWorld/TokenWorld.h; sourceTree = "<group>"; };
+		C2A01EF21E022057006D389F /* RibbonWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RibbonWorld.cpp; sourceTree = "<group>"; };
+		C2A01EF31E022057006D389F /* RibbonWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RibbonWorld.h; sourceTree = "<group>"; };
 		C2C874791DDBB2D40067E07D /* Cinder-Serial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Cinder-Serial.h"; sourceTree = "<group>"; };
 		C2C8747A1DDBB2D40067E07D /* SerialDevice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SerialDevice.h; sourceTree = "<group>"; };
 		C2C874801DDBB2D40067E07D /* unix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = unix.h; sourceTree = "<group>"; };
@@ -905,6 +908,7 @@
 		26FD3CCD1D88746D00B20327 /* World */ = {
 			isa = PBXGroup;
 			children = (
+				C2A01EF11E022057006D389F /* RibbonWorld */,
 				2606D3801DF60CE30018C8B8 /* GameWorld */,
 				2606D37F1DF60CD10018C8B8 /* BallWorld */,
 				263232111DC8167000CB2048 /* MusicWorld */,
@@ -2291,6 +2295,16 @@
 			name = TokenWorld;
 			sourceTree = "<group>";
 		};
+		C2A01EF11E022057006D389F /* RibbonWorld */ = {
+			isa = PBXGroup;
+			children = (
+				C2A01EF21E022057006D389F /* RibbonWorld.cpp */,
+				C2A01EF31E022057006D389F /* RibbonWorld.h */,
+			);
+			name = RibbonWorld;
+			path = ../src/RibbonWorld;
+			sourceTree = "<group>";
+		};
 		C2C874771DDBB2D40067E07D /* Cinder-Serial */ = {
 			isa = PBXGroup;
 			children = (
@@ -2564,6 +2578,7 @@
 				C29A0AD61DF61A15008A26A1 /* TokenWorld.cpp in Sources */,
 				7D4B6A1410EE43358255E704 /* b2TimeOfImpact.cpp in Sources */,
 				36991D11792C4997967FCEC7 /* b2ChainShape.cpp in Sources */,
+				C2A01EF41E022057006D389F /* RibbonWorld.cpp in Sources */,
 				819C4FF415DF49DCAEA34DC7 /* b2CircleShape.cpp in Sources */,
 				45BE040AA3C64DA6B477A384 /* b2EdgeShape.cpp in Sources */,
 				525C9D7D427141D18CB4B547 /* b2PolygonShape.cpp in Sources */,
