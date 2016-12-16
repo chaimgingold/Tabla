@@ -23,6 +23,7 @@
 #include "xfeatures2d.hpp"
 
 #include "TokenMatcher.h"
+#include "FileWatch.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -57,7 +58,9 @@ public:
 protected:
 
 private:
-	
+	FileWatch mFileWatch;
+	gl::GlslProgRef mRibbonShader;
+
 	Pipeline::StageRef mWorld;
 	ContourVector mContours;
 

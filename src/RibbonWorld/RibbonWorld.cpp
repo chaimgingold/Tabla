@@ -10,12 +10,24 @@
 #include "ocv.h"
 #include "geom.h"
 #include "xml.h"
+#include "PaperBounce3App.h"
 
 using namespace std;
 
+const int MAX_RIBBONS = 60;
+const int MAX_RIBBON_LENGTH = 500;
+const int MAX_DISTANCE_UNTIL_CONSIDERED_NEW_RIBBON = 10.0;
+const int MIN_DISTANCE_TO_ADD_POINT_ON_RIBBON = 1;
+
 RibbonWorld::RibbonWorld()
 {
-
+	mFileWatch.loadShader(
+						  PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / "ribbon.vert" ),
+						  PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / "ribbon.frag" ),
+						  [this](gl::GlslProgRef prog)
+						  {
+							  mRibbonShader = prog; // allows null, so we can easily see if we broke it
+						  });
 }
 
 void RibbonWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeline )
@@ -24,6 +36,11 @@ void RibbonWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeli
 	if ( !mWorld || mWorld->mImageCV.empty() ) return;
 
 	mContours = visionOut.mContours;
+
+
+	if (mRibbons.size() > MAX_RIBBONS) {
+		mRibbons.erase(mRibbons.begin(), mRibbons.begin() + mRibbons.size() - MAX_RIBBONS);
+	}
 
 	for (auto &c : mContours) {
 		vec2 newPoint = c.mPolyLine.calcCentroid();
@@ -43,23 +60,24 @@ void RibbonWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeli
 		}
 
 		// Don't create redundant points
-		if (bestDistance < 1) {
+		if (bestDistance < MIN_DISTANCE_TO_ADD_POINT_ON_RIBBON) {
 			continue;
 		}
 
 		// If tip of closest ribbon is within range, extend that ribbon
-		if (bestDistance < 10.0) {
+		if (bestDistance < MAX_DISTANCE_UNTIL_CONSIDERED_NEW_RIBBON) {
 			vec2 lastPoint = bestRibbon->lastPoint;
 			vec2 pointDiff = newPoint - lastPoint;
 			float mag = length(pointDiff);
 
-			// FIXME: do when mag > 0.01
+			float progress    = ((float)bestRibbon->numPoints)   / 100.0;
+			float oldProgress = ((float)bestRibbon->numPoints-1) / 100.0;
+
+			// Vary width with sine wave
+			float width = (sin(progress*10) + 1.5) * 1;
+
+			// Rotate two spread points in direction of new point
 			float angle = atan2(pointDiff.y, pointDiff.x) + M_PI/2;
-			float width = 1.0;
-
-			float progress = (float)bestRibbon->numPoints / 100.0;
-			float oldProgress = (float)bestRibbon->numPoints-1 / 100.0;
-
 			mat4 rotator = rotate(mat4(1), angle, vec3(0, 0, 1));
 
 			vec2 p1 = lastPoint + vec2(rotator * vec4(-width, -mag, 0, 1));
@@ -87,7 +105,7 @@ void RibbonWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeli
 			bestRibbon->numPoints++;
 
 			// Erase oldest positions
-			if (bestRibbon->numPoints > 100) {
+			if (bestRibbon->numPoints > MAX_RIBBON_LENGTH) {
 				auto &positions = bestRibbon->triMesh->getBufferPositions();
 				positions.erase(positions.begin(), positions.begin() + 6);
 
@@ -108,25 +126,20 @@ void RibbonWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeli
 			mRibbons.push_back(newRibbon);
 		}
 	}
-
-
-
 }
 
 void RibbonWorld::update()
 {
-
+	mFileWatch.scanFiles();
 }
 
 void RibbonWorld::draw( DrawType drawType )
 {
-	// Draw polyline
+	gl::ScopedGlslProg glslScp( mRibbonShader );
+	mRibbonShader->uniform( "uTime", (float)ci::app::getElapsedSeconds() );
 
 	for (auto &r : mRibbons) {
-
-		gl::color(ColorAf(1,0,1));
-		gl::draw(*r.triMesh);
-
+		gl::draw(*r.triMesh); 
 	}
 }
 
