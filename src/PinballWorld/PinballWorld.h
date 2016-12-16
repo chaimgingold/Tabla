@@ -80,6 +80,9 @@ public:
 	virtual void draw();
 	virtual void tick();
 	
+private:
+	void makeShape();
+	
 };
 
 class Bumper : public Part
@@ -183,6 +186,7 @@ private:
 	void tickFlipperState();
 	
 	// simulation
+	void updateBallWorldContours();
 	void serveBall();
 	void cullBalls(); // cull dropped balls
 	
@@ -193,6 +197,8 @@ private:
 	PartVec getPartsFromContours( const ContourVector& ); // only reason this is non-const is b/c parts point to the world
 	PartVec mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const;
 	AdjSpace getAdjacentLeftRightSpace( vec2, const ContourVector& ) const ; // how much adjacent space is to the left, right?
+	
+	ContourVec mVisionContours;
 	
 	// geometry
 	int getNumCircleVerts( float r ) const;

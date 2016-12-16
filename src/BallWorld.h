@@ -63,7 +63,7 @@ public:
 	string getSystemName() const override { return "BallWorld"; }
 	
 	void setParams( XmlTree ) override;
-	void updateVision( const Vision::Output& c, Pipeline& ) override { mContours = c.mContours; }
+	void updateVision( const Vision::Output& c, Pipeline& ) override { setContours(c.mContours); }
 	
 	void gameWillLoad() override; // make some balls by default
 	void update() override;
@@ -93,6 +93,8 @@ public:
 	const ContourVector& getContours() const { return mContours; }
 	
 protected:
+	void setContours( const ContourVec& contours ) { mContours = contours; }
+	
 	virtual void onBallBallCollide			( const Ball&, const Ball& ){}
 	virtual void onBallContourCollide		( const Ball&, const Contour& ){}
 	virtual void onBallWorldBoundaryCollide	( const Ball& ){}

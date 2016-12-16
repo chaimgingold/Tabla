@@ -38,22 +38,10 @@ Flipper::Flipper( PinballWorld& world, vec2 pin, float contourRadius, PartType t
 
 	const float kFlipperMinRadius = 1.f;
 
-	// angle is degrees from down (aka gravity vec)
-	float angle;
-	{
-		int   flipperIndex = type==PartType::FlipperLeft ? 0 : 1;
-		float angleSign[2] = {-1.f,1.f};
-		angle = angleSign[flipperIndex] * toRadians(45.f + world.getFlipperState(flipperIndex)*90.f);
-	}
-
 	mRadius = max( contourRadius, kFlipperMinRadius );
 	mFlipperLength = max(5.f,mRadius) * 1.5f;
 	
-	mFlipperLoc2 = glm::rotate( world.getGravityVec() * mFlipperLength, angle) + mLoc;
-	
-	vec2 c[2] = { mLoc, mFlipperLoc2 };
-	float r[2] = { mRadius, mRadius/2.f };
-	mPoly = world.getCapsulePoly(c,r);
+	makeShape();
 }
 
 void Flipper::draw()
@@ -64,6 +52,25 @@ void Flipper::draw()
 
 void Flipper::tick()
 {
+	// because input state might have changed...
+	makeShape();
+}
+
+void Flipper::makeShape()
+{
+	// angle is degrees from down (aka gravity vec)
+	float angle;
+	{
+		int   flipperIndex = mType==PartType::FlipperLeft ? 0 : 1;
+		float angleSign[2] = {-1.f,1.f};
+		angle = angleSign[flipperIndex] * toRadians(45.f + mWorld.getFlipperState(flipperIndex)*90.f);
+	}
+
+	mFlipperLoc2 = glm::rotate( mWorld.getGravityVec() * mFlipperLength, angle) + mLoc;
+	
+	vec2 c[2] = { mLoc, mFlipperLoc2 };
+	float r[2] = { mRadius, mRadius/2.f };
+	mPoly = mWorld.getCapsulePoly(c,r);
 }
 
 Bumper::Bumper( PinballWorld& world, vec2 pin, float contourRadius, AdjSpace adjSpace )
@@ -254,6 +261,9 @@ void PinballWorld::update()
 
 	// parts
 	for( auto p : mParts ) p->tick();
+
+	// update contours, merging in physics shapes from our parts
+	updateBallWorldContours();
 
 	// gravity
 	vector<Ball>& balls = getBalls();
@@ -484,23 +494,29 @@ void PinballWorld::updatePlayfieldLayout( const ContourVec& contours )
 	}
 }
 
+void PinballWorld::updateBallWorldContours()
+{
+	// modify vision out for ball world
+	// (we add contours to convey the new shapes to simulate)
+	ContourVec physicsContours = mVisionContours;
+
+	getContoursFromParts( mParts, physicsContours );
+	
+	// tell ball world
+	BallWorld::setContours(physicsContours);
+}
+
 void PinballWorld::updateVision( const Vision::Output& visionOut, Pipeline& p )
 {
+	// capture contours, so we can later pass them into BallWorld (after merging in part shapes)
+	mVisionContours = visionOut.mContours;
+	
 	// playfield layout
 	updatePlayfieldLayout(visionOut.mContours);
 	
 	// generate parts
 	PartVec newParts = getPartsFromContours(visionOut.mContours);
 	mParts = mergeOldAndNewParts(mParts, newParts);
-
-	// modify vision out for ball world
-	// (we add contours to convey the new shapes to simulate)
-	Vision::Output visionForBallWorld = visionOut;
-
-	getContoursFromParts(mParts,visionForBallWorld.mContours);
-	
-	// tell ball world
-	BallWorld::updateVision(visionForBallWorld,p);
 }
 
 AdjSpace
@@ -604,7 +620,7 @@ PinballWorld::mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newPa
 		// does it match an old part?
 		for( const PartRef& old : oldParts )
 		{
-			if ( //old.mType == p.mType &&
+			if ( old->mType == p->mType &&
 				 distance( old->mContourLoc, p->mContourLoc ) < mPartTrackLocMaxDist &&
 				 fabs( old->mContourRadius - p->mContourRadius ) < mPartTrackRadiusMaxDist
 				)
@@ -613,9 +629,7 @@ PinballWorld::mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newPa
 				bool replace=true;
 				
 				// but...
-				if ( old->isFlipper() ) replace=false; // flippers need to animate!
-					// ideally this would do replacement if there is no flipper animation happening
-					// between frames--basically we need to decouple the rotating shape from the rest of the state
+				// replace=false
 				
 				// replace with old.
 				// (we are simply shifting pointers rather than copying contents, but i think this is fine)
