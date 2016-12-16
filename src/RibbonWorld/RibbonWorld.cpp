@@ -58,14 +58,28 @@ void RibbonWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeli
 			float width = 1.0;
 
 			float progress = (float)bestRibbon->numPoints / 100.0;
+			float oldProgress = (float)bestRibbon->numPoints-1 / 100.0;
 
 			mat4 rotator = rotate(mat4(1), angle, vec3(0, 0, 1));
+
+
 
 			vec2 p1 = lastPoint + vec2(rotator * vec4(-width, -mag, 0, 1));
 			vec2 p2 = lastPoint + vec2(rotator * vec4( width, -mag, 0, 1));
 
+			// Tri1
+			bestRibbon->triMesh->appendPosition(bestRibbon->lastP1);
+			bestRibbon->triMesh->appendPosition(bestRibbon->lastP2);
+			bestRibbon->triMesh->appendPosition(p1);
+			bestRibbon->triMesh->appendTexCoord(vec2(0, oldProgress));
+			bestRibbon->triMesh->appendTexCoord(vec2(1, oldProgress));
+			bestRibbon->triMesh->appendTexCoord(vec2(0, progress));
+
+			// Tri2
+			bestRibbon->triMesh->appendPosition(bestRibbon->lastP2);
 			bestRibbon->triMesh->appendPosition(p1);
 			bestRibbon->triMesh->appendPosition(p2);
+			bestRibbon->triMesh->appendTexCoord(vec2(1, oldProgress));
 			bestRibbon->triMesh->appendTexCoord(vec2(0, progress));
 			bestRibbon->triMesh->appendTexCoord(vec2(1, progress));
 
