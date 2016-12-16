@@ -8,6 +8,7 @@
 
 #include "glm/glm.hpp"
 #include "PinballWorld.h"
+#include "PinballParts.h"
 #include "geom.h"
 #include "cinder/rand.h"
 #include "cinder/audio/Context.h"
@@ -20,87 +21,6 @@ using namespace ci::app;
 using namespace std;
 using namespace Pinball;
 
-void Part::draw()
-{
-	
-}
-
-void Part::tick()
-{
-	
-}
-
-Flipper::Flipper( PinballWorld& world, vec2 pin, float contourRadius, PartType type )
-	: Part(world)
-{
-	mType=type;
-	mLoc=pin;
-
-	const float kFlipperMinRadius = 1.f;
-
-	mRadius = max( contourRadius, kFlipperMinRadius );
-	mFlipperLength = max(5.f,mRadius) * 1.5f;
-	
-	makeShape();
-}
-
-void Flipper::draw()
-{
-	gl::color( ColorA(0,1,1,1) );
-	gl::drawSolid( mPoly );
-}
-
-void Flipper::tick()
-{
-	// because input state might have changed...
-	makeShape();
-}
-
-void Flipper::makeShape()
-{
-	// angle is degrees from down (aka gravity vec)
-	float angle;
-	{
-		int   flipperIndex = mType==PartType::FlipperLeft ? 0 : 1;
-		float angleSign[2] = {-1.f,1.f};
-		angle = angleSign[flipperIndex] * toRadians(45.f + mWorld.getFlipperState(flipperIndex)*90.f);
-	}
-
-	mFlipperLoc2 = glm::rotate( mWorld.getGravityVec() * mFlipperLength, angle) + mLoc;
-	
-	vec2 c[2] = { mLoc, mFlipperLoc2 };
-	float r[2] = { mRadius, mRadius/2.f };
-	mPoly = mWorld.getCapsulePoly(c,r);
-}
-
-Bumper::Bumper( PinballWorld& world, vec2 pin, float contourRadius, AdjSpace adjSpace )
-	: Part(world)
-{
-	mType=PartType::Bumper;
-	mLoc=pin;
-
-	mColor = Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat());
-
-	mRadius = min( max(contourRadius*world.mBumperContourRadiusScale,world.mBumperMinRadius),
-					 min(adjSpace.mLeft,adjSpace.mRight)
-					 );
-	
-	mPoly = world.getCirclePoly(pin, mRadius);
-}
-
-void Bumper::draw()
-{
-	//gl::color(1,0,0);
-	gl::color(mColor);
-//				gl::drawSolidCircle(p->mLoc,p->mRadius);
-	gl::drawSolid( mPoly );
-	gl::color(1,.8,0);
-	gl::drawSolidCircle(mLoc,mRadius/2.f);
-}
-
-void Bumper::tick()
-{
-}
 
 PinballWorld::PinballWorld()
 {
@@ -184,6 +104,10 @@ void PinballWorld::setParams( XmlTree xml )
 	
 	getXml(xml, "BumperMinRadius", mBumperMinRadius );
 	getXml(xml, "BumperContourRadiusScale", mBumperContourRadiusScale );
+
+	getXml(xml, "FlipperMinLength",mFlipperMinLength);
+	getXml(xml, "FlipperMaxLength",mFlipperMaxLength);
+	getXml(xml, "FlipperRadiusToLengthScale",mFlipperRadiusToLengthScale);
 	
 	getXml(xml, "CircleMinVerts", mCircleMinVerts );
 	getXml(xml, "CircleMaxVerts", mCircleMaxVerts );
@@ -645,9 +569,11 @@ void PinballWorld::getContoursFromParts( const PartVec& parts, ContourVec& conto
 {
 	for( const PartRef p : parts )
 	{
-		if (p->mPoly.size()>0)
+		PolyLine2 poly = p->getCollisionPoly();
+		
+		if (poly.size()>0)
 		{
-			addContourToVec( contourFromPoly( p->mPoly ), contours );
+			addContourToVec( contourFromPoly(poly), contours );
 		}
 	}
 }

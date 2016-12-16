@@ -12,86 +12,10 @@
 #include "BallWorld.h"
 #include "PureDataNode.h"
 #include "GamepadManager.h"
+#include "PinballParts.h"
 
 namespace Pinball
 {
-
-class PinballWorld;
-
-struct AdjSpace
-{
-	// amount of space at my left and right, from my contour's outer edge (centroid + my-width-left/right)
-	float mLeft=0.f;
-	float mRight=0.f;
-	
-	// width of my contour, from its centroid
-	float mWidthLeft=0.f;
-	float mWidthRight=0.f;
-};
-
-enum class PartType
-{
-	FlipperLeft,
-	FlipperRight,
-	Bumper
-};
-	
-class Part
-{
-public:
-
-	Part( PinballWorld& world ) : mWorld(world) {}
-	
-	virtual void draw();
-	virtual void tick();
-	
-	bool isFlipper() const { return mType==PartType::FlipperLeft || mType==PartType::FlipperRight; }
-	
-	ColorA mColor=ColorA(1,1,1,1);
-	
-	PartType  mType;
-	vec2  mLoc;
-	float mRadius=0.f;
-	
-	vec2  mFlipperLoc2; // second point of capsule that forms flipper
-	float mFlipperLength=0.f;
-	
-	PolyLine2 mPoly;
-
-	// contour origin info (for inter-frame coherency)
-	// (when we do composite parts--multiple bumpers combined into one, we'll want to make this into a vector with a particular ordering
-	// for easy comparisons)
-	vec2  mContourLoc;
-	float mContourRadius=0.f;
-	
-	PinballWorld& mWorld;
-};
-typedef std::shared_ptr<Part> PartRef;
-typedef vector<PartRef> PartVec;
-
-
-class Flipper : public Part
-{
-public:
-	Flipper( PinballWorld& world, vec2 pin, float contourRadius, PartType type );
-	
-	virtual void draw();
-	virtual void tick();
-	
-private:
-	void makeShape();
-	
-};
-
-class Bumper : public Part
-{
-public:
-	Bumper( PinballWorld& world, vec2 pin, float contourRadius, AdjSpace adjSpace );
-
-	virtual void draw();
-	virtual void tick();
-	
-};
 
 class PinballWorld : public BallWorld
 {
@@ -133,6 +57,10 @@ public:
 	// vision tuning params
 	float mBumperMinRadius = 5.f;
 	float mBumperContourRadiusScale = 1.5f;
+
+	float mFlipperMinLength=5.f;
+	float mFlipperMaxLength=10.f;
+	float mFlipperRadiusToLengthScale=5.f;	
 	
 	// state
 	float getFlipperState( int side ) const { assert(side==0||side==1); return mFlipperState[side]; }
