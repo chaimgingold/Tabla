@@ -20,6 +20,81 @@ using namespace ci::app;
 using namespace std;
 using namespace Pinball;
 
+void Part::draw()
+{
+	
+}
+
+void Part::tick()
+{
+	
+}
+
+Flipper::Flipper( PinballWorld& world, vec2 pin, float contourRadius, PartType type )
+	: Part(world)
+{
+	mType=type;
+	mLoc=pin;
+
+	const float kFlipperMinRadius = 1.f;
+
+	// angle is degrees from down (aka gravity vec)
+	float angle;
+	{
+		int   flipperIndex = type==PartType::FlipperLeft ? 0 : 1;
+		float angleSign[2] = {-1.f,1.f};
+		angle = angleSign[flipperIndex] * toRadians(45.f + world.getFlipperState(flipperIndex)*90.f);
+	}
+
+	mRadius = max( contourRadius, kFlipperMinRadius );
+	mFlipperLength = max(5.f,mRadius) * 1.5f;
+	
+	mFlipperLoc2 = glm::rotate( world.getGravityVec() * mFlipperLength, angle) + mLoc;
+	
+	vec2 c[2] = { mLoc, mFlipperLoc2 };
+	float r[2] = { mRadius, mRadius/2.f };
+	mPoly = world.getCapsulePoly(c,r);
+}
+
+void Flipper::draw()
+{
+	gl::color( ColorA(0,1,1,1) );
+	gl::drawSolid( mPoly );
+}
+
+void Flipper::tick()
+{
+}
+
+Bumper::Bumper( PinballWorld& world, vec2 pin, float contourRadius, AdjSpace adjSpace )
+	: Part(world)
+{
+	mType=PartType::Bumper;
+	mLoc=pin;
+
+	mColor = Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat());
+
+	mRadius = min( max(contourRadius*world.mBumperContourRadiusScale,world.mBumperMinRadius),
+					 min(adjSpace.mLeft,adjSpace.mRight)
+					 );
+	
+	mPoly = world.getCirclePoly(pin, mRadius);
+}
+
+void Bumper::draw()
+{
+	//gl::color(1,0,0);
+	gl::color(mColor);
+//				gl::drawSolidCircle(p->mLoc,p->mRadius);
+	gl::drawSolid( mPoly );
+	gl::color(1,.8,0);
+	gl::drawSolidCircle(mLoc,mRadius/2.f);
+}
+
+void Bumper::tick()
+{
+}
+
 PinballWorld::PinballWorld()
 {
 	setupSynthesis();
@@ -175,6 +250,10 @@ void PinballWorld::update()
 {
 	// input
 	mGamepadManager.tick();
+	tickFlipperState();
+
+	// parts
+	for( auto p : mParts ) p->tick();
 
 	// gravity
 	vector<Ball>& balls = getBalls();
@@ -185,9 +264,6 @@ void PinballWorld::update()
 	// balls
 	cullBalls();
 	BallWorld::update();
-	
-	// flippers
-	tickFlippers();
 }
 
 void PinballWorld::serveBall()
@@ -224,7 +300,7 @@ void PinballWorld::cullBalls()
 	balls = newBalls;
 }
 
-void PinballWorld::tickFlippers()
+void PinballWorld::tickFlipperState()
 {
 	for( int i=0; i<2; ++i )
 	{
@@ -359,29 +435,8 @@ void PinballWorld::keyDown( KeyEvent event )
 
 void PinballWorld::drawParts() const
 {
-	for( const auto &p : mParts )
-	{
-		switch(p->mType)
-		{
-			case Part::Type::FlipperLeft:
-			case Part::Type::FlipperRight:
-			{
-				gl::color( ColorA(0,1,1,1) );
-				gl::drawSolid( p->mPoly );
-			}
-			break;
-			
-			case Part::Type::Bumper:
-			{
-				//gl::color(1,0,0);
-				gl::color(p->mColor);
-//				gl::drawSolidCircle(p->mLoc,p->mRadius);
-				gl::drawSolid( p->mPoly );
-				gl::color(1,.8,0);
-				gl::drawSolidCircle(p->mLoc,p->mRadius/2.f);
-			}
-			break;
-		}
+	for( const auto &p : mParts ) {
+		p->draw();
 	}
 }
 
@@ -486,65 +541,17 @@ PinballWorld::getAdjacentLeftRightSpace( vec2 loc, const ContourVector& cs ) con
 	return result;
 }
 
-Part
-PinballWorld::getFlipperPart( vec2 pin, float contourRadius, Part::Type type ) const
-{
-	const float kFlipperMinRadius = 1.f;
-
-	// angle is degrees from down (aka gravity vec)
-	float angle;
-	{
-		int   flipperIndex = type==Part::Type::FlipperLeft ? 0 : 1;
-		float angleSign[2] = {-1.f,1.f};
-		angle = angleSign[flipperIndex] * toRadians(45.f + mFlipperState[flipperIndex]*90.f);
-	}
-
-	
-	Part p;
-	
-	p.mType = type;
-	p.mRadius = max( contourRadius, kFlipperMinRadius );
-	p.mFlipperLength = max(5.f,p.mRadius) * 1.5f;
-	
-	p.mLoc = pin;
-	p.mFlipperLoc2 = glm::rotate( getGravityVec() * p.mFlipperLength, angle) + p.mLoc;
-	
-	vec2 c[2] = { p.mLoc, p.mFlipperLoc2 };
-	float r[2] = { p.mRadius, p.mRadius/2.f };
-	p.mPoly = getCapsulePoly(c,r);
-	
-	return p;
-}
-
-Part
-PinballWorld::getBumperPart( vec2 pin, float contourRadius, AdjSpace adjSpace ) const
-{
-	Part p;
-	
-	p.mColor = Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat());
-
-	p.mLoc = pin;
-	p.mType = Part::Type::Bumper;
-	p.mRadius = min( max(contourRadius*mBumperContourRadiusScale,mBumperMinRadius),
-					 min(adjSpace.mLeft,adjSpace.mRight)
-					 );
-	
-	p.mPoly = getCirclePoly(pin, p.mRadius);
-	
-	return p;
-}
-
-PartVec PinballWorld::getPartsFromContours( const ContourVector& contours ) const
+PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 {
 	PartVec parts;
 	
 	for( const auto &c : contours )
 	{
-		auto add = [&c,&parts]( Part p )
+		auto add = [&c,&parts]( Part* p )
 		{
-			p.mContourLoc = c.mCenter;
-			p.mContourRadius = c.mRadius;
-			parts.push_back( std::make_shared<Part>(p) );
+			p->mContourLoc = c.mCenter;
+			p->mContourRadius = c.mRadius;
+			parts.push_back( PartRef(p) );
 		};
 
 		if ( c.mTreeDepth>0 && c.mIsHole && c.mRadius < mPartMaxContourRadius )
@@ -554,27 +561,27 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours ) cons
 			
 			if      (adjSpace.mRight < adjSpace.mLeft  && adjSpace.mRight < mFlipperDistToEdge)
 			{
-				add( getFlipperPart(c.mCenter, c.mRadius, Part::Type::FlipperRight) );
+				add( new Flipper(*this, c.mCenter, c.mRadius, PartType::FlipperRight) );
 			}
 			else if (adjSpace.mLeft  < adjSpace.mRight && adjSpace.mLeft  < mFlipperDistToEdge)
 			{
 				
-				add( getFlipperPart(c.mCenter, c.mRadius, Part::Type::FlipperLeft) );
+				add( new Flipper(*this, c.mCenter, c.mRadius, PartType::FlipperLeft) );
 			}
 //			else if (adjSpace.mLeft  < 1.f) // < epsilon
 //			{
 				// zero!
 				// plunger?
 				// something else?
-//				p.mType = Part::Type::FlipperLeft;
+//				p.mType = PartType::FlipperLeft;
 //			}
 			else
 			{
 				
-				add( getBumperPart( c.mCenter, c.mRadius, adjSpace ) );
+				add( new Bumper( *this, c.mCenter, c.mRadius, adjSpace ) );
 				
 				// equal, and there really is space, so just pick something.
-//				p.mType = Part::Type::FlipperLeft;
+//				p.mType = PartType::FlipperLeft;
 				
 				// we could have a fuzzier sense of equal (left > right + kDelta),
 				// which would allow us to have something different at the center of a space (where distance is equal-ish)

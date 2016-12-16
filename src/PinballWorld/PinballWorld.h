@@ -16,6 +16,8 @@
 namespace Pinball
 {
 
+class PinballWorld;
+
 struct AdjSpace
 {
 	// amount of space at my left and right, from my contour's outer edge (centroid + my-width-left/right)
@@ -27,20 +29,27 @@ struct AdjSpace
 	float mWidthRight=0.f;
 };
 
+enum class PartType
+{
+	FlipperLeft,
+	FlipperRight,
+	Bumper
+};
+	
 class Part
 {
 public:
-	enum class Type
-	{
-		FlipperLeft,
-		FlipperRight,
-		Bumper
-	};
-	bool isFlipper() const { return mType==Type::FlipperLeft || mType==Type::FlipperRight; }
+
+	Part( PinballWorld& world ) : mWorld(world) {}
+	
+	virtual void draw();
+	virtual void tick();
+	
+	bool isFlipper() const { return mType==PartType::FlipperLeft || mType==PartType::FlipperRight; }
 	
 	ColorA mColor=ColorA(1,1,1,1);
 	
-	Type  mType;
+	PartType  mType;
 	vec2  mLoc;
 	float mRadius=0.f;
 	
@@ -56,10 +65,32 @@ public:
 	float mContourRadius=0.f;
 	
 	AdjSpace mAdjSpace;
+	
+	PinballWorld& mWorld;
 };
 typedef std::shared_ptr<Part> PartRef;
 typedef vector<PartRef> PartVec;
 
+
+class Flipper : public Part
+{
+public:
+	Flipper( PinballWorld& world, vec2 pin, float contourRadius, PartType type );
+	
+	virtual void draw();
+	virtual void tick();
+	
+};
+
+class Bumper : public Part
+{
+public:
+	Bumper( PinballWorld& world, vec2 pin, float contourRadius, AdjSpace adjSpace );
+
+	virtual void draw();
+	virtual void tick();
+	
+};
 
 class PinballWorld : public BallWorld
 {
@@ -74,7 +105,7 @@ public:
 
 	void gameWillLoad() override;
 	void update() override;
-	virtual void updateVision( const Vision::Output&, Pipeline& ) override; // "virtual" shushes weird clang warning/error
+	void updateVision( const Vision::Output&, Pipeline& ) override;
 	void draw( DrawType ) override;
 	
 	void worldBoundsPolyDidChange() override;
@@ -86,6 +117,25 @@ protected:
 	virtual void onBallContourCollide( const Ball&, const Contour& ) override;
 	virtual void onBallWorldBoundaryCollide	( const Ball& ) override;
 
+public:
+
+	// world orientation
+	vec2 getUpVec() const { return mUpVec; }
+	vec2 getLeftVec() const { return vec2(cross(vec3(mUpVec,0),vec3(0,0,1))); }
+	vec2 getRightVec() const { return -getLeftVec(); }
+	vec2 getGravityVec() const { return -mUpVec; }
+
+	// geometry
+	PolyLine2 getCirclePoly ( vec2 c, float r ) const;
+	PolyLine2 getCapsulePoly( vec2 c[2], float r[2] ) const;
+
+	// vision tuning params
+	float mBumperMinRadius = 5.f;
+	float mBumperContourRadiusScale = 1.5f;
+	
+	// state
+	float getFlipperState( int side ) const { assert(side==0||side==1); return mFlipperState[side]; }
+	
 private:
 
 	// params
@@ -95,9 +145,6 @@ private:
 	float mFlipperDistToEdge = 10.f; // how close to the edge does a flipper appear?
 	float mBallReclaimAreaHeight = 10.f;
 
-	float mBumperMinRadius = 5.f;
-	float mBumperContourRadiusScale = 1.5f;
-	
 	int mCircleMinVerts=8;
 	int mCircleMaxVerts=100;
 	float mCircleVertsPerPerimCm=1.f;
@@ -108,12 +155,6 @@ private:
 	// more params, just for vision
 	float mPartTrackLocMaxDist = 1.f;
 	float mPartTrackRadiusMaxDist = .5f;
-	
-	// world orientation
-	vec2 getUpVec() const { return mUpVec; }
-	vec2 getLeftVec() const { return vec2(cross(vec3(mUpVec,0),vec3(0,0,1))); }
-	vec2 getRightVec() const { return -getLeftVec(); }
-	vec2 getGravityVec() const { return -mUpVec; }
 	
 	// world layout
 	vec2  toPlayfieldSpace  ( vec2 p ) const { return vec2( dot(p,getRightVec()), dot(p,getUpVec()) ); }
@@ -130,9 +171,6 @@ private:
 	
 	void updatePlayfieldLayout( const ContourVec& );
 	
-	Part getFlipperPart( vec2 pin, float contourRadius, Part::Type type ) const; // type is left or right
-	Part getBumperPart ( vec2 pin, float contourRadius, AdjSpace adjSpace ) const;
-	
 	void getContoursFromParts( const PartVec&, ContourVec& contours ) const; // for physics simulation
 	
 	PartVec mParts;
@@ -142,7 +180,7 @@ private:
 	bool  mIsFlipperDown[2]; // left, right
 	float mFlipperState[2]; // left, right; 0..1
 	
-	void tickFlippers();
+	void tickFlipperState();
 	
 	// simulation
 	void serveBall();
@@ -152,15 +190,12 @@ private:
 	void drawAdjSpaceRays() const;
 	
 	// vision
-	PartVec getPartsFromContours( const ContourVector& ) const;
+	PartVec getPartsFromContours( const ContourVector& ); // only reason this is non-const is b/c parts point to the world
 	PartVec mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const;
 	AdjSpace getAdjacentLeftRightSpace( vec2, const ContourVector& ) const ; // how much adjacent space is to the left, right?
 	
 	// geometry
 	int getNumCircleVerts( float r ) const;
-
-	PolyLine2 getCirclePoly ( vec2 c, float r ) const;
-	PolyLine2 getCapsulePoly( vec2 c[2], float r[2] ) const;
 	Contour contourFromPoly( PolyLine2 ) const; // area, radius, center, bounds, etc... is approximate
 	void addContourToVec( Contour, ContourVec& ) const;
 	
