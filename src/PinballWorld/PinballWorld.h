@@ -113,7 +113,7 @@ private:
 	
 	struct tAdjSpace
 	{
-		// amount of space at my left and right, from my edge (centroid + width-left/right)
+		// amount of space at my left and right, from my contour's outer edge (centroid + my-width-left/right)
 		float mLeft=0.f;
 		float mRight=0.f;
 		

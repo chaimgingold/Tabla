@@ -320,10 +320,19 @@ void PinballWorld::drawAdjSpaceRays() const
 		tAdjSpace space = getAdjacentLeftRightSpace(p.mLoc, mVisionOutput.mContours );
 		
 		gl::color(1,0,0);
-		gl::drawLine(p.mLoc, p.mLoc + getRightVec() * space.mRight );
+		gl::drawLine(
+			p.mLoc + getRightVec() *  space.mWidthRight,
+			p.mLoc + getRightVec() * (space.mWidthRight + space.mRight) );
 
 		gl::color(0,1,0);
-		gl::drawLine(p.mLoc, p.mLoc + getLeftVec() * space.mLeft );
+		gl::drawLine(
+			p.mLoc + getLeftVec()  *  space.mWidthLeft,
+			p.mLoc + getLeftVec()  * (space.mWidthLeft + space.mLeft) );
+
+		gl::color(0,0,1);
+		gl::drawLine(
+			p.mLoc + getLeftVec ()  * space.mWidthLeft,
+			p.mLoc + getRightVec()  * space.mWidthRight );
 	}
 }
 
@@ -470,7 +479,11 @@ PinballWorld::getAdjacentLeftRightSpace( vec2 loc, const ContourVector& cs ) con
 	
 	cs.rayIntersection( loc, getRightVec(), &result.mRight, filter );
 	cs.rayIntersection( loc, getLeftVec (), &result.mLeft , filter );
-
+	
+	// bake in contour width into adjacent space calc
+	result.mLeft  -= result.mWidthLeft;
+	result.mRight -= result.mWidthRight;
+	
 	return result;
 }
 
@@ -539,11 +552,6 @@ PinballWorld::PartVec PinballWorld::getPartsFromContours( const ContourVector& c
 		{
 			// flipper orientation
 			tAdjSpace adjSpace = getAdjacentLeftRightSpace(c.mCenter,contours);
-			
-			adjSpace.mLeft -= c.mRadius;
-			adjSpace.mRight -= c.mRadius;
-//			adjSpace.mLeft = max( adjSpace.mLeft, 0.f );
-//			adjSpace.mRight = max( adjSpace.mRight, 0.f );
 			
 			if      (adjSpace.mRight < adjSpace.mLeft  && adjSpace.mRight < mFlipperDistToEdge)
 			{
