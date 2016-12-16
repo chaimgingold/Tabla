@@ -105,7 +105,12 @@ void PinballWorld::setParams( XmlTree xml )
 	getXml(xml, "CircleMinVerts", mCircleMinVerts );
 	getXml(xml, "CircleMaxVerts", mCircleMaxVerts );
 	getXml(xml, "CircleVertsPerPerimCm", mCircleVertsPerPerimCm );
+
+	getXml(xml, "PartTrackLocMaxDist", mPartTrackLocMaxDist );
+	getXml(xml, "PartTrackRadiusMaxDist", mPartTrackRadiusMaxDist );
 	
+	getXml(xml, "DebugDrawGeneratedContours", mDebugDrawGeneratedContours);
+	getXml(xml, "DebugDrawAdjSpaceRays", mDebugDrawAdjSpaceRays );
 	
 	// gamepad
 	if (xml.hasChild("Gamepad"))
@@ -285,10 +290,10 @@ void PinballWorld::draw( DrawType drawType )
 	}
 	
 	// test ray line seg...
-	if (0) drawFlipperOrientationRays();
+	if (mDebugDrawAdjSpaceRays) drawAdjSpaceRays();
 
 	// test contour generation
-	if (0)
+	if (mDebugDrawGeneratedContours)
 	{
 		ContourVec cs = getContours();
 		int i = cs.size(); // only start loop at new contours we append
@@ -308,17 +313,26 @@ void PinballWorld::draw( DrawType drawType )
 	}
 }
 
-void PinballWorld::drawFlipperOrientationRays() const
+void PinballWorld::drawAdjSpaceRays() const
 {
 	for( auto &p : mParts )
 	{
-		tAdjSpace space = getAdjacentLeftRightSpace(p.mLoc, getContours());
+		tAdjSpace space = getAdjacentLeftRightSpace(p.mLoc, mVisionOutput.mContours );
 		
 		gl::color(1,0,0);
-		gl::drawLine(p.mLoc, p.mLoc + getRightVec() * space.mRight );
+		gl::drawLine(
+			p.mLoc + getRightVec() *  space.mWidthRight,
+			p.mLoc + getRightVec() * (space.mWidthRight + space.mRight) );
 
 		gl::color(0,1,0);
-		gl::drawLine(p.mLoc, p.mLoc + getLeftVec() * space.mLeft );
+		gl::drawLine(
+			p.mLoc + getLeftVec()  *  space.mWidthLeft,
+			p.mLoc + getLeftVec()  * (space.mWidthLeft + space.mLeft) );
+
+		gl::color(0,0,1);
+		gl::drawLine(
+			p.mLoc + getLeftVec ()  * space.mWidthLeft,
+			p.mLoc + getRightVec()  * space.mWidthRight );
 	}
 }
 
@@ -358,7 +372,8 @@ void PinballWorld::drawParts() const
 			
 			case Part::Type::Bumper:
 			{
-				gl::color(1,0,0);
+				//gl::color(1,0,0);
+				gl::color(p.mColor);
 //				gl::drawSolidCircle(p.mLoc,p.mRadius);
 				gl::drawSolid( p.mPoly );
 				gl::color(1,.8,0);
@@ -415,6 +430,8 @@ void PinballWorld::updatePlayfieldLayout( const ContourVec& contours )
 
 void PinballWorld::updateVision( const Vision::Output& visionOut, Pipeline& p )
 {
+	mVisionOutput = visionOut;
+	
 	// playfield layout
 	updatePlayfieldLayout(visionOut.mContours);
 	
@@ -435,18 +452,37 @@ void PinballWorld::updateVision( const Vision::Output& visionOut, Pipeline& p )
 PinballWorld::tAdjSpace
 PinballWorld::getAdjacentLeftRightSpace( vec2 loc, const ContourVector& cs ) const
 {
-	const Contour* c = cs.findLeafContourContainingPoint(loc);
-
-	if (c&&c->mIsHole) c = cs.getParent(c); // make sure we aren't the hole contour
-	
 	tAdjSpace result;
+
+	const Contour* leaf = cs.findLeafContourContainingPoint(loc);
 	
-	if (c)
+	if (leaf)
 	{
-		c->rayIntersection(loc,getRightVec(),&result.mRight);
-		c->rayIntersection(loc,getLeftVec(),&result.mLeft);
-		// 0.f result remains if hit fails
+		float far = leaf->mRadius * 2.f;
+		float t;
+		
+		if ( leaf->rayIntersection(loc + getLeftVec() * far, getRightVec(), &t) ) {
+			result.mWidthLeft = far - t;
+		}
+
+		if ( leaf->rayIntersection(loc + getRightVec() * far, getLeftVec(), &t) ) {
+			result.mWidthRight = far - t;
+		}
 	}
+	
+	auto filter = [loc]( const Contour& c ) -> bool
+	{
+		if ( c.mIsHole && c.contains(loc) ) return false;
+		else return true;
+		// this could be faster, by us checking against leaf variable
+	};
+	
+	cs.rayIntersection( loc, getRightVec(), &result.mRight, filter );
+	cs.rayIntersection( loc, getLeftVec (), &result.mLeft , filter );
+	
+	// bake in contour width into adjacent space calc
+	result.mLeft  -= result.mWidthLeft;
+	result.mRight -= result.mWidthRight;
 	
 	return result;
 }
@@ -485,6 +521,8 @@ PinballWorld::Part
 PinballWorld::getBumperPart( vec2 pin, float contourRadius, tAdjSpace adjSpace ) const
 {
 	Part p;
+	
+	p.mColor = Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat());
 
 	p.mLoc = pin;
 	p.mType = Part::Type::Bumper;
@@ -503,27 +541,26 @@ PinballWorld::PartVec PinballWorld::getPartsFromContours( const ContourVector& c
 	
 	for( const auto &c : contours )
 	{
+		auto add = [&c,&parts]( Part p )
+		{
+			p.mContourLoc = c.mCenter;
+			p.mContourRadius = c.mRadius;
+			parts.push_back(p);
+		};
+
 		if ( c.mTreeDepth>0 && c.mIsHole && c.mRadius < mPartMaxContourRadius )
 		{
 			// flipper orientation
 			tAdjSpace adjSpace = getAdjacentLeftRightSpace(c.mCenter,contours);
 			
-			adjSpace.mLeft -= c.mRadius;
-			adjSpace.mRight -= c.mRadius;
-//			adjSpace.mLeft = max( adjSpace.mLeft, 0.f );
-//			adjSpace.mRight = max( adjSpace.mRight, 0.f );
-			
 			if      (adjSpace.mRight < adjSpace.mLeft  && adjSpace.mRight < mFlipperDistToEdge)
 			{
-				parts.push_back(
-					getFlipperPart(c.mCenter, c.mRadius, Part::Type::FlipperRight)
-				);
+				add( getFlipperPart(c.mCenter, c.mRadius, Part::Type::FlipperRight) );
 			}
 			else if (adjSpace.mLeft  < adjSpace.mRight && adjSpace.mLeft  < mFlipperDistToEdge)
 			{
-				parts.push_back(
-					getFlipperPart(c.mCenter, c.mRadius, Part::Type::FlipperLeft)
-				);
+				
+				add( getFlipperPart(c.mCenter, c.mRadius, Part::Type::FlipperLeft) );
 			}
 //			else if (adjSpace.mLeft  < 1.f) // < epsilon
 //			{
@@ -534,9 +571,8 @@ PinballWorld::PartVec PinballWorld::getPartsFromContours( const ContourVector& c
 //			}
 			else
 			{
-				parts.push_back(
-					getBumperPart( c.mCenter, c.mRadius, adjSpace )
-				);
+				
+				add( getBumperPart( c.mCenter, c.mRadius, adjSpace ) );
 				
 				// equal, and there really is space, so just pick something.
 //				p.mType = Part::Type::FlipperLeft;
@@ -555,7 +591,33 @@ PinballWorld::PartVec PinballWorld::getPartsFromContours( const ContourVector& c
 PinballWorld::PartVec
 PinballWorld::mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const
 {
-	return newParts;
+	PartVec parts = newParts;
+	
+	for( Part& p : parts )
+	{
+		// does it match an old part?
+		for( const auto& old : oldParts )
+		{
+			if ( //old.mType == p.mType &&
+				 distance( old.mContourLoc, p.mContourLoc ) < mPartTrackLocMaxDist &&
+				 fabs( old.mContourRadius - p.mContourRadius ) < mPartTrackRadiusMaxDist
+				)
+			{
+				// matched.
+				bool replace=true;
+				
+				// but...
+				if ( old.isFlipper() ) replace=false; // flippers need to animate!
+					// ideally this would do replacement if there is no flipper animation happening
+					// between frames--basically we need to decouple the rotating shape from the rest of the state
+				
+				// replace with old.
+				if (replace) p = old;
+			}
+		}
+	}
+	
+	return parts;
 }
 
 void PinballWorld::getContoursFromParts( const PinballWorld::PartVec& parts, ContourVec& contours ) const
@@ -659,7 +721,7 @@ void PinballWorld::addContourToVec( Contour c, ContourVec& contours ) const
 	// make sure we are putting a hole in a non-hole
 	// (e.g. flipper is made by a hole, and so we don't want to be a non-hole in that hole, but a sibling to it)
 	if (parent && parent->mIsHole) {
-		parent = contours.getParent(parent);
+		parent = contours.getParent(*parent);
 	}
 
 	// link it in

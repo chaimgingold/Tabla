@@ -75,20 +75,24 @@ public:
 	const Contour* findLeafContourContainingPoint( vec2 point ) const ;
 	Contour* findLeafContourContainingPoint( vec2 point );
 
-	const Contour* getParent( const Contour* c ) const {
-		if (c->mParent!=-1) return &((*this)[c->mParent]);
+	const Contour* getParent( const Contour& c ) const {
+		if (c.mParent!=-1) return &((*this)[c.mParent]);
 		else return 0;
 	}
 
-	Contour* getParent( const Contour* c ) {
-		if (c->mParent!=-1) return &((*this)[c->mParent]);
+	Contour* getParent( const Contour& c ) {
+		if (c.mParent!=-1) return &((*this)[c.mParent]);
 		else return 0;
 	}
 
 	ContourVec& operator+=(const ContourVec& rhs);
 	ContourVec operator+(const ContourVec& rhs) const { ContourVec c = *this; c += rhs; return c; }
 
-	const Contour* rayIntersection( vec2 rayOrigin, vec2 rayVec, float *rayt=0 ) const; // returns first rayt, if any
+	const Contour* rayIntersection( vec2 rayOrigin, vec2 rayVec,
+		float *rayt=0,
+		std::function<bool(const Contour&)> = 0 // optional filter function
+		) const;
+	 // returns rayt of first edge hit, if any
 	
 };
 typedef ContourVec ContourVector;

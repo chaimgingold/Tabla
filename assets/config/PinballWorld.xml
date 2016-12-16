@@ -26,7 +26,10 @@
 		</Contours>
 	</Vision>
 
-
+<!-- Debug -->
+	<DebugDrawAdjSpaceRays>0</DebugDrawAdjSpaceRays>
+	<DebugDrawGeneratedContours>0</DebugDrawGeneratedContours>
+	
 <!-- General -->
 	<UpVec>-1 0</UpVec>
 	<Gravity>.05</Gravity>
@@ -35,6 +38,9 @@
 <!-- Vision	-->
 	<PartMaxContourRadius>5</PartMaxContourRadius>
 	<FlipperDistToEdge>5</FlipperDistToEdge>
+	
+	<PartTrackRadiusMaxDist>.5</PartTrackRadiusMaxDist>
+	<PartTrackLocMaxDist>.25</PartTrackLocMaxDist>
 	
 <!-- Object Geometry -->
 	<CircleMinVerts>8</CircleMinVerts>
