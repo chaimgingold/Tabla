@@ -245,11 +245,36 @@ void PinballWorld::tickFlipperState()
 {
 	for( int i=0; i<2; ++i )
 	{
-		float frac[2] = { .35f, .5f };
-		int fraci = mIsFlipperDown[i] ? 0 : 1;
-		
-		mFlipperState[i] = lerp( mFlipperState[i], mIsFlipperDown[i] ? 1.f : 0.f, frac[fraci] );
+		if (0)
+		{
+			// non-linear, creates lots of tunneling
+			float frac[2] = { .35f, .5f };
+			int fraci = mIsFlipperDown[i] ? 0 : 1;
+			
+			mFlipperState[i] = lerp( mFlipperState[i], mIsFlipperDown[i] ? 1.f : 0.f, frac[fraci] );
+		}
+		else
+		{
+			
+			// linear, to help me debug physics
+			float step = (1.f / 60.f) * ( 1.f / .1f );
+			
+			if ( mIsFlipperDown[i] ) mFlipperState[i] += step;
+			else mFlipperState[i] -= step;
+			
+			mFlipperState[i] = constrain( mFlipperState[i], 0.f, 1.f );
+		}
 	}
+}
+
+float PinballWorld::getFlipperAngularVel( int side ) const
+{
+	const float eps = .1f;
+	const float radPerSec = (M_PI/2.f) / 6.f; // assume 6 steps per 90 deg of motion
+	
+	if ( mIsFlipperDown[side] && mFlipperState[side] < 1.f-eps ) return radPerSec;
+	else if ( !mIsFlipperDown[side] && mFlipperState[side] > eps ) return -radPerSec;
+	else return 0.f;
 }
 
 void PinballWorld::processCollisions()

@@ -36,7 +36,15 @@ enum class PartType
 	FlipperRight,
 	Bumper
 };
-	
+
+inline int flipperTypeToIndex( PartType t )
+{
+	if (t==PartType::FlipperLeft) return 0;
+	else if (t==PartType::FlipperRight) return 1;
+	assert(0);
+	return -1;
+}
+
 class Part
 {
 public:
@@ -82,6 +90,9 @@ public:
 	virtual void onBallCollide( Ball& ) override;
 	
 private:
+	vec2 getAccelForBall( vec2 ) const;
+	
+	vec2  getTipLoc() const; // center of capsule, second point
 	float mFlipperLength=0.f;
 
 	float getCollisionFade() const;

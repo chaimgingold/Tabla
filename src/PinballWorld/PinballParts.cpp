@@ -44,25 +44,54 @@ void Flipper::draw()
 {
 	gl::color( lerp( ColorA(0,1,1,1), ColorA(1,1,1,1), powf(getCollisionFade(),3.f) ) );
 	gl::drawSolid( getCollisionPoly() );
+	
+	if (0)
+	{
+		PolyLine2 poly = getCollisionPoly();
+		vec2 tip = getTipLoc();
+		vec2 c = lerp(tip,mLoc,.5f);
+		
+		Rectf r(poly.getPoints());
+		
+		gl::color(1,0,0);
+		auto hair = [&]( vec2 p )
+		{
+			p = lerp( c, p, 1.1f );
+			vec2 v = getAccelForBall( p );
+			gl::drawLine( p, p + v );
+		};
+		
+		for( auto p : poly.getPoints() )
+		{
+			hair( lerp( c, p, 1.1f ) );
+		}
+		
+		hair( vec2(lerp(r.x1,r.x2,.5),r.y2) );
+		hair( vec2(lerp(r.x1,r.x2,.5),r.y1) );
+	}
 }
 
 void Flipper::tick()
 {
 }
 
-PolyLine2 Flipper::getCollisionPoly() const
+vec2
+Flipper::getTipLoc() const
 {
 	// angle is degrees from down (aka gravity vec)
 	float angle;
 	{
-		int   flipperIndex = mType==PartType::FlipperLeft ? 0 : 1;
+		int   flipperIndex = flipperTypeToIndex(mType);
 		float angleSign[2] = {-1.f,1.f};
 		angle = angleSign[flipperIndex] * toRadians(45.f + mWorld.getFlipperState(flipperIndex)*90.f);
 	}
 
-	vec2 flipperLoc2 = glm::rotate( mWorld.getGravityVec() * mFlipperLength, angle) + mLoc;
-	
-	vec2 c[2] = { mLoc, flipperLoc2 };
+	return glm::rotate( mWorld.getGravityVec() * mFlipperLength, angle) + mLoc;
+}
+
+PolyLine2 Flipper::getCollisionPoly() const
+{
+	vec2 c[2] = { mLoc, getTipLoc() };
 	float r[2] = { mRadius, mRadius/2.f };
 	
 	return mWorld.getCapsulePoly(c,r);
@@ -82,6 +111,32 @@ float Flipper::getCollisionFade() const
 void Flipper::onBallCollide( Ball& ball )
 {
 	mCollideTime = mWorld.time();
+	
+	ball.mAccel += getAccelForBall(ball.mLoc);
+}
+
+vec2 Flipper::getAccelForBall( vec2 p ) const
+{
+	// accelerate ball
+	vec2 contact = closestPointOnPoly( p, getCollisionPoly() );
+	vec2 surfaceNorm = p - contact;
+	if (surfaceNorm != vec2(0,0))
+	{
+		surfaceNorm = normalize(surfaceNorm);
+		
+		float omega = mWorld.getFlipperAngularVel(flipperTypeToIndex(mType));
+		
+		vec2 vs = -perp( contact-mLoc ) * omega;
+		
+		float surfaceVel = dot( vs, surfaceNorm );
+		
+		if ( surfaceVel > 0.f )
+		{
+			return 2.f * surfaceNorm * surfaceVel;
+		}
+	}
+	
+	return vec2(0,0);
 }
 
 Bumper::Bumper( PinballWorld& world, vec2 pin, float contourRadius, AdjSpace adjSpace )

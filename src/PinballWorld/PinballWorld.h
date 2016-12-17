@@ -61,6 +61,7 @@ public:
 	// state
 	float time() { return ci::app::getElapsedSeconds(); } // use this time so we can locally modulate it (eg slow down, pause, etc...)
 	float getFlipperState( int side ) const { assert(side==0||side==1); return mFlipperState[side]; }
+	float getFlipperAngularVel( int side ) const; // TODO: make radians per second
 	
 private:
 
