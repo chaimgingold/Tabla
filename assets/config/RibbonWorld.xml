@@ -1,0 +1,18 @@
+<RibbonWorld>
+
+	
+	<!-- cm -->
+	<Vision>
+		<Contours>
+			<Threshold>150</Threshold>
+<!--	-1 it OTSU, otherwise 0..255 -->
+
+			<ContourGetExactMinCircle>	0	</ContourGetExactMinCircle>
+			<ContourMinRadius>			.5	</ContourMinRadius>
+			<ContourMinArea>			1	</ContourMinArea>
+			<ContourDPEpsilon>			1	</ContourDPEpsilon>
+			<ContourMinWidth>			1	</ContourMinWidth>
+		</Contours>
+	</Vision>
+
+</RibbonWorld>

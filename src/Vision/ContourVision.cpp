@@ -16,6 +16,7 @@ void ContourVision::Params::set( XmlTree xml )
 	getXml(xml,"ContourDPEpsilon",mContourDPEpsilon);
 	getXml(xml,"ContourMinWidth",mContourMinWidth);
 	getXml(xml,"ContourGetExactMinCircle",mContourGetExactMinCircle);
+	getXml(xml,"Threshold",mThreshold);
 }
 
 ContourVec ContourVision::findContours( const Pipeline::StageRef input, Pipeline& pipeline, float contourPixelToWorld )
@@ -28,7 +29,12 @@ ContourVec ContourVision::findContours( const Pipeline::StageRef input, Pipeline
 //	pipeline.then( gray, "gray" );
 
 	// threshold
-	cv::threshold( input->mImageCV, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
+	if ( mParams.mThreshold < 0.f ) {
+		cv::threshold( input->mImageCV, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
+	}
+	else {
+		cv::threshold( input->mImageCV, thresholded, mParams.mThreshold, 255, cv::THRESH_BINARY );
+	}
 //	cv::adaptiveThreshold(clipped, thresholded, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 10, 10);
 //	cv::adaptiveThreshold(clipped, thresholded, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 32, -10);
 	pipeline.then( "thresholded", thresholded );

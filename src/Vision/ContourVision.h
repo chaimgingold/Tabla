@@ -22,7 +22,9 @@ public:
 	{
 	public:
 		void set( XmlTree );
-
+		
+		float mThreshold=-1.f; // -1 is otsu, otherwise 0..255
+		
 		float mContourMinRadius	=	3;
 		float mContourMinArea	=	100;
 		float mContourDPEpsilon	=	5;
