@@ -104,7 +104,8 @@ void PinballWorld::setParams( XmlTree xml )
 	
 	getXml(xml, "BumperMinRadius", mBumperMinRadius );
 	getXml(xml, "BumperContourRadiusScale", mBumperContourRadiusScale );
-
+	getXml(xml, "BumperKickAccel", mBumperKickAccel );
+	
 	getXml(xml, "FlipperMinLength",mFlipperMinLength);
 	getXml(xml, "FlipperMaxLength",mFlipperMaxLength);
 	getXml(xml, "FlipperRadiusToLengthScale",mFlipperRadiusToLengthScale);

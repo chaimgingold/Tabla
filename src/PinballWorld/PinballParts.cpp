@@ -42,7 +42,7 @@ Flipper::Flipper( PinballWorld& world, vec2 pin, float contourRadius, PartType t
 
 void Flipper::draw()
 {
-	gl::color( ColorA(0,1,1,1) );
+	gl::color( lerp( ColorA(0,1,1,1), ColorA(1,1,1,1), powf(getCollisionFade(),3.f) ) );
 	gl::drawSolid( getCollisionPoly() );
 }
 
@@ -68,6 +68,22 @@ PolyLine2 Flipper::getCollisionPoly() const
 	return mWorld.getCapsulePoly(c,r);
 }
 
+float Flipper::getCollisionFade() const
+{
+	const float k = .5f;
+	
+	float t = 1.f - (mWorld.time() - mCollideTime) / k;
+	
+	t = constrain( t, 0.f, 1.f);
+	
+	return t;
+}
+
+void Flipper::onBallCollide( Ball& ball )
+{
+	mCollideTime = mWorld.time();
+}
+
 Bumper::Bumper( PinballWorld& world, vec2 pin, float contourRadius, AdjSpace adjSpace )
 	: Part(world)
 {
@@ -83,10 +99,26 @@ Bumper::Bumper( PinballWorld& world, vec2 pin, float contourRadius, AdjSpace adj
 
 void Bumper::draw()
 {
+	ColorA color = mColor;
+	
+	if ( Rand::randFloat() < powf(getCollisionFade(),2.f) )
+	{
+		color = Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat());
+	}
+
+
+//	gl::pushModelMatrix();
+//	gl::translate( -mLoc );
+//	gl::scale( vec2(1,1) * (1.f + .1f + getCollisionFade() ) );
+//	gl::translate( mLoc );
+	
 	//gl::color(1,0,0);
-	gl::color(mColor);
-//	gl::drawSolidCircle(p->mLoc,p->mRadius);
-	gl::drawSolid( getCollisionPoly() );
+	gl::color(color);
+	gl::drawSolidCircle(mLoc, mRadius + .5 * powf(getCollisionFade(),2.f) );
+//	gl::drawSolid( getCollisionPoly() );
+
+//	gl::popModelMatrix();
+	
 	gl::color(1,.8,0);
 	gl::drawSolidCircle(mLoc,mRadius/2.f);
 }
@@ -100,11 +132,29 @@ PolyLine2 Bumper::getCollisionPoly() const
 	return mWorld.getCirclePoly( mLoc, mRadius );
 }
 
+float Bumper::getCollisionFade() const
+{
+	const float k = .5f;
+	
+	float t = 1.f - (mWorld.time() - mCollideTime) / k;
+	
+	t = constrain( t, 0.f, 1.f);
+	
+	return t;
+}
+
 void Bumper::onBallCollide( Ball& ball )
 {
 //	mRadius /= 2.f;
-	mColor = Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat());
 //	mColor = Color(1,0,0);
-
-	ball.mColor = mColor;
+//	ball.mColor = mColor;
+	
+	mCollideTime = mWorld.time();
+	
+	// kick ball
+	vec2 v = ball.mLoc - mLoc;
+	if (v==vec2(0,0)) v = randVec2();
+	else v = normalize(v);
+	
+	ball.mAccel += v * mWorld.mBumperKickAccel ;
 }

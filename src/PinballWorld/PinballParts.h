@@ -50,8 +50,6 @@ public:
 	
 	virtual void onBallCollide( Ball& ) {}
 	
-	ColorA mColor=ColorA(1,1,1,1);
-	
 	PartType mType;
 	vec2  mLoc;
 	float mRadius=0.f;
@@ -80,9 +78,14 @@ public:
 	virtual void tick() override;
 
 	virtual PolyLine2 getCollisionPoly() const override;
+
+	virtual void onBallCollide( Ball& ) override;
 	
 private:
 	float mFlipperLength=0.f;
+
+	float getCollisionFade() const;
+	float mCollideTime = -10.f;
 	
 };
 
@@ -97,6 +100,11 @@ public:
 	virtual void onBallCollide( Ball& ) override;
 
 	virtual PolyLine2 getCollisionPoly() const override;
+	
+	float getCollisionFade() const;
+	float mCollideTime = -10.f;
+
+	ColorA mColor = ColorA(1,1,1,1);
 	
 };
 

@@ -52,12 +52,14 @@ public:
 	// vision tuning params
 	float mBumperMinRadius = 5.f;
 	float mBumperContourRadiusScale = 1.5f;
-
+	float mBumperKickAccel = 1.f;
+	
 	float mFlipperMinLength=5.f;
 	float mFlipperMaxLength=10.f;
 	float mFlipperRadiusToLengthScale=5.f;	
 	
 	// state
+	float time() { return ci::app::getElapsedSeconds(); } // use this time so we can locally modulate it (eg slow down, pause, etc...)
 	float getFlipperState( int side ) const { assert(side==0||side==1); return mFlipperState[side]; }
 	
 private:
