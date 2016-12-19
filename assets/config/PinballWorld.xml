@@ -3,6 +3,7 @@
 	<!-- Ball World Params -->
 	<!-- cm -->
 	<BallWorld>
+		<NumIntegrationSteps>		10 </NumIntegrationSteps>
 		<DefaultNumBalls>			0 </DefaultNumBalls>
 		<BallDefaultRadius>			1.5 </BallDefaultRadius>
 		<BallDefaultMaxRadius>		1.5 </BallDefaultMaxRadius>
@@ -53,7 +54,7 @@
 	
 	<FlipperMinLength>1</FlipperMinLength>
 	<FlipperMaxLength>10</FlipperMaxLength>
-	<FlipperRadiusToLengthScale>4</FlipperRadiusToLengthScale>
+	<FlipperRadiusToLengthScale>6</FlipperRadiusToLengthScale>
 	
 <!-- Controls	-->
 <!-- TODO... Note manufacturer/model and support multiple profiles -->

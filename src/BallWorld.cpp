@@ -25,6 +25,7 @@ BallWorld::BallWorld()
 
 void BallWorld::setParams( XmlTree xml )
 {
+	getXml(xml,"NumIntegrationSteps",mNumIntegrationSteps);
 	getXml(xml,"DefaultNumBalls",mDefaultNumBalls);
 	getXml(xml,"BallDefaultRadius",mBallDefaultRadius);
 	getXml(xml,"BallDefaultMaxRadius",mBallDefaultMaxRadius);
@@ -37,6 +38,8 @@ void BallWorld::setParams( XmlTree xml )
 
 TriMeshRef BallWorld::getTriMeshForBalls() const
 {
+	const float inv_delta = mNumIntegrationSteps;
+	
 	TriMeshRef mesh = TriMesh::create( TriMesh::Format().positions(2).colors(4).texCoords0(2) );
 
 	const vec2 uv[4] = {
@@ -68,14 +71,15 @@ TriMeshRef BallWorld::getTriMeshForBalls() const
 			float f;
 			vec2 stretch;
 			{
-				vec2  vel = b.getVel() ;
+				vec2 vel    = b.getVel() * inv_delta;
+				vec2 squash = b.mSquash  * inv_delta;
 				
-				float squashLen = min( length(b.mSquash) * 10.f, b.mRadius * .5f ) ;
+				float squashLen = min( length(squash) * 10.f, b.mRadius * .5f ) ;
 				float velLen    = length(vel) ;
 				
 				float l ;
 				
-				if ( squashLen > velLen ) stretch = perp(b.mSquash), l=squashLen ;
+				if ( squashLen > velLen ) stretch = perp(squash), l=squashLen ;
 				else stretch = vel, l = velLen ;
 				
 				f = .25f * (l / b.mRadius) ;
@@ -205,6 +209,18 @@ void BallWorld::onBallWorldBoundaryCollide	( const Ball& a )
 	mBallWorldCollisions.push_back( BallWorldCollision(getBallIndex(a)));
 }
 
+void BallWorld::scaleBallVelsForIntegrationSteps( int oldSteps, int newSteps )
+{
+	if (oldSteps==newSteps) return;
+	
+	float scale = (float)oldSteps / (float)newSteps;
+	
+	for( auto &b : mBalls )
+	{
+		b.setVel( b.getVel() * scale );
+	}
+}
+
 void BallWorld::updatePhysics()
 {
 	// wipe collisions
@@ -213,8 +229,11 @@ void BallWorld::updatePhysics()
 	mBallWorldCollisions.clear();
 	
 	//
-	int   steps = 1 ;
-	float delta = 1.f / (float)steps ;
+	scaleBallVelsForIntegrationSteps( mLastNumIntegrationSteps, mNumIntegrationSteps );
+	mLastNumIntegrationSteps=mNumIntegrationSteps;
+	
+	const int   steps = mNumIntegrationSteps ;
+	const float delta = 1.f / (float)steps ;
 	
 	for( int step=0; step<steps; ++step )
 	{
@@ -222,55 +241,12 @@ void BallWorld::updatePhysics()
 		for( auto &b : mBalls )
 		{
 			b.mLoc += b.mAccel * delta*delta ;
-			b.mAccel = vec2(0,0) ;
+//			b.mAccel = vec2(0,0) ;
 		}
 
 		// ball <> contour collisions
-		for( auto &b : mBalls )
-		{
-			vec2 oldVel = b.getVel() ;
-			vec2 oldLoc = b.mLoc ;
-			
-			vec2 newLoc;
-			
-			if (b.mCollideWithContours)	newLoc = resolveCollisionWithContours		( b.mLoc, b.mRadius, &b ) ;
-			else						newLoc = resolveCollisionWithInverseContours( b.mLoc, b.mRadius, &b ) ;
-			
-			// update?
-			if ( newLoc != oldLoc )
-			{
-				// update loc
-				b.mLoc = newLoc ;
-				
-				// update vel
-				vec2 surfaceNormal = glm::normalize( newLoc - oldLoc ) ;
-					// not as accurate as it might be, but seems to work fine.
-					// also, this gets an approximate normal for collision with >1 edges
-				
-				vec2 newVel = glm::reflect( oldVel, surfaceNormal );
-				
-				if (mBallContourCoeffOfRestitution < 1.f || mBallContourFrictionlessCoeff < 1.f)
-				{
-					// modulate it with inelastic collision + maybe friction
-					vec2 normalVel  = surfaceNormal * dot(newVel,surfaceNormal); // for inelastic
-					vec2 tangentVel = newVel - normalVel; // for friction
-					
-					tangentVel *= mBallContourFrictionlessCoeff;
-					
-					newVel = tangentVel + normalVel * mBallContourCoeffOfRestitution;
-				}
-					
-				newVel += surfaceNormal * mBallContourImpactNormalVelImpulse;
-					// accumulate energy from impact
-					// would be cool to use optic flow for this, and each contour can have a velocity
-				
-				b.setVel(newVel);
-
-				// squash?
-				b.noteSquashImpact( surfaceNormal * length(b.getVel()) ) ; //newLoc - oldLoc ) ;
-			}
-		}
-
+		resolveBallContourCollisions();
+		
 		// ball <> ball collisions
 		resolveBallCollisions() ;
 		
@@ -279,21 +255,17 @@ void BallWorld::updatePhysics()
 		// alternative would be to cap impulse there)
 		if (1)
 		{
+			const float maxVel = mBallMaxVel * delta;
+			
 			for( auto &b : mBalls )
 			{
 				vec2 v = b.getVel() ;
 				
-				if ( length(v) > mBallMaxVel )
+				if ( length(v) > maxVel )
 				{
-					b.setVel( normalize(v) * mBallMaxVel ) ;
+					b.setVel( normalize(v) * maxVel ) ;
 				}
 			}
-		}
-		
-		// squash
-		for( auto &b : mBalls )
-		{
-			b.mSquash *= .7f ;
 		}
 		
 		// inertia
@@ -302,6 +274,67 @@ void BallWorld::updatePhysics()
 			vec2 vel = b.getVel() ; // rewriting mLastLoc will stomp vel, so get it first
 			b.mLastLoc = b.mLoc ;
 			b.mLoc += vel ;
+		}
+	}
+
+	// un-squash
+	for( auto &b : mBalls )
+	{
+		b.mSquash *= .7f ;
+	}
+
+	// nuke accel
+	for( auto &b : mBalls )
+	{
+		b.mAccel = vec2(0,0) ;
+	}
+}
+
+void BallWorld::resolveBallContourCollisions()
+{
+	for( auto &b : mBalls )
+	{
+		vec2 oldVel = b.getVel() ;
+		vec2 oldLoc = b.mLoc ;
+		
+		vec2 newLoc;
+		
+		if (b.mCollideWithContours)	newLoc = resolveCollisionWithContours		( b.mLoc, b.mRadius, &b ) ;
+		else						newLoc = resolveCollisionWithInverseContours( b.mLoc, b.mRadius, &b ) ;
+		
+		// update?
+		if ( newLoc != oldLoc )
+		{
+			// update loc
+			b.mLoc = newLoc ;
+			
+			// update vel
+			vec2 surfaceNormal = glm::normalize( newLoc - oldLoc ) ;
+				// not as accurate as it might be, but seems to work fine.
+				// also, this gets an approximate normal for collision with >1 edges
+			
+			vec2 newVel = glm::reflect( oldVel, surfaceNormal );
+			
+			if (mBallContourCoeffOfRestitution < 1.f || mBallContourFrictionlessCoeff < 1.f)
+			{
+				// modulate it with inelastic collision + maybe friction
+				vec2 normalVel  = surfaceNormal * dot(newVel,surfaceNormal); // for inelastic
+				vec2 tangentVel = newVel - normalVel; // for friction
+				
+				tangentVel *= mBallContourFrictionlessCoeff;
+				
+				newVel = tangentVel + normalVel * mBallContourCoeffOfRestitution;
+			}
+				
+			//newVel += surfaceNormal * mBallContourImpactNormalVelImpulse;
+			b.mAccel += surfaceNormal * mBallContourImpactNormalVelImpulse;
+				// accumulate energy from impact
+				// would be cool to use optic flow for this, and each contour can have a velocity
+			
+			b.setVel(newVel);
+
+			// squash?
+			b.noteSquashImpact( surfaceNormal * length(b.getVel()) ) ; //newLoc - oldLoc ) ;
 		}
 	}
 }
@@ -325,13 +358,16 @@ Ball& BallWorld::newRandomBall ( vec2 loc )
 		else ball.mColor = Color(.5,0,.5);
 	}
 	
-	ball.setVel( Rand::randVec2() * mBallDefaultRadius/2.f ) ;
+	ball.setVel( Rand::randVec2() * mBallDefaultRadius/2.f * (float)mNumIntegrationSteps ) ;
+	// ideally we use mAccel here, but not sure how to get that to have the same effect,
+	// so just sticking with this for now.
 	
 	mBalls.push_back( ball ) ;
 	
 	return mBalls.back();
 }
 
+/*
 vec2 BallWorld::resolveCollisionWithBalls ( vec2 p, float r, Ball* ignore, float correctionFraction ) const
 {
 	for ( const auto &b : mBalls )
@@ -355,7 +391,7 @@ vec2 BallWorld::resolveCollisionWithBalls ( vec2 p, float r, Ball* ignore, float
 	}
 	
 	return p ;
-}
+}*/
 
 void BallWorld::resolveBallCollisions()
 {

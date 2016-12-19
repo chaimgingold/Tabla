@@ -129,8 +129,9 @@ protected:
 	virtual void onBallWorldBoundaryCollide	( const Ball& );
 	// these functions record collisions. if you override, then make sure you call BallWorld::
 	// if you still want them returned in the collision lists.
-
+	
 	// params
+	int		mNumIntegrationSteps	= 1;	
 	int		mDefaultNumBalls		= 5;
 	float	mBallDefaultRadius		= 8.f *  .5f ;
 	float	mBallDefaultMaxRadius	= 8.f * 4.f ;
@@ -148,17 +149,22 @@ private:
 	BallWorldCollisionVec	mBallWorldCollisions;
 	
 	// simulation
+	int mLastNumIntegrationSteps=1;
+	
+	void scaleBallVelsForIntegrationSteps( int oldSteps, int newSteps );
 	void updatePhysics();
 
 	vec2 unlapEdge( vec2 p, float r, const Contour& poly, const Ball* b=0 );
 	vec2 unlapHoles( vec2 p, float r, ContourKind kind, const Ball* b=0 );
 	
 	//
-	vec2 resolveCollisionWithBalls		( vec2 p, float r, Ball* ignore=0, float correctionFraction=1.f ) const ;
+//	vec2 resolveCollisionWithBalls		( vec2 p, float r, Ball* ignore=0, float correctionFraction=1.f ) const ;
 		// simple pushes p out of overlapping balls.
 		// but might take multiple iterations to respond to all of them
 		// fraction is (0,1], how much of the collision correction to do.
+		// [deprecated]
 	
+	void resolveBallContourCollisions();
 	void resolveBallCollisions() ;
 
 	ContourVector		mContours;

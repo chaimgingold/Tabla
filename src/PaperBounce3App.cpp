@@ -472,7 +472,6 @@ void PaperBounce3App::loadGame( int libraryIndex )
 			{
 				// set params from xml
 				setGameWorldXmlParams(xml);
-				mVision.setParams( mGameWorld->getVisionParams() ); // (move mVision.* and mPipeline.* calls to setGameWorldXmlParams()?)
 			}
 		});
 		
