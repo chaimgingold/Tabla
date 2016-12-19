@@ -68,6 +68,7 @@ public:
 	// contour origin info (for inter-frame coherency)
 	// (when we do composite parts--multiple bumpers combined into one, we'll want to make this into a vector with a particular ordering
 	// for easy comparisons)
+	// might be most logical to just store the whole Contour, so a vector of Contours we are based on.
 	vec2  mContourLoc;
 	float mContourRadius=0.f;
 	

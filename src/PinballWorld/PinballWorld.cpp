@@ -503,6 +503,11 @@ void PinballWorld::updateVision( const Vision::Output& visionOut, Pipeline& p )
 	mParts = mergeOldAndNewParts(mParts, newParts);
 }
 
+bool PinballWorld::shouldContourBeAPart( const Contour& c ) const
+{
+	return c.mTreeDepth>0 && c.mIsHole && c.mRadius < mPartMaxContourRadius;
+}
+
 AdjSpace
 PinballWorld::getAdjacentSpace( vec2 loc, const ContourVector& cs ) const
 {
@@ -530,7 +535,7 @@ PinballWorld::getAdjacentSpace( vec2 loc, const ContourVector& cs ) const
 		//if ( c.mIsHole && c.contains(loc) ) return false;
 		if ( &c == leaf ) return false; // supposed to be optimized version of c.mIsHole && c.contains(loc)
 		// 2. not other parts
-		else if ( c.mIsHole && c.mRadius < mPartMaxContourRadius ) return false; // could be a part
+		else if ( shouldContourBeAPart(c) ) return false; // could be a part
 		// OK
 		else return true;
 	};
@@ -551,7 +556,7 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 	
 	for( const auto &c : contours )
 	{
-		if ( c.mTreeDepth>0 && c.mIsHole && c.mRadius < mPartMaxContourRadius )
+		if ( shouldContourBeAPart(c) )
 		{
 			// flipper orientation
 			AdjSpace adjSpace = getAdjacentSpace(c.mCenter,contours);
