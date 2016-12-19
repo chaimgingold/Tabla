@@ -30,6 +30,7 @@
 <!-- Debug -->
 	<DebugDrawAdjSpaceRays>0</DebugDrawAdjSpaceRays>
 	<DebugDrawGeneratedContours>0</DebugDrawGeneratedContours>
+	<DebugDrawFlipperAccelHairs>0</DebugDrawFlipperAccelHairs>
 	
 <!-- General -->
 	<UpVec>-1 0</UpVec>
@@ -51,10 +52,15 @@
 	<BumperMinRadius>1</BumperMinRadius>
 	<BumperContourRadiusScale>2</BumperContourRadiusScale>
 	<BumperKickAccel>.5</BumperKickAccel>
+
+	<BumperOuterColor>FF0000</BumperOuterColor>
+	<BumperInnerColor>FFCC00</BumperInnerColor>
+	
 	
 	<FlipperMinLength>1</FlipperMinLength>
 	<FlipperMaxLength>10</FlipperMaxLength>
 	<FlipperRadiusToLengthScale>6</FlipperRadiusToLengthScale>
+	<FlipperColor>00FFFF</FlipperColor>
 	
 <!-- Controls	-->
 <!-- TODO... Note manufacturer/model and support multiple profiles -->

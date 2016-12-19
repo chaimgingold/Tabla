@@ -105,10 +105,14 @@ void PinballWorld::setParams( XmlTree xml )
 	getXml(xml, "BumperMinRadius", mBumperMinRadius );
 	getXml(xml, "BumperContourRadiusScale", mBumperContourRadiusScale );
 	getXml(xml, "BumperKickAccel", mBumperKickAccel );
+
+	getXml(xml, "BumperOuterColor",mBumperOuterColor);
+	getXml(xml, "BumperInnerColor",mBumperInnerColor);
 	
 	getXml(xml, "FlipperMinLength",mFlipperMinLength);
 	getXml(xml, "FlipperMaxLength",mFlipperMaxLength);
 	getXml(xml, "FlipperRadiusToLengthScale",mFlipperRadiusToLengthScale);
+	getXml(xml, "FlipperColor",mFlipperColor);
 	
 	getXml(xml, "CircleMinVerts", mCircleMinVerts );
 	getXml(xml, "CircleMaxVerts", mCircleMaxVerts );
@@ -119,6 +123,7 @@ void PinballWorld::setParams( XmlTree xml )
 	
 	getXml(xml, "DebugDrawGeneratedContours", mDebugDrawGeneratedContours);
 	getXml(xml, "DebugDrawAdjSpaceRays", mDebugDrawAdjSpaceRays );
+	getXml(xml, "DebugDrawFlipperAccelHairs", mDebugDrawFlipperAccelHairs );
 	
 	// gamepad
 	if (xml.hasChild("Gamepad"))
@@ -271,9 +276,10 @@ float PinballWorld::getFlipperAngularVel( int side ) const
 {
 	const float eps = .1f;
 	const float radPerSec = (M_PI/2.f) / 6.f; // assume 6 steps per 90 deg of motion
+	const float sign[2] = {1.f,-1.f};
 	
-	if ( mIsFlipperDown[side] && mFlipperState[side] < 1.f-eps ) return radPerSec;
-	else if ( !mIsFlipperDown[side] && mFlipperState[side] > eps ) return -radPerSec;
+	if ( mIsFlipperDown[side] && mFlipperState[side] < 1.f-eps ) return radPerSec * sign[side];
+	else if ( !mIsFlipperDown[side] && mFlipperState[side] > eps ) return -radPerSec * sign[side];
 	else return 0.f;
 }
 

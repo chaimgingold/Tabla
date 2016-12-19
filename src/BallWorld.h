@@ -119,6 +119,8 @@ public:
 	const BallContourCollisionVec&	getBallContourCollisions() const { return mBallContourCollisions; }
 	const BallWorldCollisionVec&	getBallWorldCollisions() const { return mBallWorldCollisions; }
 	
+	int getNumIntegrationSteps() const { return mNumIntegrationSteps; }
+	
 protected:
 	void setContours( const ContourVec& contours ) { mContours = contours; }
 	

@@ -49,14 +49,20 @@ public:
 	PolyLine2 getCirclePoly ( vec2 c, float r ) const;
 	PolyLine2 getCapsulePoly( vec2 c[2], float r[2] ) const;
 
-	// vision tuning params
+	// part params
 	float mBumperMinRadius = 5.f;
 	float mBumperContourRadiusScale = 1.5f;
 	float mBumperKickAccel = 1.f;
+	ColorA mBumperOuterColor = ColorA(1,0,0,1);
+	ColorA mBumperInnerColor = ColorA(1,.8,0,1);
 	
 	float mFlipperMinLength=5.f;
 	float mFlipperMaxLength=10.f;
 	float mFlipperRadiusToLengthScale=5.f;	
+	ColorA mFlipperColor = ColorA(0,1,1,1);
+	
+	// debug params
+	bool mDebugDrawFlipperAccelHairs=false;
 	
 	// state
 	float time() { return ci::app::getElapsedSeconds(); } // use this time so we can locally modulate it (eg slow down, pause, etc...)

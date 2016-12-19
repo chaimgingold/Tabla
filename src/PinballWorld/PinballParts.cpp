@@ -42,10 +42,10 @@ Flipper::Flipper( PinballWorld& world, vec2 pin, float contourRadius, PartType t
 
 void Flipper::draw()
 {
-	gl::color( lerp( ColorA(0,1,1,1), ColorA(1,1,1,1), powf(getCollisionFade(),3.f) ) );
+	gl::color( lerp( mWorld.mFlipperColor, ColorA(1,1,1,1), powf(getCollisionFade(),3.f) ) );
 	gl::drawSolid( getCollisionPoly() );
 	
-	if (0)
+	if (mWorld.mDebugDrawFlipperAccelHairs)
 	{
 		PolyLine2 poly = getCollisionPoly();
 		vec2 tip = getTipLoc();
@@ -64,6 +64,17 @@ void Flipper::draw()
 		for( auto p : poly.getPoints() )
 		{
 			hair( lerp( c, p, 1.1f ) );
+		}
+
+		for( int i=0; i<poly.size(); ++i )
+		{
+			int j = (i+1) % poly.size();
+			
+			const int kk=10;
+			for( int k=1; k<kk; ++k )
+			{
+				hair( lerp( poly.getPoints()[i], poly.getPoints()[j], (float)k/(float)kk ) );
+			}
 		}
 		
 		hair( vec2(lerp(r.x1,r.x2,.5),r.y2) );
@@ -145,8 +156,9 @@ Bumper::Bumper( PinballWorld& world, vec2 pin, float contourRadius, AdjSpace adj
 	mType=PartType::Bumper;
 	mLoc=pin;
 
-	mColor = Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat());
-
+//	mColor = Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat());
+	mColor = world.mBumperOuterColor;
+	
 	mRadius = min( max(contourRadius*world.mBumperContourRadiusScale,world.mBumperMinRadius),
 					 min(adjSpace.mLeft,adjSpace.mRight)
 					 );
@@ -174,7 +186,7 @@ void Bumper::draw()
 
 //	gl::popModelMatrix();
 	
-	gl::color(1,.8,0);
+	gl::color(mWorld.mBumperInnerColor);
 	gl::drawSolidCircle(mLoc,mRadius/2.f);
 }
 

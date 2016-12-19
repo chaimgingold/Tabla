@@ -240,8 +240,8 @@ void BallWorld::updatePhysics()
 		// accelerate
 		for( auto &b : mBalls )
 		{
-			b.mLoc += b.mAccel * delta*delta ;
-//			b.mAccel = vec2(0,0) ;
+			b.mLoc += (b.mAccel * (float)steps) * delta*delta ;
+			b.mAccel = vec2(0,0) ;
 		}
 
 		// ball <> contour collisions
@@ -281,12 +281,6 @@ void BallWorld::updatePhysics()
 	for( auto &b : mBalls )
 	{
 		b.mSquash *= .7f ;
-	}
-
-	// nuke accel
-	for( auto &b : mBalls )
-	{
-		b.mAccel = vec2(0,0) ;
 	}
 }
 
@@ -358,7 +352,8 @@ Ball& BallWorld::newRandomBall ( vec2 loc )
 		else ball.mColor = Color(.5,0,.5);
 	}
 	
-	ball.setVel( Rand::randVec2() * mBallDefaultRadius/2.f * (float)mNumIntegrationSteps ) ;
+	ball.mAccel = Rand::randVec2() * mBallDefaultRadius/2.f;
+//	ball.setVel( Rand::randVec2() * mBallDefaultRadius/2.f * (float)mNumIntegrationSteps ) ;
 	// ideally we use mAccel here, but not sure how to get that to have the same effect,
 	// so just sticking with this for now.
 	
