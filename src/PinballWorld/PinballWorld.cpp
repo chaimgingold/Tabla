@@ -524,11 +524,15 @@ PinballWorld::getAdjacentSpace( vec2 loc, const ContourVector& cs ) const
 		}
 	}
 	
-	auto filter = [loc]( const Contour& c ) -> bool
+	auto filter = [&]( const Contour& c ) -> bool
 	{
-		if ( c.mIsHole && c.contains(loc) ) return false;
+		// 1. not self
+		//if ( c.mIsHole && c.contains(loc) ) return false;
+		if ( &c == leaf ) return false; // supposed to be optimized version of c.mIsHole && c.contains(loc)
+		// 2. not other parts
+		else if ( c.mIsHole && c.mRadius < mPartMaxContourRadius ) return false; // could be a part
+		// OK
 		else return true;
-		// this could be faster, by us checking against leaf variable
 	};
 	
 	cs.rayIntersection( loc, getRightVec(), &result.mRight, filter );
