@@ -106,13 +106,15 @@ private:
 	Rectf getContourBBoxInLocalSpace( const Contour& ) const;
 	
 	float mAnimTime; // our local animation time, in case we want to pause, etc...
-	vec2 mTimeVec;
-	float mWorldUnitsToSeconds;
-	float mMaxFrameDist; // for same anim
-	bool mDebugDrawTopology;
+	vec2 mTimeVec=vec2(1,0);
+	float mWorldUnitsToSeconds=10.f;
+	float mAnimLengthQuantizeToSec=.5f;
+	float mMaxFrameDist=10.f; // for same anim
+	bool mDebugDrawTopology=false;
 	
 	//
 	void drawScreen( const Frame& );
+	static void printAnims( const AnimSeqMap& ); // to cout
 	
 	// scope is mFrames
 	FrameVec mFrames;

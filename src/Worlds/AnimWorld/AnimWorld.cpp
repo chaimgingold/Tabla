@@ -32,9 +32,27 @@ void AnimWorld::setParams( XmlTree xml )
 	getXml(xml,"WorldUnitsToSeconds",mWorldUnitsToSeconds);
 	getXml(xml,"MaxFrameDist",mMaxFrameDist);
 	getXml(xml,"DebugDrawTopology",mDebugDrawTopology);
+	getXml(xml,"AnimLengthQuantizeToSec",mAnimLengthQuantizeToSec);
 	
 	mLocalToGlobal = mat2( getTimeVec(), getUpVec() );
 	mGlobalToLocal = inverse( mLocalToGlobal );
+}
+
+void AnimWorld::printAnims( const AnimSeqMap& as )
+{
+	cout << as.size() << " anims:" << endl;
+	
+	for( auto i : as )
+	{
+		cout << "\t" << i.first << " {";
+		
+		for( auto j : i.second )
+		{
+			cout << j << " ";
+		}
+		
+		cout << "}" << endl;
+	}
 }
 
 AnimSeqMap
@@ -60,9 +78,18 @@ int AnimWorld::getCurrentFrameIndexOfSeq( const FrameVec& frames, const AnimSeq&
 	vec2 worldLength = frames[seq.back()].mContour.mCenter - frames[seq.front()].mContour.mCenter;
 //	float length = dot( worldLength, getTimeVec() ) / mWorldUnitsToSeconds ;
 	float length = glm::length(worldLength) / mWorldUnitsToSeconds ;
+//	float length = mWorldUnitsToSeconds; // hard coded for now..., for stability.
+	
+//	cout << glm::length(worldLength) << endl;
+	
+	// quantize length
+	{
+		float quantizeUnit = .5f;
+		length = length - fmodf( length, quantizeUnit );
+	}
 	
 	float t = fmod( mAnimTime, length ) / length;
-	int index = constrain( (int)roundf(t * ((float)seq.size()-1)), 0, (int)seq.size()-1 );
+	int index = constrain( (int)floorf(t * (float)(seq.size())), 0, (int)seq.size()-1 );
 	int frame = seq[index];
 	
 //	cout << t << " -> " << index << " of " << seq.size() << " -> " << frame << endl;
@@ -305,6 +332,8 @@ void AnimWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeline
 	
 	mAnims = getAnimSeqs(mFrames);
 	updateCurrentFrames(mAnims,mFrames,mAnimTime);
+	
+	if (0) printAnims(mAnims);
 }
 
 void AnimWorld::update()
@@ -386,15 +415,21 @@ void AnimWorld::draw( DrawType drawType )
 		{
 			bool isCurrentFrame = ( mAnims[f.mFirstFrameIndex].mCurrentFrameIndex == f.mIndex );
 			
-			gl::color( lerp( Color(0,1,1),Color(1,.5,0), (float)(f.mSeqFrameNum-1) / (float)(f.mSeqFrameCount-1) ) );
+			Color color = lerp( Color(0,1,1),Color(1,.5,0), (float)(f.mSeqFrameNum-1) / (float)(f.mSeqFrameCount-1) );
+			
 
 			if ( isCurrentFrame ) {
+				gl::color( ColorA(color, drawType==DrawType::Projector ? 1.f : .5f) );
 				gl::drawSolid(f.mContour.mPolyLine);
 			} else {
+				gl::color(color);
 				gl::draw(f.mContour.mPolyLine);
 			}
 		}
-		else if ( f.isScreen() ) drawScreen(f);
+		else if ( f.isScreen() )
+		{
+			if (drawType == DrawType::Projector) drawScreen(f);
+		}
 		else
 		{
 			gl::color( Color(1,.8,0) );
