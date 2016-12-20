@@ -9,6 +9,7 @@
 #include "WindowData.h"
 #include "PaperBounce3App.h"
 #include "geom.h" // getPointsAsPoly
+#include "GameLibraryView.h"
 
 WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app )
 	: mApp(app)
@@ -120,6 +121,13 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 			mViews.addView( projPolyEditView );
 		}
 	}
+	
+	// game library widget
+	{
+		mGameLibraryView = std::make_shared<GameLibraryView>();
+		mViews.addView( mGameLibraryView );
+		mGameLibraryView->layout( window->getBounds() );
+	}
 }
 
 void WindowData::draw()
@@ -168,7 +176,19 @@ void WindowData::draw()
 	
 	if ( mIsUIWindow )
 	{
-		float targetFPS = mApp.getFrameRate();
+		{
+			string str = toString( (int)roundf(mApp.mCaptureFPS.mFPS) ) + " capture fps";
+			
+			vec2 size = mApp.mTextureFont->measureString(str);
+			
+			//vec2 loc( vec2(getWindowSize().x - size.x - 8.f, getWindowSize().y - 8.f ) );
+			vec2 loc( vec2(getWindowSize().x - size.x - 8.f, size.y + 8.f ) );
+
+			gl::color(1,1,1,.8);
+			mApp.mTextureFont->drawString( str, loc );
+		}
+		
+		const float targetFPS = mApp.getFrameRate();
 		
 		if ( targetFPS - mApp.mAppFPS.mFPS >= targetFPS*.1f )
 		{
@@ -176,18 +196,7 @@ void WindowData::draw()
 			
 			vec2 size = mApp.mTextureFont->measureString(str);
 			
-			vec2 loc( vec2(getWindowSize().x - size.x - 8.f, size.y + 8.f ) );
-
-			gl::color(1,1,1,.8);
-			mApp.mTextureFont->drawString( str, loc );
-		}
-		
-		{
-			string str = toString( (int)roundf(mApp.mCaptureFPS.mFPS) ) + " capture fps";
-			
-			vec2 size = mApp.mTextureFont->measureString(str);
-			
-			vec2 loc( vec2(getWindowSize().x - size.x - 8.f, getWindowSize().y - 8.f ) );
+			vec2 loc( vec2(getWindowSize().x - size.x - 8.f, size.y + 24.f ) );
 
 			gl::color(1,1,1,.8);
 			mApp.mTextureFont->drawString( str, loc );
@@ -375,4 +384,14 @@ void WindowData::updatePipelineViews()
 			pos = vec2( left, view->getFrame().y2 + mApp.mConfigWindowPipelineGutter ) ;
 		}
 	}
+}
+
+void WindowData::resize()
+{
+	if (mGameLibraryView)
+	{
+		mGameLibraryView->layout(mWindow->getBounds());
+	}
+	
+	mViews.resize();
 }

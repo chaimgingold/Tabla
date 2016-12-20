@@ -22,6 +22,7 @@ class GameWorld
 {
 public:
 	virtual string getSystemName() const { return "GameWorld"; } // for xml param block name
+	virtual string getUserName() const { return getSystemName(); }
 	
 	void		   setVisionParams( Vision::Params p ) { mVisionParams=p; }
 	Vision::Params getVisionParams() const { return mVisionParams; }
@@ -71,6 +72,7 @@ class GameCartridge
 {
 public:
 	virtual string getSystemName() const { return "GameWorld"; } // should match GameWorld name
+	virtual string getUserName() const { return getSystemName(); }
 	virtual std::shared_ptr<GameWorld> load() const { return 0; }
 	
 };

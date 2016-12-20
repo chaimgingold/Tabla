@@ -76,12 +76,17 @@ public:
 	virtual void mouseUp  ( MouseEvent ){}
 	virtual void mouseMove( MouseEvent ){}
 	virtual void mouseDrag( MouseEvent ){}
+	virtual void resize(){}
 	
 	void setHasRollover( bool v ) { mHasRollover=v; }
 	bool getHasRollover() const { return mHasRollover; }
 	
+	bool getHasMouseDown() const { return mHasMouseDown; }
+	void setHasMouseDown( bool v ) { mHasMouseDown=v; }
+	
 private:
 	bool	mHasRollover=false;
+	bool	mHasMouseDown=false;
 	
 	string	mName;
 	Rectf	mFrame = Rectf(0,0,1,1); // where it is in parent coordinate space
@@ -107,6 +112,7 @@ public:
 	void mouseUp  ( MouseEvent );
 	void mouseMove( MouseEvent );
 	void mouseDrag( MouseEvent );
+	void resize();
 	
 	ViewRef getMouseDownView() const { return mMouseDownView; }
 	ViewRef getRolloverView()  const { return mRolloverView; }

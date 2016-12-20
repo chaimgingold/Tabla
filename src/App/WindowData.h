@@ -14,6 +14,7 @@
 #include <memory>
 
 class PaperBounce3App;
+class GameLibraryView;
 
 class WindowData {
 public:
@@ -25,7 +26,8 @@ public:
 	void mouseUp  ( MouseEvent event );
 	void mouseMove( MouseEvent event ) ;
 	void mouseDrag( MouseEvent event ) ;
-
+	void resize();
+	
 	WindowRef getWindow() const { return mWindow; }
 	vec2 getMousePosInWindow() const { return mMousePosInWindow; }
 	void updateMainImageTransform(); // configure mMainImageView's transform
@@ -49,6 +51,7 @@ private:
 	vec2 mMousePosInWindow=vec2(-1000,-1000); // just get it out of bounds!
 
 	std::shared_ptr<MainImageView> mMainImageView; // main view, with image in it.
+	std::shared_ptr<GameLibraryView> mGameLibraryView;
 	
 	vector<ViewRef> mPipelineViews;
 	

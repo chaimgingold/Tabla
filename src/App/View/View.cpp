@@ -74,7 +74,10 @@ void ViewCollection::mouseDown( MouseEvent event )
 	// mouse down event
 	mMouseDownView = pickView( event.getPos() );
 	
-	if (mMouseDownView) mMouseDownView->mouseDown(event);
+	if (mMouseDownView) {
+		mMouseDownView->setHasMouseDown(true);
+		mMouseDownView->mouseDown(event);
+	}
 	
 	// nuke rollover
 	if (mRolloverView) mRolloverView->setHasRollover(false);
@@ -83,9 +86,9 @@ void ViewCollection::mouseDown( MouseEvent event )
 
 void ViewCollection::mouseUp( MouseEvent event )
 {
-	if (mMouseDownView)
-	{
+	if (mMouseDownView) {
 		mMouseDownView->mouseUp(event);
+		mMouseDownView->setHasMouseDown(false);
 		mMouseDownView=0;
 	}
 }
@@ -109,4 +112,11 @@ void ViewCollection::mouseMove( MouseEvent event )
 void ViewCollection::mouseDrag( MouseEvent event )
 {
 	if (mMouseDownView) mMouseDownView->mouseDrag(event);
+}
+
+void ViewCollection::resize()
+{
+	for( auto &v : mViews ) {
+		v->resize();
+	}
 }

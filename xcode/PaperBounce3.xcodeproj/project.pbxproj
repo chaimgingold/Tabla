@@ -54,6 +54,7 @@
 		26CCA31A1E089EE3005F7C24 /* PipelineStageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3131E089EE3005F7C24 /* PipelineStageView.cpp */; };
 		26CCA31B1E089EE3005F7C24 /* View.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3151E089EE3005F7C24 /* View.cpp */; };
 		26CCA31C1E089EE3005F7C24 /* WindowData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3171E089EE3005F7C24 /* WindowData.cpp */; };
+		26CCA3211E089F98005F7C24 /* GameLibraryView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA31F1E089F98005F7C24 /* GameLibraryView.cpp */; };
 		26F3234B1DF74D8900EC9559 /* Gamepad_macosx.c in Sources */ = {isa = PBXBuildFile; fileRef = 26F323491DF74D8900EC9559 /* Gamepad_macosx.c */; };
 		26F3234C1DF74D8900EC9559 /* Gamepad_private.c in Sources */ = {isa = PBXBuildFile; fileRef = 26F3234A1DF74D8900EC9559 /* Gamepad_private.c */; };
 		26FA36411D4A7D5300C64A00 /* todo in Resources */ = {isa = PBXBuildFile; fileRef = 26FA36401D4A7D5300C64A00 /* todo */; };
@@ -260,6 +261,8 @@
 		26CCA3161E089EE3005F7C24 /* View.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = View.h; sourceTree = "<group>"; };
 		26CCA3171E089EE3005F7C24 /* WindowData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WindowData.cpp; sourceTree = "<group>"; };
 		26CCA3181E089EE3005F7C24 /* WindowData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WindowData.h; sourceTree = "<group>"; };
+		26CCA31F1E089F98005F7C24 /* GameLibraryView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GameLibraryView.cpp; sourceTree = "<group>"; };
+		26CCA3201E089F98005F7C24 /* GameLibraryView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameLibraryView.h; sourceTree = "<group>"; };
 		26F323491DF74D8900EC9559 /* Gamepad_macosx.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Gamepad_macosx.c; path = "../blocks/Cinder-Gamepad/src/Gamepad_macosx.c"; sourceTree = "<group>"; };
 		26F3234A1DF74D8900EC9559 /* Gamepad_private.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Gamepad_private.c; path = "../blocks/Cinder-Gamepad/src/Gamepad_private.c"; sourceTree = "<group>"; };
 		26F3234D1DF74D9500EC9559 /* Gamepad.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Gamepad.h; path = "../blocks/Cinder-Gamepad/include/Gamepad.h"; sourceTree = "<group>"; };
@@ -779,9 +782,9 @@
 		26CCA2B01E089DE7005F7C24 /* Worlds */ = {
 			isa = PBXGroup;
 			children = (
+				26CCA2B71E089DE7005F7C24 /* GameWorld */,
 				26CCA2B11E089DE7005F7C24 /* BallWorld */,
 				26CCA2B41E089DE7005F7C24 /* CalibrateWorld */,
-				26CCA2B71E089DE7005F7C24 /* GameWorld */,
 				26CCA2BA1E089DE7005F7C24 /* MusicWorld */,
 				26CCA2C51E089DE7005F7C24 /* PinballWorld */,
 				26CCA2CA1E089DE7005F7C24 /* PongWorld */,
@@ -950,6 +953,8 @@
 				26CCA3141E089EE3005F7C24 /* PipelineStageView.h */,
 				26CCA3151E089EE3005F7C24 /* View.cpp */,
 				26CCA3161E089EE3005F7C24 /* View.h */,
+				26CCA31F1E089F98005F7C24 /* GameLibraryView.cpp */,
+				26CCA3201E089F98005F7C24 /* GameLibraryView.h */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -2620,6 +2625,7 @@
 				5BB8C5F56F5943658CC78ED8 /* b2DistanceJoint.cpp in Sources */,
 				E63AB3EAB9064A24A06D7722 /* b2FrictionJoint.cpp in Sources */,
 				26CCA30C1E089EB8005F7C24 /* RtMidi.cpp in Sources */,
+				26CCA3211E089F98005F7C24 /* GameLibraryView.cpp in Sources */,
 				C2C8748F1DDBB2D40067E07D /* list_ports_linux.cc in Sources */,
 				C2EC76FC1DA7157F00DB39C8 /* PureDataNode.cpp in Sources */,
 				0CA79800755547E89E33867D /* b2GearJoint.cpp in Sources */,

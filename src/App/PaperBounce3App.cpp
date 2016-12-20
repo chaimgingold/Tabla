@@ -663,6 +663,14 @@ void PaperBounce3App::updateMainImageTransform( WindowRef w )
 void PaperBounce3App::resize()
 {
 	updateMainImageTransform(getWindow());
+
+	if (getWindow())
+	{
+		WindowData *win = getWindow()->getUserData<WindowData>();
+		
+		// might not have been created yet (e.g., in setup)
+		if (win) win->resize();
+	}
 }
 
 void PaperBounce3App::drawWorld( GameWorld::DrawType drawType )
