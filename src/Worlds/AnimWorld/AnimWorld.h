@@ -34,10 +34,13 @@ public:
 	Contour mContour;
 	mat4	mFrameImageToWorld;
 	UMat	mImageCV;
+	gl::TextureRef mTexture; // created lazily, so use getAsTexture()
 	
 	bool isScreen() const { return mScreenFirstFrameIndex!=-1; }
 	bool isAnimFrame() const { return mSeqFrameCount>1; }
 	bool isFirstAnimFrame() const { return isAnimFrame() && mFirstFrameIndex==mIndex; }
+	
+	gl::TextureRef getAsTexture();
 	
 	// topology
 	int		mIndex=-1;
@@ -106,6 +109,10 @@ private:
 	vec2 mTimeVec;
 	float mWorldUnitsToSeconds;
 	float mMaxFrameDist; // for same anim
+	bool mDebugDrawTopology;
+	
+	//
+	void drawScreen( const Frame& );
 	
 	// scope is mFrames
 	FrameVec mFrames;

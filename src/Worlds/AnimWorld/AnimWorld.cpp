@@ -14,6 +14,14 @@
 using namespace std;
 using namespace Anim;
 
+gl::TextureRef Frame::getAsTexture()
+{
+	if ( !mTexture && !mImageCV.empty() ) {
+		mTexture = matToTexture(mImageCV);
+	}
+	return mTexture;
+}
+
 AnimWorld::AnimWorld()
 {
 }
@@ -23,6 +31,7 @@ void AnimWorld::setParams( XmlTree xml )
 	getXml(xml,"TimeVec",mTimeVec);
 	getXml(xml,"WorldUnitsToSeconds",mWorldUnitsToSeconds);
 	getXml(xml,"MaxFrameDist",mMaxFrameDist);
+	getXml(xml,"DebugDrawTopology",mDebugDrawTopology);
 	
 	mLocalToGlobal = mat2( getTimeVec(), getUpVec() );
 	mGlobalToLocal = inverse( mLocalToGlobal );
@@ -49,10 +58,11 @@ AnimWorld::getAnimSeqs( const FrameVec& frames ) const
 int AnimWorld::getCurrentFrameIndexOfSeq( const FrameVec& frames, const AnimSeq& seq ) const
 {
 	vec2 worldLength = frames[seq.back()].mContour.mCenter - frames[seq.front()].mContour.mCenter;
-	float length = dot( worldLength, getTimeVec() ) / mWorldUnitsToSeconds ;
+//	float length = dot( worldLength, getTimeVec() ) / mWorldUnitsToSeconds ;
+	float length = glm::length(worldLength) / mWorldUnitsToSeconds ;
 	
 	float t = fmod( mAnimTime, length ) / length;
-	int index = constrain( (int)(t * (float)seq.size()), 0, (int)seq.size()-1 );
+	int index = constrain( (int)roundf(t * ((float)seq.size()-1)), 0, (int)seq.size()-1 );
 	int frame = seq[index];
 	
 //	cout << t << " -> " << index << " of " << seq.size() << " -> " << frame << endl;
@@ -304,6 +314,70 @@ void AnimWorld::update()
 	updateCurrentFrames(mAnims,mFrames,mAnimTime);
 }
 
+void AnimWorld::drawScreen( const Frame& f )
+{
+	int frame = mAnims[f.mScreenFirstFrameIndex].mCurrentFrameIndex;
+	assert(frame!=-1);
+//	cout << ci::app::getElapsedFrames() << ": " << frame << endl;
+	
+	gl::TextureRef tex = mFrames[frame].getAsTexture();
+	if (!tex)
+	{
+		gl::color( Color(1,.8,0) );
+		gl::draw(f.mContour.mPolyLine);
+	}
+	else
+	{
+		if (0)
+		{
+			// WORKS!
+			gl::draw(tex);
+			return;
+		}
+		
+		if (0)
+		{
+			gl::ScopedTextureBind texScp( tex );
+
+			TriMesh mesh = TriMesh( TriMesh::Format().positions(2).colors(4).texCoords0(2) );
+
+			const vec2 uv[4] = {
+				vec2(0,1),
+				vec2(1,1),
+				vec2(1,0),
+				vec2(0,0)
+			};
+			
+	//		const vec2 *v = &f.mContour.mPolyLine.getPoints()[0];
+			vec2 size = vec2(1,1) * f.mContour.mRadius;
+			vec2 c = f.mContour.mCenter;
+
+			vec2 v[4];
+			Rectf r( c - size, c + size );
+	//		getRectCorners( r, v );
+	//		for( int i=0; i<4; ++i ) v[i] = mLocalToGlobal * v[i];
+			
+	//		appendQuad(mesh,ColorA(1,1,1,1), &f.mContour.mPolyLine()[0], uv);
+			appendQuad(mesh,ColorA(1,1,1,1), v, uv);
+			
+	//		gl::draw(mesh);
+		}
+		
+		
+		if (1)
+		{
+			vec2 size = vec2(1,1) * f.mContour.mRadius;
+			vec2 c = f.mContour.mCenter;
+
+			Rectf r( c - size, c + size );
+
+			gl::color(1,1,1);
+//			gl::drawSolidRect(r);
+			gl::draw(tex, r);
+		}
+	}
+}
+
 void AnimWorld::draw( DrawType drawType )
 {
 	for( const auto &f : mFrames )
@@ -320,15 +394,20 @@ void AnimWorld::draw( DrawType drawType )
 				gl::draw(f.mContour.mPolyLine);
 			}
 		}
+		else if ( f.isScreen() ) drawScreen(f);
 		else
 		{
 			gl::color( Color(1,.8,0) );
 			gl::draw(f.mContour.mPolyLine);
 			
-			gl::color(1,0,0);
-			gl::drawLine(f.mContour.mCenter, f.mContour.mCenter + getTimeVec() * 5.f );
-			gl::color(0,1,0);
-			gl::drawLine(f.mContour.mCenter, f.mContour.mCenter + getUpVec() * 5.f );
+			if (mDebugDrawTopology)
+			{
+				// axes
+				gl::color(1,0,0);
+				gl::drawLine(f.mContour.mCenter, f.mContour.mCenter + getTimeVec() * 5.f );
+				gl::color(0,1,0);
+				gl::drawLine(f.mContour.mCenter, f.mContour.mCenter + getUpVec() * 5.f );
+			}
 		}
 		
 		// test bounding boxes in local space
@@ -339,22 +418,25 @@ void AnimWorld::draw( DrawType drawType )
 			r = Rectf( mLocalToGlobal * r.getUpperLeft(), mLocalToGlobal * r.getLowerRight() );
 			
 			gl::color(1,0,0);
-			gl::drawStrokedRect(r,5.f);
+			gl::drawStrokedRect(r,1.f);
 		}
 	}
 	
-	for( const auto &f : mFrames )
+	if (mDebugDrawTopology)
 	{
-		if ( f.mNextFrameIndex!=-1 )
+		for( const auto &f : mFrames )
 		{
-			gl::color(0,0,1);
-			gl::drawLine(f.mContour.mCenter, mFrames[f.mNextFrameIndex].mContour.mCenter );
-		}
+			if ( f.mNextFrameIndex!=-1 )
+			{
+				gl::color(0,0,1);
+				gl::drawLine(f.mContour.mCenter, mFrames[f.mNextFrameIndex].mContour.mCenter );
+			}
 
-		if ( f.isScreen() ) //&& f.mScreenFirstFrameIndex!=-1 )
-		{
-			gl::color(1,0,0);
-			gl::drawLine(f.mContour.mCenter, mFrames[f.mScreenFirstFrameIndex].mContour.mCenter );
+			if ( f.isScreen() ) //&& f.mScreenFirstFrameIndex!=-1 )
+			{
+				gl::color(1,0,0);
+				gl::drawLine(f.mContour.mCenter, mFrames[f.mScreenFirstFrameIndex].mContour.mCenter );
+			}
 		}
 	}
 }

@@ -19,5 +19,6 @@
 	<TimeVec>-1 0</TimeVec>
 	<WorldUnitsToSeconds>20</WorldUnitsToSeconds>
 	<MaxFrameDist>20</MaxFrameDist>
+	<DebugDrawTopology>0</DebugDrawTopology>
 	
 </AnimWorld>

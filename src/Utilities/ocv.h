@@ -9,6 +9,8 @@
 #ifndef ocv_h
 #define ocv_h
 
+//#include "opencv2/core/opengl.hpp"
+
 namespace cinder {
 	
 	inline void vec2toOCV_4( vec2 in[4], cv::Point2f o[4] )
@@ -124,6 +126,29 @@ namespace cinder {
 		}
 
 		return true;
+	}
+	
+	inline gl::TextureRef matToTexture( cv::UMat mat )
+	{
+		/*if (0)
+		{
+			// http://stackoverflow.com/questions/18086519/is-it-possible-to-bind-a-opencv-gpumat-as-an-opengl-texture
+			
+			cv::ogl::Texture2D texture = cv::ogl::Texture2D(mat,false); // no auto-release, we will own it
+
+			return gl::Texture2d::create(
+				GL_TEXTURE_2D, // texture target (is this right?)
+				texture.texId(), // id
+				texture.cols(), texture.rows(), // size
+				false ); // do dispose it. (cinder owns the texture)
+		}
+		else*/
+		{
+	//		mImageGL = gl::Texture::create( fromOcv(mImageCV), gl::Texture::Format().loadTopDown() );
+			return gl::Texture::create(
+				ImageSourceRef( new ImageSourceCvMat( mat.getMat(cv::ACCESS_READ) ) ),
+				gl::Texture::Format().loadTopDown() );
+		}
 	}
 	
 }

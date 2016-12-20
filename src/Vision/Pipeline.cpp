@@ -14,28 +14,9 @@
 
 gl::TextureRef Pipeline::Stage::getGLImage() const
 {
-	
 	if ( !mImageGL && !mImageCV.empty() )
 	{
-		if (0)
-		{
-			// http://stackoverflow.com/questions/18086519/is-it-possible-to-bind-a-opencv-gpumat-as-an-opengl-texture
-			
-			cv::ogl::Texture2D texture = cv::ogl::Texture2D(mImageCV,false); // no auto-release, we will own it
-
-			mImageGL = gl::Texture2d::create(
-				GL_TEXTURE_2D, // texture target (is this right?)
-				texture.texId(), // id
-				texture.cols(), texture.rows(), // size
-				false ); // do dispose it. (cinder owns the texture)
-		}
-		else
-		{
-	//		mImageGL = gl::Texture::create( fromOcv(mImageCV), gl::Texture::Format().loadTopDown() );
-			mImageGL = gl::Texture::create(
-				ImageSourceRef( new ImageSourceCvMat( mImageCV.getMat(cv::ACCESS_READ) ) ),
-				gl::Texture::Format().loadTopDown() );
-		}
+		mImageGL = matToTexture(mImageCV);
 	}
 	
 	return mImageGL;
