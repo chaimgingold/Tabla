@@ -187,7 +187,7 @@ AnimWorld::getFrameTopology( const FrameVec& in ) const
 	{
 		if ( !f.isAnimFrame() )
 		{
-			f.mScreenFirstFrameIndex = getFirstFrameOfAnimForScreen(f,out);
+			f.mScreenFirstFrameIndex = getFirstFrameIndexOfAnimForScreen(f,out);
 		}
 	}
 	
@@ -201,7 +201,7 @@ PolyLine2 AnimWorld::globalToLocal( PolyLine2 p ) const
 	for ( int i=0; i<p.size(); ++i )
 	{
 		vec2 &v = p.getPoints()[i];
-		v = globalToLocal(v);
+		v = mGlobalToLocal * v;
 	}
 	
 	return p;
@@ -216,7 +216,7 @@ AnimWorld::getContourBBoxInLocalSpace( const Contour& c ) const
 }
 
 int
-AnimWorld::getFirstFrameOfAnimForScreen( const Frame& screen, const FrameVec& frames ) const
+AnimWorld::getFirstFrameIndexOfAnimForScreen( const Frame& screen, const FrameVec& frames ) const
 {
 	Rectf screenr = getContourBBoxInLocalSpace(screen.mContour);
 	// cout << screenr << endl;
@@ -361,5 +361,5 @@ void AnimWorld::draw( DrawType drawType )
 
 void AnimWorld::drawMouseDebugInfo( vec2 v )
 {
-	cout << v << " => " << globalToLocal(v) << endl;
+//	cout << v << " => " << mGlobalToLocal * v << endl;
 }

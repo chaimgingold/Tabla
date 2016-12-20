@@ -100,7 +100,6 @@ private:
 	// local is temporal space time+,up
 	
 	PolyLine2 globalToLocal( PolyLine2 ) const;
-	vec2 globalToLocal( vec2 ) const;
 	Rectf getContourBBoxInLocalSpace( const Contour& ) const;
 	
 	float mAnimTime; // our local animation time, in case we want to pause, etc...
@@ -121,8 +120,7 @@ private:
 	FrameVec getFrames( const Pipeline::StageRef, const ContourVector &contours, Pipeline&pipeline ) const;
 	FrameVec getFrameTopology( const FrameVec& ) const;
 	int getSuccessorFrameIndex( const Frame&, const FrameVec& ) const;
-//	int getScreenFrameIndex( const Frame& firstFrameOfSeq, const FrameVec& ) const;
-	int getFirstFrameOfAnimForScreen( const Frame&, const FrameVec& ) const;
+	int getFirstFrameIndexOfAnimForScreen( const Frame&, const FrameVec& ) const;
 	int getAdjacentFrameIndex( const Frame&, const FrameVec&, vec2 direction, float* distance=0 ) const;
 	
 };
