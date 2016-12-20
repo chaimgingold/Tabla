@@ -22,6 +22,7 @@ void AnimWorld::setParams( XmlTree xml )
 {
 	getXml(xml,"TimeVec",mTimeVec);
 	getXml(xml,"WorldUnitsToSeconds",mWorldUnitsToSeconds);
+	getXml(xml,"MaxFrameDist",mMaxFrameDist);
 	
 	mLocalToGlobal = mat2( getTimeVec(), getUpVec() );
 	mGlobalToLocal = inverse( mLocalToGlobal );
@@ -181,75 +182,80 @@ AnimWorld::getFrameTopology( const FrameVec& in ) const
 		}
 	}
 	
-	// screen
-	for( int i=0; i<mFrames.size(); ++i )
+	// screens
+	for( auto &f : out )
 	{
-		Frame& f = out[i];
-		if ( f.isAnimFrame() && f.mPrevFrameIndex==-1 ) // is first
+		if ( !f.isAnimFrame() )
 		{
-			int screen = getScreenFrameIndex( f, out );
-			
-			if (screen!=-1)
-			{
-				out[screen].mScreenFirstFrameIndex = f.mFirstFrameIndex;
-				
-//				for( int n = f.mIndex; n!=-1; n = out[n].mNextFrameIndex )
-//				{
-//					out[n].mScreenIndex = screen;
-//				}
-			}
+			f.mScreenFirstFrameIndex = getFirstFrameOfAnimForScreen(f,out);
 		}
 	}
-	
 	
 	return out;
 }
 
-int
-AnimWorld::getScreenFrameIndex( const Frame& firstFrameOfSeq, const FrameVec& frames ) const
+PolyLine2 AnimWorld::globalToLocal( PolyLine2 p ) const
 {
-	if (0)
+	PolyLine2 pp=p;
+	
+	for ( int i=0; i<p.size(); ++i )
 	{
-		// above first
-		return getAdjacentFrameIndex(firstFrameOfSeq, frames, getUpVec());
+		vec2 &v = p.getPoints()[i];
+		v = globalToLocal(v);
 	}
-	else
+	
+	return p;
+}
+
+Rectf
+AnimWorld::getContourBBoxInLocalSpace( const Contour& c ) const
+{
+	Rectf r( globalToLocal(c.mPolyLine).getPoints() );
+	
+	return r;
+}
+
+int
+AnimWorld::getFirstFrameOfAnimForScreen( const Frame& screen, const FrameVec& frames ) const
+{
+	Rectf screenr = getContourBBoxInLocalSpace(screen.mContour);
+	// cout << screenr << endl;
+	
+	int besti=-1;
+	float bestd=mMaxFrameDist; // reuse this const for proximity
+	
+	for( const auto &f : frames )
 	{
-		// voting
-		vector<float> score(frames.size(),MAXFLOAT);
+		Rectf fr = getContourBBoxInLocalSpace(f.mContour);
 		
-		for( int n = firstFrameOfSeq.mIndex; n!=-1; n = frames[n].mNextFrameIndex )
+		if ( f.isAnimFrame() && f.mIndex != screen.mIndex
+		  && !(screenr.x1 > fr.x2 || screenr.x2 < fr.x1 )
+		  )
 		{
-			auto &f = frames[n];
-			float dist;
+			float d = screenr.y1 - fr.y2;
 			
-			int si = getAdjacentFrameIndex(f, frames, getUpVec(), &dist );
-			
-			if ( si!=-1 && frames[si].mSeqFrameCount<=1 )
+			if (d>0 && d<bestd)
 			{
-				score[si] = min(dist,score[si]) ;
-				// subtract?
+				bestd=d;
+				besti=f.mFirstFrameIndex;
 			}
 		}
-		
-		int bestscore=MAXFLOAT;
-		int best=-1;
-		for( int i=0; i<score.size(); ++i )
-		{
-			if ( score[i] < bestscore )
-			{
-				bestscore=score[i];
-				best=i;
-			}
-		}
-		return best;
 	}
+	
+	return besti;
 }
 
 int
 AnimWorld::getSuccessorFrameIndex( const Frame& f, const FrameVec& fs ) const
 {
-	return getAdjacentFrameIndex(f, fs, getTimeVec());
+	float dist;
+	int i;
+	
+	i = getAdjacentFrameIndex(f, fs, getTimeVec(), &dist );
+	
+	if ( i != -1 && dist > mMaxFrameDist ) i=-1; // too far
+	
+	return i;
 }
 
 int AnimWorld::getAdjacentFrameIndex( const Frame& f, const FrameVec& fs, vec2 direction, float* distance ) const
@@ -324,6 +330,17 @@ void AnimWorld::draw( DrawType drawType )
 			gl::color(0,1,0);
 			gl::drawLine(f.mContour.mCenter, f.mContour.mCenter + getUpVec() * 5.f );
 		}
+		
+		// test bounding boxes in local space
+		if (0)
+		{
+			Rectf r = getContourBBoxInLocalSpace(f.mContour);
+			
+			r = Rectf( mLocalToGlobal * r.getUpperLeft(), mLocalToGlobal * r.getLowerRight() );
+			
+			gl::color(1,0,0);
+			gl::drawStrokedRect(r,5.f);
+		}
 	}
 	
 	for( const auto &f : mFrames )
@@ -340,4 +357,9 @@ void AnimWorld::draw( DrawType drawType )
 			gl::drawLine(f.mContour.mCenter, mFrames[f.mScreenFirstFrameIndex].mContour.mCenter );
 		}
 	}
+}
+
+void AnimWorld::drawMouseDebugInfo( vec2 v )
+{
+	cout << v << " => " << globalToLocal(v) << endl;
 }
