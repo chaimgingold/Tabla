@@ -37,6 +37,7 @@ public:
 	
 	bool isScreen() const { return mScreenFirstFrameIndex!=-1; }
 	bool isAnimFrame() const { return mSeqFrameCount>1; }
+	bool isFirstAnimFrame() const { return isAnimFrame() && mFirstFrameIndex==mIndex; }
 	
 	// topology
 	int		mIndex=-1;
@@ -53,6 +54,21 @@ public:
 };
 typedef vector<Frame> FrameVec;
 
+class AnimSeq : public vector<int> // indices of frames 1..N
+{
+public:
+	AnimSeq(){}
+	AnimSeq( vector<int> v ) {
+		insert(begin(), v.begin(), v.end());
+	}
+	
+	int mCurrentFrameIndex=-1; // index into FrameVec
+};
+
+class AnimSeqMap : public map<int,AnimSeq>
+{
+public:
+};
 
 class AnimWorld : public GameWorld
 {
@@ -69,22 +85,37 @@ public:
 
 private:
 	vec2 getTimeVec() const { return mTimeVec; } // right
-	vec2 getUpVec() const { return -perp(mTimeVec); } // up (??? wtf -perp() works right, and perp() doesnt)
+	vec2 getUpVec() const { return -perp(mTimeVec); }
+		// up (??? wtf -perp() works right, and perp() doesnt)
+		// i think because this single vector isn't enough data to construct a full reference frame.
+		// but it works with music. but maybe that's a fluke.
+		// it may be as simple as the inverted y coordinate frame that is confusing me: everything is actually upside down!
+		// we want y+ = up, but y- is up in the general scheme of things, so best to be consistent with that.
 	
 	mat2 mLocalToGlobal;
 	mat2 mGlobalToLocal;
 	// global is world space
 	// local is temporal space time+,up
 	
+	float mAnimTime; // our local animation time, in case we want to pause, etc...
 	vec2 mTimeVec;
+	float mWorldUnitsToSeconds;
 	
+	// scope is mFrames
+	FrameVec mFrames;
+	AnimSeqMap mAnims; // key is index of first frame
+	
+	AnimSeqMap getAnimSeqs( const FrameVec& ) const;
+	int getCurrentFrameIndexOfSeq( const FrameVec&, const AnimSeq& ) const;
+	vector<int> getFrameIndicesOfSeq( const FrameVec&, const Frame& firstFrame ) const;
+	void updateCurrentFrames( AnimSeqMap&, const FrameVec&, float currentTime );
+
+	// frame parsing
 	FrameVec getFrames( const Pipeline::StageRef, const ContourVector &contours, Pipeline&pipeline ) const;
 	FrameVec getFrameTopology( const FrameVec& ) const;
 	int getSuccessorFrameIndex( const Frame&, const FrameVec& ) const;
 	int getScreenFrameIndex( const Frame& firstFrameOfSeq, const FrameVec& ) const;
-	int getAdjacentFrame( const Frame&, const FrameVec&, vec2 direction ) const;
-	
-	FrameVec mFrames;
+	int getAdjacentFrameIndex( const Frame&, const FrameVec&, vec2 direction, float* distance=0 ) const;
 
 };
 

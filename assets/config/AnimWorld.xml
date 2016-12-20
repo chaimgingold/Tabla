@@ -17,5 +17,6 @@
 	</Vision>
 
 	<TimeVec>-1 0</TimeVec>
+	<WorldUnitsToSeconds>20</WorldUnitsToSeconds>
 
 </AnimWorld>

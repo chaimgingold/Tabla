@@ -21,9 +21,63 @@ AnimWorld::AnimWorld()
 void AnimWorld::setParams( XmlTree xml )
 {
 	getXml(xml,"TimeVec",mTimeVec);
+	getXml(xml,"WorldUnitsToSeconds",mWorldUnitsToSeconds);
 	
 	mLocalToGlobal = mat2( getTimeVec(), getUpVec() );
 	mGlobalToLocal = inverse( mLocalToGlobal );
+}
+
+AnimSeqMap
+AnimWorld::getAnimSeqs( const FrameVec& frames ) const
+{
+	AnimSeqMap as;
+	
+	for ( auto i : frames )
+	{
+		if ( i.isFirstAnimFrame() )
+		{
+			AnimSeq seq = getFrameIndicesOfSeq(frames,i);
+			
+			as[i.mIndex] = seq;
+		}
+	}
+	
+	return as;
+}
+
+int AnimWorld::getCurrentFrameIndexOfSeq( const FrameVec& frames, const AnimSeq& seq ) const
+{
+	vec2 worldLength = frames[seq.back()].mContour.mCenter - frames[seq.front()].mContour.mCenter;
+	float length = dot( worldLength, getTimeVec() ) / mWorldUnitsToSeconds ;
+	
+	float t = fmod( mAnimTime, length ) / length;
+	int index = constrain( (int)(t * (float)seq.size()), 0, (int)seq.size()-1 );
+	int frame = seq[index];
+	
+//	cout << t << " -> " << index << " of " << seq.size() << " -> " << frame << endl;
+	
+	return frame;
+}
+
+void AnimWorld::updateCurrentFrames( AnimSeqMap& seqs, const FrameVec& frames, float currentTime )
+{
+	for( auto &i : seqs )
+	{
+		i.second.mCurrentFrameIndex = getCurrentFrameIndexOfSeq( frames, i.second );
+	}
+}
+
+vector<int>
+AnimWorld::getFrameIndicesOfSeq( const FrameVec& frames, const Frame& firstFrame ) const
+{
+	vector<int> seq;
+	
+	for( int n = firstFrame.mIndex; n!=-1; n = frames[n].mNextFrameIndex )
+	{
+		seq.push_back(n);
+	}
+	
+	return seq;
 }
 
 FrameVec AnimWorld::getFrames(
@@ -154,42 +208,51 @@ AnimWorld::getFrameTopology( const FrameVec& in ) const
 int
 AnimWorld::getScreenFrameIndex( const Frame& firstFrameOfSeq, const FrameVec& frames ) const
 {
-//	return getAdjacentFrame(firstFrameOfSeq, frames, getUpVec());
-	
-	vector<int> score(frames.size(),0);
-	
-	for( int n = firstFrameOfSeq.mIndex; n!=-1; n = frames[n].mNextFrameIndex )
+	if (0)
 	{
-		auto &f = frames[n];
-		
-		int si = getAdjacentFrame(f, frames, getUpVec());
-		
-		if ( si!=-1 && frames[si].mSeqFrameCount<=1 )
-		{
-			score[si]++;
-		}
+		// above first
+		return getAdjacentFrameIndex(firstFrameOfSeq, frames, getUpVec());
 	}
-	
-	int bestscore=0;
-	int best=-1;
-	for( int i=0; i<score.size(); ++i )
+	else
 	{
-		if ( score[i] > bestscore )
+		// voting
+		vector<float> score(frames.size(),MAXFLOAT);
+		
+		for( int n = firstFrameOfSeq.mIndex; n!=-1; n = frames[n].mNextFrameIndex )
 		{
-			bestscore=score[i];
-			best=i;
+			auto &f = frames[n];
+			float dist;
+			
+			int si = getAdjacentFrameIndex(f, frames, getUpVec(), &dist );
+			
+			if ( si!=-1 && frames[si].mSeqFrameCount<=1 )
+			{
+				score[si] = min(dist,score[si]) ;
+				// subtract?
+			}
 		}
+		
+		int bestscore=MAXFLOAT;
+		int best=-1;
+		for( int i=0; i<score.size(); ++i )
+		{
+			if ( score[i] < bestscore )
+			{
+				bestscore=score[i];
+				best=i;
+			}
+		}
+		return best;
 	}
-	return best;
 }
 
 int
 AnimWorld::getSuccessorFrameIndex( const Frame& f, const FrameVec& fs ) const
 {
-	return getAdjacentFrame(f, fs, getTimeVec());
+	return getAdjacentFrameIndex(f, fs, getTimeVec());
 }
 
-int AnimWorld::getAdjacentFrame( const Frame& f, const FrameVec& fs, vec2 direction ) const
+int AnimWorld::getAdjacentFrameIndex( const Frame& f, const FrameVec& fs, vec2 direction, float* distance ) const
 {
 	int best=-1;
 	float bestdist=MAXFLOAT;
@@ -211,6 +274,7 @@ int AnimWorld::getAdjacentFrame( const Frame& f, const FrameVec& fs, vec2 direct
 		}
 	}
 	
+	if (distance) *distance = bestdist;
 	return best;
 }
 
@@ -222,11 +286,16 @@ void AnimWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeline
 	mFrames = getFrames( source, visionOut.mContours, pipeline );
 	
 	mFrames = getFrameTopology( mFrames );
+	
+	mAnims = getAnimSeqs(mFrames);
+	updateCurrentFrames(mAnims,mFrames,mAnimTime);
 }
 
 void AnimWorld::update()
 {
-
+	mAnimTime = ci::app::getElapsedSeconds();
+	
+	updateCurrentFrames(mAnims,mFrames,mAnimTime);
 }
 
 void AnimWorld::draw( DrawType drawType )
@@ -235,8 +304,15 @@ void AnimWorld::draw( DrawType drawType )
 	{
 		if ( f.isAnimFrame() )
 		{
+			bool isCurrentFrame = ( mAnims[f.mFirstFrameIndex].mCurrentFrameIndex == f.mIndex );
+			
 			gl::color( lerp( Color(0,1,1),Color(1,.5,0), (float)(f.mSeqFrameNum-1) / (float)(f.mSeqFrameCount-1) ) );
-			gl::drawSolid(f.mContour.mPolyLine);
+
+			if ( isCurrentFrame ) {
+				gl::drawSolid(f.mContour.mPolyLine);
+			} else {
+				gl::draw(f.mContour.mPolyLine);
+			}
 		}
 		else
 		{

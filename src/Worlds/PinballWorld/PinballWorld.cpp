@@ -204,6 +204,13 @@ void PinballWorld::update()
 	// sim balls
 	cullBalls();
 	BallWorld::update();
+		// TODO: To make pinball flippers super robust in terms of tunneling (especially at the tips),
+		// we should make attachments for BallWorld contours (a parallel vector)
+		// that specifies angular rotation (center, radians per second)--basically what
+		// Flipper::getAccelForBall does, and have BallWorld do more fine grained rotations of
+		// the contour itself. So we'd set the flipper to its rotation for the last frame,
+		// and specify the rotation to be the rotation that will get us to its rotation for this frame,
+		// and BallWorld will handle the granular integration itself.
 	
 	// respond to collisions
 	processCollisions();
