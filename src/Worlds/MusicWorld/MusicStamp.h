@@ -110,7 +110,7 @@ public:
 		mLastFrameTime = ci::app::getElapsedSeconds();
 	}
 	
-	void draw() const;
+	void draw( bool debugDrawSearch=false ) const;
 	void tick();
 	bool isInstrumentAvailable() const { return mInstrument && mInstrument->isAvailable(); }
 	
@@ -145,23 +145,30 @@ public:
 	void setup( const map<string,InstrumentRef>&, PolyLine2 worldBounds, vec2 timeVec, gl::GlslProgRef rainbowShader );
 	
 	void tick( const ScoreVec&, const ContourVector&, float globalPhase, float globalBeatDuration );
-
+	void draw();
+	
 private:
 	MusicStamp* getStampByInstrument( InstrumentRef );
 	
 	void decollide();
 	void decollideScores( const ScoreVec& );
+	void snapHomeIfLost();
 	void updateAnimWithScore( MusicStamp&, const Score& ) const;
 	void updateIdleAnims( float globalPhase, float globalBeatDuration );
 	void updateSearch( const ContourVector& );
 	const Contour* findContour( const ContourVector&, vec2 ) const;
 	
+	void setupStartLocsInCircle();
+	void setupStartLocsInLine();
+	
 	vec2  mTimeVec;	
 	PolyLine2 mWorldBoundsPoly;
 	float mStampIconWidth=5.f;
 	float mStampPaletteGutter=1.f;
+	bool mDoCircleLayout=true;
+	bool mDebugDrawSearch=false;
+	bool mSnapHomeWhenLost=false;
 	
-
 };
 
 #endif /* MusicStamp_hpp */

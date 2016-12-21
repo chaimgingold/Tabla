@@ -44,6 +44,8 @@ public:
 		
 		//  • Clip/Deskew
 		vec2 mCaptureCoords[4];
+		void flipCaptureCoordsVertically();
+		void flipCaptureCoordsHorizontally();
 		
 		//  • Map to World Space
 		vec2 mCaptureWorldSpaceCoords[4];
@@ -93,10 +95,11 @@ public:
 	void setCaptureProfile  ( string name );
 	void setProjectorProfile( string name );
 
-	void ensureActiveProfilesAreValid();
+	bool ensureActiveProfilesAreValid();
 		// ensures active profile names point to valid things
 		// (if there are no profiles, then it does nothing.) 
 		// setParams() calls this function after loading from xml on its own.
+		// returns true if changed
 
 private:
 	string mActiveCaptureProfileName;

@@ -78,6 +78,18 @@ LightLink::CaptureProfile::CaptureProfile( fs::path path, vec2 size )
 	mFilePath = path.string();
 }
 
+void LightLink::CaptureProfile::flipCaptureCoordsVertically()
+{
+	swap( mCaptureCoords[0], mCaptureCoords[3] );
+	swap( mCaptureCoords[1], mCaptureCoords[2] );
+}
+
+void LightLink::CaptureProfile::flipCaptureCoordsHorizontally()
+{
+	swap( mCaptureCoords[0], mCaptureCoords[1] );
+	swap( mCaptureCoords[2], mCaptureCoords[3] );
+}
+
 void LightLink::CaptureProfile::setParams( XmlTree xml )
 {
 	getXml(xml, "Name",mName);
@@ -291,21 +303,26 @@ LightLink::getCaptureProfileForFile( string filePath )
 	return 0;	
 }
 
-void LightLink::ensureActiveProfilesAreValid()
+bool LightLink::ensureActiveProfilesAreValid()
 {
 //	assert( !mProjectorProfiles.empty() );
 //	assert( !mCaptureProfiles.empty() );
 //  don't do this anymore
-
+	bool dirty=false;
+	
 	if ( !mCaptureProfiles.empty() && mCaptureProfiles.find(mActiveCaptureProfileName) == mCaptureProfiles.end() )
 	{
 		mActiveCaptureProfileName = mCaptureProfiles.begin()->second.mName;
+		dirty=true;
 	}
 
 	if ( !mProjectorProfiles.empty() && mProjectorProfiles.find(mActiveProjectorProfileName) == mProjectorProfiles.end() )
 	{
 		mActiveProjectorProfileName = mProjectorProfiles.begin()->second.mName;
+		dirty=true;
 	}
+	
+	return dirty;
 }
 
 void LightLink::eraseCaptureProfile( string name )

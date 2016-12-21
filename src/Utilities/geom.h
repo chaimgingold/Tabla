@@ -143,4 +143,31 @@ inline mat4 getRectMappingAsMatrix( Rectf from, Rectf to )
 	return m;
 }
 
+inline bool rayIntersectPoly( const PolyLine2& poly, vec2 rayOrigin, vec2 rayVec, float *rayt )
+{
+	bool hit=false;
+	int n = poly.isClosed() ? poly.size() : poly.size()-1; 
+	
+	for( int i=0; i<n; ++i )
+	{
+		int j = (i+1) % poly.size();
+		
+		float t;
+		
+		bool h = rayLineSegIntersection(rayOrigin, rayVec, poly.getPoints()[i], poly.getPoints()[j], &t );
+		
+		if (h)
+		{
+			if (rayt)
+			{
+				if (hit) *rayt = min( *rayt, t ); // min of all
+				else *rayt = t; // first
+			}
+			hit=true;
+		}
+	}
+	
+	return hit;	
+}
+
 #endif /* geom_h */

@@ -58,7 +58,7 @@ class PaperBounce3App : public App {
 	
 	void drawWorld( GameWorld::DrawType );
 	
-	void ensureLightLinkHasLocalDeviceProfiles();
+	bool ensureLightLinkHasLocalDeviceProfiles(); // returns if mLightLink changed
 	void lightLinkDidChange( bool saveToFile=true ); // calls setupCaptureDevice, tells mVision, tells mGameWorld, saves it to disk
 	bool setupCaptureDevice(); // specified by mLightLink.mCameraIndex
 	void setupNextValidCaptureProfile(); // iterate through them

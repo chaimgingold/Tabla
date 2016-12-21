@@ -52,7 +52,9 @@ PaperBounce3App::~PaperBounce3App()
 
 PolyLine2 PaperBounce3App::getWorldBoundsPoly() const
 {
-	return getPointsAsPoly( mLightLink.getCaptureProfile().mCaptureWorldSpaceCoords, 4 );
+	PolyLine2 p = getPointsAsPoly( mLightLink.getCaptureProfile().mCaptureWorldSpaceCoords, 4 );
+	p.setClosed();
+	return p;
 }
 
 fs::path PaperBounce3App::getDocsPath() const
@@ -187,8 +189,9 @@ void PaperBounce3App::setup()
 		if ( xml.hasChild("LightLink") )
 		{
 			mLightLink.setParams(xml.getChild("LightLink"));
-			ensureLightLinkHasLocalDeviceProfiles();
-			lightLinkDidChange(false); // and don't save, since we are responding to a load.
+			bool didChange = ensureLightLinkHasLocalDeviceProfiles();
+			lightLinkDidChange(didChange);
+			// don't save, since we are responding to a load, unless ensureLightLinkHasLocalDeviceProfiles() changed.
 		}
 	});
 
@@ -288,8 +291,10 @@ void PaperBounce3App::setupRFIDValueToFunction()
 	}
 }
 
-void PaperBounce3App::ensureLightLinkHasLocalDeviceProfiles()
+bool PaperBounce3App::ensureLightLinkHasLocalDeviceProfiles()
 {
+	bool dirty=false;
+	
 	// 1. Cameras
 
 	// Make sure all cameras on this computer have capture device profiles
@@ -310,6 +315,7 @@ void PaperBounce3App::ensureLightLinkHasLocalDeviceProfiles()
 					vec2(640,480) );
 				
 				mLightLink.mCaptureProfiles[profile.mName] = profile;
+				dirty=true;
 			} // make profile for device?
 		} // for
 	}
@@ -335,11 +341,14 @@ void PaperBounce3App::ensureLightLinkHasLocalDeviceProfiles()
 		
 		// insert
 		mLightLink.mProjectorProfiles[p.mName] = p;
+		dirty=true;
 	}
 	
 	// what if the profile list was empty, and we added some profiles that will be used?
 	// so: if there is no active profile, then set it to one that we made.
-	mLightLink.ensureActiveProfilesAreValid();
+	if (mLightLink.ensureActiveProfilesAreValid()) dirty=true;
+	
+	return false;
 }
 
 void PaperBounce3App::lightLinkDidChange( bool saveToFile )
