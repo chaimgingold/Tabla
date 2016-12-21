@@ -37,6 +37,7 @@ struct Ribbon {
 	vec2 lastP1;
 	vec2 lastP2;
 	int numPoints=0;
+	float birth;
 };
 
 class RibbonWorld : public GameWorld
@@ -45,6 +46,8 @@ public:
 	RibbonWorld();
 
 	string getSystemName() const override { return "RibbonWorld"; }
+
+	void setParams( XmlTree ) override;
 
 	void updateVision( const Vision::Output&, Pipeline& ) override;
 
@@ -65,6 +68,14 @@ private:
 	ContourVector mContours;
 
 	vector<Ribbon> mRibbons;
+
+
+	// Params
+	int mMaxRibbons=50;
+	int mMaxRibbonLength=50;
+	float mSnipDistance=10;
+	float mPointDistance=0.1;
+	float mWidthDivision=10;
 };
 
 class RibbonWorldCartridge : public GameCartridge

@@ -14,11 +14,6 @@
 
 using namespace std;
 
-const int MAX_RIBBONS = 60;
-const int MAX_RIBBON_LENGTH = 500;
-const int MAX_DISTANCE_UNTIL_CONSIDERED_NEW_RIBBON = 10.0;
-const int MIN_DISTANCE_TO_ADD_POINT_ON_RIBBON = 1;
-
 RibbonWorld::RibbonWorld()
 {
 	mFileWatch.loadShader(
@@ -30,6 +25,16 @@ RibbonWorld::RibbonWorld()
 						  });
 }
 
+void RibbonWorld::setParams( XmlTree xml )
+{
+	mRibbons.clear();
+	getXml(xml,"MaxRibbons",mMaxRibbons);
+	getXml(xml,"MaxRibbonLength",mMaxRibbonLength);
+	getXml(xml,"SnipDistance",mSnipDistance);
+	getXml(xml,"PointDistance",mPointDistance);
+	getXml(xml,"WidthDivision",mWidthDivision);
+}
+
 void RibbonWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeline )
 {
 	mWorld = pipeline.getStage("clipped");
@@ -38,8 +43,8 @@ void RibbonWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeli
 	mContours = visionOut.mContours;
 
 
-	if (mRibbons.size() > MAX_RIBBONS) {
-		mRibbons.erase(mRibbons.begin(), mRibbons.begin() + mRibbons.size() - MAX_RIBBONS);
+	if (mRibbons.size() > mMaxRibbons) {
+		mRibbons.erase(mRibbons.begin(), mRibbons.begin() + (mRibbons.size() - mMaxRibbons));
 	}
 
 	for (auto &c : mContours) {
@@ -60,21 +65,22 @@ void RibbonWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeli
 		}
 
 		// Don't create redundant points
-		if (bestDistance < MIN_DISTANCE_TO_ADD_POINT_ON_RIBBON) {
+		if (bestDistance < mPointDistance) {
 			continue;
 		}
 
 		// If tip of closest ribbon is within range, extend that ribbon
-		if (bestDistance < MAX_DISTANCE_UNTIL_CONSIDERED_NEW_RIBBON) {
+		if (bestDistance < mSnipDistance) {
 			vec2 lastPoint = bestRibbon->lastPoint;
 			vec2 pointDiff = newPoint - lastPoint;
 			float mag = length(pointDiff);
 
-			float progress    = ((float)bestRibbon->numPoints)   / 100.0;
-			float oldProgress = ((float)bestRibbon->numPoints-1) / 100.0;
+			float progress    = ((float)bestRibbon->numPoints);
+			float oldProgress = ((float)bestRibbon->numPoints-1);
 
 			// Vary width with sine wave
-			float width = (sin(progress*10) + 1.5) * 1;
+//			float width = (sin(progress*10) + 1.5) * 1;
+			float width = c.mArea/mWidthDivision;
 
 			// Rotate two spread points in direction of new point
 			float angle = atan2(pointDiff.y, pointDiff.x) + M_PI/2;
@@ -105,7 +111,7 @@ void RibbonWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeli
 			bestRibbon->numPoints++;
 
 			// Erase oldest positions
-			if (bestRibbon->numPoints > MAX_RIBBON_LENGTH) {
+			if (bestRibbon->numPoints > mMaxRibbonLength) {
 				auto &positions = bestRibbon->triMesh->getBufferPositions();
 				positions.erase(positions.begin(), positions.begin() + 6);
 
@@ -138,7 +144,10 @@ void RibbonWorld::draw( DrawType drawType )
 	gl::ScopedGlslProg glslScp( mRibbonShader );
 	mRibbonShader->uniform( "uTime", (float)ci::app::getElapsedSeconds() );
 
+
 	for (auto &r : mRibbons) {
+		mRibbonShader->uniform( "uOldestPoint", MAX(0, r.numPoints - mMaxRibbonLength) );
+		mRibbonShader->uniform( "uSeed", (float)r.ID );
 		gl::draw(*r.triMesh); 
 	}
 }
