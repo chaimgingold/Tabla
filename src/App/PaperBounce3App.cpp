@@ -378,36 +378,51 @@ bool PaperBounce3App::tryToSetupValidCaptureDevice()
 
 bool PaperBounce3App::setupCaptureDevice()
 {
+	mDebugFrame.reset();
+	
 	if ( mLightLink.mCaptureProfiles.empty() ) {
 		return false;
 	}
 
 	const LightLink::CaptureProfile &profile = mLightLink.getCaptureProfile();
 	
-	cout << "Trying to load capture profile '" << profile.mName << "' for '" << profile.mDeviceName << "'" << endl;
-	
-	Capture::DeviceRef device = Capture::findDeviceByNameContains(profile.mDeviceName);
-
-	if ( device )
+	if (!profile.mFilePath.empty())
 	{
-		if ( !mCapture || mCapture->getDevice() != device
-			|| mCapture->getWidth () != (int32_t)profile.mCaptureSize.x
-			|| mCapture->getHeight() != (int32_t)profile.mCaptureSize.y
-			)
-		{
-			if (mCapture) {
-				// kill old one
-				mCapture->stop();
-				mCapture = 0;
-			}
-			
-			mCapture = Capture::create(profile.mCaptureSize.x, profile.mCaptureSize.y,device);
-			mCapture->start();
-			return true;
-		}
-		return true; // lazily true
+		cout << "Trying to load capture profile '" << profile.mName << "' for file '" << profile.mFilePath << "'" << endl;
+		
+		mDebugFrame = make_shared<Surface>( loadImage(profile.mFilePath) );
+		return mDebugFrame != nullptr;
+		// ideally we should erase it if it fails to load, but that complicates situations where
+		// caller has an iterator into capture profiles (eg setupNextValidCaptureProfile). this isn't
+		// that hard, but might not be that important.
 	}
-	else return false;
+	else
+	{
+		cout << "Trying to load capture profile '" << profile.mName << "' for '" << profile.mDeviceName << "'" << endl;
+		
+		Capture::DeviceRef device = Capture::findDeviceByNameContains(profile.mDeviceName);
+
+		if ( device )
+		{
+			if ( !mCapture || mCapture->getDevice() != device
+				|| mCapture->getWidth () != (int32_t)profile.mCaptureSize.x
+				|| mCapture->getHeight() != (int32_t)profile.mCaptureSize.y
+				)
+			{
+				if (mCapture) {
+					// kill old one
+					mCapture->stop();
+					mCapture = 0;
+				}
+				
+				mCapture = Capture::create(profile.mCaptureSize.x, profile.mCaptureSize.y,device);
+				mCapture->start();
+				return true;
+			}
+			return true; // lazily true
+		}
+		else return false;
+	}
 }
 
 void PaperBounce3App::setupNextValidCaptureProfile()
@@ -579,7 +594,28 @@ void PaperBounce3App::fileDrop( FileDropEvent event )
 	auto files = event.getFiles();
 	if (files.size() > 0) {
 		auto file = files.front();
-		mDebugFrame = make_shared<Surface>( loadImage(file) );
+		
+		LightLink::CaptureProfile* profile = mLightLink.getCaptureProfileForFile(file.string());
+		
+		if ( profile )
+		{
+			mLightLink.setCaptureProfile(profile->mName);
+			lightLinkDidChange();
+		}
+		else
+		{
+			auto surf = make_shared<Surface>( loadImage(file) );
+			// let's verify it's cool, and get the size, but for consistency
+			// we'll let lightLinkDidChange load the image.
+			
+			if (surf)
+			{
+				LightLink::CaptureProfile cp(file,surf->getSize()); 
+				mLightLink.mCaptureProfiles[cp.mName] = cp;
+				mLightLink.setCaptureProfile(cp.mName);
+				lightLinkDidChange();
+			}
+		}
 	}
 }
 
@@ -600,7 +636,14 @@ void PaperBounce3App::update()
 	
 	mFileWatch.update();
 	
-	if ( (mCapture && mCapture->checkNewFrame()) || mDebugFrame )
+	updateVision();
+	
+	if (mGameWorld) mGameWorld->update();
+}
+
+void PaperBounce3App::updateVision()
+{
+	if ( (mCapture && mCapture->checkNewFrame()) || (mDebugFrame && (getElapsedFrames()%30==0)) )
 	{
 		mCaptureFPS.mark();
 		
@@ -649,8 +692,6 @@ void PaperBounce3App::update()
 		updateMainImageTransform(mUIWindow);
 		updateMainImageTransform(mMainWindow);
 	}
-	
-	if (mGameWorld) mGameWorld->update();
 }
 
 void PaperBounce3App::cleanup() {
@@ -886,7 +927,15 @@ void PaperBounce3App::keyDown( KeyEvent event )
 				loadAdjacentGame(1);
 				break;
 			case KeyEvent::KEY_ESCAPE:
-				mDebugFrame.reset();
+				{
+					mDebugFrame.reset();
+					
+					if ( !mLightLink.getCaptureProfile().mFilePath.empty() )
+					{
+						mLightLink.eraseCaptureProfile(mLightLink.getCaptureProfile().mName);
+						setupNextValidCaptureProfile();
+					}
+				}
 				break;
 			
 			default:

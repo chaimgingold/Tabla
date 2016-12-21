@@ -52,10 +52,8 @@ static vector<float> stringToFloatVec( string value )
 	return f;
 }
 
-LightLink::CaptureProfile::CaptureProfile( string name, string deviceName, vec2 size )
+LightLink::CaptureProfile::CaptureProfile( string name, vec2 size )
 	: mName(name)
-	, mDeviceName(deviceName)
-	, mCaptureSize(size)
 {
 	mCaptureCoords[0] = vec2(0,1) * size;
 	mCaptureCoords[1] = vec2(1,1) * size;
@@ -68,10 +66,23 @@ LightLink::CaptureProfile::CaptureProfile( string name, string deviceName, vec2 
 	}
 }
 
+LightLink::CaptureProfile::CaptureProfile( string name, string deviceName, vec2 size )
+	: CaptureProfile(name,size)
+{
+	mDeviceName = deviceName;
+}
+
+LightLink::CaptureProfile::CaptureProfile( fs::path path, vec2 size )
+	: CaptureProfile(path.string(),size)
+{
+	mFilePath = path.string();
+}
+
 void LightLink::CaptureProfile::setParams( XmlTree xml )
 {
 	getXml(xml, "Name",mName);
 	getXml(xml, "DeviceName",mDeviceName);
+	getXml(xml, "FileName",mFilePath);
 	getXml(xml, "CaptureSize",mCaptureSize);
 	getXml(xml, "CaptureCoords", mCaptureCoords, 4 );
 	getXml(xml, "CaptureWorldSpaceCoords", mCaptureWorldSpaceCoords, 4 );
@@ -107,6 +118,7 @@ XmlTree LightLink::CaptureProfile::getParams() const
 	
 	t.push_back( XmlTree( "Name", mName) );
 	t.push_back( XmlTree( "DeviceName", mDeviceName) );
+	t.push_back( XmlTree( "FileName", mFilePath) );
 	t.push_back( XmlTree( "CaptureSize", vecToString(mCaptureSize) ) );
 	t.push_back( XmlTree( "CaptureCoords", vecsToString(mCaptureCoords,4) ));
 	t.push_back( XmlTree( "CaptureWorldSpaceCoords", vecsToString(mCaptureWorldSpaceCoords,4) ));
@@ -265,6 +277,20 @@ LightLink::getCaptureProfilesForDevice( string deviceName ) const
 	return result;
 }
 
+LightLink::CaptureProfile*
+LightLink::getCaptureProfileForFile( string filePath )
+{
+	for( auto &p : mCaptureProfiles )
+	{
+		if (p.second.mFilePath==filePath)
+		{
+			return &p.second;
+		}
+	}
+	
+	return 0;	
+}
+
 void LightLink::ensureActiveProfilesAreValid()
 {
 //	assert( !mProjectorProfiles.empty() );
@@ -279,6 +305,16 @@ void LightLink::ensureActiveProfilesAreValid()
 	if ( !mProjectorProfiles.empty() && mProjectorProfiles.find(mActiveProjectorProfileName) == mProjectorProfiles.end() )
 	{
 		mActiveProjectorProfileName = mProjectorProfiles.begin()->second.mName;
+	}
+}
+
+void LightLink::eraseCaptureProfile( string name )
+{
+	auto i = mCaptureProfiles.find(name);
+	if (i!=mCaptureProfiles.end())
+	{
+		mCaptureProfiles.erase(i);
+		ensureActiveProfilesAreValid();	
 	}
 }
 
