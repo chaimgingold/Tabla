@@ -147,6 +147,7 @@ void PaperBounce3App::setup()
 			getXml(app,"DrawPipeline",mDrawPipeline);
 			getXml(app,"DrawContourMousePick",mDrawContourMousePick);
 			
+			getXml(app,"HasConfigWindow",mHasConfigWindow);
 			getXml(app,"ConfigWindowPipelineWidth",mConfigWindowPipelineWidth);
 			getXml(app,"ConfigWindowPipelineGutter",mConfigWindowPipelineGutter);
 			getXml(app,"ConfigWindowMainImageMargin",mConfigWindowMainImageMargin);
@@ -214,9 +215,14 @@ void PaperBounce3App::setup()
 	}
 
 	// aux UI display
-	if (1)
+	if (mHasConfigWindow)
 	{
-		// for some reason this seems to create three windows once we fullscreen the main window :P
+		// note: would be nice to have this value hot-load, but not sure how to sequence
+		// light link loading with that, and this is good enough for now.
+		
+		// for some reason this seems to sometimes create three windows once we fullscreen the main window :P
+		// and then one of those is blank. That is the reason (besides kiosk mode) for the mHasConfigWindow switch,
+		// as a workaround for that bug.
 		mUIWindow = createWindow( Window::Format().size(
 			mLightLink.getCaptureProfile().mCaptureSize.x,
 			mLightLink.getCaptureProfile().mCaptureSize.y ) );

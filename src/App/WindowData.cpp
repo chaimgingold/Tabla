@@ -123,6 +123,7 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 	}
 	
 	// game library widget
+	if ( mIsUIWindow )
 	{
 		mGameLibraryView = std::make_shared<GameLibraryView>();
 		mViews.addView( mGameLibraryView );

@@ -172,6 +172,7 @@ class PaperBounce3App : public App {
 	bool mDrawPipeline = false;
 	bool mDrawContourMousePick = false;
 
+	bool  mHasConfigWindow = true;
 	float mConfigWindowMainImageMargin = 32.f;
 	float mConfigWindowPipelineGutter = 8.f ;
 	float mConfigWindowPipelineWidth  = 64.f ;
