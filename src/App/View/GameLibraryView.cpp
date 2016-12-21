@@ -88,7 +88,11 @@ void GameLibraryView::mouseUp  ( MouseEvent e )
 {
 	const int highlight = getHighlightIndex( rootToChild(e.getPos()) );
 
-	PaperBounce3App::get()->loadGame(highlight);
+	// only do something if changed
+	if (highlight != PaperBounce3App::get()->mGameWorldCartridgeIndex )
+	{
+		PaperBounce3App::get()->loadGame(highlight);
+	}
 }
 
 vec2 GameLibraryView::getItemSize() const

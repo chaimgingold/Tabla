@@ -113,7 +113,7 @@ private:
 	bool mDebugDrawTopology=false;
 	
 	//
-	void drawScreen( const Frame& );
+	void drawScreen( const Frame&, float alpha=1.f );
 	static void printAnims( const AnimSeqMap& ); // to cout
 	
 	// scope is mFrames

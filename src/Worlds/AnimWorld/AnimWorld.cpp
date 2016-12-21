@@ -86,6 +86,7 @@ int AnimWorld::getCurrentFrameIndexOfSeq( const FrameVec& frames, const AnimSeq&
 	{
 		float quantizeUnit = .5f;
 		length = length - fmodf( length, quantizeUnit );
+		length = max( length, quantizeUnit );
 	}
 	
 	float t = fmod( mAnimTime, length ) / length;
@@ -343,7 +344,7 @@ void AnimWorld::update()
 	updateCurrentFrames(mAnims,mFrames,mAnimTime);
 }
 
-void AnimWorld::drawScreen( const Frame& f )
+void AnimWorld::drawScreen( const Frame& f, float alpha )
 {
 	int frame = mAnims[f.mScreenFirstFrameIndex].mCurrentFrameIndex;
 	assert(frame!=-1);
@@ -352,7 +353,7 @@ void AnimWorld::drawScreen( const Frame& f )
 	gl::TextureRef tex = mFrames[frame].getAsTexture();
 	if (!tex)
 	{
-		gl::color( Color(1,.8,0) );
+		gl::color( 1, .8, 0, alpha );
 		gl::draw(f.mContour.mPolyLine);
 	}
 	else
@@ -387,7 +388,7 @@ void AnimWorld::drawScreen( const Frame& f )
 	//		for( int i=0; i<4; ++i ) v[i] = mLocalToGlobal * v[i];
 			
 	//		appendQuad(mesh,ColorA(1,1,1,1), &f.mContour.mPolyLine()[0], uv);
-			appendQuad(mesh,ColorA(1,1,1,1), v, uv);
+			appendQuad(mesh,ColorA(1,1,1,alpha), v, uv);
 			
 	//		gl::draw(mesh);
 		}
@@ -400,7 +401,7 @@ void AnimWorld::drawScreen( const Frame& f )
 
 			Rectf r( c - size, c + size );
 
-			gl::color(1,1,1);
+			gl::color(1,1,1,alpha);
 //			gl::drawSolidRect(r);
 			gl::draw(tex, r);
 		}
@@ -428,7 +429,8 @@ void AnimWorld::draw( DrawType drawType )
 		}
 		else if ( f.isScreen() )
 		{
-			if (drawType == DrawType::Projector) drawScreen(f);
+			float alpha = (drawType == DrawType::Projector) ? 1.f : .5f;
+			drawScreen(f,alpha);
 		}
 		else
 		{
