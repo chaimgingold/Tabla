@@ -33,6 +33,7 @@ void AnimWorld::setParams( XmlTree xml )
 	getXml(xml,"MaxFrameDist",mMaxFrameDist);
 	getXml(xml,"DebugDrawTopology",mDebugDrawTopology);
 	getXml(xml,"AnimLengthQuantizeToSec",mAnimLengthQuantizeToSec);
+	getXml(xml,"EqualizeImages",mEqualizeImages);
 	
 	mLocalToGlobal = mat2( getTimeVec(), getUpVec() );
 	mGlobalToLocal = inverse( mLocalToGlobal );
@@ -159,13 +160,14 @@ FrameVec AnimWorld::getFrames(
 		pipeline.getStages().back()->mLayoutHintOrtho = true;
 		
 		// equalize?
-		if (0)
+		if (mEqualizeImages)
 		{
-			Mat frameContourImageEqualized;
+			UMat frameContourImageEqualized;
 			equalizeHist(frame.mImageCV, frameContourImageEqualized);
 			pipeline.then(string("Frame equalized ") + frame.mIndex, frameContourImageEqualized);
 			pipeline.getStages().back()->mLayoutHintScale = .5f;
 			pipeline.getStages().back()->mLayoutHintOrtho = true;
+			frame.mImageCV = frameContourImageEqualized; // use that!
 		}
 
 		frames.push_back(frame);
@@ -225,7 +227,7 @@ AnimWorld::getFrameTopology( const FrameVec& in ) const
 	{
 		if ( !f.isAnimFrame() )
 		{
-			f.mScreenFirstFrameIndex = getFirstFrameIndexOfAnimForScreen(f,out);
+			f.mScreenFirstFrameIndex = getFirstFrameIndexOfAnimForScreen_Closest(f,out);
 		}
 	}
 	
@@ -254,7 +256,7 @@ AnimWorld::getContourBBoxInLocalSpace( const Contour& c ) const
 }
 
 int
-AnimWorld::getFirstFrameIndexOfAnimForScreen( const Frame& screen, const FrameVec& frames ) const
+AnimWorld::getFirstFrameIndexOfAnimForScreen_Above( const Frame& screen, const FrameVec& frames ) const
 {
 	Rectf screenr = getContourBBoxInLocalSpace(screen.mContour);
 	// cout << screenr << endl;
@@ -273,6 +275,30 @@ AnimWorld::getFirstFrameIndexOfAnimForScreen( const Frame& screen, const FrameVe
 			float d = screenr.y1 - fr.y2;
 			
 			if (d>0 && d<bestd)
+			{
+				bestd=d;
+				besti=f.mFirstFrameIndex;
+			}
+		}
+	}
+	
+	return besti;
+}
+
+int
+AnimWorld::getFirstFrameIndexOfAnimForScreen_Closest( const Frame& screen, const FrameVec& frames ) const
+{
+	int besti=-1;
+	float bestd=mMaxFrameDist; // reuse this const for proximity
+	
+	for( const auto &f : frames )
+	{
+		if ( f.isAnimFrame() && f.mIndex != screen.mIndex )
+		{
+			float d = distance(f.mContour.mCenter, screen.mContour.mCenter);
+			// ideally d would be edge to edge, not center to center, but this is good enough  
+			
+			if (d<bestd)
 			{
 				bestd=d;
 				besti=f.mFirstFrameIndex;

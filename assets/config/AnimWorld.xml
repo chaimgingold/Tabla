@@ -21,5 +21,6 @@
 	<MaxFrameDist>20</MaxFrameDist>
 	<DebugDrawTopology>0</DebugDrawTopology>
 	<AnimLengthQuantizeToSec>.01</AnimLengthQuantizeToSec>
+	<EqualizeImages>1</EqualizeImages>
 	
 </AnimWorld>

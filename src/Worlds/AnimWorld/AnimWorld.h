@@ -111,6 +111,7 @@ private:
 	float mAnimLengthQuantizeToSec=.5f;
 	float mMaxFrameDist=10.f; // for same anim
 	bool mDebugDrawTopology=false;
+	bool mEqualizeImages=false;
 	
 	//
 	void drawScreen( const Frame&, float alpha=1.f );
@@ -129,7 +130,8 @@ private:
 	FrameVec getFrames( const Pipeline::StageRef, const ContourVector &contours, Pipeline&pipeline ) const;
 	FrameVec getFrameTopology( const FrameVec& ) const;
 	int getSuccessorFrameIndex( const Frame&, const FrameVec& ) const;
-	int getFirstFrameIndexOfAnimForScreen( const Frame&, const FrameVec& ) const;
+	int getFirstFrameIndexOfAnimForScreen_Above( const Frame&, const FrameVec& ) const;
+	int getFirstFrameIndexOfAnimForScreen_Closest( const Frame&, const FrameVec& ) const;
 	int getAdjacentFrameIndex( const Frame&, const FrameVec&, vec2 direction, float* distance=0 ) const;
 	
 };
