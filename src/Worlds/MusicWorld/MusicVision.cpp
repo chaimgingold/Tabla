@@ -144,9 +144,11 @@ MusicVision::doesZombieScoreIntersectZombieScores( const Score& old, ScoreVec& s
 			vector<PolyLine2> pv;
 			pv.push_back(p);
 
-			touches = ! PolyLine2::calcIntersection(opv,pv).empty() ;
-			// this is CRAZY performance wise, but it should work for now
-			// TODO: do poly-poly intersection correctly
+			try {
+				touches = ! PolyLine2::calcIntersection(opv,pv).empty() ;
+				// this is CRAZY performance wise, but it should work for now
+				// TODO: do poly-poly intersection correctly
+			} catch(...) {} // just in case boost excepts us
 		}
 
 		if ( touches )

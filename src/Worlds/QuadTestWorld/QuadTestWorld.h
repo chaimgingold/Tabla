@@ -42,10 +42,13 @@ public:
 private:
 	vec2 mTimeVec=vec2(1,0); // for orienting quads; probably doesn't matter at all.
 	float mMaxGainAreaFrac=.2f;
-	float mMaxInteriorAngle=100;
+	float mInteriorAngleMaxDelta=10;
 	
 	bool checkIsQuadReasonable( const PolyLine2& quad, const PolyLine2& source ) const;
+	bool areInteriorAnglesOK( const PolyLine2& p ) const;
 	bool getQuadFromPoly( const PolyLine2& in, PolyLine2& out ) const;
+	bool theorize( const PolyLine2& in, PolyLine2& out ) const;
+
 	
 	class Frame
 	{

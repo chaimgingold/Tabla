@@ -8,8 +8,8 @@
 		<CaptureAllPipelineStages>1</CaptureAllPipelineStages> <!-- So we can extract bitmaps -->
 
 		<Contours>
-			<ContourMinRadius>			1.5	</ContourMinRadius>
-			<ContourMinArea>			7	</ContourMinArea>
+			<ContourMinRadius>			3	</ContourMinRadius>
+			<ContourMinArea>			9	</ContourMinArea>
 			<ContourDPEpsilon>			5	</ContourDPEpsilon>
 			<ContourMinWidth>			3	</ContourMinWidth>
 		</Contours>
@@ -18,6 +18,6 @@
 
 	<TimeVec>-1 0</TimeVec>
 	<MaxGainAreaFrac>.2</MaxGainAreaFrac>
-	<MaxInteriorAngle>100</MaxInteriorAngle>
+	<InteriorAngleMaxDelta>5</InteriorAngleMaxDelta>
 	
 </QuadTestWorld>
