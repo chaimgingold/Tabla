@@ -231,6 +231,7 @@ bool QuadTestWorld::theorizeQuadFromEdge( const PolyLine2& p, int i, PolyLine2& 
 		
 		// filter based on size!
 		const vec2 size( length(jk), length(ji) );
+		const float area = size.x * size.y;
 		{
 			const float mindim = min(size.x,size.y);
 			
@@ -239,6 +240,7 @@ bool QuadTestWorld::theorizeQuadFromEdge( const PolyLine2& p, int i, PolyLine2& 
 				getVisionParams().mContourVisionParams.mContourMinRadius*2.f );
 				
 			if ( mindim < thresh ) return false;
+			if ( area   < getVisionParams().mContourVisionParams.mContourMinArea ) return false;
 		}
 		
 		PolyLine2 theory;
@@ -250,13 +252,16 @@ bool QuadTestWorld::theorizeQuadFromEdge( const PolyLine2& p, int i, PolyLine2& 
 		
 		// score heuristics
 		const float score = calcPolyEdgeOverlapFrac(theory,p);
-		const float area = size.x * size.y;
 		// TODO: consider relative area in relative ranking... we also want the biggest theorized quad!
 		// the size filtering is giving us some of that, but it isn't principled enough...
-
-		if ( score > ioBestScore )
+		// trying this below: just using score as a minimum bar to cross, then comparing areas.
+		// AND if we like this, we could move this filter into whomever calls theorize.
+		// leaving it here leaves us flexible, though.
+		
+//		if ( score > ioBestScore )
+		if ( score > ioBestScore && area > ioBestArea )
 		{
-			ioBestScore = score;
+//			ioBestScore = score; // just use input score as a floor
 			ioBestArea  = area;
 			result = theory;
 			return true;
