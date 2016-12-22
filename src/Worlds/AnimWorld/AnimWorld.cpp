@@ -384,55 +384,37 @@ void AnimWorld::drawScreen( const Frame& f, float alpha )
 	}
 	else
 	{
-		if (0)
-		{
-			// WORKS!
-			gl::draw(tex);
-			return;
-		}
+		// This is kind of a pile of poo, but i got it to work, and that's what counts right now.
+		// Ideally we draw into mQuad properly, but this is good enough.
+		// Not rectangular screens (with non-90 degree angles) will start to look weird,
+		// but this is pretty good.
 		
-		if (0)
-		{
-			// Does not work
-			gl::ScopedTextureBind texScp( tex );
+		gl::pushModelMatrix();
 
-			TriMesh mesh = TriMesh( TriMesh::Format().positions(2).colors(4).texCoords0(2) );
-
-			const vec2 uv[4] = {
-				vec2(0,1),
-				vec2(1,1),
-				vec2(1,0),
-				vec2(0,0)
-			};
-			
-	//		const vec2 *v = &f.mContour.mPolyLine.getPoints()[0];
-			vec2 size = vec2(1,1) * f.mContour.mRadius;
-			vec2 c = f.mContour.mCenter;
-
-//			vec2 v[4];
-//			Rectf r( c - size, c + size );
-	//		getRectCorners( r, v );
-	//		for( int i=0; i<4; ++i ) v[i] = mLocalToGlobal * v[i];
-			const vec2 *v = f.mQuad; 
-			
-	//		appendQuad(mesh,ColorA(1,1,1,1), &f.mContour.mPolyLine()[0], uv);
-			appendQuad(mesh,ColorA(1,1,1,alpha), v, uv);
-			
-			gl::draw(mesh);
-		}
+		const vec2 screenCenter = lerp(f.mQuad[0],f.mQuad[2],.5f);
 		
+		const vec2 screenSize = vec2(
+			distance(f.mQuad[0], f.mQuad[1]),
+			distance(f.mQuad[1], f.mQuad[2])
+			); 
 		
-		if (1)
-		{
-			vec2 size = vec2(1,1) * f.mContour.mRadius;
-			vec2 c = f.mContour.mCenter;
+		const vec2 scale = screenSize / vec2(tex->getSize());
 
-			Rectf r( c - size, c + size );
-
-			gl::color(1,1,1,alpha);
-//			gl::drawSolidRect(r);
-			gl::draw(tex, r);
-		}
+		mat3 rotate(
+			vec3(normalize(f.mQuad[1]-f.mQuad[0]),0),
+			vec3(normalize(f.mQuad[2]-f.mQuad[1]),0),
+			vec3(0,0,1)
+		);
+		
+		gl::translate(screenCenter);
+		gl::scale(vec2(1,1)*min(scale.x,scale.y));
+		gl::multModelMatrix( mat4(rotate) );
+		gl::translate( -vec2(tex->getSize())/2.f );
+		
+		gl::color(1,1,1,alpha);
+		gl::draw(tex);
+		
+		gl::popModelMatrix();
 	}
 }
 
