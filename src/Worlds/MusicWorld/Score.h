@@ -25,7 +25,6 @@ public:
 	vec2  mQuad[4];
 	/*  Vertices are played back like so:
 
-
 	 0---1
 	 |   |
 	 3---2

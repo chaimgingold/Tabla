@@ -11,28 +11,7 @@
 
 bool Contour::rayIntersection( vec2 rayOrigin, vec2 rayVec, float *rayt ) const
 {
-	bool hit=false;
-	
-	for( int i=0; i<mPolyLine.size(); ++i )
-	{
-		int j = (i+1) % mPolyLine.size();
-		
-		float t;
-		
-		bool h = rayLineSegIntersection(rayOrigin, rayVec, mPolyLine.getPoints()[i], mPolyLine.getPoints()[j], &t );
-		
-		if (h)
-		{
-			if (rayt)
-			{
-				if (hit) *rayt = min( *rayt, t ); // min of all
-				else *rayt = t; // first
-			}
-			hit=true;
-		}
-	}
-	
-	return hit;
+	return rayIntersectPoly(mPolyLine, rayOrigin, rayVec, rayt );
 }
 
 const Contour* ContourVector::findClosestContour ( vec2 point, vec2* closestPoint, float* closestDist, ContourKind kind ) const

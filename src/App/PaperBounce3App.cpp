@@ -8,6 +8,7 @@
 #include "TokenWorld.h"
 #include "RibbonWorld.h"
 #include "AnimWorld.h"
+#include "QuadTestWorld.h"
 
 #include "geom.h"
 #include "xml.h"
@@ -47,12 +48,16 @@ PaperBounce3App::~PaperBounce3App()
 
 //	mGameWorld.reset();
 
+	if (mCapture) mCapture->stop();
+	
 	cipd::PureDataNode::ShutdownGlobal();
 }
 
 PolyLine2 PaperBounce3App::getWorldBoundsPoly() const
 {
-	return getPointsAsPoly( mLightLink.getCaptureProfile().mCaptureWorldSpaceCoords, 4 );
+	PolyLine2 p = getPointsAsPoly( mLightLink.getCaptureProfile().mCaptureWorldSpaceCoords, 4 );
+	p.setClosed();
+	return p;
 }
 
 fs::path PaperBounce3App::getDocsPath() const
@@ -147,6 +152,7 @@ void PaperBounce3App::setup()
 			getXml(app,"DrawPipeline",mDrawPipeline);
 			getXml(app,"DrawContourMousePick",mDrawContourMousePick);
 			
+			getXml(app,"HasConfigWindow",mHasConfigWindow);
 			getXml(app,"ConfigWindowPipelineWidth",mConfigWindowPipelineWidth);
 			getXml(app,"ConfigWindowPipelineGutter",mConfigWindowPipelineGutter);
 			getXml(app,"ConfigWindowMainImageMargin",mConfigWindowMainImageMargin);
@@ -186,8 +192,9 @@ void PaperBounce3App::setup()
 		if ( xml.hasChild("LightLink") )
 		{
 			mLightLink.setParams(xml.getChild("LightLink"));
-			ensureLightLinkHasLocalDeviceProfiles();
-			lightLinkDidChange(false); // and don't save, since we are responding to a load.
+			bool didChange = ensureLightLinkHasLocalDeviceProfiles();
+			lightLinkDidChange(didChange);
+			// don't save, since we are responding to a load, unless ensureLightLinkHasLocalDeviceProfiles() changed.
 		}
 	});
 
@@ -214,9 +221,14 @@ void PaperBounce3App::setup()
 	}
 
 	// aux UI display
-	if (1)
+	if (mHasConfigWindow)
 	{
-		// for some reason this seems to create three windows once we fullscreen the main window :P
+		// note: would be nice to have this value hot-load, but not sure how to sequence
+		// light link loading with that, and this is good enough for now.
+		
+		// for some reason this seems to sometimes create three windows once we fullscreen the main window :P
+		// and then one of those is blank. That is the reason (besides kiosk mode) for the mHasConfigWindow switch,
+		// as a workaround for that bug.
 		mUIWindow = createWindow( Window::Format().size(
 			mLightLink.getCaptureProfile().mCaptureSize.x,
 			mLightLink.getCaptureProfile().mCaptureSize.y ) );
@@ -258,6 +270,7 @@ void PaperBounce3App::setupGameLibrary()
 	mGameLibrary.push_back( make_shared<PongWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<TokenWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<CalibrateWorldCartridge>() );
+	mGameLibrary.push_back( make_shared<QuadTestWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<MusicWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<RibbonWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<AnimWorldCartridge>() );
@@ -282,8 +295,10 @@ void PaperBounce3App::setupRFIDValueToFunction()
 	}
 }
 
-void PaperBounce3App::ensureLightLinkHasLocalDeviceProfiles()
+bool PaperBounce3App::ensureLightLinkHasLocalDeviceProfiles()
 {
+	bool dirty=false;
+	
 	// 1. Cameras
 
 	// Make sure all cameras on this computer have capture device profiles
@@ -304,6 +319,7 @@ void PaperBounce3App::ensureLightLinkHasLocalDeviceProfiles()
 					vec2(640,480) );
 				
 				mLightLink.mCaptureProfiles[profile.mName] = profile;
+				dirty=true;
 			} // make profile for device?
 		} // for
 	}
@@ -329,11 +345,14 @@ void PaperBounce3App::ensureLightLinkHasLocalDeviceProfiles()
 		
 		// insert
 		mLightLink.mProjectorProfiles[p.mName] = p;
+		dirty=true;
 	}
 	
 	// what if the profile list was empty, and we added some profiles that will be used?
 	// so: if there is no active profile, then set it to one that we made.
-	mLightLink.ensureActiveProfilesAreValid();
+	if (mLightLink.ensureActiveProfilesAreValid()) dirty=true;
+	
+	return false;
 }
 
 void PaperBounce3App::lightLinkDidChange( bool saveToFile )
@@ -372,36 +391,57 @@ bool PaperBounce3App::tryToSetupValidCaptureDevice()
 
 bool PaperBounce3App::setupCaptureDevice()
 {
+	mDebugFrame.reset();
+	
 	if ( mLightLink.mCaptureProfiles.empty() ) {
 		return false;
 	}
 
 	const LightLink::CaptureProfile &profile = mLightLink.getCaptureProfile();
 	
-	cout << "Trying to load capture profile '" << profile.mName << "' for '" << profile.mDeviceName << "'" << endl;
-	
-	Capture::DeviceRef device = Capture::findDeviceByNameContains(profile.mDeviceName);
-
-	if ( device )
+	if (!profile.mFilePath.empty())
 	{
-		if ( !mCapture || mCapture->getDevice() != device
-			|| mCapture->getWidth () != (int32_t)profile.mCaptureSize.x
-			|| mCapture->getHeight() != (int32_t)profile.mCaptureSize.y
-			)
+		cout << "Trying to load capture profile '" << profile.mName << "' for file '" << profile.mFilePath << "'" << endl;
+		
+		try
 		{
-			if (mCapture) {
-				// kill old one
-				mCapture->stop();
-				mCapture = 0;
-			}
-			
-			mCapture = Capture::create(profile.mCaptureSize.x, profile.mCaptureSize.y,device);
-			mCapture->start();
-			return true;
+			mDebugFrame = make_shared<Surface>( loadImage(profile.mFilePath) );
+		} catch (...){
+			mDebugFrame.reset();
 		}
-		return true; // lazily true
+		
+		return mDebugFrame != nullptr;
+		// ideally we should erase it if it fails to load, but that complicates situations where
+		// caller has an iterator into capture profiles (eg setupNextValidCaptureProfile). this isn't
+		// that hard, but might not be that important.
 	}
-	else return false;
+	else
+	{
+		cout << "Trying to load capture profile '" << profile.mName << "' for '" << profile.mDeviceName << "'" << endl;
+		
+		Capture::DeviceRef device = Capture::findDeviceByNameContains(profile.mDeviceName);
+
+		if ( device )
+		{
+			if ( !mCapture || mCapture->getDevice() != device
+				|| mCapture->getWidth () != (int32_t)profile.mCaptureSize.x
+				|| mCapture->getHeight() != (int32_t)profile.mCaptureSize.y
+				)
+			{
+				if (mCapture) {
+					// kill old one
+					mCapture->stop();
+					mCapture = 0;
+				}
+				
+				mCapture = Capture::create(profile.mCaptureSize.x, profile.mCaptureSize.y,device);
+				mCapture->start();
+				return true;
+			}
+			return true; // lazily true
+		}
+		else return false;
+	}
 }
 
 void PaperBounce3App::setupNextValidCaptureProfile()
@@ -573,7 +613,28 @@ void PaperBounce3App::fileDrop( FileDropEvent event )
 	auto files = event.getFiles();
 	if (files.size() > 0) {
 		auto file = files.front();
-		mDebugFrame = make_shared<Surface>( loadImage(file) );
+		
+		LightLink::CaptureProfile* profile = mLightLink.getCaptureProfileForFile(file.string());
+		
+		if ( profile )
+		{
+			mLightLink.setCaptureProfile(profile->mName);
+			lightLinkDidChange();
+		}
+		else
+		{
+			auto surf = make_shared<Surface>( loadImage(file) );
+			// let's verify it's cool, and get the size, but for consistency
+			// we'll let lightLinkDidChange load the image.
+			
+			if (surf)
+			{
+				LightLink::CaptureProfile cp(file,surf->getSize()); 
+				mLightLink.mCaptureProfiles[cp.mName] = cp;
+				mLightLink.setCaptureProfile(cp.mName);
+				lightLinkDidChange();
+			}
+		}
 	}
 }
 
@@ -594,7 +655,14 @@ void PaperBounce3App::update()
 	
 	mFileWatch.update();
 	
-	if ( (mCapture && mCapture->checkNewFrame()) || mDebugFrame )
+	updateVision();
+	
+	if (mGameWorld) mGameWorld->update();
+}
+
+void PaperBounce3App::updateVision()
+{
+	if ( (mCapture && mCapture->checkNewFrame()) || (mDebugFrame && (getElapsedFrames()%30==0)) )
 	{
 		mCaptureFPS.mark();
 		
@@ -643,8 +711,6 @@ void PaperBounce3App::update()
 		updateMainImageTransform(mUIWindow);
 		updateMainImageTransform(mMainWindow);
 	}
-	
-	if (mGameWorld) mGameWorld->update();
 }
 
 void PaperBounce3App::cleanup() {
@@ -880,7 +946,15 @@ void PaperBounce3App::keyDown( KeyEvent event )
 				loadAdjacentGame(1);
 				break;
 			case KeyEvent::KEY_ESCAPE:
-				mDebugFrame.reset();
+				{
+					mDebugFrame.reset();
+					
+					if ( !mLightLink.getCaptureProfile().mFilePath.empty() )
+					{
+						mLightLink.eraseCaptureProfile(mLightLink.getCaptureProfile().mName);
+						setupNextValidCaptureProfile();
+					}
+				}
 				break;
 			
 			default:

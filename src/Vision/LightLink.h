@@ -28,19 +28,24 @@ public:
 	{
 	public:
 		CaptureProfile() {}
+		CaptureProfile( string name, vec2 size );
 		CaptureProfile( string name, string deviceName, vec2 size ); // makes a default dummy
+		CaptureProfile( fs::path, vec2 size ); // you should have loaded it already so you can tell us the size
 		
 		void setParams( XmlTree );
 		XmlTree getParams() const;
 		
 		string mName; // user name
 		string mDeviceName; // references system device to use
-
+		string mFilePath; // some capture profiles aren't cameras, but names of static files to load
+		
 		//  • Capture
 		vec2 mCaptureSize = vec2(640,480) ;
 		
 		//  • Clip/Deskew
 		vec2 mCaptureCoords[4];
+		void flipCaptureCoordsVertically();
+		void flipCaptureCoordsHorizontally();
 		
 		//  • Map to World Space
 		vec2 mCaptureWorldSpaceCoords[4];
@@ -79,18 +84,22 @@ public:
 	const ProjectorProfile& getProjectorProfile() const;
 
 	vector<const CaptureProfile*> getCaptureProfilesForDevice( string deviceName ) const; // could return 0 if absent
+	CaptureProfile* getCaptureProfileForFile( string filePath );
 	
 	// all of them
 	map<string,CaptureProfile> mCaptureProfiles;
 	map<string,ProjectorProfile> mProjectorProfiles;
 
+	void eraseCaptureProfile( string name );
+	
 	void setCaptureProfile  ( string name );
 	void setProjectorProfile( string name );
 
-	void ensureActiveProfilesAreValid();
+	bool ensureActiveProfilesAreValid();
 		// ensures active profile names point to valid things
 		// (if there are no profiles, then it does nothing.) 
 		// setParams() calls this function after loading from xml on its own.
+		// returns true if changed
 
 private:
 	string mActiveCaptureProfileName;

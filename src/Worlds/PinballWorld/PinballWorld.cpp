@@ -204,6 +204,13 @@ void PinballWorld::update()
 	// sim balls
 	cullBalls();
 	BallWorld::update();
+		// TODO: To make pinball flippers super robust in terms of tunneling (especially at the tips),
+		// we should make attachments for BallWorld contours (a parallel vector)
+		// that specifies angular rotation (center, radians per second)--basically what
+		// Flipper::getAccelForBall does, and have BallWorld do more fine grained rotations of
+		// the contour itself. So we'd set the flipper to its rotation for the last frame,
+		// and specify the rotation to be the rotation that will get us to its rotation for this frame,
+		// and BallWorld will handle the granular integration itself.
 	
 	// respond to collisions
 	processCollisions();
@@ -732,6 +739,8 @@ Contour PinballWorld::contourFromPoly( PolyLine2 poly ) const
 	c.mBoundingRect = Rectf( poly.getPoints() );
 	c.mRadius = max( c.mBoundingRect.getWidth(), c.mBoundingRect.getHeight() ) * .5f ;
 	c.mArea = M_PI * c.mRadius * c.mRadius; // use circle approximation for area
+
+	c.mPolyLine.setClosed(); // ensure this is true in case any parts fail to do this right (ray casting cares) 
 	
 	// TODO: rotated bounding box correctly
 	// just put in a coarse approximation for now in case it starts to matter

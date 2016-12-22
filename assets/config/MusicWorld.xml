@@ -31,8 +31,6 @@
 		
 		<ScoreNoteVisionThresh>240</ScoreNoteVisionThresh>
 		<!-- 0..255, -1 for OTSU (adaptive) -->
-		<ScoreVisionTrimFrac>0</ScoreVisionTrimFrac>
-		<!-- When sampling image for each score, what amount to trim the corners (% push towards the center) -->
 		<ScoreMaxInteriorAngleDeg>110</ScoreMaxInteriorAngleDeg>
 
 		<!-- Inter-frame score tracking tuning... -->
@@ -52,6 +50,9 @@
 			<!-- how many cm become 1 second? -->
 			<!--	11" = 27.94cm	-->
 
+		<BlankEdgePixels>2</BlankEdgePixels>
+		<!--	0 for none	-->
+
 	</MusicVision>
 	
 	
@@ -59,6 +60,9 @@
 	<Stamps>
 		<IconWidth>5</IconWidth>
 		<PaletteGutter>1</PaletteGutter>
+		<DoCircleLayout>1</DoCircleLayout>
+		<DebugDrawSearch>0</DebugDrawSearch>
+		<SnapHomeWhenLost>0</SnapHomeWhenLost>
 	</Stamps>
 	
 

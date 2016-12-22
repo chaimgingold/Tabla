@@ -58,7 +58,7 @@ class PaperBounce3App : public App {
 	
 	void drawWorld( GameWorld::DrawType );
 	
-	void ensureLightLinkHasLocalDeviceProfiles();
+	bool ensureLightLinkHasLocalDeviceProfiles(); // returns if mLightLink changed
 	void lightLinkDidChange( bool saveToFile=true ); // calls setupCaptureDevice, tells mVision, tells mGameWorld, saves it to disk
 	bool setupCaptureDevice(); // specified by mLightLink.mCameraIndex
 	void setupNextValidCaptureProfile(); // iterate through them
@@ -172,6 +172,7 @@ class PaperBounce3App : public App {
 	bool mDrawPipeline = false;
 	bool mDrawContourMousePick = false;
 
+	bool  mHasConfigWindow = true;
 	float mConfigWindowMainImageMargin = 32.f;
 	float mConfigWindowPipelineGutter = 8.f ;
 	float mConfigWindowPipelineWidth  = 64.f ;
@@ -185,6 +186,10 @@ class PaperBounce3App : public App {
 	fs::path getUserLightLinkFilePath() const;
 	fs::path getUserSettingsFilePath() const;
 	
+	
+private: /* starting to make some stuff private... start somewhere */
+	void updateVision();
+
 	//
 	void loadUserSettingsFromXml( XmlTree );
 	XmlTree getUserSettingsXml() const;

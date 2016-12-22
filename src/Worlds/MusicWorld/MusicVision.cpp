@@ -16,7 +16,6 @@ void MusicVision::setParams( XmlTree xml )
 {
 	cout << "MusicVision::setParams( XmlTree xml )" << endl;
 
-	getXml(xml,"ScoreVisionTrimFrac",mScoreVisionTrimFrac);
 	getXml(xml,"ScoreNoteVisionThresh",mScoreNoteVisionThresh);
 	
 	getXml(xml,"ScoreTrackRejectNumSamples",mScoreTrackRejectNumSamples);
@@ -27,6 +26,7 @@ void MusicVision::setParams( XmlTree xml )
 	getXml(xml,"ScoreTrackTemporalBlendIfDiffFracLT",mScoreTrackTemporalBlendIfDiffFracLT);
 
 	getXml(xml,"WorldUnitsPerMeasure",mWorldUnitsPerMeasure);
+	getXml(xml,"BlankEdgePixels",mBlankEdgePixels);
 }
 
 Score*
@@ -144,9 +144,11 @@ MusicVision::doesZombieScoreIntersectZombieScores( const Score& old, ScoreVec& s
 			vector<PolyLine2> pv;
 			pv.push_back(p);
 
-			touches = ! PolyLine2::calcIntersection(opv,pv).empty() ;
-			// this is CRAZY performance wise, but it should work for now
-			// TODO: do poly-poly intersection correctly
+			try {
+				touches = ! PolyLine2::calcIntersection(opv,pv).empty() ;
+				// this is CRAZY performance wise, but it should work for now
+				// TODO: do poly-poly intersection correctly
+			} catch(...) {} // just in case boost excepts us
 		}
 
 		if ( touches )
@@ -574,6 +576,36 @@ void MusicVision::quantizeImage( Pipeline& pipeline,
 	s.mQuantizedImage = thresholded;
 }
 
+float MusicVision::getSliderValueFromQuantizedImageData( const Score& s )
+{
+	// alternative idea would be to take max, not avg
+	
+	float oldSliderValue = s.mMetaParamSliderValue;
+	float value = 0.f;
+
+	float sumw = 0.f;
+
+	for( int i=0; i<s.mQuantizedImage.rows; ++i )
+	{
+		float v = 1.f - (float)i / (float)(s.mQuantizedImage.rows-1);
+		float w = 1.f - (float)s.mQuantizedImage.at<unsigned char>(i,0) / 255.f;
+
+		sumw += w;
+		value += v * w;
+	}
+
+	value /= sumw;
+
+	if ( sumw==0.f )
+	{
+		// uh-oh! fall back to last frame value
+		value = oldSliderValue;
+	}
+	
+	return value;
+//			cout << "slider: " << s.mMetaParamSliderValue << endl;
+}
+
 void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& scores ) const
 {
 	// this function grabs the bitmaps for each score
@@ -593,58 +625,20 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& score
 		const bool doTemporalBlend = instr && instr->isNoteType() && mScoreTrackTemporalBlendFrac>0.f;
 		if ( doTemporalBlend ) oldTemporalBlendImage = s.mQuantizedImagePreThreshold.clone(); // must clone to work!
 
-		// get src points
-		vec2		srcpt[4];
-		cv::Point2f srcpt_cv[4];
-		{
-			// NOTE: trimto is deprecated (because of blank out edges)
-			vec2  trimto; // average of corners
-			for ( int i=0; i<4; ++i )
-			{
-				srcpt[i] = vec2( world->mWorldToImage * vec4(s.mQuad[i],0,1) );
-				trimto += srcpt[i]*.25f;
-			}
-
-			// trim
-			for ( int i=0; i<4; ++i ) srcpt[i] = lerp( srcpt[i], trimto, mScoreVisionTrimFrac );
-
-			// to ocv
-			vec2toOCV_4(srcpt, srcpt_cv);
-		}
-
-		// get output points
-		vec2 outsize(
-			max( distance(srcpt[0],srcpt[1]), distance(srcpt[3],srcpt[2]) ),
-			max( distance(srcpt[0],srcpt[3]), distance(srcpt[1],srcpt[2]) )
-		);
-		vec2 dstpt[4] = { {0,0}, {outsize.x,0}, {outsize.x,outsize.y}, {0,outsize.y} };
-
-		cv::Point2f dstpt_cv[4];
-		vec2toOCV_4(dstpt, dstpt_cv);
-
-		// grab it
-		cv::Mat xform = cv::getPerspectiveTransform( srcpt_cv, dstpt_cv ) ;
-		cv::warpPerspective( world->mImageCV, s.mImage, xform, cv::Size(outsize.x,outsize.y) );
-
+		// extract image
+		mat4 scoreImageToWorld;
+		getSubMatWithQuad( world->mImageCV, s.mImage, s.mQuad, world->mWorldToImage, scoreImageToWorld );
+		
 		pipeline.then( scoreName, s.mImage);
-		pipeline.setImageToWorldTransform( getOcvPerspectiveTransform(dstpt,s.mQuad) );
+		pipeline.setImageToWorldTransform( scoreImageToWorld );
 		pipeline.getStages().back()->mLayoutHintScale = .5f;
 		pipeline.getStages().back()->mLayoutHintOrtho = true;
 
 		// blank out edges
+		if (mBlankEdgePixels>0)
 		{
-			for( int x=0; x<s.mImage.cols; ++x )
-			{
-				s.mImage.at<unsigned char>(0,x) = 255;
-				s.mImage.at<unsigned char>(s.mImage.rows-1,x) = 255;
-			}
+			cv::rectangle(s.mImage, cv::Point(0,0), cv::Point(s.mImage.cols-1,s.mImage.rows-1), 255, mBlankEdgePixels );
 
-			for( int y=0; y<s.mImage.rows; ++y )
-			{
-				s.mImage.at<unsigned char>(y,0) = 255;
-				s.mImage.at<unsigned char>(y,s.mImage.cols-1) = 255;
-			}
-			
 			pipeline.then( scoreName + " blanked edges", s.mImage );
 			pipeline.getStages().back()->mLayoutHintScale = .5f;
 			pipeline.getStages().back()->mLayoutHintOrtho = true;
@@ -658,38 +652,17 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& score
 		}
 		else if ( instr && instr->mSynthType==Instrument::SynthType::Meta )
 		{
-			float oldSliderValue = s.mMetaParamSliderValue;
-
 			// meta-param
 			quantizeImage(pipeline,s,scoreName,doTemporalBlend,oldTemporalBlendImage, 1, -1 );
 				// we don't quantize to num states because it behaves weird.
 				// maybe 2x or 4x that might help, but the code below handles continuous values best.
 
-			// parse value...
-			s.mMetaParamSliderValue = 0.f;
-			float sumw = 0.f;
-
-			for( int i=0; i<s.mQuantizedImage.rows; ++i )
-			{
-				float v = 1.f - (float)i / (float)(s.mQuantizedImage.rows-1);
-				float w = 1.f - (float)s.mQuantizedImage.at<unsigned char>(i,0) / 255.f;
-
-				sumw += w;
-				s.mMetaParamSliderValue += v * w;
-			}
-
-			s.mMetaParamSliderValue /= sumw;
-
-			if ( sumw==0.f )
-			{
-				// uh-oh! fall back to last frame value
-				s.mMetaParamSliderValue = oldSliderValue;
-			}
-			
-//			cout << "slider: " << s.mMetaParamSliderValue << endl;
+			s.mMetaParamSliderValue = getSliderValueFromQuantizedImageData(s);
 		}
 		
 		// additive texture grab
-		s.mTexture = gl::Texture::create( ImageSourceRef( new ImageSourceCvMat(s.mImage)) );
+		if (instr && instr->mSynthType==Instrument::SynthType::Additive) {
+			s.mTexture = matToTexture(s.mImage);
+		}
 	}
 }

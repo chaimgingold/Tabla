@@ -397,7 +397,7 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 {
 	// scores, stamps
 	for( const auto &s : mScores ) s.draw(drawType);
-	for( const auto &s : mStamps ) s.draw();
+	mStamps.draw();
 
 	// draw time direction (for debugging score generation)
 	if (0)

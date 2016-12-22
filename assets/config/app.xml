@@ -16,6 +16,7 @@
 		<DrawContourTree>			0 </DrawContourTree>
 		<DrawPipeline>				0 </DrawPipeline>
 		
+		<HasConfigWindow>1</HasConfigWindow>
 		<ConfigWindowMainImageMargin> 32 </ConfigWindowMainImageMargin>
 		<ConfigWindowPipelineGutter> 8 </ConfigWindowPipelineGutter>
 		<ConfigWindowPipelineWidth> 64 </ConfigWindowPipelineWidth>
@@ -48,6 +49,11 @@
 		<tag>
 			<id>17326116</id>
 			<value>cartridge/PinballWorld</value>
+		</tag>
+		
+		<tag>
+			<id>17322276</id>
+			<value>cartridge/AnimWorld</value>
 		</tag>
 		
 	</RFID>

@@ -57,11 +57,11 @@ tIconAnimState::getIdleSway( float phaseInBeats, float beatDuration )
 	return sway;
 }
 
-void MusicStamp::draw() const
+void MusicStamp::draw( bool debugDrawSearch ) const
 {
 	drawInstrumentIcon( mXAxis, mIconPose );
 	
-	if (0)
+	if (debugDrawSearch)
 	{
 		// debug search
 		gl::color(0,0,1);
@@ -148,10 +148,18 @@ void MusicStamp::drawInstrumentIcon( vec2 worldx, tIconAnimState pose ) const
 	gl::popModelMatrix();
 }
 
+void MusicStampVec::draw()
+{
+	for( const auto &s : *this ) s.draw(mDebugDrawSearch);
+}
+
 void MusicStampVec::setParams( XmlTree& xml )
 {
 	getXml(xml,"IconWidth",mStampIconWidth);
 	getXml(xml,"PaletteGutter",mStampPaletteGutter);
+	getXml(xml,"DoCircleLayout",mDoCircleLayout);
+	getXml(xml,"DebugDrawSearch",mDebugDrawSearch);
+	getXml(xml,"SnapHomeWhenLost",mSnapHomeWhenLost);
 }
 
 void MusicStampVec::setup( const map<string,InstrumentRef>& instruments, PolyLine2 worldBounds, vec2 timeVec, gl::GlslProgRef rainbowShader )
@@ -160,6 +168,29 @@ void MusicStampVec::setup( const map<string,InstrumentRef>& instruments, PolyLin
 	mWorldBoundsPoly = worldBounds;
 	this->clear();
 	
+	// make stamps
+	int index = 0;
+	for( auto i : instruments )
+	{
+		MusicStamp s;
+		
+		s.mRainbowShader = rainbowShader;
+
+		s.mXAxis = mTimeVec;
+		s.mIconWidth = mStampIconWidth;
+		s.mInstrument = i.second;
+		s.mGradientSeed = index++;
+		
+		this->push_back(s);
+	}
+	
+	//
+	if (mDoCircleLayout) setupStartLocsInCircle();
+	else setupStartLocsInLine();
+}
+
+void MusicStampVec::setupStartLocsInCircle()
+{
 	// get info about shape of world
 	vec2 c = mWorldBoundsPoly.calcCentroid();
 	float minr = MAXFLOAT, maxr = 0.f;
@@ -173,33 +204,58 @@ void MusicStampVec::setup( const map<string,InstrumentRef>& instruments, PolyLin
 	
 	// compute layout info
 	float stampDist = mStampPaletteGutter + mStampIconWidth ;
-	float circum = stampDist * (float) instruments.size();
+	float circum = stampDist * (float)size();
 	float r = circum / (2.f * M_PI); // 2πr
 	r = min(r,minr-10.f); // what r to put them at?
 	// this could be based on the number of stamps we want in the ring
-	
-	// make stamps
-	float angle=0.f;
-	float anglestep = M_PI*2.f / (float)instruments.size() ;
 
-	int index = 0;
-	for( auto i : instruments )
+	float angle=0.f;
+	float anglestep = M_PI*2.f / (float)size() ;
+	
+	for( MusicStamp &s : *this )
 	{
-		MusicStamp s;
-		
-		s.mRainbowShader = rainbowShader;
 		s.mLoc = c + vec2(glm::rotate( vec3(r,0,0), angle, vec3(0,0,1) ));
 		s.mHomeLoc = s.mLoc;
 		s.mSearchForPaperLoc = s.mLoc;
-
-		s.mXAxis = mTimeVec;
-		s.mIconWidth = mStampIconWidth;
-		s.mInstrument = i.second;
-		s.mGradientSeed = index++;
 		
 		angle += anglestep;
+	}	
+}
+
+void MusicStampVec::setupStartLocsInLine()
+{
+	const float gutter = mStampPaletteGutter + mStampIconWidth/2;
+	const vec2  worldc = mWorldBoundsPoly.calcCentroid();
+	const vec2  up = -perp(mTimeVec);
+	float upt;
+	
+	if ( !rayIntersectPoly( mWorldBoundsPoly, worldc, up, &upt ) ) return;
+	
+	const vec2 topc = worldc + up * (upt - gutter);
+	
+	float leftt,rightt;
+	if ( !rayIntersectPoly( mWorldBoundsPoly, topc,  mTimeVec, &rightt ) ) return;
+	if ( !rayIntersectPoly( mWorldBoundsPoly, topc, -mTimeVec, &leftt  ) ) return;
+	
+	const vec2 right = topc + mTimeVec * ( rightt - gutter ); 
+	const vec2 left  = topc - mTimeVec * ( leftt  - gutter );
+	
+	if (empty())
+	{
+		MusicStamp& s = (*this)[0];
 		
-		this->push_back(s);
+		s.mLoc = s.mSearchForPaperLoc = s.mHomeLoc = topc;
+	}
+	else
+	{
+		for ( int i=0; i<size(); ++i )
+		{
+			float f = (float)i / (float)(size()-1);
+			
+			MusicStamp& s = (*this)[i];
+			
+			s.mLoc = s.mSearchForPaperLoc = s.mHomeLoc = lerp(left,right,f);			
+		}
 	}
 }
 
@@ -255,6 +311,9 @@ void MusicStampVec::tick( const ScoreVec& scores, const ContourVector& contours,
 	// De-collide them
 	decollide();
 	decollideScores(scores);
+	
+	// Snap home?
+	if (mSnapHomeWhenLost) snapHomeIfLost();
 	
 	// Tick stamps
 	for( auto &stamp : *this ) stamp.tick();
@@ -333,7 +392,8 @@ void MusicStampVec::updateSearch( const ContourVector& contours )
 			{
 				float dist;
 				contains = contours.findClosestContour(stamp.mSearchForPaperLoc,0,&dist);
-				if (dist>stamp.mIconWidth) contains=0;
+				float maxDist = stamp.mIconWidth * ((stamp.mLastHasContour || stamp.mLastHasScore) ? 5.f : 1.f ); 
+				if (dist>maxDist) contains=0;
 			}
 			
 			// check it and bind
@@ -344,10 +404,22 @@ void MusicStampVec::updateSearch( const ContourVector& contours )
 				// 2. it isn't in a score [Not doing this; Should we?]
 				// 3. we aren't reusing an ocv contour >1x
 				
-				if ( contains->contains(contains->mCenter) && contoursUsed.find(contains->mOcvContourIndex) == contoursUsed.end() )
+				vec2 goTo = contains->mCenter;
+				
+				if ( !contains->contains(goTo) )
+				{
+					const float kGoInsideAmount = .5f;
+
+					float dist;
+					vec2 closest = closestPointOnPoly(goTo,contains->mPolyLine,0,0,&dist);					
+					goTo += normalize(closest-goTo) * (dist+kGoInsideAmount);
+				}
+				
+				if (   contains->contains(goTo) /* To be 100% sure; not like it really matters */
+					&& contoursUsed.find(contains->mOcvContourIndex) == contoursUsed.end() )
 				{
 					stamp.mHasContour = true;
-					stamp.mSearchForPaperLoc = contains->mCenter;
+					stamp.mSearchForPaperLoc = goTo;
 					contoursUsed.insert(contains->mOcvContourIndex);
 				}
 			}
@@ -427,6 +499,17 @@ void MusicStampVec::decollideScores( const ScoreVec& scores )
 				stamp.mLoc = stamp.mHomeLoc;
 				stamp.mSearchForPaperLoc = stamp.mLoc;
 			}
+		}
+	}
+}
+
+void MusicStampVec::snapHomeIfLost()
+{
+	for( auto &stamp : *this )
+	{
+		if ( !stamp.mHasScore && !stamp.mHasContour )
+		{
+			stamp.mLoc = stamp.mSearchForPaperLoc = stamp.mHomeLoc;
 		}
 	}
 }

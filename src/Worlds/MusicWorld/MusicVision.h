@@ -40,7 +40,6 @@ private:
 
 	// params
 	int	  mScoreNoteVisionThresh=-1; // 0..255, or -1 for OTSU
-	float mScoreVisionTrimFrac=0.f;
 
 	int   mScoreTrackRejectNumSamples=10;
 	float mScoreTrackRejectSuccessThresh=.2f;
@@ -50,6 +49,8 @@ private:
 	float mScoreTrackTemporalBlendIfDiffFracLT=.1f; // only do blending if frames are similar enough; otherwise: fast no blend mode.
 
 	float mWorldUnitsPerMeasure = 5.f;
+	int  mBlankEdgePixels=0;
+
 
 	// helpers
 	ScoreVec getScores( const ContourVector&, const ScoreVec& oldScores, const vector<MusicStamp>& stamps ) const;
@@ -103,6 +104,7 @@ private:
 		// and does temporal smoothing (optionally)
 		// if you pass -1 for cols or rows then it isn't resized in that dimension
 	
+	static float getSliderValueFromQuantizedImageData( const Score& );
 };
 
 #endif /* MusicVision_hpp */
