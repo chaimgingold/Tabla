@@ -574,6 +574,36 @@ void MusicVision::quantizeImage( Pipeline& pipeline,
 	s.mQuantizedImage = thresholded;
 }
 
+float MusicVision::getSliderValueFromQuantizedImageData( const Score& s )
+{
+	// alternative idea would be to take max, not avg
+	
+	float oldSliderValue = s.mMetaParamSliderValue;
+	float value = 0.f;
+
+	float sumw = 0.f;
+
+	for( int i=0; i<s.mQuantizedImage.rows; ++i )
+	{
+		float v = 1.f - (float)i / (float)(s.mQuantizedImage.rows-1);
+		float w = 1.f - (float)s.mQuantizedImage.at<unsigned char>(i,0) / 255.f;
+
+		sumw += w;
+		value += v * w;
+	}
+
+	value /= sumw;
+
+	if ( sumw==0.f )
+	{
+		// uh-oh! fall back to last frame value
+		value = oldSliderValue;
+	}
+	
+	return value;
+//			cout << "slider: " << s.mMetaParamSliderValue << endl;
+}
+
 void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& scores ) const
 {
 	// this function grabs the bitmaps for each score
@@ -620,35 +650,12 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& score
 		}
 		else if ( instr && instr->mSynthType==Instrument::SynthType::Meta )
 		{
-			float oldSliderValue = s.mMetaParamSliderValue;
-
 			// meta-param
 			quantizeImage(pipeline,s,scoreName,doTemporalBlend,oldTemporalBlendImage, 1, -1 );
 				// we don't quantize to num states because it behaves weird.
 				// maybe 2x or 4x that might help, but the code below handles continuous values best.
 
-			// parse value...
-			s.mMetaParamSliderValue = 0.f;
-			float sumw = 0.f;
-
-			for( int i=0; i<s.mQuantizedImage.rows; ++i )
-			{
-				float v = 1.f - (float)i / (float)(s.mQuantizedImage.rows-1);
-				float w = 1.f - (float)s.mQuantizedImage.at<unsigned char>(i,0) / 255.f;
-
-				sumw += w;
-				s.mMetaParamSliderValue += v * w;
-			}
-
-			s.mMetaParamSliderValue /= sumw;
-
-			if ( sumw==0.f )
-			{
-				// uh-oh! fall back to last frame value
-				s.mMetaParamSliderValue = oldSliderValue;
-			}
-			
-//			cout << "slider: " << s.mMetaParamSliderValue << endl;
+			s.mMetaParamSliderValue = getSliderValueFromQuantizedImageData(s);
 		}
 		
 		// additive texture grab

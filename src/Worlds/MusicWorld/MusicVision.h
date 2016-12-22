@@ -104,6 +104,7 @@ private:
 		// and does temporal smoothing (optionally)
 		// if you pass -1 for cols or rows then it isn't resized in that dimension
 	
+	static float getSliderValueFromQuantizedImageData( const Score& );
 };
 
 #endif /* MusicVision_hpp */

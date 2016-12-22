@@ -47,6 +47,8 @@ PaperBounce3App::~PaperBounce3App()
 
 //	mGameWorld.reset();
 
+	if (mCapture) mCapture->stop();
+	
 	cipd::PureDataNode::ShutdownGlobal();
 }
 
@@ -399,7 +401,13 @@ bool PaperBounce3App::setupCaptureDevice()
 	{
 		cout << "Trying to load capture profile '" << profile.mName << "' for file '" << profile.mFilePath << "'" << endl;
 		
-		mDebugFrame = make_shared<Surface>( loadImage(profile.mFilePath) );
+		try
+		{
+			mDebugFrame = make_shared<Surface>( loadImage(profile.mFilePath) );
+		} catch (...){
+			mDebugFrame.reset();
+		}
+		
 		return mDebugFrame != nullptr;
 		// ideally we should erase it if it fails to load, but that complicates situations where
 		// caller has an iterator into capture profiles (eg setupNextValidCaptureProfile). this isn't
