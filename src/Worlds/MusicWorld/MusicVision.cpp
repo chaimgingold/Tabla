@@ -659,6 +659,8 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& score
 		}
 		
 		// additive texture grab
-		s.mTexture = gl::Texture::create( ImageSourceRef( new ImageSourceCvMat(s.mImage)) );
+		if (instr && instr->mSynthType==Instrument::SynthType::Additive) {
+			s.mTexture = matToTexture(s.mImage);
+		}
 	}
 }

@@ -49,6 +49,7 @@ namespace cinder {
 	}
 	
 	gl::TextureRef matToTexture( cv::UMat mat );
+	gl::TextureRef matToTexture( cv::Mat mat );
 	
 	void getSubMatWithQuad(
 		cv::InputArray,

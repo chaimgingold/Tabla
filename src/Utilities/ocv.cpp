@@ -107,6 +107,11 @@ namespace cinder {
 		return mat3to4( fromOcvMat3x3(xform) );
 	}
 	
+	gl::TextureRef matToTexture( cv::Mat mat )
+	{
+		return gl::Texture::create( ImageSourceRef( new ImageSourceCvMat(mat)) );
+	}
+	
 	gl::TextureRef matToTexture( cv::UMat mat )
 	{
 		/*if (0)
