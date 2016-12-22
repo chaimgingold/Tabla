@@ -596,57 +596,7 @@ void Score::draw( GameWorld::DrawType drawType ) const
 
 bool Score::setQuadFromPolyLine( PolyLine2 poly, vec2 timeVec )
 {
-	// could have simplified a bit and just examined two bisecting lines. oh well. it works.
-	// also calling this object 'Score' and the internal scores 'score' is a little confusing.
-	if ( poly.size()==4 )
-	{
-		auto in = [&]( int i ) -> vec2
-		{
-			return poly.getPoints()[i%4];
-		};
-
-		auto scoreEdge = [&]( int from, int to )
-		{
-			return dot( timeVec, normalize( in(to) - in(from) ) );
-		};
-
-		auto scoreSide = [&]( int side )
-		{
-			/* input pts:
-			   0--1
-			   |  |
-			   3--2
-
-			   side 0 : score of 0-->1, 3-->2
-			*/
-
-			return ( scoreEdge(side+0,side+1) + scoreEdge(side+3,side+2) ) / 2.f;
-		};
-
-		int   bestSide =0;
-		float bestScore=0;
-
-		for( int i=0; i<4; ++i )
-		{
-			float score = scoreSide(i);
-
-			if ( score > bestScore )
-			{
-				bestScore = score ;
-				bestSide  = i;
-			}
-		}
-
-		// copy to mQuad
-		mQuad[0] = in( bestSide+3 );
-		mQuad[1] = in( bestSide+2 );
-		mQuad[2] = in( bestSide+1 );
-		mQuad[3] = in( bestSide+0 );
-		// wtf i don't get the logic but it works
-
-		return true ;
-	}
-	else return false;
+	return getOrientedQuadFromPolyLine(poly, timeVec, mQuad);
 }
 
 PolyLine2 Score::getPolyLine() const

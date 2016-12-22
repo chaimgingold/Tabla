@@ -22,5 +22,6 @@
 	<DebugDrawTopology>0</DebugDrawTopology>
 	<AnimLengthQuantizeToSec>.01</AnimLengthQuantizeToSec>
 	<EqualizeImages>1</EqualizeImages>
+	<BlankEdgePixels>2</BlankEdgePixels>
 	
 </AnimWorld>

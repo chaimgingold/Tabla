@@ -129,5 +129,39 @@ namespace cinder {
 				gl::Texture::Format().loadTopDown() );
 		}
 	}
+
+	void getSubMatWithQuad(
+		cv::InputArray in,
+		cv::OutputArray out,
+		const vec2 quad[4],
+		const mat4& quadWorldToInputImage, // maps quadWorld -> input matrix space
+		mat4& outputImageToWorld // maps output matrix space -> world space
+		)
+	{
+		vec2 srcpt[4];
+		cv::Point2f srcpt_cv[4];
+
+		for ( int i=0; i<4; ++i ) {
+			srcpt[i] = vec2( quadWorldToInputImage * vec4(quad[i],0,1) );
+		}
+		
+		vec2toOCV_4(srcpt, srcpt_cv);
+
+		// get output points
+		vec2 outsize(
+			max( distance(srcpt[0],srcpt[1]), distance(srcpt[3],srcpt[2]) ),
+			max( distance(srcpt[0],srcpt[3]), distance(srcpt[1],srcpt[2]) )
+		);
+		vec2 dstpt[4] = { {0,0}, {outsize.x,0}, {outsize.x,outsize.y}, {0,outsize.y} };
+
+		cv::Point2f dstpt_cv[4];
+		vec2toOCV_4(dstpt, dstpt_cv);
+
+		// grab it
+		cv::Mat xform = cv::getPerspectiveTransform( srcpt_cv, dstpt_cv ) ;
+		cv::warpPerspective( in, out, xform, cv::Size(outsize.x,outsize.y) );
+		
+		outputImageToWorld = getOcvPerspectiveTransform(dstpt,quad);				
+	}
 	
 }

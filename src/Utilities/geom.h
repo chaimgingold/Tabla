@@ -52,4 +52,14 @@ mat4 getRectMappingAsMatrix( Rectf from, Rectf to );
 
 bool rayIntersectPoly( const PolyLine2& poly, vec2 rayOrigin, vec2 rayVec, float *rayt );
 
+bool getOrientedQuadFromPolyLine( PolyLine2 polyquad, vec2 xVec, vec2 quad[4] ); // returns false if polyquad.size()!=4
+	/* Returns oriented like so:
+	
+     0---1
+	 |   |
+	 3---2
+
+	 --> xVec	*/
+
+
 #endif /* geom_h */

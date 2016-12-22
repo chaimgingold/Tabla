@@ -34,6 +34,7 @@ void AnimWorld::setParams( XmlTree xml )
 	getXml(xml,"DebugDrawTopology",mDebugDrawTopology);
 	getXml(xml,"AnimLengthQuantizeToSec",mAnimLengthQuantizeToSec);
 	getXml(xml,"EqualizeImages",mEqualizeImages);
+	getXml(xml,"BlankEdgePixels",mBlankEdgePixels);
 	
 	mLocalToGlobal = mat2( getTimeVec(), getUpVec() );
 	mGlobalToLocal = inverse( mLocalToGlobal );
@@ -139,25 +140,24 @@ FrameVec AnimWorld::getFrames(
 		frame.mIndex = frames.size();
 		frame.mContour = c;
 
-		Rectf boundingRect = c.mBoundingRect;
-
-		Rectf imageSpaceRect = boundingRect.transformed(mat4to3(world->mWorldToImage));
-
-		cv::Rect cropRect = toOcv(Area(imageSpaceRect));
-
-		if (cropRect.size().width < 2 || cropRect.size().height < 2) {
-			continue;
-		}
-
-		frame.mImageCV = world->mImageCV(cropRect);
-
-		imageSpaceRect.offset(-imageSpaceRect.getUpperLeft());
-		frame.mFrameImageToWorld = getRectMappingAsMatrix(imageSpaceRect, boundingRect);
-
+		getOrientedQuadFromPolyLine(frame.mContour.mPolyLine, mTimeVec, frame.mQuad);
+		
+		getSubMatWithQuad( world->mImageCV, frame.mImageCV, frame.mQuad, world->mWorldToImage, frame.mFrameImageToWorld );
+		
 		pipeline.then(string("Frame ") + frame.mIndex, frame.mImageCV);
 		pipeline.setImageToWorldTransform( frame.mFrameImageToWorld );
 		pipeline.getStages().back()->mLayoutHintScale = .5f;
 		pipeline.getStages().back()->mLayoutHintOrtho = true;
+		
+		// blank edges
+		if (mBlankEdgePixels>0)
+		{
+			cv::rectangle(frame.mImageCV, cv::Point(0,0), cv::Point(frame.mImageCV.cols-1,frame.mImageCV.rows-1), 255, mBlankEdgePixels );
+			
+			pipeline.then(string("Frame edge blanked") + frame.mIndex, frame.mImageCV);
+			pipeline.getStages().back()->mLayoutHintScale = .5f;
+			pipeline.getStages().back()->mLayoutHintOrtho = true;
+		}
 		
 		// equalize?
 		if (mEqualizeImages)
@@ -393,6 +393,7 @@ void AnimWorld::drawScreen( const Frame& f, float alpha )
 		
 		if (0)
 		{
+			// Does not work
 			gl::ScopedTextureBind texScp( tex );
 
 			TriMesh mesh = TriMesh( TriMesh::Format().positions(2).colors(4).texCoords0(2) );
@@ -408,15 +409,16 @@ void AnimWorld::drawScreen( const Frame& f, float alpha )
 			vec2 size = vec2(1,1) * f.mContour.mRadius;
 			vec2 c = f.mContour.mCenter;
 
-			vec2 v[4];
-			Rectf r( c - size, c + size );
+//			vec2 v[4];
+//			Rectf r( c - size, c + size );
 	//		getRectCorners( r, v );
 	//		for( int i=0; i<4; ++i ) v[i] = mLocalToGlobal * v[i];
+			const vec2 *v = f.mQuad; 
 			
 	//		appendQuad(mesh,ColorA(1,1,1,1), &f.mContour.mPolyLine()[0], uv);
 			appendQuad(mesh,ColorA(1,1,1,alpha), v, uv);
 			
-	//		gl::draw(mesh);
+			gl::draw(mesh);
 		}
 		
 		
@@ -470,6 +472,17 @@ void AnimWorld::draw( DrawType drawType )
 				gl::drawLine(f.mContour.mCenter, f.mContour.mCenter + getTimeVec() * 5.f );
 				gl::color(0,1,0);
 				gl::drawLine(f.mContour.mCenter, f.mContour.mCenter + getUpVec() * 5.f );
+			}
+		}
+		
+		if (mDebugDrawTopology)
+		{
+			Color c[4] = { Color(1,0,0), Color(0,1,0), Color(0,0,1), Color(1,1,1) };
+			
+			for( int i=0; i<4; ++i )
+			{
+				gl::color(c[i]);
+				gl::drawSolidCircle(f.mQuad[i],1.f);
 			}
 		}
 		

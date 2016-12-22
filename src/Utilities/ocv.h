@@ -50,6 +50,14 @@ namespace cinder {
 	
 	gl::TextureRef matToTexture( cv::UMat mat );
 	
+	void getSubMatWithQuad(
+		cv::InputArray,
+		cv::OutputArray,
+		const vec2 quadWorld[4],
+		const mat4& quadWorldToInputImage, // maps quadWorld -> input matrix space
+		mat4& outputImageToWorld // maps output matrix space -> world space
+		);
+	
 }
 
 

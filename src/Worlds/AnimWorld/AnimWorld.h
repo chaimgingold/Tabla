@@ -31,6 +31,14 @@ namespace Anim
 class Frame
 {
 public:
+	vec2	mQuad[4];
+	/*
+	 0---1
+	 |   |
+	 3---2
+
+	 --> time		*/
+	
 	Contour mContour;
 	mat4	mFrameImageToWorld;
 	UMat	mImageCV;
@@ -112,6 +120,7 @@ private:
 	float mMaxFrameDist=10.f; // for same anim
 	bool mDebugDrawTopology=false;
 	bool mEqualizeImages=false;
+	int  mBlankEdgePixels=0;
 	
 	//
 	void drawScreen( const Frame&, float alpha=1.f );

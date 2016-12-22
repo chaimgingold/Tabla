@@ -144,3 +144,63 @@ bool rayIntersectPoly( const PolyLine2& poly, vec2 rayOrigin, vec2 rayVec, float
 	
 	return hit;	
 }
+
+bool getOrientedQuadFromPolyLine( PolyLine2 poly, vec2 xVec, vec2 quad[4] )
+{
+	// could have simplified a bit and just examined two bisecting lines. oh well. it works.
+	// also calling this object 'Score' and the internal scores 'score' is a little confusing.
+
+	if ( poly.size()==4 )
+	{
+		auto in = [&]( int i ) -> vec2
+		{
+			return poly.getPoints()[i%4];
+		};
+
+		auto scoreEdge = [&]( int from, int to )
+		{
+			return dot( xVec, normalize( in(to) - in(from) ) );
+		};
+
+		auto scoreSide = [&]( int side )
+		{
+			/* input pts:
+			   0--1
+			   |  |
+			   3--2
+
+			   side 0 : score of 0-->1, 3-->2
+			*/
+
+			return ( scoreEdge(side+0,side+1) + scoreEdge(side+3,side+2) ) / 2.f;
+		};
+
+		int   bestSide =0;
+		float bestScore=0;
+
+		for( int i=0; i<4; ++i )
+		{
+			float score = scoreSide(i);
+
+			if ( score > bestScore )
+			{
+				bestScore = score ;
+				bestSide  = i;
+			}
+		}
+
+		// copy to quad
+		quad[0] = in( bestSide+3 );
+		quad[1] = in( bestSide+2 );
+		quad[2] = in( bestSide+1 );
+		quad[3] = in( bestSide+0 );
+		// wtf i don't get the logic but it works
+		// my confusion stems, i think, from the fact that y is inverted.
+		// but it should be since we are likely in an upside down coordinate space,
+		// so the ordering here is fixing that, whereas the right thing to do is handle it
+		// explicitly elsewhere. but this works and stuff that uses it works, so not messing with now.
+
+		return true ;
+	}
+	else return false;	
+}
