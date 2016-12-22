@@ -35,6 +35,7 @@ void QuadTestWorld::setParams( XmlTree xml )
 	getXml(xml,"TimeVec",mTimeVec);
 	getXml(xml,"MaxGainAreaFrac",mMaxGainAreaFrac);
 	getXml(xml,"InteriorAngleMaxDelta",mInteriorAngleMaxDelta);
+	getXml(xml,"TheorizedRectMinPerimOverlapFrac",mTheorizedRectMinPerimOverlapFrac);
 }
 
 void QuadTestWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeline )
@@ -86,6 +87,85 @@ float getPolyDiffArea( PolyLine2 a, PolyLine2 b, std::vector<PolyLine2>* diff=0 
 	// i suppose that's really us going bananas on it. :-)
 }
 
+float QuadTestWorld::getFracOfEdgeCoveredByPoly( vec2 a, vec2 b, const PolyLine2& p, float& out_abLen ) const
+{
+	const float kDistanceAttentuate = 1.f;
+	
+	const vec2  ab = b - a;
+	const vec2  abnorm = normalize(ab);
+	const vec2  abnormperp = perp(abnorm);
+	const float ablen  = length(ab);
+	
+	float edgefrac = 0.f;
+	
+	const int pn = p.isClosed() ? p.size() : p.size()-1; 
+	for( int i=0; i<pn; ++i )
+	{
+		const int j = (i+1) % p.size();
+		
+		const vec2 pi = p.getPoints()[i];
+		const vec2 pj = p.getPoints()[j];
+		const vec2 pij = pj - pi;
+		const vec2 pijnorm = normalize(pij);
+		
+		// pi,pj projected onto ab sits from t0..t1 (ab goes from 0...ablen)
+		float t0 = dot(pi-a,abnorm);
+		float t1 = dot(pj-a,abnorm);
+		if (t0>t1) swap(t0,t1);
+		
+		float overlap;
+		
+		if ( t1<0.f || t0>ablen ) overlap=0.f;
+		else
+		{
+			const float t0c = max(0.f,t0);
+			const float t1c = min(ablen,t1);
+			
+			overlap = t1c - t0c;
+		}
+		
+		// get how much angles coincide
+		const float angle_overlap = pow( max( 0.f, dot(abnorm,pijnorm)), 2.f );
+		
+		// how far away is it?
+		const float distance = fabs( dot(pi-a,abnormperp) ) + fabs( dot(pj-a,abnormperp) ) ;
+		const float distance_score = 1.f - min(1.f, distance / kDistanceAttentuate);
+		
+		// 
+		const float score = angle_overlap * distance_score ;
+		edgefrac += overlap * score;
+	}
+	
+	// finish
+	out_abLen = ablen;
+	return min( edgefrac, ablen ); // don't let us exceed the length of this edge
+}
+
+float QuadTestWorld::calcPolyEdgeOverlapFrac( const PolyLine2& a, const PolyLine2& b ) const
+{
+	// what frac-of-A is covered-by-B ?
+	
+	const int an = a.isClosed() ? a.size() : a.size()-1; 
+	
+	float totalfrac=0.f;
+	float totallen =0.f;
+	
+	for( int i=0; i<an; ++i )
+	{
+		int j = (i+1) % a.size();
+		
+		float len;
+		float frac = getFracOfEdgeCoveredByPoly( a.getPoints()[i], a.getPoints()[j], b, len );
+		
+		// integrate
+//		totalfrac = (totalfrac * totallen + edgefrac * pji_len) / (totallen + pji_len);
+		totalfrac += frac;
+		totallen  += len;
+	}
+	
+	return totalfrac / totallen;
+}
+
 static float getInteriorAngle( const PolyLine2& p, int index )
 {
 	int i = index==0 ? (p.size()-1) : (index-1);
@@ -129,7 +209,7 @@ bool QuadTestWorld::checkIsQuadReasonable( const PolyLine2& quad, const PolyLine
 }
 
 	
-bool theorizeQuadFromEdge( const PolyLine2& p, int i, PolyLine2& result, float& inOutBestScore, float angleDev )
+bool QuadTestWorld::theorizeQuadFromEdge( const PolyLine2& p, int i, PolyLine2& result, float& ioBestScore, float &ioBestArea, float angleDev ) const
 {
 	/*  o  k
 		   |
@@ -149,6 +229,18 @@ bool theorizeQuadFromEdge( const PolyLine2& p, int i, PolyLine2& result, float& 
 		vec2 o = lerp( v[i] + jk, v[k] + ji, .5f );
 		// split the difference between two projected fourth coordinate locations
 		
+		// filter based on size!
+		const vec2 size( length(jk), length(ji) );
+		{
+			const float mindim = min(size.x,size.y);
+			
+			float thresh = min(
+				getVisionParams().mContourVisionParams.mContourMinWidth,
+				getVisionParams().mContourVisionParams.mContourMinRadius*2.f );
+				
+			if ( mindim < thresh ) return false;
+		}
+		
 		PolyLine2 theory;
 		theory.push_back(v[i]);
 		theory.push_back(v[j]);
@@ -157,15 +249,15 @@ bool theorizeQuadFromEdge( const PolyLine2& p, int i, PolyLine2& result, float& 
 		theory.setClosed();
 		
 		// score heuristics
-		float score = getPolyDiffArea(p,theory);
-			// this heuristic isn't appropriate for this quad generator.
-			// TODO:
-			// what we really need to do is look at degree of perimeter overlap--what % of the
-			// theorized quad perimeter isn't on the perimeter of the input poly. 
-		 
-		if ( score < inOutBestScore )
+		const float score = calcPolyEdgeOverlapFrac(theory,p);
+		const float area = size.x * size.y;
+		// TODO: consider relative area in relative ranking... we also want the biggest theorized quad!
+		// the size filtering is giving us some of that, but it isn't principled enough...
+
+		if ( score > ioBestScore )
 		{
-			inOutBestScore = score;
+			ioBestScore = score;
+			ioBestArea  = area;
 			result = theory;
 			return true;
 		}
@@ -181,11 +273,12 @@ bool theorizeQuadFromEdge( const PolyLine2& p, int i, PolyLine2& result, float& 
 
 bool QuadTestWorld::theorize( const PolyLine2& in, PolyLine2& out ) const
 {
-	float inOutBestScore = in.calcArea() * mMaxGainAreaFrac;
-		
+	float ioBestScore = mTheorizedRectMinPerimOverlapFrac;
+	float ioBestArea = 0.f;
+	
 	for( int i=0; i<in.size(); ++i )
 	{
-		theorizeQuadFromEdge(in,i,out,inOutBestScore,mInteriorAngleMaxDelta);
+		theorizeQuadFromEdge(in,i,out,ioBestScore,ioBestArea,mInteriorAngleMaxDelta);
 	}
 	
 	return out.size()>0;
@@ -241,9 +334,18 @@ QuadTestWorld::FrameVec QuadTestWorld::getFrames(
 		frame.mContourPoly = c.mPolyLine;
 		frame.mIsValid = getQuadFromPoly(frame.mContourPoly,frame.mContourPolyReduced);
 		frame.mConvexHull = getConvexHull(frame.mContourPoly);
+		
+		PolyLine2* diffPoly=0;
+		
+		if ( frame.mContourPolyReduced.size() > 0 ) {
+			diffPoly = &frame.mContourPolyReduced; 
+		} else {
+			diffPoly = &frame.mConvexHull;
+		}
 
-		getPolyDiffArea(frame.mConvexHull,frame.mContourPoly,&frame.mReducedDiff);
-		// use convex hull, since reduced may be present for invalid frames
+		frame.mOverlapScore = calcPolyEdgeOverlapFrac(*diffPoly,frame.mContourPoly);
+				
+		getPolyDiffArea(*diffPoly,frame.mContourPoly,&frame.mReducedDiff);
 		
 		if (frame.mIsValid) {
 			getOrientedQuadFromPolyLine(frame.mContourPolyReduced, mTimeVec, frame.mQuad);
@@ -282,15 +384,17 @@ void QuadTestWorld::draw( DrawType drawType )
 		// frame
 		if (1)
 		{
-			gl::color(1,.5,0);
-			gl::draw(f.mConvexHull);
+			gl::color(1,0,0);
+			gl::draw( f.mContourPolyReduced.size()==0 ? f.mConvexHull : f.mContourPolyReduced );
 			
 //			if ( !f.mIsValid && f.mConvexHull.size()>0 )
-			if (0)
+			if (1)
 			{
 				PaperBounce3App::get()->mTextureFont->drawString(
-					toString(f.mConvexHull.size()) + " " + toString(f.mContourPoly.calcArea()),
-					f.mConvexHull.getPoints()[0] + vec2(0,-1),
+				//	toString(f.mConvexHull.size()) + " " + toString(f.mContourPoly.calcArea()),	
+					toString(floorf(f.mOverlapScore*100.f)) + "%",
+					//f.mConvexHull.getPoints()[0] + vec2(0,-1),
+					f.mContourPoly.calcCentroid(),
 					gl::TextureFont::DrawOptions().scale(1.f/8.f).pixelSnap(false)
 					);
 			}
