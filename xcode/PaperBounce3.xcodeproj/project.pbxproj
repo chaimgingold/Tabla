@@ -58,6 +58,7 @@
 		26CCA3261E08AD8E005F7C24 /* AnimWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3241E08AD8E005F7C24 /* AnimWorld.cpp */; };
 		26E30EA61E0B4E3D00AA9F97 /* geom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E30EA51E0B4E3D00AA9F97 /* geom.cpp */; };
 		26E30EA91E0B4F0600AA9F97 /* ocv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E30EA81E0B4F0600AA9F97 /* ocv.cpp */; };
+		26E30EAE1E0C567100AA9F97 /* QuadTestWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E30EAC1E0C567100AA9F97 /* QuadTestWorld.cpp */; };
 		26F3234B1DF74D8900EC9559 /* Gamepad_macosx.c in Sources */ = {isa = PBXBuildFile; fileRef = 26F323491DF74D8900EC9559 /* Gamepad_macosx.c */; };
 		26F3234C1DF74D8900EC9559 /* Gamepad_private.c in Sources */ = {isa = PBXBuildFile; fileRef = 26F3234A1DF74D8900EC9559 /* Gamepad_private.c */; };
 		26FA36411D4A7D5300C64A00 /* todo in Resources */ = {isa = PBXBuildFile; fileRef = 26FA36401D4A7D5300C64A00 /* todo */; };
@@ -270,6 +271,8 @@
 		26CCA3251E08AD8E005F7C24 /* AnimWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnimWorld.h; sourceTree = "<group>"; };
 		26E30EA51E0B4E3D00AA9F97 /* geom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = geom.cpp; sourceTree = "<group>"; };
 		26E30EA81E0B4F0600AA9F97 /* ocv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ocv.cpp; sourceTree = "<group>"; };
+		26E30EAC1E0C567100AA9F97 /* QuadTestWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = QuadTestWorld.cpp; sourceTree = "<group>"; };
+		26E30EAD1E0C567100AA9F97 /* QuadTestWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QuadTestWorld.h; sourceTree = "<group>"; };
 		26F323491DF74D8900EC9559 /* Gamepad_macosx.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Gamepad_macosx.c; path = "../blocks/Cinder-Gamepad/src/Gamepad_macosx.c"; sourceTree = "<group>"; };
 		26F3234A1DF74D8900EC9559 /* Gamepad_private.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Gamepad_private.c; path = "../blocks/Cinder-Gamepad/src/Gamepad_private.c"; sourceTree = "<group>"; };
 		26F3234D1DF74D9500EC9559 /* Gamepad.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Gamepad.h; path = "../blocks/Cinder-Gamepad/include/Gamepad.h"; sourceTree = "<group>"; };
@@ -798,6 +801,7 @@
 				26CCA2CA1E089DE7005F7C24 /* PongWorld */,
 				26CCA2CD1E089DE7005F7C24 /* RibbonWorld */,
 				26CCA2D01E089DE7005F7C24 /* TokenWorld */,
+				26E30EAB1E0C567100AA9F97 /* QuadTestWorld */,
 			);
 			name = Worlds;
 			path = ../src/Worlds;
@@ -976,6 +980,15 @@
 				26CCA3251E08AD8E005F7C24 /* AnimWorld.h */,
 			);
 			path = AnimWorld;
+			sourceTree = "<group>";
+		};
+		26E30EAB1E0C567100AA9F97 /* QuadTestWorld */ = {
+			isa = PBXGroup;
+			children = (
+				26E30EAC1E0C567100AA9F97 /* QuadTestWorld.cpp */,
+				26E30EAD1E0C567100AA9F97 /* QuadTestWorld.h */,
+			);
+			path = QuadTestWorld;
 			sourceTree = "<group>";
 		};
 		26F323471DF74D5700EC9559 /* Gamepad */ = {
@@ -2594,6 +2607,7 @@
 				26CCA3261E08AD8E005F7C24 /* AnimWorld.cpp in Sources */,
 				3A09A46A8AF949E89CBDD5B5 /* b2CollideCircle.cpp in Sources */,
 				C84DC4502D0A4C2384BE60F8 /* b2CollideEdge.cpp in Sources */,
+				26E30EAE1E0C567100AA9F97 /* QuadTestWorld.cpp in Sources */,
 				C2EC76FF1DA7157F00DB39C8 /* PdTypes.cpp in Sources */,
 				741A16EB71BE4A308C86D708 /* b2CollidePolygon.cpp in Sources */,
 				509D1EB4420C46A3BB6D751D /* b2Collision.cpp in Sources */,
