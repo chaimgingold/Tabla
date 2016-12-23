@@ -31,7 +31,7 @@
 		
 		<ScoreNoteVisionThresh>240</ScoreNoteVisionThresh>
 		<!-- 0..255, -1 for OTSU (adaptive) -->
-		<ScoreMaxInteriorAngleDeg>110</ScoreMaxInteriorAngleDeg>
+<!--		<ScoreMaxInteriorAngleDeg>110</ScoreMaxInteriorAngleDeg>-->
 
 		<!-- Inter-frame score tracking tuning... -->
 		<ScoreTrackRejectNumSamples>10</ScoreTrackRejectNumSamples> <!-- How many random samples to try when testing for rejection?-->
@@ -52,6 +52,24 @@
 
 		<BlankEdgePixels>2</BlankEdgePixels>
 		<!--	0 for none	-->
+
+		<RectFinder>
+
+	<!--	What strategies to allow	-->
+			<AllowSubset>1</AllowSubset>
+			<AllowSuperset>1</AllowSuperset>
+
+	<!--	Filters. (Last two should/could be identical to Vision/Contours)	-->
+			<InteriorAngleMaxDelta>5</InteriorAngleMaxDelta>
+			<MinRectWidth>3</MinRectWidth>
+			<MinRectArea>9</MinRectArea>
+			
+	<!--	Tuning params	-->
+			<MaxGainAreaFrac>.2</MaxGainAreaFrac>
+			<SubsetRectMinPerimOverlapFrac>.8</TheorizedRectMinPerimOverlapFrac>
+			<EdgeOverlapDistAttenuate>1</EdgeOverlapDistAttenuate>
+			
+		</RectFinder>
 
 	</MusicVision>
 	

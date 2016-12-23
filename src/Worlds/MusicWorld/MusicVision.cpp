@@ -14,19 +14,21 @@
 
 void MusicVision::setParams( XmlTree xml )
 {
-	cout << "MusicVision::setParams( XmlTree xml )" << endl;
-
 	getXml(xml,"ScoreNoteVisionThresh",mScoreNoteVisionThresh);
 	
 	getXml(xml,"ScoreTrackRejectNumSamples",mScoreTrackRejectNumSamples);
 	getXml(xml,"ScoreTrackRejectSuccessThresh",mScoreTrackRejectSuccessThresh);
 	getXml(xml,"ScoreTrackMaxError",mScoreTrackMaxError);
-	getXml(xml,"ScoreMaxInteriorAngleDeg",mScoreMaxInteriorAngleDeg);
+//	getXml(xml,"ScoreMaxInteriorAngleDeg",mScoreMaxInteriorAngleDeg);
 	getXml(xml,"ScoreTrackTemporalBlendFrac",mScoreTrackTemporalBlendFrac);
 	getXml(xml,"ScoreTrackTemporalBlendIfDiffFracLT",mScoreTrackTemporalBlendIfDiffFracLT);
 
 	getXml(xml,"WorldUnitsPerMeasure",mWorldUnitsPerMeasure);
 	getXml(xml,"BlankEdgePixels",mBlankEdgePixels);
+
+	if ( xml.hasChild("RectFinder") ) {
+		mRectFinder.mParams.set( xml.getChild("RectFinder") );
+	}
 }
 
 Score*
@@ -366,13 +368,16 @@ MusicVision::getScoresFromContours( const ContourVector& contours, const vector<
 	
 	for( const auto &c : contours )
 	{
-		if ( !c.mIsHole && c.mTreeDepth==0 && c.mPolyLine.size()==4 )
+		PolyLine2 rectPoly;
+
+		if ( !c.mIsHole && c.mTreeDepth==0 && mRectFinder.getRectFromPoly(c.mPolyLine,rectPoly) )
 		{
 			Score score;
 
 			// shape
-			score.setQuadFromPolyLine(c.mPolyLine,mTimeVec);
-			if ( score.getQuadMaxInteriorAngle() > toRadians(mScoreMaxInteriorAngleDeg) ) continue;
+			score.setQuadFromPolyLine(rectPoly,mTimeVec);
+//			if ( score.getQuadMaxInteriorAngle() > toRadians(mScoreMaxInteriorAngleDeg) ) continue;
+				// this final test is now redundant to RectFinder
 
 			// instrument
 			InstrumentRef instr = decideInstrumentForScore(score,stamps);

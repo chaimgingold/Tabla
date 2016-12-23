@@ -13,6 +13,7 @@
 #include "Score.h"
 #include "Contour.h"
 #include "MusicStamp.h"
+#include "RectFinder.h"
 
 class MusicVision
 {
@@ -44,7 +45,7 @@ private:
 	int   mScoreTrackRejectNumSamples=10;
 	float mScoreTrackRejectSuccessThresh=.2f;
 	float mScoreTrackMaxError=1.f;
-	float mScoreMaxInteriorAngleDeg=120.f;
+//	float mScoreMaxInteriorAngleDeg=120.f;
 	float mScoreTrackTemporalBlendFrac=.5f; // 0 means off, so all new
 	float mScoreTrackTemporalBlendIfDiffFracLT=.1f; // only do blending if frames are similar enough; otherwise: fast no blend mode.
 
@@ -62,6 +63,8 @@ private:
 	void updateScoresWithImageData( Pipeline& pipeline, ScoreVec& scores ) const;
 	
 	float getNearestTempo( float ) const; // input -> closest mMeasureCounts[]
+	
+	RectFinder mRectFinder;
 	
 	//
 	float		  decideMeasureCountForScore( const Score& ) const;
