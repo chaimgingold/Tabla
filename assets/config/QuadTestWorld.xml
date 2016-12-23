@@ -8,8 +8,8 @@
 		<CaptureAllPipelineStages>1</CaptureAllPipelineStages> <!-- So we can extract bitmaps -->
 
 		<Contours>
-			<ContourMinRadius>			3	</ContourMinRadius>
-			<ContourMinArea>			9	</ContourMinArea>
+			<ContourMinRadius>			1.5	</ContourMinRadius>
+			<ContourMinArea>			3	</ContourMinArea>
 			<ContourDPEpsilon>			5	</ContourDPEpsilon>
 			<ContourMinWidth>			3	</ContourMinWidth>
 		</Contours>

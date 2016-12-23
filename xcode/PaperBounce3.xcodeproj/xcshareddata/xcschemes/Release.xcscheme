@@ -67,6 +67,10 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "-assets /Users/$USER/Documents/code/PaperBounce3/assets"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "-gameworld PinballWorld"
             isEnabled = "NO">
          </CommandLineArgument>

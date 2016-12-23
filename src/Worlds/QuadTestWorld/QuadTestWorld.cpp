@@ -32,8 +32,7 @@ void QuadTestWorld::setParams( XmlTree xml )
 {
 	getXml(xml,"TimeVec",mTimeVec);
 
-	if ( xml.hasChild("RectFinder") )
-	{
+	if ( xml.hasChild("RectFinder") ) {
 		mRectFinder.mParams.set( xml.getChild("RectFinder") );
 	}
 }

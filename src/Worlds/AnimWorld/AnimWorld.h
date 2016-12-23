@@ -17,6 +17,7 @@
 
 #include "GameWorld.h"
 #include "Contour.h"
+#include "RectFinder.h"
 #include "geom.h"
 
 using namespace ci;
@@ -40,6 +41,7 @@ public:
 	 --> time		*/
 	
 	Contour mContour;
+	PolyLine2 mRectPoly;
 	mat4	mFrameImageToWorld;
 	UMat	mImageCV;
 	gl::TextureRef mTexture; // created lazily, so use getAsTexture()
@@ -111,7 +113,7 @@ private:
 	// local is temporal space time+,up
 	
 	PolyLine2 globalToLocal( PolyLine2 ) const;
-	Rectf getContourBBoxInLocalSpace( const Contour& ) const;
+	Rectf getFrameBBoxInLocalSpace( const Frame& ) const;
 	
 	float mAnimTime; // our local animation time, in case we want to pause, etc...
 	vec2 mTimeVec=vec2(1,0);
@@ -136,6 +138,8 @@ private:
 	void updateCurrentFrames( AnimSeqMap&, const FrameVec&, float currentTime );
 
 	// frame parsing
+	RectFinder mRectFinder;
+	
 	FrameVec getFrames( const Pipeline::StageRef, const ContourVector &contours, Pipeline&pipeline ) const;
 	FrameVec getFrameTopology( const FrameVec& ) const;
 	int getSuccessorFrameIndex( const Frame&, const FrameVec& ) const;

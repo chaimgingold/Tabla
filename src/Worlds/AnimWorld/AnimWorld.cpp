@@ -38,6 +38,10 @@ void AnimWorld::setParams( XmlTree xml )
 	
 	mLocalToGlobal = mat2( getTimeVec(), getUpVec() );
 	mGlobalToLocal = inverse( mLocalToGlobal );
+	
+	if ( xml.hasChild("RectFinder") ) {
+		mRectFinder.mParams.set( xml.getChild("RectFinder") );
+	}	
 }
 
 void AnimWorld::printAnims( const AnimSeqMap& as )
@@ -131,16 +135,19 @@ FrameVec AnimWorld::getFrames(
 
 	for ( auto c : contours )
 	{
-		if ( c.mIsHole || c.mTreeDepth>0 || c.mPolyLine.size()!=4 ) {
+		if ( c.mIsHole || c.mTreeDepth>0 ) { //|| c.mPolyLine.size()!=4 ) {
 			continue;
 		}
 
+		
 		Frame frame;
+
+		if ( !mRectFinder.getRectFromPoly(c.mPolyLine,frame.mRectPoly) ) continue;
 
 		frame.mIndex = frames.size();
 		frame.mContour = c;
 
-		getOrientedQuadFromPolyLine(frame.mContour.mPolyLine, mTimeVec, frame.mQuad);
+		getOrientedQuadFromPolyLine(frame.mRectPoly, mTimeVec, frame.mQuad);
 		
 		getSubMatWithQuad( world->mImageCV, frame.mImageCV, frame.mQuad, world->mWorldToImage, frame.mFrameImageToWorld );
 		
@@ -248,9 +255,9 @@ PolyLine2 AnimWorld::globalToLocal( PolyLine2 p ) const
 }
 
 Rectf
-AnimWorld::getContourBBoxInLocalSpace( const Contour& c ) const
+AnimWorld::getFrameBBoxInLocalSpace( const Frame& f ) const
 {
-	Rectf r( globalToLocal(c.mPolyLine).getPoints() );
+	Rectf r( globalToLocal(f.mRectPoly).getPoints() );
 	
 	return r;
 }
@@ -258,7 +265,7 @@ AnimWorld::getContourBBoxInLocalSpace( const Contour& c ) const
 int
 AnimWorld::getFirstFrameIndexOfAnimForScreen_Above( const Frame& screen, const FrameVec& frames ) const
 {
-	Rectf screenr = getContourBBoxInLocalSpace(screen.mContour);
+	Rectf screenr = getFrameBBoxInLocalSpace(screen);
 	// cout << screenr << endl;
 	
 	int besti=-1;
@@ -266,7 +273,7 @@ AnimWorld::getFirstFrameIndexOfAnimForScreen_Above( const Frame& screen, const F
 	
 	for( const auto &f : frames )
 	{
-		Rectf fr = getContourBBoxInLocalSpace(f.mContour);
+		Rectf fr = getFrameBBoxInLocalSpace(f);
 		
 		if ( f.isAnimFrame() && f.mIndex != screen.mIndex
 		  && !(screenr.x1 > fr.x2 || screenr.x2 < fr.x1 )
@@ -380,7 +387,7 @@ void AnimWorld::drawScreen( const Frame& f, float alpha )
 	if (!tex)
 	{
 		gl::color( 1, .8, 0, alpha );
-		gl::draw(f.mContour.mPolyLine);
+		gl::draw(f.mRectPoly);
 	}
 	else
 	{
@@ -431,21 +438,29 @@ void AnimWorld::draw( DrawType drawType )
 
 			if ( isCurrentFrame ) {
 				gl::color( ColorA(color, drawType==DrawType::Projector ? 1.f : .5f) );
-				gl::drawSolid(f.mContour.mPolyLine);
+				gl::drawSolid(f.mRectPoly);
 			} else {
 				gl::color(color);
-				gl::draw(f.mContour.mPolyLine);
+				gl::draw(f.mRectPoly);
 			}
 		}
 		else if ( f.isScreen() )
 		{
-			float alpha = (drawType == DrawType::Projector) ? 1.f : .5f;
-			drawScreen(f,alpha);
+			if (drawType == DrawType::Projector)
+			{
+				drawScreen(f,1.f);
+			}
+			else
+			{
+				gl::color(0,0,0,.1f);
+				gl::draw(f.mRectPoly);
+				drawScreen(f,.5f);
+			}
 		}
 		else
 		{
 			gl::color( Color(1,.8,0) );
-			gl::draw(f.mContour.mPolyLine);
+			gl::draw(f.mRectPoly);
 			
 			if (mDebugDrawTopology)
 			{
@@ -471,7 +486,7 @@ void AnimWorld::draw( DrawType drawType )
 		// test bounding boxes in local space
 		if (0)
 		{
-			Rectf r = getContourBBoxInLocalSpace(f.mContour);
+			Rectf r = getFrameBBoxInLocalSpace(f);
 			
 			r = Rectf( mLocalToGlobal * r.getUpperLeft(), mLocalToGlobal * r.getLowerRight() );
 			
