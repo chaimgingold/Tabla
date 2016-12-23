@@ -448,11 +448,13 @@ void AnimWorld::draw( DrawType drawType )
 		{
 			if (drawType == DrawType::Projector)
 			{
+//				gl::color(1,1,1); // bathe screen in light
+//				gl::draw(f.mRectPoly);
 				drawScreen(f,1.f);
 			}
 			else
 			{
-				gl::color(0,0,0,.1f);
+				gl::color(0,0,0,.3f);
 				gl::draw(f.mRectPoly);
 				drawScreen(f,.5f);
 			}
