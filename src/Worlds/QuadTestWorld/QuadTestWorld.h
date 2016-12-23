@@ -18,6 +18,7 @@
 #include "GameWorld.h"
 #include "Contour.h"
 #include "geom.h"
+#include "RectFinder.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -41,19 +42,6 @@ public:
 
 private:
 	vec2 mTimeVec=vec2(1,0); // for orienting quads; probably doesn't matter at all.
-	float mMaxGainAreaFrac=.2f;
-	float mInteriorAngleMaxDelta=10;
-	float mTheorizedRectMinPerimOverlapFrac=.8f;
-	
-	float getFracOfEdgeCoveredByPoly( vec2 a, vec2 b, const PolyLine2& p, float& abLen ) const;
-	float calcPolyEdgeOverlapFrac( const PolyLine2& fracOfA, const PolyLine2& isCoveredByB ) const; // 0..1 result
-	
-	bool checkIsQuadReasonable( const PolyLine2& quad, const PolyLine2& source ) const;
-	bool areInteriorAnglesOK( const PolyLine2& p ) const;
-	bool getQuadFromPoly( const PolyLine2& in, PolyLine2& out ) const;
-	bool theorize( const PolyLine2& in, PolyLine2& out ) const;
-	bool theorizeQuadFromEdge( const PolyLine2& p, int i, PolyLine2& result, float& ioBestScore, float &ioBestArea, float angleDev ) const;
-
 	
 	class Frame
 	{
@@ -77,6 +65,7 @@ private:
 		const ContourVector &contours,
 		Pipeline& pipeline ) const;
 	
+	RectFinder mRectFinder;
 };
 
 class QuadTestWorldCartridge : public GameCartridge
