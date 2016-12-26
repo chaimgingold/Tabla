@@ -78,9 +78,9 @@
 	<Stamps>
 		<IconWidth>5</IconWidth>
 		<PaletteGutter>1</PaletteGutter>
-		<DoCircleLayout>1</DoCircleLayout>
+		<DoCircleLayout>0</DoCircleLayout>
 		<DebugDrawSearch>0</DebugDrawSearch>
-		<SnapHomeWhenLost>0</SnapHomeWhenLost>
+		<SnapHomeWhenLost>1</SnapHomeWhenLost>
 	</Stamps>
 	
 
