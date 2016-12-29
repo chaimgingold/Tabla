@@ -331,7 +331,17 @@ bool RectFinder::trySubset( const PolyLine2& in, PolyLine2& out ) const
 RectFinder::CandidateVec
 RectFinder::getFragmentCandidates( const PolyLine2& poly ) const
 {
-	// TODO: Optimize by only capturing unique ijkl indices, independent of permutation.
+	// TODO: Optimize by eliminating this case:
+	//
+	// i  j
+	// +  +
+	// |  | 
+	// +  + 
+	//         +--+ k
+	//       +--+ l
+	// for a first edge i we need to find the combined range along i for i and j
+	// then we need to project k,l onto that and ensure they are within that range.
+	// easy. 
 	
 //	const float kDotEps = 1.f - cos(mParams.mInteriorAngleMaxDelta);
 	// is this right??? 
@@ -353,6 +363,8 @@ RectFinder::getFragmentCandidates( const PolyLine2& poly ) const
 	set<int> uniqueIndices;
 	
 	auto isUnique = [&]( int i, int j, int k, int l ) -> bool {
+		// this effectively cuts candidates in half,
+		// eliminating the same box, but rotated 90-degrees
 		vector<int> v;
 		v.push_back(i);
 		v.push_back(j);
