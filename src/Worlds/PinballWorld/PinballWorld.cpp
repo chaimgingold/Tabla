@@ -339,18 +339,14 @@ void PinballWorld::draw( DrawType drawType )
 		fromPlayfieldSpace(vec2(mPlayfieldBallReclaimX[0],mPlayfieldBallReclaimY)),
 		fromPlayfieldSpace(vec2(mPlayfieldBallReclaimX[1],mPlayfieldBallReclaimY)) ) ;
 	
-	// balls
-	BallWorld::draw(drawType);
-	
-	// flippers, etc...
-	drawParts();
 
 
 
 	// --- debugging/testing ---
 
 	// 3d test
-	if (0) draw3dTest(drawType);
+	if (1) draw3d(drawType);
+	else draw2d(drawType);
 	
 	// world orientation debug info
 	if (0)
@@ -394,7 +390,16 @@ void PinballWorld::draw( DrawType drawType )
 	}
 }
 
-void PinballWorld::draw3dTest( DrawType drawType ) const
+void PinballWorld::draw2d( DrawType drawType )
+{
+	// balls
+	BallWorld::draw(drawType);
+	
+	// flippers, etc...
+	drawParts();
+}
+
+void PinballWorld::beginDraw3d() const
 {
 	// all of this may be for naught as it seems that it won't hold up to the
 	// deformations we do for the projector transform.
@@ -414,6 +419,8 @@ void PinballWorld::draw3dTest( DrawType drawType ) const
 //	cout << gl::getViewMatrix() * vec4(0,0,1,1) << endl;	
 		// this insanity is to capture when things have turned inside out on us, and
 		// we need to reverse culling... (e.g. for reversed projection mapping)
+		// I have **NO** idea how robust this test is; it just seems to work given the one
+		// test case I did. I'm sure there is a right way to do this, I just don't know what it is.
 		
 	gl::enableDepthRead();
 	gl::enableDepthWrite();
@@ -467,13 +474,59 @@ void PinballWorld::draw3dTest( DrawType drawType ) const
 		gl::multModelMatrix(skew);
 //		gl::scale(vec3(1,1,-1));
 	}	
+}
 
+void PinballWorld::endDraw3d() const
+{
+	gl::popModelView();
+
+	gl::enableDepthRead(false);
+	gl::enableDepthWrite(false);
+	gl::enableFaceCulling(false);
+}
+
+Shape2d PinballWorld::polyToShape( const PolyLine2& poly ) const
+{
+	Shape2d shape;
+	shape.moveTo(poly.getPoints()[0]);
+	for( int i=1; i<poly.size(); ++i ) shape.lineTo(poly.getPoints()[i]);
+	if (poly.isClosed()) shape.close(); // so we can generalize poly -> shape
+	return shape;
+}
+
+const float kExtrudeDepth = 2.f;				
+
+TriMesh PinballWorld::get3dMeshForPoly( const PolyLine2& poly ) const
+{
+	std::function<Colorf(vec3)> posToColor = [&]( vec3 v ) -> Colorf
+	{
+		//return Colorf( v.x, v.y, v.z );
+		return lerp( Colorf(0,1,0), Colorf(1,0,0), constrain( (v.z+kExtrudeDepth/2.f)/kExtrudeDepth, 0.f, 1.f ) );
+		// near to viewer ... away from viewer
+	};
+	
+//	PolyLine2 poly=c.mPolyLine;
+//			poly.reverse(); // turn it inside out, so normals face inward
+	
+	auto src = geom::Extrude( polyToShape(poly), kExtrudeDepth ).caps(false).subdivisions( 1 );
+	auto dst = src >> geom::ColorFromAttrib( geom::POSITION, posToColor ) >> geom::Translate(0,0,kExtrudeDepth/2);
+	
+	TriMesh mesh(dst);
+
+	return mesh;
+}
+
+void PinballWorld::draw3d( DrawType drawType )
+{
+	beginDraw3d();
+	
 	#if 0
 	auto lambert = gl::ShaderDef().lambert().color();
 	auto shader = gl::getStockShader( lambert );
 	gl::ScopedGlslProg glslScp(shader);
 	#endif
-		
+	
+	// 3d contours
 	for( const auto &c : mVisionContours )
 	{
 		if (c.mTreeDepth==0)
@@ -488,43 +541,25 @@ void PinballWorld::draw3dTest( DrawType drawType ) const
 
 				gl::color(0,1,1);
 				gl::drawSphere( vec3(c.mCenter+getRightVec()*3.f,-1), min(2.f,c.mRadius) * 1.5f ) ;
-				// WHAT? z is backwards?
+				// +z is away from viewer
 			}
-
-			const float kExtrudeDepth = 2.f;				
-
-			std::function<Colorf(vec3)> posToColor = [&]( vec3 v ) -> Colorf
-			{
-				//return Colorf( v.x, v.y, v.z );
-				return lerp( Colorf(0,1,0), Colorf(1,0,0), constrain( (v.z+kExtrudeDepth/2.f)/kExtrudeDepth, 0.f, 1.f ) );
-				// near to viewer ... away from viewer
-			};
 			
-			PolyLine2 poly=c.mPolyLine;
-//			poly.reverse(); // turn it inside out, so normals face inward
-			Shape2d shape;
-			shape.moveTo(poly.getPoints()[0]);
-			for( int i=1; i<poly.size(); ++i ) shape.lineTo(poly.getPoints()[i]);
-			if (poly.isClosed()) shape.close(); // so we can generalize poly -> shape
-			
-			auto src = geom::Extrude( shape, kExtrudeDepth ).caps(false).subdivisions( 1 );
-			auto dst = src >> geom::ColorFromAttrib( geom::POSITION, posToColor );
-			
-			gl::pushModelView();
-			
-			gl::translate(vec3(0,0,kExtrudeDepth/2));
-			TriMesh mesh(dst);
-			gl::draw(mesh);
-			
-			gl::popModelView();
+			gl::draw( get3dMeshForPoly(c.mPolyLine) );
 		}
 	}
 
-	gl::popModelView();
+	// 3d part sides
+	for( const auto &p : mParts )
+	{
+		gl::draw( get3dMeshForPoly(p->getCollisionPoly()) );
+	}
 
-	gl::enableDepthRead(false);
-	gl::enableDepthWrite(false);
-	gl::enableFaceCulling(false);
+	// done with 3d
+	endDraw3d();
+
+	// 2d stuff at table level
+	drawParts();
+	BallWorld::draw(drawType);
 }
 
 void PinballWorld::drawAdjSpaceRays() const

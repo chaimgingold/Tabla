@@ -70,8 +70,14 @@ public:
 	float getFlipperAngularVel( int side ) const; // TODO: make radians per second
 	
 private:
-
-	void draw3dTest( DrawType ) const;
+	
+	void draw2d( DrawType );
+	
+	void draw3d( DrawType );
+	void beginDraw3d() const;
+	void endDraw3d() const;
+	Shape2d polyToShape( const PolyLine2& ) const;
+	TriMesh get3dMeshForPoly( const PolyLine2& ) const;
 	
 	// params
 	vec2  mUpVec = vec2(0,1);
