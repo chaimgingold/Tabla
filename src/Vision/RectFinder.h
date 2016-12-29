@@ -36,19 +36,55 @@ public:
 	};
 	Params mParams;
 	
-	bool getRectFromPoly( const PolyLine2& poly, PolyLine2& rect ) const;
-
-	// For debugging visualization (basically a sugar-coat wrapper on cinder poly xor)
+	// old api
+	bool getRectFromPoly_old( const PolyLine2& in, PolyLine2& out ) const;
 	static float getPolyDiffArea( PolyLine2 a, PolyLine2 b, std::vector<PolyLine2>* diff=0 );
+	// For debugging visualization (basically a sugar-coat wrapper on cinder poly xor)
 
+	// new api
+	struct Candidate
+	{
+	public:
+		// output quad verts, clockwise order
+		vec2 mV[4];
+		PolyLine2 getAsPoly() const {
+			PolyLine2 p;
+			p.push_back(mV[0]);
+			p.push_back(mV[1]);
+			p.push_back(mV[2]);
+			p.push_back(mV[3]);
+			p.setClosed();
+			return p;
+		}
+		
+		// internal data for debugging/visualization  
+		std::vector<PolyLine2> mPolyDiff;
+		vec2  mSize;
+		float mArea=0;
+		float mSourcePolyArea=0.f;
+		float mDiffArea=MAXFLOAT;
+		float mPerimScore=0.f;
+		bool  mAllowed=false;
+		float mScore=0.f;
+	};
+	typedef vector<Candidate> CandidateVec;
+	
+	bool getRectFromPoly( const PolyLine2& poly, PolyLine2& rect, CandidateVec* candidates=0 ) const;
+	bool getRectFromPoly( const PolyLine2& poly, PolyLine2& rect, CandidateVec& cv ) const {
+		return getRectFromPoly(poly,rect,&cv);
+	}
+	
 private:
+
 	bool checkIsConvexHullReasonable( const PolyLine2& quad, const PolyLine2& source ) const;
 	bool areInteriorAnglesOK( const PolyLine2& p ) const;
-	bool isSizeOK( const PolyLine2& p ) const;
+	bool isSizeOK( const PolyLine2& p ) const;	
+	bool isOK( const PolyLine2& p ) const;
 	
 	bool trySubset( const PolyLine2& in, PolyLine2& out ) const;
 	bool trySubsetQuadFromEdge( const PolyLine2& p, int i, PolyLine2& result, float& ioBestScore, float &ioBestArea, float angleDev ) const;
 	
+	CandidateVec getFragmentCandidates( const PolyLine2& ) const;
 	
 };
 

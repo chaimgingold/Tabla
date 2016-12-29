@@ -17,6 +17,12 @@ void RectFinder::Params::set( XmlTree xml )
 
 	if ( getXml(xml,"InteriorAngleMaxDelta",mInteriorAngleMaxDelta) ) {
 		mInteriorAngleMaxDelta = toRadians(mInteriorAngleMaxDelta);
+		
+		cout << "mInteriorAngleMaxDelta: " << endl
+			<< "\t" << mInteriorAngleMaxDelta << endl
+			<< "\tcos = " << cos(mInteriorAngleMaxDelta) << endl
+			<< "\tacos = " << acos(mInteriorAngleMaxDelta) << endl
+			;
 	}	
 
 	getXml(xml,"MaxGainAreaFrac",mMaxGainAreaFrac);
@@ -25,25 +31,121 @@ void RectFinder::Params::set( XmlTree xml )
 
 	getXml(xml,"MinRectWidth",mMinRectWidth);
 	getXml(xml,"MinRectArea",mMinRectArea);
-
 }
 
-bool RectFinder::getRectFromPoly( const PolyLine2& in, PolyLine2& out ) const
+bool RectFinder::getRectFromPoly( const PolyLine2& poly, PolyLine2& rect, CandidateVec* oCandidates ) const
 {
-	// was it good to begin with?
-	if ( in.size()==4 )
+	CandidateVec cand;
+
+	const float sourcePolyArea = poly.calcArea();
+	
+	if ( isOK(poly) )
+	{
+		// intrinsically ok
+		Candidate c;
+		
+		for( int i=0; i<4; ++i ) c.mV[i] = poly.getPoints()[i];
+		
+		c.mArea = c.getAsPoly().calcArea();
+		c.mSourcePolyArea = sourcePolyArea;
+		c.mDiffArea=0.f;
+		c.mPerimScore=1.f;
+		
+		cand.push_back(c);
+	}
+	else
+	{
+		cand = getFragmentCandidates(poly);
+		
+		// score them
+		for( auto &c : cand )
+		{
+			PolyLine2 quadPoly = c.getAsPoly();
+
+			std::vector<PolyLine2>* keepPolyDiff = oCandidates ? &c.mPolyDiff : 0;
+			
+			c.mArea = quadPoly.calcArea();
+			c.mSourcePolyArea = sourcePolyArea;
+			c.mDiffArea = getPolyDiffArea(quadPoly,poly,keepPolyDiff) / c.mArea;
+			c.mPerimScore = calcPolyEdgeOverlapFrac(quadPoly,poly,mParams.mEdgeOverlapDistAttenuate);
+		}
+	}
+
+	// calc sizes + filter
+	for( auto &c : cand )
+	{
+		c.mSize = vec2(
+			distance(c.mV[0], c.mV[1]),
+			distance(c.mV[1], c.mV[2])
+		); // assuming square-ish
+		
+		c.mAllowed =
+			 c.mPerimScore > mParams.mSubsetRectMinPerimOverlapFrac
+		  && c.mArea > mParams.mMinRectArea
+		  && min(c.mSize.x,c.mSize.y) > mParams.mMinRectWidth
+		  && c.mDiffArea < c.mSourcePolyArea * mParams.mMaxGainAreaFrac
+		  ;
+	}
+	
+	// pick a winner?
+	int winner=-1;
+	float bestScore=0.f;
+	for( int i=0; i<cand.size(); ++i )
+	{
+		auto &c = cand[i];
+		
+		if ( c.mAllowed ) c.mScore = c.mArea;
+		else c.mScore=0.f;
+		
+		if (c.mScore > bestScore)
+		{
+			bestScore = c.mScore;
+			winner=i;
+		}
+	}
+	
+	// 
+
+	// return internal scores?
+	if (oCandidates) *oCandidates=cand;
+	
+	// return result
+	if (winner==-1)
+	{
+		return false;
+	}
+	else
+	{
+		rect = cand[winner].getAsPoly();
+		return true;
+	}
+}
+
+bool RectFinder::isOK( const PolyLine2& p ) const
+{
+	if ( p.size()==4 )
 	{
 		// size
-		if ( !isSizeOK(in) ) return false;
+		if ( !isSizeOK(p) ) return false;
 		
 		// angles
-		if ( !areInteriorAnglesOK(in) ) return false;
+		if ( !areInteriorAnglesOK(p) ) return false;
 		
 		// OK
+		return true;
+	}
+	else return false;	
+}
+
+bool RectFinder::getRectFromPoly_old( const PolyLine2& in, PolyLine2& out ) const
+{
+	// was it good to begin with?
+	if ( isOK(in) )
+	{
 		out = in;
 		return true;
 	}
-
+	
 	// convex hull strategy
 	if (mParams.mAllowSuperset)
 	{
@@ -224,4 +326,141 @@ bool RectFinder::trySubset( const PolyLine2& in, PolyLine2& out ) const
 	}
 	
 	return out.size()>0;
+}
+
+RectFinder::CandidateVec
+RectFinder::getFragmentCandidates( const PolyLine2& poly ) const
+{
+	// TODO: Optimize by only capturing unique ijkl indices, independent of permutation.
+	
+//	const float kDotEps = 1.f - cos(mParams.mInteriorAngleMaxDelta);
+	// is this right??? 
+	const float kDotEps = .025f;
+
+
+	const vec2* pts = &poly.getPoints()[0];
+	const int   n   = poly.size();
+
+	CandidateVec result;
+	
+	vector<vec2> norms(n);
+	for( int i=0; i<n; ++i )
+	{
+		const int j = (i+1) % n;
+		norms[i] = normalize( pts[j] - pts[i] ); 
+	}
+
+	set<int> uniqueIndices;
+	
+	auto isUnique = [&]( int i, int j, int k, int l ) -> bool {
+		vector<int> v;
+		v.push_back(i);
+		v.push_back(j);
+		v.push_back(k);
+		v.push_back(l);
+		sort(v.begin(),v.end());
+		
+		int index = v[0] + v[1]*n + v[2]*n*n + v[3]*n*n*n;
+		
+		 if (uniqueIndices.find(index)==uniqueIndices.end())
+		 {
+			uniqueIndices.insert(index);
+			return true;
+		 }
+		 else return false;
+	};
+
+	auto isParallel = [kDotEps]( vec2 n1, vec2 n2 ) -> bool {
+		return fabs( dot(n1,n2) ) > 1.f - kDotEps;
+	};
+	
+	auto isOrthogonal = [kDotEps]( vec2 n1, vec2 n2 ) -> bool {
+		return fabs( dot(n1,n2) ) < kDotEps;
+	};
+
+	auto isColinear = [&]( int i, int j ) -> bool
+	{
+		const vec2 p = perp(norms[i]);
+		
+		float d = max(
+			fabs( dot( pts[j]       - pts[i], p ) ),
+			fabs( dot( pts[(j+1)%n] - pts[i], p ) )
+			); 
+			
+		return d < mParams.mMinRectWidth * .8f;
+		// TODO: optimize by making it return true sometimes; needs a threshold tuning value
+		// base the value on min width / 2 (tada!) 
+		// we can assume isParallel(i,j) -> true 
+//		return false;
+	};
+	
+	
+	auto getCorner = [&]( int i, int j ) -> vec2
+	{
+		// https://gist.github.com/danieljfarrell/faf7c4cafd683db13cbc
+		
+		const vec2& rayOrigin = pts[i];
+		const vec2& rayDirection = norms[i];
+		const vec2& point1 = pts[j];
+		const vec2& point2 = pts[(j+1)%n];
+		
+		vec2 v1 = rayOrigin - point1;
+		vec2 v2 = point2 - point1;
+		vec2 v3 = vec2(-rayDirection[1], rayDirection[0]) ;
+		float t1 = cross(vec3(v2,0), vec3(v1,0)).z / dot(v2, v3);
+//		float t2 = dot(v1, v3) / dot(v2, v3);
+		
+		return rayOrigin + rayDirection * t1 ;
+//		if ( t1 >= 0.0 && t2 >= 0.0 && t2 <= 1.f )
+//		{
+//			if (rayt) *rayt = t1;
+//			return true;
+//		}
+//		return false;
+	};	
+	
+	for( int i=0;   i<n-1; ++i )
+	for( int j=i+1; j<n  ; ++j )
+	{
+		// i,j parallel?
+		if ( isParallel(norms[i],norms[j]) && !isColinear(i,j) )
+		{
+			for( int k=0; k<n-1; ++k )
+			{
+				// k orthogonal?
+				if ( isOrthogonal(norms[i],norms[k]) )
+				{
+					for( int l=k+1; l<n; ++l )
+					{
+						// l orthogonal?
+						if ( isParallel(norms[k],norms[l]) && !isColinear(k,l) )
+						{
+							if ( isUnique(i,j,k,l) )
+							{
+								// reconstruct corners of quad
+								Candidate q;
+								
+								q.mV[0] = getCorner(i,k);
+								q.mV[1] = getCorner(k,j);
+								q.mV[2] = getCorner(j,l);
+								q.mV[3] = getCorner(l,i);
+
+								// use convex hull to ensure proper clockwise ordering
+								if (0) // doesn't seem to be necessary...
+								{
+									PolyLine2 hull = getConvexHull(q.getAsPoly());
+									assert(hull.size()==4);
+									for( int i=0; i<4; ++i ) q.mV[i]=hull.getPoints()[i];
+								}
+								
+								result.push_back(q);
+							}
+						}
+					} // l
+				}
+			} // k
+		}
+	} // i,j
+	
+	return result;
 }

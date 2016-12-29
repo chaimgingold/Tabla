@@ -11,7 +11,7 @@
 			<ContourMinRadius>			1.5	</ContourMinRadius>
 			<ContourMinArea>			3	</ContourMinArea>
 			<ContourDPEpsilon>			5	</ContourDPEpsilon>
-			<ContourMinWidth>			3	</ContourMinWidth>
+			<ContourMinWidth>			2	</ContourMinWidth>
 		</Contours>
 
 	</Vision>
@@ -24,7 +24,7 @@
 
 <!--	Filters. (Last two should/could be identical to Vision/Contours)	-->
 		<InteriorAngleMaxDelta>5</InteriorAngleMaxDelta>
-		<MinRectWidth>3</MinRectWidth>
+		<MinRectWidth>2</MinRectWidth>
 		<MinRectArea>9</MinRectArea>
 		
 <!--	Tuning params	-->

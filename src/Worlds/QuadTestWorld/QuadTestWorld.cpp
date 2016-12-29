@@ -14,6 +14,7 @@
 
 using namespace std;
 
+/*
 PolyLine2 QuadTestWorld::Frame::getQuadAsPoly() const
 {
 	PolyLine2 p;
@@ -22,7 +23,7 @@ PolyLine2 QuadTestWorld::Frame::getQuadAsPoly() const
 	
 	p.setClosed();
 	return p;
-}
+}*/
 
 QuadTestWorld::QuadTestWorld()
 {
@@ -60,28 +61,13 @@ QuadTestWorld::FrameVec QuadTestWorld::getFrames(
 		// do it
 		Frame frame;
 		frame.mContourPoly = c.mPolyLine;
-		frame.mIsValid = mRectFinder.getRectFromPoly(frame.mContourPoly,frame.mContourPolyReduced);
-		frame.mConvexHull = getConvexHull(frame.mContourPoly);
 		
-		PolyLine2* diffPoly=0;
-		
-		if ( frame.mContourPolyReduced.size() > 0 ) {
-			diffPoly = &frame.mContourPolyReduced; 
-		} else {
-			diffPoly = &frame.mConvexHull;
-		}
-
-		frame.mOverlapScore = calcPolyEdgeOverlapFrac(
-			*diffPoly,
+		frame.mIsOK = mRectFinder.getRectFromPoly(
 			frame.mContourPoly,
-			mRectFinder.mParams.mEdgeOverlapDistAttenuate);
-				
-		RectFinder::getPolyDiffArea(*diffPoly,frame.mContourPoly,&frame.mReducedDiff);
-		
-		if ( frame.mIsValid ) {
-			getOrientedQuadFromPolyLine(frame.mContourPolyReduced, mTimeVec, frame.mQuad);
-		}
-		
+			frame.mContourPolyResult,
+			frame.mCandidates
+		);
+
 		frames.push_back(frame);
 	}
 	return frames;	
@@ -95,24 +81,48 @@ void QuadTestWorld::draw( DrawType drawType )
 {
 	for( const auto &f : mFrames )
 	{
-		// fill
-		if (1)
+		// candidates
+		for( const auto &c : f.mCandidates )
 		{
-			gl::color(0,1,1,.5);
-			gl::drawSolid( f.getQuadAsPoly() );
+			float a = c.mPerimScore;
+			
+			if (!c.mAllowed) a = max( .15f, a * .25f );
+			
+			gl::color( 1,1,1, a );
+			gl::draw(c.getAsPoly());
 		}
 		
 		// diff
 		if (1)
 		{
-			gl::color(1, 0, 0, .6f);
-			for( const auto &p : f.mReducedDiff )
+			for( const auto &c : f.mCandidates )
 			{
-				gl::drawSolid(p);
+				if ( c.mAllowed )
+				{
+					gl::color(1, 0, 0, .5f);
+					for( const auto &p : c.mPolyDiff )
+					{
+						gl::drawSolid(p);
+					}
+				}
 			}
 		}
-		
+
+		// original poly
+		gl::color( 1., 1., .1 );
+		gl::draw(f.mContourPoly);				
+
+		// fill solution
+		if (f.mIsOK)
+		{
+			gl::color(0,1,1,.5);
+			gl::drawSolid( f.mContourPolyResult );
+			gl::color(0,1,0);
+			gl::draw( f.mContourPolyResult );
+		}
+
 		// frame
+		/*
 		if (1)
 		{
 			gl::color(1,0,0);
@@ -129,17 +139,17 @@ void QuadTestWorld::draw( DrawType drawType )
 					gl::TextureFont::DrawOptions().scale(1.f/8.f).pixelSnap(false)
 					);
 			}
-		}
+		}*/
 		
 		// frame corners 
-		if (f.mIsValid)
+		if (f.mIsOK)
 		{
 			Color c[4] = { Color(1,0,0), Color(0,1,0), Color(0,0,1), Color(1,1,1) };
 			
 			for( int i=0; i<4; ++i )
 			{
 				gl::color(c[i]);
-				gl::drawSolidCircle(f.mQuad[i],1.f);
+				gl::drawSolidCircle(f.mContourPolyResult.getPoints()[i],.5f,6);
 			}
 		}
 	}

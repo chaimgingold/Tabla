@@ -46,16 +46,10 @@ private:
 	class Frame
 	{
 	public:
-		bool mIsValid=false;
-		
 		PolyLine2 mContourPoly;
-		PolyLine2 mContourPolyReduced;
-		PolyLine2 mConvexHull;
-		std::vector<PolyLine2> mReducedDiff;
-		vec2 mQuad[4];
-		
-		float mOverlapScore;
-		PolyLine2 getQuadAsPoly() const;
+		PolyLine2 mContourPolyResult;
+		RectFinder::CandidateVec mCandidates;
+		bool mIsOK;
 	};
 	typedef vector<Frame> FrameVec; 
 	FrameVec mFrames;
