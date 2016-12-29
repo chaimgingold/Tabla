@@ -350,7 +350,7 @@ void PinballWorld::draw( DrawType drawType )
 	// --- debugging/testing ---
 
 	// 3d test
-	if (0) draw3dTest();
+	if (0) draw3dTest(drawType);
 	
 	// world orientation debug info
 	if (0)
@@ -394,7 +394,7 @@ void PinballWorld::draw( DrawType drawType )
 	}
 }
 
-void PinballWorld::draw3dTest()
+void PinballWorld::draw3dTest( DrawType drawType ) const
 {
 	// all of this may be for naught as it seems that it won't hold up to the
 	// deformations we do for the projector transform.
@@ -407,11 +407,18 @@ void PinballWorld::draw3dTest()
 	// to compensate for that.
 	// that actually could get us quite close.
 	
+	// i think +z is away from the camera (doh!), and i don't quite have that right yet...
+	// also, projector view is quite messed compared to UI window :P, but UI is a start...
+	
+	const bool isViewFlipped = (gl::getViewMatrix() * vec4(0,0,1,1)).w < 1.f; 
+//	cout << gl::getViewMatrix() * vec4(0,0,1,1) << endl;	
+		// this insanity is to capture when things have turned inside out on us, and
+		// we need to reverse culling... (e.g. for reversed projection mapping)
+		
 	gl::enableDepthRead();
 	gl::enableDepthWrite();
 	gl::enableFaceCulling();
-//		gl::cullFace(GL_FRONT);
-	gl::cullFace(GL_BACK);
+	gl::cullFace( isViewFlipped ? GL_FRONT : GL_BACK );
 	gl::clear(GL_DEPTH_BUFFER_BIT);
 //		glDepthRangef(0.f,1.f);
 	
@@ -420,11 +427,13 @@ void PinballWorld::draw3dTest()
 //		gl::color(.5,.5,.5);
 		// mask out the tabletop in depth buffer
 		gl::color(.5,.5,.5);
-		gl::colorMask(false, false, false, false);
-//			gl::enableDepthRead(false);
-		gl::disable(GL_DEPTH_TEST);
+		if (1) gl::colorMask(false, false, false, false); // for debug vis...
 		
-		const float kTableThickness = 5.f;
+//			gl::enableDepthRead(false);
+//		gl::disable(GL_DEPTH_TEST);
+		glDepthFunc(GL_ALWAYS);
+		
+		const float kTableThickness = 10.f;
 
 		// write 0 everywhere for tabletop
 		gl::pushModelView();
@@ -434,7 +443,7 @@ void PinballWorld::draw3dTest()
 
 		// punch out holes where paper is at table floor
 		gl::pushModelView();
-		gl::translate(vec3(0,0,-kTableThickness));
+		gl::translate(vec3(0,0,kTableThickness));
 		gl::color(1,1,1);
 		for( const auto &c : mVisionContours )
 		{
@@ -445,12 +454,13 @@ void PinballWorld::draw3dTest()
 		gl::popModelView();
 		gl::colorMask(true,true,true,true);
 //			gl::enableDepthRead(true);
-		gl::enable(GL_DEPTH_TEST);
+//		gl::enable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LESS);
 	}
 
 	{
 		mat4 skew;
-		float skewAmount = .5f; // move up with z+
+		float skewAmount = -.5f; // move down with z+ (z+ goes away from viewer)
 		skew[2][0] = getUpVec().x * skewAmount;
 		skew[2][1] = getUpVec().y * skewAmount;
 		gl::pushModelView();
@@ -468,7 +478,7 @@ void PinballWorld::draw3dTest()
 	{
 		if (c.mTreeDepth==0)
 		{
-			if (1)
+			if (0)
 			{
 //					gl::color(1,0,0);
 //					gl::drawSolidCircle( c.mCenter, min(2.f,c.mRadius) );
@@ -487,10 +497,11 @@ void PinballWorld::draw3dTest()
 			{
 				//return Colorf( v.x, v.y, v.z );
 				return lerp( Colorf(0,1,0), Colorf(1,0,0), constrain( (v.z+kExtrudeDepth/2.f)/kExtrudeDepth, 0.f, 1.f ) );
+				// near to viewer ... away from viewer
 			};
 			
 			PolyLine2 poly=c.mPolyLine;
-			poly.reverse(); // turn it inside out, so normals face inward
+//			poly.reverse(); // turn it inside out, so normals face inward
 			Shape2d shape;
 			shape.moveTo(poly.getPoints()[0]);
 			for( int i=1; i<poly.size(); ++i ) shape.lineTo(poly.getPoints()[i]);
@@ -501,7 +512,7 @@ void PinballWorld::draw3dTest()
 			
 			gl::pushModelView();
 			
-			gl::translate(vec3(0,0,-kExtrudeDepth/2));
+			gl::translate(vec3(0,0,kExtrudeDepth/2));
 			TriMesh mesh(dst);
 			gl::draw(mesh);
 			

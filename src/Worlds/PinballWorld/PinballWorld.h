@@ -71,7 +71,7 @@ public:
 	
 private:
 
-	void draw3dTest();
+	void draw3dTest( DrawType ) const;
 	
 	// params
 	vec2  mUpVec = vec2(0,1);
