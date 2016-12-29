@@ -66,7 +66,7 @@ bool RectFinder::getRectFromPoly( const PolyLine2& poly, PolyLine2& rect, Candid
 			
 			c.mArea = quadPoly.calcArea();
 			c.mSourcePolyArea = sourcePolyArea;
-			c.mDiffArea = getPolyDiffArea(quadPoly,poly,keepPolyDiff) / c.mArea;
+			c.mDiffArea = getPolyDiffArea(quadPoly,poly,keepPolyDiff);
 			c.mPerimScore = calcPolyEdgeOverlapFrac(quadPoly,poly,mParams.mEdgeOverlapDistAttenuate);
 		}
 	}

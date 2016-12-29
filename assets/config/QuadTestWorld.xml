@@ -28,7 +28,7 @@
 		<MinRectArea>9</MinRectArea>
 		
 <!--	Tuning params	-->
-		<MaxGainAreaFrac>.2</MaxGainAreaFrac>
+		<MaxGainAreaFrac>.3</MaxGainAreaFrac>
 		<SubsetRectMinPerimOverlapFrac>.8</TheorizedRectMinPerimOverlapFrac>
 		<EdgeOverlapDistAttenuate>1</EdgeOverlapDistAttenuate>
 		

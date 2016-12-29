@@ -102,11 +102,14 @@ void QuadTestWorld::draw( DrawType drawType )
 					gl::color(1, 0, 0, .5f);
 					for( const auto &p : c.mPolyDiff )
 					{
-						gl::drawSolid(p);
+						if (p.size()>0)
+						{
+							gl::drawSolid(p);
+						}
 					}
 				}
 			}
-		}
+		}	
 
 		// original poly
 		gl::color( 1., 1., .1 );
