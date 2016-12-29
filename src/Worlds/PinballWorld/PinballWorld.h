@@ -71,6 +71,8 @@ public:
 	
 private:
 
+	void draw3dTest();
+	
 	// params
 	vec2  mUpVec = vec2(0,1);
 	float mGravity=0.1f;

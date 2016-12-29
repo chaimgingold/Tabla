@@ -11,6 +11,9 @@
 #include "geom.h" // getPointsAsPoly
 #include "GameLibraryView.h"
 
+const float kZNear =  100.f;
+const float kZFar  = -100.f;
+
 WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app )
 	: mApp(app)
 	, mWindow(window)
@@ -149,7 +152,9 @@ void WindowData::draw()
 
 	// ====== Window Space (UI) =====
 	// baseline coordinate space
-	gl::setMatricesWindow( getWindowSize() );
+//	gl::setMatricesWindow( getWindowSize() );
+	CameraOrtho cam(0.f, getWindow()->getWidth(), getWindow()->getHeight(), 0.f, kZNear, kZFar);
+	gl::setMatrices(cam);	
 	
 	// views
 	mViews.draw();

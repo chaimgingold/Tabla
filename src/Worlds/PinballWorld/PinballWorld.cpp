@@ -349,6 +349,9 @@ void PinballWorld::draw( DrawType drawType )
 
 	// --- debugging/testing ---
 
+	// 3d test
+	if (0) draw3dTest();
+	
 	// world orientation debug info
 	if (0)
 	{
@@ -389,6 +392,128 @@ void PinballWorld::draw( DrawType drawType )
 			gl::draw(c.mPolyLine);
 		}
 	}
+}
+
+void PinballWorld::draw3dTest()
+{
+	// all of this may be for naught as it seems that it won't hold up to the
+	// deformations we do for the projector transform.
+	// so the right way to do this--without doing something really transformationally clever with
+	// the ogl pipeline i can barely even get my brain to think of the possibility--would be to
+	// render to a texture and then project onto the table. 
+	
+	// alternatives: we use a stencil to cut out the transparent part of the tabletop.
+	// i think our 3d effect might still be a bit messed, but we might be able to adjust the skew
+	// to compensate for that.
+	// that actually could get us quite close.
+	
+	gl::enableDepthRead();
+	gl::enableDepthWrite();
+	gl::enableFaceCulling();
+//		gl::cullFace(GL_FRONT);
+	gl::cullFace(GL_BACK);
+	gl::clear(GL_DEPTH_BUFFER_BIT);
+//		glDepthRangef(0.f,1.f);
+	
+	if (1)
+	{
+//		gl::color(.5,.5,.5);
+		// mask out the tabletop in depth buffer
+		gl::color(.5,.5,.5);
+		gl::colorMask(false, false, false, false);
+//			gl::enableDepthRead(false);
+		gl::disable(GL_DEPTH_TEST);
+		
+		const float kTableThickness = 5.f;
+
+		// write 0 everywhere for tabletop
+		gl::pushModelView();
+		gl::translate(vec3(0,0,1.f));
+		gl::drawSolid( getWorldBoundsPoly() );
+		gl::popModelView();
+
+		// punch out holes where paper is at table floor
+		gl::pushModelView();
+		gl::translate(vec3(0,0,-kTableThickness));
+		gl::color(1,1,1);
+		for( const auto &c : mVisionContours )
+		{
+			if (c.mTreeDepth==0) {
+				gl::drawSolid(c.mPolyLine);
+			}
+		}
+		gl::popModelView();
+		gl::colorMask(true,true,true,true);
+//			gl::enableDepthRead(true);
+		gl::enable(GL_DEPTH_TEST);
+	}
+
+	{
+		mat4 skew;
+		float skewAmount = .5f; // move up with z+
+		skew[2][0] = getUpVec().x * skewAmount;
+		skew[2][1] = getUpVec().y * skewAmount;
+		gl::pushModelView();
+		gl::multModelMatrix(skew);
+//		gl::scale(vec3(1,1,-1));
+	}	
+
+	#if 0
+	auto lambert = gl::ShaderDef().lambert().color();
+	auto shader = gl::getStockShader( lambert );
+	gl::ScopedGlslProg glslScp(shader);
+	#endif
+		
+	for( const auto &c : mVisionContours )
+	{
+		if (c.mTreeDepth==0)
+		{
+			if (1)
+			{
+//					gl::color(1,0,0);
+//					gl::drawSolidCircle( c.mCenter, min(2.f,c.mRadius) );
+				gl::color(0,1,0);
+//					gl::drawCube( vec3(c.mCenter,0), vec3(1,1,1) * min(2.f,c.mRadius) * 2.f ) ;
+				gl::drawSphere( vec3(c.mCenter,0), min(2.f,c.mRadius) * 2.f ) ;
+
+				gl::color(0,1,1);
+				gl::drawSphere( vec3(c.mCenter+getRightVec()*3.f,-1), min(2.f,c.mRadius) * 1.5f ) ;
+				// WHAT? z is backwards?
+			}
+
+			const float kExtrudeDepth = 2.f;				
+
+			std::function<Colorf(vec3)> posToColor = [&]( vec3 v ) -> Colorf
+			{
+				//return Colorf( v.x, v.y, v.z );
+				return lerp( Colorf(0,1,0), Colorf(1,0,0), constrain( (v.z+kExtrudeDepth/2.f)/kExtrudeDepth, 0.f, 1.f ) );
+			};
+			
+			PolyLine2 poly=c.mPolyLine;
+			poly.reverse(); // turn it inside out, so normals face inward
+			Shape2d shape;
+			shape.moveTo(poly.getPoints()[0]);
+			for( int i=1; i<poly.size(); ++i ) shape.lineTo(poly.getPoints()[i]);
+			if (poly.isClosed()) shape.close(); // so we can generalize poly -> shape
+			
+			auto src = geom::Extrude( shape, kExtrudeDepth ).caps(false).subdivisions( 1 );
+			auto dst = src >> geom::ColorFromAttrib( geom::POSITION, posToColor );
+			
+			gl::pushModelView();
+			
+			gl::translate(vec3(0,0,-kExtrudeDepth/2));
+			TriMesh mesh(dst);
+			gl::draw(mesh);
+			
+			gl::popModelView();
+		}
+	}
+
+	gl::popModelView();
+
+	gl::enableDepthRead(false);
+	gl::enableDepthWrite(false);
+	gl::enableFaceCulling(false);
 }
 
 void PinballWorld::drawAdjSpaceRays() const
