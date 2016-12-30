@@ -62,8 +62,16 @@
 	<FlipperRadiusToLengthScale>6</FlipperRadiusToLengthScale>
 	<FlipperColor>00FFFF</FlipperColor>
 	
+<!-- 3d	-->
+	<3d>
+		<Enable>1</Enable>
+		<BackfaceCull>0</BackfaceCull>
+		<TableDepth>2</TableDepth>
+		<ZSkew>.5</ZSkew>
+	</3d>
+	
 <!-- Controls	-->
-<!-- TODO... Note manufacturer/model and support multiple profiles -->
+<!-- TODO... Note manufacturer/model and support multiple profiles; this is for PS4 -->
 	<Gamepad>
 		<button id="4" do="flippers-left"/>
 		<button id="6" do="flippers-left"/>

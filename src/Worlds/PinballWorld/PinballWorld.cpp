@@ -125,6 +125,11 @@ void PinballWorld::setParams( XmlTree xml )
 	getXml(xml, "DebugDrawAdjSpaceRays", mDebugDrawAdjSpaceRays );
 	getXml(xml, "DebugDrawFlipperAccelHairs", mDebugDrawFlipperAccelHairs );
 	
+	getXml(xml, "3d/Enable", m3dEnable );
+	getXml(xml, "3d/BackfaceCull", m3dBackfaceCull );
+	getXml(xml, "3d/TableDepth", m3dTableDepth );
+	getXml(xml, "3d/ZSkew", m3dZSkew );
+	
 	// gamepad
 	if (xml.hasChild("Gamepad"))
 	{
@@ -301,14 +306,14 @@ void PinballWorld::processCollisions()
 	
 	for( const auto &c : getBallWorldCollisions() )
 	{
-		mPureDataNode->sendBang("hit-wall");
+//		mPureDataNode->sendBang("hit-wall");
 
 		if (0) cout << "ball world collide (" << c.mBallIndex << ")" << endl;
 	}
 	
 	for( const auto &c : getBallContourCollisions() )
 	{
-		mPureDataNode->sendBang("hit-object");
+//		mPureDataNode->sendBang("hit-object");
 
 		if (0) cout << "ball contour collide (ball=" << c.mBallIndex << ", " << c.mContourIndex << ")" << endl;
 		
@@ -339,14 +344,12 @@ void PinballWorld::draw( DrawType drawType )
 		fromPlayfieldSpace(vec2(mPlayfieldBallReclaimX[0],mPlayfieldBallReclaimY)),
 		fromPlayfieldSpace(vec2(mPlayfieldBallReclaimX[1],mPlayfieldBallReclaimY)) ) ;
 	
-
+	// world
+	if (m3dEnable) draw3d(drawType);
+	else draw2d(drawType);
 
 
 	// --- debugging/testing ---
-
-	// 3d test
-	if (1) draw3d(drawType);
-	else draw2d(drawType);
 	
 	// world orientation debug info
 	if (0)
@@ -415,43 +418,50 @@ void PinballWorld::beginDraw3d() const
 	// i think +z is away from the camera (doh!), and i don't quite have that right yet...
 	// also, projector view is quite messed compared to UI window :P, but UI is a start...
 	
-	const bool isViewFlipped = (gl::getViewMatrix() * vec4(0,0,1,1)).w < 1.f; 
-//	cout << gl::getViewMatrix() * vec4(0,0,1,1) << endl;	
-		// this insanity is to capture when things have turned inside out on us, and
-		// we need to reverse culling... (e.g. for reversed projection mapping)
-		// I have **NO** idea how robust this test is; it just seems to work given the one
-		// test case I did. I'm sure there is a right way to do this, I just don't know what it is.
-		
+
+	
+	// back face culling (a little weird, and not necessary)
+	if (m3dBackfaceCull)
+	{
+		const bool isViewFlipped = (gl::getViewMatrix() * vec4(0,0,1,1)).w < 1.f; 
+	//	cout << gl::getViewMatrix() * vec4(0,0,1,1) << endl;	
+			// this insanity is to capture when things have turned inside out on us, and
+			// we need to reverse culling... (e.g. for reversed projection mapping)
+			// I have **NO** idea how robust this test is; it just seems to work given the one
+			// test case I did. I'm sure there is a right way to do this, I just don't know what it is.
+			
+
+		gl::enableFaceCulling();
+		gl::cullFace( isViewFlipped ? GL_FRONT : GL_BACK );
+	}
+	
+	// depth
 	gl::enableDepthRead();
 	gl::enableDepthWrite();
-	gl::enableFaceCulling();
-	gl::cullFace( isViewFlipped ? GL_FRONT : GL_BACK );
-	gl::clear(GL_DEPTH_BUFFER_BIT);
-//		glDepthRangef(0.f,1.f);
-	
+
 	if (1)
 	{
-//		gl::color(.5,.5,.5);
-		// mask out the tabletop in depth buffer
-		gl::color(.5,.5,.5);
-		if (1) gl::colorMask(false, false, false, false); // for debug vis...
+		const bool kDebugVizDepth = false;
 		
-//			gl::enableDepthRead(false);
-//		gl::disable(GL_DEPTH_TEST);
+		if (kDebugVizDepth) {
+			gl::color(.5,.5,.5);
+		}
+		else {
+			gl::colorMask(false, false, false, false);
+		}
+		
 		glDepthFunc(GL_ALWAYS);
 		
-		const float kTableThickness = 10.f;
-
 		// write 0 everywhere for tabletop
-		gl::pushModelView();
-		gl::translate(vec3(0,0,1.f));
-		gl::drawSolid( getWorldBoundsPoly() );
-		gl::popModelView();
+		gl::clearDepth(0.f);
+		gl::clear(GL_DEPTH_BUFFER_BIT);
 
 		// punch out holes where paper is at table floor
 		gl::pushModelView();
-		gl::translate(vec3(0,0,kTableThickness));
-		gl::color(1,1,1);
+		gl::translate(vec3(0,0,m3dTableDepth));
+		
+		if (kDebugVizDepth) gl::color(1,1,1);
+		
 		for( const auto &c : mVisionContours )
 		{
 			if (c.mTreeDepth==0) {
@@ -460,19 +470,16 @@ void PinballWorld::beginDraw3d() const
 		}
 		gl::popModelView();
 		gl::colorMask(true,true,true,true);
-//			gl::enableDepthRead(true);
-//		gl::enable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
 	}
 
+	// 3d transform
 	{
 		mat4 skew;
-		float skewAmount = -.5f; // move down with z+ (z+ goes away from viewer)
-		skew[2][0] = getUpVec().x * skewAmount;
-		skew[2][1] = getUpVec().y * skewAmount;
+		skew[2][0] = getGravityVec().x * m3dZSkew;
+		skew[2][1] = getGravityVec().y * m3dZSkew;
 		gl::pushModelView();
 		gl::multModelMatrix(skew);
-//		gl::scale(vec3(1,1,-1));
 	}	
 }
 
@@ -482,7 +489,10 @@ void PinballWorld::endDraw3d() const
 
 	gl::enableDepthRead(false);
 	gl::enableDepthWrite(false);
-	gl::enableFaceCulling(false);
+	
+	if (m3dBackfaceCull) {
+		gl::enableFaceCulling(false);
+	}
 }
 
 Shape2d PinballWorld::polyToShape( const PolyLine2& poly ) const
@@ -494,22 +504,26 @@ Shape2d PinballWorld::polyToShape( const PolyLine2& poly ) const
 	return shape;
 }
 
-const float kExtrudeDepth = 2.f;				
-
-TriMesh PinballWorld::get3dMeshForPoly( const PolyLine2& poly ) const
+TriMesh PinballWorld::get3dMeshForPoly( const PolyLine2& poly, float znear, float zfar ) const
 {
+	float extrudeDepth = zfar - znear;
+	
 	std::function<Colorf(vec3)> posToColor = [&]( vec3 v ) -> Colorf
 	{
-		//return Colorf( v.x, v.y, v.z );
-		return lerp( Colorf(0,1,0), Colorf(1,0,0), constrain( (v.z+kExtrudeDepth/2.f)/kExtrudeDepth, 0.f, 1.f ) );
-		// near to viewer ... away from viewer
+		return lerp(
+			Colorf(0,1,0),
+			Colorf(1,0,0),
+//			Colorf(1,1,1),
+//			Colorf(.5,.5,.5),
+			constrain( (v.z-znear)/(zfar-znear), 0.f, 1.f ) );
+			// near -> far (from viewer)
 	};
 	
 //	PolyLine2 poly=c.mPolyLine;
 //			poly.reverse(); // turn it inside out, so normals face inward
 	
-	auto src = geom::Extrude( polyToShape(poly), kExtrudeDepth ).caps(false).subdivisions( 1 );
-	auto dst = src >> geom::ColorFromAttrib( geom::POSITION, posToColor ) >> geom::Translate(0,0,kExtrudeDepth/2);
+	auto src = geom::Extrude( polyToShape(poly), extrudeDepth ).caps(false).subdivisions( 1 );
+	auto dst = src >> geom::Translate(0,0,extrudeDepth/2+znear) >> geom::ColorFromAttrib( geom::POSITION, posToColor ) ;
 	
 	TriMesh mesh(dst);
 
@@ -529,7 +543,7 @@ void PinballWorld::draw3d( DrawType drawType )
 	// 3d contours
 	for( const auto &c : mVisionContours )
 	{
-		if (c.mTreeDepth==0)
+		if ( !shouldContourBeAPart(c) )
 		{
 			if (0)
 			{
@@ -544,20 +558,20 @@ void PinballWorld::draw3d( DrawType drawType )
 				// +z is away from viewer
 			}
 			
-			gl::draw( get3dMeshForPoly(c.mPolyLine) );
+			gl::draw( get3dMeshForPoly(c.mPolyLine,0.f,m3dTableDepth) );
 		}
 	}
 
 	// 3d part sides
 	for( const auto &p : mParts )
 	{
-		gl::draw( get3dMeshForPoly(p->getCollisionPoly()) );
+		gl::draw( get3dMeshForPoly(p->getCollisionPoly(),0.f,m3dTableDepth) );
 	}
 
 	// done with 3d
 	endDraw3d();
 
-	// 2d stuff at table level
+	// 2d stuff at table level (slap it on top)
 	drawParts();
 	BallWorld::draw(drawType);
 }

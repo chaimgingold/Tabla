@@ -77,7 +77,7 @@ private:
 	void beginDraw3d() const;
 	void endDraw3d() const;
 	Shape2d polyToShape( const PolyLine2& ) const;
-	TriMesh get3dMeshForPoly( const PolyLine2& ) const;
+	TriMesh get3dMeshForPoly( const PolyLine2&, float znear, float zfar ) const; // e.g. 0..1, from tabletop in 1cm
 	
 	// params
 	vec2  mUpVec = vec2(0,1);
@@ -92,6 +92,12 @@ private:
 	
 	bool mDebugDrawAdjSpaceRays=false;
 	bool mDebugDrawGeneratedContours=false;
+	
+	// 3d params
+	bool  m3dEnable      = false;
+	bool  m3dBackfaceCull= false;
+	float m3dTableDepth  = 10.f;
+	float m3dZSkew       = .5f;
 	
 	// more params, just for vision
 	float mPartTrackLocMaxDist = 1.f;
