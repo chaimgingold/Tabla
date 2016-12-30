@@ -158,8 +158,10 @@ void PaperBounce3App::setup()
 			getXml(app,"ConfigWindowMainImageMargin",mConfigWindowMainImageMargin);
 			
 			getXml(app,"KeyboardStringTimeout",mKeyboardStringTimeout);
+			
+			getXml(app,"DefaultPixelsPerWorldUnit",mDefaultPixelsPerWorldUnit);
 		}
-
+		
 		if (xml.hasChild("PaperBounce3/RFID"))
 		{
 			XmlTree rfid = xml.getChild("PaperBounce3/RFID");
@@ -177,7 +179,7 @@ void PaperBounce3App::setup()
 		}
 		
 		// 2. respond
-
+		updateDebugFrameCaptureDevicesWithPxPerWorldUnit(mDefaultPixelsPerWorldUnit);
 		
 		// TODO:
 		// - get a new camera capture object so that resolution can change live (I think I do that now)
@@ -316,7 +318,9 @@ bool PaperBounce3App::ensureLightLinkHasLocalDeviceProfiles()
 				LightLink::CaptureProfile profile(
 					string("Default ") + d->getName(),
 					d->getName(),
-					vec2(640,480) );
+					vec2(640,480),
+					mDefaultPixelsPerWorldUnit
+					);
 				
 				mLightLink.mCaptureProfiles[profile.mName] = profile;
 				dirty=true;
@@ -403,17 +407,23 @@ bool PaperBounce3App::setupCaptureDevice()
 	{
 		cout << "Trying to load capture profile '" << profile.mName << "' for file '" << profile.mFilePath << "'" << endl;
 		
-		try
+		mDebugFrameFileWatch = FileWatch();
+		
+		mDebugFrameFileWatch.load( profile.mFilePath, [&]( fs::path )
 		{
-			mDebugFrame = make_shared<Surface>( loadImage(profile.mFilePath) );
-		} catch (...){
-			mDebugFrame.reset();
-		}
+			try
+			{
+				mDebugFrame = make_shared<Surface>( loadImage(profile.mFilePath) );
+			} catch (...){
+				mDebugFrame.reset();
+			}
+		});
 		
 		return mDebugFrame != nullptr;
 		// ideally we should erase it if it fails to load, but that complicates situations where
 		// caller has an iterator into capture profiles (eg setupNextValidCaptureProfile). this isn't
 		// that hard, but might not be that important.
+		// we also might want to always return true so that user can escape missing files (removing from list)
 	}
 	else
 	{
@@ -629,13 +639,29 @@ void PaperBounce3App::fileDrop( FileDropEvent event )
 			
 			if (surf)
 			{
-				LightLink::CaptureProfile cp(file,surf->getSize()); 
+				LightLink::CaptureProfile cp(file,surf->getSize(),mDefaultPixelsPerWorldUnit); 
 				mLightLink.mCaptureProfiles[cp.mName] = cp;
 				mLightLink.setCaptureProfile(cp.mName);
 				lightLinkDidChange();
 			}
 		}
 	}
+}
+
+void PaperBounce3App::updateDebugFrameCaptureDevicesWithPxPerWorldUnit( float x )
+{
+	bool dirty=false;
+	
+	for( auto &c : mLightLink.mCaptureProfiles )
+	{
+		if ( !c.second.mFilePath.empty() )
+		{
+			dirty=true;
+			c.second.setWorldCoordsFromCaptureCoords(x);
+		}
+	}
+	
+	if (dirty) lightLinkDidChange();
 }
 
 void PaperBounce3App::addProjectorPipelineStages()
@@ -654,6 +680,7 @@ void PaperBounce3App::update()
 	mAppFPS.mark();
 	
 	mFileWatch.update();
+	mDebugFrameFileWatch.update();
 	
 	updateVision();
 	
@@ -883,11 +910,25 @@ void PaperBounce3App::keyDown( KeyEvent event )
 	
 	bool handled = false;
 	
+	auto openFile = []( fs::path path ) {
+		::system( (string("open \"") + path.string() + string("\"")).c_str() );		
+	};
+	
 	// meta chars
 	if ( event.isAltDown() )
 	{
 		switch ( event.getCode() )
 		{
+			case KeyEvent::KEY_x:
+				if (mGameWorld) {
+					openFile( getXmlConfigPathForGame( mGameWorld->getSystemName() ) );
+				}
+				break;
+			
+			case KeyEvent::KEY_l:
+				openFile( getUserLightLinkFilePath() );
+				break;
+
 			case KeyEvent::KEY_TAB:
 				handled=true;
 				setupNextValidCaptureProfile();
@@ -915,17 +956,7 @@ void PaperBounce3App::keyDown( KeyEvent event )
 				break ;
 
 			case KeyEvent::KEY_x:
-				{
-					fs::path path;
-					
-					if ( mGameWorld && !event.isControlDown() )
-					{
-						path = getXmlConfigPathForGame( mGameWorld->getSystemName() );
-					}
-					else path = hotloadableAssetPath( fs::path("config") / "app.xml" );
-					
-					::system( (string("open \"") + path.string() + string("\"")).c_str() );
-				}
+				openFile( hotloadableAssetPath( fs::path("config") / "app.xml" ) );
 				break ;
 			
 			case KeyEvent::KEY_UP:

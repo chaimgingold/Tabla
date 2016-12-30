@@ -445,8 +445,7 @@ void PinballWorld::beginDraw3d() const
 		
 		if (kDebugVizDepth) {
 			gl::color(.5,.5,.5);
-		}
-		else {
+		} else {
 			gl::colorMask(false, false, false, false);
 		}
 		
@@ -456,19 +455,37 @@ void PinballWorld::beginDraw3d() const
 		gl::clearDepth(0.f);
 		gl::clear(GL_DEPTH_BUFFER_BIT);
 
-		// punch out holes where paper is at table floor
-		gl::pushModelView();
-		gl::translate(vec3(0,0,m3dTableDepth));
+		// punch out holes where paper is at table floor, and tabletops for holes inside of that
 		
-		if (kDebugVizDepth) gl::color(1,1,1);
+		std::function<void(const Contour& c)> recurseTree;
+		
+		recurseTree = [&]( const Contour& c ) -> void
+		{
+			// draw me
+			const bool punchOut = !c.mIsHole;
+			
+			if (punchOut) {
+				// if punching out, go in; otherwise we stay at 0 (and fill)
+				gl::pushModelView();
+				gl::translate(vec3(0,0,m3dTableDepth));				
+				if (kDebugVizDepth) gl::color(1,1,1);
+			}
+			else if (kDebugVizDepth) gl::color(.5,.5,.5);
+			
+			gl::drawSolid(c.mPolyLine);
+			
+			if (punchOut) gl::popModelView();
+			
+			// childers
+			for( int childIndex : c.mChild ) {
+				recurseTree(mVisionContours[childIndex]);
+			}
+		};
 		
 		for( const auto &c : mVisionContours )
 		{
-			if (c.mTreeDepth==0) {
-				gl::drawSolid(c.mPolyLine);
-			}
+			if (c.mTreeDepth==0) recurseTree(c);
 		}
-		gl::popModelView();
 		gl::colorMask(true,true,true,true);
 		glDepthFunc(GL_LESS);
 	}

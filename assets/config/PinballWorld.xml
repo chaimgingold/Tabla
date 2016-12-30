@@ -31,7 +31,7 @@
 	<DebugDrawAdjSpaceRays>0</DebugDrawAdjSpaceRays>
 	<DebugDrawGeneratedContours>0</DebugDrawGeneratedContours>
 	<DebugDrawFlipperAccelHairs>0</DebugDrawFlipperAccelHairs>
-	
+		
 <!-- General -->
 	<UpVec>-1 0</UpVec>
 	<Gravity>.05</Gravity>

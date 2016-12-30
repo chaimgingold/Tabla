@@ -22,6 +22,8 @@
 		<ConfigWindowPipelineWidth> 64 </ConfigWindowPipelineWidth>
 		
 		<KeyboardStringTimeout>.2</KeyboardStringTimeout>
+		
+		<DefaultPixelsPerWorldUnit>5</DefaultPixelsPerWorldUnit>
 	</App>
 
 	<RFID>
