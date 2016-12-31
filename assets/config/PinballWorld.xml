@@ -64,7 +64,7 @@
 	
 <!-- 3d	-->
 	<3d>
-		<Enable>1</Enable>
+		<Enable>0</Enable>
 		<BackfaceCull>0</BackfaceCull>
 		<TableDepth>2</TableDepth>
 		<ZSkew>.5</ZSkew>

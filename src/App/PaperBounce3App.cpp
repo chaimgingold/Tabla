@@ -917,6 +917,8 @@ void PaperBounce3App::keyDown( KeyEvent event )
 	// meta chars
 	if ( event.isAltDown() )
 	{
+		bool caught=true;
+		
 		switch ( event.getCode() )
 		{
 			case KeyEvent::KEY_x:
@@ -930,20 +932,23 @@ void PaperBounce3App::keyDown( KeyEvent event )
 				break;
 
 			case KeyEvent::KEY_TAB:
-				handled=true;
 				setupNextValidCaptureProfile();
 				break;
 				
 			case KeyEvent::KEY_c:
 				mDrawContours = !mDrawContours;
-				handled=true;
 				break;
 
 			case KeyEvent::KEY_t:
 				mDrawPipeline = !mDrawPipeline;
-				handled=true;
+				break;
+				
+			default:
+				caught=false;
 				break;
 		}
+		
+		if (caught) handled=true;
 	}
 	
 	// handle char

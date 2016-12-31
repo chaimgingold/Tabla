@@ -456,29 +456,31 @@ void PinballWorld::beginDraw3d() const
 		gl::clear(GL_DEPTH_BUFFER_BIT);
 
 		// punch out holes where paper is at table floor, and tabletops for holes inside of that
-		
 		std::function<void(const Contour& c)> recurseTree;
 		
 		recurseTree = [&]( const Contour& c ) -> void
 		{
-			// draw me
-			const bool punchOut = !c.mIsHole;
-			
-			if (punchOut) {
-				// if punching out, go in; otherwise we stay at 0 (and fill)
-				gl::pushModelView();
-				gl::translate(vec3(0,0,m3dTableDepth));				
-				if (kDebugVizDepth) gl::color(1,1,1);
-			}
-			else if (kDebugVizDepth) gl::color(.5,.5,.5);
-			
-			gl::drawSolid(c.mPolyLine);
-			
-			if (punchOut) gl::popModelView();
-			
-			// childers
-			for( int childIndex : c.mChild ) {
-				recurseTree(mVisionContours[childIndex]);
+			if ( !shouldContourBeAPart(c) )
+			{
+				// draw me
+				const bool punchOut = !c.mIsHole;
+				
+				if (punchOut) {
+					// if punching out, go in; otherwise we stay at 0 (and fill)
+					gl::pushModelView();
+					gl::translate(vec3(0,0,m3dTableDepth));				
+					if (kDebugVizDepth) gl::color(1,1,1);
+				}
+				else if (kDebugVizDepth) gl::color(.5,.5,.5);
+				
+				gl::drawSolid(c.mPolyLine);
+				
+				if (punchOut) gl::popModelView();
+				
+				// childers
+				for( int childIndex : c.mChild ) {
+					recurseTree(mVisionContours[childIndex]);
+				}
 			}
 		};
 		
@@ -582,37 +584,64 @@ void PinballWorld::draw3d( DrawType drawType )
 	// 3d part sides
 	for( const auto &p : mParts )
 	{
-		gl::draw( get3dMeshForPoly(p->getCollisionPoly(),0.f,m3dTableDepth) );
+		PolyLine2 poly = p->getCollisionPoly();
+		
+		if (poly.size()>0) {
+			gl::draw( get3dMeshForPoly(poly,0.f,m3dTableDepth) );
+		}
 	}
+
+	
+//	gl::enableDepthWrite(false);
+	
+	// parts
+	for( const auto &p : mParts )
+	{
+		float z = p->getZDepth();
+		bool hasZ = z!=0.f;
+		
+		if (hasZ) {
+			gl::pushModelView();
+			gl::translate(vec3(0,0,z));				
+		}
+		
+		p->draw();
+		
+		if (hasZ) gl::popModelView();
+	}
+
+	// 2d stuff at table level (slap it on top)
+	// (will all draw at z=0)	
+	BallWorld::draw(drawType);
+
+//	gl::enableDepthWrite(true);
 
 	// done with 3d
 	endDraw3d();
-
-	// 2d stuff at table level (slap it on top)
-	drawParts();
-	BallWorld::draw(drawType);
 }
 
 void PinballWorld::drawAdjSpaceRays() const
 {
 	for( auto &p : mParts )
 	{
-		const AdjSpace space = getAdjacentSpace(p->mLoc,mVisionContours);
+		vec2 loc = p->getAdjSpaceOrigin();
+		
+		const AdjSpace space = getAdjacentSpace(loc,mVisionContours);
 		
 		gl::color(1,0,0);
 		gl::drawLine(
-			p->mLoc + getRightVec() *  space.mWidthRight,
-			p->mLoc + getRightVec() * (space.mWidthRight + space.mRight) );
+			loc + getRightVec() *  space.mWidthRight,
+			loc + getRightVec() * (space.mWidthRight + space.mRight) );
 
 		gl::color(0,1,0);
 		gl::drawLine(
-			p->mLoc + getLeftVec()  *  space.mWidthLeft,
-			p->mLoc + getLeftVec()  * (space.mWidthLeft + space.mLeft) );
+			loc + getLeftVec()  *  space.mWidthLeft,
+			loc + getLeftVec()  * (space.mWidthLeft + space.mLeft) );
 
 		gl::color(0,0,1);
 		gl::drawLine(
-			p->mLoc + getLeftVec ()  * space.mWidthLeft,
-			p->mLoc + getRightVec()  * space.mWidthRight );
+			loc + getLeftVec ()  * space.mWidthLeft,
+			loc + getRightVec()  * space.mWidthRight );
 	}
 }
 
@@ -634,6 +663,15 @@ void PinballWorld::keyDown( KeyEvent event )
 			j->second();
 		}
 	}
+}
+
+void PinballWorld::mouseClick( vec2 loc )
+{
+	PartRef part( new RolloverTarget( *this, loc, 3.f ) );
+	
+	part->setShouldAlwaysPersist(true);
+	
+	mParts.push_back(part);
 }
 
 void PinballWorld::drawParts() const
@@ -830,15 +868,13 @@ PinballWorld::mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newPa
 {
 	PartVec parts = newParts;
 	
+	// match old parts to new ones
 	for( PartRef &p : parts )
 	{
 		// does it match an old part?
 		for( const PartRef& old : oldParts )
 		{
-			if ( old->mType == p->mType &&
-				 distance( old->mContourLoc, p->mContourLoc ) < mPartTrackLocMaxDist &&
-				 fabs( old->mContourRadius - p->mContourRadius ) < mPartTrackRadiusMaxDist
-				)
+			if ( !old->getShouldAlwaysPersist() && p->getShouldMergeWithOldPart(old) )
 			{
 				// matched.
 				bool replace=true;
@@ -851,6 +887,12 @@ PinballWorld::mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newPa
 				if (replace) p = old;
 			}
 		}
+	}
+	
+	// carry forward any old parts that should be
+	for( const PartRef &p : oldParts )
+	{
+		if (p->getShouldAlwaysPersist()) parts.push_back(p);
 	}
 	
 	return parts;

@@ -34,7 +34,9 @@ enum class PartType
 {
 	FlipperLeft,
 	FlipperRight,
-	Bumper
+	Bumper,
+	RolloverTargetOff,
+	RolloverTargetOn
 };
 
 inline int flipperTypeToIndex( PartType t )
@@ -45,37 +47,55 @@ inline int flipperTypeToIndex( PartType t )
 	return -1;
 }
 
+class Part;
+typedef std::shared_ptr<Part> PartRef;
+typedef vector<PartRef> PartVec;
+
 class Part
 {
 public:
 
-	Part( PinballWorld& world ) : mWorld(world) {}
+	Part( PinballWorld& world, PartType type ) : mWorld(world), mType(type) {}
 	
-	virtual void draw();
-	virtual void tick();
+	virtual void draw(){}
+	virtual void tick(){}
 	
 	bool isFlipper() const { return mType==PartType::FlipperLeft || mType==PartType::FlipperRight; }
 	
 	virtual void onBallCollide( Ball& ) {}
-	
-	PartType mType;
-	vec2  mLoc;
-	float mRadius=0.f;
-	
+		
 	virtual PolyLine2 getCollisionPoly() const { return PolyLine2(); }
 	// we could save some cpu by having a get/set and caching it internally, but who cares right now
 	
-	// contour origin info (for inter-frame coherency)
-	// (when we do composite parts--multiple bumpers combined into one, we'll want to make this into a vector with a particular ordering
-	// for easy comparisons)
-	// might be most logical to just store the whole Contour, so a vector of Contours we are based on.
+	virtual vec2 getAdjSpaceOrigin() const { return mContourLoc; }
+	
+	PinballWorld& getWorld() const { return mWorld; }
+	PartType getType() const { return mType; }
+	
+	float getZDepth() const { return mZDepth; }
+	void  setZDepth( float d ) { mZDepth=d; }
+	
+	// inter-frame coherency + persistence
+	bool getShouldAlwaysPersist() const { return mShouldAlwaysPersist; }
+	void setShouldAlwaysPersist( bool v ) { mShouldAlwaysPersist=v; }
+	bool getShouldMergeWithOldPart( const PartRef oldPart ) const;
+	
 	vec2  mContourLoc;
 	float mContourRadius=0.f;
+		// contour origin info
+		// (when we do composite parts--multiple bumpers combined into one, we'll want to make this into a vector with a particular ordering
+		// for easy comparisons)
+		// might be most logical to just store the whole Contour, so a vector of Contours we are based on.
+
+protected:
+	void setType( PartType t ) { mType=t; }
 	
+private:
+	PartType mType;
 	PinballWorld& mWorld;
+	bool mShouldAlwaysPersist=false;
+	float mZDepth=0.f; // +z means it is going deeper, away from the viewer
 };
-typedef std::shared_ptr<Part> PartRef;
-typedef vector<PartRef> PartVec;
 
 
 class Flipper : public Part
@@ -92,6 +112,9 @@ public:
 	
 private:
 	vec2 getAccelForBall( vec2 ) const;
+
+	vec2  mLoc;
+	float mRadius=0.f;
 	
 	vec2  getTipLoc() const; // center of capsule, second point
 	float mFlipperLength=0.f;
@@ -114,10 +137,35 @@ public:
 	virtual PolyLine2 getCollisionPoly() const override;
 	
 	float getCollisionFade() const;
+	
+private:
+	vec2  mLoc;
+	float mRadius=0.f;
+
 	float mCollideTime = -10.f;
 
 	ColorA mColor = ColorA(1,1,1,1);
 	
+};
+
+class RolloverTarget : public Part
+{
+public:
+	RolloverTarget( PinballWorld& world, vec2 pin, float radius );
+
+	virtual void draw() override;
+	virtual void tick() override;
+	
+private:
+	void setIsLit( bool );
+
+	bool  mIsLit=false; // discrete goal
+	float mLight=0.f; // continues, current anim state.
+	
+	float mRadius;
+	vec2  mLoc;
+
+	ColorA mColorOff, mColorOn;
 };
 
 } // namespace

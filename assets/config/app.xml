@@ -23,7 +23,7 @@
 		
 		<KeyboardStringTimeout>.2</KeyboardStringTimeout>
 		
-		<DefaultPixelsPerWorldUnit>5</DefaultPixelsPerWorldUnit>
+		<DefaultPixelsPerWorldUnit>8</DefaultPixelsPerWorldUnit>
 	</App>
 
 	<RFID>

@@ -36,6 +36,7 @@ public:
 	void worldBoundsPolyDidChange() override;
 
 	void keyDown( KeyEvent ) override;
+	void mouseClick( vec2 ) override;
 
 public:
 
@@ -44,7 +45,9 @@ public:
 	vec2 getLeftVec() const { return vec2(cross(vec3(mUpVec,0),vec3(0,0,1))); }
 	vec2 getRightVec() const { return -getLeftVec(); }
 	vec2 getGravityVec() const { return -mUpVec; }
-
+	
+	float getTableDepth() const { return m3dTableDepth; }
+	
 	// geometry
 	PolyLine2 getCirclePoly ( vec2 c, float r ) const;
 	PolyLine2 getCapsulePoly( vec2 c[2], float r[2] ) const;
@@ -60,6 +63,10 @@ public:
 	float mFlipperMaxLength=10.f;
 	float mFlipperRadiusToLengthScale=5.f;	
 	ColorA mFlipperColor = ColorA(0,1,1,1);
+
+	// part params for inter-frame coherence
+	float mPartTrackLocMaxDist = 1.f;
+	float mPartTrackRadiusMaxDist = .5f;	
 	
 	// debug params
 	bool mDebugDrawFlipperAccelHairs=false;
@@ -98,10 +105,6 @@ private:
 	bool  m3dBackfaceCull= false;
 	float m3dTableDepth  = 10.f;
 	float m3dZSkew       = .5f;
-	
-	// more params, just for vision
-	float mPartTrackLocMaxDist = 1.f;
-	float mPartTrackRadiusMaxDist = .5f;
 	
 	// world layout
 	vec2  toPlayfieldSpace  ( vec2 p ) const { return vec2( dot(p,getRightVec()), dot(p,getUpVec()) ); }
