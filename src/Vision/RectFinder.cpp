@@ -14,7 +14,8 @@ void RectFinder::Params::set( XmlTree xml )
 {
 	getXml(xml,"AllowSubset",mAllowSubset);
 	getXml(xml,"AllowSuperset",mAllowSuperset);
-
+	getXml(xml,"AllowFragment",mAllowFragment);
+	
 	if ( getXml(xml,"InteriorAngleMaxDelta",mInteriorAngleMaxDelta) ) {
 		mInteriorAngleMaxDelta = toRadians(mInteriorAngleMaxDelta);
 		
@@ -33,27 +34,93 @@ void RectFinder::Params::set( XmlTree xml )
 	getXml(xml,"MinRectArea",mMinRectArea);
 }
 
-bool RectFinder::getRectFromPoly( const PolyLine2& poly, PolyLine2& rect, CandidateVec* oCandidates ) const
+bool RectFinder::getRectFromPoly( const PolyLine2& in, PolyLine2& out, CandidateVec* oCandidates ) const
+{
+	if ( getRectFromPoly_Intrinsic(in, out, oCandidates) ) return true;
+	
+	// convex hull strategy
+	if ( mParams.mAllowSuperset )
+	{
+		if ( getRectFromPoly_Superset(in, out,oCandidates) ) return true;
+	}
+	
+	// theorize quads strategy
+	if ( mParams.mAllowSubset )
+	{
+		if ( getRectFromPoly_Subset(in, out,oCandidates) ) return true;
+	}
+	
+	// fragment
+	if ( mParams.mAllowFragment )
+	{
+		if ( getRectFromPoly_Fragment( in, out, oCandidates ) ) {
+			return true;
+		}
+	}
+	
+	// fail
+	return false;		
+}
+
+bool RectFinder::getRectFromPoly_Intrinsic( const PolyLine2& poly, PolyLine2& rect, CandidateVec* oCandidates ) const
+{
+	// intrinsically ok?
+	if ( isOK(poly) )
+	{
+		Candidate c;
+		
+		for( int i=0; i<4; ++i ) c.mV[i] = poly.getPoints()[i];
+		
+		c.mStrategy = Candidate::Strategy::Intrinsic;
+		c.mArea = c.getAsPoly().calcArea();
+		c.mSourcePolyArea = poly.calcArea();
+		c.mDiffArea=0.f;
+		c.mPerimScore=1.f;
+		
+		rect = poly;
+		
+		if (oCandidates) oCandidates->push_back(c);
+		return true;
+	}	
+	
+	return false;
+}
+
+bool RectFinder::getRectFromPoly_Subset  ( const PolyLine2& in, PolyLine2& out, CandidateVec* candidates ) const
+{
+	// TODO: add things we try to candidates
+	if ( trySubset(in,out) ) return true;
+	else return false;
+}
+
+bool RectFinder::getRectFromPoly_Superset( const PolyLine2& in, PolyLine2& out, CandidateVec* candidates ) const
+{
+	PolyLine2 convexHull = getConvexHull(in);
+	
+	if (candidates)
+	{
+		// TODO: show all the diffs, other params...
+		Candidate c;
+		c.mStrategy = Candidate::Strategy::Superset;
+		for( int i=0; i<4; ++i ) c.mV[i] = in.getPoints()[i];
+		
+		candidates->push_back(c);
+	}
+	
+	if ( checkIsConvexHullReasonable(convexHull,in) )
+	{
+		out=convexHull;
+		return true;
+	}
+	else return false;
+}
+	
+bool RectFinder::getRectFromPoly_Fragment( const PolyLine2& poly, PolyLine2& rect, CandidateVec* oCandidates ) const
 {
 	CandidateVec cand;
 
 	const float sourcePolyArea = poly.calcArea();
 	
-	if ( isOK(poly) )
-	{
-		// intrinsically ok
-		Candidate c;
-		
-		for( int i=0; i<4; ++i ) c.mV[i] = poly.getPoints()[i];
-		
-		c.mArea = c.getAsPoly().calcArea();
-		c.mSourcePolyArea = sourcePolyArea;
-		c.mDiffArea=0.f;
-		c.mPerimScore=1.f;
-		
-		cand.push_back(c);
-	}
-	else
 	{
 		cand = getFragmentCandidates(poly);
 		
@@ -74,6 +141,8 @@ bool RectFinder::getRectFromPoly( const PolyLine2& poly, PolyLine2& rect, Candid
 	// calc sizes + filter
 	for( auto &c : cand )
 	{
+		c.mStrategy = Candidate::Strategy::Fragment;
+		
 		c.mSize = vec2(
 			distance(c.mV[0], c.mV[1]),
 			distance(c.mV[1], c.mV[2])
@@ -107,7 +176,9 @@ bool RectFinder::getRectFromPoly( const PolyLine2& poly, PolyLine2& rect, Candid
 	// 
 
 	// return internal scores?
-	if (oCandidates) *oCandidates=cand;
+	if (oCandidates) {
+		oCandidates->insert(oCandidates->begin(), cand.begin(), cand.end());
+	}
 	
 	// return result
 	if (winner==-1)
@@ -135,37 +206,6 @@ bool RectFinder::isOK( const PolyLine2& p ) const
 		return true;
 	}
 	else return false;	
-}
-
-bool RectFinder::getRectFromPoly_old( const PolyLine2& in, PolyLine2& out ) const
-{
-	// was it good to begin with?
-	if ( isOK(in) )
-	{
-		out = in;
-		return true;
-	}
-	
-	// convex hull strategy
-	if (mParams.mAllowSuperset)
-	{
-		PolyLine2 convexHull = getConvexHull(in);
-		
-		if ( checkIsConvexHullReasonable(convexHull,in) )
-		{
-			out=convexHull;
-			return true;
-		}
-	}
-	
-	// theorize quads strategy
-	if (mParams.mAllowSubset)
-	{
-		if ( trySubset(in,out) ) return true;
-	}
-	
-	// fail
-	return false;
 }
 
 float RectFinder::getPolyDiffArea( PolyLine2 a, PolyLine2 b, std::vector<PolyLine2>* diff )
@@ -342,6 +382,8 @@ RectFinder::getFragmentCandidates( const PolyLine2& poly ) const
 	// for a first edge i we need to find the combined range along i for i and j
 	// then we need to project k,l onto that and ensure they are within that range.
 	// easy. 
+	// 
+	// auto isBracketed = []() {...}
 	
 //	const float kDotEps = 1.f - cos(mParams.mInteriorAngleMaxDelta);
 	// is this right??? 
@@ -392,6 +434,10 @@ RectFinder::getFragmentCandidates( const PolyLine2& poly ) const
 
 	auto isColinear = [&]( int i, int j ) -> bool
 	{
+		// TODO: replace with a heuristic that checks if they are the RIGHT distance
+		// apart... >= mMinRectWidth
+		// Rename isValidWidth
+		
 		const vec2 p = perp(norms[i]);
 		
 		float d = max(
@@ -405,7 +451,6 @@ RectFinder::getFragmentCandidates( const PolyLine2& poly ) const
 		// we can assume isParallel(i,j) -> true 
 //		return false;
 	};
-	
 	
 	auto getCorner = [&]( int i, int j ) -> vec2
 	{
