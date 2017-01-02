@@ -227,6 +227,8 @@ void PongWorld::serve()
 	
 	ball.setVel( Rand::randVec2() * ball.mRadius/2.f ) ;
 	
+	ball.mHistory.set_capacity(getRibbonMaxLength());
+	
 	getBalls().push_back( ball ) ;
 }
 

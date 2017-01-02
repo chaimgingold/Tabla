@@ -14,7 +14,17 @@
 		<BallContourCoeffOfRestitution>.7</BallContourCoeffOfRestitution>
 		<BallContourFrictionlessCoeff>1</BallContourFrictionlessCoeff>
 			<!-- We	might want to make this a property of each ball, or of each ball<->contour interaction -->
-			
+
+		<Ribbon>
+			<Enabled>1</Enabled>
+			<MaxLength>50</MaxLength>
+			<SampleRate>1</SampleRate>
+			<RadiusScale>.4</RadiusScale>
+			<RadiusExp>.5</RadiusExp>
+			<AlphaScale>.5</AlphaScale>
+			<AlphaExp>.5</AlphaExp>
+		</Ribbon>
+				
 	</BallWorld>
 
 	<!-- cm -->

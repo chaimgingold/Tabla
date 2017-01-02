@@ -34,6 +34,125 @@ void BallWorld::setParams( XmlTree xml )
 	getXml(xml,"BallContourImpactNormalVelImpulse",mBallContourImpactNormalVelImpulse);
 	getXml(xml,"BallContourCoeffOfRestitution",mBallContourCoeffOfRestitution);
 	getXml(xml,"BallContourFrictionlessCoeff",mBallContourFrictionlessCoeff);
+
+	getXml(xml,"Ribbon/Enabled",mRibbonEnabled);
+	getXml(xml,"Ribbon/MaxLength",mRibbonMaxLength);
+	getXml(xml,"Ribbon/SampleRate",mRibbonSampleRate);
+	getXml(xml,"Ribbon/RadiusScale",mRibbonRadiusScale);
+	getXml(xml,"Ribbon/RadiusExp",mRibbonRadiusExp);
+	getXml(xml,"Ribbon/AlphaScale",mRibbonAlphaScale);
+	getXml(xml,"Ribbon/AlphaExp",mRibbonAlphaExp);
+	
+	updateBallsWithRibbonParams();
+}
+
+void BallWorld::updateBallsWithRibbonParams()
+{
+	const int maxlen = getRibbonMaxLength();
+		
+	for( auto &b : mBalls )
+	{
+		int size = b.mHistory.max_size();
+		
+		if ( size > maxlen ) {
+			b.mHistory.resize(maxlen);
+		} else if ( size < maxlen ) {
+			b.mHistory.set_capacity(maxlen);
+		}
+	}
+}
+
+void BallWorld::accumulateBallHistory()
+{
+	if ( ci::app::getElapsedFrames() % mRibbonSampleRate==0 )
+	{
+		for( auto &b : mBalls )
+		{
+			if ( b.mHistory.max_size() > 0 )
+			{
+				if ( b.mHistory.full() && !b.mHistory.empty() ) b.mHistory.pop_front();
+				
+				b.mHistory.push_back( b.mLoc );
+			}
+		}
+	}
+}
+
+TriMeshRef BallWorld::getTriMeshForRibbons() const
+{
+	TriMesh mesh( TriMesh::Format().positions(2).colors(4) );
+	
+	auto getRadius = [this]( const Ball& b, int i ) -> float
+	{
+		float f = (float)i / (float)(b.mHistory.size()-1);
+		f = powf(f,mRibbonRadiusExp);
+		return b.mRadius * mRibbonRadiusScale * f;
+	};
+
+	auto getColor = [this]( const Ball& b, int i ) -> ColorA
+	{
+		float f = (float)i / (float)(b.mHistory.size()-1);
+		f = powf(f,mRibbonAlphaExp);
+		
+		ColorA c = b.mColor;
+		c.a *= f * mRibbonAlphaScale;
+		return c;
+		//return ColorA(1,1,1,.8f);
+	};
+	
+	auto add = [&]( const Ball& ball, int a, int b, int v )
+	{
+		const auto &pts = ball.mHistory; 
+
+		ColorA color = getColor(ball,v);
+		
+		vec2 d = normalize( pts[b] - pts[a] );
+		vec2 p = perp(d) * getRadius(ball,v);
+		
+		mesh.appendPosition(pts[v] + p);
+		mesh.appendPosition(pts[v] - p);
+		mesh.appendColorRgba(color);
+		mesh.appendColorRgba(color);
+	};
+	
+	auto pushIndices = [&mesh]()
+	{
+		/*  0-2
+			|/|  -->>
+			1-3  */
+		uint32_t i = mesh.getNumVertices()-4; 
+		uint32_t ind[6] = {
+			i+0, i+1, i+2,
+			i+1, i+3, i+2
+		};
+		mesh.appendIndices(ind,6);
+	};
+	
+	for( const auto &b : mBalls )
+	{
+		if ( b.mHistory.size() >= 2 )
+		{
+			// front
+			add(b,0,1,0);
+			
+			// middle
+			for( int i=1; i<b.mHistory.size()-1; ++i )
+			{
+				add(b,i-1,i+1,i);
+				pushIndices();
+			}
+			
+			// back
+			{
+				int n = b.mHistory.size()-1;
+
+				add(b,n-1,n,n);
+				pushIndices();
+			}		
+		}
+	}
+	
+	return std::make_shared<TriMesh>(mesh);
 }
 
 TriMeshRef BallWorld::getTriMeshForBalls() const
@@ -111,6 +230,7 @@ TriMeshRef BallWorld::getTriMeshForBalls() const
 void BallWorld::prepareToDraw()
 {
 	mBallMesh = getTriMeshForBalls();
+	mRibbonMesh = getTriMeshForRibbons();
 }
 
 void BallWorld::drawImmediate( bool lowPoly ) const
@@ -159,6 +279,8 @@ void BallWorld::draw( DrawType drawType )
 {
 	if (1)
 	{
+		if (mRibbonMesh) gl::draw(*mRibbonMesh);
+		
 		// draw using graphics we setup in prepareToDraw().
 		if (mBallMesh && mCircleShader)
 		{
@@ -168,9 +290,12 @@ void BallWorld::draw( DrawType drawType )
 	}
 	else
 	{
+		auto ribbons = getTriMeshForRibbons();
+		if (ribbons) gl::draw(*ribbons);
+		
 		// draw immediate mode
 		drawImmediate( drawType==DrawType::UIPipelineThumb );
-	}
+	}	
 }
 
 void BallWorld::gameWillLoad()
@@ -282,6 +407,9 @@ void BallWorld::updatePhysics()
 	{
 		b.mSquash *= .7f ;
 	}
+	
+	// history
+	if (mRibbonEnabled) accumulateBallHistory();
 }
 
 void BallWorld::resolveBallContourCollisions()
@@ -356,6 +484,8 @@ Ball& BallWorld::newRandomBall ( vec2 loc )
 //	ball.setVel( Rand::randVec2() * mBallDefaultRadius/2.f * (float)mNumIntegrationSteps ) ;
 	// ideally we use mAccel here, but not sure how to get that to have the same effect,
 	// so just sticking with this for now.
+	
+	ball.mHistory.set_capacity(getRibbonMaxLength());
 	
 	mBalls.push_back( ball ) ;
 	

@@ -6,6 +6,16 @@
 	<BallContourImpactNormalVelImpulse>.1</BallContourImpactNormalVelImpulse>
 	<BallDefaultColor>			C62D41 </BallDefaultColor>
 
+	<Ribbon>
+		<Enabled>1</Enabled>
+		<MaxLength>50</MaxLength>
+		<SampleRate>1</SampleRate>
+		<RadiusScale>.9</RadiusScale>
+		<RadiusExp>.5</RadiusExp>
+		<AlphaScale>.5</AlphaScale>
+		<AlphaExp>.5</AlphaExp>
+	</Ribbon>
+	
 	<!-- cm -->
 	<Vision>
 		<Contours>

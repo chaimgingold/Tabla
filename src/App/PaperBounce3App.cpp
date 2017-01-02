@@ -923,7 +923,7 @@ void PaperBounce3App::keyDown( KeyEvent event )
 		{
 			case KeyEvent::KEY_x:
 				if (mGameWorld) {
-					openFile( getXmlConfigPathForGame( mGameWorld->getSystemName() ) );
+					openFile( hotloadableAssetPath( fs::path("config") / "app.xml" ) );
 				}
 				break;
 			
@@ -961,7 +961,7 @@ void PaperBounce3App::keyDown( KeyEvent event )
 				break ;
 
 			case KeyEvent::KEY_x:
-				openFile( hotloadableAssetPath( fs::path("config") / "app.xml" ) );
+				openFile( getXmlConfigPathForGame( mGameWorld->getSystemName() ) );
 				break ;
 			
 			case KeyEvent::KEY_UP:
