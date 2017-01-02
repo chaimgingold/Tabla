@@ -49,6 +49,7 @@
 	
 <!-- Vision	-->
 	<PartMaxContourRadius>5</PartMaxContourRadius>
+	<HolePartMaxContourRadius>2</HolePartMaxContourRadius>
 	<FlipperDistToEdge>4</FlipperDistToEdge>
 	
 	<PartTrackRadiusMaxDist>.5</PartTrackRadiusMaxDist>
@@ -66,7 +67,9 @@
 	<BumperOuterColor>FF0000</BumperOuterColor>
 	<BumperInnerColor>FFCC00</BumperInnerColor>
 	
-	
+	<RolloverTriggerRadius>1</RolloverTriggerRadius>
+	<RolloverTriggerMinWallDist>1</RolloverTriggerMinWallDist>
+
 	<FlipperMinLength>1</FlipperMinLength>
 	<FlipperMaxLength>10</FlipperMaxLength>
 	<FlipperRadiusToLengthScale>6</FlipperRadiusToLengthScale>

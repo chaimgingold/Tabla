@@ -75,6 +75,8 @@ public:
 	float time() { return ci::app::getElapsedSeconds(); } // use this time so we can locally modulate it (eg slow down, pause, etc...)
 	float getFlipperState( int side ) const { assert(side==0||side==1); return mFlipperState[side]; }
 	float getFlipperAngularVel( int side ) const; // TODO: make radians per second
+
+	const PartVec& getParts() const { return mParts; }
 	
 private:
 	
@@ -90,12 +92,16 @@ private:
 	vec2  mUpVec = vec2(0,1);
 	float mGravity=0.1f;
 	float mPartMaxContourRadius = 5.f; // contour radius lt => part
+	float mHolePartMaxContourRadius = 2.f;
 	float mFlipperDistToEdge = 10.f; // how close to the edge does a flipper appear?
 	float mBallReclaimAreaHeight = 10.f;
 
 	int mCircleMinVerts=8;
 	int mCircleMaxVerts=100;
 	float mCircleVertsPerPerimCm=1.f;
+	
+	float mRolloverTriggerRadius=1.f;
+	float mRolloverTriggerMinWallDist=1.f;
 	
 	bool mDebugDrawAdjSpaceRays=false;
 	bool mDebugDrawGeneratedContours=false;
@@ -132,6 +138,9 @@ private:
 	
 	PartRef findPartForContour( const Contour& ) const;
 	PartRef findPartForContour( int contourIndex ) const;
+	
+	void rolloverTest();
+	bool isValidRolloverLoc( vec2 loc, float r, const PartVec& ) const;
 	
 	// are flippers depressed
 	bool  mIsFlipperDown[2]; // left, right

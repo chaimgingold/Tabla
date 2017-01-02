@@ -125,7 +125,7 @@ public:
 	int getNumIntegrationSteps() const { return mNumIntegrationSteps; }
 	
 protected:
-	void setContours( const ContourVec& contours ) { mContours = contours; }
+	void setContours( const ContourVec& contours, ContourVec::Filter filter=0 ) { mContours = contours; mContourFilter=filter; }
 	
 	int getBallIndex( const Ball& b ) const;
 	
@@ -185,6 +185,7 @@ private:
 	void resolveBallCollisions() ;
 
 	ContourVector		mContours;
+	ContourVector::Filter mContourFilter;
 	vector<Ball>		mBalls ;
 
 	// drawing

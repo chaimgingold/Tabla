@@ -99,6 +99,7 @@ void PinballWorld::setParams( XmlTree xml )
 	getXml(xml, "FlipperDistToEdge", mFlipperDistToEdge );
 	
 	getXml(xml, "PartMaxContourRadius", mPartMaxContourRadius );
+	getXml(xml, "HolePartMaxContourRadius",mHolePartMaxContourRadius);
 	getXml(xml, "Gravity", mGravity );
 	getXml(xml, "BallReclaimAreaHeight", mBallReclaimAreaHeight );
 	
@@ -113,6 +114,9 @@ void PinballWorld::setParams( XmlTree xml )
 	getXml(xml, "FlipperMaxLength",mFlipperMaxLength);
 	getXml(xml, "FlipperRadiusToLengthScale",mFlipperRadiusToLengthScale);
 	getXml(xml, "FlipperColor",mFlipperColor);
+
+	getXml(xml,"RolloverTriggerRadius",mRolloverTriggerRadius);
+	getXml(xml,"RolloverTriggerMinWallDist",mRolloverTriggerMinWallDist);
 	
 	getXml(xml, "CircleMinVerts", mCircleMinVerts );
 	getXml(xml, "CircleMaxVerts", mCircleMaxVerts );
@@ -350,6 +354,8 @@ void PinballWorld::draw( DrawType drawType )
 
 
 	// --- debugging/testing ---
+
+	if (0) rolloverTest();
 	
 	// world orientation debug info
 	if (0)
@@ -530,9 +536,10 @@ TriMesh PinballWorld::get3dMeshForPoly( const PolyLine2& poly, float znear, floa
 	std::function<Colorf(vec3)> posToColor = [&]( vec3 v ) -> Colorf
 	{
 		return lerp(
-			Colorf(0,1,0),
-			Colorf(1,0,0),
-//			Colorf(1,1,1),
+//			Colorf(0,1,0),
+//			Colorf(1,0,0),
+			Colorf(1,1,1),
+			Colorf(0,0,0),
 //			Colorf(.5,.5,.5),
 			constrain( (v.z-znear)/(zfar-znear), 0.f, 1.f ) );
 			// near -> far (from viewer)
@@ -667,7 +674,7 @@ void PinballWorld::keyDown( KeyEvent event )
 
 void PinballWorld::mouseClick( vec2 loc )
 {
-	PartRef part( new RolloverTarget( *this, loc, 3.f ) );
+	PartRef part( new RolloverTarget( *this, loc, mRolloverTriggerRadius ) );
 	
 	part->setShouldAlwaysPersist(true);
 	
@@ -688,7 +695,7 @@ Rectf PinballWorld::getPlayfieldBoundingBox( const ContourVec& cs ) const
 	
 	for( const auto& c : cs )
 	{
-		if (c.mTreeDepth==0)
+		if (c.mTreeDepth==0 && !shouldContourBeAPart(c))
 		{
 			pts.insert(pts.end(),c.mPolyLine.getPoints().begin(), c.mPolyLine.end());
 		}
@@ -733,8 +740,16 @@ void PinballWorld::updateBallWorldContours()
 
 	getContoursFromParts( mParts, physicsContours, mContoursToParts );
 	
+	// which contours to use?
+	// (we could move this computation into updateVision(), but its cheap and convenient to do it here)
+	ContourVec::Mask mask(physicsContours.size(),true); // all true...
+	for( int i=0; i<mVisionContours.size(); ++i )
+	{
+		mask[i] = !shouldContourBeAPart(physicsContours[i]); // ...except vision contours that became parts
+	}
+	
 	// tell ball world
-	BallWorld::setContours(physicsContours);
+	BallWorld::setContours(physicsContours,ContourVec::getMaskFilter(mask));
 }
 
 void PinballWorld::updateVision( const Vision::Output& visionOut, Pipeline& p )
@@ -752,7 +767,12 @@ void PinballWorld::updateVision( const Vision::Output& visionOut, Pipeline& p )
 
 bool PinballWorld::shouldContourBeAPart( const Contour& c ) const
 {
-	return c.mTreeDepth>0 && c.mIsHole && c.mRadius < mPartMaxContourRadius;
+	if ( c.mIsHole ) {
+		return c.mTreeDepth>0 && /*c.mIsHole && */ c.mRadius < mPartMaxContourRadius;
+	}
+	else {
+		return c.mTreeDepth==0 && c.mRadius < mHolePartMaxContourRadius;
+	}
 }
 
 AdjSpace
@@ -809,7 +829,9 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 	
 	for( const auto &c : contours )
 	{
-		if ( shouldContourBeAPart(c) )
+		if ( !shouldContourBeAPart(c) ) continue;
+
+		if ( c.mIsHole )
 		{
 			// flipper orientation
 			AdjSpace adjSpace = getAdjacentSpace(&c,c.mCenter,contours);
@@ -821,11 +843,14 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 				parts.push_back( PartRef(p) );
 			};
 			
-			if      (adjSpace.mRight < adjSpace.mLeft  && adjSpace.mRight < mFlipperDistToEdge)
+			const bool closeToRight = adjSpace.mRight < mFlipperDistToEdge;
+			const bool closeToLeft  = adjSpace.mLeft  < mFlipperDistToEdge;
+			
+			if ( closeToRight && !closeToLeft )
 			{
 				add( new Flipper(*this, c.mCenter, c.mRadius, PartType::FlipperRight) );
 			}
-			else if (adjSpace.mLeft  < adjSpace.mRight && adjSpace.mLeft  < mFlipperDistToEdge)
+			else if ( closeToLeft && !closeToRight )
 			{
 				
 				add( new Flipper(*this, c.mCenter, c.mRadius, PartType::FlipperLeft) );
@@ -850,8 +875,8 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 				// (like a bumper!)
 				// or even a rule that said left is only when a left edge is within x space at left (eg), so very tight proximity rules.
 			}
-		}
-	}
+		} // hole
+	} // for
 	
 	return parts;
 }
@@ -898,7 +923,22 @@ PinballWorld::mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newPa
 	// carry forward any old parts that should be
 	for( const PartRef &p : oldParts )
 	{
-		if (p->getShouldAlwaysPersist()) parts.push_back(p);
+		if (p->getShouldAlwaysPersist())
+		{
+			bool doIt=true;
+			
+			// are we an expired trigger?
+			if ( p->getType()==PartType::RolloverTarget )
+			{
+				auto rt = dynamic_cast<RolloverTarget*>(&(*p));
+				if ( rt && !isValidRolloverLoc( rt->mLoc, rt->mRadius, oldParts ) )
+				{
+//					doIt=false;
+				}
+			}
+			
+			if (doIt) parts.push_back(p);
+		}
 	}
 	
 	return parts;
@@ -918,6 +958,51 @@ void PinballWorld::getContoursFromParts( const PartVec& parts, ContourVec& conto
 			
 			c2p[contours.size()-1] = p;
 		}
+	}
+}
+
+bool PinballWorld::isValidRolloverLoc( vec2 loc, float r, const PartVec& parts ) const
+{
+	// outside?
+	if ( ! mVisionContours.findLeafContourContainingPoint(loc) ) {
+		return false;
+	}
+
+	// too close to edge?
+	float closestContourDist;
+	if ( mVisionContours.findClosestContour(loc,0,&closestContourDist)
+	  && closestContourDist < mRolloverTriggerMinWallDist + r )
+	{
+		return false;
+	}
+	
+	// parts
+	for( const auto &p : parts ) {
+		if ( !p->isValidLocForRolloverTrigger(loc,r) ) return false;
+	}
+	
+	// ok
+	return true;
+}
+
+void PinballWorld::rolloverTest()
+{
+	const Rectf playfieldbb = toPlayfieldBoundingBox(getWorldBoundsPoly());
+	
+	Rand rgen(0);
+	
+	for ( int i=0; i<200; ++i )
+	{
+		vec2 p( rgen.nextFloat(), rgen.nextFloat() );
+		
+		p.x = lerp( playfieldbb.x1, playfieldbb.x2, p.x );
+		p.y = lerp( playfieldbb.y1, playfieldbb.y2, p.y );
+		
+		p = fromPlayfieldSpace(p);
+		float r = mRolloverTriggerRadius;
+		
+		gl::color( isValidRolloverLoc(p, r, mParts) ? Color(0,1,0) : Color(1,0,0) );
+		gl::drawSolidCircle(p, r);
 	}
 }
 
@@ -1022,6 +1107,7 @@ void PinballWorld::addContourToVec( Contour c, ContourVec& contours ) const
 		c.mIsHole = true;
 		c.mTreeDepth = parent->mTreeDepth + 1;
 		c.mIsLeaf = true;
+		c.mIndex = contours.size();
 		parent->mChild.push_back(contours.size()); // have parent point to where we will be
 		contours.push_back(c);
 	}

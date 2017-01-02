@@ -225,7 +225,7 @@ void Bumper::onBallCollide( Ball& ball )
 }
 
 RolloverTarget::RolloverTarget( PinballWorld& world, vec2 pin, float radius )
-	: Part(world,PartType::RolloverTargetOff)
+	: Part(world,PartType::RolloverTarget)
 	, mLoc(pin)
 	, mRadius(radius)
 {
@@ -265,5 +265,5 @@ void RolloverTarget::tick()
 void RolloverTarget::setIsLit( bool v )
 {
 	mIsLit=v;
-	setType( v ? PartType::RolloverTargetOn : PartType::RolloverTargetOff );
+//	setType( v ? PartType::RolloverTargetOn : PartType::RolloverTargetOff );
 }

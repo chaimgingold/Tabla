@@ -11,7 +11,7 @@
 	<BallContourFrictionlessCoeff>1</BallContourFrictionlessCoeff>
 
 	<Ribbon>
-		<Enabled>1</Enabled>
+		<Enabled>0</Enabled>
 		<MaxLength>50</MaxLength>
 		<SampleRate>1</SampleRate>
 		<RadiusScale>.9</RadiusScale>

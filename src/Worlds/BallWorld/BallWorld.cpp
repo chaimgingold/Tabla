@@ -632,7 +632,8 @@ vec2 BallWorld::unlapHoles( vec2 p, float r, ContourKind kind, const Ball* b )
 	float dist ;
 	vec2 x ;
 	
-	const Contour * nearestHole = mContours.findClosestContour( p, &x, &dist, kind ) ;
+	const Contour * nearestHole = mContours.findClosestContour( p, &x, &dist,
+		ContourVec::getAndFilter( ContourVec::getKindFilter(kind), mContourFilter ) ) ;
 	
 	if ( nearestHole && dist < r && !nearestHole->mPolyLine.contains(p) )
 		// ensure we aren't actually in this hole or that would be bad...
@@ -651,7 +652,7 @@ vec2 BallWorld::unlapHoles( vec2 p, float r, ContourKind kind, const Ball* b )
 vec2 BallWorld::resolveCollisionWithContours ( vec2 point, float radius, const Ball* b )
 {
 	// inside a poly?
-	const Contour* in = mContours.findLeafContourContainingPoint(point) ;
+	const Contour* in = mContours.findLeafContourContainingPoint(point,mContourFilter) ;
 	
 	if (in)
 	{
@@ -683,7 +684,10 @@ vec2 BallWorld::resolveCollisionWithContours ( vec2 point, float radius, const B
 		// push us into nearest paper
 		vec2 x ;
 		
-		const Contour* nearest = mContours.findClosestContour( point, &x, 0, ContourKind::NonHoles );
+		const Contour* nearest = mContours.findClosestContour(
+			point, &x, 0,
+			ContourVec::getAndFilter( ContourVec::getKindFilter(ContourKind::NonHoles), mContourFilter )
+		);
 		
 		if ( nearest )
 		{
@@ -698,7 +702,7 @@ vec2 BallWorld::resolveCollisionWithContours ( vec2 point, float radius, const B
 vec2 BallWorld::resolveCollisionWithInverseContours ( vec2 point, float radius, const Ball* b )
 {
 	// inside a poly?
-	const Contour* in = mContours.findLeafContourContainingPoint(point) ;
+	const Contour* in = mContours.findLeafContourContainingPoint(point,mContourFilter) ;
 	
 	// ok, find closest
 	if (in)
@@ -716,7 +720,10 @@ vec2 BallWorld::resolveCollisionWithInverseContours ( vec2 point, float radius, 
 			vec2 x2 ;
 			float x2dist;
 			
-			const Contour* interiorHole = mContours.findClosestContour(point,&x2,&x2dist,ContourKind::Holes);
+			const Contour* interiorHole = mContours.findClosestContour(
+				point,&x2,&x2dist,
+				ContourVec::getAndFilter( ContourVec::getKindFilter(ContourKind::Holes), mContourFilter )
+				);
 			
 			if ( interiorHole )
 			{
@@ -753,7 +760,10 @@ vec2 BallWorld::resolveCollisionWithInverseContours ( vec2 point, float radius, 
 		// make sure we aren't grazing a contour
 		vec2 x;
 		float dist;
-		const Contour * nearest = mContours.findClosestContour( point, &x, &dist, ContourKind::NonHoles ) ;
+		const Contour * nearest = mContours.findClosestContour(
+			point, &x, &dist,
+			ContourVec::getAndFilter( ContourVec::getKindFilter(ContourKind::NonHoles), mContourFilter )
+			);
 		
 		if ( nearest && dist < radius )
 		{

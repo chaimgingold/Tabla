@@ -35,8 +35,7 @@ enum class PartType
 	FlipperLeft,
 	FlipperRight,
 	Bumper,
-	RolloverTargetOff,
-	RolloverTargetOn
+	RolloverTarget
 };
 
 inline int flipperTypeToIndex( PartType t )
@@ -68,6 +67,7 @@ public:
 	// we could save some cpu by having a get/set and caching it internally, but who cares right now
 	
 	virtual vec2 getAdjSpaceOrigin() const { return mContourLoc; }
+	virtual bool isValidLocForRolloverTrigger( vec2 loc, float r ) const { return true; }
 	
 	PinballWorld& getWorld() const { return mWorld; }
 	PartType getType() const { return mType; }
@@ -109,6 +109,10 @@ public:
 	virtual PolyLine2 getCollisionPoly() const override;
 
 	virtual void onBallCollide( Ball& ) override;
+
+	virtual bool isValidLocForRolloverTrigger( vec2 loc, float r ) const override {
+		return distance(loc,mLoc) > r + mFlipperLength;
+	}
 	
 private:
 	vec2 getAccelForBall( vec2 ) const;
@@ -137,6 +141,10 @@ public:
 	virtual PolyLine2 getCollisionPoly() const override;
 	
 	float getCollisionFade() const;
+
+	virtual bool isValidLocForRolloverTrigger( vec2 loc, float r ) const override {
+		return distance(loc,mLoc) > r + mRadius;
+	}
 	
 private:
 	vec2  mLoc;
@@ -155,6 +163,13 @@ public:
 
 	virtual void draw() override;
 	virtual void tick() override;
+
+	virtual bool isValidLocForRolloverTrigger( vec2 loc, float r ) const override {
+		return distance(loc,mLoc) > r + mRadius;
+	}
+
+	float mRadius;
+	vec2  mLoc;
 	
 private:
 	void setIsLit( bool );
@@ -162,9 +177,6 @@ private:
 	bool  mIsLit=false; // discrete goal
 	float mLight=0.f; // continues, current anim state.
 	
-	float mRadius;
-	vec2  mLoc;
-
 	ColorA mColorOff, mColorOn;
 };
 
