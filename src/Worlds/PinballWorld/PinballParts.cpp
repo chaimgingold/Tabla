@@ -18,20 +18,17 @@ using namespace ci::app;
 using namespace std;
 using namespace Pinball;
 
-void Part::draw()
+bool Part::getShouldMergeWithOldPart( const PartRef old ) const
 {
-	
-}
-
-void Part::tick()
-{
-	
+	return old->getType() == getType() &&
+		 distance( old->mContourLoc, mContourLoc ) < getWorld().mPartTrackLocMaxDist &&
+		 fabs( old->mContourRadius - mContourRadius ) < getWorld().mPartTrackRadiusMaxDist
+		;
 }
 
 Flipper::Flipper( PinballWorld& world, vec2 pin, float contourRadius, PartType type )
-	: Part(world)
+	: Part(world,type)
 {
-	mType=type;
 	mLoc=pin;
 
 	const float kFlipperMinRadius = 1.f;
@@ -42,10 +39,11 @@ Flipper::Flipper( PinballWorld& world, vec2 pin, float contourRadius, PartType t
 
 void Flipper::draw()
 {
-	gl::color( lerp( mWorld.mFlipperColor, ColorA(1,1,1,1), powf(getCollisionFade(),3.f) ) );
+//	gl::color( lerp( getWorld().mFlipperColor, ColorA(1,1,1,1), powf(getCollisionFade(),3.f) ) );
+	gl::color( getWorld().mFlipperColor );
 	gl::drawSolid( getCollisionPoly() );
 	
-	if (mWorld.mDebugDrawFlipperAccelHairs)
+	if (getWorld().mDebugDrawFlipperAccelHairs)
 	{
 		PolyLine2 poly = getCollisionPoly();
 		vec2 tip = getTipLoc();
@@ -92,12 +90,12 @@ Flipper::getTipLoc() const
 	// angle is degrees from down (aka gravity vec)
 	float angle;
 	{
-		int   flipperIndex = flipperTypeToIndex(mType);
+		int   flipperIndex = flipperTypeToIndex(getType());
 		float angleSign[2] = {-1.f,1.f};
-		angle = angleSign[flipperIndex] * toRadians(45.f + mWorld.getFlipperState(flipperIndex)*90.f);
+		angle = angleSign[flipperIndex] * toRadians(45.f + getWorld().getFlipperState(flipperIndex)*90.f);
 	}
 
-	return glm::rotate( mWorld.getGravityVec() * mFlipperLength, angle) + mLoc;
+	return glm::rotate( getWorld().getGravityVec() * mFlipperLength, angle) + mLoc;
 }
 
 PolyLine2 Flipper::getCollisionPoly() const
@@ -105,14 +103,14 @@ PolyLine2 Flipper::getCollisionPoly() const
 	vec2 c[2] = { mLoc, getTipLoc() };
 	float r[2] = { mRadius, mRadius/2.f };
 	
-	return mWorld.getCapsulePoly(c,r);
+	return getWorld().getCapsulePoly(c,r);
 }
 
 float Flipper::getCollisionFade() const
 {
 	const float k = .5f;
 	
-	float t = 1.f - (mWorld.time() - mCollideTime) / k;
+	float t = 1.f - (getWorld().time() - mCollideTime) / k;
 	
 	t = constrain( t, 0.f, 1.f);
 	
@@ -121,7 +119,7 @@ float Flipper::getCollisionFade() const
 
 void Flipper::onBallCollide( Ball& ball )
 {
-	mCollideTime = mWorld.time();
+	mCollideTime = getWorld().time();
 	
 	ball.mAccel += getAccelForBall(ball.mLoc);
 }
@@ -135,7 +133,7 @@ vec2 Flipper::getAccelForBall( vec2 p ) const
 	{
 		surfaceNorm = normalize(surfaceNorm);
 		
-		float omega = mWorld.getFlipperAngularVel(flipperTypeToIndex(mType));
+		float omega = getWorld().getFlipperAngularVel(flipperTypeToIndex(getType()));
 		
 		vec2 vs = -perp( contact-mLoc ) * omega;
 		
@@ -151,9 +149,8 @@ vec2 Flipper::getAccelForBall( vec2 p ) const
 }
 
 Bumper::Bumper( PinballWorld& world, vec2 pin, float contourRadius, AdjSpace adjSpace )
-	: Part(world)
+	: Part(world,PartType::Bumper)
 {
-	mType=PartType::Bumper;
 	mLoc=pin;
 
 //	mColor = Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat());
@@ -186,7 +183,7 @@ void Bumper::draw()
 
 //	gl::popModelMatrix();
 	
-	gl::color(mWorld.mBumperInnerColor);
+	gl::color(getWorld().mBumperInnerColor);
 	gl::drawSolidCircle(mLoc,mRadius/2.f);
 }
 
@@ -196,14 +193,14 @@ void Bumper::tick()
 
 PolyLine2 Bumper::getCollisionPoly() const
 {
-	return mWorld.getCirclePoly( mLoc, mRadius );
+	return getWorld().getCirclePoly( mLoc, mRadius );
 }
 
 float Bumper::getCollisionFade() const
 {
 	const float k = .5f;
 	
-	float t = 1.f - (mWorld.time() - mCollideTime) / k;
+	float t = 1.f - (getWorld().time() - mCollideTime) / k;
 	
 	t = constrain( t, 0.f, 1.f);
 	
@@ -216,12 +213,109 @@ void Bumper::onBallCollide( Ball& ball )
 //	mColor = Color(1,0,0);
 //	ball.mColor = mColor;
 	
-	mCollideTime = mWorld.time();
+	mCollideTime = getWorld().time();
 	
 	// kick ball
 	vec2 v = ball.mLoc - mLoc;
 	if (v==vec2(0,0)) v = randVec2();
 	else v = normalize(v);
 	
-	ball.mAccel += v * mWorld.mBumperKickAccel ;
+	ball.mAccel += v * getWorld().mBumperKickAccel ;
+}
+
+RolloverTarget::RolloverTarget( PinballWorld& world, vec2 pin, float radius )
+	: Part(world,PartType::RolloverTarget)
+	, mLoc(pin)
+	, mRadius(radius)
+{
+	mColorOff = getWorld().mRolloverTargetOffColor;
+	mColorOn  = getWorld().mRolloverTargetOnColor;
+}
+
+void RolloverTarget::draw()
+{
+	float collideFade = getCollisionFade();
+	
+	gl::color( lerp( lerp(mColorOff,mColorOn,mLight), ColorA(1,1,1,1), collideFade ) );
+	gl::drawSolidCircle(mLoc, mRadius);
+	
+	if ( mContourPoly.size()>0 && collideFade > 0.f )
+	{
+		gl::color( mColorOn * ColorA(1,1,1,collideFade) );
+		gl::drawSolid(mContourPoly);
+	}
+}
+
+void RolloverTarget::tick()
+{
+	setZDepth( getWorld().getTableDepth() -.01f) ; // so we are responsive to hotloading
+		// epsilon so we don't z-clip behind table back
+		
+	mLight = lerp( mLight, mIsLit ? 1.f : 0.f, .5f );
+	
+	const auto &balls = getWorld().getBalls();
+	
+	if (balls.empty()) setIsLit(false);
+	else //if ( !mIsLit )
+	{
+		for ( auto &b : balls )
+		{
+			if ( distance(b.mLoc,mLoc) < mRadius + b.mRadius )
+			{
+				mCollideTime = getWorld().time();
+				setIsLit(true);
+				break;
+			}
+		}
+	}
+}
+
+void RolloverTarget::setIsLit( bool v )
+{
+	mIsLit=v;
+//	setType( v ? PartType::RolloverTargetOn : PartType::RolloverTargetOff );
+}
+
+float RolloverTarget::getCollisionFade() const
+{
+	const float k = .5f;
+	
+	float t = 1.f - (getWorld().time() - mCollideTime) / k;
+	
+	t = constrain( t, 0.f, 1.f);
+	
+	return t;
+}
+
+bool RolloverTarget::getShouldMergeWithOldPart( const PartRef old ) const
+{
+	if ( !Part::getShouldMergeWithOldPart(old) ) return false;
+	
+	if ( old->getType() == PartType::RolloverTarget )
+	{
+		auto o = dynamic_cast<RolloverTarget*>(old.get());
+		assert(o);
+		return distance( o->mLoc, mLoc ) < min( mRadius, o->mRadius ) ;
+			// this constant needs to be bigger than mPartTrackLocMaxDist otherwise it jitters.
+			// why? because as the angle of the contour jitters it shoots us off far away.
+			// so we know the contour is the same, so we can be liberal here.
+	}
+	else return true;
+}
+
+Plunger::Plunger( PinballWorld& world, vec2 pin, float radius )
+	: Part(world,PartType::Plunger)
+	, mLoc(pin)
+	, mRadius(radius)
+{
+}
+
+void Plunger::draw()
+{
+	gl::color(1,1,1);
+	gl::drawSolidCircle(mLoc, mRadius);
+}
+
+void Plunger::tick()
+{
 }

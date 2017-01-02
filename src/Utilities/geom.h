@@ -61,5 +61,8 @@ bool getOrientedQuadFromPolyLine( PolyLine2 polyquad, vec2 xVec, vec2 quad[4] );
 
 	 --> xVec	*/
 
+PolyLine2 getConvexHull( const PolyLine2& ); // does the right thing with closed polys, unlike built-in cinder func.
+
+float calcPolyEdgeOverlapFrac( const PolyLine2& a, const PolyLine2& b, float distanceAttenuate );
 
 #endif /* geom_h */

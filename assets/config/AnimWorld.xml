@@ -16,12 +16,32 @@
 
 	</Vision>
 
+	<RectFinder>
+
+<!--	What strategies to allow	-->
+		<AllowSubset>1</AllowSubset>
+		<AllowSuperset>1</AllowSuperset>
+
+<!--	Filters. (Last two should/could be identical to Vision/Contours)	-->
+		<InteriorAngleMaxDelta>5</InteriorAngleMaxDelta>
+		<MinRectWidth>3</MinRectWidth>
+		<MinRectArea>9</MinRectArea>
+		
+<!--	Tuning params	-->
+		<MaxGainAreaFrac>.2</MaxGainAreaFrac>
+		<SubsetRectMinPerimOverlapFrac>.8</TheorizedRectMinPerimOverlapFrac>
+		<EdgeOverlapDistAttenuate>1</EdgeOverlapDistAttenuate>
+		
+	</RectFinder>
+	
+	
 	<TimeVec>-1 0</TimeVec>
 	<WorldUnitsToSeconds>20</WorldUnitsToSeconds>
 	<MaxFrameDist>20</MaxFrameDist>
 	<DebugDrawTopology>0</DebugDrawTopology>
 	<AnimLengthQuantizeToSec>.01</AnimLengthQuantizeToSec>
-	<EqualizeImages>1</EqualizeImages>
+	<EqualizeImages>0</EqualizeImages>
 	<BlankEdgePixels>2</BlankEdgePixels>
+
 	
 </AnimWorld>

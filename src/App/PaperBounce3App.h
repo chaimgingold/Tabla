@@ -74,7 +74,11 @@ class PaperBounce3App : public App {
 	
 	Pipeline			mPipeline; // traces processing
 
-	SurfaceRef mDebugFrame; // a static debug frame
+	
+	// static debug frame
+	SurfaceRef mDebugFrame;
+	FileWatch  mDebugFrameFileWatch;
+	void updateDebugFrameCaptureDevicesWithPxPerWorldUnit( float );
 	
 	// game library
 	void setupGameLibrary();
@@ -176,6 +180,8 @@ class PaperBounce3App : public App {
 	float mConfigWindowMainImageMargin = 32.f;
 	float mConfigWindowPipelineGutter = 8.f ;
 	float mConfigWindowPipelineWidth  = 64.f ;
+	
+	float mDefaultPixelsPerWorldUnit = 10.f; // doesn't quite hot-load; you need to 
 	
 	fs::path hotloadableAssetPath( fs::path ) const ; // prepends the appropriate thing...
 	string mOverloadedAssetPath;

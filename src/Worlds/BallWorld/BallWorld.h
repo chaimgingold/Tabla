@@ -13,6 +13,7 @@
 #include "cinder/gl/gl.h"
 #include "cinder/Xml.h"
 #include "cinder/Color.h"
+#include <boost/circular_buffer.hpp>
 
 #include "FileWatch.h"
 #include "GameWorld.h"
@@ -47,6 +48,8 @@ public:
 
 	vec2  mSquash ; // direction and magnitude
 	bool  mCollideWithContours=true; // false: collide with inverse contours
+	
+	boost::circular_buffer<vec2> mHistory;
 	
 private:
 	float	mMass = 1.f ; // let's start by doing the right thing.
@@ -122,7 +125,7 @@ public:
 	int getNumIntegrationSteps() const { return mNumIntegrationSteps; }
 	
 protected:
-	void setContours( const ContourVec& contours ) { mContours = contours; }
+	void setContours( const ContourVec& contours, ContourVec::Filter filter=0 ) { mContours = contours; mContourFilter=filter; }
 	
 	int getBallIndex( const Ball& b ) const;
 	
@@ -143,8 +146,20 @@ protected:
 	float	mBallContourCoeffOfRestitution = 1.f; // [0,1] [elastic,inelastic]
 	float	mBallContourFrictionlessCoeff = 1.f;
 	
-private:
-
+	bool	mRibbonEnabled   = false;
+	int		mRibbonMaxLength = 32;
+	int		mRibbonSampleRate= 1;
+	float	mRibbonRadiusScale = .9f;
+	float	mRibbonRadiusExp   = .5f;
+	float	mRibbonAlphaScale  = .5f;
+	float	mRibbonAlphaExp    = .5f;
+	
+	// ribbons
+	int  getRibbonMaxLength() const { return mRibbonEnabled ? mRibbonMaxLength : 0; }
+	void accumulateBallHistory();
+	void updateBallsWithRibbonParams();
+	
+private:	
 	// storing collisions
 	BallBallCollisionVec	mBallBallCollisions;
 	BallContourCollisionVec	mBallContourCollisions;
@@ -170,13 +185,16 @@ private:
 	void resolveBallCollisions() ;
 
 	ContourVector		mContours;
+	ContourVector::Filter mContourFilter;
 	vector<Ball>		mBalls ;
 
 	// drawing
 	void drawImmediate( bool lowPoly ) const;
 	TriMeshRef getTriMeshForBalls() const;
+	TriMeshRef getTriMeshForRibbons() const;
 	TriMeshRef mBallMesh; // Make into a Batch for even more performance (that we don't need)
-
+	TriMeshRef mRibbonMesh;
+	
 	gl::GlslProgRef mCircleShader;
 	
 	// asset loading

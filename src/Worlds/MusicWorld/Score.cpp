@@ -788,7 +788,7 @@ int Score::noteForY( int y ) const {
 
 	return note + extraOctaveShift + mRootNote + mOctave*12;
 }
-
+/*
 float Score::getQuadMaxInteriorAngle() const
 {
 	float mang=0.f;
@@ -809,7 +809,7 @@ float Score::getQuadMaxInteriorAngle() const
 	}
 
 	return mang;
-}
+}*/
 
 const Score* ScoreVec::pick( vec2 p ) const
 {

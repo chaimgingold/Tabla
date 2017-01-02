@@ -102,6 +102,7 @@ ContourVec ContourVision::findContours( const Pipeline::StageRef input, Pipeline
 				myc.mArea   = area ;
 				myc.mBoundingRect = Rectf( myc.mPolyLine.getPoints() ); // after scaling points!
 				myc.mRotatedBoundingRect = minRotatedRect;
+				myc.mIndex = output.size() ;
 				myc.mOcvContourIndex = i ;
 
 				

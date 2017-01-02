@@ -36,6 +36,7 @@ public:
 	void worldBoundsPolyDidChange() override;
 
 	void keyDown( KeyEvent ) override;
+	void mouseClick( vec2 ) override;
 
 public:
 
@@ -43,8 +44,11 @@ public:
 	vec2 getUpVec() const { return mUpVec; }
 	vec2 getLeftVec() const { return vec2(cross(vec3(mUpVec,0),vec3(0,0,1))); }
 	vec2 getRightVec() const { return -getLeftVec(); }
-	vec2 getGravityVec() const { return -mUpVec; }
-
+	vec2 getDownVec() const { return -mUpVec; }
+	vec2 getGravityVec() const { return getDownVec(); } // sugar
+	
+	float getTableDepth() const { return m3dTableDepth; }
+	
 	// geometry
 	PolyLine2 getCirclePoly ( vec2 c, float r ) const;
 	PolyLine2 getCapsulePoly( vec2 c[2], float r[2] ) const;
@@ -60,6 +64,13 @@ public:
 	float mFlipperMaxLength=10.f;
 	float mFlipperRadiusToLengthScale=5.f;	
 	ColorA mFlipperColor = ColorA(0,1,1,1);
+
+	ColorA mRolloverTargetOnColor=Color(1,0,0);
+	ColorA mRolloverTargetOffColor=Color(0,1,0);
+	
+	// part params for inter-frame coherence
+	float mPartTrackLocMaxDist = 1.f;
+	float mPartTrackRadiusMaxDist = .5f;
 	
 	// debug params
 	bool mDebugDrawFlipperAccelHairs=false;
@@ -68,13 +79,24 @@ public:
 	float time() { return ci::app::getElapsedSeconds(); } // use this time so we can locally modulate it (eg slow down, pause, etc...)
 	float getFlipperState( int side ) const { assert(side==0||side==1); return mFlipperState[side]; }
 	float getFlipperAngularVel( int side ) const; // TODO: make radians per second
+
+	const PartVec& getParts() const { return mParts; }
 	
 private:
-
+	
+	void draw2d( DrawType );
+	
+	void draw3d( DrawType );
+	void beginDraw3d() const;
+	void endDraw3d() const;
+	Shape2d polyToShape( const PolyLine2& ) const;
+	TriMesh get3dMeshForPoly( const PolyLine2&, float znear, float zfar ) const; // e.g. 0..1, from tabletop in 1cm
+	
 	// params
 	vec2  mUpVec = vec2(0,1);
 	float mGravity=0.1f;
 	float mPartMaxContourRadius = 5.f; // contour radius lt => part
+	float mHolePartMaxContourRadius = 2.f;
 	float mFlipperDistToEdge = 10.f; // how close to the edge does a flipper appear?
 	float mBallReclaimAreaHeight = 10.f;
 
@@ -82,12 +104,18 @@ private:
 	int mCircleMaxVerts=100;
 	float mCircleVertsPerPerimCm=1.f;
 	
+	float mRolloverTargetRadius=1.f;
+	float mRolloverTargetMinWallDist=1.f;
+	bool  mRolloverTargetDynamicRadius=false;
+	
 	bool mDebugDrawAdjSpaceRays=false;
 	bool mDebugDrawGeneratedContours=false;
 	
-	// more params, just for vision
-	float mPartTrackLocMaxDist = 1.f;
-	float mPartTrackRadiusMaxDist = .5f;
+	// 3d params
+	bool  m3dEnable      = false;
+	bool  m3dBackfaceCull= false;
+	float m3dTableDepth  = 10.f;
+	float m3dZSkew       = .5f;
 	
 	// world layout
 	vec2  toPlayfieldSpace  ( vec2 p ) const { return vec2( dot(p,getRightVec()), dot(p,getUpVec()) ); }
@@ -116,6 +144,9 @@ private:
 	PartRef findPartForContour( const Contour& ) const;
 	PartRef findPartForContour( int contourIndex ) const;
 	
+	void rolloverTest();
+	bool isValidRolloverLoc( vec2 loc, float r, const PartVec& ) const;
+	
 	// are flippers depressed
 	bool  mIsFlipperDown[2]; // left, right
 	float mFlipperState[2]; // left, right; 0..1
@@ -133,8 +164,9 @@ private:
 	
 	// vision
 	PartVec getPartsFromContours( const ContourVector& ); // only reason this is non-const is b/c parts point to the world
-	bool shouldContourBeAPart( const Contour& ) const;
+	bool shouldContourBeAPart( const Contour&, const ContourVector& ) const;
 	PartVec mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const;
+	AdjSpace getAdjacentSpace( const Contour*, vec2, const ContourVector& ) const ;
 	AdjSpace getAdjacentSpace( vec2, const ContourVector& ) const ; // how much adjacent space is to the left, right?
 	
 	ContourVec mVisionContours;

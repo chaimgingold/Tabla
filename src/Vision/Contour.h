@@ -43,6 +43,7 @@ public:
 	vector<int> mChild ; // indices into mContour of contours which are in me
 	int			mTreeDepth = 0 ;
 	
+	int			mIndex = -1;
 	int			mOcvContourIndex = -1 ;
 	
 	bool		isKind ( ContourKind kind ) const
@@ -69,11 +70,46 @@ class ContourVec : public vector<Contour>
 {
 public:
 
+	typedef std::function<bool(const Contour&)> Filter;
+	typedef vector<bool> Mask;
+	
+	Mask getMask( Filter f ) const
+	{
+		Mask m(size());
+		for( int i=0; i<size(); ++i ) {
+			m[i] = f((*this)[i]);
+		}
+		return m;
+	}
+	
+	static Filter getMaskFilter( const Mask m ) {
+		return [m](const Contour& c) -> bool
+		{
+			int i = c.mIndex;
+			if (i > m.size()-1) return false;
+			return m[i];
+		};
+	}
+	
+	static Filter getKindFilter( ContourKind kind ) {
+		return [kind](const Contour& c) -> bool {
+			return c.isKind(kind);
+		};
+	}
+	
+	static Filter getAndFilter( Filter f1, Filter f2 ) {
+		if (!f2) return f1;
+		if (!f1) return f2;
+		return [f1,f2](const Contour& c) -> bool {
+			return f1(c) && f2(c);
+		};
+	}
+	
 	// physics/geometry helpers
-	const Contour* findClosestContour ( vec2 point, vec2* closestPoint=0, float* closestDist=0, ContourKind kind = ContourKind::Any ) const ; // assumes findLeafContourContainingPoint failed
+	const Contour* findClosestContour ( vec2 point, vec2* closestPoint=0, float* closestDist=0, Filter=0 ) const ; // assumes findLeafContourContainingPoint failed
 
-	const Contour* findLeafContourContainingPoint( vec2 point ) const ;
-	Contour* findLeafContourContainingPoint( vec2 point );
+	const Contour* findLeafContourContainingPoint( vec2 point, Filter=0 ) const ;
+	Contour* findLeafContourContainingPoint( vec2 point, Filter=0 );
 
 	const Contour* getParent( const Contour& c ) const {
 		if (c.mParent!=-1) return &((*this)[c.mParent]);
@@ -96,7 +132,7 @@ public:
 	
 	const Contour* rayIntersection( vec2 rayOrigin, vec2 rayVec,
 		float *rayt=0,
-		std::function<bool(const Contour&)> = 0 // optional filter function
+		Filter = 0 // optional filter function
 		) const;
 	 // returns rayt of first edge hit, if any
 	

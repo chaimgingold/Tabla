@@ -28,9 +28,11 @@ public:
 	{
 	public:
 		CaptureProfile() {}
-		CaptureProfile( string name, vec2 size );
-		CaptureProfile( string name, string deviceName, vec2 size ); // makes a default dummy
-		CaptureProfile( fs::path, vec2 size ); // you should have loaded it already so you can tell us the size
+		CaptureProfile( string name, vec2 size, float pixelsPerWorldUnit=1.f );
+		CaptureProfile( string name, string deviceName, vec2 size, float pixelsPerWorldUnit ); // makes a default dummy
+		CaptureProfile( fs::path, vec2 size, float pixelsPerWorldUnit=1.f ); // you should have loaded it already so you can tell us the size
+		
+		void setWorldCoordsFromCaptureCoords( float pixelsPerWorldUnit );
 		
 		void setParams( XmlTree );
 		XmlTree getParams() const;

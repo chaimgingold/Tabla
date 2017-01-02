@@ -158,8 +158,10 @@ void PaperBounce3App::setup()
 			getXml(app,"ConfigWindowMainImageMargin",mConfigWindowMainImageMargin);
 			
 			getXml(app,"KeyboardStringTimeout",mKeyboardStringTimeout);
+			
+			getXml(app,"DefaultPixelsPerWorldUnit",mDefaultPixelsPerWorldUnit);
 		}
-
+		
 		if (xml.hasChild("PaperBounce3/RFID"))
 		{
 			XmlTree rfid = xml.getChild("PaperBounce3/RFID");
@@ -177,7 +179,7 @@ void PaperBounce3App::setup()
 		}
 		
 		// 2. respond
-
+		updateDebugFrameCaptureDevicesWithPxPerWorldUnit(mDefaultPixelsPerWorldUnit);
 		
 		// TODO:
 		// - get a new camera capture object so that resolution can change live (I think I do that now)
@@ -220,6 +222,10 @@ void PaperBounce3App::setup()
 		mMainWindow->setFullScreen(true) ;
 	}
 
+	mMainWindow->getSignalMove()  .connect( [&]{ this->saveUserSettings(); });
+	mMainWindow->getSignalResize().connect( [&]{ this->saveUserSettings(); });
+	
+
 	// aux UI display
 	if (mHasConfigWindow)
 	{
@@ -241,6 +247,10 @@ void PaperBounce3App::setup()
 		{
 			mUIWindow->setPos( mMainWindow->getPos() + ivec2( -mMainWindow->getWidth()-16,0) ) ;
 		}
+		
+		// save changes (do this AFTER we set it up, so we don't save initial conditions!)
+		mUIWindow->getSignalMove()  .connect( [&]{ this->saveUserSettings(); });
+		mUIWindow->getSignalResize().connect( [&]{ this->saveUserSettings(); });
 	}
 	
 	// load the games, rfid functions
@@ -256,7 +266,7 @@ void PaperBounce3App::setup()
 			loadUserSettingsFromXml(xml.getChild("settings"));
 		}
 	});
-
+	
 	// load default game (or command line arg)
 	if ( !mGameWorld || !cmdLineArgGameName.empty() ) { // because loadUserSettingsFromXml might have done it
 		loadDefaultGame(cmdLineArgGameName);
@@ -316,7 +326,9 @@ bool PaperBounce3App::ensureLightLinkHasLocalDeviceProfiles()
 				LightLink::CaptureProfile profile(
 					string("Default ") + d->getName(),
 					d->getName(),
-					vec2(640,480) );
+					vec2(640,480),
+					mDefaultPixelsPerWorldUnit
+					);
 				
 				mLightLink.mCaptureProfiles[profile.mName] = profile;
 				dirty=true;
@@ -403,17 +415,23 @@ bool PaperBounce3App::setupCaptureDevice()
 	{
 		cout << "Trying to load capture profile '" << profile.mName << "' for file '" << profile.mFilePath << "'" << endl;
 		
-		try
+		mDebugFrameFileWatch = FileWatch();
+		
+		mDebugFrameFileWatch.load( profile.mFilePath, [&]( fs::path )
 		{
-			mDebugFrame = make_shared<Surface>( loadImage(profile.mFilePath) );
-		} catch (...){
-			mDebugFrame.reset();
-		}
+			try
+			{
+				mDebugFrame = make_shared<Surface>( loadImage(profile.mFilePath) );
+			} catch (...){
+				mDebugFrame.reset();
+			}
+		});
 		
 		return mDebugFrame != nullptr;
 		// ideally we should erase it if it fails to load, but that complicates situations where
 		// caller has an iterator into capture profiles (eg setupNextValidCaptureProfile). this isn't
 		// that hard, but might not be that important.
+		// we also might want to always return true so that user can escape missing files (removing from list)
 	}
 	else
 	{
@@ -629,13 +647,29 @@ void PaperBounce3App::fileDrop( FileDropEvent event )
 			
 			if (surf)
 			{
-				LightLink::CaptureProfile cp(file,surf->getSize()); 
+				LightLink::CaptureProfile cp(file,surf->getSize(),mDefaultPixelsPerWorldUnit); 
 				mLightLink.mCaptureProfiles[cp.mName] = cp;
 				mLightLink.setCaptureProfile(cp.mName);
 				lightLinkDidChange();
 			}
 		}
 	}
+}
+
+void PaperBounce3App::updateDebugFrameCaptureDevicesWithPxPerWorldUnit( float x )
+{
+	bool dirty=false;
+	
+	for( auto &c : mLightLink.mCaptureProfiles )
+	{
+		if ( !c.second.mFilePath.empty() )
+		{
+			dirty=true;
+			c.second.setWorldCoordsFromCaptureCoords(x);
+		}
+	}
+	
+	if (dirty) lightLinkDidChange();
 }
 
 void PaperBounce3App::addProjectorPipelineStages()
@@ -654,6 +688,7 @@ void PaperBounce3App::update()
 	mAppFPS.mark();
 	
 	mFileWatch.update();
+	mDebugFrameFileWatch.update();
 	
 	updateVision();
 	
@@ -883,26 +918,45 @@ void PaperBounce3App::keyDown( KeyEvent event )
 	
 	bool handled = false;
 	
+	auto openFile = []( fs::path path ) {
+		::system( (string("open \"") + path.string() + string("\"")).c_str() );		
+	};
+	
 	// meta chars
 	if ( event.isAltDown() )
 	{
+		bool caught=true;
+		
 		switch ( event.getCode() )
 		{
+			case KeyEvent::KEY_x:
+				if (mGameWorld) {
+					openFile( hotloadableAssetPath( fs::path("config") / "app.xml" ) );
+				}
+				break;
+			
+			case KeyEvent::KEY_l:
+				openFile( getUserLightLinkFilePath() );
+				break;
+
 			case KeyEvent::KEY_TAB:
-				handled=true;
 				setupNextValidCaptureProfile();
 				break;
 				
 			case KeyEvent::KEY_c:
 				mDrawContours = !mDrawContours;
-				handled=true;
 				break;
 
 			case KeyEvent::KEY_t:
 				mDrawPipeline = !mDrawPipeline;
-				handled=true;
+				break;
+				
+			default:
+				caught=false;
 				break;
 		}
+		
+		if (caught) handled=true;
 	}
 	
 	// handle char
@@ -915,27 +969,19 @@ void PaperBounce3App::keyDown( KeyEvent event )
 				break ;
 
 			case KeyEvent::KEY_x:
-				{
-					fs::path path;
-					
-					if ( mGameWorld && !event.isControlDown() )
-					{
-						path = getXmlConfigPathForGame( mGameWorld->getSystemName() );
-					}
-					else path = hotloadableAssetPath( fs::path("config") / "app.xml" );
-					
-					::system( (string("open \"") + path.string() + string("\"")).c_str() );
-				}
+				openFile( getXmlConfigPathForGame( mGameWorld->getSystemName() ) );
 				break ;
 			
 			case KeyEvent::KEY_UP:
 				if (event.isMetaDown()) mPipeline.setQuery( mPipeline.getFirstStageName() );
 				else mPipeline.setQuery( mPipeline.getPrevStageName(mPipeline.getQuery() ) );
+				saveUserSettings();
 				break;
 				
 			case KeyEvent::KEY_DOWN:
 				if (event.isMetaDown()) mPipeline.setQuery( mPipeline.getLastStageName() );
 				else mPipeline.setQuery( mPipeline.getNextStageName(mPipeline.getQuery() ) );
+				saveUserSettings();
 				break;
 			
 			case KeyEvent::KEY_LEFT:
@@ -1031,6 +1077,32 @@ void PaperBounce3App::loadUserSettingsFromXml( XmlTree xml )
 			else cout << "loadUserSettingsFromXml: unknown game world " << name << endl;
 		}
 	}
+	
+	if ( xml.hasChild("PipelineQuery") )
+	{
+		string name = xml.getChild("PipelineQuery").getValue();
+		mPipeline.setQuery(name);
+	}
+	
+	auto getWindowBounds = [&xml]( string xmlName, WindowRef win )
+	{
+		if ( xml.hasChild(xmlName) && win )
+		{
+			try {
+				string val = xml.getChild(xmlName).getValue();
+				
+				Area a;
+				if ( sscanf(val.c_str(), "(%d, %d)-(%d, %d)",&a.x1,&a.y1,&a.x2,&a.y2)==4 )
+				{
+					win->setSize(a.getSize());
+					win->setPos (a.getUL());
+				}
+			} catch (...) {}
+		}
+	};
+	
+	getWindowBounds( "UIWindowBounds", mUIWindow );
+	getWindowBounds( "MainWindowBounds", mMainWindow );
 }
 
 XmlTree PaperBounce3App::getUserSettingsXml() const
@@ -1041,6 +1113,15 @@ XmlTree PaperBounce3App::getUserSettingsXml() const
 	{
 		xml.push_back( XmlTree("GameWorld",mGameWorld->getSystemName()) );
 	}
+	
+	xml.push_back( XmlTree("PipelineQuery",mPipeline.getQuery()) );
+	
+	auto setWindowBounds = [&xml]( string xmlName, WindowRef win ) {
+		if (win) xml.push_back( XmlTree(xmlName,  toString(win->getBounds()+win->getPos())) );
+	};
+	
+	setWindowBounds("UIWindowBounds",mUIWindow);
+	setWindowBounds("MainWindowBounds",mMainWindow);
 	
 	return xml;
 }

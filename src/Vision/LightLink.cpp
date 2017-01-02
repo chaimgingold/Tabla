@@ -52,30 +52,35 @@ static vector<float> stringToFloatVec( string value )
 	return f;
 }
 
-LightLink::CaptureProfile::CaptureProfile( string name, vec2 size )
+LightLink::CaptureProfile::CaptureProfile( string name, vec2 size, float pixelsPerWorldUnit )
 	: mName(name)
 {
 	mCaptureCoords[0] = vec2(0,1) * size;
 	mCaptureCoords[1] = vec2(1,1) * size;
 	mCaptureCoords[2] = vec2(1,0) * size;
 	mCaptureCoords[3] = vec2(0,0) * size;
-	
-	for( int i=0; i<4; ++i )
-	{
-		mCaptureWorldSpaceCoords[i] = mCaptureCoords[i] / 10.f ; // 10px per cm as a default...
-	}
+
+	setWorldCoordsFromCaptureCoords(pixelsPerWorldUnit);
 }
 
-LightLink::CaptureProfile::CaptureProfile( string name, string deviceName, vec2 size )
-	: CaptureProfile(name,size)
+LightLink::CaptureProfile::CaptureProfile( string name, string deviceName, vec2 size, float pixelsPerWorldUnit )
+	: CaptureProfile(name,size,pixelsPerWorldUnit)
 {
 	mDeviceName = deviceName;
 }
 
-LightLink::CaptureProfile::CaptureProfile( fs::path path, vec2 size )
-	: CaptureProfile(path.string(),size)
+LightLink::CaptureProfile::CaptureProfile( fs::path path, vec2 size, float pixelsPerWorldUnit )
+	: CaptureProfile(path.string(),size,pixelsPerWorldUnit)
 {
 	mFilePath = path.string();
+}
+
+void LightLink::CaptureProfile::setWorldCoordsFromCaptureCoords( float pixelsPerWorldUnit )
+{
+	for( int i=0; i<4; ++i )
+	{
+		mCaptureWorldSpaceCoords[i] = mCaptureCoords[i] / pixelsPerWorldUnit ;
+	}
 }
 
 void LightLink::CaptureProfile::flipCaptureCoordsVertically()

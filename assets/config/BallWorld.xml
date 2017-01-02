@@ -1,6 +1,6 @@
 <BallWorld>
 	<!-- cm -->
-	<NumIntegrationSteps>		10 </NumIntegrationSteps>
+	<NumIntegrationSteps>	1 </NumIntegrationSteps>
 	<DefaultNumBalls>			100 </DefaultNumBalls>
 	<BallDefaultRadius>			.5 </BallDefaultRadius>
 	<BallDefaultMaxRadius>		2 </BallDefaultMaxRadius>
@@ -9,7 +9,18 @@
 	<BallContourImpactNormalVelImpulse>.1</BallContourImpactNormalVelImpulse>
 	<BallContourCoeffOfRestitution>1</BallContourCoeffOfRestitution>
 	<BallContourFrictionlessCoeff>1</BallContourFrictionlessCoeff>
-	
+
+	<Ribbon>
+		<Enabled>0</Enabled>
+		<MaxLength>50</MaxLength>
+		<SampleRate>1</SampleRate>
+		<RadiusScale>.9</RadiusScale>
+		<RadiusExp>.5</RadiusExp>
+		<AlphaScale>.5</AlphaScale>
+		<AlphaExp>.5</AlphaExp>
+	</Ribbon>
+
+
 	<!-- cm -->
 	<Vision>
 		<Contours>

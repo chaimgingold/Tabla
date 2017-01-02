@@ -18,6 +18,7 @@
 #include "GameWorld.h"
 #include "Contour.h"
 #include "geom.h"
+#include "RectFinder.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -41,27 +42,14 @@ public:
 
 private:
 	vec2 mTimeVec=vec2(1,0); // for orienting quads; probably doesn't matter at all.
-	float mMaxGainAreaFrac=.2f;
-	float mInteriorAngleMaxDelta=10;
-	
-	bool checkIsQuadReasonable( const PolyLine2& quad, const PolyLine2& source ) const;
-	bool areInteriorAnglesOK( const PolyLine2& p ) const;
-	bool getQuadFromPoly( const PolyLine2& in, PolyLine2& out ) const;
-	bool theorize( const PolyLine2& in, PolyLine2& out ) const;
-
 	
 	class Frame
 	{
 	public:
-		bool mIsValid=false;
-		
 		PolyLine2 mContourPoly;
-		PolyLine2 mContourPolyReduced;
-		PolyLine2 mConvexHull;
-		std::vector<PolyLine2> mReducedDiff;
-		vec2 mQuad[4];
-		
-		PolyLine2 getQuadAsPoly() const;
+		PolyLine2 mContourPolyResult;
+		RectFinder::CandidateVec mCandidates;
+		bool mIsOK;
 	};
 	typedef vector<Frame> FrameVec; 
 	FrameVec mFrames;
@@ -71,6 +59,7 @@ private:
 		const ContourVector &contours,
 		Pipeline& pipeline ) const;
 	
+	RectFinder mRectFinder;
 };
 
 class QuadTestWorldCartridge : public GameCartridge

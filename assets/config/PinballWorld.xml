@@ -14,7 +14,17 @@
 		<BallContourCoeffOfRestitution>.7</BallContourCoeffOfRestitution>
 		<BallContourFrictionlessCoeff>1</BallContourFrictionlessCoeff>
 			<!-- We	might want to make this a property of each ball, or of each ball<->contour interaction -->
-			
+
+		<Ribbon>
+			<Enabled>1</Enabled>
+			<MaxLength>50</MaxLength>
+			<SampleRate>1</SampleRate>
+			<RadiusScale>.4</RadiusScale>
+			<RadiusExp>.5</RadiusExp>
+			<AlphaScale>.5</AlphaScale>
+			<AlphaExp>.5</AlphaExp>
+		</Ribbon>
+				
 	</BallWorld>
 
 	<!-- cm -->
@@ -31,7 +41,7 @@
 	<DebugDrawAdjSpaceRays>0</DebugDrawAdjSpaceRays>
 	<DebugDrawGeneratedContours>0</DebugDrawGeneratedContours>
 	<DebugDrawFlipperAccelHairs>0</DebugDrawFlipperAccelHairs>
-	
+		
 <!-- General -->
 	<UpVec>-1 0</UpVec>
 	<Gravity>.05</Gravity>
@@ -39,6 +49,7 @@
 	
 <!-- Vision	-->
 	<PartMaxContourRadius>5</PartMaxContourRadius>
+	<HolePartMaxContourRadius>2</HolePartMaxContourRadius>
 	<FlipperDistToEdge>4</FlipperDistToEdge>
 	
 	<PartTrackRadiusMaxDist>.5</PartTrackRadiusMaxDist>
@@ -56,14 +67,28 @@
 	<BumperOuterColor>FF0000</BumperOuterColor>
 	<BumperInnerColor>FFCC00</BumperInnerColor>
 	
-	
+	<RolloverTargetRadius>1</RolloverTargetRadius>
+	<RolloverTargetMinWallDist>1</RolloverTargetMinWallDist>
+	<RolloverTargetDynamicRadius>1</RolloverTargetDynamicRadius>
+
+	<RolloverTargetOnColor>22FF55</RolloverTargetOnColor>
+	<RolloverTargetOffColor>0055CC</RolloverTargetOffColor>
+
 	<FlipperMinLength>1</FlipperMinLength>
 	<FlipperMaxLength>10</FlipperMaxLength>
 	<FlipperRadiusToLengthScale>6</FlipperRadiusToLengthScale>
 	<FlipperColor>00FFFF</FlipperColor>
 	
+<!-- 3d	-->
+	<3d>
+		<Enable>0</Enable>
+		<BackfaceCull>0</BackfaceCull>
+		<TableDepth>2</TableDepth>
+		<ZSkew>.75</ZSkew>
+	</3d>
+	
 <!-- Controls	-->
-<!-- TODO... Note manufacturer/model and support multiple profiles -->
+<!-- TODO... Note manufacturer/model and support multiple profiles; this is for PS4 -->
 	<Gamepad>
 		<button id="4" do="flippers-left"/>
 		<button id="6" do="flippers-left"/>

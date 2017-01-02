@@ -14,7 +14,7 @@ bool Contour::rayIntersection( vec2 rayOrigin, vec2 rayVec, float *rayt ) const
 	return rayIntersectPoly(mPolyLine, rayOrigin, rayVec, rayt );
 }
 
-const Contour* ContourVector::findClosestContour ( vec2 point, vec2* closestPoint, float* closestDist, ContourKind kind ) const
+const Contour* ContourVector::findClosestContour ( vec2 point, vec2* closestPoint, float* closestDist, Filter filter ) const
 {
 	float best = MAXFLOAT ;
 	const Contour* result = 0 ;
@@ -22,7 +22,7 @@ const Contour* ContourVector::findClosestContour ( vec2 point, vec2* closestPoin
 	// can optimize this by using bounding boxes as heuristic, but whatev for now.
 	for ( const auto &c : *this )
 	{
-		if ( c.isKind(kind) )
+		if ( !filter || filter(c) )
 		{
 			float dist ;
 			
@@ -41,10 +41,12 @@ const Contour* ContourVector::findClosestContour ( vec2 point, vec2* closestPoin
 	return result ;
 }
 
-const Contour* ContourVector::findLeafContourContainingPoint( vec2 point ) const
+const Contour* ContourVector::findLeafContourContainingPoint( vec2 point, Filter filter ) const
 {
 	function<const Contour*(const Contour&)> search = [&]( const Contour& at ) -> const Contour*
 	{
+		if ( filter && !filter(at) ) return 0;
+		
 		if ( at.contains(point) )
 		{
 			for( auto childIndex : at.mChild )
@@ -74,10 +76,12 @@ const Contour* ContourVector::findLeafContourContainingPoint( vec2 point ) const
 }
 
 // same as above, just without const...
-Contour* ContourVector::findLeafContourContainingPoint( vec2 point )
+Contour* ContourVector::findLeafContourContainingPoint( vec2 point, Filter filter )
 {
 	function<Contour*(Contour&)> search = [&]( Contour& at ) -> Contour*
 	{
+		if ( filter && !filter(at) ) return 0;
+
 		if ( at.contains(point) )
 		{
 			for( auto childIndex : at.mChild )
@@ -120,7 +124,7 @@ ContourVector& ContourVector::operator+=(const ContourVector& rhs)
 	return *this;
 }
 
-const Contour* ContourVector::rayIntersection( vec2 rayOrigin, vec2 rayVec, float *rayt, std::function<bool(const Contour&)> filter ) const
+const Contour* ContourVector::rayIntersection( vec2 rayOrigin, vec2 rayVec, float *rayt, Filter filter ) const
 {
 	float m = MAXFLOAT;
 	const Contour* hit=0;
