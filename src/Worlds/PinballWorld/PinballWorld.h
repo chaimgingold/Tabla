@@ -152,6 +152,7 @@ private:
 	PartVec getPartsFromContours( const ContourVector& ); // only reason this is non-const is b/c parts point to the world
 	bool shouldContourBeAPart( const Contour& ) const;
 	PartVec mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const;
+	AdjSpace getAdjacentSpace( const Contour*, vec2, const ContourVector& ) const ;
 	AdjSpace getAdjacentSpace( vec2, const ContourVector& ) const ; // how much adjacent space is to the left, right?
 	
 	ContourVec mVisionContours;

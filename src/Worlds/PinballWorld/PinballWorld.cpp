@@ -758,10 +758,16 @@ bool PinballWorld::shouldContourBeAPart( const Contour& c ) const
 AdjSpace
 PinballWorld::getAdjacentSpace( vec2 loc, const ContourVector& cs ) const
 {
-	AdjSpace result;
-
 	const Contour* leaf = cs.findLeafContourContainingPoint(loc);
 	
+	return getAdjacentSpace(leaf, loc, cs);
+}
+
+AdjSpace
+PinballWorld::getAdjacentSpace( const Contour* leaf, vec2 loc, const ContourVector& cs ) const
+{
+	AdjSpace result;
+
 	if (leaf)
 	{
 		float far = leaf->mRadius * 2.f;
@@ -806,7 +812,7 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 		if ( shouldContourBeAPart(c) )
 		{
 			// flipper orientation
-			AdjSpace adjSpace = getAdjacentSpace(c.mCenter,contours);
+			AdjSpace adjSpace = getAdjacentSpace(&c,c.mCenter,contours);
 
 			auto add = [&c,&parts,adjSpace]( Part* p )
 			{
