@@ -542,8 +542,8 @@ TriMesh PinballWorld::get3dMeshForPoly( const PolyLine2& poly, float znear, floa
 //			Colorf(0,1,0),
 //			Colorf(1,0,0),
 			Colorf(1,1,1),
-			Colorf(0,0,0),
-//			Colorf(.5,.5,.5),
+//			Colorf(0,0,0),
+			Colorf(.5,.5,.5),
 			constrain( (v.z-znear)/(zfar-znear), 0.f, 1.f ) );
 			// near -> far (from viewer)
 	};
@@ -877,8 +877,9 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 		if ( c.mIsHole )
 		{
 			// flipper orientation
-			const bool closeToRight = adjSpace.mRight < mFlipperDistToEdge;
-			const bool closeToLeft  = adjSpace.mLeft  < mFlipperDistToEdge;
+			const bool closeToRight  = adjSpace.mRight < mFlipperDistToEdge;
+			const bool closeToLeft   = adjSpace.mLeft  < mFlipperDistToEdge;
+//			const bool closeToBottom = adjSpace.mDown  < mFlipperDistToEdge;
 			
 			if ( closeToRight && !closeToLeft )
 			{
@@ -890,7 +891,7 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 			}
 //			else if ( closeToLeft && closeToRight && closeToBottom )
 //			{
-				// plunger
+//				 add( new Plunger( *this, c.mCenter, c.mRadius ) );
 //			}
 			else
 			{

@@ -302,3 +302,20 @@ bool RolloverTarget::getShouldMergeWithOldPart( const PartRef old ) const
 	}
 	else return true;
 }
+
+Plunger::Plunger( PinballWorld& world, vec2 pin, float radius )
+	: Part(world,PartType::Plunger)
+	, mLoc(pin)
+	, mRadius(radius)
+{
+}
+
+void Plunger::draw()
+{
+	gl::color(1,1,1);
+	gl::drawSolidCircle(mLoc, mRadius);
+}
+
+void Plunger::tick()
+{
+}

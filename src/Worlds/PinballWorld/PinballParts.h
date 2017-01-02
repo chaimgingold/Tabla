@@ -39,7 +39,8 @@ enum class PartType
 	FlipperLeft,
 	FlipperRight,
 	Bumper,
-	RolloverTarget
+	RolloverTarget,
+	Plunger
 };
 
 inline int flipperTypeToIndex( PartType t )
@@ -189,6 +190,19 @@ private:
 	float getCollisionFade() const;
 	float mCollideTime = -10.f;
 
+};
+
+class Plunger : public Part
+{
+public:
+	Plunger( PinballWorld& world, vec2 pin, float radius );
+
+	virtual void draw() override;
+	virtual void tick() override;
+
+	float mRadius;
+	vec2  mLoc;
+	
 };
 
 } // namespace

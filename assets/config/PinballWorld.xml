@@ -84,7 +84,7 @@
 		<Enable>0</Enable>
 		<BackfaceCull>0</BackfaceCull>
 		<TableDepth>2</TableDepth>
-		<ZSkew>.5</ZSkew>
+		<ZSkew>.75</ZSkew>
 	</3d>
 	
 <!-- Controls	-->
