@@ -295,9 +295,10 @@ bool RolloverTarget::getShouldMergeWithOldPart( const PartRef old ) const
 	{
 		auto o = dynamic_cast<RolloverTarget*>(old.get());
 		assert(o);
-		return distance( o->mLoc, mLoc ) < getWorld().mPartTrackLocMaxDist * 2.f;
-			// this constant needs to be bigger for some reason, or the jitters come and
-			// inappropriately destroy our parts
+		return distance( o->mLoc, mLoc ) < min( mRadius, o->mRadius ) ;
+			// this constant needs to be bigger than mPartTrackLocMaxDist otherwise it jitters.
+			// why? because as the angle of the contour jitters it shoots us off far away.
+			// so we know the contour is the same, so we can be liberal here.
 	}
 	else return true;
 }

@@ -119,6 +119,7 @@ void PinballWorld::setParams( XmlTree xml )
 	getXml(xml, "RolloverTargetMinWallDist",mRolloverTargetMinWallDist);
 	getXml(xml, "RolloverTargetOnColor",mRolloverTargetOnColor);
 	getXml(xml, "RolloverTargetOffColor",mRolloverTargetOffColor);
+	getXml(xml, "RolloverTargetDynamicRadius",mRolloverTargetDynamicRadius);
 	
 	getXml(xml, "CircleMinVerts", mCircleMinVerts );
 	getXml(xml, "CircleMaxVerts", mCircleMaxVerts );
@@ -403,11 +404,11 @@ void PinballWorld::draw( DrawType drawType )
 
 void PinballWorld::draw2d( DrawType drawType )
 {
-	// balls
-	BallWorld::draw(drawType);
-	
 	// flippers, etc...
 	drawParts();
+
+	// balls
+	BallWorld::draw(drawType);
 }
 
 void PinballWorld::beginDraw3d() const
@@ -900,7 +901,7 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 		{
 			// non-hole:
 			
-			// rollover target
+			// make rollover target
 			auto filter = [this,contours]( const Contour& c ) -> bool {
 				return !shouldContourBeAPart(c,contours);
 			};
@@ -911,15 +912,24 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 			contours.findClosestContour(c.mCenter,&closestPt,&dist,filter);
 			
 			vec2 rolloverLoc = c.mCenter;
+			float r = mRolloverTargetRadius;
 			
 			if ( closestPt != c.mCenter )
 			{
 				vec2 dir = normalize( closestPt - c.mCenter );
+
+				float far=0.f;
 				
-				rolloverLoc = closestPt + dir * mRolloverTargetRadius;
+				if (mRolloverTargetDynamicRadius)
+				{
+					r = max( r, distance(closestPt,c.mCenter) - c.mRadius );
+					far = r;
+				}
+				
+				rolloverLoc = closestPt + dir * (r+far);
 			}
 			
-			auto rt = new RolloverTarget(*this,rolloverLoc,mRolloverTargetRadius);
+			auto rt = new RolloverTarget(*this,rolloverLoc,r);
 			rt->mContourPoly = c.mPolyLine;
 			
 			add( rt );

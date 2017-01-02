@@ -70,7 +70,7 @@ public:
 	
 	// part params for inter-frame coherence
 	float mPartTrackLocMaxDist = 1.f;
-	float mPartTrackRadiusMaxDist = .5f;	
+	float mPartTrackRadiusMaxDist = .5f;
 	
 	// debug params
 	bool mDebugDrawFlipperAccelHairs=false;
@@ -106,6 +106,7 @@ private:
 	
 	float mRolloverTargetRadius=1.f;
 	float mRolloverTargetMinWallDist=1.f;
+	bool  mRolloverTargetDynamicRadius=false;
 	
 	bool mDebugDrawAdjSpaceRays=false;
 	bool mDebugDrawGeneratedContours=false;

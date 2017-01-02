@@ -69,6 +69,7 @@
 	
 	<RolloverTargetRadius>1</RolloverTargetRadius>
 	<RolloverTargetMinWallDist>1</RolloverTargetMinWallDist>
+	<RolloverTargetDynamicRadius>1</RolloverTargetDynamicRadius>
 
 	<RolloverTargetOnColor>22FF55</RolloverTargetOnColor>
 	<RolloverTargetOffColor>0055CC</RolloverTargetOffColor>
