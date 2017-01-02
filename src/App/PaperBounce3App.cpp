@@ -222,6 +222,10 @@ void PaperBounce3App::setup()
 		mMainWindow->setFullScreen(true) ;
 	}
 
+	mMainWindow->getSignalMove()  .connect( [&]{ this->saveUserSettings(); });
+	mMainWindow->getSignalResize().connect( [&]{ this->saveUserSettings(); });
+	
+
 	// aux UI display
 	if (mHasConfigWindow)
 	{
@@ -243,6 +247,10 @@ void PaperBounce3App::setup()
 		{
 			mUIWindow->setPos( mMainWindow->getPos() + ivec2( -mMainWindow->getWidth()-16,0) ) ;
 		}
+		
+		// save changes (do this AFTER we set it up, so we don't save initial conditions!)
+		mUIWindow->getSignalMove()  .connect( [&]{ this->saveUserSettings(); });
+		mUIWindow->getSignalResize().connect( [&]{ this->saveUserSettings(); });
 	}
 	
 	// load the games, rfid functions
@@ -258,7 +266,7 @@ void PaperBounce3App::setup()
 			loadUserSettingsFromXml(xml.getChild("settings"));
 		}
 	});
-
+	
 	// load default game (or command line arg)
 	if ( !mGameWorld || !cmdLineArgGameName.empty() ) { // because loadUserSettingsFromXml might have done it
 		loadDefaultGame(cmdLineArgGameName);
@@ -967,11 +975,13 @@ void PaperBounce3App::keyDown( KeyEvent event )
 			case KeyEvent::KEY_UP:
 				if (event.isMetaDown()) mPipeline.setQuery( mPipeline.getFirstStageName() );
 				else mPipeline.setQuery( mPipeline.getPrevStageName(mPipeline.getQuery() ) );
+				saveUserSettings();
 				break;
 				
 			case KeyEvent::KEY_DOWN:
 				if (event.isMetaDown()) mPipeline.setQuery( mPipeline.getLastStageName() );
 				else mPipeline.setQuery( mPipeline.getNextStageName(mPipeline.getQuery() ) );
+				saveUserSettings();
 				break;
 			
 			case KeyEvent::KEY_LEFT:
@@ -1067,6 +1077,32 @@ void PaperBounce3App::loadUserSettingsFromXml( XmlTree xml )
 			else cout << "loadUserSettingsFromXml: unknown game world " << name << endl;
 		}
 	}
+	
+	if ( xml.hasChild("PipelineQuery") )
+	{
+		string name = xml.getChild("PipelineQuery").getValue();
+		mPipeline.setQuery(name);
+	}
+	
+	auto getWindowBounds = [&xml]( string xmlName, WindowRef win )
+	{
+		if ( xml.hasChild(xmlName) && win )
+		{
+			try {
+				string val = xml.getChild(xmlName).getValue();
+				
+				Area a;
+				if ( sscanf(val.c_str(), "(%d, %d)-(%d, %d)",&a.x1,&a.y1,&a.x2,&a.y2)==4 )
+				{
+					win->setSize(a.getSize());
+					win->setPos (a.getUL());
+				}
+			} catch (...) {}
+		}
+	};
+	
+	getWindowBounds( "UIWindowBounds", mUIWindow );
+	getWindowBounds( "MainWindowBounds", mMainWindow );
 }
 
 XmlTree PaperBounce3App::getUserSettingsXml() const
@@ -1077,6 +1113,15 @@ XmlTree PaperBounce3App::getUserSettingsXml() const
 	{
 		xml.push_back( XmlTree("GameWorld",mGameWorld->getSystemName()) );
 	}
+	
+	xml.push_back( XmlTree("PipelineQuery",mPipeline.getQuery()) );
+	
+	auto setWindowBounds = [&xml]( string xmlName, WindowRef win ) {
+		if (win) xml.push_back( XmlTree(xmlName,  toString(win->getBounds()+win->getPos())) );
+	};
+	
+	setWindowBounds("UIWindowBounds",mUIWindow);
+	setWindowBounds("MainWindowBounds",mMainWindow);
 	
 	return xml;
 }
