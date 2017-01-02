@@ -11,7 +11,7 @@
 			<ContourMinRadius>			1.5	</ContourMinRadius>
 			<ContourMinArea>			3	</ContourMinArea>
 			<ContourDPEpsilon>			5	</ContourDPEpsilon>
-			<ContourMinWidth>			3	</ContourMinWidth>
+			<ContourMinWidth>			2	</ContourMinWidth>
 		</Contours>
 
 	</Vision>
@@ -21,14 +21,15 @@
 <!--	What strategies to allow	-->
 		<AllowSubset>1</AllowSubset>
 		<AllowSuperset>1</AllowSuperset>
+		<AllowFragment>1</AllowFragment>
 
 <!--	Filters. (Last two should/could be identical to Vision/Contours)	-->
 		<InteriorAngleMaxDelta>5</InteriorAngleMaxDelta>
-		<MinRectWidth>3</MinRectWidth>
+		<MinRectWidth>2</MinRectWidth>
 		<MinRectArea>9</MinRectArea>
 		
 <!--	Tuning params	-->
-		<MaxGainAreaFrac>.2</MaxGainAreaFrac>
+		<MaxGainAreaFrac>.3</MaxGainAreaFrac>
 		<SubsetRectMinPerimOverlapFrac>.8</TheorizedRectMinPerimOverlapFrac>
 		<EdgeOverlapDistAttenuate>1</EdgeOverlapDistAttenuate>
 		
