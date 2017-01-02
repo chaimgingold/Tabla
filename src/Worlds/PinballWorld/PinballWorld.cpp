@@ -634,21 +634,30 @@ void PinballWorld::drawAdjSpaceRays() const
 		vec2 loc = p->getAdjSpaceOrigin();
 		
 		const AdjSpace space = getAdjacentSpace(loc,mVisionContours);
-		
-		gl::color(1,0,0);
-		gl::drawLine(
-			loc + getRightVec() *  space.mWidthRight,
-			loc + getRightVec() * (space.mWidthRight + space.mRight) );
 
-		gl::color(0,1,0);
-		gl::drawLine(
-			loc + getLeftVec()  *  space.mWidthLeft,
-			loc + getLeftVec()  * (space.mWidthLeft + space.mLeft) );
+		auto draw = [&]( ColorA color, vec2 vec, float width, float m )
+		{
+			gl::color(color);
+			gl::drawLine(
+				loc + vec *  width,
+				loc + vec * (width + m) );
+		};
+		
+		draw( Color(1,0,0), getRightVec(), space.mWidthRight, space.mRight );
+		draw( Color(0,1,0), getLeftVec(), space.mWidthLeft, space.mLeft );
+		draw( Color(1,0,0), getUpVec(), space.mWidthUp, space.mUp );
+		draw( Color(0,1,0), getDownVec(), space.mWidthDown, space.mDown );
+
 
 		gl::color(0,0,1);
 		gl::drawLine(
 			loc + getLeftVec ()  * space.mWidthLeft,
 			loc + getRightVec()  * space.mWidthRight );
+
+		gl::color(0,0,1);
+		gl::drawLine(
+			loc + getUpVec  ()  * space.mWidthUp,
+			loc + getDownVec()  * space.mWidthDown );
 	}
 }
 
@@ -791,15 +800,19 @@ PinballWorld::getAdjacentSpace( const Contour* leaf, vec2 loc, const ContourVect
 	if (leaf)
 	{
 		float far = leaf->mRadius * 2.f;
-		float t;
 		
-		if ( leaf->rayIntersection(loc + getLeftVec() * far, getRightVec(), &t) ) {
-			result.mWidthLeft = far - t;
-		}
-
-		if ( leaf->rayIntersection(loc + getRightVec() * far, getLeftVec(), &t) ) {
-			result.mWidthRight = far - t;
-		}
+		auto calcSize = [&]( vec2 vec, float& result )
+		{
+			float t;
+			if ( leaf->rayIntersection(loc + vec * far, -vec, &t) ) {
+				result = far - t;
+			}
+		};
+		
+		calcSize( getLeftVec(), result.mWidthLeft );
+		calcSize( getRightVec(), result.mWidthRight );
+		calcSize( getUpVec(), result.mWidthUp );
+		calcSize( getDownVec(), result.mWidthDown );
 	}
 	
 	auto filter = [&]( const Contour& c ) -> bool
@@ -815,10 +828,14 @@ PinballWorld::getAdjacentSpace( const Contour* leaf, vec2 loc, const ContourVect
 	
 	cs.rayIntersection( loc, getRightVec(), &result.mRight, filter );
 	cs.rayIntersection( loc, getLeftVec (), &result.mLeft , filter );
+	cs.rayIntersection( loc, getUpVec(),    &result.mUp , filter );
+	cs.rayIntersection( loc, getDownVec(),  &result.mDown , filter );
 	
 	// bake in contour width into adjacent space calc
 	result.mLeft  -= result.mWidthLeft;
 	result.mRight -= result.mWidthRight;
+	result.mUp    -= result.mWidthUp;
+	result.mDown  -= result.mWidthDown;
 	
 	return result;
 }
@@ -852,28 +869,15 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 			}
 			else if ( closeToLeft && !closeToRight )
 			{
-				
 				add( new Flipper(*this, c.mCenter, c.mRadius, PartType::FlipperLeft) );
 			}
-//			else if (adjSpace.mLeft  < 1.f) // < epsilon
+//			else if ( closeToLeft && closeToRight && closeToBottom )
 //			{
-				// zero!
-				// plunger?
-				// something else?
-//				p.mType = PartType::FlipperLeft;
+				// plunger
 //			}
 			else
 			{
-				
 				add( new Bumper( *this, c.mCenter, c.mRadius, adjSpace ) );
-				
-				// equal, and there really is space, so just pick something.
-//				p.mType = PartType::FlipperLeft;
-				
-				// we could have a fuzzier sense of equal (left > right + kDelta),
-				// which would allow us to have something different at the center of a space (where distance is equal-ish)
-				// (like a bumper!)
-				// or even a rule that said left is only when a left edge is within x space at left (eg), so very tight proximity rules.
 			}
 		} // hole
 	} // for

@@ -44,7 +44,9 @@ public:
 	vec2 getUpVec() const { return mUpVec; }
 	vec2 getLeftVec() const { return vec2(cross(vec3(mUpVec,0),vec3(0,0,1))); }
 	vec2 getRightVec() const { return -getLeftVec(); }
-	vec2 getGravityVec() const { return -mUpVec; }
+	vec2 getDownVec() const { return -mUpVec; }
+	vec2 getGravityVec() const { return getDownVec(); } // sugar
+	
 	
 	float getTableDepth() const { return m3dTableDepth; }
 	

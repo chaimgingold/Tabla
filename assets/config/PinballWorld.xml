@@ -38,7 +38,7 @@
 	</Vision>
 
 <!-- Debug -->
-	<DebugDrawAdjSpaceRays>0</DebugDrawAdjSpaceRays>
+	<DebugDrawAdjSpaceRays>1</DebugDrawAdjSpaceRays>
 	<DebugDrawGeneratedContours>0</DebugDrawGeneratedContours>
 	<DebugDrawFlipperAccelHairs>0</DebugDrawFlipperAccelHairs>
 		

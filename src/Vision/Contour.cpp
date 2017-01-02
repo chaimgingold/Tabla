@@ -124,7 +124,7 @@ ContourVector& ContourVector::operator+=(const ContourVector& rhs)
 	return *this;
 }
 
-const Contour* ContourVector::rayIntersection( vec2 rayOrigin, vec2 rayVec, float *rayt, std::function<bool(const Contour&)> filter ) const
+const Contour* ContourVector::rayIntersection( vec2 rayOrigin, vec2 rayVec, float *rayt, Filter filter ) const
 {
 	float m = MAXFLOAT;
 	const Contour* hit=0;

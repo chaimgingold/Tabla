@@ -24,10 +24,14 @@ struct AdjSpace
 	// amount of space at my left and right, from my contour's outer edge (centroid + my-width-left/right)
 	float mLeft=0.f;
 	float mRight=0.f;
+	float mUp=0.f;
+	float mDown=0.f;
 	
 	// width of my contour, from its centroid
 	float mWidthLeft=0.f;
 	float mWidthRight=0.f;
+	float mWidthUp=0.f;
+	float mWidthDown=0.f;
 };
 
 enum class PartType
