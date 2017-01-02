@@ -621,9 +621,17 @@ void PinballWorld::draw3d( DrawType drawType )
 	}
 
 	// 2d stuff at table level (slap it on top)
-	// (will all draw at z=0)	
-	BallWorld::draw(drawType);
-
+	// (will all draw at z=0)
+	gl::pushModelView();
+	gl::translate(0,0,m3dTableDepth - mBallDefaultRadius*.5f);
+	
+	gl::enableDepthWrite(false);
+//	BallWorld::draw(drawType);
+	BallWorld::drawRibbons(drawType);
+	gl::enableDepthWrite(true);
+	BallWorld::drawBalls(drawType);
+	gl::popModelView();
+	
 //	gl::enableDepthWrite(true);
 
 	// done with 3d
