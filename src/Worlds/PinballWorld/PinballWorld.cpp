@@ -6,6 +6,7 @@
 //
 //
 
+#include "PaperBounce3App.h"
 #include "glm/glm.hpp"
 #include "PinballWorld.h"
 #include "PinballParts.h"
@@ -82,6 +83,26 @@ PinballWorld::PinballWorld()
 	mGamepadFunctions["flippers-left-up"]    = [this]() { mIsFlipperDown[0] = false; };
 	mGamepadFunctions["flippers-right-down"] = [this]() { mIsFlipperDown[1] = true; };
 	mGamepadFunctions["flippers-right-up"]   = [this]() { mIsFlipperDown[1] = false; };
+	
+	loadShaders();
+}
+
+void PinballWorld::loadShaders()
+{
+	auto load = [this]( string name, gl::GlslProgRef* to )
+	{
+		mFileWatch.loadShader(
+			PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / (name + ".vert") ),
+			PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / (name + ".frag") ),
+			[this,to](gl::GlslProgRef prog)
+		{
+			*to = prog; // allows null, so we can easily see if we broke it
+		});
+	};
+	
+	load( "pinball-wall", &mWallShader );
+	load( "pinball-ball", &mBallShader );
+	load( "pinball-floor", &mFloorShader );
 }
 
 PinballWorld::~PinballWorld()
@@ -197,6 +218,8 @@ void PinballWorld::gameWillLoad()
 
 void PinballWorld::update()
 {
+	mFileWatch.update();
+	
 	// input
 	mGamepadManager.tick();
 	tickFlipperState();
@@ -1185,9 +1208,26 @@ void PinballWorld::addContourToVec( Contour c, ContourVec& contours ) const
 void PinballWorld::setupSynthesis()
 {
 	mPureDataNode = cipd::PureDataNode::Global();
+
+	// Register file-watchers for all the major pd patch components
+	auto app = PaperBounce3App::get();
 	
+	std::vector<fs::path> paths =
+	{
+		app->hotloadableAssetPath("synths/pong.pd")
+//		app->hotloadableAssetPath("synths/music-image.pd",
+//		app->hotloadableAssetPath("synths/music-grain.pd"),
+//		app->hotloadableAssetPath("synths/music-osc.pd")
+	};
+
 	// Load pong synthesis patch
-	mPatch = mPureDataNode->loadPatch( DataSourcePath::create(getAssetPath("synths/pong.pd")) );
+	mFileWatch.load( paths, [this,app]( fs::path path )
+	{
+		// Ignore the passed-in path, we only want to reload the root patch
+		auto rootPatch = app->hotloadableAssetPath("synths/pong.pd");
+		mPureDataNode->closePatch(mPatch);
+		mPatch = mPureDataNode->loadPatch( DataSourcePath::create(rootPatch) );
+	});
 }
 
 void PinballWorld::shutdownSynthesis() {
