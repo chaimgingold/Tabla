@@ -47,7 +47,6 @@ public:
 	vec2 getDownVec() const { return -mUpVec; }
 	vec2 getGravityVec() const { return getDownVec(); } // sugar
 	
-	
 	float getTableDepth() const { return m3dTableDepth; }
 	
 	// geometry
@@ -66,6 +65,9 @@ public:
 	float mFlipperRadiusToLengthScale=5.f;	
 	ColorA mFlipperColor = ColorA(0,1,1,1);
 
+	ColorA mRolloverTargetOnColor=Color(1,0,0);
+	ColorA mRolloverTargetOffColor=Color(0,1,0);
+	
 	// part params for inter-frame coherence
 	float mPartTrackLocMaxDist = 1.f;
 	float mPartTrackRadiusMaxDist = .5f;	
@@ -102,8 +104,8 @@ private:
 	int mCircleMaxVerts=100;
 	float mCircleVertsPerPerimCm=1.f;
 	
-	float mRolloverTriggerRadius=1.f;
-	float mRolloverTriggerMinWallDist=1.f;
+	float mRolloverTargetRadius=1.f;
+	float mRolloverTargetMinWallDist=1.f;
 	
 	bool mDebugDrawAdjSpaceRays=false;
 	bool mDebugDrawGeneratedContours=false;
@@ -161,7 +163,7 @@ private:
 	
 	// vision
 	PartVec getPartsFromContours( const ContourVector& ); // only reason this is non-const is b/c parts point to the world
-	bool shouldContourBeAPart( const Contour& ) const;
+	bool shouldContourBeAPart( const Contour&, const ContourVector& ) const;
 	PartVec mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const;
 	AdjSpace getAdjacentSpace( const Contour*, vec2, const ContourVector& ) const ;
 	AdjSpace getAdjacentSpace( vec2, const ContourVector& ) const ; // how much adjacent space is to the left, right?

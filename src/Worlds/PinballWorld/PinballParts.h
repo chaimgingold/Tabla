@@ -71,7 +71,7 @@ public:
 	// we could save some cpu by having a get/set and caching it internally, but who cares right now
 	
 	virtual vec2 getAdjSpaceOrigin() const { return mContourLoc; }
-	virtual bool isValidLocForRolloverTrigger( vec2 loc, float r ) const { return true; }
+	virtual bool isValidLocForRolloverTarget( vec2 loc, float r ) const { return true; }
 	
 	PinballWorld& getWorld() const { return mWorld; }
 	PartType getType() const { return mType; }
@@ -82,7 +82,7 @@ public:
 	// inter-frame coherency + persistence
 	bool getShouldAlwaysPersist() const { return mShouldAlwaysPersist; }
 	void setShouldAlwaysPersist( bool v ) { mShouldAlwaysPersist=v; }
-	bool getShouldMergeWithOldPart( const PartRef oldPart ) const;
+	virtual bool getShouldMergeWithOldPart( const PartRef oldPart ) const;
 	
 	vec2  mContourLoc;
 	float mContourRadius=0.f;
@@ -114,7 +114,7 @@ public:
 
 	virtual void onBallCollide( Ball& ) override;
 
-	virtual bool isValidLocForRolloverTrigger( vec2 loc, float r ) const override {
+	virtual bool isValidLocForRolloverTarget( vec2 loc, float r ) const override {
 		return distance(loc,mLoc) > r + mFlipperLength;
 	}
 	
@@ -146,7 +146,7 @@ public:
 	
 	float getCollisionFade() const;
 
-	virtual bool isValidLocForRolloverTrigger( vec2 loc, float r ) const override {
+	virtual bool isValidLocForRolloverTarget( vec2 loc, float r ) const override {
 		return distance(loc,mLoc) > r + mRadius;
 	}
 	
@@ -168,20 +168,27 @@ public:
 	virtual void draw() override;
 	virtual void tick() override;
 
-	virtual bool isValidLocForRolloverTrigger( vec2 loc, float r ) const override {
+	virtual bool isValidLocForRolloverTarget( vec2 loc, float r ) const override {
 		return distance(loc,mLoc) > r + mRadius;
 	}
 
+	virtual bool getShouldMergeWithOldPart( const PartRef oldPart ) const override;
+
 	float mRadius;
 	vec2  mLoc;
+	PolyLine2 mContourPoly; // so we can strobe it!
+	
+	ColorA mColorOff, mColorOn;
 	
 private:
 	void setIsLit( bool );
 
 	bool  mIsLit=false; // discrete goal
 	float mLight=0.f; // continues, current anim state.
-	
-	ColorA mColorOff, mColorOn;
+
+	float getCollisionFade() const;
+	float mCollideTime = -10.f;
+
 };
 
 } // namespace

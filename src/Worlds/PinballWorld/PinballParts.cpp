@@ -24,7 +24,6 @@ bool Part::getShouldMergeWithOldPart( const PartRef old ) const
 		 distance( old->mContourLoc, mContourLoc ) < getWorld().mPartTrackLocMaxDist &&
 		 fabs( old->mContourRadius - mContourRadius ) < getWorld().mPartTrackRadiusMaxDist
 		;
-	
 }
 
 Flipper::Flipper( PinballWorld& world, vec2 pin, float contourRadius, PartType type )
@@ -229,14 +228,22 @@ RolloverTarget::RolloverTarget( PinballWorld& world, vec2 pin, float radius )
 	, mLoc(pin)
 	, mRadius(radius)
 {
-	mColorOff = ColorA(0,.4,.1);
-	mColorOn  = ColorA(.8,1.,.1);
+	mColorOff = getWorld().mRolloverTargetOffColor;
+	mColorOn  = getWorld().mRolloverTargetOnColor;
 }
 
 void RolloverTarget::draw()
 {
-	gl::color( lerp(mColorOff,mColorOn,mLight) );
+	float collideFade = getCollisionFade();
+	
+	gl::color( lerp( lerp(mColorOff,mColorOn,mLight), ColorA(1,1,1,1), collideFade ) );
 	gl::drawSolidCircle(mLoc, mRadius);
+	
+	if ( mContourPoly.size()>0 && collideFade > 0.f )
+	{
+		gl::color( mColorOn * ColorA(1,1,1,collideFade) );
+		gl::drawSolid(mContourPoly);
+	}
 }
 
 void RolloverTarget::tick()
@@ -249,12 +256,13 @@ void RolloverTarget::tick()
 	const auto &balls = getWorld().getBalls();
 	
 	if (balls.empty()) setIsLit(false);
-	else if ( !mIsLit )
+	else //if ( !mIsLit )
 	{
 		for ( auto &b : balls )
 		{
 			if ( distance(b.mLoc,mLoc) < mRadius + b.mRadius )
 			{
+				mCollideTime = getWorld().time();
 				setIsLit(true);
 				break;
 			}
@@ -266,4 +274,30 @@ void RolloverTarget::setIsLit( bool v )
 {
 	mIsLit=v;
 //	setType( v ? PartType::RolloverTargetOn : PartType::RolloverTargetOff );
+}
+
+float RolloverTarget::getCollisionFade() const
+{
+	const float k = .5f;
+	
+	float t = 1.f - (getWorld().time() - mCollideTime) / k;
+	
+	t = constrain( t, 0.f, 1.f);
+	
+	return t;
+}
+
+bool RolloverTarget::getShouldMergeWithOldPart( const PartRef old ) const
+{
+	if ( !Part::getShouldMergeWithOldPart(old) ) return false;
+	
+	if ( old->getType() == PartType::RolloverTarget )
+	{
+		auto o = dynamic_cast<RolloverTarget*>(old.get());
+		assert(o);
+		return distance( o->mLoc, mLoc ) < getWorld().mPartTrackLocMaxDist * 2.f;
+			// this constant needs to be bigger for some reason, or the jitters come and
+			// inappropriately destroy our parts
+	}
+	else return true;
 }

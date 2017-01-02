@@ -38,7 +38,7 @@
 	</Vision>
 
 <!-- Debug -->
-	<DebugDrawAdjSpaceRays>1</DebugDrawAdjSpaceRays>
+	<DebugDrawAdjSpaceRays>0</DebugDrawAdjSpaceRays>
 	<DebugDrawGeneratedContours>0</DebugDrawGeneratedContours>
 	<DebugDrawFlipperAccelHairs>0</DebugDrawFlipperAccelHairs>
 		
@@ -67,8 +67,11 @@
 	<BumperOuterColor>FF0000</BumperOuterColor>
 	<BumperInnerColor>FFCC00</BumperInnerColor>
 	
-	<RolloverTriggerRadius>1</RolloverTriggerRadius>
-	<RolloverTriggerMinWallDist>1</RolloverTriggerMinWallDist>
+	<RolloverTargetRadius>1</RolloverTargetRadius>
+	<RolloverTargetMinWallDist>1</RolloverTargetMinWallDist>
+
+	<RolloverTargetOnColor>22FF55</RolloverTargetOnColor>
+	<RolloverTargetOffColor>0055CC</RolloverTargetOffColor>
 
 	<FlipperMinLength>1</FlipperMinLength>
 	<FlipperMaxLength>10</FlipperMaxLength>
