@@ -320,13 +320,18 @@ void PinballWorld::processCollisions()
 	
 	for( const auto &c : getBallContourCollisions() )
 	{
-//		mPureDataNode->sendBang("hit-object");
+
 
 		if (0) cout << "ball contour collide (ball=" << c.mBallIndex << ", " << c.mContourIndex << ")" << endl;
 		
 		// tell part
 		PartRef p = findPartForContour(c.mContourIndex);
 		if (p) {
+
+			if (p.get()->getType() == PartType::Bumper) {
+				mPureDataNode->sendBang("hit-object");
+			}
+
 			
 			Ball* ball=0;
 			if (c.mBallIndex>=0 && c.mBallIndex<=getBalls().size())
@@ -1178,11 +1183,11 @@ void PinballWorld::setupSynthesis()
 {
 	mPureDataNode = cipd::PureDataNode::Global();
 	
-	// Load pong synthesis patch
-	mPatch = mPureDataNode->loadPatch( DataSourcePath::create(getAssetPath("synths/pong.pd")) );
+	// Load pinball synthesis patch
+	mPatch = mPureDataNode->loadPatch( DataSourcePath::create(getAssetPath("synths/pinball-world.pd")) );
 }
 
 void PinballWorld::shutdownSynthesis() {
-	// Close pong synthesis patch
+	// Close pinball synthesis patch
 	mPureDataNode->closePatch(mPatch);
 }

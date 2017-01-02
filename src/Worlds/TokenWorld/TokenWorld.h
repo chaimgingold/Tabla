@@ -65,7 +65,6 @@ private:
 
 	TokenMatcher mTokenMatcher;
 
-
 	Pipeline::StageRef mWorld;
 
 	vector<cv::KeyPoint> mGlobalKeypoints;
