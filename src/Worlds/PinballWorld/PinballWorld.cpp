@@ -28,15 +28,7 @@ PinballWorld::PinballWorld()
 {
 	setupSynthesis();
 	setupControls();
-	loadShaders();
-
-	{
-		ci::geom::Sphere sphereGeom;
-		sphereGeom.colors(false);
-		sphereGeom.radius(1.f);
-		sphereGeom.center(vec3(0,0,0));
-		mBallMesh = gl::VboMesh::create(sphereGeom);
-	}
+	setupGraphics();
 }
 
 void PinballWorld::setupControls()
@@ -99,8 +91,16 @@ void PinballWorld::setupControls()
 	mGamepadFunctions["flippers-right-up"]   = [this]() { mIsFlipperDown[1] = false; };
 }
 
-void PinballWorld::loadShaders()
+void PinballWorld::setupGraphics()
 {
+	{
+		ci::geom::Sphere sphereGeom;
+		sphereGeom.colors(false);
+		sphereGeom.radius(1.f);
+		sphereGeom.center(vec3(0,0,0));
+		mBallMesh = gl::VboMesh::create(sphereGeom);
+	}
+
 	auto load = [this]( string name, gl::GlslProgRef* to, std::function<void(void)> f )
 	{
 		mFileWatch.loadShader(
@@ -426,6 +426,13 @@ void PinballWorld::drawBallCullLine() const
 		fromPlayfieldSpace(vec2(mPlayfieldBallReclaimX[1],mPlayfieldBallReclaimY)) ) ;
 }
 
+void PinballWorld::prepareToDraw()
+{
+	BallWorld::prepareToDraw();
+	
+	if (m3dEnable) prepare3dScene();
+}
+
 void PinballWorld::draw( DrawType drawType )
 {
 	// world
@@ -611,12 +618,14 @@ Shape2d PinballWorld::polyToShape( const PolyLine2& poly ) const
 	return shape;
 }
 
-TriMesh PinballWorld::get3dMeshForPoly( const PolyLine2& poly, float znear, float zfar ) const
+TriMeshRef PinballWorld::get3dMeshForPoly( const PolyLine2& poly, float znear, float zfar ) const
 {
 	float extrudeDepth = zfar - znear;
 	
 	std::function<Colorf(vec3)> posToColor = [&]( vec3 v ) -> Colorf
 	{
+		return Colorf(1,1,1);
+		
 		return lerp(
 //			Colorf(0,1,0),
 //			Colorf(1,0,0),
@@ -630,26 +639,32 @@ TriMesh PinballWorld::get3dMeshForPoly( const PolyLine2& poly, float znear, floa
 //	PolyLine2 poly=c.mPolyLine;
 //			poly.reverse(); // turn it inside out, so normals face inward
 	
-	auto src = geom::Extrude( polyToShape(poly), extrudeDepth ).caps(false).subdivisions( 1 );
-	auto dst = src >> geom::Translate(0,0,extrudeDepth/2+znear) >> geom::ColorFromAttrib( geom::POSITION, posToColor ) ;
-	
-	TriMesh mesh(dst);
-
-	return mesh;
+	return TriMesh::create(
+		   geom::Extrude( polyToShape(poly), extrudeDepth ).caps(false).subdivisions( 1 )
+		>> geom::Translate(0,0,extrudeDepth/2+znear)
+		>> geom::ColorFromAttrib( geom::POSITION, posToColor )
+	);
 }
 
-/*gl::BatchRef PinballWorld::getBallDrawBatch() const
+void PinballWorld::prepare3dScene()
 {
-	if (mBallShader)
+	mDrawScene = Scene();
+	
+	// 3d contours
+	for( const auto &c : mVisionContours )
 	{
-		ci::geom::Sphere sphereGeom;
-		sphereGeom.colors(false);
-		sphereGeom.radius(1.f);
-		sphereGeom.center(vec3(0,0,0));
-		return gl::Batch::create( sphereGeom, mBallShader );
+		if ( !shouldContourBeAPart(c,mVisionContours) )
+		{
+			mDrawScene.mWalls.push_back( get3dMeshForPoly(c.mPolyLine,0.f,m3dTableDepth) );
+		}
 	}
-	else return 0;
-}*/
+
+	// 3d part sides
+	for( auto &p : mParts )
+	{
+		p->addTo3dScene(mDrawScene);
+	}
+}
 
 void PinballWorld::draw3d( DrawType drawType )
 {
@@ -681,22 +696,12 @@ void PinballWorld::draw3d( DrawType drawType )
 	{
 		gl::ScopedGlslProg glslScp(mWallShader);
 		
-		// 3d contours
-		for( const auto &c : mVisionContours )
-		{
-			if ( !shouldContourBeAPart(c,mVisionContours) )
-			{
-				gl::draw( get3dMeshForPoly(c.mPolyLine,0.f,m3dTableDepth) );
-			}
-		}
-
-		// 3d part sides
-		for( const auto &p : mParts )
-		{
-			PolyLine2 poly = p->getCollisionPoly();
-			
-			if (poly.size()>0) {
-				gl::draw( get3dMeshForPoly(poly,0.f,m3dTableDepth) );
+		// mDrawScene is assembled in prepare3dScene
+		for( auto w : mDrawScene.mWalls ) {
+			if (w.mMesh) {
+				gl::ScopedModelMatrix trans;
+				gl::multModelMatrix(w.mTransform);
+				gl::draw(*w.mMesh);
 			}
 		}
 	}
@@ -724,21 +729,16 @@ void PinballWorld::draw3d( DrawType drawType )
 	{
 		gl::ScopedGlslProg glslScp(mBallShader);
 		
-		if (mCubeMap)
-		{
+		if (mCubeMap) {
 			mCubeMap->bind();
 			mBallShader->uniform( "uCubeMapTex" , 0 );
 		}
 		
 		for( const auto &b : getBalls() )
 		{
-			mat4 fixNormalMatrix;
-
 			gl::ScopedModelMatrix model;
-			gl::multModelMatrix( getBallTransform(b,&fixNormalMatrix) );
+			gl::multModelMatrix( getBallTransform(b) );
 			gl::translate(0,0,m3dTableDepth-b.mRadius/2);
-			
-//			mBallShader->uniform("fixNormalMatrix",fixNormalMatrix);
 			gl::draw(mBallMesh);
 		}
 	}

@@ -18,6 +18,7 @@ namespace Pinball
 {
 
 class PinballWorld;
+class Scene;
 
 struct AdjSpace
 {
@@ -63,6 +64,7 @@ public:
 	
 	virtual void draw(){}
 	virtual void tick(){}
+	virtual void addTo3dScene( Scene& ){}
 	
 	bool isFlipper() const { return mType==PartType::FlipperLeft || mType==PartType::FlipperRight; }
 	
@@ -90,6 +92,7 @@ public:
 		// might be most logical to just store the whole Contour, so a vector of Contours we are based on.
 
 protected:
+	void addExtrudedCollisionPolyToScene( Scene&, ColorA ) const;
 	void setType( PartType t ) { mType=t; }
 	
 private:
@@ -106,6 +109,7 @@ public:
 	
 	virtual void draw() override;
 	virtual void tick() override;
+	virtual void addTo3dScene( Scene& ) override;
 
 	virtual PolyLine2 getCollisionPoly() const override;
 
@@ -136,6 +140,7 @@ public:
 
 	virtual void draw() override;
 	virtual void tick() override;
+	virtual void addTo3dScene( Scene& ) override;
 
 	virtual void onBallCollide( Ball& ) override;
 
@@ -156,7 +161,7 @@ private:
 	float mCollideTime = -10.f;
 
 	ColorA mColor = ColorA(1,1,1,1);
-	
+	ColorA mStrobeColor;
 };
 
 class RolloverTarget : public Part

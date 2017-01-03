@@ -26,6 +26,28 @@ bool Part::getShouldMergeWithOldPart( const PartRef old ) const
 		;
 }
 
+void Part::addExtrudedCollisionPolyToScene( Scene& s, ColorA c ) const
+{
+	float znear = 0.f;
+	float zfar  = getWorld().getTableDepth();
+	float extrudeDepth = zfar - znear ;
+	
+	PolyLine2 poly = getCollisionPoly();
+	assert(poly.size()>0);
+	
+	std::function<Colorf(vec3)> posToColor = [&]( vec3 v ) -> Colorf
+	{
+		return c;
+	};
+	
+	auto mesh = TriMesh::create(
+		   geom::Extrude( getWorld().polyToShape(poly), extrudeDepth ).caps(false).subdivisions( 1 )
+		>> geom::Translate(0,0,extrudeDepth/2+znear)
+		>> geom::ColorFromAttrib( geom::POSITION, posToColor ));
+	
+	s.mWalls.push_back( mesh );
+}
+
 Flipper::Flipper( PinballWorld& world, vec2 pin, float contourRadius, PartType type )
 	: Part(world,type)
 {
@@ -78,6 +100,11 @@ void Flipper::draw()
 		hair( vec2(lerp(r.x1,r.x2,.5),r.y2) );
 		hair( vec2(lerp(r.x1,r.x2,.5),r.y1) );
 	}
+}
+
+void Flipper::addTo3dScene( Scene& s )
+{
+	addExtrudedCollisionPolyToScene(s, lerp(getWorld().mFlipperColor,ColorA(1,1,1,1),.5f) );
 }
 
 void Flipper::tick()
@@ -168,21 +195,13 @@ float Bumper::getDynamicRadius() const
 
 void Bumper::draw()
 {
-	ColorA color = mColor;
-	
-	if ( Rand::randFloat() < powf(getCollisionFade(),2.f) )
-	{
-		color = Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat());
-	}
-
-
 //	gl::pushModelMatrix();
 //	gl::translate( -mLoc );
 //	gl::scale( vec2(1,1) * (1.f + .1f + getCollisionFade() ) );
 //	gl::translate( mLoc );
 	
 	//gl::color(1,0,0);
-	gl::color(color);
+	gl::color(mStrobeColor);
 	gl::drawSolidCircle(mLoc, getDynamicRadius() );
 //	gl::drawSolid( getCollisionPoly() );
 
@@ -197,8 +216,19 @@ void Bumper::draw()
 	}
 }
 
+void Bumper::addTo3dScene( Scene& s )
+{
+	addExtrudedCollisionPolyToScene(s, lerp(mStrobeColor,ColorA(1,1,1,1),.5f) );
+}
+
 void Bumper::tick()
 {
+	mStrobeColor = mColor;
+	
+	if ( Rand::randFloat() < powf(getCollisionFade(),2.f) )
+	{
+		mStrobeColor = Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat());
+	}
 }
 
 PolyLine2 Bumper::getCollisionPoly() const

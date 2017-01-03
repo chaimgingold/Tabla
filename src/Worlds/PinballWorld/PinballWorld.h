@@ -18,6 +18,27 @@
 namespace Pinball
 {
 
+class Scene
+{
+public:
+	
+	struct Obj
+	{
+		Obj();
+		Obj( TriMeshRef m ) : mMesh(m) {}
+		Obj( TriMeshRef m, mat4 x ) : mMesh(m), mTransform(x) {}
+		
+		TriMeshRef mMesh;
+		mat4	   mTransform;
+	};
+	
+	typedef vector<Obj> Meshes;
+	
+	// by shader
+	Meshes mWalls;
+	
+};
+
 class PinballWorld : public BallWorld
 {
 public:
@@ -32,6 +53,7 @@ public:
 	void gameWillLoad() override;
 	void update() override;
 	void updateVision( const Vision::Output&, Pipeline& ) override;
+	void prepareToDraw() override;
 	void draw( DrawType ) override;
 	
 	void worldBoundsPolyDidChange() override;
@@ -82,18 +104,22 @@ public:
 	float getFlipperAngularVel( int side ) const; // TODO: make radians per second
 
 	const PartVec& getParts() const { return mParts; }
+
+	Shape2d polyToShape( const PolyLine2& ) const;
+	TriMeshRef get3dMeshForPoly( const PolyLine2&, float znear, float zfar ) const; // e.g. 0..1, from tabletop in 1cm	
 	
 private:
 	
 	void draw2d( DrawType );
 	
+	void prepare3dScene();
 	void draw3d( DrawType );
 	void beginDraw3d() const;
 	void endDraw3d() const;
-	Shape2d polyToShape( const PolyLine2& ) const;
-	TriMesh get3dMeshForPoly( const PolyLine2&, float znear, float zfar ) const; // e.g. 0..1, from tabletop in 1cm
-	
+
 	void drawBallCullLine() const;
+	
+	Scene mDrawScene;
 	
 	// params
 	vec2  mUpVec = vec2(0,1);
@@ -198,10 +224,10 @@ private:
 	void setupSynthesis();
 	void shutdownSynthesis();
 
-	// shaders
-	gl::TextureCubeMapRef mCubeMap;	
-	
-	void loadShaders();
+	// graphics
+	void setupGraphics();
+
+	gl::TextureCubeMapRef mCubeMap;
 	
 	gl::GlslProgRef mWallShader;
 	gl::GlslProgRef mBallShader;
