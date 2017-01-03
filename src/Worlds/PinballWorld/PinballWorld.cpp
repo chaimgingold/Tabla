@@ -162,6 +162,7 @@ void PinballWorld::setParams( XmlTree xml )
 	getXml(xml, "RolloverTargetMinWallDist",mRolloverTargetMinWallDist);
 	getXml(xml, "RolloverTargetOnColor",mRolloverTargetOnColor);
 	getXml(xml, "RolloverTargetOffColor",mRolloverTargetOffColor);
+	getXml(xml, "RolloverTargetStrobeColor",mRolloverTargetStrobeColor);
 	getXml(xml, "RolloverTargetDynamicRadius",mRolloverTargetDynamicRadius);
 	
 	getXml(xml, "CircleMinVerts", mCircleMinVerts );
@@ -239,6 +240,13 @@ void PinballWorld::gameWillLoad()
 	// most important thing is to prevent BallWorld from doing its default thing.
 }
 
+void PinballWorld::sendGameEvent( GameEvent e )
+{
+	for( auto p : mParts ) {
+		p->onGameEvent(e);
+	}
+}
+
 void PinballWorld::update()
 {
 	mFileWatch.update();
@@ -276,6 +284,8 @@ void PinballWorld::update()
 
 void PinballWorld::serveBall()
 {
+	const int oldCount = getBalls().size();
+
 	// for now, from the top
 	float fx = Rand::randFloat();
 	
@@ -287,10 +297,15 @@ void PinballWorld::serveBall()
 	
 	ball.mCollideWithContours = true;
 	ball.mColor = mBallDefaultColor; // no random colors that are set entirely in code, i think. :P
+	
+	sendGameEvent(GameEvent::ServeBall);
+	if (oldCount>0) sendGameEvent(GameEvent::ServeMultiBall);
 }
 
 void PinballWorld::cullBalls()
 {
+	const int oldCount = getBalls().size();
+	
 	// remove?
 	vector<Ball>& balls = getBalls();
 	vector<Ball> newBalls;
@@ -309,6 +324,12 @@ void PinballWorld::cullBalls()
 	}
 	
 	balls = newBalls;
+	
+	// events
+	const int newCount = balls.size();
+	
+	if (newCount==0 && oldCount>0) sendGameEvent(GameEvent::LostLastMultiBall);
+	if (newCount < oldCount) sendGameEvent(GameEvent::LostBall);
 }
 
 void PinballWorld::tickFlipperState()
@@ -335,6 +356,15 @@ void PinballWorld::tickFlipperState()
 			mFlipperState[i] = constrain( mFlipperState[i], 0.f, 1.f );
 		}
 	}
+}
+
+float PinballWorld::getStrobe( float phase, float freq ) const
+{
+	float strobe;
+	strobe = getStrobeTime();
+	strobe = fmod( strobe, freq ) / freq;
+	strobe = (cos( (strobe + phase)*M_PI*2.f) + 1.f) / 2.f;
+	return strobe;
 }
 
 float PinballWorld::getFlipperAngularVel( int side ) const

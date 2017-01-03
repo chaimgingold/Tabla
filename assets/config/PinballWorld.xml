@@ -76,7 +76,8 @@
 
 	<RolloverTargetOnColor>22FF55</RolloverTargetOnColor>
 	<RolloverTargetOffColor>0055CC</RolloverTargetOffColor>
-
+	<RolloverTargetStrobeColor>FF00FF</RolloverTargetStrobeColor>
+	
 	<FlipperMinLength>1</FlipperMinLength>
 	<FlipperMaxLength>10</FlipperMaxLength>
 	<FlipperRadiusToLengthScale>6</FlipperRadiusToLengthScale>

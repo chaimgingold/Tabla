@@ -270,6 +270,7 @@ RolloverTarget::RolloverTarget( PinballWorld& world, vec2 pin, float radius )
 {
 	mColorOff = getWorld().mRolloverTargetOffColor;
 	mColorOn  = getWorld().mRolloverTargetOnColor;
+	mColorStrobe = getWorld().mRolloverTargetStrobeColor;
 	
 	mStrobePhase = randBool() ? .5f : 0.f;
 }
@@ -280,25 +281,15 @@ void RolloverTarget::draw()
 	gl::translate( 0, 0, getWorld().getTableDepth() -.01f); // epsilon so we don't z-clip behind table back
 
 	float collideFade = getCollisionFade();
-	float strobe;
 	
-	{
-		float freq;
-		float phase = mStrobePhase;
-
-		if (collideFade>0.f) freq  = .15f;
-		else freq = 1.5f;
-		
-		if (mIsLit && collideFade==0.f) phase=0.f;
-		
-		strobe = getWorld().getStrobeTime();
-		strobe = fmod( strobe, freq ) / freq;
-		strobe = (cos( (strobe + phase)*M_PI*2.f) + 1.f) / 2.f;
-	}
+	float strobe = getWorld().getStrobe(
+		(mIsLit && collideFade==0.f) ? 0.f : mStrobePhase,
+		collideFade > 0.f ? .15f : 1.5f
+	);
 	
 	ColorA c = lerp(
 		lerp(mColorOff,mColorOn,mLight),
-		lerp(ColorA(1,0,1,1),mColorOff,mLight),
+		lerp(mColorStrobe,mColorOff,mLight),
 		strobe );
 	
 	gl::color(c);
@@ -314,7 +305,7 @@ void RolloverTarget::draw()
 //		gl::color( mColorOn * ColorA(1,1,1,collideFade) );
 
 		if ( collideFade > 0.f ) gl::color(c);
-		else gl::color( Color(1,0,1) * strobe );
+		else gl::color( mColorStrobe * strobe );
 //		gl::color( c );
 		gl::drawSolid(mContourPoly);
 	}
@@ -326,7 +317,10 @@ void RolloverTarget::tick()
 	
 	const auto &balls = getWorld().getBalls();
 	
-	if (balls.empty()) setIsLit(false);
+	if (balls.empty())
+	{
+		setIsLit(false);
+	}
 	else //if ( !mIsLit )
 	{
 		for ( auto &b : balls )
@@ -334,6 +328,7 @@ void RolloverTarget::tick()
 			if ( distance(b.mLoc,mLoc) < mRadius + b.mRadius )
 			{
 				mCollideTime = getWorld().getTime();
+				mCollideFade = .75f;
 				setIsLit(true);
 				break;
 			}
@@ -347,11 +342,27 @@ void RolloverTarget::setIsLit( bool v )
 //	setType( v ? PartType::RolloverTargetOn : PartType::RolloverTargetOff );
 }
 
+void RolloverTarget::onGameEvent( GameEvent e )
+{
+	switch(e)
+	{
+		case GameEvent::LostBall:
+			mCollideTime = getWorld().getTime();
+			mCollideFade = 1.f;
+			break;
+			
+		case GameEvent::LostLastMultiBall:
+			mCollideTime = getWorld().getTime();
+			mCollideFade = 3.f;
+			break;
+			
+		default:break;
+	}
+}
+
 float RolloverTarget::getCollisionFade() const
 {
-	const float k = .5f;
-	
-	float t = 1.f - (getWorld().getTime() - mCollideTime) / k;
+	float t = 1.f - (getWorld().getTime() - mCollideTime) / mCollideFade;
 	
 	t = constrain( t, 0.f, 1.f);
 	

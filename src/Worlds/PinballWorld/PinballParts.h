@@ -20,6 +20,14 @@ namespace Pinball
 class PinballWorld;
 class Scene;
 
+enum class GameEvent
+{
+	ServeBall, // 0 => 1
+	ServeMultiBall, // >0 => +1
+	LostBall, // n => n-1
+	LostLastMultiBall // 1 => 0
+};
+
 struct AdjSpace
 {
 	// amount of space at my left and right, from my contour's outer edge (centroid + my-width-left/right)
@@ -69,7 +77,8 @@ public:
 	bool isFlipper() const { return mType==PartType::FlipperLeft || mType==PartType::FlipperRight; }
 	
 	virtual void onBallCollide( Ball& ) {}
-		
+	virtual void onGameEvent( GameEvent ) {}
+	
 	virtual PolyLine2 getCollisionPoly() const { return PolyLine2(); }
 	// we could save some cpu by having a get/set and caching it internally, but who cares right now
 	
@@ -182,7 +191,10 @@ public:
 	vec2  mLoc;
 	PolyLine2 mContourPoly; // so we can strobe it!
 	
-	ColorA mColorOff, mColorOn;
+	ColorA mColorOff, mColorOn, mColorStrobe;
+
+protected:
+	void onGameEvent( GameEvent ) override;
 	
 private:
 	void setIsLit( bool );
@@ -194,6 +206,7 @@ private:
 
 	float getCollisionFade() const;
 	float mCollideTime = -10.f;
+	float mCollideFade;
 
 };
 
