@@ -26,7 +26,12 @@ using namespace Pinball;
 PinballWorld::PinballWorld()
 {
 	setupSynthesis();
+	setupControls();
+	loadShaders();
+}
 
+void PinballWorld::setupControls()
+{
 	mIsFlipperDown[0] = false;
 	mIsFlipperDown[1] = false;
 	
@@ -83,8 +88,6 @@ PinballWorld::PinballWorld()
 	mGamepadFunctions["flippers-left-up"]    = [this]() { mIsFlipperDown[0] = false; };
 	mGamepadFunctions["flippers-right-down"] = [this]() { mIsFlipperDown[1] = true; };
 	mGamepadFunctions["flippers-right-up"]   = [this]() { mIsFlipperDown[1] = false; };
-	
-	loadShaders();
 }
 
 void PinballWorld::loadShaders()
@@ -585,45 +588,43 @@ TriMesh PinballWorld::get3dMeshForPoly( const PolyLine2& poly, float znear, floa
 void PinballWorld::draw3d( DrawType drawType )
 {
 	beginDraw3d();
-	
-	#if 0
-	auto lambert = gl::ShaderDef().lambert().color();
-	auto shader = gl::getStockShader( lambert );
-	gl::ScopedGlslProg glslScp(shader);
-	#endif
-	
-	// 3d contours
-	for( const auto &c : mVisionContours )
-	{
-		if ( !shouldContourBeAPart(c,mVisionContours) )
-		{
-			if (0)
-			{
-//					gl::color(1,0,0);
-//					gl::drawSolidCircle( c.mCenter, min(2.f,c.mRadius) );
-				gl::color(0,1,0);
-//					gl::drawCube( vec3(c.mCenter,0), vec3(1,1,1) * min(2.f,c.mRadius) * 2.f ) ;
-				gl::drawSphere( vec3(c.mCenter,0), min(2.f,c.mRadius) * 2.f ) ;
 
-				gl::color(0,1,1);
-				gl::drawSphere( vec3(c.mCenter+getRightVec()*3.f,-1), min(2.f,c.mRadius) * 1.5f ) ;
-				// +z is away from viewer
-			}
-			
-			gl::draw( get3dMeshForPoly(c.mPolyLine,0.f,m3dTableDepth) );
-		}
-	}
-
-	// 3d part sides
-	for( const auto &p : mParts )
+	if (mWallShader)
 	{
-		PolyLine2 poly = p->getCollisionPoly();
+		gl::ScopedGlslProg glslScp(mWallShader);
 		
-		if (poly.size()>0) {
-			gl::draw( get3dMeshForPoly(poly,0.f,m3dTableDepth) );
+		// 3d contours
+		for( const auto &c : mVisionContours )
+		{
+			if ( !shouldContourBeAPart(c,mVisionContours) )
+			{
+				if (0)
+				{
+	//					gl::color(1,0,0);
+	//					gl::drawSolidCircle( c.mCenter, min(2.f,c.mRadius) );
+					gl::color(0,1,0);
+	//					gl::drawCube( vec3(c.mCenter,0), vec3(1,1,1) * min(2.f,c.mRadius) * 2.f ) ;
+					gl::drawSphere( vec3(c.mCenter,0), min(2.f,c.mRadius) * 2.f ) ;
+
+					gl::color(0,1,1);
+					gl::drawSphere( vec3(c.mCenter+getRightVec()*3.f,-1), min(2.f,c.mRadius) * 1.5f ) ;
+					// +z is away from viewer
+				}
+				
+				gl::draw( get3dMeshForPoly(c.mPolyLine,0.f,m3dTableDepth) );
+			}
+		}
+
+		// 3d part sides
+		for( const auto &p : mParts )
+		{
+			PolyLine2 poly = p->getCollisionPoly();
+			
+			if (poly.size()>0) {
+				gl::draw( get3dMeshForPoly(poly,0.f,m3dTableDepth) );
+			}
 		}
 	}
-
 	
 //	gl::enableDepthWrite(false);
 	

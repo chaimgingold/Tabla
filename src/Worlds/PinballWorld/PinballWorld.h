@@ -182,6 +182,7 @@ private:
 	map<string,function<void()>> mInputToFunction; // maps input names to code handlers
 
 	// game pad
+	void setupControls();
 	GamepadManager mGamepadManager;
 	map<unsigned int,string> mGamepadButtons;
 	map<string,function<void()>> mGamepadFunctions;
