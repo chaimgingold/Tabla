@@ -413,7 +413,7 @@ void MusicWorld::setupSynthesis()
 	killAllNotes();
 
 	// Create the synth engine
-	mPureDataNode = PureDataNode::Global();
+	mPureDataNode = PaperBounce3App::get()->mPd;
 
 	// Lets us use lists to set arrays, which seems to cause less thread contention
 	mPureDataNode->setMaxMessageLength(1024);
@@ -422,7 +422,7 @@ void MusicWorld::setupSynthesis()
 		// Ignore the passed-in path, we only want to reload the root patch
 		auto rootPatch = PaperBounce3App::get()->hotloadableAssetPath("synths/music.pd");
 		mPureDataNode->closePatch(mPatch);
-		mPatch = mPureDataNode->loadPatch( DataSourcePath::create(rootPatch) );
+		mPatch = mPureDataNode->loadPatch( DataSourcePath::create(rootPatch) ).get();
 	};
 
 	// Register file-watchers for all the major pd patch components
