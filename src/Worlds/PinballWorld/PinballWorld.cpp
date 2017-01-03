@@ -92,7 +92,7 @@ void PinballWorld::setupControls()
 		cout << "flippers-right" << endl;
 	};
 	
-	mGamepadFunctions["flippers-left-down"]  = [this]() { mIsFlipperDown[0] = true; cout << "boo" << endl; };
+	mGamepadFunctions["flippers-left-down"]  = [this]() { mIsFlipperDown[0] = true; };
 	mGamepadFunctions["flippers-left-up"]    = [this]() { mIsFlipperDown[0] = false; };
 	mGamepadFunctions["flippers-right-down"] = [this]() { mIsFlipperDown[1] = true; };
 	mGamepadFunctions["flippers-right-up"]   = [this]() { mIsFlipperDown[1] = false; };
@@ -1295,15 +1295,12 @@ void PinballWorld::setupSynthesis()
 	std::vector<fs::path> paths =
 	{
 		app->hotloadableAssetPath("synths/pinball-world.pd")
-//		app->hotloadableAssetPath("synths/music-image.pd",
-//		app->hotloadableAssetPath("synths/music-grain.pd"),
-//		app->hotloadableAssetPath("synths/music-osc.pd")
 	};
 
 	// Load pinball synthesis patch
-	mFileWatch.load( paths, [this,app]( fs::path path )
+	mFileWatch.load( paths, [this,app]()
 	{
-		// Ignore the passed-in path, we only want to reload the root patch
+		// Reload the root patch
 		auto rootPatch = app->hotloadableAssetPath("synths/pinball-world.pd");
 		mPureDataNode->closePatch(mPatch);
 		mPatch = mPureDataNode->loadPatch( DataSourcePath::create(rootPatch) ).get();

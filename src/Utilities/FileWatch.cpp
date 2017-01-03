@@ -54,11 +54,16 @@ void FileWatch::load( fs::path path, tCallback func )
 	mFileWatch[path] = pair<time_t,tCallback>(modtime,func) ;
 }
 
-void FileWatch::load ( vector<fs::path> ps, tCallback func )
+void FileWatch::load ( vector<fs::path> ps, tMultiCallback func )
 {
+	auto cb = [func]( fs::path )
+	{
+		if (func) func();
+	};
+	
 	for( auto p : ps )
 	{
-		load( p, func );
+		load( p, cb );
 	}
 }
 
@@ -88,7 +93,7 @@ void FileWatch::loadShader( fs::path vert, fs::path frag, tGlslProgCallback func
 		vert, frag
 	};
 	
-	load( paths, [vert,frag,func]( fs::path )
+	load( paths, [vert,frag,func]()
 	{
 		gl::GlslProgRef shader;
 		

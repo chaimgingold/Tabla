@@ -418,18 +418,27 @@ void MusicWorld::setupSynthesis()
 	// Lets us use lists to set arrays, which seems to cause less thread contention
 	mPureDataNode->setMaxMessageLength(1024);
 
-	auto reloadPdLambda = [this]( fs::path path ){
-		// Ignore the passed-in path, we only want to reload the root patch
-		auto rootPatch = PaperBounce3App::get()->hotloadableAssetPath("synths/music.pd");
-		mPureDataNode->closePatch(mPatch);
-		mPatch = mPureDataNode->loadPatch( DataSourcePath::create(rootPatch) ).get();
+	cout << "loading patch..." << endl;
+
+	auto app = PaperBounce3App::get();
+	std::vector<fs::path> paths =
+	{
+		app->hotloadableAssetPath("synths/music.pd"),
+		app->hotloadableAssetPath("synths/music-image.pd"),
+		app->hotloadableAssetPath("synths/music-grain.pd"),
+		app->hotloadableAssetPath("synths/music-osc.pd")
 	};
 
 	// Register file-watchers for all the major pd patch components
-	mFileWatch.load( PaperBounce3App::get()->hotloadableAssetPath("synths/music.pd"),       reloadPdLambda);
-	mFileWatch.load( PaperBounce3App::get()->hotloadableAssetPath("synths/music-image.pd"), reloadPdLambda);
-	mFileWatch.load( PaperBounce3App::get()->hotloadableAssetPath("synths/music-grain.pd"), reloadPdLambda);
-	mFileWatch.load( PaperBounce3App::get()->hotloadableAssetPath("synths/music-osc.pd"),   reloadPdLambda);
+	mFileWatch.load( paths, [this,app]()
+	{
+		// Reload the root patch
+		auto rootPatch = app->hotloadableAssetPath("synths/music.pd");
+		mPureDataNode->closePatch(mPatch);
+		mPatch = mPureDataNode->loadPatch( DataSourcePath::create(rootPatch) ).get();
+	});
+
+	cout << "done loading patch." << endl;
 }
 
 void MusicWorld::cleanup() {
