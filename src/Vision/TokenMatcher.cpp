@@ -19,7 +19,10 @@ void TokenMatcher::Params::set( XmlTree xml )
 	getXml(xml,"NNMatchPercentage",mNNMatchPercentage);
 	
 	mTokenLibraryPaths.clear();
-	for( auto i = xml.begin( "Tokens" ); i != xml.end(); ++i )
+	const bool kVerbose = true;
+	if (kVerbose) cout << "Tokens:" << endl;
+
+	for( auto i = xml.begin( "Tokens/Token" ); i != xml.end(); ++i )
 	{
 		if ( i->hasChild("Path") )
 		{
@@ -28,6 +31,8 @@ void TokenMatcher::Params::set( XmlTree xml )
 			path = PaperBounce3App::get()->hotloadableAssetPath(path);
 			
 			mTokenLibraryPaths.push_back(path);
+
+			if (kVerbose) cout << "\t" << path << endl;
 		}
 	}
 }
@@ -39,7 +44,7 @@ TokenMatcher::TokenMatcher()
 	mMatcher = cv::BFMatcher(NORM_HAMMING);
 
 	mFeatureDetectors.push_back(make_pair("AKAZE", cv::AKAZE::create()));
-	mFeatureDetectors.push_back(make_pair("ORB", cv::ORB::create()));
+	mFeatureDetectors.push_back(make_pair("ORB",   cv::ORB::create()));
 	mFeatureDetectors.push_back(make_pair("BRISK", cv::BRISK::create()));
 
 	// TODO: these want some different Mat type... figure out the conversion
@@ -150,11 +155,6 @@ vector<MatchingTokenIndexPair> TokenMatcher::matchTokens( vector<TokenFeatures> 
 
 			TokenFeatures candidateToken = candidates[j];
 
-			// FIXME just for testing
-			if (focusedToken.index == candidateToken.index) {
-				continue;
-			}
-
 			// nn_matches will be same size as focusedToken.keypoints.
 			vector<vector<DMatch>> nn_matches;
 			mMatcher.knnMatch(focusedToken.descriptors,
@@ -258,6 +258,7 @@ void TokenMatcher::setParams( Params p )
 {
 	mParams=p;
 	
+	mTokenLibrary.clear();
 	for ( fs::path path : mParams.mTokenLibraryPaths )
 	{
 		cv::Mat input;

@@ -25,9 +25,9 @@ void TokenWorld::setParams( XmlTree xml )
 {
 	// we're parsing the xml data as if the <TokenWorld> xml node contains the
 	// data that would normally be within Vision/Tokens
-	TokenMatcher::Params params;
-	params.set(xml);
-	mTokenMatcher.setParams(params);
+//	TokenMatcher::Params params;
+//	params.set(xml);
+//	mTokenMatcher.setParams(params);
 }
 
 void TokenWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeline )
@@ -49,6 +49,7 @@ void TokenWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipelin
 				cout << match.mName << endl;
 			}
 //			mTokens = visionOut.mTokens;
+
 //			mTokens = mTokenMatcher.findTokenCandidates(mWorld, visionOut.mContours, pipeline);
 
 			// N-to-N matching:
