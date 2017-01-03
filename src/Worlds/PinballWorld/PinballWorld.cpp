@@ -399,8 +399,13 @@ void PinballWorld::processCollisions()
 
 	//mPureDataNode->sendList("hit-objects", hitObjects);
 	//mPureDataNode->sendList("hit-walls", hitWalls);
-	mPureDataNode->sendFloat("hit-walls", MIN(5, hitWalls));
-	mPureDataNode->sendFloat("hit-objects", MIN(5, hitObjects));
+	pd::List hitList;
+	hitList.addFloat(MIN(5, hitObjects));
+	hitList.addFloat(MIN(5, hitWalls));
+
+	mPureDataNode->sendList("hit-list", hitList);
+	//mPureDataNode->sendFloat("hit-walls", );
+	//mPureDataNode->sendFloat("hit-objects", MIN(5, hitObjects));
 }
 
 void PinballWorld::drawBallCullLine() const
