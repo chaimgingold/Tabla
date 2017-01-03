@@ -1,190 +1,220 @@
 #include "PureDataNode.h"
 
+#include "cinder/Log.h"
 #include "cinder/audio/Context.h"
 #include "cinder/audio/dsp/Converter.h"
-#include "cinder/Log.h"
 
-using namespace std;
 using namespace ci;
-
-
 
 namespace cipd {
 
-void PureDataPrintReceiver::print(const std::string& message) {
-	cout << message + "\n";
-};
-
-static mutex globalMutex;
-static PureDataNodeRef globalInstance;
-
-PureDataNodeRef PureDataNode::Global() {
-	lock_guard<mutex> lock(globalMutex);
-
-	if (!globalInstance) {
-		auto ctx = audio::master();
-		
-		// Create the synth engine
-		globalInstance = ctx->makeNode( new cipd::PureDataNode( audio::Node::Format().autoEnable() ) );
-		
-		// Connect synth to master output
-		globalInstance >> audio::master()->getOutput();
-
-		// Enable Cinder audio
-		ctx->enable();
-	}
-
-
-	
-	return globalInstance;
+PureDataNode::PureDataNode(const Format &format)
+: Node{ format }, mQueueToAudio{ 64 }, mQueueFromAudio{ 64 } {
+  if (getChannelMode() != ChannelMode::SPECIFIED) {
+    setChannelMode(ChannelMode::SPECIFIED);
+    setNumChannels(2);
+  }
 }
 
-void PureDataNode::ShutdownGlobal()
-{
-	lock_guard<mutex> lock(globalMutex);
-	
-	globalInstance.reset();
+void PureDataNode::initialize() {
+  mPdBase.setReceiver(this);
+  mNumTicksPerBlock = getFramesPerBlock() / pd::PdBase::blockSize();
+
+  auto numChannels = getNumChannels();
+  auto sampleRate = getSampleRate();
+
+  if (numChannels > 1) {
+    mBufferInterleaved = audio::BufferInterleaved(getFramesPerBlock(), numChannels);
+  }
+
+  queueTask([=](pd::PdBase &pd) {
+    bool success = pd.init(int(numChannels), int(numChannels), int(sampleRate));
+    CI_ASSERT(success);
+
+    // in libpd world, dsp computation is controlled through the process methods,
+    // so computeAudio is enabled until uninitialize.
+    pd.computeAudio(true);
+
+  });
 }
 
-PureDataNode::PureDataNode( const Format &format )
-	: Node( format )
-{
-	if( getChannelMode() != ChannelMode::SPECIFIED ) {
-		setChannelMode( ChannelMode::SPECIFIED );
-		setNumChannels( 2 );
-	}
+void PureDataNode::uninitialize() {
+  queueTask([](pd::PdBase &pd) { pd.computeAudio(false); });
 }
 
-PureDataNode::~PureDataNode()
-{
+void PureDataNode::process(audio::Buffer *buffer) {
+  {
+    QueueItem item;
+    for (bool success = true; success;) {
+      success = mQueueToAudio.try_dequeue(item);
+      if (success) {
+        switch (item.which()) {
+          case 0:
+            break;
 
+          case 1: {
+            (*boost::get<TaskPtr>(item))(mPdBase);
+          } break;
+
+          case 2: {
+            const auto &msg = boost::get<BangMessage>(item);
+            mPdBase.sendBang(msg.address);
+          } break;
+
+          case 3: {
+            const auto &msg = boost::get<FloatMessage>(item);
+            mPdBase.sendFloat(msg.address, msg.value);
+          } break;
+
+          case 4: {
+            const auto &msg = boost::get<SymbolMessage>(item);
+            mPdBase.sendSymbol(msg.address, msg.symbol);
+          } break;
+        }
+      }
+    }
+  }
+
+  if (getNumChannels() > 1) {
+    if (getNumConnectedInputs() > 0) {
+      audio::dsp::interleaveBuffer(buffer, &mBufferInterleaved);
+    }
+
+    mPdBase.processFloat(int(mNumTicksPerBlock), mBufferInterleaved.getData(),
+                         mBufferInterleaved.getData());
+
+    audio::dsp::deinterleaveBuffer(&mBufferInterleaved, buffer);
+  } else {
+    mPdBase.processFloat(int(mNumTicksPerBlock), buffer->getData(), buffer->getData());
+  }
+
+  mPdBase.receiveMessages();
 }
 
-void PureDataNode::initialize()
-{
-	mNumTicksPerBlock = getFramesPerBlock() / pd::PdBase::blockSize();
+std::future<PatchRef> PureDataNode::loadPatch(const ci::DataSourceRef &dataSource) {
+  if (!isInitialized()) {
+    getContext()->initializeNode(shared_from_this());
+  }
 
-	if( getNumChannels() > 1 )
-		mBufferInterleaved = audio::BufferInterleaved( getFramesPerBlock(), getNumChannels() );
+  const fs::path &path = dataSource->getFilePath();
 
-	lock_guard<mutex> lock( mMutex );
-
-	__unused bool success = mPdBase.init( getNumChannels(), getNumChannels(), getSampleRate() );
-	CI_ASSERT( success );
-
-	mPdReceiver = PureDataPrintReceiver();
-	mPdBase.setReceiver(&mPdReceiver);
-	// in libpd world, dsp computation is controlled through the process methods, so computeAudio is enabled until uninitialize
-	mPdBase.computeAudio( true );
+  return queueTaskWithReturn([path](pd::PdBase &pd) {
+    auto patch = pd.openPatch(path.filename().string(), path.parent_path().string());
+    if (!patch.isValid()) {
+      CI_LOG_E("Could not open patch from dataSource: " << path);
+      return PatchRef();
+    }
+    return std::make_shared<pd::Patch>(std::move(patch));
+  });
 }
 
-void PureDataNode::uninitialize()
-{
-	lock_guard<mutex> lock( mMutex );
-
-	mPdBase.computeAudio( false );
+void PureDataNode::closePatch(const PatchRef &patch) {
+  if (patch) {
+    queueTask([=](pd::PdBase &pd) { pd.closePatch(*patch); });
+  }
 }
 
-void PureDataNode::process( audio::Buffer *buffer )
-{
-	if( getNumChannels() > 1 ) {
-		audio::dsp::interleaveBuffer( buffer, &mBufferInterleaved );
-
-		mMutex.lock();
-		mPdBase.processFloat( mNumTicksPerBlock, mBufferInterleaved.getData(), mBufferInterleaved.getData() );
-		mMutex.unlock();
-
-		audio::dsp::deinterleaveBuffer( &mBufferInterleaved, buffer );
-	}
-	else {
-		mMutex.lock();
-		mPdBase.processFloat( mNumTicksPerBlock, buffer->getData(), buffer->getData() );
-		mMutex.unlock();
-	}
+void PureDataNode::setMaxMessageLength(int length) {
+	queueTask([=](pd::PdBase &pd) { pd.setMaxMessageLen(length); });
 }
 
-void PureDataNode::addToPath( cinder::fs::path path ) {
-	lock_guard<mutex> lock( mMutex );
-	mPdBase.addToSearchPath(path.string());
+void PureDataNode::queueTask(Task &&task) {
+  mQueueToAudio.enqueue(QueueItem(std::make_unique<Task>(std::move(task))));
 }
 
-PatchRef PureDataNode::loadPatch( ci::DataSourceRef dataSource )
-{
-	if( ! isInitialized() )
-		getContext()->initializeNode( shared_from_this() );
-
-	lock_guard<mutex> lock( mMutex );
-
-	const fs::path& path = dataSource->getFilePath();
-	pd::Patch patch = mPdBase.openPatch( path.filename().string(), path.parent_path().string() );
-	if( ! patch.isValid() ) {
-		CI_LOG_E( "could not open patch from dataSource: " << path );
-		return PatchRef();
-	}
-	return make_shared<pd::Patch>( patch );
+void PureDataNode::subscribe(const std::string &address) {
+  queueTask([=](pd::PdBase &pd) { pd.subscribe(address); });
 }
 
-void PureDataNode::closePatch( const PatchRef &patch )
-{
-	if( ! patch )
-		return;
-
-	lock_guard<mutex> lock( mMutex );
-	mPdBase.closePatch( *patch );
+void PureDataNode::sendBang(const std::string &dest) {
+  mQueueToAudio.enqueue(QueueItem(BangMessage{ dest }));
 }
 
-void PureDataNode::sendBang( const std::string& dest )
-{
-	lock_guard<mutex> lock( mMutex );
-	mPdBase.sendBang( dest );
+void PureDataNode::sendFloat(const std::string &dest, float value) {
+  mQueueToAudio.enqueue(QueueItem(FloatMessage{ dest, value }));
 }
 
-void PureDataNode::sendFloat( const std::string& dest, float value )
-{
-	lock_guard<mutex> lock( mMutex );
-	mPdBase.sendFloat( dest, value );
+void PureDataNode::sendSymbol(const std::string &dest, const std::string &symbol) {
+  mQueueToAudio.enqueue(QueueItem(SymbolMessage{ dest, symbol }));
 }
 
-void PureDataNode::sendSymbol( const std::string& dest, const std::string& symbol )
-{
-	lock_guard<mutex> lock( mMutex );
-	mPdBase.sendSymbol( dest, symbol );
+void PureDataNode::sendList(const std::string &dest, const pd::List &list) {
+  queueTask([=](pd::PdBase &pd) { pd.sendList(dest, list); });
 }
 
-void PureDataNode::sendList( const std::string& dest, const pd::List& list )
-{
-	lock_guard<mutex> lock( mMutex );
-	mPdBase.sendList( dest, list );
+void PureDataNode::sendMessage(const std::string &dest, const std::string &msg,
+                               const pd::List &list) {
+  queueTask([=](pd::PdBase &pd) { pd.sendMessage(dest, msg, list); });
 }
 
-void PureDataNode::sendMessage( const std::string& dest, const std::string& msg, const pd::List& list )
-{
-	lock_guard<mutex> lock( mMutex );
-	mPdBase.sendMessage( dest, msg, list );
+std::future<std::vector<float>> PureDataNode::readArray(const std::string &arrayName, int readLen,
+                                                        int offset) {
+  return queueTaskWithReturn([=](pd::PdBase &pd) {
+    std::vector<float> dest;
+    pd.readArray(arrayName, dest, readLen, offset);
+    return dest;
+  });
 }
 
-bool PureDataNode::readArray( const std::string& arrayName, std::vector<float>& dest, int readLen, int offset )
-{
-	lock_guard<mutex> lock( mMutex );
-	return mPdBase.readArray( arrayName, dest, readLen, offset );
+void PureDataNode::writeArray(const std::string &name, const std::vector<float> &source, int length,
+                              int offset) {
+  queueTask([=](pd::PdBase &pd) {
+    // NOTE(ryan): source is internal to this lambda, so it's okay to cast away the const-ness.
+    pd.writeArray(name, const_cast<std::vector<float> &>(source), length, offset);
+  });
 }
 
-bool PureDataNode::writeArray( const std::string& arrayName, std::vector<float>& source, int writeLen, int offset )
-{
-	lock_guard<mutex> lock( mMutex );
-	return mPdBase.writeArray( arrayName, source, writeLen, offset );
+void PureDataNode::clearArray(const std::string &name, int value) {
+  queueTask([=](pd::PdBase &pd) { pd.clearArray(name, value); });
 }
 
-void PureDataNode::clearArray( const std::string& arrayName, int value )
-{
-	lock_guard<mutex> lock( mMutex );
-	mPdBase.clearArray( arrayName, value );
+
+void PureDataNode::print(const std::string &message) {
+  CI_LOG_I(message);
 }
 
-void PureDataNode::setMaxMessageLength ( unsigned int len )
-{
-	lock_guard<mutex> lock( mMutex );
-	mPdBase.setMaxMessageLen( len );
+void PureDataNode::receiveBang(const std::string &address) {
+  mQueueFromAudio.enqueue(QueueItem(BangMessage{ address }));
 }
-	
+
+void PureDataNode::receiveFloat(const std::string &address, float value) {
+  mQueueFromAudio.enqueue(QueueItem(FloatMessage{ address, value }));
+}
+
+void PureDataNode::receiveSymbol(const std::string &address, const std::string &symbol) {
+  mQueueFromAudio.enqueue(QueueItem(SymbolMessage{ address, symbol }));
+}
+
+
+void PureDataNode::receiveAll(pd::PdReceiver &receiver) {
+  QueueItem item;
+  for (bool success = true; success;) {
+    success = mQueueFromAudio.try_dequeue(item);
+    if (success) {
+      switch (item.which()) {
+        case 0:
+          break;
+
+        case 1:
+          break;
+
+        case 2: {
+          const auto &msg = boost::get<BangMessage>(item);
+          receiver.receiveBang(msg.address);
+        } break;
+
+        case 3: {
+          const auto &msg = boost::get<FloatMessage>(item);
+          receiver.receiveFloat(msg.address, msg.value);
+        } break;
+
+        case 4: {
+          const auto &msg = boost::get<SymbolMessage>(item);
+          receiver.receiveSymbol(msg.address, msg.symbol);
+        } break;
+      }
+    }
+  }
+}
+
 } // namespace cipd

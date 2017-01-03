@@ -33,6 +33,7 @@
 #include "PipelineStageView.h"
 #include "WindowData.h"
 
+#include "PureDataNode.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -192,6 +193,8 @@ class PaperBounce3App : public App {
 	fs::path getUserLightLinkFilePath() const;
 	fs::path getUserSettingsFilePath() const;
 	
+	// Synthesis
+	cipd::PureDataNodeRef mPd;
 	
 private: /* starting to make some stuff private... start somewhere */
 	void updateVision();

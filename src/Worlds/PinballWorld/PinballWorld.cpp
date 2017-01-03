@@ -356,7 +356,10 @@ void PinballWorld::processCollisions()
 
 		if (0) cout << "ball world collide (" << c.mBallIndex << ")" << endl;
 	}
-	
+
+	pd::List hitObjects;
+	pd::List hitWalls;
+
 	for( const auto &c : getBallContourCollisions() )
 	{
 
@@ -368,10 +371,12 @@ void PinballWorld::processCollisions()
 		if (p) {
 
 			if (p.get()->getType() == PartType::Bumper) {
-				mPureDataNode->sendBang("hit-object");
+				hitObjects.addFloat(0);
+			} else {
+				hitWalls.addFloat(0);
+
 			}
 
-			
 			Ball* ball=0;
 			if (c.mBallIndex>=0 && c.mBallIndex<=getBalls().size())
 			{
@@ -382,9 +387,13 @@ void PinballWorld::processCollisions()
 			if (ball) p->onBallCollide(*ball);
 		}
 		else {
+			hitWalls.addFloat(0);
 	//		cout << "collide wall" << endl;
 		}
 	}
+
+	mPureDataNode->sendList("hit-objects", hitObjects);
+	mPureDataNode->sendList("hit-walls", hitWalls);
 }
 
 void PinballWorld::drawBallCullLine() const
@@ -1276,10 +1285,12 @@ void PinballWorld::addContourToVec( Contour c, ContourVec& contours ) const
 // Synthesis
 void PinballWorld::setupSynthesis()
 {
-	mPureDataNode = cipd::PureDataNode::Global();
+
 
 	// Register file-watchers for all the major pd patch components
 	auto app = PaperBounce3App::get();
+
+	mPureDataNode = app->mPd;
 
 	std::vector<fs::path> paths =
 	{
@@ -1295,7 +1306,7 @@ void PinballWorld::setupSynthesis()
 		// Ignore the passed-in path, we only want to reload the root patch
 		auto rootPatch = app->hotloadableAssetPath("synths/pinball-world.pd");
 		mPureDataNode->closePatch(mPatch);
-		mPatch = mPureDataNode->loadPatch( DataSourcePath::create(rootPatch) );
+		mPatch = mPureDataNode->loadPatch( DataSourcePath::create(rootPatch) ).get();
 	});
 }
 

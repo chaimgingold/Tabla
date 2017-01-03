@@ -352,6 +352,8 @@
 		C0B1C0F0E0A44565970E6E65 /* b2Body.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2Body.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/b2Body.cpp; sourceTree = "<group>"; };
 		C159A0020C244479B7849346 /* b2EdgeAndPolygonContact.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2EdgeAndPolygonContact.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Contacts/b2EdgeAndPolygonContact.cpp; sourceTree = "<group>"; };
 		C20E7BFEBC8645C79A3B1048 /* b2RopeJoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2RopeJoint.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Joints/b2RopeJoint.cpp; sourceTree = "<group>"; };
+		C21AE8171E1B343D00AFB272 /* blockingconcurrentqueue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = blockingconcurrentqueue.h; sourceTree = "<group>"; };
+		C21AE8181E1B343D00AFB272 /* concurrentqueue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = concurrentqueue.h; sourceTree = "<group>"; };
 		C227BF991DE00524008A8024 /* TODO-lxi.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = "TODO-lxi.md"; path = "../design/TODO-lxi.md"; sourceTree = "<group>"; };
 		C24197A61DC42959005AE51F /* ChangeLog.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = ChangeLog.md; path = ../ChangeLog.md; sourceTree = "<group>"; };
 		C267F7561DDA8932006B8672 /* Refactorings.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = Refactorings.md; path = ../Refactorings.md; sourceTree = "<group>"; };
@@ -2472,6 +2474,8 @@
 		C2EC763F1DA7157E00DB39C8 /* Cinder-PureDataNode */ = {
 			isa = PBXGroup;
 			children = (
+				C21AE8171E1B343D00AFB272 /* blockingconcurrentqueue.h */,
+				C21AE8181E1B343D00AFB272 /* concurrentqueue.h */,
 				C2EC76401DA7157E00DB39C8 /* PureDataNode.cpp */,
 				C2EC76411DA7157E00DB39C8 /* PureDataNode.h */,
 			);
@@ -2785,7 +2789,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CINDER_PATH = ../../cinder_0.9.0_mac;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
@@ -2830,7 +2834,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CINDER_PATH = ../../cinder_0.9.0_mac;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;

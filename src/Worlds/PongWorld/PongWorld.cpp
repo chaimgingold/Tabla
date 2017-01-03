@@ -11,6 +11,7 @@
 #include "cinder/rand.h"
 #include "cinder/audio/Context.h"
 #include "cinder/audio/Source.h"
+#include "PaperBounce3App.h"
 
 PongWorld::PongWorld()
 {
@@ -383,9 +384,9 @@ void PongWorld::strobeBalls()
 // Synthesis
 void PongWorld::setupSynthesis()
 {
-	mPureDataNode = cipd::PureDataNode::Global();
+	mPureDataNode = PaperBounce3App::get()->mPd;
 	// Load pong synthesis patch
-	mPatch = mPureDataNode->loadPatch( DataSourcePath::create(getAssetPath("synths/pong.pd")) );
+	mPatch = mPureDataNode->loadPatch( DataSourcePath::create(getAssetPath("synths/pong.pd")) ).get();
 }
 
 PongWorld::~PongWorld() {

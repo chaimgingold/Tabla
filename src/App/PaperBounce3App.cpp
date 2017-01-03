@@ -15,6 +15,9 @@
 #include "View.h"
 #include "ocv.h"
 
+#include "cinder/audio/Context.h"
+#include "cinder/audio/dsp/Converter.h"
+
 #include <map>
 #include <string>
 #include <memory>
@@ -49,8 +52,8 @@ PaperBounce3App::~PaperBounce3App()
 //	mGameWorld.reset();
 
 	if (mCapture) mCapture->stop();
-	
-	cipd::PureDataNode::ShutdownGlobal();
+
+	//
 }
 
 PolyLine2 PaperBounce3App::getWorldBoundsPoly() const
@@ -199,6 +202,19 @@ void PaperBounce3App::setup()
 			// don't save, since we are responding to a load, unless ensureLightLinkHasLocalDeviceProfiles() changed.
 		}
 	});
+
+	// Pure Data
+	auto ctx = audio::master();
+
+	// Create the synth engine
+	mPd = ctx->makeNode( new cipd::PureDataNode( audio::Node::Format().autoEnable() ) );
+
+	// Connect synth to master output
+	mPd >> audio::master()->getOutput();
+
+	// Enable Cinder audio
+	ctx->enable();
+	
 
 	// ui stuff (do before making windows)
 	mTextureFont = gl::TextureFont::create( Font("Avenir",12) );
