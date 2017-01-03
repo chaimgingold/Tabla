@@ -26,7 +26,8 @@ Part::Part( PinballWorld& world, PartType type )
 
 void Part::setStrobePhase( int nparts )
 {
-	mStrobePhase = randBool() ? 0.f : (1.f / (float)nparts);
+	if (nparts<2) mStrobePhase = 0.f;
+	else mStrobePhase = randBool() ? 0.f : (1.f / (float)nparts);
 }
 
 bool Part::getShouldMergeWithOldPart( const PartRef old ) const
@@ -317,7 +318,7 @@ void RolloverTarget::draw()
 
 	float collideFade = getCollisionFade();
 	
-	float strobe = getStrobe( 1.5f, .15f );
+	float strobe = getStrobe( mIsLit ? .75f : 1.5f, .15f );
 	
 	ColorA c = lerp(
 		lerp(mColorOff,mColorOn,mLight),
