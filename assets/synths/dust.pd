@@ -1,0 +1,13 @@
+#N canvas 1055 22 450 300 10;
+#X obj 101 172 delay;
+#X obj 101 130 metro \$1;
+#X obj 101 151 random \$1;
+#X obj 176 100 inlet;
+#X obj 101 203 outlet;
+#X obj 101 102 inlet;
+#X connect 0 0 4 0;
+#X connect 1 0 2 0;
+#X connect 2 0 0 0;
+#X connect 3 0 1 1;
+#X connect 3 0 2 1;
+#X connect 5 0 1 0;
