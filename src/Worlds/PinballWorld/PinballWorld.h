@@ -93,6 +93,8 @@ private:
 	Shape2d polyToShape( const PolyLine2& ) const;
 	TriMesh get3dMeshForPoly( const PolyLine2&, float znear, float zfar ) const; // e.g. 0..1, from tabletop in 1cm
 	
+	void drawBallCullLine() const;
+	
 	// params
 	vec2  mUpVec = vec2(0,1);
 	float mGravity=0.1f;

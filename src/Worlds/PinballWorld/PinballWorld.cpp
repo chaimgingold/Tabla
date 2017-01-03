@@ -374,14 +374,17 @@ void PinballWorld::processCollisions()
 	}
 }
 
-void PinballWorld::draw( DrawType drawType )
+void PinballWorld::drawBallCullLine() const
 {
 	// playfield markers
 	gl::color(1,0,0);
 	gl::drawLine(
 		fromPlayfieldSpace(vec2(mPlayfieldBallReclaimX[0],mPlayfieldBallReclaimY)),
 		fromPlayfieldSpace(vec2(mPlayfieldBallReclaimX[1],mPlayfieldBallReclaimY)) ) ;
-	
+}
+
+void PinballWorld::draw( DrawType drawType )
+{
 	// world
 	if (m3dEnable) draw3d(drawType);
 	else draw2d(drawType);
@@ -435,6 +438,8 @@ void PinballWorld::draw( DrawType drawType )
 
 void PinballWorld::draw2d( DrawType drawType )
 {
+	drawBallCullLine();
+	
 	// flippers, etc...
 	drawParts();
 
@@ -508,7 +513,7 @@ void PinballWorld::beginDraw3d() const
 				if (punchOut) {
 					// if punching out, go in; otherwise we stay at 0 (and fill)
 					gl::pushModelView();
-					gl::translate(vec3(0,0,m3dTableDepth));				
+					gl::translate(vec3(0,0,m3dTableDepth*2.f)); // go beyond floor, because we will draw it in later
 					if (kDebugVizDepth) gl::color(1,1,1);
 				}
 				else if (kDebugVizDepth) gl::color(.5,.5,.5);
@@ -594,6 +599,26 @@ void PinballWorld::draw3d( DrawType drawType )
 {
 	beginDraw3d();
 
+	if (mFloorShader)
+	{
+		gl::ScopedGlslProg glslScp(mFloorShader);
+		
+		gl::pushModelView();
+		gl::translate(0,0,m3dTableDepth);
+		// we don't z fight with depth punch out because it is beyond the floor;
+		// we are building a floor for things to clip against here.
+		
+		for( const auto &c : mVisionContours )
+		{
+			if ( !c.mIsHole && !shouldContourBeAPart(c,mVisionContours) )
+			{
+				gl::drawSolid(c.mPolyLine);
+			}
+		}
+		
+		gl::popModelView();
+	}
+	
 	if (mWallShader)
 	{
 		gl::ScopedGlslProg glslScp(mWallShader);
@@ -631,9 +656,9 @@ void PinballWorld::draw3d( DrawType drawType )
 		}
 	}
 	
-//	gl::enableDepthWrite(false);
-	
 	// parts
+	// 2d stuff at table level (slap it on top)
+	// (will all draw at z=0)
 	for( const auto &p : mParts )
 	{
 		float z = p->getZDepth();
@@ -649,16 +674,19 @@ void PinballWorld::draw3d( DrawType drawType )
 		if (hasZ) gl::popModelView();
 	}
 
-	// 2d stuff at table level (slap it on top)
-	// (will all draw at z=0)
+	//
+	drawBallCullLine();
+
+	// balls
 	gl::pushModelView();
 	gl::translate(0,0,m3dTableDepth - mBallDefaultRadius*.5f);
+	{
+		gl::enableDepthWrite(false);
+		BallWorld::drawRibbons(drawType);
+		gl::enableDepthWrite(true);
 	
-	gl::enableDepthWrite(false);
-//	BallWorld::draw(drawType);
-	BallWorld::drawRibbons(drawType);
-	gl::enableDepthWrite(true);
-	BallWorld::drawBalls(drawType);
+		BallWorld::drawBalls(drawType);
+	}
 	gl::popModelView();
 	
 //	gl::enableDepthWrite(true);
@@ -1220,7 +1248,7 @@ void PinballWorld::setupSynthesis()
 
 	std::vector<fs::path> paths =
 	{
-		app->hotloadableAssetPath("synths/pong.pd")
+		app->hotloadableAssetPath("synths/pinball-world.pd")
 //		app->hotloadableAssetPath("synths/music-image.pd",
 //		app->hotloadableAssetPath("synths/music-grain.pd"),
 //		app->hotloadableAssetPath("synths/music-osc.pd")
