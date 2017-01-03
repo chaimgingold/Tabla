@@ -75,15 +75,10 @@ void PinballWorld::setupControls()
 	};
 	
 	// inputs
-	mInputToFunction["flippers-left"] = []()
-	{
-		cout << "flippers-left" << endl;
-	};
-
-	mInputToFunction["flippers-right"] = []()
-	{
-		cout << "flippers-right" << endl;
-	};
+	mInputToFunction["flippers-left-down"]  = [this]() { mIsFlipperDown[0] = true; };
+	mInputToFunction["flippers-left-up"]    = [this]() { mIsFlipperDown[0] = false; };
+	mInputToFunction["flippers-right-down"] = [this]() { mIsFlipperDown[1] = true; };
+	mInputToFunction["flippers-right-up"]   = [this]() { mIsFlipperDown[1] = false; };
 	
 	mGamepadFunctions["flippers-left-down"]  = [this]() { mIsFlipperDown[0] = true; };
 	mGamepadFunctions["flippers-left-up"]    = [this]() { mIsFlipperDown[0] = false; };
@@ -798,7 +793,7 @@ void PinballWorld::worldBoundsPolyDidChange()
 {
 }
 
-void PinballWorld::keyDown( KeyEvent event )
+void PinballWorld::processKeyEvent( KeyEvent event, string suffix )
 {
 	char c = event.getChar();
 	
@@ -806,12 +801,28 @@ void PinballWorld::keyDown( KeyEvent event )
 	
 	if (i!=mKeyToInput.end())
 	{
-		auto j = mInputToFunction.find(i->second);
+		auto j = mInputToFunction.find(i->second + suffix);
 		if (j!=mInputToFunction.end())
 		{
 			j->second();
 		}
 	}
+}
+
+void PinballWorld::keyDown( KeyEvent event )
+{
+	processKeyEvent(event, "-down");
+
+	if ( getBalls().empty() || mKeyToInput.find(event.getChar())==mKeyToInput.end() )
+	{
+		// serve if no ball, or it isn't a mapped (eg flipper) key
+		serveBall();
+	}
+}
+
+void PinballWorld::keyUp( KeyEvent event )
+{
+	processKeyEvent(event, "-up");
 }
 
 void PinballWorld::mouseClick( vec2 loc )

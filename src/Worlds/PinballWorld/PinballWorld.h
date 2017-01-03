@@ -59,6 +59,7 @@ public:
 	void worldBoundsPolyDidChange() override;
 
 	void keyDown( KeyEvent ) override;
+	void keyUp( KeyEvent ) override;
 	void mouseClick( vec2 ) override;
 
 public:
@@ -208,10 +209,11 @@ private:
 	Contour contourFromPoly( PolyLine2 ) const; // area, radius, center, bounds, etc... is approximate
 	void addContourToVec( Contour, ContourVec& ) const;
 	
-	// keymap (deprecated)
+	// keymap
 	map<char,string> mKeyToInput; // maps keystrokes to input names
 	map<string,function<void()>> mInputToFunction; // maps input names to code handlers
-
+	void processKeyEvent( KeyEvent, string suffix );
+	
 	// game pad
 	void setupControls();
 	GamepadManager mGamepadManager;
