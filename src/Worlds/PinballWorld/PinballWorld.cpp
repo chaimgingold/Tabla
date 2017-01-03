@@ -92,20 +92,33 @@ void PinballWorld::setupControls()
 
 void PinballWorld::loadShaders()
 {
-	auto load = [this]( string name, gl::GlslProgRef* to )
+	auto load = [this]( string name, gl::GlslProgRef* to, std::function<void(void)> f )
 	{
 		mFileWatch.loadShader(
-			PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / (name + ".vert") ),
-			PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / (name + ".frag") ),
-			[this,to](gl::GlslProgRef prog)
+			PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / "pinball" / (name + ".vert") ),
+			PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / "pinball" / (name + ".frag") ),
+			[this,to,f](gl::GlslProgRef prog)
 		{
 			*to = prog; // allows null, so we can easily see if we broke it
+			if (f) f();
 		});
 	};
 	
-	load( "pinball-wall", &mWallShader );
-	load( "pinball-ball", &mBallShader );
-	load( "pinball-floor", &mFloorShader );
+	load( "wall", &mWallShader, 0 );
+	load( "ball", &mBallShader, [this]()
+	{
+		if (mBallShader)
+		{
+			ci::geom::Sphere sphereGeom;
+			sphereGeom.colors(false);
+			sphereGeom.radius(1.f);
+			sphereGeom.center(vec3(0,0,0));
+			mBallDrawBatch = gl::Batch::create( sphereGeom, mBallShader );
+		} else mBallDrawBatch = gl::BatchRef();
+	});
+
+	load( "floor", &mFloorShader, 0 );
+	load( "ball-shadow", &mBallShadowShader, 0 );
 }
 
 PinballWorld::~PinballWorld()
@@ -386,7 +399,7 @@ void PinballWorld::drawBallCullLine() const
 void PinballWorld::draw( DrawType drawType )
 {
 	// world
-	if (m3dEnable) draw3d(drawType);
+	if (m3dEnable && (drawType==DrawType::UIMain || drawType==DrawType::Projector) ) draw3d(drawType);
 	else draw2d(drawType);
 
 
@@ -628,19 +641,6 @@ void PinballWorld::draw3d( DrawType drawType )
 		{
 			if ( !shouldContourBeAPart(c,mVisionContours) )
 			{
-				if (0)
-				{
-	//					gl::color(1,0,0);
-	//					gl::drawSolidCircle( c.mCenter, min(2.f,c.mRadius) );
-					gl::color(0,1,0);
-	//					gl::drawCube( vec3(c.mCenter,0), vec3(1,1,1) * min(2.f,c.mRadius) * 2.f ) ;
-					gl::drawSphere( vec3(c.mCenter,0), min(2.f,c.mRadius) * 2.f ) ;
-
-					gl::color(0,1,1);
-					gl::drawSphere( vec3(c.mCenter+getRightVec()*3.f,-1), min(2.f,c.mRadius) * 1.5f ) ;
-					// +z is away from viewer
-				}
-				
 				gl::draw( get3dMeshForPoly(c.mPolyLine,0.f,m3dTableDepth) );
 			}
 		}
@@ -655,39 +655,74 @@ void PinballWorld::draw3d( DrawType drawType )
 			}
 		}
 	}
+
+	// ball shadows
+	if (mBallShadowShader)
+	{
+		gl::ScopedModelMatrix trans;
+		gl::translate(0,0,m3dTableDepth - .01f);
+		
+		BallWorld::drawBalls(drawType,mBallShadowShader);
+	}
 	
 	// parts
-	// 2d stuff at table level (slap it on top)
-	// (will all draw at z=0)
 	for( const auto &p : mParts )
 	{
-		float z = p->getZDepth();
-		bool hasZ = z!=0.f;
-		
-		if (hasZ) {
-			gl::pushModelView();
-			gl::translate(vec3(0,0,z));				
-		}
-		
 		p->draw();
-		
-		if (hasZ) gl::popModelView();
 	}
 
 	//
 	drawBallCullLine();
 
 	// balls
-	gl::pushModelView();
-	gl::translate(0,0,m3dTableDepth - mBallDefaultRadius*.5f);
+	if (1)
 	{
-		gl::enableDepthWrite(false);
-		BallWorld::drawRibbons(drawType);
-		gl::enableDepthWrite(true);
-	
-		BallWorld::drawBalls(drawType);
+		if (mBallDrawBatch)
+		{
+			for( const auto &b : getBalls() )
+			{
+				// TODO: squash, stretch
+				mat4 fixNormalMatrix;
+
+				gl::ScopedModelMatrix model;
+				gl::multModelMatrix( getBallTransform(b,&fixNormalMatrix) );
+				gl::translate(0,0,m3dTableDepth-b.mRadius/2);
+				
+//				gl::translate(vec3(b.mLoc,m3dTableDepth-b.mRadius/2));
+//				gl::scale( vec3(1,1,1) * b.mRadius );
+				
+				mBallShader->uniform("fixNormalMatrix",fixNormalMatrix);
+				mBallDrawBatch->draw();
+				
+//				gl::color(1,1,1);
+//				gl::drawSphere( vec3(b.mLoc,m3dTableDepth-b.mRadius/2), b.mRadius);
+			}
+		}
+		
+		// ribbons
+		{
+			gl::ScopedModelMatrix trans;
+			gl::translate(0,0,m3dTableDepth - mBallDefaultRadius*.5f);
+			
+			gl::enableDepthWrite(false);
+			BallWorld::drawRibbons(drawType);
+			gl::enableDepthWrite(true);
+		}
 	}
-	gl::popModelView();
+	else
+	{
+		// 2d style circles
+		gl::pushModelView();
+		gl::translate(0,0,m3dTableDepth - mBallDefaultRadius*.5f);
+		{
+			gl::enableDepthWrite(false);
+			BallWorld::drawRibbons(drawType);
+			gl::enableDepthWrite(true);
+		
+			BallWorld::drawBalls(drawType);
+		}
+		gl::popModelView();
+	}
 	
 //	gl::enableDepthWrite(true);
 

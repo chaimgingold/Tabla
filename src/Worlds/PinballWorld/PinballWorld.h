@@ -204,6 +204,9 @@ private:
 	gl::GlslProgRef mWallShader;
 	gl::GlslProgRef mBallShader;
 	gl::GlslProgRef mFloorShader;
+	gl::GlslProgRef mBallShadowShader;
+	
+	gl::BatchRef mBallDrawBatch;
 };
 
 } // namespace Pinball
