@@ -22,10 +22,14 @@ class Scene;
 
 enum class GameEvent
 {
+	// game-wide
 	ServeBall, // 0 => 1
 	ServeMultiBall, // >0 => +1
 	LostBall, // n => n-1
-	LostLastMultiBall // 1 => 0
+	LostLastMultiBall, // 1 => 0
+	
+	// part specific
+	NewPart // you are new
 };
 
 struct AdjSpace
@@ -68,7 +72,7 @@ class Part
 {
 public:
 
-	Part( PinballWorld& world, PartType type ) : mWorld(world), mType(type) {}
+	Part( PinballWorld& world, PartType type );
 	
 	virtual void draw(){}
 	virtual void tick(){}
@@ -103,11 +107,21 @@ public:
 protected:
 	void addExtrudedCollisionPolyToScene( Scene&, ColorA ) const;
 	void setType( PartType t ) { mType=t; }
+
+	void markCollision( float decay );
+	float getCollisionFade() const;
+	float getStrobe( float strobeFreqSlow, float strobeFreqFast ) const;
 	
 private:
 	PartType mType;
 	PinballWorld& mWorld;
 	bool mShouldAlwaysPersist=false;
+
+	float mStrobePhase=0.f;
+
+	float mCollideTime = -10.f;
+	float mCollideDecay=0.f;
+
 };
 
 
@@ -136,9 +150,6 @@ private:
 	
 	vec2  getTipLoc() const; // center of capsule, second point
 	float mFlipperLength=0.f;
-
-	float getCollisionFade() const;
-	float mCollideTime = -10.f;
 	
 };
 
@@ -154,8 +165,6 @@ public:
 	virtual void onBallCollide( Ball& ) override;
 
 	virtual PolyLine2 getCollisionPoly() const override;
-	
-	float getCollisionFade() const;
 
 	virtual bool isValidLocForRolloverTarget( vec2 loc, float r ) const override {
 		return distance(loc,mLoc) > r + mRadius;
@@ -166,8 +175,6 @@ private:
 	
 	vec2  mLoc;
 	float mRadius=0.f;
-
-	float mCollideTime = -10.f;
 
 	ColorA mColor = ColorA(1,1,1,1);
 	ColorA mStrobeColor;
@@ -199,15 +206,9 @@ protected:
 private:
 	void setIsLit( bool );
 	
-	float mStrobePhase=0.f;
-	
 	bool  mIsLit=false; // discrete goal
 	float mLight=0.f; // continues, current anim state.
-
-	float getCollisionFade() const;
-	float mCollideTime = -10.f;
-	float mCollideFade;
-
+	
 };
 
 class Plunger : public Part

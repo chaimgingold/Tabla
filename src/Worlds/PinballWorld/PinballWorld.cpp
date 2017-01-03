@@ -1189,6 +1189,8 @@ PinballWorld::mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newPa
 	for( PartRef &p : parts )
 	{
 		// does it match an old part?
+		bool wasMatched = false;
+		
 		for( const PartRef& old : oldParts )
 		{
 			if ( !old->getShouldAlwaysPersist() && p->getShouldMergeWithOldPart(old) )
@@ -1201,9 +1203,15 @@ PinballWorld::mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newPa
 				
 				// replace with old.
 				// (we are simply shifting pointers rather than copying contents, but i think this is fine)
-				if (replace) p = old;
+				if (replace) {
+					p = old;
+					wasMatched = true;
+				}
 			}
 		}
+		
+		//
+		if (!wasMatched) p->onGameEvent(GameEvent::NewPart);
 	}
 	
 	// carry forward any old parts that should be
