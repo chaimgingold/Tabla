@@ -30,7 +30,7 @@
 		
 <!--	Tuning params	-->
 		<MaxGainAreaFrac>.3</MaxGainAreaFrac>
-		<SubsetRectMinPerimOverlapFrac>.8</TheorizedRectMinPerimOverlapFrac>
+		<SubsetRectMinPerimOverlapFrac>.8</SubsetRectMinPerimOverlapFrac>
 		<EdgeOverlapDistAttenuate>1</EdgeOverlapDistAttenuate>
 		
 	</RectFinder>
