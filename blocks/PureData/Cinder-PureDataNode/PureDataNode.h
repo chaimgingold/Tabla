@@ -98,6 +98,7 @@ public:
   void receiveAll(pd::PdReceiver &receiver);
 
   void setMaxMessageLength(int length);
+  void addToSearchPath(const std::string &path);
 };
 
 } // namespace cipd

@@ -70,7 +70,7 @@ private:
 	ContourVector mContours;
 	
 	// synthesis
-	PureDataNodeRef	mPureDataNode;	// synth engine
+	PureDataNodeRef	mPd;	// synth engine
 	PatchRef		mPatch;			// music patch
 
 	void setupSynthesis();

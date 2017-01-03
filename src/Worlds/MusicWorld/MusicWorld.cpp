@@ -116,7 +116,7 @@ void MusicWorld::setParams( XmlTree xml )
 			instr.mAdditiveSynthID = nextAdditiveSynthID;
 			nextAdditiveSynthID++;
 		}
-		instr.mPureDataNode = mPureDataNode;
+		instr.mPd = mPd;
 		instr.mPokieRobitPulseTime = mPokieRobitPulseTime;
 		
 		// store it
@@ -351,7 +351,7 @@ void MusicWorld::updateMetaParameter(MetaParam metaParam, float value)
 				for (int i = 0; i < mScale.size(); i++) {
 					scaleDegrees.addFloat(mScale[i]);
 				}
-				mPureDataNode->sendList("global-scale", scaleDegrees);
+				mPd->sendList("global-scale", scaleDegrees);
 				break;
 			}
 			case MetaParam::RootNote:
@@ -359,7 +359,7 @@ void MusicWorld::updateMetaParameter(MetaParam metaParam, float value)
 				// this could also be "root degree", and stay locked to the scale (or that could be separate slider)
 				mRootNote = (int)(value * 12) + 48;
 
-				mPureDataNode->sendFloat("global-root-note", mRootNote);
+				mPd->sendFloat("global-root-note", mRootNote);
 				break;
 			}
 			case MetaParam::Tempo:
@@ -383,7 +383,7 @@ void MusicWorld::updateAdditiveScoreSynthesis()
 	// Mute all additive synths, in case their score has disappeared (FIXME: do this in ~Score() ?)
 	for( int additiveSynthID=0; additiveSynthID<kMaxSynths; ++additiveSynthID )
 	{
-		mPureDataNode->sendFloat(toString(additiveSynthID)+string("volume"), 0);
+		mPd->sendFloat(toString(additiveSynthID)+string("volume"), 0);
 	}
 
 	// send scores to Pd
@@ -413,29 +413,29 @@ void MusicWorld::setupSynthesis()
 	killAllNotes();
 
 	// Create the synth engine
-	mPureDataNode = PaperBounce3App::get()->mPd;
+	mPd = PaperBounce3App::get()->mPd;
 
 	// Lets us use lists to set arrays, which seems to cause less thread contention
-	mPureDataNode->setMaxMessageLength(1024);
+	mPd->setMaxMessageLength(1024);
 
 	cout << "loading patch..." << endl;
 
 	auto app = PaperBounce3App::get();
 	std::vector<fs::path> paths =
 	{
-		app->hotloadableAssetPath("synths/music.pd"),
-		app->hotloadableAssetPath("synths/music-image.pd"),
-		app->hotloadableAssetPath("synths/music-grain.pd"),
-		app->hotloadableAssetPath("synths/music-osc.pd")
+		app->hotloadableAssetPath("synths/MusicWorld/music-world.pd"),
+		app->hotloadableAssetPath("synths/MusicWorld/music-image.pd"),
+		app->hotloadableAssetPath("synths/MusicWorld/music-grain.pd"),
+		app->hotloadableAssetPath("synths/MusicWorld/music-osc.pd")
 	};
 
 	// Register file-watchers for all the major pd patch components
 	mFileWatch.load( paths, [this,app]()
 	{
 		// Reload the root patch
-		auto rootPatch = app->hotloadableAssetPath("synths/music.pd");
-		mPureDataNode->closePatch(mPatch);
-		mPatch = mPureDataNode->loadPatch( DataSourcePath::create(rootPatch) ).get();
+		auto rootPatch = app->hotloadableAssetPath("synths/MusicWorld/music-world.pd");
+		mPd->closePatch(mPatch);
+		mPatch = mPd->loadPatch( DataSourcePath::create(rootPatch) ).get();
 	});
 
 	cout << "done loading patch." << endl;
@@ -445,7 +445,7 @@ void MusicWorld::cleanup() {
 	killAllNotes();
 
 	// Clean up synth engine
-	mPureDataNode->closePatch(mPatch);
+	mPd->closePatch(mPatch);
 }
 
 MusicWorld::~MusicWorld() {

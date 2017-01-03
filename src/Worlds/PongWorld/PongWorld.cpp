@@ -165,7 +165,7 @@ void PongWorld::stateDidChange( GameState old, GameState newState )
 		
 		case GameState::Over:
 		{
-			mPureDataNode->sendBang("new-game");
+			mPd->sendBang("new-game");
 		}
 		break;
 	}
@@ -179,14 +179,14 @@ void PongWorld::onBallBallCollide   ( const Ball&, const Ball& )
 
 void PongWorld::onBallContourCollide( const Ball&, const Contour& )
 {
-	mPureDataNode->sendBang("hit-object");
+	mPd->sendBang("hit-object");
 
 	if (0) cout << "ball contour collide" << endl;
 }
 
 void PongWorld::onBallWorldBoundaryCollide	( const Ball& b )
 {
-	mPureDataNode->sendBang("hit-wall");
+	mPd->sendBang("hit-wall");
 
 	if (0) cout << "ball world collide" << endl;
 
@@ -205,7 +205,7 @@ void PongWorld::onBallWorldBoundaryCollide	( const Ball& b )
 
 void PongWorld::didScore( int player )
 {
-	mPureDataNode->sendFloat("scored-point", player);
+	mPd->sendFloat("scored-point", player);
 
 	cout << "didScore " << player << endl;
 
@@ -385,12 +385,12 @@ void PongWorld::strobeBalls()
 // Synthesis
 void PongWorld::setupSynthesis()
 {
-	mPureDataNode = PaperBounce3App::get()->mPd;
+	mPd = PaperBounce3App::get()->mPd;
 	// Load pong synthesis patch
-	mPatch = mPureDataNode->loadPatch( DataSourcePath::create(getAssetPath("synths/pong.pd")) ).get();
+	mPatch = mPd->loadPatch( DataSourcePath::create(getAssetPath("synths/PongWorld/pong-world.pd")) ).get();
 }
 
 PongWorld::~PongWorld() {
 	// Close pong synthesis patch
-	mPureDataNode->closePatch(mPatch);
+	mPd->closePatch(mPatch);
 }

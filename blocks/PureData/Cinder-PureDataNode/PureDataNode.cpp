@@ -118,6 +118,11 @@ void PureDataNode::setMaxMessageLength(int length) {
 	queueTask([=](pd::PdBase &pd) { pd.setMaxMessageLen(length); });
 }
 
+void PureDataNode::addToSearchPath(const std::string &path) {
+	queueTask([=](pd::PdBase &pd) { pd.addToSearchPath(path); });
+}
+
+	
 void PureDataNode::queueTask(Task &&task) {
   mQueueToAudio.enqueue(QueueItem(std::make_unique<Task>(std::move(task))));
 }

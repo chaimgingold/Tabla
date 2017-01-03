@@ -22,7 +22,7 @@ using namespace ci::app;
 using namespace std;
 using namespace Pinball;
 
-const bool kDoSound = false;
+const bool kDoSound = true;
 //const bool kLogButtons = true; // we will need them to configure new controllers :P
 
 PinballWorld::PinballWorld()
@@ -77,15 +77,19 @@ void PinballWorld::setupControls()
 	};
 	
 	// inputs
-	mInputToFunction["flippers-left-down"]  = [this]() { mIsFlipperDown[0] = true; };
-	mInputToFunction["flippers-left-up"]    = [this]() { mIsFlipperDown[0] = false; };
-	mInputToFunction["flippers-right-down"] = [this]() { mIsFlipperDown[1] = true; };
-	mInputToFunction["flippers-right-up"]   = [this]() { mIsFlipperDown[1] = false; };
+	auto sound = [this](int state)
+	{
+		mPd->sendFloat("flipper-change", state);
+	};
+	mInputToFunction["flippers-left-down"]  = [this,sound]() { mIsFlipperDown[0] = true; sound(1); };
+	mInputToFunction["flippers-left-up"]    = [this,sound]() { mIsFlipperDown[0] = false; sound(0); };
+	mInputToFunction["flippers-right-down"] = [this,sound]() { mIsFlipperDown[1] = true; sound(1); };
+	mInputToFunction["flippers-right-up"]   = [this,sound]() { mIsFlipperDown[1] = false; sound(0); };
 	
-	mGamepadFunctions["flippers-left-down"]  = [this]() { mIsFlipperDown[0] = true; };
-	mGamepadFunctions["flippers-left-up"]    = [this]() { mIsFlipperDown[0] = false; };
-	mGamepadFunctions["flippers-right-down"] = [this]() { mIsFlipperDown[1] = true; };
-	mGamepadFunctions["flippers-right-up"]   = [this]() { mIsFlipperDown[1] = false; };
+	mGamepadFunctions["flippers-left-down"]  = [this,sound]() { mIsFlipperDown[0] = true; sound(1); };
+	mGamepadFunctions["flippers-left-up"]    = [this,sound]() { mIsFlipperDown[0] = false; sound(0); };
+	mGamepadFunctions["flippers-right-down"] = [this,sound]() { mIsFlipperDown[1] = true; sound(1); };
+	mGamepadFunctions["flippers-right-up"]   = [this,sound]() { mIsFlipperDown[1] = false; sound(0); };
 }
 
 void PinballWorld::setupGraphics()
@@ -272,6 +276,19 @@ void PinballWorld::update()
 	
 	// respond to collisions
 	processCollisions();
+	
+	updateBallSynthesis();
+}
+
+void PinballWorld::updateBallSynthesis() {
+	vector<Ball>& balls = getBalls();
+	for( Ball &b : balls ) {
+		float velocity = length(b.getVel());
+		mPd->sendFloat("ball-velocity", velocity * 10);
+	}
+	if (balls.empty()) {
+		mPd->sendFloat("ball-velocity", 0);
+	}
 }
 
 void PinballWorld::serveBall()
@@ -352,14 +369,14 @@ void PinballWorld::processCollisions()
 {
 	for( const auto &c : getBallBallCollisions() )
 	{
-	//	mPureDataNode->sendBang("new-game");
+	//	mPd->sendBang("new-game");
 
 		if (0) cout << "ball ball collide (" << c.mBallIndex[0] << ", " << c.mBallIndex[1] << ")" << endl;
 	}
 	
 	for( const auto &c : getBallWorldCollisions() )
 	{
-//		mPureDataNode->sendBang("hit-wall");
+//		mPd->sendBang("hit-wall");
 
 		if (0) cout << "ball world collide (" << c.mBallIndex << ")" << endl;
 	}
@@ -404,15 +421,17 @@ void PinballWorld::processCollisions()
 		}
 	}
 
-	//mPureDataNode->sendList("hit-objects", hitObjects);
-	//mPureDataNode->sendList("hit-walls", hitWalls);
-	pd::List hitList;
-	hitList.addFloat(MIN(5, hitObjects));
-	hitList.addFloat(MIN(5, hitWalls));
-
-	mPureDataNode->sendList("hit-list", hitList);
-	//mPureDataNode->sendFloat("hit-walls", );
-	//mPureDataNode->sendFloat("hit-objects", MIN(5, hitObjects));
+	//mPd->sendList("hit-objects", hitObjects);
+	//mPd->sendList("hit-walls", hitWalls);
+	if (hitObjects || hitWalls) {
+		pd::List hitList;
+		hitList.addFloat(MIN(5, hitObjects));
+		hitList.addFloat(MIN(5, hitWalls));
+		
+		mPd->sendList("hit-list", hitList);
+		//mPd->sendFloat("hit-walls", );
+		//mPd->sendFloat("hit-objects", MIN(5, hitObjects));
+	}
 }
 
 void PinballWorld::drawBallCullLine() const
@@ -1375,24 +1394,24 @@ void PinballWorld::setupSynthesis()
 	// Register file-watchers for all the major pd patch components
 	auto app = PaperBounce3App::get();
 
-	mPureDataNode = app->mPd;
+	mPd = app->mPd;
 
 	std::vector<fs::path> paths =
 	{
-		app->hotloadableAssetPath("synths/pinball-world.pd")
+		app->hotloadableAssetPath("synths/PinballWorld/pinball-world.pd")
 	};
 
 	// Load pinball synthesis patch
 	if (kDoSound) mFileWatch.load( paths, [this,app]()
 	{
 		// Reload the root patch
-		auto rootPatch = app->hotloadableAssetPath("synths/pinball-world.pd");
-		mPureDataNode->closePatch(mPatch);
-		mPatch = mPureDataNode->loadPatch( DataSourcePath::create(rootPatch) ).get();
+		auto rootPatch = app->hotloadableAssetPath("synths/PinballWorld/pinball-world.pd");
+		mPd->closePatch(mPatch);
+		mPatch = mPd->loadPatch( DataSourcePath::create(rootPatch) ).get();
 	});
 }
 
 void PinballWorld::shutdownSynthesis() {
 	// Close pinball synthesis patch
-	mPureDataNode->closePatch(mPatch);
+	mPd->closePatch(mPatch);
 }

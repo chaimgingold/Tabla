@@ -14,8 +14,8 @@ void Vision::Params::set( XmlTree xml )
 {
 	getXml(xml,"CaptureAllPipelineStages",mCaptureAllPipelineStages);
 	
-	cout << xml.getChild("Contours") << endl;
-	cout << xml.getChild("TokenMatcher") << endl;
+//	cout << xml.getChild("Contours") << endl;
+//	cout << xml.getChild("TokenMatcher") << endl;
 	if ( xml.hasChild("Contours") )
 	{
 		mContourVisionParams.set( xml.getChild("Contours") );
@@ -198,14 +198,21 @@ Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 	
 	output.mContours = mContourVision.findContours( clippedStage, pipeline, contourPixelToWorld );
 	
-	output.mTokens = TokenMatches();
-	vector<TokenCandidate> candidates = mTokenMatcher.findTokenCandidates( clippedStage, output.mContours, pipeline );
-	vector<TokenFeatures>  candidateFeatures;
-	for (auto &candidate : candidates) {
-		candidateFeatures.push_back(candidate.features);
+	if (mTokenMatcher.getTokenLibrary().empty())
+	{
+		output.mTokens = TokenMatches();
 	}
-	vector<MatchingTokenIndexPair> matches = mTokenMatcher.matchTokens(mTokenMatcher.getTokenLibrary(), candidateFeatures);
-	cout << matches.size() << endl;
+	else
+	{
+//		vector<TokenCandidate> candidates = mTokenMatcher.findTokenCandidates( clippedStage, output.mContours, pipeline );
+//		vector<TokenFeatures>  candidateFeatures;
+//		for (auto &candidate : candidates) {
+//			candidateFeatures.push_back(candidate.features);
+//		}
+//		vector<MatchingTokenIndexPair> matches = mTokenMatcher.matchTokens(mTokenMatcher.getTokenLibrary(), candidateFeatures);
+//		cout << matches.size() << endl;
+	}
+	
 	
 	// output
 	return output;

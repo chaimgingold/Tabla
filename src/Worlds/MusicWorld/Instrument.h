@@ -118,7 +118,7 @@ public:
 	MetaParamInfo mMetaParamInfo;
 
 	int mAdditiveSynthID;
-	PureDataNodeRef mPureDataNode;
+	PureDataNodeRef mPd;
 	
 	// Arpeggiator
 	void tickArpeggiator();
