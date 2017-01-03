@@ -1143,7 +1143,9 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 			vec2 rolloverLoc = c.mCenter;
 			float r = mRolloverTargetRadius;
 			
-			if ( closestPt != c.mCenter )
+			const float kMaxDist = mRolloverTargetDynamicRadius*4.f;
+			
+			if ( closestPt != c.mCenter && dist < kMaxDist )
 			{
 				vec2 dir = normalize( closestPt - c.mCenter );
 
@@ -1151,17 +1153,17 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 				
 				if (mRolloverTargetDynamicRadius)
 				{
-					r = max( r, distance(closestPt,c.mCenter) - c.mRadius );
+					r = min( mRolloverTargetRadius*4.f, max( r, distance(closestPt,c.mCenter) - c.mRadius ) );
 					far = r;
 				}
 				
 				rolloverLoc = closestPt + dir * (r+far);
+
+				auto rt = new RolloverTarget(*this,rolloverLoc,r);
+				rt->mContourPoly = c.mPolyLine;
+				
+				add( rt );
 			}
-			
-			auto rt = new RolloverTarget(*this,rolloverLoc,r);
-			rt->mContourPoly = c.mPolyLine;
-			
-			add( rt );
 		}
 		
 	} // for
