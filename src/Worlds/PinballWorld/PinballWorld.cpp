@@ -28,6 +28,14 @@ PinballWorld::PinballWorld()
 	setupSynthesis();
 	setupControls();
 	loadShaders();
+
+	{
+		ci::geom::Sphere sphereGeom;
+		sphereGeom.colors(false);
+		sphereGeom.radius(1.f);
+		sphereGeom.center(vec3(0,0,0));
+		mBallMesh = gl::VboMesh::create(sphereGeom);
+	}
 }
 
 void PinballWorld::setupControls()
@@ -105,18 +113,7 @@ void PinballWorld::loadShaders()
 	};
 	
 	load( "wall", &mWallShader, 0 );
-	load( "ball", &mBallShader, [this]()
-	{
-		if (mBallShader)
-		{
-			ci::geom::Sphere sphereGeom;
-			sphereGeom.colors(false);
-			sphereGeom.radius(1.f);
-			sphereGeom.center(vec3(0,0,0));
-			mBallDrawBatch = gl::Batch::create( sphereGeom, mBallShader );
-		} else mBallDrawBatch = gl::BatchRef();
-	});
-
+	load( "ball", &mBallShader, 0 );
 	load( "floor", &mFloorShader, 0 );
 	load( "ball-shadow", &mBallShadowShader, 0 );
 }
@@ -629,6 +626,19 @@ TriMesh PinballWorld::get3dMeshForPoly( const PolyLine2& poly, float znear, floa
 	return mesh;
 }
 
+/*gl::BatchRef PinballWorld::getBallDrawBatch() const
+{
+	if (mBallShader)
+	{
+		ci::geom::Sphere sphereGeom;
+		sphereGeom.colors(false);
+		sphereGeom.radius(1.f);
+		sphereGeom.center(vec3(0,0,0));
+		return gl::Batch::create( sphereGeom, mBallShader );
+	}
+	else return 0;
+}*/
+
 void PinballWorld::draw3d( DrawType drawType )
 {
 	beginDraw3d();
@@ -698,8 +708,10 @@ void PinballWorld::draw3d( DrawType drawType )
 	drawBallCullLine();
 
 	// balls
-	if (mBallDrawBatch)
+	if (mBallShader)
 	{
+		gl::ScopedGlslProg glslScp(mBallShader);
+		
 		for( const auto &b : getBalls() )
 		{
 			mat4 fixNormalMatrix;
@@ -709,7 +721,7 @@ void PinballWorld::draw3d( DrawType drawType )
 			gl::translate(0,0,m3dTableDepth-b.mRadius/2);
 			
 			mBallShader->uniform("fixNormalMatrix",fixNormalMatrix);
-			mBallDrawBatch->draw();
+			gl::draw(mBallMesh);
 		}
 	}
 	
