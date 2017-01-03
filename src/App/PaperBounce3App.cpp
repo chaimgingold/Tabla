@@ -205,6 +205,13 @@ void PaperBounce3App::setup()
 
 	// Pure Data
 	auto ctx = audio::master();
+	
+	for (auto &device : ctx->deviceManager()->getDevices()) {
+		int currentFramesPerBlock = ctx->deviceManager()->getFramesPerBlock(device);
+		cout << "Frames per block: " << device->getName() << " - " << currentFramesPerBlock;
+//		ctx->deviceManager()->setFramesPerBlock(device, 512);
+	}
+	
 
 	// Create the synth engine
 	mPd = ctx->makeNode( new cipd::PureDataNode( audio::Node::Format().autoEnable() ) );

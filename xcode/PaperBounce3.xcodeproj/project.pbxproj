@@ -682,11 +682,11 @@
 			isa = PBXGroup;
 			children = (
 				26F323471DF74D5700EC9559 /* Gamepad */,
-				C29A0AD31DF1FE16008A26A1 /* OpenCV3-Contrib */,
 				C2C874771DDBB2D40067E07D /* Cinder-Serial */,
 				C2EC763E1DA7157E00DB39C8 /* PureData */,
 				3BA24452A4BE4625A810020B /* Box2D */,
 				BC3D44BD779D48C6980C3280 /* OpenCV3 */,
+				C29A0AD31DF1FE16008A26A1 /* OpenCV3-Contrib */,
 			);
 			name = Blocks;
 			sourceTree = "<group>";
@@ -1041,7 +1041,7 @@
 			isa = PBXGroup;
 			children = (
 				C277596C1DF16EB30030FDC9 /* OpenCV3-Contrib */,
-				C27759351DF16E600030FDC9 /* OpenCV3+Contrib */,
+				C27759351DF16E600030FDC9 /* OpenCV3 */,
 				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 				C9366F177495484A87934087 /* OpenCL.framework */,
@@ -1169,7 +1169,7 @@
 			name = OpenCV3;
 			sourceTree = "<group>";
 		};
-		C27759351DF16E600030FDC9 /* OpenCV3+Contrib */ = {
+		C27759351DF16E600030FDC9 /* OpenCV3 */ = {
 			isa = PBXGroup;
 			children = (
 				C277580C1DF16B400030FDC9 /* libippicv.a */,
@@ -1189,7 +1189,7 @@
 				C27757DC1DF16AFB0030FDC9 /* libopencv_videoio.a */,
 				C27757DD1DF16AFB0030FDC9 /* libopencv_videostab.a */,
 			);
-			name = "OpenCV3+Contrib";
+			name = OpenCV3;
 			sourceTree = "<group>";
 		};
 		C277596C1DF16EB30030FDC9 /* OpenCV3-Contrib */ = {
