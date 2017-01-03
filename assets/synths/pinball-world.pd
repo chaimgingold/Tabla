@@ -1,18 +1,18 @@
-#N canvas 400 175 1300 1059 10;
-#X obj 107 1039 dac~;
-#X msg 4 250 next \$1;
-#X obj 53 471 dac~;
-#X obj 49 421 *~ 1;
-#X obj 123 542 bob~;
-#X floatatom 179 550 5 0 0 0 - - -, f 5;
-#X obj 137 511 +~ 1500;
-#X obj 137 486 *~ 1000;
-#X obj 213 542 bob~;
-#X obj 227 511 +~ 1500;
-#X obj 227 486 *~ 1000;
-#X obj 227 461 osc~ 0.5;
-#X obj 137 461 osc~ 0.3;
-#X obj 6 174 keypiano;
+#N canvas 261 130 1284 738 10;
+#X obj 197 659 dac~;
+#X msg 44 250 next \$1;
+#X obj 93 471 dac~;
+#X obj 89 421 *~ 1;
+#X obj 163 542 bob~;
+#X floatatom 219 550 5 0 0 0 - - -, f 5;
+#X obj 177 511 +~ 1500;
+#X obj 177 486 *~ 1000;
+#X obj 253 542 bob~;
+#X obj 267 511 +~ 1500;
+#X obj 267 486 *~ 1000;
+#X obj 267 461 osc~ 0.5;
+#X obj 177 461 osc~ 0.3;
+#X obj 46 174 keypiano;
 #N canvas 615 22 480 404 note-run 0;
 #X obj 152 273 t a;
 #X obj 67 222 f;
@@ -56,25 +56,25 @@ each time;
 #X connect 14 0 6 1;
 #X connect 16 0 2 1;
 #X connect 17 0 2 1;
-#X restore 268 134 pd note-run;
-#X obj 268 76 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+#X restore 308 134 pd note-run;
+#X obj 308 76 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
-#X obj 369 205 degree-to-note;
-#X obj 387 157 loadbang;
-#X obj 368 160 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+#X obj 409 205 degree-to-note;
+#X obj 427 157 loadbang;
+#X obj 408 160 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X obj 268 206 list-map;
-#X obj 369 242 + 60;
-#X obj 465 143 random 3;
-#X obj 465 166 + 4;
-#X obj 465 192 * 12;
-#X obj 268 104 t b b;
-#X obj 465 220 + 0;
-#X obj 268 29 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#X obj 308 206 list-map;
+#X obj 409 242 + 60;
+#X obj 505 143 random 3;
+#X obj 505 166 + 4;
+#X obj 505 192 * 12;
+#X obj 308 104 t b b;
+#X obj 505 220 + 0;
+#X obj 308 29 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
-#X obj 911 431 hsl 128 15 0 127 0 0 strum-length empty strum-length
+#X obj 951 431 hsl 128 15 0 127 0 0 strum-length empty strum-length
 -2 -8 0 10 -262144 -1 -1 0 1;
-#X obj 914 476 hsl 128 15 0.97 0.99 0 0 string-duration empty string-duration
+#X obj 954 476 hsl 128 15 0.97 0.99 0 0 string-duration empty string-duration
 -2 -8 0 10 -262144 -1 -1 0 1;
 #N canvas 16 380 450 323 little-tune 0;
 #X obj 32 76 metro 250;
@@ -133,64 +133,64 @@ each time;
 #X connect 22 0 16 0;
 #X connect 23 0 22 0;
 #X coords 0 -1 1 1 77 44 1 264 17;
-#X restore 78 87 pd little-tune;
-#X obj 78 23 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0 1
-;
-#X obj 915 516 hsl 128 15 0 2 0 0 vibrato-amount empty vibrato-amount
+#X restore 118 87 pd little-tune;
+#X obj 118 23 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X obj 955 516 hsl 128 15 0 2 0 0 vibrato-amount empty vibrato-amount
 -2 -8 0 10 -262144 -1 -1 0 1;
-#X obj 915 556 hsl 128 15 0 20 0 0 vibrato-freq empty vibrato-freq
+#X obj 955 556 hsl 128 15 0 20 0 0 vibrato-freq empty vibrato-freq
 -2 -8 0 10 -262144 -1 -1 0 1;
-#X floatatom 915 577 5 0 0 0 - - -, f 5;
-#X obj 498 221 r root-note;
-#X obj 914 614 hradio 15 0 0 8 root-note empty root-note 0 -8 0 10
+#X floatatom 955 577 5 0 0 0 - - -, f 5;
+#X obj 538 221 r root-note;
+#X obj 954 614 hradio 15 0 0 8 root-note empty root-note 0 -8 0 10
 -262144 -1 -1 0;
-#X obj 387 181 major-scale;
-#X obj 123 333 clone strum-voice 11;
-#X obj 123 310 prepent next;
-#X obj 123 378 prepent next;
-#X floatatom 1072 485 5 0 0 0 - - -, f 5;
-#X floatatom 1062 434 5 0 0 0 - - -, f 5;
-#X obj 918 122 loadbang;
-#X obj 355 43 hsl 128 15 10 1000 0 0 empty empty empty -2 -8 0 10 -262144
+#X obj 427 181 major-scale;
+#X obj 163 333 clone strum-voice 11;
+#X obj 163 310 prepent next;
+#X obj 163 378 prepent next;
+#X floatatom 1112 485 5 0 0 0 - - -, f 5;
+#X floatatom 1102 434 5 0 0 0 - - -, f 5;
+#X obj 958 122 loadbang;
+#X obj 395 43 hsl 128 15 10 1000 0 0 empty empty empty -2 -8 0 10 -262144
 -1 -1 0 1;
-#X obj 123 355 list split 1;
-#X obj 552 356 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+#X obj 163 355 list split 1;
+#X obj 592 356 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X obj 636 322 degree-to-note;
-#X obj 654 274 loadbang;
-#X obj 632 363 + 60;
-#X obj 732 260 random 3;
-#X obj 732 283 + 4;
-#X obj 732 309 * 12;
-#X obj 732 337 + 0;
-#X obj 765 338 r root-note;
-#X obj 654 298 major-scale;
-#X obj 636 208 t a b;
-#X obj 330 398 +~;
-#X obj 635 181 random 7;
-#X obj 566 400 prepent next;
-#X obj 679 138 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+#X obj 676 322 degree-to-note;
+#X obj 694 274 loadbang;
+#X obj 672 363 + 60;
+#X obj 772 260 random 3;
+#X obj 772 283 + 4;
+#X obj 772 309 * 12;
+#X obj 772 337 + 0;
+#X obj 805 338 r root-note;
+#X obj 694 298 major-scale;
+#X obj 676 208 t a b;
+#X obj 370 398 +~;
+#X obj 675 181 random 7;
+#X obj 606 400 prepent next;
+#X obj 719 138 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X obj 268 53 dust 300;
-#X obj 617 285 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+#X obj 308 53 dust 300;
+#X obj 657 285 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X obj 911 391 hsl 128 15 0 127 0 0 bell-duration empty bell-duration
+#X obj 951 391 hsl 128 15 0 127 0 0 bell-duration empty bell-duration
 -2 -8 0 10 -262144 -1 -1 3400 1;
-#X floatatom 1073 386 5 0 0 0 - - -, f 5;
-#X msg 918 172 \; strum-length 25 \; string-duration 0.977 \; vibrato-amount
+#X floatatom 1113 386 5 0 0 0 - - -, f 5;
+#X msg 958 172 \; strum-length 25 \; string-duration 0.977 \; vibrato-amount
 0 \; vibrato-freq 1.7 \; reverb-amount 73 \; reverb-damping 83 \; bell-duration
 33;
-#X obj 635 84 r hit-walls;
-#X obj 635 137 until;
-#X obj 502 101 until;
-#X obj 502 48 r hit-objects;
-#X obj 502 76 m_speedlimit 30;
-#X obj 635 108 m_speedlimit 30;
-#X obj 568 431 clone bell-voice 5;
-#X obj 123 402 clone spring-voice 5;
-#X obj 657 44 r hit-list;
-#X obj 744 50 list trim;
-#X obj 750 76 unpack f f;
+#X obj 675 84 r hit-walls;
+#X obj 675 137 until;
+#X obj 542 101 until;
+#X obj 542 48 r hit-objects;
+#X obj 542 76 m_speedlimit 30;
+#X obj 675 108 m_speedlimit 30;
+#X obj 608 431 clone bell-voice 5;
+#X obj 163 402 clone spring-voice 5;
+#X obj 697 44 r hit-list;
+#X obj 784 50 list trim;
+#X obj 790 76 unpack f f;
 #X connect 1 0 72 0;
 #X connect 3 0 2 0;
 #X connect 3 0 2 1;
