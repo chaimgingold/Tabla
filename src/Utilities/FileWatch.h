@@ -30,6 +30,7 @@ public:
 	
 	// ask to load files
 	void	load		( fs::path, tCallback );
+	void	load		( vector<fs::path>, tCallback ); // load as a group; WIP, but providing proper api
 	void	loadXml		( fs::path, tXmlCallback ); // get an XmlTree
 	void	loadShader	( fs::path vert, fs::path frag, tGlslProgCallback ); // get a glsl prog; might be 0 if parse fail
 	

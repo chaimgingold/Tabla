@@ -125,6 +125,11 @@ public:
 	int getNumIntegrationSteps() const { return mNumIntegrationSteps; }
 	
 protected:
+
+	void drawBalls( DrawType );
+	void drawRibbons( DrawType );
+	// doing your own drawing? use these. these use geometry generated in prepareToDraw()
+	
 	void setContours( const ContourVec& contours, ContourVec::Filter filter=0 ) { mContours = contours; mContourFilter=filter; }
 	
 	int getBallIndex( const Ball& b ) const;

@@ -13,6 +13,7 @@
 #include "PureDataNode.h"
 #include "GamepadManager.h"
 #include "PinballParts.h"
+#include "FileWatch.h"
 
 namespace Pinball
 {
@@ -185,6 +186,8 @@ private:
 	map<unsigned int,string> mGamepadButtons;
 	map<string,function<void()>> mGamepadFunctions;
 	
+	FileWatch mFileWatch;
+	
 	// synthesis
 	cipd::PureDataNodeRef	mPureDataNode;	// synth engine
 	cipd::PatchRef			mPatch;			// pong patch
@@ -192,6 +195,12 @@ private:
 	void setupSynthesis();
 	void shutdownSynthesis();
 
+	// shaders
+	void loadShaders();
+	
+	gl::GlslProgRef mWallShader;
+	gl::GlslProgRef mBallShader;
+	gl::GlslProgRef mFloorShader;
 };
 
 } // namespace Pinball

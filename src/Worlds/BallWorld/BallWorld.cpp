@@ -279,23 +279,32 @@ void BallWorld::draw( DrawType drawType )
 {
 	if (1)
 	{
-		if (mRibbonMesh) gl::draw(*mRibbonMesh);
-		
-		// draw using graphics we setup in prepareToDraw().
-		if (mBallMesh && mCircleShader)
-		{
-			gl::ScopedGlslProg glslScp( mCircleShader );
-			gl::draw(*mBallMesh);
-		}
+		drawRibbons(drawType);
+		drawBalls(drawType);
 	}
 	else
 	{
+		// draw immediate mode
 		auto ribbons = getTriMeshForRibbons();
 		if (ribbons) gl::draw(*ribbons);
 		
-		// draw immediate mode
 		drawImmediate( drawType==DrawType::UIPipelineThumb );
 	}	
+}
+
+void BallWorld::drawBalls( DrawType )
+{
+	// draw using graphics we setup in prepareToDraw().
+	if (mBallMesh && mCircleShader)
+	{
+		gl::ScopedGlslProg glslScp( mCircleShader );
+		gl::draw(*mBallMesh);
+	}
+}
+
+void BallWorld::drawRibbons( DrawType )
+{
+	if (mRibbonMesh) gl::draw(*mRibbonMesh);
 }
 
 void BallWorld::gameWillLoad()

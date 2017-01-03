@@ -54,6 +54,14 @@ void FileWatch::load( fs::path path, tCallback func )
 	mFileWatch[path] = pair<time_t,tCallback>(modtime,func) ;
 }
 
+void FileWatch::load ( vector<fs::path> ps, tCallback func )
+{
+	for( auto p : ps )
+	{
+		load( p, func );
+	}
+}
+
 void FileWatch::loadXml( fs::path path, tXmlCallback func )
 {
 	load( path, [func](fs::path path)
@@ -76,7 +84,11 @@ void FileWatch::loadXml( fs::path path, tXmlCallback func )
 
 void FileWatch::loadShader( fs::path vert, fs::path frag, tGlslProgCallback func )
 {
-	auto loadShader = [vert,frag,func]()
+	std::vector<fs::path> paths = {
+		vert, frag
+	};
+	
+	load( paths, [vert,frag,func]( fs::path )
 	{
 		gl::GlslProgRef shader;
 		
@@ -91,10 +103,10 @@ void FileWatch::loadShader( fs::path vert, fs::path frag, tGlslProgCallback func
 		}
 		
 		func(shader);
-	};
+	});
 	
-	load( vert, [loadShader](fs::path){loadShader();} );
-	load( frag, [loadShader](fs::path){loadShader();} );
+//	load( vert, [loadShader](fs::path){loadShader();} );
+//	load( frag, [loadShader](fs::path){loadShader();} );
 	
 	// this will load the shader 2x on first load.
 	// whatever. if this was a problem, then we could manually update last read time for both files in the lambda.
