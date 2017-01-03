@@ -126,7 +126,7 @@ public:
 	
 protected:
 
-	void drawBalls( DrawType );
+	void drawBalls( DrawType, gl::GlslProgRef=0 );
 	void drawRibbons( DrawType );
 	// doing your own drawing? use these. these use geometry generated in prepareToDraw()
 	
@@ -163,6 +163,8 @@ protected:
 	int  getRibbonMaxLength() const { return mRibbonEnabled ? mRibbonMaxLength : 0; }
 	void accumulateBallHistory();
 	void updateBallsWithRibbonParams();
+
+	mat4 getBallTransform( const Ball& b, mat4* fixNormalMatrix=0 ) const;
 	
 private:	
 	// storing collisions

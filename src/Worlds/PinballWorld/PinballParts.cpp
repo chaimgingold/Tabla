@@ -161,6 +161,11 @@ Bumper::Bumper( PinballWorld& world, vec2 pin, float contourRadius, AdjSpace adj
 					 );
 }
 
+float Bumper::getDynamicRadius() const
+{
+	return mRadius + .5 * powf(getCollisionFade(),2.f);
+}
+
 void Bumper::draw()
 {
 	ColorA color = mColor;
@@ -178,13 +183,18 @@ void Bumper::draw()
 	
 	//gl::color(1,0,0);
 	gl::color(color);
-	gl::drawSolidCircle(mLoc, mRadius + .5 * powf(getCollisionFade(),2.f) );
+	gl::drawSolidCircle(mLoc, getDynamicRadius() );
 //	gl::drawSolid( getCollisionPoly() );
 
 //	gl::popModelMatrix();
 	
-	gl::color(getWorld().mBumperInnerColor);
-	gl::drawSolidCircle(mLoc,mRadius/2.f);
+	{
+		gl::ScopedModelMatrix trans;
+		gl::translate(0,0,-.1f); // so we are above main bumper
+		
+		gl::color(getWorld().mBumperInnerColor);
+		gl::drawSolidCircle(mLoc,mRadius/2.f);
+	}
 }
 
 void Bumper::tick()
@@ -193,7 +203,7 @@ void Bumper::tick()
 
 PolyLine2 Bumper::getCollisionPoly() const
 {
-	return getWorld().getCirclePoly( mLoc, mRadius );
+	return getWorld().getCirclePoly( mLoc, getDynamicRadius() );
 }
 
 float Bumper::getCollisionFade() const
@@ -234,13 +244,21 @@ RolloverTarget::RolloverTarget( PinballWorld& world, vec2 pin, float radius )
 
 void RolloverTarget::draw()
 {
+	gl::pushModelView();
+	gl::translate( 0, 0, getWorld().getTableDepth() -.01f); // epsilon so we don't z-clip behind table back
+
 	float collideFade = getCollisionFade();
 	
 	gl::color( lerp( lerp(mColorOff,mColorOn,mLight), ColorA(1,1,1,1), collideFade ) );
 	gl::drawSolidCircle(mLoc, mRadius);
+
+	gl::popModelView();
 	
 	if ( mContourPoly.size()>0 && collideFade > 0.f )
 	{
+		// we are at wrong z...
+		// the objects should manage that themselves
+		gl::ScopedDepth depthTest(false);
 		gl::color( mColorOn * ColorA(1,1,1,collideFade) );
 		gl::drawSolid(mContourPoly);
 	}
@@ -248,9 +266,6 @@ void RolloverTarget::draw()
 
 void RolloverTarget::tick()
 {
-	setZDepth( getWorld().getTableDepth() -.01f) ; // so we are responsive to hotloading
-		// epsilon so we don't z-clip behind table back
-		
 	mLight = lerp( mLight, mIsLit ? 1.f : 0.f, .5f );
 	
 	const auto &balls = getWorld().getBalls();

@@ -77,9 +77,6 @@ public:
 	PinballWorld& getWorld() const { return mWorld; }
 	PartType getType() const { return mType; }
 	
-	float getZDepth() const { return mZDepth; }
-	void  setZDepth( float d ) { mZDepth=d; }
-	
 	// inter-frame coherency + persistence
 	bool getShouldAlwaysPersist() const { return mShouldAlwaysPersist; }
 	void setShouldAlwaysPersist( bool v ) { mShouldAlwaysPersist=v; }
@@ -99,7 +96,6 @@ private:
 	PartType mType;
 	PinballWorld& mWorld;
 	bool mShouldAlwaysPersist=false;
-	float mZDepth=0.f; // +z means it is going deeper, away from the viewer
 };
 
 
@@ -152,6 +148,8 @@ public:
 	}
 	
 private:
+	float getDynamicRadius() const;
+	
 	vec2  mLoc;
 	float mRadius=0.f;
 

@@ -155,10 +155,46 @@ TriMeshRef BallWorld::getTriMeshForRibbons() const
 	return std::make_shared<TriMesh>(mesh);
 }
 
-TriMeshRef BallWorld::getTriMeshForBalls() const
+mat4 BallWorld::getBallTransform( const Ball& b, mat4* fixNormalMatrix ) const
 {
 	const float inv_delta = mNumIntegrationSteps;
+
+	mat4 x;
 	
+	float f;
+	vec2 stretch;
+	{
+		vec2 vel    = b.getVel() * inv_delta;
+		vec2 squash = b.mSquash  * inv_delta;
+		
+		float squashLen = min( length(squash) * 10.f, b.mRadius * .5f ) ;
+		float velLen    = length(vel) ;
+		
+		float l ;
+		
+		if ( squashLen > velLen ) stretch = perp(squash), l=squashLen ;
+		else stretch = vel, l = velLen ;
+		
+		f = .25f * (l / b.mRadius) ;
+	}
+	
+	x *= glm::translate( vec3(b.mLoc,0) ) ;
+	x *= glm::scale( vec3(b.mRadius,b.mRadius,1.f) );
+	
+	mat4 rotate = glm::rotate( glm::atan( stretch.y, stretch.x ), vec3(0,0,1) );
+	
+	x *= rotate;
+	x *= glm::scale( vec3(1.f+f,1.f-f,1) );
+	
+	if (fixNormalMatrix) {
+		*fixNormalMatrix = inverse(rotate);
+	}
+	
+	return x;
+}
+
+TriMeshRef BallWorld::getTriMeshForBalls() const
+{
 	TriMeshRef mesh = TriMesh::create( TriMesh::Format().positions(2).colors(4).texCoords0(2) );
 
 	const vec2 uv[4] = {
@@ -185,30 +221,7 @@ TriMeshRef BallWorld::getTriMeshForBalls() const
 		else
 		{
 			// squash and stretch
-			mat4 x;
-			
-			float f;
-			vec2 stretch;
-			{
-				vec2 vel    = b.getVel() * inv_delta;
-				vec2 squash = b.mSquash  * inv_delta;
-				
-				float squashLen = min( length(squash) * 10.f, b.mRadius * .5f ) ;
-				float velLen    = length(vel) ;
-				
-				float l ;
-				
-				if ( squashLen > velLen ) stretch = perp(squash), l=squashLen ;
-				else stretch = vel, l = velLen ;
-				
-				f = .25f * (l / b.mRadius) ;
-			}
-			
-			x *= glm::translate( vec3(b.mLoc,0) ) ;
-			x *= glm::scale( vec3(b.mRadius,b.mRadius,1.f) );
-			
-			x *= glm::rotate( glm::atan( stretch.y, stretch.x ), vec3(0,0,1) );
-			x *= glm::scale( vec3(1.f+f,1.f-f,1) );
+			mat4 x = getBallTransform(b);
 			
 			// just a circle
 			vec2 v[4] = {
@@ -292,12 +305,14 @@ void BallWorld::draw( DrawType drawType )
 	}	
 }
 
-void BallWorld::drawBalls( DrawType )
+void BallWorld::drawBalls( DrawType, gl::GlslProgRef shader )
 {
 	// draw using graphics we setup in prepareToDraw().
-	if (mBallMesh && mCircleShader)
+	if (!shader) shader=mCircleShader;
+	
+	if (mBallMesh && shader)
 	{
-		gl::ScopedGlslProg glslScp( mCircleShader );
+		gl::ScopedGlslProg glslScp( shader );
 		gl::draw(*mBallMesh);
 	}
 }
