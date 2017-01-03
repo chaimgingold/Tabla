@@ -344,8 +344,10 @@ void PinballWorld::processCollisions()
 		if (0) cout << "ball world collide (" << c.mBallIndex << ")" << endl;
 	}
 
-	pd::List hitObjects;
-	pd::List hitWalls;
+	//pd::List hitObjects;
+	//pd::List hitWalls;
+	int hitObjects = 0;
+	int hitWalls = 0;
 
 	for( const auto &c : getBallContourCollisions() )
 	{
@@ -358,9 +360,11 @@ void PinballWorld::processCollisions()
 		if (p) {
 
 			if (p.get()->getType() == PartType::Bumper) {
-				hitObjects.addFloat(0);
+				// hitObjects.addFloat(0);
+				hitObjects++;
 			} else {
-				hitWalls.addFloat(0);
+				// hitWalls.addFloat(0);
+				hitWalls++;
 
 			}
 
@@ -374,13 +378,16 @@ void PinballWorld::processCollisions()
 			if (ball) p->onBallCollide(*ball);
 		}
 		else {
-			hitWalls.addFloat(0);
+			// hitWalls.addFloat(0);
+			hitWalls++;
 	//		cout << "collide wall" << endl;
 		}
 	}
 
-	mPureDataNode->sendList("hit-objects", hitObjects);
-	mPureDataNode->sendList("hit-walls", hitWalls);
+	//mPureDataNode->sendList("hit-objects", hitObjects);
+	//mPureDataNode->sendList("hit-walls", hitWalls);
+	mPureDataNode->sendFloat("hit-walls", MIN(5, hitWalls));
+	mPureDataNode->sendFloat("hit-objects", MIN(5, hitObjects));
 }
 
 void PinballWorld::draw( DrawType drawType )
