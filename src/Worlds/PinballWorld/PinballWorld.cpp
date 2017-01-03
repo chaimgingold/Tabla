@@ -621,6 +621,7 @@ void PinballWorld::draw3d( DrawType drawType )
 {
 	beginDraw3d();
 
+	// floor
 	if (mFloorShader)
 	{
 		gl::ScopedGlslProg glslScp(mFloorShader);
@@ -641,6 +642,7 @@ void PinballWorld::draw3d( DrawType drawType )
 		gl::popModelView();
 	}
 	
+	// walls
 	if (mWallShader)
 	{
 		gl::ScopedGlslProg glslScp(mWallShader);
@@ -680,60 +682,34 @@ void PinballWorld::draw3d( DrawType drawType )
 		p->draw();
 	}
 
-	//
+	// red line
 	drawBallCullLine();
 
 	// balls
-	if (1)
+	if (mBallDrawBatch)
 	{
-		if (mBallDrawBatch)
+		for( const auto &b : getBalls() )
 		{
-			for( const auto &b : getBalls() )
-			{
-				// TODO: squash, stretch
-				mat4 fixNormalMatrix;
+			mat4 fixNormalMatrix;
 
-				gl::ScopedModelMatrix model;
-				gl::multModelMatrix( getBallTransform(b,&fixNormalMatrix) );
-				gl::translate(0,0,m3dTableDepth-b.mRadius/2);
-				
-//				gl::translate(vec3(b.mLoc,m3dTableDepth-b.mRadius/2));
-//				gl::scale( vec3(1,1,1) * b.mRadius );
-				
-				mBallShader->uniform("fixNormalMatrix",fixNormalMatrix);
-				mBallDrawBatch->draw();
-				
-//				gl::color(1,1,1);
-//				gl::drawSphere( vec3(b.mLoc,m3dTableDepth-b.mRadius/2), b.mRadius);
-			}
-		}
-		
-		// ribbons
-		{
-			gl::ScopedModelMatrix trans;
-			gl::translate(0,0,m3dTableDepth - mBallDefaultRadius*.5f);
+			gl::ScopedModelMatrix model;
+			gl::multModelMatrix( getBallTransform(b,&fixNormalMatrix) );
+			gl::translate(0,0,m3dTableDepth-b.mRadius/2);
 			
-			gl::enableDepthWrite(false);
-			BallWorld::drawRibbons(drawType);
-			gl::enableDepthWrite(true);
+			mBallShader->uniform("fixNormalMatrix",fixNormalMatrix);
+			mBallDrawBatch->draw();
 		}
-	}
-	else
-	{
-		// 2d style circles
-		gl::pushModelView();
-		gl::translate(0,0,m3dTableDepth - mBallDefaultRadius*.5f);
-		{
-			gl::enableDepthWrite(false);
-			BallWorld::drawRibbons(drawType);
-			gl::enableDepthWrite(true);
-		
-			BallWorld::drawBalls(drawType);
-		}
-		gl::popModelView();
 	}
 	
-//	gl::enableDepthWrite(true);
+	// ribbons
+	{
+		gl::ScopedModelMatrix trans;
+		gl::translate(0,0,m3dTableDepth - mBallDefaultRadius*.5f);
+		
+		gl::enableDepthWrite(false);
+		BallWorld::drawRibbons(drawType);
+		gl::enableDepthWrite(true);
+	}
 
 	// done with 3d
 	endDraw3d();
