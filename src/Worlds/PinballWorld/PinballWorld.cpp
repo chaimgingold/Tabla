@@ -1219,7 +1219,7 @@ void PinballWorld::setupSynthesis()
 
 	std::vector<fs::path> paths =
 	{
-		app->hotloadableAssetPath("synths/pong.pd")
+		app->hotloadableAssetPath("synths/pinball-world.pd")
 //		app->hotloadableAssetPath("synths/music-image.pd",
 //		app->hotloadableAssetPath("synths/music-grain.pd"),
 //		app->hotloadableAssetPath("synths/music-osc.pd")
