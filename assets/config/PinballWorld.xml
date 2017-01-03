@@ -9,6 +9,7 @@
 		<BallDefaultMaxRadius>		1.5 </BallDefaultMaxRadius>
 		<BallMaxVel>				2 </BallMaxVel>
 		<BallDefaultColor>			00FFFF </BallDefaultColor>
+		<BallDefaultRibbonColor>			FFFFFF </BallDefaultRibbonColor>
 
 		<BallContourImpactNormalVelImpulse>0</BallContourImpactNormalVelImpulse>
 		<BallContourCoeffOfRestitution>.7</BallContourCoeffOfRestitution>

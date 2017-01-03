@@ -199,6 +199,8 @@ private:
 	void shutdownSynthesis();
 
 	// shaders
+	gl::TextureCubeMapRef mCubeMap;	
+	
 	void loadShaders();
 	
 	gl::GlslProgRef mWallShader;

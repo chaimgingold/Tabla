@@ -30,6 +30,7 @@ void BallWorld::setParams( XmlTree xml )
 	getXml(xml,"BallDefaultRadius",mBallDefaultRadius);
 	getXml(xml,"BallDefaultMaxRadius",mBallDefaultMaxRadius);
 	getXml(xml,"BallDefaultColor",mBallDefaultColor);
+	getXml(xml,"BallDefaultRibbonColor",mBallDefaultRibbonColor);
 	getXml(xml,"BallMaxVel",mBallMaxVel);
 	getXml(xml,"BallContourImpactNormalVelImpulse",mBallContourImpactNormalVelImpulse);
 	getXml(xml,"BallContourCoeffOfRestitution",mBallContourCoeffOfRestitution);
@@ -94,7 +95,7 @@ TriMeshRef BallWorld::getTriMeshForRibbons() const
 		float f = (float)i / (float)(b.mHistory.size()-1);
 		f = powf(f,mRibbonAlphaExp);
 		
-		ColorA c = b.mColor;
+		ColorA c = b.mRibbonColor;
 		c.a *= f * mRibbonAlphaScale;
 		return c;
 		//return ColorA(1,1,1,.8f);
@@ -490,6 +491,7 @@ Ball& BallWorld::newRandomBall ( vec2 loc )
 	Ball ball ;
 	
 	ball.mColor = mBallDefaultColor;
+	ball.mRibbonColor = mBallDefaultRibbonColor;
 	
 	ball.setLoc( loc ) ;
 	ball.mRadius = Rand::randFloat(mBallDefaultRadius,mBallDefaultMaxRadius) ;

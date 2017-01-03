@@ -22,6 +22,7 @@ using namespace ci::app;
 using namespace std;
 using namespace Pinball;
 
+const bool kDoSound = false;
 
 PinballWorld::PinballWorld()
 {
@@ -116,6 +117,17 @@ void PinballWorld::loadShaders()
 	load( "ball", &mBallShader, 0 );
 	load( "floor", &mFloorShader, 0 );
 	load( "ball-shadow", &mBallShadowShader, 0 );
+	
+	mFileWatch.load( PaperBounce3App::get()->hotloadableAssetPath( fs::path("images") / "env_map.jpg" ),
+		[this]( fs::path path ){
+			try {
+				mCubeMap = gl::TextureCubeMap::create( loadImage(path),
+					gl::TextureCubeMap::Format().mipmap() );
+			} catch (...) {
+				mCubeMap = 0;
+			}
+		}
+	);
 }
 
 PinballWorld::~PinballWorld()
@@ -712,6 +724,12 @@ void PinballWorld::draw3d( DrawType drawType )
 	{
 		gl::ScopedGlslProg glslScp(mBallShader);
 		
+		if (mCubeMap)
+		{
+			mCubeMap->bind();
+			mBallShader->uniform( "uCubeMapTex" , 0 );
+		}
+		
 		for( const auto &b : getBalls() )
 		{
 			mat4 fixNormalMatrix;
@@ -720,7 +738,7 @@ void PinballWorld::draw3d( DrawType drawType )
 			gl::multModelMatrix( getBallTransform(b,&fixNormalMatrix) );
 			gl::translate(0,0,m3dTableDepth-b.mRadius/2);
 			
-			mBallShader->uniform("fixNormalMatrix",fixNormalMatrix);
+//			mBallShader->uniform("fixNormalMatrix",fixNormalMatrix);
 			gl::draw(mBallMesh);
 		}
 	}
@@ -1285,8 +1303,6 @@ void PinballWorld::addContourToVec( Contour c, ContourVec& contours ) const
 // Synthesis
 void PinballWorld::setupSynthesis()
 {
-
-
 	// Register file-watchers for all the major pd patch components
 	auto app = PaperBounce3App::get();
 
@@ -1298,7 +1314,7 @@ void PinballWorld::setupSynthesis()
 	};
 
 	// Load pinball synthesis patch
-	mFileWatch.load( paths, [this,app]()
+	if (kDoSound) mFileWatch.load( paths, [this,app]()
 	{
 		// Reload the root patch
 		auto rootPatch = app->hotloadableAssetPath("synths/pinball-world.pd");

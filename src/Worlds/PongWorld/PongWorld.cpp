@@ -219,7 +219,8 @@ void PongWorld::serve()
 {
 	Ball ball ;
 	
-	ball.mColor = Color(1,0,0);
+	ball.mColor = mBallDefaultColor;
+	ball.mRibbonColor = mBallDefaultRibbonColor;
 	ball.setLoc( mCenter ) ;
 	ball.mRadius = 2.f;
 	ball.setMass( M_PI * powf(ball.mRadius,3.f) ) ;

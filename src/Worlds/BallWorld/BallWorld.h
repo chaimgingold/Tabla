@@ -32,6 +32,7 @@ public:
 	
 	float mRadius ;
 	ColorAf mColor ;
+	ColorAf mRibbonColor=ColorAf(0,0,0,0) ;
 	
 	void setLoc( vec2 l ) { mLoc=mLastLoc=l; }
 	void setVel( vec2 v ) { mLastLoc = mLoc - v ; }
@@ -147,6 +148,7 @@ protected:
 	float	mBallDefaultMaxRadius	= 8.f * 4.f ;
 	float	mBallMaxVel				= 8.f ;
 	ColorAf mBallDefaultColor		= ColorAf::hex(0xC62D41);
+	ColorAf mBallDefaultRibbonColor	= ColorAf(1,1,1,1);
 	float   mBallContourImpactNormalVelImpulse = .0f; // for added excitement. if zero, then max vel matters less.
 	float	mBallContourCoeffOfRestitution = 1.f; // [0,1] [elastic,inelastic]
 	float	mBallContourFrictionlessCoeff = 1.f;
