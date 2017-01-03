@@ -1033,6 +1033,11 @@ void PaperBounce3App::keyDown( KeyEvent event )
 	}
 }
 
+void PaperBounce3App::keyUp( KeyEvent event )
+{
+	if (mGameWorld) mGameWorld->keyUp(event);
+}
+
 bool PaperBounce3App::parseKeyboardString( string str )
 {
 	bool handled = false;

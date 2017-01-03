@@ -59,6 +59,7 @@ public:
 	void worldBoundsPolyDidChange() override;
 
 	void keyDown( KeyEvent ) override;
+	void keyUp( KeyEvent ) override;
 	void mouseClick( vec2 ) override;
 
 public:
@@ -91,15 +92,17 @@ public:
 	ColorA mRolloverTargetOnColor=Color(1,0,0);
 	ColorA mRolloverTargetOffColor=Color(0,1,0);
 	
-	// part params for inter-frame coherence
+	// inter-frame coherence params
 	float mPartTrackLocMaxDist = 1.f;
 	float mPartTrackRadiusMaxDist = .5f;
+	float mDejitterContourMaxDist = 0.f;
 	
 	// debug params
 	bool mDebugDrawFlipperAccelHairs=false;
 	
 	// state
-	float time() { return ci::app::getElapsedSeconds(); } // use this time so we can locally modulate it (eg slow down, pause, etc...)
+	float getTime() const { return ci::app::getElapsedSeconds(); } // use this time so we can locally modulate it (eg slow down, pause, etc...)
+	float getStrobeTime() const { return getTime(); }
 	float getFlipperState( int side ) const { assert(side==0||side==1); return mFlipperState[side]; }
 	float getFlipperAngularVel( int side ) const; // TODO: make radians per second
 
@@ -197,6 +200,8 @@ private:
 	PartVec mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const;
 	AdjSpace getAdjacentSpace( const Contour*, vec2, const ContourVector& ) const ;
 	AdjSpace getAdjacentSpace( vec2, const ContourVector& ) const ; // how much adjacent space is to the left, right?
+
+	ContourVec dejitterVisionContours( ContourVec in, ContourVec old ) const;
 	
 	ContourVec mVisionContours;
 	
@@ -205,10 +210,11 @@ private:
 	Contour contourFromPoly( PolyLine2 ) const; // area, radius, center, bounds, etc... is approximate
 	void addContourToVec( Contour, ContourVec& ) const;
 	
-	// keymap (deprecated)
+	// keymap
 	map<char,string> mKeyToInput; // maps keystrokes to input names
 	map<string,function<void()>> mInputToFunction; // maps input names to code handlers
-
+	void processKeyEvent( KeyEvent, string suffix );
+	
 	// game pad
 	void setupControls();
 	GamepadManager mGamepadManager;

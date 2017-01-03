@@ -186,7 +186,9 @@ public:
 	
 private:
 	void setIsLit( bool );
-
+	
+	float mStrobePhase=0.f;
+	
 	bool  mIsLit=false; // discrete goal
 	float mLight=0.f; // continues, current anim state.
 

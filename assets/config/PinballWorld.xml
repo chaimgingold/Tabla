@@ -53,8 +53,10 @@
 	<HolePartMaxContourRadius>2</HolePartMaxContourRadius>
 	<FlipperDistToEdge>4</FlipperDistToEdge>
 	
-	<PartTrackRadiusMaxDist>.5</PartTrackRadiusMaxDist>
+	<PartTrackRadiusMaxDist>1</PartTrackRadiusMaxDist>
 	<PartTrackLocMaxDist>.25</PartTrackLocMaxDist>
+	
+	<DejitterContourMaxDist>0</DejitterContourMaxDist> <!-- 0 for off -->
 	
 <!-- Object Geometry -->
 	<CircleMinVerts>8</CircleMinVerts>

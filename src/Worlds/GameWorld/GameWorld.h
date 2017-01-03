@@ -60,6 +60,7 @@ public:
 	virtual void drawMouseDebugInfo( vec2 ){}
 	virtual void mouseClick( vec2 ){}
 	virtual void keyDown( KeyEvent ){}
+	virtual void keyUp( KeyEvent ){}
 	
 private:
 	Vision::Params	mVisionParams;
