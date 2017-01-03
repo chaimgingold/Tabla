@@ -18,6 +18,18 @@ using namespace ci::app;
 using namespace std;
 using namespace Pinball;
 
+Part::Part( PinballWorld& world, PartType type )
+	: mWorld(world), mType(type)
+{
+	setStrobePhase(2);
+}
+
+void Part::setStrobePhase( int nparts )
+{
+	if (nparts<2) mStrobePhase = 0.f;
+	else mStrobePhase = randBool() ? 0.f : (1.f / (float)nparts);
+}
+
 bool Part::getShouldMergeWithOldPart( const PartRef old ) const
 {
 	return old->getType() == getType() &&
@@ -46,6 +58,21 @@ void Part::addExtrudedCollisionPolyToScene( Scene& s, ColorA c ) const
 		>> geom::ColorFromAttrib( geom::POSITION, posToColor ));
 	
 	s.mWalls.push_back( mesh );
+}
+
+void Part::markCollision( float decay )
+{
+	mCollideTime = getWorld().getTime();
+	mCollideDecay = decay;
+}
+
+float Part::getCollisionFade() const
+{
+	float t = 1.f - (getWorld().getTime() - mCollideTime) / mCollideDecay;
+	
+	t = constrain( t, 0.f, 1.f);
+	
+	return t;
 }
 
 Flipper::Flipper( PinballWorld& world, vec2 pin, float contourRadius, PartType type )
@@ -133,20 +160,9 @@ PolyLine2 Flipper::getCollisionPoly() const
 	return getWorld().getCapsulePoly(c,r);
 }
 
-float Flipper::getCollisionFade() const
-{
-	const float k = .5f;
-	
-	float t = 1.f - (getWorld().getTime() - mCollideTime) / k;
-	
-	t = constrain( t, 0.f, 1.f);
-	
-	return t;
-}
-
 void Flipper::onBallCollide( Ball& ball )
 {
-	mCollideTime = getWorld().getTime();
+	markCollision(.5f);
 	
 	ball.mAccel += getAccelForBall(ball.mLoc);
 }
@@ -182,15 +198,26 @@ Bumper::Bumper( PinballWorld& world, vec2 pin, float contourRadius, AdjSpace adj
 
 //	mColor = Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat());
 	mColor = world.mBumperOuterColor;
+	mStrobeColor = world.mBumperStrobeColor;
 	
 	mRadius = min( max(contourRadius*world.mBumperContourRadiusScale,world.mBumperMinRadius),
 					 min(adjSpace.mLeft,adjSpace.mRight)
 					 );
+	
+	setStrobePhase(4);
 }
 
 float Bumper::getDynamicRadius() const
 {
 	return mRadius + .5 * powf(getCollisionFade(),2.f);
+}
+
+ColorA Bumper::getColor() const
+{
+	return lerp(
+		getCollisionFade() > 0.f ? getWorld().mBumperOnColor : mColor,
+		mStrobeColor, getStrobe( 1.3f, .15f )
+	);
 }
 
 void Bumper::draw()
@@ -201,7 +228,7 @@ void Bumper::draw()
 //	gl::translate( mLoc );
 	
 	//gl::color(1,0,0);
-	gl::color(mStrobeColor);
+	gl::color( getColor() );
 	gl::drawSolidCircle(mLoc, getDynamicRadius() );
 //	gl::drawSolid( getCollisionPoly() );
 
@@ -218,16 +245,30 @@ void Bumper::draw()
 
 void Bumper::addTo3dScene( Scene& s )
 {
-	addExtrudedCollisionPolyToScene(s, lerp(mStrobeColor,ColorA(1,1,1,1),.5f) );
+	addExtrudedCollisionPolyToScene(s, lerp(getColor(),ColorA(1,1,1,1),.5f) );
 }
 
 void Bumper::tick()
 {
-	mStrobeColor = mColor;
-	
-	if ( Rand::randFloat() < powf(getCollisionFade(),2.f) )
+}
+
+void Bumper::onGameEvent( GameEvent e )
+{
+	switch(e)
 	{
-		mStrobeColor = Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat());
+		case GameEvent::LostBall:
+			markCollision(.75f);
+			break;
+			
+		case GameEvent::LostLastMultiBall:
+			markCollision(2.f);
+			break;
+			
+		case GameEvent::NewPart:
+			markCollision(.5f);
+			break;
+		
+		default:break;
 	}
 }
 
@@ -236,24 +277,9 @@ PolyLine2 Bumper::getCollisionPoly() const
 	return getWorld().getCirclePoly( mLoc, getDynamicRadius() );
 }
 
-float Bumper::getCollisionFade() const
-{
-	const float k = .5f;
-	
-	float t = 1.f - (getWorld().getTime() - mCollideTime) / k;
-	
-	t = constrain( t, 0.f, 1.f);
-	
-	return t;
-}
-
 void Bumper::onBallCollide( Ball& ball )
 {
-//	mRadius /= 2.f;
-//	mColor = Color(1,0,0);
-//	ball.mColor = mColor;
-	
-	mCollideTime = getWorld().getTime();
+	markCollision(.5f);
 	
 	// kick ball
 	vec2 v = ball.mLoc - mLoc;
@@ -270,8 +296,19 @@ RolloverTarget::RolloverTarget( PinballWorld& world, vec2 pin, float radius )
 {
 	mColorOff = getWorld().mRolloverTargetOffColor;
 	mColorOn  = getWorld().mRolloverTargetOnColor;
+	mColorStrobe = getWorld().mRolloverTargetStrobeColor;
+
+	setStrobePhase(2);
+}
+
+float Part::getStrobe( float strobeFreqSlow, float strobeFreqFast ) const
+{
+	float collideFade = getCollisionFade();
 	
-	mStrobePhase = randBool() ? .5f : 0.f;
+	return getWorld().getStrobe(
+		mStrobePhase,
+		collideFade > 0.f ? strobeFreqFast : strobeFreqSlow
+	);
 }
 
 void RolloverTarget::draw()
@@ -280,25 +317,12 @@ void RolloverTarget::draw()
 	gl::translate( 0, 0, getWorld().getTableDepth() -.01f); // epsilon so we don't z-clip behind table back
 
 	float collideFade = getCollisionFade();
-	float strobe;
 	
-	{
-		float freq;
-		float phase = mStrobePhase;
-
-		if (collideFade>0.f) freq  = .15f;
-		else freq = 1.5f;
-		
-		if (mIsLit && collideFade==0.f) phase=0.f;
-		
-		strobe = getWorld().getStrobeTime();
-		strobe = fmod( strobe, freq ) / freq;
-		strobe = (cos( (strobe + phase)*M_PI*2.f) + 1.f) / 2.f;
-	}
+	float strobe = getStrobe( mIsLit ? .75f : 1.5f, .15f );
 	
 	ColorA c = lerp(
 		lerp(mColorOff,mColorOn,mLight),
-		lerp(ColorA(1,0,1,1),mColorOff,mLight),
+		lerp(mColorStrobe,mColorOff,mLight),
 		strobe );
 	
 	gl::color(c);
@@ -314,7 +338,7 @@ void RolloverTarget::draw()
 //		gl::color( mColorOn * ColorA(1,1,1,collideFade) );
 
 		if ( collideFade > 0.f ) gl::color(c);
-		else gl::color( Color(1,0,1) * strobe );
+		else gl::color( mColorStrobe * strobe );
 //		gl::color( c );
 		gl::drawSolid(mContourPoly);
 	}
@@ -326,14 +350,17 @@ void RolloverTarget::tick()
 	
 	const auto &balls = getWorld().getBalls();
 	
-	if (balls.empty()) setIsLit(false);
+	if (balls.empty())
+	{
+		setIsLit(false);
+	}
 	else //if ( !mIsLit )
 	{
 		for ( auto &b : balls )
 		{
 			if ( distance(b.mLoc,mLoc) < mRadius + b.mRadius )
 			{
-				mCollideTime = getWorld().getTime();
+				markCollision(.75f);
 				setIsLit(true);
 				break;
 			}
@@ -347,15 +374,24 @@ void RolloverTarget::setIsLit( bool v )
 //	setType( v ? PartType::RolloverTargetOn : PartType::RolloverTargetOff );
 }
 
-float RolloverTarget::getCollisionFade() const
+void RolloverTarget::onGameEvent( GameEvent e )
 {
-	const float k = .5f;
-	
-	float t = 1.f - (getWorld().getTime() - mCollideTime) / k;
-	
-	t = constrain( t, 0.f, 1.f);
-	
-	return t;
+	switch(e)
+	{
+		case GameEvent::LostBall:
+			markCollision(1.f);
+			break;
+			
+		case GameEvent::LostLastMultiBall:
+			markCollision(3.f);
+			break;
+			
+		case GameEvent::NewPart:
+			markCollision(.5f);
+			break;
+		
+		default:break;
+	}
 }
 
 bool RolloverTarget::getShouldMergeWithOldPart( const PartRef old ) const

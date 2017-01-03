@@ -20,6 +20,18 @@ namespace Pinball
 class PinballWorld;
 class Scene;
 
+enum class GameEvent
+{
+	// game-wide
+	ServeBall, // 0 => 1
+	ServeMultiBall, // >0 => +1
+	LostBall, // n => n-1
+	LostLastMultiBall, // 1 => 0
+	
+	// part specific
+	NewPart // you are new
+};
+
 struct AdjSpace
 {
 	// amount of space at my left and right, from my contour's outer edge (centroid + my-width-left/right)
@@ -60,7 +72,7 @@ class Part
 {
 public:
 
-	Part( PinballWorld& world, PartType type ) : mWorld(world), mType(type) {}
+	Part( PinballWorld& world, PartType type );
 	
 	virtual void draw(){}
 	virtual void tick(){}
@@ -69,7 +81,8 @@ public:
 	bool isFlipper() const { return mType==PartType::FlipperLeft || mType==PartType::FlipperRight; }
 	
 	virtual void onBallCollide( Ball& ) {}
-		
+	virtual void onGameEvent( GameEvent ) {}
+	
 	virtual PolyLine2 getCollisionPoly() const { return PolyLine2(); }
 	// we could save some cpu by having a get/set and caching it internally, but who cares right now
 	
@@ -94,11 +107,22 @@ public:
 protected:
 	void addExtrudedCollisionPolyToScene( Scene&, ColorA ) const;
 	void setType( PartType t ) { mType=t; }
+
+	void markCollision( float decay );
+	float getCollisionFade() const;
+	float getStrobe( float strobeFreqSlow, float strobeFreqFast ) const;
+	void setStrobePhase( int nparts );
 	
 private:
 	PartType mType;
 	PinballWorld& mWorld;
 	bool mShouldAlwaysPersist=false;
+
+	float mStrobePhase=0.f;
+
+	float mCollideTime = -10.f;
+	float mCollideDecay=0.f;
+
 };
 
 
@@ -127,9 +151,6 @@ private:
 	
 	vec2  getTipLoc() const; // center of capsule, second point
 	float mFlipperLength=0.f;
-
-	float getCollisionFade() const;
-	float mCollideTime = -10.f;
 	
 };
 
@@ -145,20 +166,21 @@ public:
 	virtual void onBallCollide( Ball& ) override;
 
 	virtual PolyLine2 getCollisionPoly() const override;
-	
-	float getCollisionFade() const;
 
 	virtual bool isValidLocForRolloverTarget( vec2 loc, float r ) const override {
 		return distance(loc,mLoc) > r + mRadius;
 	}
-	
+
+protected:
+	void onGameEvent( GameEvent ) override;
+
 private:
+	ColorA getColor() const;
+	
 	float getDynamicRadius() const;
 	
 	vec2  mLoc;
 	float mRadius=0.f;
-
-	float mCollideTime = -10.f;
 
 	ColorA mColor = ColorA(1,1,1,1);
 	ColorA mStrobeColor;
@@ -182,19 +204,17 @@ public:
 	vec2  mLoc;
 	PolyLine2 mContourPoly; // so we can strobe it!
 	
-	ColorA mColorOff, mColorOn;
+	ColorA mColorOff, mColorOn, mColorStrobe;
+
+protected:
+	void onGameEvent( GameEvent ) override;
 	
 private:
 	void setIsLit( bool );
 	
-	float mStrobePhase=0.f;
-	
 	bool  mIsLit=false; // discrete goal
 	float mLight=0.f; // continues, current anim state.
-
-	float getCollisionFade() const;
-	float mCollideTime = -10.f;
-
+	
 };
 
 class Plunger : public Part

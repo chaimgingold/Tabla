@@ -156,6 +156,8 @@ void PinballWorld::setParams( XmlTree xml )
 
 	getXml(xml, "BumperOuterColor",mBumperOuterColor);
 	getXml(xml, "BumperInnerColor",mBumperInnerColor);
+	getXml(xml, "BumperOnColor", mBumperOnColor);
+	getXml(xml, "BumperStrobeColor",mBumperStrobeColor);
 	
 	getXml(xml, "FlipperMinLength",mFlipperMinLength);
 	getXml(xml, "FlipperMaxLength",mFlipperMaxLength);
@@ -166,6 +168,7 @@ void PinballWorld::setParams( XmlTree xml )
 	getXml(xml, "RolloverTargetMinWallDist",mRolloverTargetMinWallDist);
 	getXml(xml, "RolloverTargetOnColor",mRolloverTargetOnColor);
 	getXml(xml, "RolloverTargetOffColor",mRolloverTargetOffColor);
+	getXml(xml, "RolloverTargetStrobeColor",mRolloverTargetStrobeColor);
 	getXml(xml, "RolloverTargetDynamicRadius",mRolloverTargetDynamicRadius);
 	
 	getXml(xml, "CircleMinVerts", mCircleMinVerts );
@@ -243,6 +246,13 @@ void PinballWorld::gameWillLoad()
 	// most important thing is to prevent BallWorld from doing its default thing.
 }
 
+void PinballWorld::sendGameEvent( GameEvent e )
+{
+	for( auto p : mParts ) {
+		p->onGameEvent(e);
+	}
+}
+
 void PinballWorld::update()
 {
 	mFileWatch.update();
@@ -293,6 +303,8 @@ void PinballWorld::updateBallSynthesis() {
 
 void PinballWorld::serveBall()
 {
+	const int oldCount = getBalls().size();
+
 	// for now, from the top
 	float fx = Rand::randFloat();
 	
@@ -304,10 +316,15 @@ void PinballWorld::serveBall()
 	
 	ball.mCollideWithContours = true;
 	ball.mColor = mBallDefaultColor; // no random colors that are set entirely in code, i think. :P
+	
+	sendGameEvent(GameEvent::ServeBall);
+	if (oldCount>0) sendGameEvent(GameEvent::ServeMultiBall);
 }
 
 void PinballWorld::cullBalls()
 {
+	const int oldCount = getBalls().size();
+	
 	// remove?
 	vector<Ball>& balls = getBalls();
 	vector<Ball> newBalls;
@@ -326,6 +343,12 @@ void PinballWorld::cullBalls()
 	}
 	
 	balls = newBalls;
+	
+	// events
+	const int newCount = balls.size();
+	
+	if (newCount==0 && oldCount>0) sendGameEvent(GameEvent::LostLastMultiBall);
+	if (newCount < oldCount) sendGameEvent(GameEvent::LostBall);
 }
 
 void PinballWorld::tickFlipperState()
@@ -352,6 +375,15 @@ void PinballWorld::tickFlipperState()
 			mFlipperState[i] = constrain( mFlipperState[i], 0.f, 1.f );
 		}
 	}
+}
+
+float PinballWorld::getStrobe( float phase, float freq ) const
+{
+	float strobe;
+	strobe = getStrobeTime();
+	strobe = fmod( strobe, freq ) / freq;
+	strobe = (cos( (strobe + phase)*M_PI*2.f) + 1.f) / 2.f;
+	return strobe;
 }
 
 float PinballWorld::getFlipperAngularVel( int side ) const
@@ -1130,7 +1162,9 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 			vec2 rolloverLoc = c.mCenter;
 			float r = mRolloverTargetRadius;
 			
-			if ( closestPt != c.mCenter )
+			const float kMaxDist = mRolloverTargetDynamicRadius*4.f;
+			
+			if ( closestPt != c.mCenter && dist < kMaxDist )
 			{
 				vec2 dir = normalize( closestPt - c.mCenter );
 
@@ -1138,17 +1172,17 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 				
 				if (mRolloverTargetDynamicRadius)
 				{
-					r = max( r, distance(closestPt,c.mCenter) - c.mRadius );
+					r = min( mRolloverTargetRadius*4.f, max( r, distance(closestPt,c.mCenter) - c.mRadius ) );
 					far = r;
 				}
 				
 				rolloverLoc = closestPt + dir * (r+far);
+
+				auto rt = new RolloverTarget(*this,rolloverLoc,r);
+				rt->mContourPoly = c.mPolyLine;
+				
+				add( rt );
 			}
-			
-			auto rt = new RolloverTarget(*this,rolloverLoc,r);
-			rt->mContourPoly = c.mPolyLine;
-			
-			add( rt );
 		}
 		
 	} // for
@@ -1178,6 +1212,8 @@ PinballWorld::mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newPa
 	for( PartRef &p : parts )
 	{
 		// does it match an old part?
+		bool wasMatched = false;
+		
 		for( const PartRef& old : oldParts )
 		{
 			if ( !old->getShouldAlwaysPersist() && p->getShouldMergeWithOldPart(old) )
@@ -1190,9 +1226,15 @@ PinballWorld::mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newPa
 				
 				// replace with old.
 				// (we are simply shifting pointers rather than copying contents, but i think this is fine)
-				if (replace) p = old;
+				if (replace) {
+					p = old;
+					wasMatched = true;
+				}
 			}
 		}
+		
+		//
+		if (!wasMatched) p->onGameEvent(GameEvent::NewPart);
 	}
 	
 	// carry forward any old parts that should be

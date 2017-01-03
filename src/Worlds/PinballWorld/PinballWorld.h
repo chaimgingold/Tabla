@@ -83,6 +83,8 @@ public:
 	float mBumperKickAccel = 1.f;
 	ColorA mBumperOuterColor = ColorA(1,0,0,1);
 	ColorA mBumperInnerColor = ColorA(1,.8,0,1);
+	ColorA mBumperStrobeColor = ColorA(0,.8,1,1);
+	ColorA mBumperOnColor = ColorA(0,.8,1,1);
 	
 	float mFlipperMinLength=5.f;
 	float mFlipperMaxLength=10.f;
@@ -91,6 +93,7 @@ public:
 
 	ColorA mRolloverTargetOnColor=Color(1,0,0);
 	ColorA mRolloverTargetOffColor=Color(0,1,0);
+	ColorA mRolloverTargetStrobeColor=ColorA(1,0,1);
 	
 	// inter-frame coherence params
 	float mPartTrackLocMaxDist = 1.f;
@@ -101,8 +104,13 @@ public:
 	bool mDebugDrawFlipperAccelHairs=false;
 	
 	// state
+	void sendGameEvent( GameEvent );
+	
 	float getTime() const { return ci::app::getElapsedSeconds(); } // use this time so we can locally modulate it (eg slow down, pause, etc...)
+	
 	float getStrobeTime() const { return getTime(); }
+	float getStrobe( float phase, float freq ) const;
+	
 	float getFlipperState( int side ) const { assert(side==0||side==1); return mFlipperState[side]; }
 	float getFlipperAngularVel( int side ) const; // TODO: make radians per second
 
