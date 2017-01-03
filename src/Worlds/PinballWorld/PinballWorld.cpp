@@ -23,6 +23,7 @@ using namespace std;
 using namespace Pinball;
 
 const bool kDoSound = false;
+//const bool kLogButtons = true; // we will need them to configure new controllers :P
 
 PinballWorld::PinballWorld()
 {
@@ -55,6 +56,7 @@ void PinballWorld::setupControls()
 			}
 		}
 	};
+	
 	
 	mGamepadManager.mOnButtonDown = [this,button]( const GamepadManager::Event& event )
 	{

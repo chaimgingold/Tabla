@@ -137,7 +137,7 @@ float Flipper::getCollisionFade() const
 {
 	const float k = .5f;
 	
-	float t = 1.f - (getWorld().time() - mCollideTime) / k;
+	float t = 1.f - (getWorld().getTime() - mCollideTime) / k;
 	
 	t = constrain( t, 0.f, 1.f);
 	
@@ -146,7 +146,7 @@ float Flipper::getCollisionFade() const
 
 void Flipper::onBallCollide( Ball& ball )
 {
-	mCollideTime = getWorld().time();
+	mCollideTime = getWorld().getTime();
 	
 	ball.mAccel += getAccelForBall(ball.mLoc);
 }
@@ -240,7 +240,7 @@ float Bumper::getCollisionFade() const
 {
 	const float k = .5f;
 	
-	float t = 1.f - (getWorld().time() - mCollideTime) / k;
+	float t = 1.f - (getWorld().getTime() - mCollideTime) / k;
 	
 	t = constrain( t, 0.f, 1.f);
 	
@@ -253,7 +253,7 @@ void Bumper::onBallCollide( Ball& ball )
 //	mColor = Color(1,0,0);
 //	ball.mColor = mColor;
 	
-	mCollideTime = getWorld().time();
+	mCollideTime = getWorld().getTime();
 	
 	// kick ball
 	vec2 v = ball.mLoc - mLoc;
@@ -270,6 +270,8 @@ RolloverTarget::RolloverTarget( PinballWorld& world, vec2 pin, float radius )
 {
 	mColorOff = getWorld().mRolloverTargetOffColor;
 	mColorOn  = getWorld().mRolloverTargetOnColor;
+	
+	mStrobePhase = randBool() ? .5f : 0.f;
 }
 
 void RolloverTarget::draw()
@@ -278,18 +280,42 @@ void RolloverTarget::draw()
 	gl::translate( 0, 0, getWorld().getTableDepth() -.01f); // epsilon so we don't z-clip behind table back
 
 	float collideFade = getCollisionFade();
+	float strobe;
 	
-	gl::color( lerp( lerp(mColorOff,mColorOn,mLight), ColorA(1,1,1,1), collideFade ) );
+	{
+		float freq;
+		float phase = mStrobePhase;
+
+		if (collideFade>0.f) freq  = .15f;
+		else freq = 1.5f;
+		
+		if (mIsLit && collideFade==0.f) phase=0.f;
+		
+		strobe = getWorld().getStrobeTime();
+		strobe = fmod( strobe, freq ) / freq;
+		strobe = (cos( (strobe + phase)*M_PI*2.f) + 1.f) / 2.f;
+	}
+	
+	ColorA c = lerp(
+		lerp(mColorOff,mColorOn,mLight),
+		lerp(ColorA(1,0,1,1),mColorOff,mLight),
+		strobe );
+	
+	gl::color(c);
 	gl::drawSolidCircle(mLoc, mRadius);
 
 	gl::popModelView();
 	
-	if ( mContourPoly.size()>0 && collideFade > 0.f )
+	if ( mContourPoly.size()>0 )
 	{
 		// we are at wrong z...
 		// the objects should manage that themselves
 		gl::ScopedDepth depthTest(false);
-		gl::color( mColorOn * ColorA(1,1,1,collideFade) );
+//		gl::color( mColorOn * ColorA(1,1,1,collideFade) );
+
+		if ( collideFade > 0.f ) gl::color(c);
+		else gl::color( Color(1,0,1) * strobe );
+//		gl::color( c );
 		gl::drawSolid(mContourPoly);
 	}
 }
@@ -307,7 +333,7 @@ void RolloverTarget::tick()
 		{
 			if ( distance(b.mLoc,mLoc) < mRadius + b.mRadius )
 			{
-				mCollideTime = getWorld().time();
+				mCollideTime = getWorld().getTime();
 				setIsLit(true);
 				break;
 			}
@@ -325,7 +351,7 @@ float RolloverTarget::getCollisionFade() const
 {
 	const float k = .5f;
 	
-	float t = 1.f - (getWorld().time() - mCollideTime) / k;
+	float t = 1.f - (getWorld().getTime() - mCollideTime) / k;
 	
 	t = constrain( t, 0.f, 1.f);
 	
