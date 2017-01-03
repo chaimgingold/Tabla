@@ -218,7 +218,7 @@ each time;
 #X obj 330 398 +~;
 #X obj 635 181 random 7;
 #X obj 566 400 prepent next;
-#X obj 709 125 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+#X obj 679 138 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
 #X obj 268 53 dust 300;
 #X obj 617 285 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
@@ -233,6 +233,8 @@ each time;
 #X obj 635 137 until;
 #X obj 502 101 until;
 #X obj 502 48 r hit-objects;
+#X obj 502 76 m_speedlimit 30;
+#X obj 635 108 m_speedlimit 30;
 #X connect 1 0 3 0;
 #X connect 2 0 11 1;
 #X connect 3 0 2 0;
@@ -338,8 +340,10 @@ each time;
 #X connect 107 0 52 0;
 #X connect 108 0 101 0;
 #X connect 109 0 110 0;
-#X connect 112 0 113 0;
+#X connect 112 0 117 0;
 #X connect 113 0 104 0;
 #X connect 114 0 61 0;
-#X connect 115 0 114 0;
+#X connect 115 0 116 0;
+#X connect 116 0 114 0;
+#X connect 117 0 113 0;
 #X coords 0 0 1 1 114 119 0;
