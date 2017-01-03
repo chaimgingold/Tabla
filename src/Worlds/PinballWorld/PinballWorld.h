@@ -91,9 +91,10 @@ public:
 	ColorA mRolloverTargetOnColor=Color(1,0,0);
 	ColorA mRolloverTargetOffColor=Color(0,1,0);
 	
-	// part params for inter-frame coherence
+	// inter-frame coherence params
 	float mPartTrackLocMaxDist = 1.f;
 	float mPartTrackRadiusMaxDist = .5f;
+	float mDejitterContourMaxDist = 0.f;
 	
 	// debug params
 	bool mDebugDrawFlipperAccelHairs=false;
@@ -197,6 +198,8 @@ private:
 	PartVec mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const;
 	AdjSpace getAdjacentSpace( const Contour*, vec2, const ContourVector& ) const ;
 	AdjSpace getAdjacentSpace( vec2, const ContourVector& ) const ; // how much adjacent space is to the left, right?
+
+	ContourVec dejitterVisionContours( ContourVec in, ContourVec old ) const;
 	
 	ContourVec mVisionContours;
 	

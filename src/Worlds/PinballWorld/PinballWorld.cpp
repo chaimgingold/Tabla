@@ -173,6 +173,7 @@ void PinballWorld::setParams( XmlTree xml )
 
 	getXml(xml, "PartTrackLocMaxDist", mPartTrackLocMaxDist );
 	getXml(xml, "PartTrackRadiusMaxDist", mPartTrackRadiusMaxDist );
+	getXml(xml, "DejitterContourMaxDist", mDejitterContourMaxDist );
 	
 	getXml(xml, "DebugDrawGeneratedContours", mDebugDrawGeneratedContours);
 	getXml(xml, "DebugDrawAdjSpaceRays", mDebugDrawAdjSpaceRays );
@@ -691,20 +692,22 @@ void PinballWorld::draw3d( DrawType drawType )
 		gl::popModelView();
 	}
 	
-	// walls
-	if (mWallShader)
+	// collected 3d scene
+	auto drawSceneSegment = [this]( gl::GlslProgRef shader, const Scene::Meshes& meshes )
 	{
-		gl::ScopedGlslProg glslScp(mWallShader);
+		gl::ScopedGlslProg glslScp(shader);
 		
 		// mDrawScene is assembled in prepare3dScene
-		for( auto w : mDrawScene.mWalls ) {
+		for( auto w : meshes ) {
 			if (w.mMesh) {
 				gl::ScopedModelMatrix trans;
 				gl::multModelMatrix(w.mTransform);
 				gl::draw(*w.mMesh);
 			}
 		}
-	}
+	};
+	
+	drawSceneSegment(mWallShader,mDrawScene.mWalls);
 
 	// ball shadows
 	if (mBallShadowShader)
@@ -892,10 +895,63 @@ void PinballWorld::updateBallWorldContours()
 	BallWorld::setContours(physicsContours,ContourVec::getMaskFilter(mask));
 }
 
+ContourVec PinballWorld::dejitterVisionContours( ContourVec in, ContourVec old ) const
+{
+	ContourVec out = in;
+	
+	for( auto &c : out )
+	{
+		// find closest contour to compare ourselves against
+		float bestscore = MAXFLOAT;
+		const Contour* match = 0;
+		
+		for( auto &o : old )
+		{
+			if (o.mIsHole != c.mIsHole) continue;
+			if (o.mTreeDepth != c.mTreeDepth) continue;
+			
+			float score = distance( c.mCenter, o.mCenter )
+				+ fabs( c.mRadius - o.mRadius )
+				;
+			
+			if (score < bestscore)
+			{
+				bestscore=score;
+				match = &o;
+			}
+		}
+		
+		// match points
+		if (match)
+		{
+			for( auto &p : c.mPolyLine.getPoints() )
+			{
+				float bestscore = mDejitterContourMaxDist;
+				
+				for ( auto op : match->mPolyLine.getPoints() )
+				{
+					float score = distance(p,op);
+					if (score<bestscore)
+					{
+						bestscore = score;
+						p = op;
+					}
+				}
+			}
+		}
+	}
+	
+	return out;
+}
+
 void PinballWorld::updateVision( const Vision::Output& visionOut, Pipeline& p )
 {
 	// capture contours, so we can later pass them into BallWorld (after merging in part shapes)
-	mVisionContours = visionOut.mContours;
+	if ( mDejitterContourMaxDist > 0.f ) {
+		mVisionContours = dejitterVisionContours( visionOut.mContours, mVisionContours );
+	} else {
+		mVisionContours = visionOut.mContours;
+	}
 	
 	// playfield layout
 	updatePlayfieldLayout(visionOut.mContours);
