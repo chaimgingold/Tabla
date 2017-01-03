@@ -28,7 +28,7 @@ void PureDataNode::initialize() {
   }
 
   queueTask([=](pd::PdBase &pd) {
-    bool success = pd.init(int(numChannels), int(numChannels), int(sampleRate));
+    __unused bool success = pd.init(int(numChannels), int(numChannels), int(sampleRate));
     CI_ASSERT(success);
 
     // in libpd world, dsp computation is controlled through the process methods,
