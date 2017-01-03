@@ -44,7 +44,11 @@ void TokenWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipelin
 			break;
 		case TokenVisionMode::Matching:
 		{
-
+			cout << "*****" << endl;
+			for (auto &match : visionOut.mTokens) {
+				cout << match.mName << endl;
+			}
+//			mTokens = visionOut.mTokens;
 //			mTokens = mTokenMatcher.findTokenCandidates(mWorld, visionOut.mContours, pipeline);
 
 			// N-to-N matching:

@@ -6,7 +6,11 @@ in vec4 ciPosition;
 in vec2 ciTexCoord0;
 
 out vec2 vUV;
+out float vAlpha;
+
 uniform float uTime;
+
+uniform int uOldestPoint;
 
 //
 // Description : Array and textureless GLSL 2D/3D/4D simplex
@@ -129,9 +133,16 @@ float fbm(vec3 domain) {
 
 void main()
 {
+	const int fadeOverPoints = 20;
+
 	vUV = ciTexCoord0;
 
-	float offset = fbm(vec3(ciPosition.xy/10+vUV, uTime/5)) * 1;
+	float offset = fbm(vec3(ciPosition.xy/10+vUV/100, uTime/5)) * 1;
 
 	gl_Position = ciModelViewProjection * vec4(ciPosition.xy+offset, 0.0, 1.0);
+
+	float pointIndex = vUV.y - uOldestPoint;
+	float alpha = pointIndex / fadeOverPoints;
+
+	vAlpha = min(alpha, 1);
 }

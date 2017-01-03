@@ -346,13 +346,18 @@ void PinballWorld::processCollisions()
 	
 	for( const auto &c : getBallContourCollisions() )
 	{
-//		mPureDataNode->sendBang("hit-object");
+
 
 		if (0) cout << "ball contour collide (ball=" << c.mBallIndex << ", " << c.mContourIndex << ")" << endl;
 		
 		// tell part
 		PartRef p = findPartForContour(c.mContourIndex);
 		if (p) {
+
+			if (p.get()->getType() == PartType::Bumper) {
+				mPureDataNode->sendBang("hit-object");
+			}
+
 			
 			Ball* ball=0;
 			if (c.mBallIndex>=0 && c.mBallIndex<=getBalls().size())
@@ -1212,7 +1217,7 @@ void PinballWorld::setupSynthesis()
 
 	// Register file-watchers for all the major pd patch components
 	auto app = PaperBounce3App::get();
-	
+
 	std::vector<fs::path> paths =
 	{
 		app->hotloadableAssetPath("synths/pong.pd")
@@ -1221,17 +1226,17 @@ void PinballWorld::setupSynthesis()
 //		app->hotloadableAssetPath("synths/music-osc.pd")
 	};
 
-	// Load pong synthesis patch
+	// Load pinball synthesis patch
 	mFileWatch.load( paths, [this,app]( fs::path path )
 	{
 		// Ignore the passed-in path, we only want to reload the root patch
-		auto rootPatch = app->hotloadableAssetPath("synths/pong.pd");
+		auto rootPatch = app->hotloadableAssetPath("synths/pinball-world.pd");
 		mPureDataNode->closePatch(mPatch);
 		mPatch = mPureDataNode->loadPatch( DataSourcePath::create(rootPatch) );
 	});
 }
 
 void PinballWorld::shutdownSynthesis() {
-	// Close pong synthesis patch
+	// Close pinball synthesis patch
 	mPureDataNode->closePatch(mPatch);
 }

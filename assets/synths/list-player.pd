@@ -1,0 +1,16 @@
+#N canvas 615 22 639 426 10;
+#X obj 80 163 list split 1;
+#X obj 80 136 list;
+#X obj 80 89 inlet;
+#X obj 199 89 inlet delay;
+#X obj 80 210 outlet;
+#X obj 166 137 del \$1;
+#X obj 166 110 t b;
+#X connect 0 0 4 0;
+#X connect 0 0 6 0;
+#X connect 0 1 1 1;
+#X connect 1 0 0 0;
+#X connect 2 0 1 0;
+#X connect 3 0 5 1;
+#X connect 5 0 1 0;
+#X connect 6 0 5 0;

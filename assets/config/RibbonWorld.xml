@@ -4,7 +4,8 @@
 	<!-- cm -->
 	<Vision>
 		<Contours>
-			<Threshold>150</Threshold>
+<!--			<Threshold>10</Threshold>-->
+			<Threshold>110</Threshold>
 <!--	-1 it OTSU, otherwise 0..255 -->
 
 			<ContourGetExactMinCircle>	0	</ContourGetExactMinCircle>
@@ -15,4 +16,11 @@
 		</Contours>
 	</Vision>
 
+	<MaxRibbons>10</MaxRibbons>
+	<MaxRibbonLength>50</MaxRibbonLength>
+<!--	Maximum allowed "hop" for a tracked object to gain new identity -->
+	<SnipDistance>10</SnipDistance>
+<!--	Distance until a new point is added on the ribbon-->
+	<PointDistance>0.1</PointDistance>
+	<WidthDivision>10</WidthDivision>
 </RibbonWorld>
