@@ -111,6 +111,7 @@ protected:
 	void markCollision( float decay );
 	float getCollisionFade() const;
 	float getStrobe( float strobeFreqSlow, float strobeFreqFast ) const;
+	void setStrobePhase( int nparts );
 	
 private:
 	PartType mType;
@@ -169,8 +170,13 @@ public:
 	virtual bool isValidLocForRolloverTarget( vec2 loc, float r ) const override {
 		return distance(loc,mLoc) > r + mRadius;
 	}
-	
+
+protected:
+	void onGameEvent( GameEvent ) override;
+
 private:
+	ColorA getColor() const;
+	
 	float getDynamicRadius() const;
 	
 	vec2  mLoc;

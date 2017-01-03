@@ -152,6 +152,8 @@ void PinballWorld::setParams( XmlTree xml )
 
 	getXml(xml, "BumperOuterColor",mBumperOuterColor);
 	getXml(xml, "BumperInnerColor",mBumperInnerColor);
+	getXml(xml, "BumperOnColor", mBumperOnColor);
+	getXml(xml, "BumperStrobeColor",mBumperStrobeColor);
 	
 	getXml(xml, "FlipperMinLength",mFlipperMinLength);
 	getXml(xml, "FlipperMaxLength",mFlipperMaxLength);

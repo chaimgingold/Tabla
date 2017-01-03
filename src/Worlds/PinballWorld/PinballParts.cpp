@@ -21,7 +21,12 @@ using namespace Pinball;
 Part::Part( PinballWorld& world, PartType type )
 	: mWorld(world), mType(type)
 {
-	mStrobePhase = randBool() ? 0.f : .5f;
+	setStrobePhase(2);
+}
+
+void Part::setStrobePhase( int nparts )
+{
+	mStrobePhase = randBool() ? 0.f : (1.f / (float)nparts);
 }
 
 bool Part::getShouldMergeWithOldPart( const PartRef old ) const
@@ -192,15 +197,26 @@ Bumper::Bumper( PinballWorld& world, vec2 pin, float contourRadius, AdjSpace adj
 
 //	mColor = Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat());
 	mColor = world.mBumperOuterColor;
+	mStrobeColor = world.mBumperStrobeColor;
 	
 	mRadius = min( max(contourRadius*world.mBumperContourRadiusScale,world.mBumperMinRadius),
 					 min(adjSpace.mLeft,adjSpace.mRight)
 					 );
+	
+	setStrobePhase(4);
 }
 
 float Bumper::getDynamicRadius() const
 {
 	return mRadius + .5 * powf(getCollisionFade(),2.f);
+}
+
+ColorA Bumper::getColor() const
+{
+	return lerp(
+		getCollisionFade() > 0.f ? getWorld().mBumperOnColor : mColor,
+		mStrobeColor, getStrobe( 1.3f, .15f )
+	);
 }
 
 void Bumper::draw()
@@ -211,7 +227,7 @@ void Bumper::draw()
 //	gl::translate( mLoc );
 	
 	//gl::color(1,0,0);
-	gl::color(mStrobeColor);
+	gl::color( getColor() );
 	gl::drawSolidCircle(mLoc, getDynamicRadius() );
 //	gl::drawSolid( getCollisionPoly() );
 
@@ -228,16 +244,30 @@ void Bumper::draw()
 
 void Bumper::addTo3dScene( Scene& s )
 {
-	addExtrudedCollisionPolyToScene(s, lerp(mStrobeColor,ColorA(1,1,1,1),.5f) );
+	addExtrudedCollisionPolyToScene(s, lerp(getColor(),ColorA(1,1,1,1),.5f) );
 }
 
 void Bumper::tick()
 {
-	mStrobeColor = mColor;
-	
-	if ( Rand::randFloat() < powf(getCollisionFade(),2.f) )
+}
+
+void Bumper::onGameEvent( GameEvent e )
+{
+	switch(e)
 	{
-		mStrobeColor = Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat());
+		case GameEvent::LostBall:
+			markCollision(.75f);
+			break;
+			
+		case GameEvent::LostLastMultiBall:
+			markCollision(2.f);
+			break;
+			
+		case GameEvent::NewPart:
+			markCollision(.5f);
+			break;
+		
+		default:break;
 	}
 }
 
@@ -248,10 +278,6 @@ PolyLine2 Bumper::getCollisionPoly() const
 
 void Bumper::onBallCollide( Ball& ball )
 {
-//	mRadius /= 2.f;
-//	mColor = Color(1,0,0);
-//	ball.mColor = mColor;
-	
 	markCollision(.5f);
 	
 	// kick ball
@@ -270,6 +296,8 @@ RolloverTarget::RolloverTarget( PinballWorld& world, vec2 pin, float radius )
 	mColorOff = getWorld().mRolloverTargetOffColor;
 	mColorOn  = getWorld().mRolloverTargetOnColor;
 	mColorStrobe = getWorld().mRolloverTargetStrobeColor;
+
+	setStrobePhase(2);
 }
 
 float Part::getStrobe( float strobeFreqSlow, float strobeFreqFast ) const
@@ -278,7 +306,7 @@ float Part::getStrobe( float strobeFreqSlow, float strobeFreqFast ) const
 	
 	return getWorld().getStrobe(
 		mStrobePhase,
-		collideFade > 0.f ? strobeFreqSlow : strobeFreqFast
+		collideFade > 0.f ? strobeFreqFast : strobeFreqSlow
 	);
 }
 
@@ -289,7 +317,7 @@ void RolloverTarget::draw()
 
 	float collideFade = getCollisionFade();
 	
-	float strobe = getStrobe( .15f, 1.5f );
+	float strobe = getStrobe( 1.5f, .15f );
 	
 	ColorA c = lerp(
 		lerp(mColorOff,mColorOn,mLight),

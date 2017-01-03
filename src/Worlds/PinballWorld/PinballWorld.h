@@ -83,6 +83,8 @@ public:
 	float mBumperKickAccel = 1.f;
 	ColorA mBumperOuterColor = ColorA(1,0,0,1);
 	ColorA mBumperInnerColor = ColorA(1,.8,0,1);
+	ColorA mBumperStrobeColor = ColorA(0,.8,1,1);
+	ColorA mBumperOnColor = ColorA(0,.8,1,1);
 	
 	float mFlipperMinLength=5.f;
 	float mFlipperMaxLength=10.f;

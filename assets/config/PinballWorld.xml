@@ -9,7 +9,7 @@
 		<BallDefaultMaxRadius>		1.5 </BallDefaultMaxRadius>
 		<BallMaxVel>				2 </BallMaxVel>
 		<BallDefaultColor>			00FFFF </BallDefaultColor>
-		<BallDefaultRibbonColor>			FFFFFF </BallDefaultRibbonColor>
+		<BallDefaultRibbonColor>			DDFFFF </BallDefaultRibbonColor>
 
 		<BallContourImpactNormalVelImpulse>0</BallContourImpactNormalVelImpulse>
 		<BallContourCoeffOfRestitution>.7</BallContourCoeffOfRestitution>
@@ -54,7 +54,7 @@
 	<FlipperDistToEdge>4</FlipperDistToEdge>
 	
 	<PartTrackRadiusMaxDist>1</PartTrackRadiusMaxDist>
-	<PartTrackLocMaxDist>.25</PartTrackLocMaxDist>
+	<PartTrackLocMaxDist>.5</PartTrackLocMaxDist>
 	
 	<DejitterContourMaxDist>0</DejitterContourMaxDist> <!-- 0 for off -->
 	
@@ -69,6 +69,8 @@
 
 	<BumperOuterColor>FF0000</BumperOuterColor>
 	<BumperInnerColor>FFCC00</BumperInnerColor>
+	<BumperOnColor>00CCFF</BumperOnColor>
+	<BumperStrobeColor>FFCC22</BumperStrobeColor>
 	
 	<RolloverTargetRadius>1</RolloverTargetRadius>
 	<RolloverTargetMinWallDist>1</RolloverTargetMinWallDist>
