@@ -295,13 +295,14 @@ void PinballWorld::update()
 
 void PinballWorld::updateBallSynthesis() {
 	vector<Ball>& balls = getBalls();
+	
+	auto ballVels = pd::List();
+	
 	for( Ball &b : balls ) {
-		float velocity = length(b.getVel());
-		mPd->sendFloat("ball-velocity", velocity * 10);
+		ballVels.addFloat(length(b.getVel()) * 10);
 	}
-	if (balls.empty()) {
-		mPd->sendFloat("ball-velocity", 0);
-	}
+	
+	mPd->sendList("ball-velocities", ballVels );
 }
 
 void PinballWorld::serveBall()
@@ -411,19 +412,18 @@ void PinballWorld::processCollisions()
 	
 	for( const auto &c : getBallWorldCollisions() )
 	{
-//		mPd->sendBang("hit-wall");
+		
 
 		if (0) cout << "ball world collide (" << c.mBallIndex << ")" << endl;
 	}
 
-	//pd::List hitObjects;
-	//pd::List hitWalls;
-	int hitObjects = 0;
-	int hitWalls = 0;
-
 	for( const auto &c : getBallContourCollisions() )
 	{
-
+		Ball* ball=0;
+		if (c.mBallIndex>=0 && c.mBallIndex<=getBalls().size())
+		{
+			ball = &getBalls()[c.mBallIndex];
+		}
 
 		if (0) cout << "ball contour collide (ball=" << c.mBallIndex << ", " << c.mContourIndex << ")" << endl;
 		
@@ -431,41 +431,15 @@ void PinballWorld::processCollisions()
 		PartRef p = findPartForContour(c.mContourIndex);
 		if (p) {
 
-			if (p.get()->getType() == PartType::Bumper) {
-				// hitObjects.addFloat(0);
-				hitObjects++;
-			} else {
-				// hitWalls.addFloat(0);
-				hitWalls++;
-
-			}
-
-			Ball* ball=0;
-			if (c.mBallIndex>=0 && c.mBallIndex<=getBalls().size())
-			{
-				ball = &getBalls()[c.mBallIndex];
-			}
+			
 			
 	//		cout << "collide part" << endl;
 			if (ball) p->onBallCollide(*ball);
 		}
 		else {
-			// hitWalls.addFloat(0);
-			hitWalls++;
+			if (ball) mPd->sendFloat("hit-wall", length(ball->getVel()) * 10);
 	//		cout << "collide wall" << endl;
 		}
-	}
-
-	//mPd->sendList("hit-objects", hitObjects);
-	//mPd->sendList("hit-walls", hitWalls);
-	if (hitObjects || hitWalls) {
-		pd::List hitList;
-		hitList.addFloat(MIN(5, hitObjects));
-		hitList.addFloat(MIN(5, hitWalls));
-		
-		mPd->sendList("hit-list", hitList);
-		//mPd->sendFloat("hit-walls", );
-		//mPd->sendFloat("hit-objects", MIN(5, hitObjects));
 	}
 }
 

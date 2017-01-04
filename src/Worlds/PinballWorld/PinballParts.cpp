@@ -287,6 +287,8 @@ void Bumper::onBallCollide( Ball& ball )
 	else v = normalize(v);
 	
 	ball.mAccel += v * getWorld().mBumperKickAccel ;
+	
+	getWorld().getPd()->sendFloat("hit-bumper", length(ball.getVel())*10);
 }
 
 RolloverTarget::RolloverTarget( PinballWorld& world, vec2 pin, float radius )
@@ -370,6 +372,10 @@ void RolloverTarget::tick()
 
 void RolloverTarget::setIsLit( bool v )
 {
+	if (v && !mIsLit) {
+		getWorld().getPd()->sendFloat("hit-rollover", int(mLoc.y));
+	}
+	
 	mIsLit=v;
 //	setType( v ? PartType::RolloverTargetOn : PartType::RolloverTargetOff );
 }

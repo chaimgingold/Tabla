@@ -5,15 +5,15 @@
 -262144 -1 -1 0 1;
 #X obj 315 144 hsl 128 15 50 5000 1 0 empty empty empty -2 -8 0 10
 -262144 -1 -1 0 1;
-#X obj 383 311 hsl 128 15 0 100 0 0 empty empty empty -2 -8 0 10 -262144
+#X obj 433 451 hsl 128 15 0 100 0 0 empty empty empty -2 -8 0 10 -262144
 -1 -1 0 1;
 #X obj 106 237 hsl 128 15 50 5000 1 0 empty empty empty -2 -8 0 10
 -262144 -1 -1 0 1;
-#X obj 190 450 +~;
+#X obj 240 590 +~;
 #X floatatom 106 257 5 0 0 0 - - -, f 5;
 #X floatatom 266 257 5 0 0 0 - - -, f 5;
 #X floatatom 363 280 5 0 0 0 - - -, f 5;
-#X floatatom 383 331 5 0 0 0 - - -, f 5;
+#X floatatom 433 471 5 0 0 0 - - -, f 5;
 #X obj 315 195 * 0.6;
 #X obj 116 203 * 0.34;
 #X obj 614 298 +~;
@@ -38,31 +38,29 @@
 #X obj 674 236 +~ 450;
 #X obj 674 211 *~ 320;
 #X obj 311 10 inlet;
-#X obj 547 26 loadbang;
-#X msg 584 45 0;
-#X obj 190 494 outlet~;
-#X obj 30 288 bp~ 0 50;
-#X obj 190 288 bp~ 0 50;
-#X obj 287 291 bp~ 0 50;
+#X obj 240 634 outlet~;
+#X obj 80 428 bp~ 0 50;
+#X obj 240 428 bp~ 0 50;
+#X obj 337 431 bp~ 0 50;
 #X connect 0 0 7 0;
-#X connect 0 0 33 1;
+#X connect 0 0 31 1;
 #X connect 1 0 8 0;
-#X connect 1 0 34 1;
+#X connect 1 0 32 1;
 #X connect 2 0 1 0;
 #X connect 2 0 10 0;
 #X connect 2 0 11 0;
 #X connect 3 0 9 0;
+#X connect 3 0 30 2;
+#X connect 3 0 31 2;
 #X connect 3 0 32 2;
-#X connect 3 0 33 2;
-#X connect 3 0 34 2;
 #X connect 4 0 6 0;
-#X connect 4 0 32 1;
-#X connect 5 0 31 0;
+#X connect 4 0 30 1;
+#X connect 5 0 29 0;
 #X connect 10 0 0 0;
 #X connect 11 0 4 0;
+#X connect 12 0 30 0;
+#X connect 12 0 31 0;
 #X connect 12 0 32 0;
-#X connect 12 0 33 0;
-#X connect 12 0 34 0;
 #X connect 13 0 23 0;
 #X connect 14 0 27 0;
 #X connect 15 0 14 0;
@@ -81,8 +79,6 @@
 #X connect 27 0 26 0;
 #X connect 28 0 21 0;
 #X connect 28 0 19 0;
-#X connect 29 0 30 0;
-#X connect 30 0 16 0;
+#X connect 30 0 5 0;
+#X connect 31 0 5 0;
 #X connect 32 0 5 0;
-#X connect 33 0 5 0;
-#X connect 34 0 5 0;

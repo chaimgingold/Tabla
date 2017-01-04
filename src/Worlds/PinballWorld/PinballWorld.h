@@ -120,6 +120,7 @@ public:
 	Shape2d polyToShape( const PolyLine2& ) const;
 	TriMeshRef get3dMeshForPoly( const PolyLine2&, float znear, float zfar ) const; // e.g. 0..1, from tabletop in 1cm	
 	
+	cipd::PureDataNodeRef getPd() { return mPd; }
 private:
 	
 	void draw2d( DrawType );

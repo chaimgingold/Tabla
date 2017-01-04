@@ -5,16 +5,14 @@
 
 out vec4 fragColor;
 
-//const float aaConstant = .1;
-
 void main()
 {
-//	float r = 0.; //length( coord - vec2(.5,.5) ) * 2;
-//
-//	vec4 c = color;
-//
-//	c.a *= smoothstep( 1.0, 1.0 - aaConstant, r);
-//	
-//	fragColor = c;
-	fragColor = vec4(.1,.1,.1,1);
+	const float gridSize = 20;
+	float x = smoothstep(0.1, 0, fract(gl_FragCoord.x/gridSize));
+	float y = smoothstep(0.1, 0, fract(gl_FragCoord.y/gridSize));
+	float gridMask = (x+y)*0.5;
+	vec3 gridColor = vec3(0.1,0.9,0.4);
+	vec3 bgColor = vec3(0.0,0.1,0.1);
+	
+	fragColor = vec4(mix(bgColor, gridColor, gridMask), 1);
 }
