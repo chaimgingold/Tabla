@@ -1,4 +1,4 @@
-#N canvas 1125 495 828 478 10;
+#N canvas 755 454 828 478 10;
 #X obj 485 250 sqrt;
 #X text 37 104 trigger;
 #X text 53 191 relative frequency;
