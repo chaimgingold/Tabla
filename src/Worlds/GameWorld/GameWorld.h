@@ -46,7 +46,7 @@ public:
 		Projector,
 		UIPipelineThumb,
 		UIMain,
-		EnvMap
+		CubeMap
 	};
 	
 	virtual void gameWillLoad(){}

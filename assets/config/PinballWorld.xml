@@ -42,7 +42,7 @@
 	<DebugDrawAdjSpaceRays>0</DebugDrawAdjSpaceRays>
 	<DebugDrawGeneratedContours>0</DebugDrawGeneratedContours>
 	<DebugDrawFlipperAccelHairs>0</DebugDrawFlipperAccelHairs>
-	<DebugDrawEnvMaps>0</DebugDrawEnvMaps>
+	<DebugDrawCubeMaps>0</DebugDrawCubeMaps>
 	
 <!-- General -->
 	<UpVec>-1 0</UpVec>
@@ -92,8 +92,10 @@
 		<BackfaceCull>0</BackfaceCull>
 		<TableDepth>2</TableDepth>
 		<ZSkew>.75</ZSkew>
-		<DynamicEnvMap>1</DynamicEnvMap>
+		<DynamicCubeMap>1</DynamicCubeMap>
 		<CubeMapSize>256</CubeMapSize>
+		<MaxCubeMaps>4</MaxCubeMaps>
+		<CubeMapFrameSkip>4</CubeMapFrameSkip>
 	</3d>
 	
 <!-- Controls	-->

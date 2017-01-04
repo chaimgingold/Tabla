@@ -40,16 +40,18 @@ void main()
 	EyeDirWorldSpace = vec3( ciViewMatrixInverse * eyeDirViewSpace );
 	
 	vec3 normal = ciNormal;
-//	vec3 normal = vec3( vec4(ciNormal,1) * fixNormalMatrix );
-	
 	vec3 normalViewSpace = ciNormalMatrix * normal;
 	NormalWorldSpace = normalize( vec3( vec4( normalViewSpace, 0 ) * ciViewMatrix ) );
-	NormalWorldSpace.y *= -1.;
-//	NormalWorldSpace = NormalWorldSpace * mat3(rotationMatrix( vec3(0,1,0), M_PI/2. ));
-	NormalWorldSpace = NormalWorldSpace * mat3(
-		  rotationMatrix( vec3(0,1,0), M_PI/2. )
-		* rotationMatrix( vec3(0,0,1), -M_PI/2. )
-		);
+
+	if (false)
+	{
+		NormalWorldSpace.y *= -1.;
+	//	NormalWorldSpace = NormalWorldSpace * mat3(rotationMatrix( vec3(0,1,0), M_PI/2. ));
+		NormalWorldSpace = NormalWorldSpace * mat3(
+			  rotationMatrix( vec3(0,1,0), M_PI/2. )
+			* rotationMatrix( vec3(0,0,1), -M_PI/2. )
+			);
+	}
 	
 	gl_Position = ciModelViewProjection * ciPosition;
 	

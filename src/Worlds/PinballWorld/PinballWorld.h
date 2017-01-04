@@ -73,10 +73,6 @@ public:
 	
 	float getTableDepth() const { return m3dTableDepth; }
 	
-	// geometry
-	PolyLine2 getCirclePoly ( vec2 c, float r ) const;
-	PolyLine2 getCapsulePoly( vec2 c[2], float r[2] ) const;
-
 	// part params
 	float mBumperMinRadius = 5.f;
 	float mBumperContourRadiusScale = 1.5f;
@@ -94,6 +90,10 @@ public:
 	ColorA mRolloverTargetOnColor=Color(1,0,0);
 	ColorA mRolloverTargetOffColor=Color(0,1,0);
 	ColorA mRolloverTargetStrobeColor=ColorA(1,0,1);
+
+	float mRolloverTargetRadius=1.f;
+	float mRolloverTargetMinWallDist=1.f;
+	bool  mRolloverTargetDynamicRadius=false;	
 	
 	// inter-frame coherence params
 	float mPartTrackLocMaxDist = 1.f;
@@ -102,7 +102,9 @@ public:
 	
 	// debug params
 	bool mDebugDrawFlipperAccelHairs=false;
-	bool mDebugDrawEnvMaps=false;
+	bool mDebugDrawCubeMaps=false;
+	bool mDebugDrawAdjSpaceRays=false;
+	bool mDebugDrawGeneratedContours=false;
 	
 	// state
 	void sendGameEvent( GameEvent );
@@ -117,61 +119,27 @@ public:
 
 	const PartVec& getParts() const { return mParts; }
 
+	cipd::PureDataNodeRef getPd() { return mPd; }
+
+
+	// geometry
+	PolyLine2 getCirclePoly ( vec2 c, float r ) const;
+	PolyLine2 getCapsulePoly( vec2 c[2], float r[2] ) const;
+
 	Shape2d polyToShape( const PolyLine2& ) const;
 	TriMeshRef get3dMeshForPoly( const PolyLine2&, float znear, float zfar ) const; // e.g. 0..1, from tabletop in 1cm	
 	
-	cipd::PureDataNodeRef getPd() { return mPd; }
+	
 private:
 	
-	void draw2d( DrawType );
-	
-	void prepare3dScene();
-	void draw3d( DrawType );
-	void beginDraw3d() const;
-	void endDraw3d() const;
-
-	void draw3dFloor() const;
-	void draw3dScene() const;
-	void draw3dBalls() const;
-	void draw3dRibbons( DrawType drawType ) const;
-	
-	void drawBallCullLine() const;
-	
-	Scene mDrawScene;
-	
-	void updateEnvMaps();
-	gl::FboCubeMapRef getCubeMap( gl::FboCubeMapRef, vec3 eye ) const;
-	vector<gl::FboCubeMapRef> mEnvMaps;
-	
+	FileWatch mFileWatch;
+		
 	// params
 	vec2  mUpVec = vec2(0,1);
 	float mGravity=0.1f;
-	float mPartMaxContourRadius = 5.f; // contour radius lt => part
-	float mHolePartMaxContourRadius = 2.f;
-	float mFlipperDistToEdge = 10.f; // how close to the edge does a flipper appear?
 	float mBallReclaimAreaHeight = 10.f;
-
-	int mCircleMinVerts=8;
-	int mCircleMaxVerts=100;
-	float mCircleVertsPerPerimCm=1.f;
-	
-	float mRolloverTargetRadius=1.f;
-	float mRolloverTargetMinWallDist=1.f;
-	bool  mRolloverTargetDynamicRadius=false;
-	
-	bool mDebugDrawAdjSpaceRays=false;
-	bool mDebugDrawGeneratedContours=false;
-	
-	int mCubeMapSize = 256;
-	
-	// 3d params
-	bool  m3dEnable      = false;
-	bool  m3dBackfaceCull= false;
-	float m3dTableDepth  = 10.f;
-	float m3dZSkew       = .5f;
-	bool  m3dDynamicEnvMap = false;
-	
-	// world layout
+		
+	// playfield layout
 	vec2  toPlayfieldSpace  ( vec2 p ) const { return vec2( dot(p,getRightVec()), dot(p,getUpVec()) ); }
 	vec2  fromPlayfieldSpace( vec2 p ) const { return getRightVec() * p.x + getUpVec() * p.y ; }
 		// could make this into two matrices
@@ -185,6 +153,7 @@ private:
 	float mPlayfieldBallReclaimX[2]; // left, right edges for drawing...
 	
 	void updatePlayfieldLayout( const ContourVec& );
+	
 	
 	// parts
 	typedef map<int,PartRef> ContourToPartMap;
@@ -201,12 +170,6 @@ private:
 	void rolloverTest();
 	bool isValidRolloverLoc( vec2 loc, float r, const PartVec& ) const;
 	
-	// are flippers depressed
-	bool  mIsFlipperDown[2]; // left, right
-	float mFlipperState[2]; // left, right; 0..1
-	
-	void tickFlipperState();
-	
 	// simulation
 	void updateBallWorldContours();
 	void processCollisions();
@@ -216,7 +179,16 @@ private:
 	// drawing
 	void drawAdjSpaceRays() const;
 	
-	// vision
+	
+	// --- Vision ---
+	//
+
+	// - params
+	float mPartMaxContourRadius = 5.f; // contour radius lt => part
+	float mHolePartMaxContourRadius = 2.f;
+	float mFlipperDistToEdge = 10.f; // how close to the edge does a flipper appear?
+
+	// - do it
 	PartVec getPartsFromContours( const ContourVector& ); // only reason this is non-const is b/c parts point to the world
 	bool shouldContourBeAPart( const Contour&, const ContourVector& ) const;
 	PartVec mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const;
@@ -225,13 +197,21 @@ private:
 
 	ContourVec dejitterVisionContours( ContourVec in, ContourVec old ) const;
 	
+	// - state
 	ContourVec mVisionContours;
-	
-	// geometry
-	int getNumCircleVerts( float r ) const;
 	Contour contourFromPoly( PolyLine2 ) const; // area, radius, center, bounds, etc... is approximate
-	void addContourToVec( Contour, ContourVec& ) const;
+	void addContourToVec( Contour, ContourVec& ) const; // for accumulating physics contours from Parts
 	
+	
+	// --- Input ---
+	//
+	
+	// are flippers depressed
+	bool  mIsFlipperDown[2]; // left, right
+	float mFlipperState[2]; // left, right; 0..1
+	
+	void tickFlipperState();	
+
 	// keymap
 	map<char,string> mKeyToInput; // maps keystrokes to input names
 	map<string,function<void()>> mInputToFunction; // maps input names to code handlers
@@ -243,9 +223,8 @@ private:
 	map<unsigned int,string> mGamepadButtons;
 	map<string,function<void()>> mGamepadFunctions;
 	
-	FileWatch mFileWatch;
 	
-	// synthesis
+	// --- Sound Synthesis ---
 	cipd::PureDataNodeRef	mPd;	// synth engine
 	cipd::PatchRef			mPatch;			// pong patch
 	
@@ -254,16 +233,62 @@ private:
 	
 	void updateBallSynthesis();
 	
-	// graphics
+	
+	
+	// --- Graphics ---
+	//
+	// TODO: Move into a different object
 	void setupGraphics();
 
-	gl::TextureCubeMapRef mCubeMap;
+	//
+	void draw2d( DrawType );
 	
+	void prepare3dScene();
+	void draw3d( DrawType );
+	void beginDraw3d() const;
+	void endDraw3d() const;
+
+	void draw3dFloor() const;
+	void draw3dScene() const;
+	void draw3dBalls() const;
+	void draw3dRibbons( DrawType drawType ) const;
+	
+	void drawBallCullLine() const;
+	
+	Scene mDrawScene;
+
+	// - params
+	int mCircleMinVerts=8;
+	int mCircleMaxVerts=100;
+	float mCircleVertsPerPerimCm=1.f;
+
+	int mCubeMapSize = 256;
+	int mMaxCubeMaps = 10;
+	int mCubeMapFrameSkip = 0;
+	
+	bool  m3dEnable      = false;
+	bool  m3dBackfaceCull= false;
+	float m3dTableDepth  = 10.f;
+	float m3dZSkew       = .5f;
+	bool  m3dDynamicCubeMap = false;
+
+	int getNumCircleVerts( float r ) const;
+
+	// - cube maps
+	gl::TextureCubeMapRef mCubeMap; // static
+	vector<gl::FboCubeMapRef> mCubeMaps; // dynamic
+
+	void updateCubeMaps();
+	gl::FboCubeMapRef updateCubeMap( gl::FboCubeMapRef, vec3 eye ) const;
+	gl::TextureCubeMapRef getCubeMapForBall( int ball ) const;
+	
+	// - shaders
 	gl::GlslProgRef mWallShader;
 	gl::GlslProgRef mBallShader;
 	gl::GlslProgRef mFloorShader;
 	gl::GlslProgRef mBallShadowShader;
 	
+	// - meshes
 	gl::VboMeshRef mBallMesh;
 };
 
