@@ -40,7 +40,7 @@
 using namespace ci;
 using namespace std;
 
-inline bool getXml( XmlTree &xml, string name, bool& var )
+inline bool getXml( const XmlTree &xml, string name, bool& var )
 {
 	auto n = xml.begin(name);
 	
@@ -56,7 +56,7 @@ inline bool getXml( XmlTree &xml, string name, bool& var )
 	return false;
 } ;
 
-inline bool getXml( XmlTree &xml, string name, string& var )
+inline bool getXml( const XmlTree &xml, string name, string& var )
 {
 	auto n = xml.begin(name);
 	
@@ -68,7 +68,7 @@ inline bool getXml( XmlTree &xml, string name, string& var )
 	return false;
 } ;
 
-inline bool getXml( XmlTree &xml, string name, float& var )
+inline bool getXml( const XmlTree &xml, string name, float& var )
 {
 	auto n = xml.begin(name);
 	
@@ -84,7 +84,7 @@ inline bool getXml( XmlTree &xml, string name, float& var )
 	return false;
 } ;
 
-inline bool getXml( XmlTree &xml, string name, vec2& var )
+inline bool getXml( const XmlTree &xml, string name, vec2& var )
 {
 	auto n = xml.begin(name);
 	
@@ -106,7 +106,7 @@ inline bool getXml( XmlTree &xml, string name, vec2& var )
 	return false;
 } ;
 
-inline bool getXml( XmlTree &xml, string name, vector<vec2> &var )
+inline bool getXml( const XmlTree &xml, string name, vector<vec2> &var )
 {
 	auto n = xml.begin(name);
 	bool ok=false;
@@ -133,7 +133,7 @@ inline bool getXml( XmlTree &xml, string name, vector<vec2> &var )
 } ;
 
 template<class T>
-bool getXml( XmlTree &xml, string name, vector<T> &var )
+bool getXml( const XmlTree &xml, string name, vector<T> &var )
 {
 	auto n = xml.begin(name);
 //	bool ok=true;
@@ -161,7 +161,7 @@ bool getXml( XmlTree &xml, string name, vector<T> &var )
 } ;
 
 
-inline bool getXml( XmlTree &xml, string name, vec2 var[], int len )
+inline bool getXml( const XmlTree &xml, string name, vec2 var[], int len )
 {
 	vector<vec2> v ;
 	
@@ -176,7 +176,7 @@ inline bool getXml( XmlTree &xml, string name, vec2 var[], int len )
 	else return false ;
 }
 
-inline bool getXml( XmlTree &xml, string name, ColorAf& var )
+inline bool getXml( const XmlTree &xml, string name, ColorAf& var )
 {
 	auto n = xml.begin(name);
 	
@@ -202,7 +202,7 @@ inline bool getXml( XmlTree &xml, string name, ColorAf& var )
 } ;
 
 template<class T>
-bool getXml( XmlTree &xml, string name, T& var )
+bool getXml( const XmlTree &xml, string name, T& var )
 {
 	auto n = xml.begin(name);
 	

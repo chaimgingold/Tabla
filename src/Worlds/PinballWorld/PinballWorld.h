@@ -62,6 +62,8 @@ public:
 	void keyUp( KeyEvent ) override;
 	void mouseClick( vec2 ) override;
 
+	PartParams mPartParams;
+	
 public:
 
 	// world orientation
@@ -72,28 +74,6 @@ public:
 	vec2 getGravityVec() const { return getDownVec(); } // sugar
 	
 	float getTableDepth() const { return m3dTableDepth; }
-	
-	// part params
-	float mBumperMinRadius = 5.f;
-	float mBumperContourRadiusScale = 1.5f;
-	float mBumperKickAccel = 1.f;
-	ColorA mBumperOuterColor = ColorA(1,0,0,1);
-	ColorA mBumperInnerColor = ColorA(1,.8,0,1);
-	ColorA mBumperStrobeColor = ColorA(0,.8,1,1);
-	ColorA mBumperOnColor = ColorA(0,.8,1,1);
-	
-	float mFlipperMinLength=5.f;
-	float mFlipperMaxLength=10.f;
-	float mFlipperRadiusToLengthScale=5.f;	
-	ColorA mFlipperColor = ColorA(0,1,1,1);
-
-	ColorA mRolloverTargetOnColor=Color(1,0,0);
-	ColorA mRolloverTargetOffColor=Color(0,1,0);
-	ColorA mRolloverTargetStrobeColor=ColorA(1,0,1);
-
-	float mRolloverTargetRadius=1.f;
-	float mRolloverTargetMinWallDist=1.f;
-	bool  mRolloverTargetDynamicRadius=false;	
 	
 	// inter-frame coherence params
 	float mPartTrackLocMaxDist = 1.f;

@@ -64,27 +64,29 @@
 	<CircleMaxVerts>100</CircleMaxVerts>
 	<CircleVertsPerPerimCm>.5</CircleVertsPerPerimCm>
 
-	<BumperMinRadius>1</BumperMinRadius>
-	<BumperContourRadiusScale>2</BumperContourRadiusScale>
-	<BumperKickAccel>.5</BumperKickAccel>
+	<Parts>
+		<BumperMinRadius>1</BumperMinRadius>
+		<BumperContourRadiusScale>2</BumperContourRadiusScale>
+		<BumperKickAccel>.5</BumperKickAccel>
 
-	<BumperOuterColor>FF0000</BumperOuterColor>
-	<BumperInnerColor>FFCC00</BumperInnerColor>
-	<BumperOnColor>00CCFF</BumperOnColor>
-	<BumperStrobeColor>FFCC22</BumperStrobeColor>
-	
-	<RolloverTargetRadius>1</RolloverTargetRadius>
-	<RolloverTargetMinWallDist>1</RolloverTargetMinWallDist>
-	<RolloverTargetDynamicRadius>1</RolloverTargetDynamicRadius>
+		<BumperOuterColor>FF0000</BumperOuterColor>
+		<BumperInnerColor>FFCC00</BumperInnerColor>
+		<BumperOnColor>00CCFF</BumperOnColor>
+		<BumperStrobeColor>FFCC22</BumperStrobeColor>
+		
+		<RolloverTargetRadius>1</RolloverTargetRadius>
+		<RolloverTargetMinWallDist>1</RolloverTargetMinWallDist>
+		<RolloverTargetDynamicRadius>1</RolloverTargetDynamicRadius>
 
-	<RolloverTargetOnColor>22FF55</RolloverTargetOnColor>
-	<RolloverTargetOffColor>0055CC</RolloverTargetOffColor>
-	<RolloverTargetStrobeColor>FF00FF</RolloverTargetStrobeColor>
-	
-	<FlipperMinLength>1</FlipperMinLength>
-	<FlipperMaxLength>10</FlipperMaxLength>
-	<FlipperRadiusToLengthScale>6</FlipperRadiusToLengthScale>
-	<FlipperColor>00FFFF</FlipperColor>
+		<RolloverTargetOnColor>22FF55</RolloverTargetOnColor>
+		<RolloverTargetOffColor>0055CC</RolloverTargetOffColor>
+		<RolloverTargetStrobeColor>FF00FF</RolloverTargetStrobeColor>
+		
+		<FlipperMinLength>1</FlipperMinLength>
+		<FlipperMaxLength>10</FlipperMaxLength>
+		<FlipperRadiusToLengthScale>6</FlipperRadiusToLengthScale>
+		<FlipperColor>00FFFF</FlipperColor>
+	</Parts>
 	
 <!-- 3d	-->
 	<3d>

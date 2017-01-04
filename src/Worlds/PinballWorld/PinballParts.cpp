@@ -12,11 +12,36 @@
 #include "PinballWorld.h"
 #include "geom.h"
 #include "cinder/rand.h"
+#include "xml.h"
 
 using namespace ci;
 using namespace ci::app;
 using namespace std;
 using namespace Pinball;
+
+void PartParams::set( const XmlTree& xml )
+{
+	getXml(xml, "BumperMinRadius", mBumperMinRadius );
+	getXml(xml, "BumperContourRadiusScale", mBumperContourRadiusScale );
+	getXml(xml, "BumperKickAccel", mBumperKickAccel );
+
+	getXml(xml, "BumperOuterColor",mBumperOuterColor);
+	getXml(xml, "BumperInnerColor",mBumperInnerColor);
+	getXml(xml, "BumperOnColor", mBumperOnColor);
+	getXml(xml, "BumperStrobeColor",mBumperStrobeColor);
+	
+	getXml(xml, "FlipperMinLength",mFlipperMinLength);
+	getXml(xml, "FlipperMaxLength",mFlipperMaxLength);
+	getXml(xml, "FlipperRadiusToLengthScale",mFlipperRadiusToLengthScale);
+	getXml(xml, "FlipperColor",mFlipperColor);	
+
+	getXml(xml, "RolloverTargetRadius",mRolloverTargetRadius);
+	getXml(xml, "RolloverTargetMinWallDist",mRolloverTargetMinWallDist);
+	getXml(xml, "RolloverTargetOnColor",mRolloverTargetOnColor);
+	getXml(xml, "RolloverTargetOffColor",mRolloverTargetOffColor);
+	getXml(xml, "RolloverTargetStrobeColor",mRolloverTargetStrobeColor);
+	getXml(xml, "RolloverTargetDynamicRadius",mRolloverTargetDynamicRadius);
+}
 
 Part::Part( PinballWorld& world, PartType type )
 	: mWorld(world), mType(type)
@@ -83,13 +108,16 @@ Flipper::Flipper( PinballWorld& world, vec2 pin, float contourRadius, PartType t
 	const float kFlipperMinRadius = 1.f;
 
 	mRadius = max( contourRadius, kFlipperMinRadius );
-	mFlipperLength = constrain( mRadius * world.mFlipperRadiusToLengthScale, world.mFlipperMinLength, world.mFlipperMaxLength );
+	mFlipperLength = constrain(
+		mRadius * world.mPartParams.mFlipperRadiusToLengthScale,
+		world.mPartParams.mFlipperMinLength,
+		world.mPartParams.mFlipperMaxLength );
 }
 
 void Flipper::draw()
 {
-//	gl::color( lerp( getWorld().mFlipperColor, ColorA(1,1,1,1), powf(getCollisionFade(),3.f) ) );
-	gl::color( getWorld().mFlipperColor );
+//	gl::color( lerp( getWorld().mPartParams.mFlipperColor, ColorA(1,1,1,1), powf(getCollisionFade(),3.f) ) );
+	gl::color( getWorld().mPartParams.mFlipperColor );
 	gl::drawSolid( getCollisionPoly() );
 	
 	if (getWorld().mDebugDrawFlipperAccelHairs)
@@ -131,7 +159,7 @@ void Flipper::draw()
 
 void Flipper::addTo3dScene( Scene& s )
 {
-	addExtrudedCollisionPolyToScene(s, lerp(getWorld().mFlipperColor,ColorA(1,1,1,1),.5f) );
+	addExtrudedCollisionPolyToScene(s, lerp(getWorld().mPartParams.mFlipperColor,ColorA(1,1,1,1),.5f) );
 }
 
 void Flipper::tick()
@@ -197,10 +225,11 @@ Bumper::Bumper( PinballWorld& world, vec2 pin, float contourRadius, AdjSpace adj
 	mLoc=pin;
 
 //	mColor = Color(Rand::randFloat(),Rand::randFloat(),Rand::randFloat());
-	mColor = world.mBumperOuterColor;
-	mStrobeColor = world.mBumperStrobeColor;
+	mColor = world.mPartParams.mBumperOuterColor;
+	mStrobeColor = world.mPartParams.mBumperStrobeColor;
 	
-	mRadius = min( max(contourRadius*world.mBumperContourRadiusScale,world.mBumperMinRadius),
+	mRadius = min( max(contourRadius*world.mPartParams.mBumperContourRadiusScale,
+					   world.mPartParams.mBumperMinRadius),
 					 min(adjSpace.mLeft,adjSpace.mRight)
 					 );
 	
@@ -215,7 +244,7 @@ float Bumper::getDynamicRadius() const
 ColorA Bumper::getColor() const
 {
 	return lerp(
-		getCollisionFade() > 0.f ? getWorld().mBumperOnColor : mColor,
+		getCollisionFade() > 0.f ? getWorld().mPartParams.mBumperOnColor : mColor,
 		mStrobeColor, getStrobe( 1.3f, .15f )
 	);
 }
@@ -238,7 +267,7 @@ void Bumper::draw()
 		gl::ScopedModelMatrix trans;
 		gl::translate(0,0,-.1f); // so we are above main bumper
 		
-		gl::color(getWorld().mBumperInnerColor);
+		gl::color(getWorld().mPartParams.mBumperInnerColor);
 		gl::drawSolidCircle(mLoc,mRadius/2.f);
 	}
 }
@@ -286,7 +315,7 @@ void Bumper::onBallCollide( Ball& ball )
 	if (v==vec2(0,0)) v = randVec2();
 	else v = normalize(v);
 	
-	ball.mAccel += v * getWorld().mBumperKickAccel ;
+	ball.mAccel += v * getWorld().mPartParams.mBumperKickAccel ;
 	
 	getWorld().getPd()->sendFloat("hit-bumper", length(ball.getVel())*10);
 }
@@ -296,9 +325,9 @@ RolloverTarget::RolloverTarget( PinballWorld& world, vec2 pin, float radius )
 	, mLoc(pin)
 	, mRadius(radius)
 {
-	mColorOff = getWorld().mRolloverTargetOffColor;
-	mColorOn  = getWorld().mRolloverTargetOnColor;
-	mColorStrobe = getWorld().mRolloverTargetStrobeColor;
+	mColorOff = getWorld().mPartParams.mRolloverTargetOffColor;
+	mColorOn  = getWorld().mPartParams.mRolloverTargetOnColor;
+	mColorStrobe = getWorld().mPartParams.mRolloverTargetStrobeColor;
 
 	setStrobePhase(2);
 }

@@ -138,6 +138,11 @@ PinballWorld::~PinballWorld()
 
 void PinballWorld::setParams( XmlTree xml )
 {
+	if ( xml.hasChild("Parts") )
+	{
+		mPartParams.set(xml.getChild("Parts"));
+	}
+	
 	if ( xml.hasChild("BallWorld") ) {
 		BallWorld::setParams( xml.getChild("BallWorld") );
 	}
@@ -149,27 +154,6 @@ void PinballWorld::setParams( XmlTree xml )
 	getXml(xml, "HolePartMaxContourRadius",mHolePartMaxContourRadius);
 	getXml(xml, "Gravity", mGravity );
 	getXml(xml, "BallReclaimAreaHeight", mBallReclaimAreaHeight );
-	
-	getXml(xml, "BumperMinRadius", mBumperMinRadius );
-	getXml(xml, "BumperContourRadiusScale", mBumperContourRadiusScale );
-	getXml(xml, "BumperKickAccel", mBumperKickAccel );
-
-	getXml(xml, "BumperOuterColor",mBumperOuterColor);
-	getXml(xml, "BumperInnerColor",mBumperInnerColor);
-	getXml(xml, "BumperOnColor", mBumperOnColor);
-	getXml(xml, "BumperStrobeColor",mBumperStrobeColor);
-	
-	getXml(xml, "FlipperMinLength",mFlipperMinLength);
-	getXml(xml, "FlipperMaxLength",mFlipperMaxLength);
-	getXml(xml, "FlipperRadiusToLengthScale",mFlipperRadiusToLengthScale);
-	getXml(xml, "FlipperColor",mFlipperColor);
-
-	getXml(xml, "RolloverTargetRadius",mRolloverTargetRadius);
-	getXml(xml, "RolloverTargetMinWallDist",mRolloverTargetMinWallDist);
-	getXml(xml, "RolloverTargetOnColor",mRolloverTargetOnColor);
-	getXml(xml, "RolloverTargetOffColor",mRolloverTargetOffColor);
-	getXml(xml, "RolloverTargetStrobeColor",mRolloverTargetStrobeColor);
-	getXml(xml, "RolloverTargetDynamicRadius",mRolloverTargetDynamicRadius);
 	
 	getXml(xml, "CircleMinVerts", mCircleMinVerts );
 	getXml(xml, "CircleMaxVerts", mCircleMaxVerts );
@@ -1003,7 +987,7 @@ void PinballWorld::keyUp( KeyEvent event )
 
 void PinballWorld::mouseClick( vec2 loc )
 {
-	PartRef part( new RolloverTarget( *this, loc, mRolloverTargetRadius ) );
+	PartRef part( new RolloverTarget( *this, loc, mPartParams.mRolloverTargetRadius ) );
 	
 	part->setShouldAlwaysPersist(true);
 	
@@ -1283,9 +1267,9 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 			contours.findClosestContour(c.mCenter,&closestPt,&dist,filter);
 			
 			vec2 rolloverLoc = c.mCenter;
-			float r = mRolloverTargetRadius;
+			float r = mPartParams.mRolloverTargetRadius;
 			
-			const float kMaxDist = mRolloverTargetDynamicRadius*4.f;
+			const float kMaxDist = mPartParams.mRolloverTargetDynamicRadius*4.f;
 			
 			if ( closestPt != c.mCenter && dist < kMaxDist )
 			{
@@ -1293,9 +1277,9 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 
 				float far=0.f;
 				
-				if (mRolloverTargetDynamicRadius)
+				if (mPartParams.mRolloverTargetDynamicRadius)
 				{
-					r = min( mRolloverTargetRadius*4.f, max( r, distance(closestPt,c.mCenter) - c.mRadius ) );
+					r = min( mPartParams.mRolloverTargetRadius*4.f, max( r, distance(closestPt,c.mCenter) - c.mRadius ) );
 					far = r;
 				}
 				
@@ -1411,7 +1395,7 @@ bool PinballWorld::isValidRolloverLoc( vec2 loc, float r, const PartVec& parts )
 	// too close to edge?
 	float closestContourDist;
 	if ( mVisionContours.findClosestContour(loc,0,&closestContourDist)
-	  && closestContourDist < mRolloverTargetMinWallDist + r )
+	  && closestContourDist < mPartParams.mRolloverTargetMinWallDist + r )
 	{
 		return false;
 	}
@@ -1439,7 +1423,7 @@ void PinballWorld::rolloverTest()
 		p.y = lerp( playfieldbb.y1, playfieldbb.y2, p.y );
 		
 		p = fromPlayfieldSpace(p);
-		float r = mRolloverTargetRadius;
+		float r = mPartParams.mRolloverTargetRadius;
 		
 		gl::color( isValidRolloverLoc(p, r, mParts) ? Color(0,1,0) : Color(1,0,0) );
 		gl::drawSolidCircle(p, r);
