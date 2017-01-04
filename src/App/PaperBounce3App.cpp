@@ -440,6 +440,16 @@ bool PaperBounce3App::setupCaptureDevice()
 
 	const LightLink::CaptureProfile &profile = mLightLink.getCaptureProfile();
 	
+	// try to update world mapping for projector
+	if ( !mLightLink.mProjectorProfiles.empty() )
+	{
+		auto &p = mLightLink.getProjectorProfile();
+		
+		for( int i=0; i<4; ++i ) {
+			p.mProjectorWorldSpaceCoords[i] = profile.mCaptureWorldSpaceCoords[i];
+		}
+	}
+	
 	if (!profile.mFilePath.empty())
 	{
 		cout << "Trying to load capture profile '" << profile.mName << "' for file '" << profile.mFilePath << "'" << endl;

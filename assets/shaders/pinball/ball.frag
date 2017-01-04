@@ -27,7 +27,6 @@ void main()
 //		);
 	
 	fragColor = texture( uCubeMapTex, reflectedEyeWorldSpace );
-
 //	fragColor = vec4(NormalWorldSpace,1);
 //	fragColor = vec4(EyeDirWorldSpace,1);
 //	fragColor = vec4(reflectedEyeWorldSpace,1);

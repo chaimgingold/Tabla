@@ -20,6 +20,8 @@ void PipelineStageView::draw()
 	
 	const Pipeline::StageRef stage = mPipeline.getStage(mStageName);
 
+	bool drawWorld = true;
+	
 	// image
 	if ( stage && stage->getGLImage() )
 	{
@@ -28,6 +30,7 @@ void PipelineStageView::draw()
 	}
 	else if ( stage && stage->mImageCubeMapGL )
 	{
+		drawWorld = false;
 		gl::color(1,1,1);
 		gl::drawHorizontalCross( stage->mImageCubeMapGL, getBounds() );
 	}
@@ -39,7 +42,7 @@ void PipelineStageView::draw()
 	}
 	
 	// world
-	if ( mWorldDrawFunc )
+	if ( mWorldDrawFunc && drawWorld )
 	{
 		if (stage)
 		{
@@ -73,6 +76,8 @@ void MainImageView::draw()
 {
 	const Pipeline::StageRef stage = getPipelineStage();
 	
+	bool drawWorld = true;
+	
 	// vision pipeline image
 	if ( stage && stage->getGLImage() )
 	{
@@ -82,6 +87,7 @@ void MainImageView::draw()
 	}
 	else if ( stage && stage->mImageCubeMapGL )
 	{
+		drawWorld = false;
 		gl::color(1,1,1);
 		gl::drawHorizontalCross( stage->mImageCubeMapGL, getBounds() );
 	}
@@ -98,8 +104,10 @@ void MainImageView::draw()
 //	}
 
 	// ===== World space =====
-	gl::pushViewMatrix();
+	if (drawWorld)
 	{
+		gl::ScopedViewMatrix viewm;
+		
 		if (stage)
 		{
 			// convert world coordinates to drawn texture coords
@@ -115,7 +123,6 @@ void MainImageView::draw()
 				: GameWorld::DrawType::UIMain ); // high quality
 		}
 	}
-	gl::popViewMatrix();
 }
 
 void MainImageView::drawFrame()

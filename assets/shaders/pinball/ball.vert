@@ -19,7 +19,6 @@ out vec4 color;
 out highp vec3	NormalWorldSpace;
 out highp vec3  EyeDirWorldSpace;
 
-
 mat4 rotationMatrix(vec3 axis, float angle)
 {
 //    axis = normalize(axis);
@@ -45,12 +44,11 @@ void main()
 
 	if (false)
 	{
-		NormalWorldSpace.y *= -1.;
-	//	NormalWorldSpace = NormalWorldSpace * mat3(rotationMatrix( vec3(0,1,0), M_PI/2. ));
-		NormalWorldSpace = NormalWorldSpace * mat3(
-			  rotationMatrix( vec3(0,1,0), M_PI/2. )
-			* rotationMatrix( vec3(0,0,1), -M_PI/2. )
-			);
+		NormalWorldSpace *= mat3(
+			vec3(0,-1,0),
+			vec3(1,0,0),
+			vec3(0,0,-1)
+		);
 	}
 	
 	gl_Position = ciModelViewProjection * ciPosition;
