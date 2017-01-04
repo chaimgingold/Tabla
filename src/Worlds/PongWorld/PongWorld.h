@@ -106,7 +106,7 @@ private:
 	void strobeBalls();
 	
 	// synthesis
-	cipd::PureDataNodeRef	mPureDataNode;	// synth engine
+	cipd::PureDataNodeRef	mPd;	// synth engine
 	cipd::PatchRef			mPatch;			// pong patch
 	
 	void setupSynthesis();

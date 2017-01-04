@@ -245,12 +245,14 @@ private:
 	FileWatch mFileWatch;
 	
 	// synthesis
-	cipd::PureDataNodeRef	mPureDataNode;	// synth engine
+	cipd::PureDataNodeRef	mPd;	// synth engine
 	cipd::PatchRef			mPatch;			// pong patch
 	
 	void setupSynthesis();
 	void shutdownSynthesis();
-
+	
+	void updateBallSynthesis();
+	
 	// graphics
 	void setupGraphics();
 

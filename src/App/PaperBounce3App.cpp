@@ -205,6 +205,14 @@ void PaperBounce3App::setup()
 
 	// Pure Data
 	auto ctx = audio::master();
+	
+	cout << "Frames per block: " << endl;
+	for (auto &device : ctx->deviceManager()->getDevices()) {
+		int currentFramesPerBlock = ctx->deviceManager()->getFramesPerBlock(device);
+		cout << "\t" << device->getName() << " - " << currentFramesPerBlock << endl;
+//		ctx->deviceManager()->setFramesPerBlock(device, 512);
+	}
+	
 
 	// Create the synth engine
 	mPd = ctx->makeNode( new cipd::PureDataNode( audio::Node::Format().autoEnable() ) );
@@ -215,6 +223,11 @@ void PaperBounce3App::setup()
 	// Enable Cinder audio
 	ctx->enable();
 	
+	mPd->addToSearchPath(hotloadableAssetPath("synths").string());
+	
+	for (auto p : fs::directory_iterator(hotloadableAssetPath("synths"))) {
+		mPd->addToSearchPath(p.path().string());
+	}
 
 	// ui stuff (do before making windows)
 	mTextureFont = gl::TextureFont::create( Font("Avenir",12) );

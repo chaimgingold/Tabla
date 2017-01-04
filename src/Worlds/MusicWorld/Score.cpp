@@ -621,7 +621,7 @@ void Score::tick(float globalPhase, float beatDuration)
 		case Instrument::SynthType::Additive:
 		{
 			// Update time
-			mInstrument->mPureDataNode->sendFloat(toString(mInstrument->mAdditiveSynthID)+string("phase"),
+			mInstrument->mPd->sendFloat(toString(mInstrument->mAdditiveSynthID)+string("phase"),
 												  getPlayheadFrac() );
 		}
 		break;
@@ -681,7 +681,7 @@ void Score::updateAdditiveSynthesis() {
 	// send image for additive synthesis
 	if ( instr->mSynthType==Instrument::SynthType::Additive && !mImage.empty() )
 	{
-		PureDataNodeRef pd = instr->mPureDataNode;
+		PureDataNodeRef pd = instr->mPd;
 		int additiveSynthID = mInstrument->mAdditiveSynthID;
 
 		int rows = mImage.rows;
