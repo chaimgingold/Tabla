@@ -39,6 +39,7 @@
 	</Vision>
 
 <!-- General -->
+	<SoundEnabled>1</SoundEnabled>
 	<UpVec>-1 0</UpVec>
 	<Gravity>.05</Gravity>
 	<BallReclaimAreaHeight>4</BallReclaimAreaHeight>

@@ -22,7 +22,6 @@ using namespace ci::app;
 using namespace std;
 using namespace Pinball;
 
-const bool kDoSound = true;
 //const bool kLogButtons = true; // we will need them to configure new controllers :P
 
 PinballWorld::PinballWorld()
@@ -111,6 +110,10 @@ void PinballWorld::setParams( XmlTree xml )
 	if ( xml.hasChild("View") ) {
 		mView.setParams(xml.getChild("View"));
 	}
+	
+	bool wasSoundEnabled = mSoundEnabled;
+	getXml(xml, "SoundEnabled", mSoundEnabled);
+	if (wasSoundEnabled!=mSoundEnabled) setupSynthesis();
 	
 	// playfield
 	getXml(xml, "UpVec", mUpVec );	
@@ -934,13 +937,21 @@ void PinballWorld::setupSynthesis()
 	};
 
 	// Load pinball synthesis patch
-	if (kDoSound) mFileWatch.load( paths, [this,app]()
+	if (mSoundEnabled)
 	{
-		// Reload the root patch
-		auto rootPatch = app->hotloadableAssetPath("synths/PinballWorld/pinball-world.pd");
+		mFileWatch.load( paths, [this,app]()
+		{
+			// Reload the root patch
+			auto rootPatch = app->hotloadableAssetPath("synths/PinballWorld/pinball-world.pd");
+			mPd->closePatch(mPatch);
+			mPatch = mPd->loadPatch( DataSourcePath::create(rootPatch) ).get();
+		});
+	}
+	else
+	{
 		mPd->closePatch(mPatch);
-		mPatch = mPd->loadPatch( DataSourcePath::create(rootPatch) ).get();
-	});
+		mPatch=0;
+	}
 }
 
 void PinballWorld::shutdownSynthesis() {

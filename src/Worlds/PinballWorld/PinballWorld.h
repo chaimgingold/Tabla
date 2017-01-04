@@ -178,6 +178,8 @@ private:
 	
 	
 	// --- Sound Synthesis ---
+	bool mSoundEnabled=true;
+	
 	cipd::PureDataNodeRef	mPd;	// synth engine
 	cipd::PatchRef			mPatch;			// pong patch
 	
