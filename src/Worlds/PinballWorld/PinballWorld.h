@@ -13,31 +13,11 @@
 #include "PureDataNode.h"
 #include "GamepadManager.h"
 #include "PinballParts.h"
+#include "PinballView.h"
 #include "FileWatch.h"
 
 namespace Pinball
 {
-
-class Scene
-{
-public:
-	
-	struct Obj
-	{
-		Obj();
-		Obj( TriMeshRef m ) : mMesh(m) {}
-		Obj( TriMeshRef m, mat4 x ) : mMesh(m), mTransform(x) {}
-		
-		TriMeshRef mMesh;
-		mat4	   mTransform;
-	};
-	
-	typedef vector<Obj> Meshes;
-	
-	// by shader
-	Meshes mWalls;
-	
-};
 
 class PinballWorld : public BallWorld
 {
@@ -63,6 +43,7 @@ public:
 	void mouseClick( vec2 ) override;
 
 	PartParams mPartParams;
+	PinballView mView;
 	
 public:
 
@@ -73,18 +54,8 @@ public:
 	vec2 getDownVec() const { return -mUpVec; }
 	vec2 getGravityVec() const { return getDownVec(); } // sugar
 	
-	float getTableDepth() const { return m3dTableDepth; }
-	
-	// inter-frame coherence params
-	float mPartTrackLocMaxDist = 1.f;
-	float mPartTrackRadiusMaxDist = .5f;
-	float mDejitterContourMaxDist = 0.f;
-	
-	// debug params
-	bool mDebugDrawFlipperAccelHairs=false;
-	bool mDebugDrawCubeMaps=false;
-	bool mDebugDrawAdjSpaceRays=false;
-	bool mDebugDrawGeneratedContours=false;
+	float getTableDepth() const { return mView.m3dTableDepth; }
+	void  getCullLine( vec2 v[2] ) const;
 	
 	// state
 	void sendGameEvent( GameEvent );
@@ -102,15 +73,9 @@ public:
 	cipd::PureDataNodeRef getPd() { return mPd; }
 
 
-	// geometry
-	PolyLine2 getCirclePoly ( vec2 c, float r ) const;
-	PolyLine2 getCapsulePoly( vec2 c[2], float r[2] ) const;
-
-	Shape2d polyToShape( const PolyLine2& ) const;
-	TriMeshRef get3dMeshForPoly( const PolyLine2&, float znear, float zfar ) const; // e.g. 0..1, from tabletop in 1cm	
-	
-	
 private:
+	
+	friend class PinballView; // for getContoursFromParts
 	
 	FileWatch mFileWatch;
 		
@@ -119,7 +84,7 @@ private:
 	float mGravity=0.1f;
 	float mBallReclaimAreaHeight = 10.f;
 		
-	// playfield layout
+	// playfield layout	
 	vec2  toPlayfieldSpace  ( vec2 p ) const { return vec2( dot(p,getRightVec()), dot(p,getUpVec()) ); }
 	vec2  fromPlayfieldSpace( vec2 p ) const { return getRightVec() * p.x + getUpVec() * p.y ; }
 		// could make this into two matrices
@@ -141,8 +106,7 @@ private:
 	PartVec mParts;
 	ContourToPartMap mContoursToParts;
 
-	void getContoursFromParts( const PartVec&, ContourVec& contours, ContourToPartMap& ) const; // for physics simulation
-	void drawParts() const;
+	void getContoursFromParts( const PartVec&, ContourVec& contours, ContourToPartMap* c2pm=0 ) const; // for physics simulation
 	
 	PartRef findPartForContour( const Contour& ) const;
 	PartRef findPartForContour( int contourIndex ) const;
@@ -156,13 +120,17 @@ private:
 	void serveBall();
 	void cullBalls(); // cull dropped balls
 	
-	// drawing
-	void drawAdjSpaceRays() const;
-	
 	
 	// --- Vision ---
 	//
 
+public:
+	// - inter-frame coherence params
+	float mPartTrackLocMaxDist = 1.f;
+	float mPartTrackRadiusMaxDist = .5f;
+	float mDejitterContourMaxDist = 0.f;	
+
+private:
 	// - params
 	float mPartMaxContourRadius = 5.f; // contour radius lt => part
 	float mHolePartMaxContourRadius = 2.f;
@@ -170,11 +138,16 @@ private:
 
 	// - do it
 	PartVec getPartsFromContours( const ContourVector& ); // only reason this is non-const is b/c parts point to the world
-	bool shouldContourBeAPart( const Contour&, const ContourVector& ) const;
 	PartVec mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const;
+	
+public:
 	AdjSpace getAdjacentSpace( const Contour*, vec2, const ContourVector& ) const ;
 	AdjSpace getAdjacentSpace( vec2, const ContourVector& ) const ; // how much adjacent space is to the left, right?
 
+	bool shouldContourBeAPart( const Contour&, const ContourVector& ) const;
+	const ContourVec& getVisionContours() const { return mVisionContours ; }
+	
+private:
 	ContourVec dejitterVisionContours( ContourVec in, ContourVec old ) const;
 	
 	// - state
@@ -211,65 +184,7 @@ private:
 	void setupSynthesis();
 	void shutdownSynthesis();
 	
-	void updateBallSynthesis();
-	
-	
-	
-	// --- Graphics ---
-	//
-	// TODO: Move into a different object
-	void setupGraphics();
-
-	//
-	void draw2d( DrawType );
-	
-	void prepare3dScene();
-	void draw3d( DrawType );
-	void beginDraw3d() const;
-	void endDraw3d() const;
-
-	void draw3dFloor() const;
-	void draw3dScene() const;
-	void draw3dBalls() const;
-	void draw3dRibbons( DrawType drawType ) const;
-	
-	void drawBallCullLine() const;
-	
-	Scene mDrawScene;
-
-	// - params
-	int mCircleMinVerts=8;
-	int mCircleMaxVerts=100;
-	float mCircleVertsPerPerimCm=1.f;
-
-	int mCubeMapSize = 256;
-	int mMaxCubeMaps = 10;
-	int mCubeMapFrameSkip = 0;
-	
-	bool  m3dEnable      = false;
-	bool  m3dBackfaceCull= false;
-	float m3dTableDepth  = 10.f;
-	float m3dZSkew       = .5f;
-	bool  m3dDynamicCubeMap = false;
-
-	int getNumCircleVerts( float r ) const;
-
-	// - cube maps
-	gl::TextureCubeMapRef mCubeMap; // static
-	vector<gl::FboCubeMapRef> mCubeMaps; // dynamic
-
-	void updateCubeMaps();
-	gl::FboCubeMapRef updateCubeMap( gl::FboCubeMapRef, vec3 eye ) const;
-	gl::TextureCubeMapRef getCubeMapForBall( int ball ) const;
-	
-	// - shaders
-	gl::GlslProgRef mWallShader;
-	gl::GlslProgRef mBallShader;
-	gl::GlslProgRef mFloorShader;
-	gl::GlslProgRef mBallShadowShader;
-	
-	// - meshes
-	gl::VboMeshRef mBallMesh;
+	void updateBallSynthesis();	
 };
 
 } // namespace Pinball

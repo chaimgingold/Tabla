@@ -38,12 +38,6 @@
 		</Contours>
 	</Vision>
 
-<!-- Debug -->
-	<DebugDrawAdjSpaceRays>0</DebugDrawAdjSpaceRays>
-	<DebugDrawGeneratedContours>0</DebugDrawGeneratedContours>
-	<DebugDrawFlipperAccelHairs>0</DebugDrawFlipperAccelHairs>
-	<DebugDrawCubeMaps>0</DebugDrawCubeMaps>
-	
 <!-- General -->
 	<UpVec>-1 0</UpVec>
 	<Gravity>.05</Gravity>
@@ -59,11 +53,6 @@
 	
 	<DejitterContourMaxDist>0</DejitterContourMaxDist> <!-- 0 for off -->
 	
-<!-- Object Geometry -->
-	<CircleMinVerts>8</CircleMinVerts>
-	<CircleMaxVerts>100</CircleMaxVerts>
-	<CircleVertsPerPerimCm>.5</CircleVertsPerPerimCm>
-
 	<Parts>
 		<BumperMinRadius>1</BumperMinRadius>
 		<BumperContourRadiusScale>2</BumperContourRadiusScale>
@@ -88,17 +77,33 @@
 		<FlipperColor>00FFFF</FlipperColor>
 	</Parts>
 	
-<!-- 3d	-->
-	<3d>
-		<Enable>1</Enable>
-		<BackfaceCull>0</BackfaceCull>
-		<TableDepth>2</TableDepth>
-		<ZSkew>.75</ZSkew>
-		<DynamicCubeMap>1</DynamicCubeMap>
-		<CubeMapSize>256</CubeMapSize>
-		<MaxCubeMaps>4</MaxCubeMaps>
-		<CubeMapFrameSkip>4</CubeMapFrameSkip>
-	</3d>
+	
+<!-- Graphics -->
+	<View>
+
+		<!-- Object Geometry -->
+		<CircleMinVerts>8</CircleMinVerts>
+		<CircleMaxVerts>100</CircleMaxVerts>
+		<CircleVertsPerPerimCm>.5</CircleVertsPerPerimCm>
+
+		<3d>
+			<Enable>1</Enable>
+			<BackfaceCull>0</BackfaceCull>
+			<TableDepth>2</TableDepth>
+			<ZSkew>.75</ZSkew>
+			<DynamicCubeMap>1</DynamicCubeMap>
+			<CubeMapSize>256</CubeMapSize>
+			<MaxCubeMaps>4</MaxCubeMaps>
+			<CubeMapFrameSkip>4</CubeMapFrameSkip>
+		</3d>
+
+		<!-- Debug -->
+		<DebugDrawAdjSpaceRays>0</DebugDrawAdjSpaceRays>
+		<DebugDrawGeneratedContours>0</DebugDrawGeneratedContours>
+		<DebugDrawFlipperAccelHairs>0</DebugDrawFlipperAccelHairs>
+		<DebugDrawCubeMaps>0</DebugDrawCubeMaps>
+
+	</View>
 	
 <!-- Controls	-->
 <!-- TODO... Note manufacturer/model and support multiple profiles; this is for PS4 -->

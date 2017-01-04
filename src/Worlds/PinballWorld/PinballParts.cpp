@@ -10,6 +10,7 @@
 
 #include "glm/glm.hpp"
 #include "PinballWorld.h"
+#include "PinballView.h"
 #include "geom.h"
 #include "cinder/rand.h"
 #include "xml.h"
@@ -78,7 +79,7 @@ void Part::addExtrudedCollisionPolyToScene( Scene& s, ColorA c ) const
 	};
 	
 	auto mesh = TriMesh::create(
-		   geom::Extrude( getWorld().polyToShape(poly), extrudeDepth ).caps(false).subdivisions( 1 )
+		   geom::Extrude( getWorld().mView.polyToShape(poly), extrudeDepth ).caps(false).subdivisions( 1 )
 		>> geom::Translate(0,0,extrudeDepth/2+znear)
 		>> geom::ColorFromAttrib( geom::POSITION, posToColor ));
 	
@@ -120,7 +121,7 @@ void Flipper::draw()
 	gl::color( getWorld().mPartParams.mFlipperColor );
 	gl::drawSolid( getCollisionPoly() );
 	
-	if (getWorld().mDebugDrawFlipperAccelHairs)
+	if (getWorld().mView.mDebugDrawFlipperAccelHairs)
 	{
 		PolyLine2 poly = getCollisionPoly();
 		vec2 tip = getTipLoc();
@@ -185,7 +186,7 @@ PolyLine2 Flipper::getCollisionPoly() const
 	vec2 c[2] = { mLoc, getTipLoc() };
 	float r[2] = { mRadius, mRadius/2.f };
 	
-	return getWorld().getCapsulePoly(c,r);
+	return getWorld().mView.getCapsulePoly(c,r);
 }
 
 void Flipper::onBallCollide( Ball& ball )
@@ -303,7 +304,7 @@ void Bumper::onGameEvent( GameEvent e )
 
 PolyLine2 Bumper::getCollisionPoly() const
 {
-	return getWorld().getCirclePoly( mLoc, getDynamicRadius() );
+	return getWorld().mView.getCirclePoly( mLoc, getDynamicRadius() );
 }
 
 void Bumper::onBallCollide( Ball& ball )
