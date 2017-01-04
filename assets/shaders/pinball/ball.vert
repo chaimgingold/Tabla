@@ -1,5 +1,7 @@
 #version 330
 
+#define M_PI 3.1415926535897932384626433832795
+
 uniform mat4	ciModelView;
 uniform mat4	ciModelViewProjection;
 uniform mat3	ciNormalMatrix;
@@ -17,6 +19,20 @@ out vec4 color;
 out highp vec3	NormalWorldSpace;
 out highp vec3  EyeDirWorldSpace;
 
+
+mat4 rotationMatrix(vec3 axis, float angle)
+{
+//    axis = normalize(axis);
+    float s = sin(angle);
+    float c = cos(angle);
+    float oc = 1.0 - c;
+    
+    return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
+                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
+                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
+                0.0,                                0.0,                                0.0,                                1.0);
+}
+
 void main()
 {
 	vec4 positionViewSpace = ciModelView * ciPosition;
@@ -28,6 +44,13 @@ void main()
 	
 	vec3 normalViewSpace = ciNormalMatrix * normal;
 	NormalWorldSpace = normalize( vec3( vec4( normalViewSpace, 0 ) * ciViewMatrix ) );
+	NormalWorldSpace.y *= -1.;
+//	NormalWorldSpace = NormalWorldSpace * mat3(rotationMatrix( vec3(0,1,0), M_PI/2. ));
+	NormalWorldSpace = NormalWorldSpace * mat3(
+		  rotationMatrix( vec3(0,1,0), M_PI/2. )
+		* rotationMatrix( vec3(0,0,1), -M_PI/2. )
+		);
+	
 	gl_Position = ciModelViewProjection * ciPosition;
 	
 //	coord = ciTexCoord0; // -1..1

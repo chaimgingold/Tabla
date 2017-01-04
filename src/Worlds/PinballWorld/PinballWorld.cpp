@@ -800,7 +800,7 @@ void PinballWorld::draw3dBalls() const
 			{
 				gl::TextureCubeMapRef env;
 				
-				if ( mEnvMaps.size() > i ) {
+				if ( mEnvMaps.size() > i && mEnvMaps[i] ) {
 					env = mEnvMaps[i]->getTextureCubeMap();
 				}
 				
@@ -811,7 +811,7 @@ void PinballWorld::draw3dBalls() const
 			const Ball& b = getBalls()[i];
 			
 			gl::ScopedModelMatrix model;
-			if (1) gl::multModelMatrix( getBallTransform(b) );
+			if (!m3dDynamicEnvMap) gl::multModelMatrix( getBallTransform(b) );
 			else
 			{
 				// no deform, for testing
@@ -923,7 +923,8 @@ gl::FboCubeMapRef PinballWorld::getCubeMap( gl::FboCubeMapRef fbo, vec3 eye ) co
 			gl::clear();
 			
 			draw3dFloor();
-			draw3dRibbons(DrawType::EnvMap);
+			draw3dBalls();
+//			draw3dRibbons(DrawType::EnvMap);
 			draw3dScene();
 		}
 
