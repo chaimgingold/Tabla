@@ -861,10 +861,10 @@
 		26CCA2C51E089DE7005F7C24 /* PinballWorld */ = {
 			isa = PBXGroup;
 			children = (
-				26CCA2C61E089DE7005F7C24 /* PinballParts.cpp */,
-				26CCA2C71E089DE7005F7C24 /* PinballParts.h */,
 				26CCA2C81E089DE7005F7C24 /* PinballWorld.cpp */,
 				26CCA2C91E089DE7005F7C24 /* PinballWorld.h */,
+				26CCA2C61E089DE7005F7C24 /* PinballParts.cpp */,
+				26CCA2C71E089DE7005F7C24 /* PinballParts.h */,
 				2673CD5C1E1D791C0036C02D /* PinballView.cpp */,
 				2673CD5D1E1D791C0036C02D /* PinballView.h */,
 			);

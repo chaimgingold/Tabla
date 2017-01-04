@@ -473,8 +473,11 @@ void PinballView::beginDraw3d() const
 		skew[2][0] = mWorld.getGravityVec().x * m3dZSkew;
 		skew[2][1] = mWorld.getGravityVec().y * m3dZSkew;
 		gl::pushModelView();
+//		gl::setViewMatrix( gl::getModelView()
 		gl::multModelMatrix(skew);
-	}	
+		
+//		gl::pushmode
+	}
 }
 
 void PinballView::endDraw3d() const
@@ -676,8 +679,25 @@ void PinballView::draw3d( GameWorld::DrawType drawType )
 	// collected 3d scene
 	draw3dScene();
 
+	// axes
+	if (0)
+	{
+		vec3 c = vec3( mWorld.getWorldBoundsPoly().calcCentroid(), -2 );
+		float l = 10.f;
+
+		gl::color(1,0,0);
+		gl::drawLine( c, c + vec3(1,0,0) * l );
+
+		gl::color(0,1,0);
+		gl::drawLine( c, c + vec3(0,1,0) * l );
+
+		gl::color(0,0,1);
+		gl::drawLine( c, c + vec3(0,0,1) * l );
+	}
+	
+
 	// ball shadows
-	if (mBallShadowShader)
+	if (0&&mBallShadowShader)
 	{
 		gl::ScopedModelMatrix trans;
 		gl::translate(0,0,m3dTableDepth - .01f);
