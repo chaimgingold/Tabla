@@ -306,7 +306,7 @@ void BallWorld::draw( DrawType drawType )
 	}	
 }
 
-void BallWorld::drawBalls( DrawType, gl::GlslProgRef shader )
+void BallWorld::drawBalls( DrawType, gl::GlslProgRef shader ) const
 {
 	// draw using graphics we setup in prepareToDraw().
 	if (!shader) shader=mCircleShader;
@@ -318,7 +318,7 @@ void BallWorld::drawBalls( DrawType, gl::GlslProgRef shader )
 	}
 }
 
-void BallWorld::drawRibbons( DrawType )
+void BallWorld::drawRibbons( DrawType ) const
 {
 	if (mRibbonMesh) gl::draw(*mRibbonMesh);
 }

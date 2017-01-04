@@ -136,6 +136,8 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 
 void WindowData::draw()
 {
+	gl::ScopedViewport viewport( ivec2( 0, 0 ), getWindow()->getSize() );
+
 	gl::clear();
 	gl::enableAlphaBlending();
 

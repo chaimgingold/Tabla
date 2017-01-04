@@ -338,7 +338,7 @@ void RolloverTarget::draw()
 //		gl::color( mColorOn * ColorA(1,1,1,collideFade) );
 
 		if ( collideFade > 0.f ) gl::color(c);
-		else gl::color( mColorStrobe * strobe );
+		else gl::color( lerp(mColorStrobe,mColorOff,mLight) * strobe );
 //		gl::color( c );
 		gl::drawSolid(mContourPoly);
 	}

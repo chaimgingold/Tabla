@@ -127,8 +127,8 @@ public:
 	
 protected:
 
-	void drawBalls( DrawType, gl::GlslProgRef=0 );
-	void drawRibbons( DrawType );
+	void drawBalls( DrawType, gl::GlslProgRef=0 ) const;
+	void drawRibbons( DrawType ) const;
 	// doing your own drawing? use these. these use geometry generated in prepareToDraw()
 	
 	void setContours( const ContourVec& contours, ContourVec::Filter filter=0 ) { mContours = contours; mContourFilter=filter; }

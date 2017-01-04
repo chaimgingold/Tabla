@@ -102,6 +102,7 @@ public:
 	
 	// debug params
 	bool mDebugDrawFlipperAccelHairs=false;
+	bool mDebugDrawEnvMaps=false;
 	
 	// state
 	void sendGameEvent( GameEvent );
@@ -128,9 +129,18 @@ private:
 	void beginDraw3d() const;
 	void endDraw3d() const;
 
+	void draw3dFloor() const;
+	void draw3dScene() const;
+	void draw3dBalls() const;
+	void draw3dRibbons( DrawType drawType ) const;
+	
 	void drawBallCullLine() const;
 	
 	Scene mDrawScene;
+	
+	void updateEnvMaps();
+	gl::FboCubeMapRef getCubeMap( gl::FboCubeMapRef, vec3 eye ) const;
+	vector<gl::FboCubeMapRef> mEnvMaps;
 	
 	// params
 	vec2  mUpVec = vec2(0,1);
@@ -151,11 +161,14 @@ private:
 	bool mDebugDrawAdjSpaceRays=false;
 	bool mDebugDrawGeneratedContours=false;
 	
+	int mCubeMapSize = 256;
+	
 	// 3d params
 	bool  m3dEnable      = false;
 	bool  m3dBackfaceCull= false;
 	float m3dTableDepth  = 10.f;
 	float m3dZSkew       = .5f;
+	bool  m3dDynamicEnvMap = false;
 	
 	// world layout
 	vec2  toPlayfieldSpace  ( vec2 p ) const { return vec2( dot(p,getRightVec()), dot(p,getUpVec()) ); }

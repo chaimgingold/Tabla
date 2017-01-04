@@ -178,11 +178,14 @@ void PinballWorld::setParams( XmlTree xml )
 	getXml(xml, "DebugDrawGeneratedContours", mDebugDrawGeneratedContours);
 	getXml(xml, "DebugDrawAdjSpaceRays", mDebugDrawAdjSpaceRays );
 	getXml(xml, "DebugDrawFlipperAccelHairs", mDebugDrawFlipperAccelHairs );
+	getXml(xml, "DebugDrawEnvMaps", mDebugDrawEnvMaps);
 	
 	getXml(xml, "3d/Enable", m3dEnable );
 	getXml(xml, "3d/BackfaceCull", m3dBackfaceCull );
 	getXml(xml, "3d/TableDepth", m3dTableDepth );
 	getXml(xml, "3d/ZSkew", m3dZSkew );
+	getXml(xml, "3d/CubeMapSize", mCubeMapSize );
+	getXml(xml, "3d/DynamicEnvMap", m3dDynamicEnvMap );
 	
 	// gamepad
 	if (xml.hasChild("Gamepad"))
@@ -460,7 +463,11 @@ void PinballWorld::prepareToDraw()
 {
 	BallWorld::prepareToDraw();
 	
-	if (m3dEnable) prepare3dScene();
+	if (m3dEnable) {
+		prepare3dScene();
+		if (m3dDynamicEnvMap) updateEnvMaps();
+		else mEnvMaps.clear();
+	}
 }
 
 void PinballWorld::draw( DrawType drawType )
@@ -469,6 +476,22 @@ void PinballWorld::draw( DrawType drawType )
 	if (m3dEnable && (drawType==DrawType::UIMain || drawType==DrawType::Projector) ) draw3d(drawType);
 	else draw2d(drawType);
 
+	if ( mDebugDrawEnvMaps && drawType==DrawType::UIMain && !mEnvMaps.empty() )
+	{
+		const int kWidth = 100;
+		const int kHeight = kWidth/2;
+		
+//		for( int i=0; i<mEnvMaps.size(); ++i )
+		if (!mEnvMaps.empty())
+		{
+			int i=0;
+			if (mEnvMaps[i]) {
+				gl::drawHorizontalCross( mEnvMaps[i]->getTextureCubeMap(),
+					//Rectf( 0, kHeight*i, kWidth, (kHeight+1)*i ) );
+					Rectf( 0, 0, kWidth, kHeight ) );
+			}
+		}
+	}
 
 	// --- debugging/testing ---
 
@@ -696,10 +719,8 @@ void PinballWorld::prepare3dScene()
 	}
 }
 
-void PinballWorld::draw3d( DrawType drawType )
+void PinballWorld::draw3dFloor() const
 {
-	beginDraw3d();
-
 	// floor
 	if (mFloorShader)
 	{
@@ -720,8 +741,10 @@ void PinballWorld::draw3d( DrawType drawType )
 		
 		gl::popModelView();
 	}
-	
-	// collected 3d scene
+}
+
+void PinballWorld::draw3dScene() const
+{
 	auto drawSceneSegment = [this]( gl::GlslProgRef shader, const Scene::Meshes& meshes )
 	{
 		gl::ScopedGlslProg glslScp(shader);
@@ -737,6 +760,63 @@ void PinballWorld::draw3d( DrawType drawType )
 	};
 	
 	drawSceneSegment(mWallShader,mDrawScene.mWalls);
+}
+
+void PinballWorld::draw3dBalls() const
+{
+	if (mBallShader)
+	{
+		gl::ScopedGlslProg glslScp(mBallShader);
+		
+		if (mCubeMap && !m3dDynamicEnvMap) {
+			mCubeMap->bind();
+			mBallShader->uniform( "uCubeMapTex", 0 );
+		}
+		
+		mBallShader->uniform( "uCubeMapTex", 0 );
+		
+		for( int i=0; i<getBalls().size(); ++i )
+		{
+			if (m3dDynamicEnvMap)
+			{
+				gl::TextureCubeMapRef env;
+				
+				if ( mEnvMaps.size() > i ) {
+					env = mEnvMaps[i]->getTextureCubeMap();
+				}
+				
+				if (!env) env = mCubeMap;
+				if (env) env->bind();
+			}
+			
+			const Ball& b = getBalls()[i];
+			
+			gl::ScopedModelMatrix model;
+			gl::multModelMatrix( getBallTransform(b) );
+			gl::translate(0,0,m3dTableDepth-b.mRadius/2);
+			gl::draw(mBallMesh);
+		}
+	}
+}
+
+void PinballWorld::draw3dRibbons( DrawType drawType ) const
+{
+	gl::ScopedModelMatrix trans;
+	gl::translate(0,0,m3dTableDepth - mBallDefaultRadius*.5f);
+	
+	gl::enableDepthWrite(false);
+	BallWorld::drawRibbons(drawType);
+	gl::enableDepthWrite(true);
+}
+
+void PinballWorld::draw3d( DrawType drawType )
+{
+	beginDraw3d();
+
+	draw3dFloor();
+	
+	// collected 3d scene
+	draw3dScene();
 
 	// ball shadows
 	if (mBallShadowShader)
@@ -747,9 +827,8 @@ void PinballWorld::draw3d( DrawType drawType )
 		BallWorld::drawBalls(drawType,mBallShadowShader);
 	}
 	
-	// parts
-	for( const auto &p : mParts )
-	{
+	// parts (2d)
+	for( const auto &p : mParts ) {
 		p->draw();
 	}
 
@@ -757,36 +836,68 @@ void PinballWorld::draw3d( DrawType drawType )
 	drawBallCullLine();
 
 	// balls
-	if (mBallShader)
-	{
-		gl::ScopedGlslProg glslScp(mBallShader);
-		
-		if (mCubeMap) {
-			mCubeMap->bind();
-			mBallShader->uniform( "uCubeMapTex" , 0 );
-		}
-		
-		for( const auto &b : getBalls() )
-		{
-			gl::ScopedModelMatrix model;
-			gl::multModelMatrix( getBallTransform(b) );
-			gl::translate(0,0,m3dTableDepth-b.mRadius/2);
-			gl::draw(mBallMesh);
-		}
-	}
-	
-	// ribbons
-	{
-		gl::ScopedModelMatrix trans;
-		gl::translate(0,0,m3dTableDepth - mBallDefaultRadius*.5f);
-		
-		gl::enableDepthWrite(false);
-		BallWorld::drawRibbons(drawType);
-		gl::enableDepthWrite(true);
-	}
+	draw3dBalls();
+	draw3dRibbons(drawType);
 
 	// done with 3d
 	endDraw3d();
+}
+
+void PinballWorld::updateEnvMaps()
+{
+	if (0)
+	{
+		mEnvMaps.resize(1);
+		
+		mEnvMaps[0] = getCubeMap( mEnvMaps[0], vec3(getWorldBoundsPoly().calcCentroid(),getTableDepth()/2.f) );
+	}
+	else
+	{
+		mEnvMaps.resize( getBalls().size() );
+		
+		for( int i=0; i<mEnvMaps.size(); ++i )
+		{
+			const auto& ball = getBalls()[i];
+			
+			mEnvMaps[i] = getCubeMap( mEnvMaps[i], vec3( ball.mLoc, getTableDepth() - ball.mRadius ) );
+		}
+	}
+}
+
+gl::FboCubeMapRef PinballWorld::getCubeMap( gl::FboCubeMapRef fbo, vec3 eye ) const
+{
+	if ( !fbo || fbo->getSize() != ivec2(mCubeMapSize, mCubeMapSize) ) {
+		fbo = gl::FboCubeMap::create( mCubeMapSize, mCubeMapSize );
+	}
+	
+	if (fbo)
+	{
+		gl::ScopedMatrices matrix;
+		gl::ScopedViewport viewport( ivec2( 0, 0 ), fbo->getSize() );
+//		gl::ScopedDepthTest depth(true);
+
+		// we need to save the current FBO because we'll be calling bindFramebufferFace() below
+		gl::context()->pushFramebuffer();
+		
+		for( uint8_t dir = 0; dir < 6; ++dir )
+		{
+			ci::CameraPersp camera( fbo->getWidth(), fbo->getHeight(), 90.0f, 1, 1000 );
+			gl::setProjectionMatrix( camera.getProjectionMatrix() );
+			gl::setViewMatrix( fbo->calcViewMatrix( GL_TEXTURE_CUBE_MAP_POSITIVE_X + dir, eye ) );
+			
+			fbo->bindFramebufferFace( GL_TEXTURE_CUBE_MAP_POSITIVE_X + dir );
+			
+			gl::clear();
+			
+			draw3dFloor();
+			draw3dRibbons(DrawType::EnvMap);
+			draw3dScene();
+		}
+
+		gl::context()->popFramebuffer();
+	}
+	
+	return fbo;
 }
 
 void PinballWorld::drawAdjSpaceRays() const
