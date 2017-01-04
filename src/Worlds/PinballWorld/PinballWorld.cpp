@@ -495,9 +495,11 @@ void PinballWorld::draw( DrawType drawType )
 	if (m3dEnable && (drawType==DrawType::UIMain || drawType==DrawType::Projector) ) draw3d(drawType);
 	else draw2d(drawType);
 
+	// --- debugging/testing ---
+
 	if ( mDebugDrawEnvMaps && drawType==DrawType::UIMain && !mEnvMaps.empty() )
 	{
-		const int kWidth = 100;
+		const int kWidth = constrain(mCubeMapSize,64,100);
 		const int kHeight = kWidth/2;
 		
 //		for( int i=0; i<mEnvMaps.size(); ++i )
@@ -511,8 +513,6 @@ void PinballWorld::draw( DrawType drawType )
 			}
 		}
 	}
-
-	// --- debugging/testing ---
 
 	if (0) rolloverTest();
 	
@@ -811,7 +811,15 @@ void PinballWorld::draw3dBalls() const
 			const Ball& b = getBalls()[i];
 			
 			gl::ScopedModelMatrix model;
-			gl::multModelMatrix( getBallTransform(b) );
+			if (1) gl::multModelMatrix( getBallTransform(b) );
+			else
+			{
+				// no deform, for testing
+				gl::multModelMatrix(
+					glm::translate(vec3(b.mLoc,0))
+					*  glm::scale( vec3(1,1,1)*b.mRadius )
+				);
+			}
 			gl::translate(0,0,m3dTableDepth-b.mRadius/2);
 			gl::draw(mBallMesh);
 		}
@@ -872,7 +880,7 @@ void PinballWorld::updateEnvMaps()
 	}
 	else
 	{
-		mEnvMaps.resize( getBalls().size() );
+		if (getBalls().size() != mEnvMaps.size()) mEnvMaps.resize( getBalls().size() );
 		
 		for( int i=0; i<mEnvMaps.size(); ++i )
 		{
@@ -887,6 +895,12 @@ gl::FboCubeMapRef PinballWorld::getCubeMap( gl::FboCubeMapRef fbo, vec3 eye ) co
 {
 	if ( !fbo || fbo->getSize() != ivec2(mCubeMapSize, mCubeMapSize) ) {
 		fbo = gl::FboCubeMap::create( mCubeMapSize, mCubeMapSize );
+		
+		if (fbo)
+		{
+			// configure some stuff tht isn't set properly
+			fbo->getTextureCubeMap()->setMagFilter(GL_LINEAR);
+		}
 	}
 	
 	if (fbo)

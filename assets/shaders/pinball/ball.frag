@@ -15,6 +15,17 @@ const float aaConstant = .1;
 void main()
 {
 	vec3 reflectedEyeWorldSpace = reflect( EyeDirWorldSpace, normalize(NormalWorldSpace) );
+	
+//	reflectedEyeWorldSpace *= -1;
+	
+//	reflectedEyeWorldSpace = reflectedEyeWorldSpace.zxy;
+	
+//	reflectedEyeWorldSpace = vec3(
+//		reflectedEyeWorldSpace.y,
+//		reflectedEyeWorldSpace.z,
+//		reflectedEyeWorldSpace.x
+//		);
+	
 	fragColor = texture( uCubeMapTex, reflectedEyeWorldSpace );
 
 //	fragColor = vec4(NormalWorldSpace,1);
