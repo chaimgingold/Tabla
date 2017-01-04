@@ -85,6 +85,7 @@ void PinballWorld::setupControls()
 	mInputToFunction["flippers-left-up"]    = [this,sound]() { mIsFlipperDown[0] = false; sound(0); };
 	mInputToFunction["flippers-right-down"] = [this,sound]() { mIsFlipperDown[1] = true; sound(1); };
 	mInputToFunction["flippers-right-up"]   = [this,sound]() { mIsFlipperDown[1] = false; sound(0); };
+	mInputToFunction["pause-ball-world-down"]    = [this](){ mPauseBallWorld = !mPauseBallWorld; };
 	
 	mGamepadFunctions["flippers-left-down"]  = [this,sound]() { mIsFlipperDown[0] = true; sound(1); };
 	mGamepadFunctions["flippers-left-up"]    = [this,sound]() { mIsFlipperDown[0] = false; sound(0); };
@@ -216,7 +217,7 @@ void PinballWorld::update()
 	
 	// sim balls
 	cullBalls();
-	BallWorld::update();
+	if (!mPauseBallWorld) BallWorld::update();
 		// TODO: To make pinball flippers super robust in terms of tunneling (especially at the tips),
 		// we should make attachments for BallWorld contours (a parallel vector)
 		// that specifies angular rotation (center, radians per second)--basically what
@@ -576,6 +577,9 @@ void PinballWorld::updateVision( const Vision::Output& visionOut, Pipeline& p )
 	// generate parts
 	PartVec newParts = getPartsFromContours(visionOut.mContours);
 	mParts = mergeOldAndNewParts(mParts, newParts);
+	
+	// log cube maps
+	mView.appendToVisionPipeline(p);
 }
 
 bool PinballWorld::shouldContourBeAPart( const Contour& c, const ContourVec& cs ) const

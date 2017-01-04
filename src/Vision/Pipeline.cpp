@@ -72,6 +72,15 @@ Pipeline::StageRef Pipeline::then( string name, gl::Texture2dRef ref )
 	return s;
 }
 
+Pipeline::StageRef Pipeline::then( string name, gl::TextureCubeMapRef ref )
+{
+	StageRef s = then( name, ivec2( ref->getWidth(), ref->getHeight() ) );
+
+	if ( getShouldCacheImage(s) ) s->mImageCubeMapGL = ref;
+
+	return s;
+}
+
 Pipeline::StageRef Pipeline::then( string name, vec2 size )
 {
 	StageRef s = then(name);

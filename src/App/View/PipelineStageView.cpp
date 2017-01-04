@@ -26,6 +26,11 @@ void PipelineStageView::draw()
 		gl::color(1,1,1);
 		gl::draw( stage->getGLImage(), getBounds() );
 	}
+	else if ( stage && stage->mImageCubeMapGL )
+	{
+		gl::color(1,1,1);
+		gl::drawHorizontalCross( stage->mImageCubeMapGL, getBounds() );
+	}
 	else
 	{
 //		gl::color(0,0,0);
@@ -64,8 +69,6 @@ void PipelineStageView::drawFrame()
 	gl::drawStrokedRect( getFrame(), 2.f );
 }
 
-
-
 void MainImageView::draw()
 {
 	const Pipeline::StageRef stage = getPipelineStage();
@@ -76,6 +79,11 @@ void MainImageView::draw()
 		gl::color( 1, 1, 1 );
 		
 		gl::draw( stage->getGLImage() );
+	}
+	else if ( stage && stage->mImageCubeMapGL )
+	{
+		gl::color(1,1,1);
+		gl::drawHorizontalCross( stage->mImageCubeMapGL, getBounds() );
 	}
 
 //	if (1)

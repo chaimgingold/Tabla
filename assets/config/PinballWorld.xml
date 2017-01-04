@@ -120,6 +120,11 @@
 <!-- Keyboard deprecated... -->
 	<KeyMap>
 	
+		<Key>
+			<char>.</char>
+			<input>pause-ball-world</input>
+		</Key>
+		
 <!-- Left flipper	-->
 		<Key>
 			<char>n</char>

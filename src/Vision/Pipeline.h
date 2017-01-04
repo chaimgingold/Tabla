@@ -56,6 +56,7 @@ public:
 		
 		cv::UMat			mImageCV;
 		mutable gl::TextureRef	mImageGL;
+		gl::TextureCubeMapRef	mImageCubeMapGL;
 		
 		gl::TextureRef getGLImage() const; // will convert mImageCV -> mImageGL if needed & possible.
 		
@@ -75,7 +76,10 @@ public:
 	StageRef then( string name, Surface &img );
 	StageRef then( string name, cv::Mat &img );
 	StageRef then( string name, cv::UMat &img );
+	
+	// copy by ref, not value; you must do it yourself
 	StageRef then( string name, gl::Texture2dRef ref );
+	StageRef then( string name, gl::TextureCubeMapRef ref );
 	
 	const vector<StageRef>& getStages() const { return mStages ; }
 	const StageRef getStage( string name ) const;

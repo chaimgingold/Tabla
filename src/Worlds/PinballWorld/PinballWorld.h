@@ -164,7 +164,9 @@ private:
 	float mFlipperState[2]; // left, right; 0..1
 	
 	void tickFlipperState();	
-
+	
+	bool mPauseBallWorld=false;
+	
 	// keymap
 	map<char,string> mKeyToInput; // maps keystrokes to input names
 	map<string,function<void()>> mInputToFunction; // maps input names to code handlers

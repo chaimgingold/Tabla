@@ -51,6 +51,7 @@ public:
 	void draw( GameWorld::DrawType );
 
 	void drawAdjSpaceRays( const PartVec& ) const;
+	void appendToVisionPipeline( Pipeline& ) const;
 	
 	// debug params
 	bool mDebugDrawFlipperAccelHairs=false;
@@ -83,8 +84,10 @@ private:
 
 	void draw3dFloor() const;
 	void draw3dScene() const;
-	void draw3dBalls() const;
+	void draw3dBalls( int skipBall=-1, gl::TextureCubeMapRef skipMap=0 ) const;
 	void draw3dRibbons( GameWorld::DrawType ) const;
+	
+	void drawBallOrientationMarkers() const;
 	
 	void drawBallCullLine() const;
 	
@@ -112,7 +115,7 @@ private:
 	vector<gl::FboCubeMapRef> mCubeMaps; // dynamic
 
 	void updateCubeMaps();
-	gl::FboCubeMapRef updateCubeMap( gl::FboCubeMapRef, vec3 eye ) const;
+	gl::FboCubeMapRef updateCubeMap( gl::FboCubeMapRef, vec3 eye, int skipBall=-1 ) const; // updateCubeMaps sets up appropriate state, so don't call without that!
 	gl::TextureCubeMapRef getCubeMapForBall( int ball ) const;
 	
 	// - shaders

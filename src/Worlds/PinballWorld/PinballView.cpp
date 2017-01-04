@@ -166,9 +166,30 @@ gl::TextureCubeMapRef PinballView::getCubeMapForBall( int i ) const
 	
 	return env;
 }
-				
+			
+void PinballView::appendToVisionPipeline( Pipeline& p ) const
+{
+	for( int i=0; i<mCubeMaps.size(); ++i )
+	{
+		if (mCubeMaps[i])
+		{
+			p.then( string("mCubeMaps[")+toString(i)+"]", mCubeMaps[i]->getTextureCubeMap() );
+		}
+	}
+}
+	
 void PinballView::updateCubeMaps()
 {
+	// Optimization: move this state pushing/pulling to the caller of updateCubeMap
+	gl::ScopedMatrices matrix;
+	gl::ScopedDepthTest depth(true,GL_LESS);
+	gl::ScopedFaceCulling cull(true,GL_BACK);
+	gl::enableDepthRead();
+	gl::enableDepthWrite();			
+	gl::context()->pushFramebuffer();
+	// we need to save the current FBO because we'll be calling bindFramebufferFace() below
+	
+
 	if (0)
 	{
 		mCubeMaps.resize(1);
@@ -189,13 +210,21 @@ void PinballView::updateCubeMaps()
 			{
 				const auto& ball = mWorld.getBalls()[i];
 				
-				mCubeMaps[i] = updateCubeMap( mCubeMaps[i], vec3( ball.mLoc, mWorld.getTableDepth() - ball.mRadius ) );
+				mCubeMaps[i] = updateCubeMap(
+					mCubeMaps[i],
+					vec3( ball.mLoc, mWorld.getTableDepth() - ball.mRadius ),
+					i
+					);
 			}
 		}
 	}
+
+	gl::context()->popFramebuffer();
+	gl::enableDepthRead(false);
+	gl::enableDepthWrite(false);
 }
 
-gl::FboCubeMapRef PinballView::updateCubeMap( gl::FboCubeMapRef fbo, vec3 eye ) const
+gl::FboCubeMapRef PinballView::updateCubeMap( gl::FboCubeMapRef fbo, vec3 eye, int skipBall ) const
 {
 	if ( !fbo || fbo->getSize() != ivec2(mCubeMapSize, mCubeMapSize) ) {
 		fbo = gl::FboCubeMap::create( mCubeMapSize, mCubeMapSize );
@@ -209,13 +238,8 @@ gl::FboCubeMapRef PinballView::updateCubeMap( gl::FboCubeMapRef fbo, vec3 eye ) 
 	
 	if (fbo)
 	{
-		gl::ScopedMatrices matrix;
 		gl::ScopedViewport PinballViewport( ivec2( 0, 0 ), fbo->getSize() );
-//		gl::ScopedDepthTest depth(true);
 
-		// we need to save the current FBO because we'll be calling bindFramebufferFace() below
-		gl::context()->pushFramebuffer();
-		
 		for( uint8_t dir = 0; dir < 6; ++dir )
 		{
 			ci::CameraPersp camera( fbo->getWidth(), fbo->getHeight(), 90.0f, 1, 1000 );
@@ -224,15 +248,15 @@ gl::FboCubeMapRef PinballView::updateCubeMap( gl::FboCubeMapRef fbo, vec3 eye ) 
 			
 			fbo->bindFramebufferFace( GL_TEXTURE_CUBE_MAP_POSITIVE_X + dir );
 			
+			gl::clearDepth(1.f);
 			gl::clear();
 			
 			draw3dFloor();
-			draw3dBalls();
+			draw3dBalls( skipBall, fbo->getTextureCubeMap());
 //			draw3dRibbons(DrawType::CubeMap);
 			draw3dScene();
+			if (mDebugDrawCubeMaps) drawBallOrientationMarkers();
 		}
-
-		gl::context()->popFramebuffer();
 	}
 	
 	return fbo;
@@ -298,23 +322,6 @@ void PinballView::draw( GameWorld::DrawType drawType )
 	else draw2d(drawType);
 
 	// --- debugging/testing ---
-
-	if ( mDebugDrawCubeMaps && drawType==GameWorld::DrawType::UIMain && !mCubeMaps.empty() )
-	{
-		const int kWidth = constrain(mCubeMapSize,64,100);
-		const int kHeight = kWidth/2;
-		
-//		for( int i=0; i<mCubeMaps.size(); ++i )
-		if (!mCubeMaps.empty())
-		{
-			int i=0;
-			if (mCubeMaps[i]) {
-				gl::drawHorizontalCross( mCubeMaps[i]->getTextureCubeMap(),
-					//Rectf( 0, kHeight*i, kWidth, (kHeight+1)*i ) );
-					Rectf( 0, 0, kWidth, kHeight ) );
-			}
-		}
-	}
 	
 	// world orientation debug info
 	if (0)
@@ -582,7 +589,7 @@ void PinballView::draw3dScene() const
 	drawSceneSegment(mWallShader,mDrawScene.mWalls);
 }
 
-void PinballView::draw3dBalls() const
+void PinballView::draw3dBalls( int skipBall, gl::TextureCubeMapRef skipMap ) const
 {
 	if (mBallShader)
 	{
@@ -597,10 +604,12 @@ void PinballView::draw3dBalls() const
 		
 		for( int i=0; i<mWorld.getBalls().size(); ++i )
 		{
+			if (i==skipBall) continue;
+			
 			if (m3dDynamicCubeMap)
 			{
 				gl::TextureCubeMapRef env = getCubeMapForBall(i);
-				if (env) env->bind();
+				if (env&&env!=skipMap) env->bind();
 			}
 			
 			const Ball& b = mWorld.getBalls()[i];
@@ -618,6 +627,33 @@ void PinballView::draw3dBalls() const
 			gl::translate(0,0,m3dTableDepth-b.mRadius/2);
 			gl::draw(mBallMesh);
 		}
+	}
+}
+
+void PinballView::drawBallOrientationMarkers() const
+{
+	const int n = 8; 
+	
+	for( auto &ball : mWorld.getBalls() )
+	{
+		const vec3 ballc = vec3(ball.mLoc,mWorld.getTableDepth()-ball.mRadius);
+		const float r = ball.mRadius*.5f;
+		const float dist = ball.mRadius*2.f;
+		
+		for( int i=0; i<n; ++i )
+		{
+			vec3 v;
+			
+			float a = (float)i / (float)n * M_PI*2.f;
+			mat4 rotate = glm::rotate( a, vec3(0.f,0.f,-1.f) );
+			v = vec3( vec4(1,0,0,1) * rotate ); 
+			
+			gl::color(v.x,v.y,0.f);
+			gl::drawSphere( ballc + v * dist, r );
+		}
+		
+		gl::color(0,0,1);
+		gl::drawSphere( ballc + vec3(0,0,-1)*dist, r );		
 	}
 }
 
@@ -660,6 +696,7 @@ void PinballView::draw3d( GameWorld::DrawType drawType )
 	// balls
 	draw3dBalls();
 	draw3dRibbons(drawType);
+	if (mDebugDrawCubeMaps) drawBallOrientationMarkers();
 
 	// done with 3d
 	endDraw3d();
