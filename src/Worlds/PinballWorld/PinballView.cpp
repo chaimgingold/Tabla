@@ -155,17 +155,14 @@ PolyLine2 PinballView::getCapsulePoly( vec2 c[2], float r[2] ) const
 
 gl::TextureCubeMapRef PinballView::getCubeMapForBall( int i ) const
 {
-	gl::FboCubeMapRef fbo;
-	
-	if ( mCubeMaps.size() > i && mCubeMaps[i] ) { 
-		fbo = mCubeMaps[i];
-	} else if (!mCubeMaps.empty()) {
-		fbo = mCubeMaps[ i % mCubeMaps.size() ];
+	gl::TextureCubeMapRef env;
+
+	if ( mCubeMapTextures.size() > i && mCubeMapTextures[i] ) {
+		env = mCubeMapTextures[i];
+	} else if (!mCubeMapTextures.empty()) {
+		env = mCubeMapTextures[ i % mCubeMapTextures.size() ];
 	}
 	
-	gl::TextureCubeMapRef env;
-	
-	if (fbo) env = fbo->getTextureCubeMap();
 	if (!env) env = mCubeMap;
 	
 	return env;
@@ -220,6 +217,8 @@ void PinballView::updateCubeMaps()
 		
 		if (targetnum != mCubeMaps.size()) mCubeMaps.resize( targetnum );
 		
+		mCubeMapTextures.resize(mCubeMaps.size(),0);
+		
 		// update
 		for( int i=0; i<mCubeMaps.size(); ++i )
 		{
@@ -232,6 +231,11 @@ void PinballView::updateCubeMaps()
 					vec3( ball.mLoc, mWorld.getTableDepth() - ball.mRadius ),
 					i
 					);
+				
+				// bake
+				if (mCubeMaps[i]) {
+					mCubeMapTextures[i] = mCubeMaps[i]->getTextureCubeMap();
+				}
 			}
 		}
 	}
@@ -243,14 +247,15 @@ void PinballView::updateCubeMaps()
 
 gl::FboCubeMapRef PinballView::updateCubeMap( gl::FboCubeMapRef fbo, vec3 eye, int skipBall ) const
 {
-	if ( !fbo || fbo->getSize() != ivec2(mCubeMapSize, mCubeMapSize) ) {
-		fbo = gl::FboCubeMap::create( mCubeMapSize, mCubeMapSize );
+	if ( !fbo || fbo->getSize() != ivec2(mCubeMapSize, mCubeMapSize) )
+	{
+		gl::FboCubeMap::Format format;
+		format.textureCubeMapFormat(
+			gl::TextureCubeMap::Format()
+			.magFilter(GL_LINEAR)
+			.minFilter(GL_LINEAR) );
 		
-		if (fbo)
-		{
-			// configure some stuff tht isn't set properly
-			fbo->getTextureCubeMap()->setMagFilter(GL_LINEAR);
-		}
+		fbo = gl::FboCubeMap::create( mCubeMapSize, mCubeMapSize, format );
 	}
 	
 	if (fbo)
@@ -268,7 +273,7 @@ gl::FboCubeMapRef PinballView::updateCubeMap( gl::FboCubeMapRef fbo, vec3 eye, i
 			gl::clearDepth(1.f);
 			gl::clear();
 			
-			draw3dFloor();
+//			draw3dFloor();
 			draw3dBalls( skipBall, fbo->getTextureCubeMap());
 //			draw3dRibbons(DrawType::CubeMap);
 			draw3dScene();
@@ -314,14 +319,14 @@ void PinballView::drawAdjSpaceRays( const PartVec& parts ) const
 	}
 }
 
-void PinballView::drawBallCullLine() const
+void PinballView::drawBallCullLine( float z ) const
 {
 	vec2 p[2];
 	mWorld.getCullLine(p);
 	
 	// playfield markers
 	gl::color(1,0,0);
-	gl::drawLine(p[0],p[1]);
+	gl::drawLine( vec3(p[0],z),vec3(p[1],z));
 }
 
 void PinballView::prepareToDraw()
@@ -582,11 +587,21 @@ void PinballView::draw3dFloor() const
 		// we don't z fight with depth punch out because it is beyond the floor;
 		// we are building a floor for things to clip against here.
 		
-		for( const auto &c : mWorld.getVisionContours() )
+		if (1)
 		{
-			if ( !c.mIsHole && !mWorld.shouldContourBeAPart(c,mWorld.getVisionContours()) )
+			// let z-buffer clip it for us
+			// (but it doesn't render anymore in the fbo... but it's on the bottom of the ball, so whatever)
+			gl::drawSolid( mWorld.getWorldBoundsPoly() );
+		}
+		else
+		{
+			// only fill in precisely the right places
+			for( const auto &c : mWorld.getVisionContours() )
 			{
-				gl::drawSolid(c.mPolyLine);
+				if ( !c.mIsHole && !mWorld.shouldContourBeAPart(c,mWorld.getVisionContours()) )
+				{
+					gl::drawSolid(c.mPolyLine);
+				}
 			}
 		}
 		
@@ -750,7 +765,7 @@ void PinballView::draw3d( GameWorld::DrawType drawType )
 	}
 
 	// red line
-	drawBallCullLine();
+	drawBallCullLine(m3dTableDepth - .01f);
 
 	// balls
 	draw3dBalls();

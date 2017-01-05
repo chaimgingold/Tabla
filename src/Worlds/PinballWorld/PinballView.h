@@ -93,7 +93,7 @@ private:
 	
 	void drawBallOrientationMarkers() const;
 	
-	void drawBallCullLine() const;
+	void drawBallCullLine( float z=0.f ) const;
 	void drawSky() const;
 	
 	Scene mDrawScene;
@@ -123,7 +123,8 @@ private:
 	// - cube maps
 	gl::TextureCubeMapRef mCubeMap; // static
 	vector<gl::FboCubeMapRef> mCubeMaps; // dynamic
-
+	vector<gl::TextureCubeMapRef> mCubeMapTextures;
+	
 	void updateCubeMaps();
 	gl::FboCubeMapRef updateCubeMap( gl::FboCubeMapRef, vec3 eye, int skipBall=-1 ) const; // updateCubeMaps sets up appropriate state, so don't call without that!
 	gl::TextureCubeMapRef getCubeMapForBall( int ball ) const;
