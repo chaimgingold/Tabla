@@ -117,6 +117,7 @@ void PinballWorld::setParams( XmlTree xml )
 	// vision
 	getXml(xml, "FlipperDistToEdge", mFlipperDistToEdge );	
 	getXml(xml, "PartMaxContourRadius", mPartMaxContourRadius );
+	getXml(xml, "PartMaxContourAspectRatio", mPartMaxContourAspectRatio );
 	getXml(xml, "HolePartMaxContourRadius",mHolePartMaxContourRadius);
 	
 	getXml(xml, "PartTrackLocMaxDist", mPartTrackLocMaxDist );
@@ -638,15 +639,13 @@ void PinballWorld::updateVision( const Vision::Output& visionOut, Pipeline& p )
 bool PinballWorld::shouldContourBeAPart( const Contour& c, const ContourVec& cs ) const
 {
 	{
-		const float kMinRoundnessConst = 2.f;
-		
 		float lo = c.mRotatedBoundingRect.mSize.x;
 		float hi = c.mRotatedBoundingRect.mSize.y;
 		
 		if (hi<lo) swap(lo,hi);
 		
 		// not round enough
-		if (hi>lo*kMinRoundnessConst) return false;
+		if (hi>lo*mPartMaxContourAspectRatio) return false;
 	}
 	
 	if ( c.mIsHole ) {

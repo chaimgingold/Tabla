@@ -50,6 +50,7 @@
 
 <!-- Vision	-->
 	<PartMaxContourRadius>5</PartMaxContourRadius>
+	<PartMaxContourAspectRatio>2</PartMaxContourAspectRatio> <!-- 0 means no parts! 100+ means all parts; 2 is a reasonable #. -->
 	<HolePartMaxContourRadius>2</HolePartMaxContourRadius>
 	<FlipperDistToEdge>4</FlipperDistToEdge>
 	

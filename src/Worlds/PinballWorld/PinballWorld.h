@@ -140,6 +140,7 @@ public:
 private:
 	// - params
 	float mPartMaxContourRadius = 5.f; // contour radius lt => part
+	float mPartMaxContourAspectRatio = 2.f;
 	float mHolePartMaxContourRadius = 2.f;
 	float mFlipperDistToEdge = 10.f; // how close to the edge does a flipper appear?
 
