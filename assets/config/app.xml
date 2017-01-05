@@ -24,6 +24,7 @@
 		<KeyboardStringTimeout>.2</KeyboardStringTimeout>
 		
 		<DefaultPixelsPerWorldUnit>8</DefaultPixelsPerWorldUnit>
+		<DebugFrameSkip>10</DebugFrameSkip>
 	</App>
 
 	<RFID>

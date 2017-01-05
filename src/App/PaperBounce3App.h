@@ -185,6 +185,8 @@ class PaperBounce3App : public App {
 	
 	float mDefaultPixelsPerWorldUnit = 10.f; // doesn't quite hot-load; you need to 
 	
+	int mDebugFrameSkip = 30;
+	
 	fs::path hotloadableAssetPath( fs::path ) const ; // prepends the appropriate thing...
 	string mOverloadedAssetPath;
 	

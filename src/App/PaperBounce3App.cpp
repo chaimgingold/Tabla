@@ -163,6 +163,7 @@ void PaperBounce3App::setup()
 			getXml(app,"KeyboardStringTimeout",mKeyboardStringTimeout);
 			
 			getXml(app,"DefaultPixelsPerWorldUnit",mDefaultPixelsPerWorldUnit);
+			getXml(app,"DebugFrameSkip",mDebugFrameSkip);
 		}
 		
 		if (xml.hasChild("PaperBounce3/RFID"))
@@ -739,7 +740,8 @@ void PaperBounce3App::update()
 
 void PaperBounce3App::updateVision()
 {
-	if ( (mCapture && mCapture->checkNewFrame()) || (mDebugFrame && (getElapsedFrames()%30==0)) )
+	if (   (mCapture && mCapture->checkNewFrame())
+		|| (mDebugFrame && (mDebugFrameSkip<2 || getElapsedFrames()%mDebugFrameSkip==0)) )
 	{
 		mCaptureFPS.mark();
 		
