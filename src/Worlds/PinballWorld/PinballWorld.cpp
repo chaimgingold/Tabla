@@ -245,7 +245,7 @@ void PinballWorld::update()
 	mGamepadManager.tick();
 	tickFlipperState();
 
-	updateScreenShake();
+	if (!mPauseBallWorld) updateScreenShake();
 	
 	// tick parts
 	for( auto p : mParts ) p->tick();

@@ -88,7 +88,7 @@ private:
 
 	void draw3dFloor() const;
 	void draw3dScene() const;
-	void draw3dBalls( int skipBall=-1, gl::TextureCubeMapRef skipMap=0 ) const;
+	void draw3dBalls( vec3 eyeLoc, int skipBall=-1, gl::TextureCubeMapRef skipMap=0 ) const;
 	void draw3dRibbons( GameWorld::DrawType ) const;
 	
 	void drawBallOrientationMarkers() const;
@@ -111,6 +111,16 @@ private:
 	int mCubeMapSize = 256;
 	int mMaxCubeMaps = 10;
 	int mCubeMapFrameSkip = 0;
+
+	bool mCubeMapDrawFloor = true;
+	bool mCubeMapDrawBalls = true;
+	bool mCubeMapDrawRibbons = false;
+	float mCubeMapEyeHeight = 50.f;
+	float mCubeMapLightHeight = 50.f;
+	ColorA mCubeMapLightColor = ColorA(1,1,1,1);
+	
+//	Color mCubeMapSpecularColor = Color(1,1,1);
+//	float mCubeMapSpecularExp
 	
 	bool  m3dEnable      = false;
 	bool  m3dBackfaceCull= false;

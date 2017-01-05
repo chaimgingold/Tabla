@@ -72,7 +72,7 @@ public:
 
 	cipd::PureDataNodeRef getPd() { return mPd; }
 
-	vec2 getScreenShake() const { return mScreenShakeVec; }
+	vec2 getScreenShake() const { return mPauseBallWorld ? vec2() : mScreenShakeVec; }
 	
 private:
 	

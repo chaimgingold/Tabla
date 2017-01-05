@@ -102,6 +102,16 @@
 			<CubeMapFrameSkip>4</CubeMapFrameSkip>
 		</3d>
 
+		<CubeMap>
+			<DrawFloor>1</DrawFloor>
+			<DrawBalls>1</DrawBalls>
+			<DrawRibbons>0</DrawRibbons>
+			<EyeHeight>25</EyeHeight>
+			<LightHeight>200</LightHeight>
+			<LightColor>DDFFCC</LightColor>
+				<!--	.8,1.,.7	-->
+		</CubeMap>
+
 		<SkyPipelineStageName></SkyPipelineStageName>
 		<SkyHeight>5</SkyHeight>
 <!--	How far in -Z from table top does sky draw for balls... -->

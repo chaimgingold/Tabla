@@ -83,6 +83,13 @@ void PinballView::setParams( XmlTree xml )
 	getXml(xml, "3d/DynamicCubeMap", m3dDynamicCubeMap );
 	getXml(xml, "3d/MaxCubeMaps",mMaxCubeMaps);
 	getXml(xml, "3d/CubeMapFrameSkip",mCubeMapFrameSkip);
+
+	getXml(xml, "CubeMap/DrawFloor", mCubeMapDrawFloor );
+	getXml(xml, "CubeMap/DrawBalls", mCubeMapDrawBalls );
+	getXml(xml, "CubeMap/DrawRibbons", mCubeMapDrawRibbons );
+	getXml(xml, "CubeMap/EyeHeight", mCubeMapEyeHeight );
+	getXml(xml, "CubeMap/LightHeight", mCubeMapLightHeight );
+	getXml(xml, "CubeMap/LightColor", mCubeMapLightColor );
 	
 	getXml(xml, "SkyPipelineStageName", mSkyPipelineStageName);
 	getXml(xml, "SkyHeight", mSkyHeight);
@@ -273,9 +280,9 @@ gl::FboCubeMapRef PinballView::updateCubeMap( gl::FboCubeMapRef fbo, vec3 eye, i
 			gl::clearDepth(1.f);
 			gl::clear();
 			
-//			draw3dFloor();
-			draw3dBalls( skipBall, fbo->getTextureCubeMap());
-//			draw3dRibbons(DrawType::CubeMap);
+			if (mCubeMapDrawFloor) draw3dFloor();
+			if (mCubeMapDrawBalls) draw3dBalls( eye, skipBall, fbo->getTextureCubeMap());
+			if (mCubeMapDrawRibbons) draw3dRibbons(GameWorld::DrawType::CubeMap);
 			draw3dScene();
 			drawSky();
 			if (mDebugDrawCubeMaps) drawBallOrientationMarkers();
@@ -589,6 +596,8 @@ void PinballView::draw3dFloor() const
 		
 		if (1)
 		{
+			gl::ScopedFaceCulling cull(false); // world bounds poly not guaranteed to be proper winding :P (should be though)
+			
 			// let z-buffer clip it for us
 			// (but it doesn't render anymore in the fbo... but it's on the bottom of the ball, so whatever)
 			gl::drawSolid( mWorld.getWorldBoundsPoly() );
@@ -646,7 +655,7 @@ void PinballView::draw3dScene() const
 	drawSceneSegment(mWallShader,mDrawScene.mWalls);
 }
 
-void PinballView::draw3dBalls( int skipBall, gl::TextureCubeMapRef skipMap ) const
+void PinballView::draw3dBalls( vec3 eyeLoc, int skipBall, gl::TextureCubeMapRef skipMap ) const
 {
 	if (mBallShader)
 	{
@@ -657,7 +666,12 @@ void PinballView::draw3dBalls( int skipBall, gl::TextureCubeMapRef skipMap ) con
 			mBallShader->uniform( "uCubeMapTex", 0 );
 		}
 		
+		vec3 lightLoc = vec3( mWorld.getWorldBoundsPoly().calcCentroid(), -mCubeMapLightHeight ) ;
+		
 		mBallShader->uniform( "uCubeMapTex", 0 );
+		mBallShader->uniform( "inLightLoc", lightLoc);
+		mBallShader->uniform( "inEyeLoc", eyeLoc);
+		mBallShader->uniform( "uLightColor", mCubeMapLightColor );
 		
 		for( int i=0; i<mWorld.getBalls().size(); ++i )
 		{
@@ -671,6 +685,10 @@ void PinballView::draw3dBalls( int skipBall, gl::TextureCubeMapRef skipMap ) con
 			
 			const Ball& b = mWorld.getBalls()[i];
 			
+			float ballz = m3dTableDepth-b.mRadius/2;
+			
+			mBallShader->uniform("inBallLoc", vec3( b.mLoc, ballz ) );
+			
 			gl::ScopedModelMatrix model;
 			if (!m3dDynamicCubeMap) gl::multModelMatrix( mWorld.getBallTransform(b) );
 			else
@@ -681,7 +699,7 @@ void PinballView::draw3dBalls( int skipBall, gl::TextureCubeMapRef skipMap ) con
 					*  glm::scale( vec3(1,1,1)*b.mRadius )
 				);
 			}
-			gl::translate(0,0,m3dTableDepth-b.mRadius/2);
+			gl::translate(0,0,ballz);
 			gl::draw(mBallMesh);
 		}
 	}
@@ -768,7 +786,12 @@ void PinballView::draw3d( GameWorld::DrawType drawType )
 	drawBallCullLine(m3dTableDepth - .01f);
 
 	// balls
-	draw3dBalls();
+	vec3 eyeLoc = 
+		  vec3( mWorld.getWorldBoundsPoly().calcCentroid(), -mCubeMapEyeHeight )
+		+ vec3( mWorld.getDownVec(), 0 ) * mCubeMapEyeHeight * m3dZSkew ;
+		// some slight of hand here... 
+		
+	draw3dBalls(eyeLoc);
 	draw3dRibbons(drawType);
 	if (mDebugDrawCubeMaps) drawBallOrientationMarkers();
 
