@@ -109,8 +109,9 @@ private:
 	float mCircleVertsPerPerimCm=1.f;
 
 	int mCubeMapSize = 256;
-	int mMaxCubeMaps = 10;
 	int mCubeMapFrameSkip = 0;
+	int mCubeMapMaxCount = 10;
+	bool mCubeMapDynamic = false;
 
 	bool mCubeMapDrawFloor = true;
 	bool mCubeMapDrawBalls = true;
@@ -126,7 +127,7 @@ private:
 	bool  m3dBackfaceCull= false;
 	float m3dTableDepth  = 10.f;
 	float m3dZSkew       = .5f;
-	bool  m3dDynamicCubeMap = false;
+	
 
 	int getNumCircleVerts( float r ) const;
 

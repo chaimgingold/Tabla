@@ -79,10 +79,11 @@ void PinballView::setParams( XmlTree xml )
 	getXml(xml, "3d/BackfaceCull", m3dBackfaceCull );
 	getXml(xml, "3d/TableDepth", m3dTableDepth );
 	getXml(xml, "3d/ZSkew", m3dZSkew );
-	getXml(xml, "3d/CubeMapSize", mCubeMapSize );
-	getXml(xml, "3d/DynamicCubeMap", m3dDynamicCubeMap );
-	getXml(xml, "3d/MaxCubeMaps",mMaxCubeMaps);
-	getXml(xml, "3d/CubeMapFrameSkip",mCubeMapFrameSkip);
+	
+	getXml(xml, "CubeMap/FrameSkip",mCubeMapFrameSkip);
+	getXml(xml, "CubeMap/Size", mCubeMapSize );
+	getXml(xml, "CubeMap/MaxCount",mCubeMapMaxCount);
+	getXml(xml, "CubeMap/Dynamic", mCubeMapDynamic );
 
 	getXml(xml, "CubeMap/DrawFloor", mCubeMapDrawFloor );
 	getXml(xml, "CubeMap/DrawBalls", mCubeMapDrawBalls );
@@ -220,7 +221,7 @@ void PinballView::updateCubeMaps()
 	else
 	{
 		// re-allocate
-		int targetnum = min( mMaxCubeMaps, (int)mWorld.getBalls().size() ); 
+		int targetnum = min( mCubeMapMaxCount, (int)mWorld.getBalls().size() ); 
 		
 		if (targetnum != mCubeMaps.size()) mCubeMaps.resize( targetnum );
 		
@@ -340,7 +341,7 @@ void PinballView::prepareToDraw()
 {
 	if (m3dEnable) {
 		prepare3dScene();
-		if (m3dDynamicCubeMap) updateCubeMaps();
+		if (mCubeMapDynamic) updateCubeMaps();
 		else mCubeMaps.clear();
 	}
 }
@@ -661,7 +662,7 @@ void PinballView::draw3dBalls( vec3 eyeLoc, int skipBall, gl::TextureCubeMapRef 
 	{
 		gl::ScopedGlslProg glslScp(mBallShader);
 		
-		if (mCubeMap && !m3dDynamicCubeMap) {
+		if (mCubeMap && !mCubeMapDynamic) {
 			mCubeMap->bind();
 			mBallShader->uniform( "uCubeMapTex", 0 );
 		}
@@ -677,7 +678,7 @@ void PinballView::draw3dBalls( vec3 eyeLoc, int skipBall, gl::TextureCubeMapRef 
 		{
 			if (i==skipBall) continue;
 			
-			if (m3dDynamicCubeMap)
+			if (mCubeMapDynamic)
 			{
 				gl::TextureCubeMapRef env = getCubeMapForBall(i);
 				if (env&&env!=skipMap) env->bind();
@@ -690,7 +691,7 @@ void PinballView::draw3dBalls( vec3 eyeLoc, int skipBall, gl::TextureCubeMapRef 
 			mBallShader->uniform("inBallLoc", vec3( b.mLoc, ballz ) );
 			
 			gl::ScopedModelMatrix model;
-			if (!m3dDynamicCubeMap) gl::multModelMatrix( mWorld.getBallTransform(b) );
+			if (!mCubeMapDynamic) gl::multModelMatrix( mWorld.getBallTransform(b) );
 			else
 			{
 				// no deform, for testing
