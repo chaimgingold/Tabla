@@ -133,6 +133,7 @@
 		<button id="5" do="flippers-right"/>
 		<button id="7" do="flippers-right"/>
 		<button id="13" do="serve-multiball"/>
+		<button id="9" do="pause-ball-world"/>
 	</Gamepad>
 
 
