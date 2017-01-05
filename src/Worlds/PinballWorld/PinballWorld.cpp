@@ -212,7 +212,9 @@ void PinballWorld::onGameEvent( GameEvent e )
 		case GameEvent::LostLastMultiBall:
 			mPd->sendBang("game-over");
 			break;
-			
+		case GameEvent::ServeBall:
+			mPd->sendBang("serve-ball");
+			break;
 		default:break;
 	}
 }
