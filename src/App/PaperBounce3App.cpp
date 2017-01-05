@@ -211,6 +211,8 @@ void PaperBounce3App::setup()
 	for (auto &device : ctx->deviceManager()->getDevices()) {
 		int currentFramesPerBlock = ctx->deviceManager()->getFramesPerBlock(device);
 		cout << "\t" << device->getName() << " - " << currentFramesPerBlock << endl;
+
+//		ctx->deviceManager()->setFramesPerBlock(device, 1024);
 //		ctx->deviceManager()->setFramesPerBlock(device, 512);
 	}
 	

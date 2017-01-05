@@ -589,6 +589,8 @@ void PinballView::draw3dFloor() const
 	{
 		gl::ScopedGlslProg glslScp(mFloorShader);
 		
+		mFloorShader->uniform( "uTime", (float)ci::app::getElapsedSeconds() );
+
 		gl::pushModelView();
 		gl::translate(0,0,m3dTableDepth);
 		// we don't z fight with depth punch out because it is beyond the floor;

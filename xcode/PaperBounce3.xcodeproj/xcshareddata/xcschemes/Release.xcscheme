@@ -64,7 +64,11 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "-assets /Users/$USER/Documents/PaperBounce3/assets"
-            isEnabled = "YES">
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-assets /Users/$USER/Projects/PaperBounce3/assets"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-assets /Users/$USER/Documents/code/PaperBounce3/assets"
