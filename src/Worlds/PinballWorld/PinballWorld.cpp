@@ -44,16 +44,8 @@ void PinballWorld::setupControls()
 	{
 		auto i = mGamepadButtons.find(id);
 		if (i!=mGamepadButtons.end())
-		{
-			string key = i->second + postfix;
-			
-			cout << "-> " << key << endl;
-			
-			auto j = mGamepadFunctions.find(key);
-			if (j!=mGamepadFunctions.end())
-			{
-				j->second();
-			}
+		{			
+			processInputEvent( i->second + postfix );
 		}
 	};
 	
@@ -62,12 +54,6 @@ void PinballWorld::setupControls()
 	{
 		cout << "down " << event.mId << endl;
 		button(event.mId,"-down");
-		
-		if ( getBalls().empty() || mGamepadButtons.find(event.mId)==mGamepadButtons.end() )
-		{
-			// serve if no ball, or it isn't a mapped (eg flipper) button
-			serveBall();
-		}
 	};
 
 	mGamepadManager.mOnButtonUp = [this,button]( const GamepadManager::Event& event )
@@ -77,21 +63,23 @@ void PinballWorld::setupControls()
 	};
 	
 	// inputs
-	auto sound = [this](int state)
+	auto flipperChange = [this]( int side, int state )
 	{
+		mIsFlipperDown[side] = state;
+		
+		if (getBalls().empty() && state==1) serveBall(); 
+		
 		mPd->sendFloat("flipper-change", state);
+		
 		if (state) this->addScreenShake(mFlipperScreenShake);
 	};
-	mInputToFunction["flippers-left-down"]  = [this,sound]() { mIsFlipperDown[0] = true; sound(1); };
-	mInputToFunction["flippers-left-up"]    = [this,sound]() { mIsFlipperDown[0] = false; sound(0); };
-	mInputToFunction["flippers-right-down"] = [this,sound]() { mIsFlipperDown[1] = true; sound(1); };
-	mInputToFunction["flippers-right-up"]   = [this,sound]() { mIsFlipperDown[1] = false; sound(0); };
-	mInputToFunction["pause-ball-world-down"]    = [this](){ mPauseBallWorld = !mPauseBallWorld; };
 	
-	mGamepadFunctions["flippers-left-down"]  = [this,sound]() { mIsFlipperDown[0] = true; sound(1); };
-	mGamepadFunctions["flippers-left-up"]    = [this,sound]() { mIsFlipperDown[0] = false; sound(0); };
-	mGamepadFunctions["flippers-right-down"] = [this,sound]() { mIsFlipperDown[1] = true; sound(1); };
-	mGamepadFunctions["flippers-right-up"]   = [this,sound]() { mIsFlipperDown[1] = false; sound(0); };
+	mInputToFunction["flippers-left-down"]  = [this,flipperChange]() { flipperChange(0,1); };
+	mInputToFunction["flippers-left-up"]    = [this,flipperChange]() { flipperChange(0,0); };
+	mInputToFunction["flippers-right-down"] = [this,flipperChange]() { flipperChange(1,1); };
+	mInputToFunction["flippers-right-up"]   = [this,flipperChange]() { flipperChange(1,0); };
+	mInputToFunction["pause-ball-world-down"]    = [this](){ mPauseBallWorld = !mPauseBallWorld; };
+	mInputToFunction["serve-multiball-down"]     = [this](){ serveBall(); }; 
 }
 
 PinballWorld::~PinballWorld()
@@ -403,7 +391,9 @@ void PinballWorld::processCollisions()
 	auto shakeWithBall = [&]( int i )
 	{
 		Ball* b = getBall(i);
-		if (b) screenShake += length(b->getVel()) * mBallVelScreenShakeK;
+		if (b) {
+			screenShake += length(getDenoisedBallVel(*b)) * mBallVelScreenShakeK;
+		}
 	};
 	
 	for( const auto &c : getBallBallCollisions() )
@@ -437,7 +427,7 @@ void PinballWorld::processCollisions()
 		}
 		else {
 			if (ball) {
-				mPd->sendFloat("hit-wall", length(ball->getVel()) * 10);
+				mPd->sendFloat("hit-wall", length( getDenoisedBallVel(*ball) ) * 10);
 			}
 	//		cout << "collide wall" << endl;
 		}
@@ -464,6 +454,17 @@ void PinballWorld::worldBoundsPolyDidChange()
 {
 }
 
+void PinballWorld::processInputEvent( string name )
+{
+	cout << "-> " << name << endl;
+
+	auto j = mInputToFunction.find(name);
+	if (j!=mInputToFunction.end())
+	{
+		j->second();
+	}
+}
+
 void PinballWorld::processKeyEvent( KeyEvent event, string suffix )
 {
 	char c = event.getChar();
@@ -472,23 +473,13 @@ void PinballWorld::processKeyEvent( KeyEvent event, string suffix )
 	
 	if (i!=mKeyToInput.end())
 	{
-		auto j = mInputToFunction.find(i->second + suffix);
-		if (j!=mInputToFunction.end())
-		{
-			j->second();
-		}
+		processInputEvent(i->second + suffix);
 	}
 }
 
 void PinballWorld::keyDown( KeyEvent event )
 {
 	processKeyEvent(event, "-down");
-
-	if ( getBalls().empty() || mKeyToInput.find(event.getChar())==mKeyToInput.end() )
-	{
-		// serve if no ball, or it isn't a mapped (eg flipper) key
-		serveBall();
-	}
 }
 
 void PinballWorld::keyUp( KeyEvent event )

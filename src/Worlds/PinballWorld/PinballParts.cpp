@@ -318,7 +318,7 @@ void Bumper::onBallCollide( Ball& ball )
 	
 	ball.mAccel += v * getWorld().mPartParams.mBumperKickAccel ;
 	
-	getWorld().getPd()->sendFloat("hit-bumper", length(ball.getVel())*10);
+	getWorld().getPd()->sendFloat("hit-bumper", length( getWorld().getDenoisedBallVel(ball)*10.f ) );
 }
 
 RolloverTarget::RolloverTarget( PinballWorld& world, vec2 pin, float radius )

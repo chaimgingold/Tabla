@@ -178,16 +178,18 @@ private:
 	
 	bool mPauseBallWorld=false;
 	
-	// keymap
-	map<char,string> mKeyToInput; // maps keystrokes to input names
-	map<string,function<void()>> mInputToFunction; // maps input names to code handlers
-	void processKeyEvent( KeyEvent, string suffix );
-	
-	// game pad
+	// generic
 	void setupControls();
+	map<string,function<void()>> mInputToFunction; // maps input names to code handlers
+	void processInputEvent( string name );
+	
+	// keyboard map
+	map<char,string> mKeyToInput; // maps keystrokes to input names
+	void processKeyEvent( KeyEvent, string suffix );
+
+	// game pad
 	GamepadManager mGamepadManager;
 	map<unsigned int,string> mGamepadButtons;
-	map<string,function<void()>> mGamepadFunctions;
 	
 	
 	// --- Sound Synthesis ---
