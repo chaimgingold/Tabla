@@ -49,6 +49,7 @@ void PinballView::setup()
 	load( "wall", &mWallShader, 0 );
 	load( "ball", &mBallShader, 0 );
 	load( "floor", &mFloorShader, 0 );
+	load( "sky", &mSkyShader, 0 );
 	load( "ball-shadow", &mBallShadowShader, 0 );
 	
 	mFileWatch.load( PaperBounce3App::get()->hotloadableAssetPath( fs::path("images") / "env_map.jpg" ),
@@ -82,6 +83,9 @@ void PinballView::setParams( XmlTree xml )
 	getXml(xml, "3d/DynamicCubeMap", m3dDynamicCubeMap );
 	getXml(xml, "3d/MaxCubeMaps",mMaxCubeMaps);
 	getXml(xml, "3d/CubeMapFrameSkip",mCubeMapFrameSkip);
+	
+	getXml(xml, "SkyPipelineStageName", mSkyPipelineStageName);
+	getXml(xml, "SkyHeight", mSkyHeight);
 }
 
 void PinballView::update()
@@ -166,7 +170,20 @@ gl::TextureCubeMapRef PinballView::getCubeMapForBall( int i ) const
 	
 	return env;
 }
-			
+
+void PinballView::updateVision( Pipeline& p )
+{
+	// grab sky image
+	auto stage = p.getStage(mSkyPipelineStageName);
+	if (stage) {
+		mSkyTexture = stage->getGLImage();
+	}
+	else mSkyTexture=0;
+	
+	// log cube maps
+	appendToVisionPipeline(p);
+}
+
 void PinballView::appendToVisionPipeline( Pipeline& p ) const
 {
 	for( int i=0; i<mCubeMaps.size(); ++i )
@@ -255,6 +272,7 @@ gl::FboCubeMapRef PinballView::updateCubeMap( gl::FboCubeMapRef fbo, vec3 eye, i
 			draw3dBalls( skipBall, fbo->getTextureCubeMap());
 //			draw3dRibbons(DrawType::CubeMap);
 			draw3dScene();
+			drawSky();
 			if (mDebugDrawCubeMaps) drawBallOrientationMarkers();
 		}
 	}
@@ -472,6 +490,9 @@ void PinballView::beginDraw3d() const
 		mat4 skew;
 		skew[2][0] = mWorld.getGravityVec().x * m3dZSkew;
 		skew[2][1] = mWorld.getGravityVec().y * m3dZSkew;
+		
+		skew *= glm::translate( vec3( mWorld.getScreenShake(), 0 ) );
+		
 		gl::pushModelView();
 //		gl::setViewMatrix( gl::getModelView()
 		gl::multModelMatrix(skew);
@@ -570,6 +591,24 @@ void PinballView::draw3dFloor() const
 		}
 		
 		gl::popModelView();
+	}
+}
+
+void PinballView::drawSky() const
+{
+	if (mSkyTexture) //&&mSkyShader)
+	{
+		gl::ScopedFaceCulling cull(false);
+		
+//		mSkyTexture->bind();
+//		mDrawScene.mSky
+		
+		gl::ScopedModelMatrix mat;
+		gl::translate(0,0,-mSkyHeight);
+		
+		Rectf r(  mWorld.getWorldBoundsPoly().getPoints() );
+		
+		gl::draw(mSkyTexture, r );
 	}
 }
 
