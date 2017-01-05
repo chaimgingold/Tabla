@@ -371,6 +371,22 @@ void BallWorld::scaleBallVelsForIntegrationSteps( int oldSteps, int newSteps )
 	}
 }
 
+vec2 BallWorld::getDenoisedBallVel( const Ball& b ) const
+{
+	vec2 vel;
+	
+	const int n = b.mHistory.size();
+	
+	if ( 1 && n>1 )
+	{
+		vel = b.mHistory[n-1] - b.mHistory[n-2];
+		vel /= (float)getNumIntegrationSteps(); // make it coherent with mVel, which is scaled to time steps
+	}
+	else vel = b.getVel();
+	
+	return vel;	
+}
+
 void BallWorld::updatePhysics()
 {
 	// wipe collisions

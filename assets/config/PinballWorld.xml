@@ -132,6 +132,7 @@
 		<button id="6" do="flippers-left"/>
 		<button id="5" do="flippers-right"/>
 		<button id="7" do="flippers-right"/>
+		<button id="13" do="serve-multiball"/>
 	</Gamepad>
 
 
@@ -139,6 +140,11 @@
 <!-- Keyboard deprecated... -->
 	<KeyMap>
 	
+		<Key>
+			<char>b</char>
+			<input>serve-multiball</input>
+		</Key>
+		
 		<Key>
 			<char>.</char>
 			<input>pause-ball-world</input>

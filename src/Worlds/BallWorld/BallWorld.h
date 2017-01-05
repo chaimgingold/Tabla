@@ -92,6 +92,7 @@ public:
 	
 	vector<Ball>& getBalls() { return mBalls; }
 	const vector<Ball>& getBalls() const { return mBalls; }
+	vec2 getDenoisedBallVel( const Ball& ) const; // tries to use mHistory if it's there, otherwise just mVel
 	
 	ContourVector& getContours() { return mContours; }
 	const ContourVector& getContours() const { return mContours; }
@@ -128,7 +129,7 @@ public:
 	void drawBalls( DrawType, gl::GlslProgRef=0 ) const;
 	void drawRibbons( DrawType ) const;
 	// doing your own drawing? use these. these use geometry generated in prepareToDraw()	
-	
+		
 protected:
 
 	void setContours( const ContourVec& contours, ContourVec::Filter filter=0 ) { mContours = contours; mContourFilter=filter; }
