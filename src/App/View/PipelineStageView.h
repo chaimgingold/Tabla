@@ -57,8 +57,8 @@ public:
 	{
 	}
 
-	void setIsProjectorView( bool v ) { mSetIsProjectorView=v; }
-	bool getIsProjectorView() { return mSetIsProjectorView; }
+	void setIsProjectorView( bool v ) { mIsProjectorView=v; }
+	bool getIsProjectorView() { return mIsProjectorView; }
 	
 	void draw() override;
 	void drawFrame() override; // none by default unless you set its color
@@ -91,7 +91,7 @@ public:
 	void	setFont( gl::TextureFontRef f ) { mTextureFont=f; }
 	
 private:
-	bool	mSetIsProjectorView=true;
+	bool	mIsProjectorView=true;
 	
 	GameWorld* getGameWorld() const;
 	Pipeline&  getPipeline () const;

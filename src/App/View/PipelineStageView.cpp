@@ -79,17 +79,20 @@ void MainImageView::draw()
 	bool drawWorld = true;
 	
 	// vision pipeline image
-	if ( stage && stage->getGLImage() )
+	if ( !mIsProjectorView && mApp.mConfigWindowMainImagDrawBkgndImage )
 	{
-		gl::color( 1, 1, 1 );
-		
-		gl::draw( stage->getGLImage() );
-	}
-	else if ( stage && stage->mImageCubeMapGL )
-	{
-		drawWorld = false;
-		gl::color(1,1,1);
-		gl::drawHorizontalCross( stage->mImageCubeMapGL, getBounds() );
+		if ( stage && stage->getGLImage() )
+		{
+			gl::color( 1, 1, 1 );
+			
+			gl::draw( stage->getGLImage() );
+		}
+		else if ( stage && stage->mImageCubeMapGL )
+		{
+			drawWorld = false;
+			gl::color(1,1,1);
+			gl::drawHorizontalCross( stage->mImageCubeMapGL, getBounds() );
+		}
 	}
 
 //	if (1)
@@ -118,7 +121,7 @@ void MainImageView::draw()
 		else if (getGameWorld())
 		{
 			getGameWorld()->draw(
-				mSetIsProjectorView
+				mIsProjectorView
 				? GameWorld::DrawType::Projector
 				: GameWorld::DrawType::UIMain ); // high quality
 		}

@@ -155,6 +155,8 @@ void PaperBounce3App::setup()
 			getXml(app,"DrawPipeline",mDrawPipeline);
 			getXml(app,"DrawContourMousePick",mDrawContourMousePick);
 			
+			getXml(app,"ConfigWindowMainImagDrawBkgndImage",mConfigWindowMainImagDrawBkgndImage);
+			
 			getXml(app,"HasConfigWindow",mHasConfigWindow);
 			getXml(app,"ConfigWindowPipelineWidth",mConfigWindowPipelineWidth);
 			getXml(app,"ConfigWindowPipelineGutter",mConfigWindowPipelineGutter);

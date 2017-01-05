@@ -177,7 +177,8 @@ class PaperBounce3App : public App {
 	bool mDrawContourTree = false ;
 	bool mDrawPipeline = false;
 	bool mDrawContourMousePick = false;
-
+	bool mConfigWindowMainImagDrawBkgndImage = true;
+	
 	bool  mHasConfigWindow = true;
 	float mConfigWindowMainImageMargin = 32.f;
 	float mConfigWindowPipelineGutter = 8.f ;
