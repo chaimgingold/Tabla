@@ -209,6 +209,9 @@ void PinballWorld::onGameEvent( GameEvent e )
 		case GameEvent::LostBall:
 //			addScreenShake(1.f);
 			break;
+		case GameEvent::LostLastMultiBall:
+			mPd->sendBang("game-over");
+			break;
 			
 		default:break;
 	}

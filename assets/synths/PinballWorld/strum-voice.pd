@@ -3,9 +3,6 @@
 #X obj 29 49 list-player 70;
 #X obj 29 77 outlet;
 #X obj 121 49 r \$2;
-#X obj 185 50 print \$2;
-#X obj 194 29 loadbang;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;
 #X connect 3 0 1 1;
-#X connect 5 0 4 0;
