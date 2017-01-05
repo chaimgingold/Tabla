@@ -80,6 +80,7 @@ void PinballWorld::setupControls()
 	auto sound = [this](int state)
 	{
 		mPd->sendFloat("flipper-change", state);
+		if (state) this->addScreenShake(mFlipperScreenShake);
 	};
 	mInputToFunction["flippers-left-down"]  = [this,sound]() { mIsFlipperDown[0] = true; sound(1); };
 	mInputToFunction["flippers-left-up"]    = [this,sound]() { mIsFlipperDown[0] = false; sound(0); };
@@ -115,6 +116,9 @@ void PinballWorld::setParams( XmlTree xml )
 	bool wasSoundEnabled = mSoundEnabled;
 	getXml(xml, "SoundEnabled", mSoundEnabled);
 	if (wasSoundEnabled!=mSoundEnabled) setupSynthesis();
+
+	getXml(xml, "FlipperScreenShake", mFlipperScreenShake );
+	getXml(xml, "BallVelScreenShakeK", mBallVelScreenShakeK );
 	
 	// playfield
 	getXml(xml, "UpVec", mUpVec );	
@@ -190,8 +194,39 @@ void PinballWorld::gameWillLoad()
 
 void PinballWorld::sendGameEvent( GameEvent e )
 {
+	onGameEvent(e);
+	
 	for( auto p : mParts ) {
 		p->onGameEvent(e);
+	}
+}
+
+void PinballWorld::onGameEvent( GameEvent e )
+{
+	switch(e)
+	{
+		case GameEvent::LostBall:
+//			addScreenShake(1.f);
+			break;
+			
+		default:break;
+	}
+}
+
+void PinballWorld::addScreenShake( float intensity )
+{
+	mScreenShakeValue += intensity;
+//	mScreenShakeValue = min( 1.f, mScreenShakeValue + intensity) ;
+}
+
+void PinballWorld::updateScreenShake()
+{
+	mScreenShakeValue *= .9f;
+	mScreenShakeVec *= .5f;
+	
+	if ( randFloat() < mScreenShakeValue )
+	{
+		mScreenShakeVec += randVec2() * mScreenShakeValue;
 	}
 }
 
@@ -203,6 +238,8 @@ void PinballWorld::update()
 	mGamepadManager.tick();
 	tickFlipperState();
 
+	updateScreenShake();
+	
 	// tick parts
 	for( auto p : mParts ) p->tick();
 
@@ -344,44 +381,62 @@ float PinballWorld::getFlipperAngularVel( int side ) const
 
 void PinballWorld::processCollisions()
 {
+	float screenShake=0.f;
+	
+	auto getBall = [this]( int i ) -> Ball*
+	{
+		Ball* ball=0;
+		if (i>=0 && i<=getBalls().size())
+		{
+			ball = &getBalls()[i];
+		}
+		return ball;
+	};
+	
+	auto shakeWithBall = [&]( int i )
+	{
+		Ball* b = getBall(i);
+		if (b) screenShake += length(b->getVel()) * mBallVelScreenShakeK;
+	};
+	
 	for( const auto &c : getBallBallCollisions() )
 	{
 	//	mPd->sendBang("new-game");
 
 		if (0) cout << "ball ball collide (" << c.mBallIndex[0] << ", " << c.mBallIndex[1] << ")" << endl;
+		
+		shakeWithBall(c.mBallIndex[0]);
+		shakeWithBall(c.mBallIndex[1]);
 	}
 	
 	for( const auto &c : getBallWorldCollisions() )
 	{
-		
-
 		if (0) cout << "ball world collide (" << c.mBallIndex << ")" << endl;
 	}
 
 	for( const auto &c : getBallContourCollisions() )
 	{
-		Ball* ball=0;
-		if (c.mBallIndex>=0 && c.mBallIndex<=getBalls().size())
-		{
-			ball = &getBalls()[c.mBallIndex];
-		}
+		shakeWithBall(c.mBallIndex);
 
+		Ball* ball = getBall(c.mBallIndex);
+		
 		if (0) cout << "ball contour collide (ball=" << c.mBallIndex << ", " << c.mContourIndex << ")" << endl;
 		
 		// tell part
 		PartRef p = findPartForContour(c.mContourIndex);
 		if (p) {
-
-			
-			
 	//		cout << "collide part" << endl;
 			if (ball) p->onBallCollide(*ball);
 		}
 		else {
-			if (ball) mPd->sendFloat("hit-wall", length(ball->getVel()) * 10);
+			if (ball) {
+				mPd->sendFloat("hit-wall", length(ball->getVel()) * 10);
+			}
 	//		cout << "collide wall" << endl;
 		}
 	}
+	
+	this->addScreenShake(screenShake);
 }
 
 void PinballWorld::prepareToDraw()
@@ -578,8 +633,8 @@ void PinballWorld::updateVision( const Vision::Output& visionOut, Pipeline& p )
 	PartVec newParts = getPartsFromContours(visionOut.mContours);
 	mParts = mergeOldAndNewParts(mParts, newParts);
 	
-	// log cube maps
-	mView.appendToVisionPipeline(p);
+	// log cube maps, allow it to capture images
+	mView.updateVision(p);
 }
 
 bool PinballWorld::shouldContourBeAPart( const Contour& c, const ContourVec& cs ) const

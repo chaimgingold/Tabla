@@ -72,7 +72,8 @@ public:
 
 	cipd::PureDataNodeRef getPd() { return mPd; }
 
-
+	vec2 getScreenShake() const { return mScreenShakeVec; }
+	
 private:
 	
 	friend class PinballView; // for getContoursFromParts
@@ -120,6 +121,12 @@ private:
 	void serveBall();
 	void cullBalls(); // cull dropped balls
 	
+	float mScreenShakeValue=0.f;
+	vec2 mScreenShakeVec;
+	void addScreenShake( float intensity );
+	void updateScreenShake();
+	
+	void onGameEvent( GameEvent );
 	
 	// --- Vision ---
 	//
@@ -135,6 +142,9 @@ private:
 	float mPartMaxContourRadius = 5.f; // contour radius lt => part
 	float mHolePartMaxContourRadius = 2.f;
 	float mFlipperDistToEdge = 10.f; // how close to the edge does a flipper appear?
+
+	float mFlipperScreenShake=.05f;
+	float mBallVelScreenShakeK=1.f;
 
 	// - do it
 	PartVec getPartsFromContours( const ContourVector& ); // only reason this is non-const is b/c parts point to the world

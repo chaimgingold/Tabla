@@ -32,6 +32,8 @@ public:
 	
 	typedef vector<Obj> Meshes;
 	
+	gl::VboMeshRef mSky;
+	
 	// by shader
 	Meshes mWalls;
 	
@@ -51,7 +53,7 @@ public:
 	void draw( GameWorld::DrawType );
 
 	void drawAdjSpaceRays( const PartVec& ) const;
-	void appendToVisionPipeline( Pipeline& ) const;
+	void updateVision( Pipeline& );
 	
 	// debug params
 	bool mDebugDrawFlipperAccelHairs=false;
@@ -68,6 +70,8 @@ public:
 	
 	
 private:
+	
+	void appendToVisionPipeline( Pipeline& ) const;
 	
 	const Pinball::PinballWorld& mWorld;
 	
@@ -90,10 +94,16 @@ private:
 	void drawBallOrientationMarkers() const;
 	
 	void drawBallCullLine() const;
+	void drawSky() const;
 	
 	Scene mDrawScene;
 
+	gl::TextureRef mSkyTexture;
+	
 	// - params
+	string mSkyPipelineStageName; // what stage of pipeline to use?
+	float mSkyHeight=0.f;
+	
 	int mCircleMinVerts=8;
 	int mCircleMaxVerts=100;
 	float mCircleVertsPerPerimCm=1.f;
@@ -123,6 +133,7 @@ private:
 	gl::GlslProgRef mBallShader;
 	gl::GlslProgRef mFloorShader;
 	gl::GlslProgRef mBallShadowShader;
+	gl::GlslProgRef mSkyShader;
 	
 	// - meshes
 	gl::VboMeshRef mBallMesh;

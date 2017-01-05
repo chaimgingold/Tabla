@@ -43,7 +43,11 @@
 	<UpVec>-1 0</UpVec>
 	<Gravity>.05</Gravity>
 	<BallReclaimAreaHeight>4</BallReclaimAreaHeight>
-	
+
+	<FlipperScreenShake>.1</FlipperScreenShake>
+	<BallVelScreenShakeK>.5</BallVelScreenShakeK>
+
+
 <!-- Vision	-->
 	<PartMaxContourRadius>5</PartMaxContourRadius>
 	<HolePartMaxContourRadius>2</HolePartMaxContourRadius>
@@ -97,6 +101,10 @@
 			<MaxCubeMaps>4</MaxCubeMaps>
 			<CubeMapFrameSkip>4</CubeMapFrameSkip>
 		</3d>
+
+		<SkyPipelineStageName></SkyPipelineStageName>
+		<SkyHeight>5</SkyHeight>
+<!--	How far in -Z from table top does sky draw for balls... -->
 
 		<!-- Debug -->
 		<DebugDrawAdjSpaceRays>0</DebugDrawAdjSpaceRays>
