@@ -53,7 +53,7 @@ each time;
 #X obj 350 146 + 4;
 #X obj 350 172 * 12;
 #X obj 163 104 t b b;
-#X obj 263 29 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+#X obj 263 29 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
 #X obj 955 401 hsl 128 15 0 127 0 0 strum-length empty strum-length
 -2 -8 0 10 -262144 -1 -1 6000 1;
@@ -381,6 +381,7 @@ each time;
 1 1;
 #X obj 1168 237 sel 0;
 #X obj 1168 215 random 3;
+#X obj 1224 124 loadbang;
 #X connect 1 0 21 0;
 #X connect 2 0 5 0;
 #X connect 3 0 9 0;
@@ -494,4 +495,5 @@ each time;
 #X connect 117 0 116 0;
 #X connect 118 0 102 0;
 #X connect 119 0 118 0;
+#X connect 120 0 116 0;
 #X coords 0 0 1 1 114 119 0;
