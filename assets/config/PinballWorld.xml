@@ -69,13 +69,13 @@
 		<BumperOnColor>00CCFF</BumperOnColor>
 		<BumperStrobeColor>FFCC22</BumperStrobeColor>
 		
-		<RolloverTargetRadius>1</RolloverTargetRadius>
-		<RolloverTargetMinWallDist>1</RolloverTargetMinWallDist>
-		<RolloverTargetDynamicRadius>1</RolloverTargetDynamicRadius>
+		<TargetRadius>1</TargetRadius>
+		<TargetMinWallDist>1</TargetMinWallDist>
+		<TargetDynamicRadius>1</TargetDynamicRadius>
 
-		<RolloverTargetOnColor>22FF55</RolloverTargetOnColor>
-		<RolloverTargetOffColor>0055CC</RolloverTargetOffColor>
-		<RolloverTargetStrobeColor>FF00FF</RolloverTargetStrobeColor>
+		<TargetOnColor>22FF55</TargetOnColor>
+		<TargetOffColor>0055CC</TargetOffColor>
+		<TargetStrobeColor>FF00FF</TargetStrobeColor>
 		
 		<FlipperMinLength>1</FlipperMinLength>
 		<FlipperMaxLength>10</FlipperMaxLength>

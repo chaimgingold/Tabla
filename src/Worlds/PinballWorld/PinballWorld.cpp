@@ -490,7 +490,7 @@ void PinballWorld::keyUp( KeyEvent event )
 
 void PinballWorld::mouseClick( vec2 loc )
 {
-	PartRef part( new RolloverTarget( *this, loc, mPartParams.mRolloverTargetRadius ) );
+	PartRef part( new Target( *this, loc, mPartParams.mTargetRadius ) );
 	
 	part->setShouldAlwaysPersist(true);
 	
@@ -781,9 +781,9 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 			contours.findClosestContour(c.mCenter,&closestPt,&dist,filter);
 			
 			vec2 rolloverLoc = c.mCenter;
-			float r = mPartParams.mRolloverTargetRadius;
+			float r = mPartParams.mTargetRadius;
 			
-			const float kMaxDist = mPartParams.mRolloverTargetDynamicRadius*4.f;
+			const float kMaxDist = mPartParams.mTargetDynamicRadius*4.f;
 			
 			if ( closestPt != c.mCenter && dist < kMaxDist )
 			{
@@ -791,15 +791,15 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 
 				float far=0.f;
 				
-				if (mPartParams.mRolloverTargetDynamicRadius)
+				if (mPartParams.mTargetDynamicRadius)
 				{
-					r = min( mPartParams.mRolloverTargetRadius*4.f, max( r, distance(closestPt,c.mCenter) - c.mRadius ) );
+					r = min( mPartParams.mTargetRadius*4.f, max( r, distance(closestPt,c.mCenter) - c.mRadius ) );
 					far = r;
 				}
 				
 				rolloverLoc = closestPt + dir * (r+far);
 
-				auto rt = new RolloverTarget(*this,rolloverLoc,r);
+				auto rt = new Target(*this,rolloverLoc,r);
 				rt->mContourPoly = c.mPolyLine;
 				
 				add( rt );
@@ -866,9 +866,9 @@ PinballWorld::mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newPa
 			bool doIt=true;
 			
 			// are we an expired trigger?
-			if ( p->getType()==PartType::RolloverTarget )
+			if ( p->getType()==PartType::Target )
 			{
-				auto rt = dynamic_cast<RolloverTarget*>(p.get());
+				auto rt = dynamic_cast<Target*>(p.get());
 				if ( rt && !isValidRolloverLoc( rt->mLoc, rt->mRadius, oldParts ) )
 				{
 //					doIt=false;
@@ -909,14 +909,14 @@ bool PinballWorld::isValidRolloverLoc( vec2 loc, float r, const PartVec& parts )
 	// too close to edge?
 	float closestContourDist;
 	if ( mVisionContours.findClosestContour(loc,0,&closestContourDist)
-	  && closestContourDist < mPartParams.mRolloverTargetMinWallDist + r )
+	  && closestContourDist < mPartParams.mTargetMinWallDist + r )
 	{
 		return false;
 	}
 	
 	// parts
 	for( const auto &p : parts ) {
-		if ( !p->isValidLocForRolloverTarget(loc,r) ) return false;
+		if ( !p->isValidLocForTarget(loc,r) ) return false;
 	}
 	
 	// ok
@@ -937,7 +937,7 @@ void PinballWorld::rolloverTest()
 		p.y = lerp( playfieldbb.y1, playfieldbb.y2, p.y );
 		
 		p = fromPlayfieldSpace(p);
-		float r = mPartParams.mRolloverTargetRadius;
+		float r = mPartParams.mTargetRadius;
 		
 		gl::color( isValidRolloverLoc(p, r, mParts) ? Color(0,1,0) : Color(1,0,0) );
 		gl::drawSolidCircle(p, r);

@@ -36,12 +36,12 @@ void PartParams::set( const XmlTree& xml )
 	getXml(xml, "FlipperRadiusToLengthScale",mFlipperRadiusToLengthScale);
 	getXml(xml, "FlipperColor",mFlipperColor);	
 
-	getXml(xml, "RolloverTargetRadius",mRolloverTargetRadius);
-	getXml(xml, "RolloverTargetMinWallDist",mRolloverTargetMinWallDist);
-	getXml(xml, "RolloverTargetOnColor",mRolloverTargetOnColor);
-	getXml(xml, "RolloverTargetOffColor",mRolloverTargetOffColor);
-	getXml(xml, "RolloverTargetStrobeColor",mRolloverTargetStrobeColor);
-	getXml(xml, "RolloverTargetDynamicRadius",mRolloverTargetDynamicRadius);
+	getXml(xml, "TargetRadius",mTargetRadius);
+	getXml(xml, "TargetMinWallDist",mTargetMinWallDist);
+	getXml(xml, "TargetOnColor",mTargetOnColor);
+	getXml(xml, "TargetOffColor",mTargetOffColor);
+	getXml(xml, "TargetStrobeColor",mTargetStrobeColor);
+	getXml(xml, "TargetDynamicRadius",mTargetDynamicRadius);
 }
 
 Part::Part( PinballWorld& world, PartType type )
@@ -321,14 +321,14 @@ void Bumper::onBallCollide( Ball& ball )
 	getWorld().getPd()->sendFloat("hit-bumper", length( getWorld().getDenoisedBallVel(ball)*10.f ) );
 }
 
-RolloverTarget::RolloverTarget( PinballWorld& world, vec2 pin, float radius )
-	: Part(world,PartType::RolloverTarget)
+Target::Target( PinballWorld& world, vec2 pin, float radius )
+	: Part(world,PartType::Target)
 	, mLoc(pin)
 	, mRadius(radius)
 {
-	mColorOff = getWorld().mPartParams.mRolloverTargetOffColor;
-	mColorOn  = getWorld().mPartParams.mRolloverTargetOnColor;
-	mColorStrobe = getWorld().mPartParams.mRolloverTargetStrobeColor;
+	mColorOff = getWorld().mPartParams.mTargetOffColor;
+	mColorOn  = getWorld().mPartParams.mTargetOnColor;
+	mColorStrobe = getWorld().mPartParams.mTargetStrobeColor;
 
 	setStrobePhase(2);
 }
@@ -343,7 +343,7 @@ float Part::getStrobe( float strobeFreqSlow, float strobeFreqFast ) const
 	);
 }
 
-void RolloverTarget::draw()
+void Target::draw()
 {
 	gl::pushModelView();
 	gl::translate( 0, 0, getWorld().getTableDepth() -.01f); // epsilon so we don't z-clip behind table back
@@ -376,7 +376,7 @@ void RolloverTarget::draw()
 	}
 }
 
-void RolloverTarget::tick()
+void Target::tick()
 {
 	mLight = lerp( mLight, mIsLit ? 1.f : 0.f, .5f );
 	
@@ -400,17 +400,18 @@ void RolloverTarget::tick()
 	}
 }
 
-void RolloverTarget::setIsLit( bool v )
+void Target::setIsLit( bool v )
 {
 	if (v && !mIsLit) {
+		getWorld().sendGameEvent( GameEvent::ATargetTurnedOn );
 		getWorld().getPd()->sendFloat("hit-rollover", int(mLoc.y));
 	}
 	
 	mIsLit=v;
-//	setType( v ? PartType::RolloverTargetOn : PartType::RolloverTargetOff );
+//	setType( v ? PartType::TargetOn : PartType::TargetOff );
 }
 
-void RolloverTarget::onGameEvent( GameEvent e )
+void Target::onGameEvent( GameEvent e )
 {
 	switch(e)
 	{
@@ -430,13 +431,13 @@ void RolloverTarget::onGameEvent( GameEvent e )
 	}
 }
 
-bool RolloverTarget::getShouldMergeWithOldPart( const PartRef old ) const
+bool Target::getShouldMergeWithOldPart( const PartRef old ) const
 {
 	if ( !Part::getShouldMergeWithOldPart(old) ) return false;
 	
-	if ( old->getType() == PartType::RolloverTarget )
+	if ( old->getType() == PartType::Target )
 	{
-		auto o = dynamic_cast<RolloverTarget*>(old.get());
+		auto o = dynamic_cast<Target*>(old.get());
 		assert(o);
 		return distance( o->mLoc, mLoc ) < min( mRadius, o->mRadius ) ;
 			// this constant needs to be bigger than mPartTrackLocMaxDist otherwise it jitters.

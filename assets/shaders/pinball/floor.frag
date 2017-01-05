@@ -28,7 +28,7 @@ float hash11(float p) {
 
 void main()
 {
-	float uGradientFreq = 1;
+	float uGradientFreq = 10;
 	vec2 uGradientCenter = vec2(0.5);
 	float uSeed = 1;
 	vec2 st = gl_FragCoord.xy / vec2(1024, 768);
@@ -40,18 +40,22 @@ void main()
 	if (false) {
 		// world space
 		usepos = pos;
-		gridSize = 1;
+		gridSize = 3;
 	} else {
 		// pixel space
 		usepos = gl_FragCoord.xy;
 		gridSize = 20;
 	}
 
-	float x = smoothstep(0.1, 0, fract(usepos.x/gridSize));
-	float y = smoothstep(0.1, 0, fract(usepos.y/gridSize));
-	float gridMask = (x+y)*0.5;
+//	float x = smoothstep(0.2, 0, fract(usepos.x/gridSize));
+//	float y = smoothstep(0.2, 0, fract(usepos.y/gridSize));
+	vec2 xy = fract(usepos/vec2(gridSize,gridSize));
+	float k =.05;
+	if (xy.x>k) xy.x=0; else xy.x=1;
+	if (xy.y>k) xy.y=0; else xy.y=1;
+	float gridMask = max(xy.x,xy.y);
 	vec3 gridColor = vec3(0.1,0.9,0.4);
-	vec3 bgColor = vec3(0.0,0.1,0.1);
+	vec3 bgColor = vec3(0.0,0.0,0.0);
 
 
 	float t = uSeed;

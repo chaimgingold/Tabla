@@ -641,9 +641,16 @@ void PinballView::drawSky() const
 
 void PinballView::draw3dScene() const
 {
-	auto drawSceneSegment = [this]( gl::GlslProgRef shader, const Scene::Meshes& meshes )
+	auto drawSceneSegment = [this](
+		gl::GlslProgRef shader,
+		const Scene::Meshes& meshes,
+		function<void()> f=0 )
 	{
+		if (!shader) return;
+		
 		gl::ScopedGlslProg glslScp(shader);
+		
+		if (f) f();
 		
 		// mDrawScene is assembled in prepare3dScene
 		for( auto w : meshes ) {
@@ -655,7 +662,9 @@ void PinballView::draw3dScene() const
 		}
 	};
 	
-	drawSceneSegment(mWallShader,mDrawScene.mWalls);
+	drawSceneSegment(mWallShader,mDrawScene.mWalls,[this](){
+		mWallShader->uniform("uTime",(float)ci::app::getElapsedSeconds());
+	});
 }
 
 void PinballView::draw3dBalls( vec3 eyeLoc, int skipBall, gl::TextureCubeMapRef skipMap ) const

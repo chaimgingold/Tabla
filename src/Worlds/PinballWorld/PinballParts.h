@@ -29,7 +29,10 @@ enum class GameEvent
 	LostLastMultiBall, // 1 => 0
 	
 	// part specific
-	NewPart // you are new
+	NewPart, // you are new
+	
+	// sent from parts
+	ATargetTurnedOn
 };
 
 struct AdjSpace
@@ -52,7 +55,7 @@ enum class PartType
 	FlipperLeft,
 	FlipperRight,
 	Bumper,
-	RolloverTarget,
+	Target,
 	Plunger
 };
 
@@ -86,13 +89,13 @@ public:
 	float mFlipperRadiusToLengthScale=5.f;	
 	ColorA mFlipperColor = ColorA(0,1,1,1);
 
-	ColorA mRolloverTargetOnColor=Color(1,0,0);
-	ColorA mRolloverTargetOffColor=Color(0,1,0);
-	ColorA mRolloverTargetStrobeColor=ColorA(1,0,1);
+	ColorA mTargetOnColor=Color(1,0,0);
+	ColorA mTargetOffColor=Color(0,1,0);
+	ColorA mTargetStrobeColor=ColorA(1,0,1);
 
-	float mRolloverTargetRadius=1.f;
-	float mRolloverTargetMinWallDist=1.f;
-	bool  mRolloverTargetDynamicRadius=false;	
+	float mTargetRadius=1.f;
+	float mTargetMinWallDist=1.f;
+	bool  mTargetDynamicRadius=false;	
 };
 
 class Part
@@ -114,7 +117,7 @@ public:
 	// we could save some cpu by having a get/set and caching it internally, but who cares right now
 	
 	virtual vec2 getAdjSpaceOrigin() const { return mContourLoc; }
-	virtual bool isValidLocForRolloverTarget( vec2 loc, float r ) const { return true; }
+	virtual bool isValidLocForTarget( vec2 loc, float r ) const { return true; }
 	
 	PinballWorld& getWorld() const { return mWorld; }
 	PartType getType() const { return mType; }
@@ -166,7 +169,7 @@ public:
 
 	virtual void onBallCollide( Ball& ) override;
 
-	virtual bool isValidLocForRolloverTarget( vec2 loc, float r ) const override {
+	virtual bool isValidLocForTarget( vec2 loc, float r ) const override {
 		return distance(loc,mLoc) > r + mFlipperLength;
 	}
 	
@@ -194,7 +197,7 @@ public:
 
 	virtual PolyLine2 getCollisionPoly() const override;
 
-	virtual bool isValidLocForRolloverTarget( vec2 loc, float r ) const override {
+	virtual bool isValidLocForTarget( vec2 loc, float r ) const override {
 		return distance(loc,mLoc) > r + mRadius;
 	}
 
@@ -213,15 +216,15 @@ private:
 	ColorA mStrobeColor;
 };
 
-class RolloverTarget : public Part
+class Target : public Part
 {
 public:
-	RolloverTarget( PinballWorld& world, vec2 pin, float radius );
+	Target( PinballWorld& world, vec2 pin, float radius );
 
 	virtual void draw() override;
 	virtual void tick() override;
 
-	virtual bool isValidLocForRolloverTarget( vec2 loc, float r ) const override {
+	virtual bool isValidLocForTarget( vec2 loc, float r ) const override {
 		return distance(loc,mLoc) > r + mRadius;
 	}
 
