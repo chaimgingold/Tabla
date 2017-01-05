@@ -7,10 +7,18 @@ out vec4 fragColor;
 
 void main()
 {
-//	vec2 usepos = pos;
-//	const float gridSize = 3;
-	vec2 usepos = gl_FragCoord.xy;
-	const float gridSize = 20;
+	vec2 usepos;
+	float gridSize;
+
+	if (false) {
+		// world space
+		usepos = pos;
+		gridSize = 1;
+	} else {
+		// pixel space
+		usepos = gl_FragCoord.xy;
+		gridSize = 20;
+	}
 	
 	float x = smoothstep(0.1, 0, fract(usepos.x/gridSize));
 	float y = smoothstep(0.1, 0, fract(usepos.y/gridSize));
