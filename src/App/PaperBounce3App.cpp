@@ -80,6 +80,20 @@ fs::path PaperBounce3App::getUserSettingsFilePath() const
 
 void PaperBounce3App::setup()
 {
+	auto overloadAssetPath = [this]( string p )
+	{
+		cout << "OverloadedAssetPath: " << p << endl;
+		mOverloadedAssetPath = p;
+	};
+	
+	// env vars for hotloading assets
+	{
+		const char* srcroot = getenv("LATABLASRCROOT");
+		if (srcroot) {
+			overloadAssetPath( (fs::path(srcroot) / ".." / "assets").string() );
+		}
+	}
+	
 	cout << getAppPath() << endl;
 	
 	// command line args
@@ -93,7 +107,7 @@ void PaperBounce3App::setup()
 		{
 			string overloadedAssetPath = args[a+1];
 			if ( fs::exists(overloadedAssetPath) ) {
-				mOverloadedAssetPath = overloadedAssetPath;
+				overloadAssetPath( overloadedAssetPath );
 			}
 		}
 

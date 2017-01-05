@@ -28,7 +28,7 @@ float hash11(float p) {
 
 void main()
 {
-	float uGradientFreq = 10;
+	float uGradientFreq = 5;
 	vec2 uGradientCenter = vec2(0.5);
 	float uSeed = 1;
 	vec2 st = gl_FragCoord.xy / vec2(1024, 768);
@@ -53,7 +53,7 @@ void main()
 	float k =.05;
 	if (xy.x>k) xy.x=0; else xy.x=1;
 	if (xy.y>k) xy.y=0; else xy.y=1;
-	float gridMask = max(xy.x,xy.y);
+	float gridMask = max(xy.x,xy.y) * .55;
 	vec3 gridColor = vec3(0.1,0.9,0.4);
 	vec3 bgColor = vec3(0.0,0.0,0.0);
 
