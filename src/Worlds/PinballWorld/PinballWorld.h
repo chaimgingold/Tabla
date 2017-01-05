@@ -145,7 +145,8 @@ private:
 
 	float mFlipperScreenShake=.05f;
 	float mBallVelScreenShakeK=1.f;
-
+	float mMaxScreenShake=2.f;
+	
 	// - do it
 	PartVec getPartsFromContours( const ContourVector& ); // only reason this is non-const is b/c parts point to the world
 	PartVec mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const;

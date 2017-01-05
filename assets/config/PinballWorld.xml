@@ -46,7 +46,7 @@
 
 	<FlipperScreenShake>.1</FlipperScreenShake>
 	<BallVelScreenShakeK>.5</BallVelScreenShakeK>
-
+	<MaxScreenShake>1</MaxScreenShake>
 
 <!-- Vision	-->
 	<PartMaxContourRadius>5</PartMaxContourRadius>
@@ -97,7 +97,7 @@
 			<TableDepth>2</TableDepth>
 			<ZSkew>.75</ZSkew>
 			<DynamicCubeMap>1</DynamicCubeMap>
-			<CubeMapSize>256</CubeMapSize>
+			<CubeMapSize>32</CubeMapSize>
 			<MaxCubeMaps>4</MaxCubeMaps>
 			<CubeMapFrameSkip>4</CubeMapFrameSkip>
 		</3d>

@@ -119,6 +119,7 @@ void PinballWorld::setParams( XmlTree xml )
 
 	getXml(xml, "FlipperScreenShake", mFlipperScreenShake );
 	getXml(xml, "BallVelScreenShakeK", mBallVelScreenShakeK );
+	getXml(xml, "MaxScreenShake", mMaxScreenShake);
 	
 	// playfield
 	getXml(xml, "UpVec", mUpVec );	
@@ -216,6 +217,7 @@ void PinballWorld::onGameEvent( GameEvent e )
 void PinballWorld::addScreenShake( float intensity )
 {
 	mScreenShakeValue += intensity;
+	mScreenShakeValue = min( mScreenShakeValue, mMaxScreenShake );
 //	mScreenShakeValue = min( 1.f, mScreenShakeValue + intensity) ;
 }
 
