@@ -21,6 +21,8 @@ BallWorld::BallWorld()
 	{
 		mCircleShader = prog; // allows null, so we can easily see if we broke it
 	});
+
+	setupSynthesis();
 }
 
 void BallWorld::setParams( XmlTree xml )
@@ -335,6 +337,38 @@ void BallWorld::update()
 {
 	mFileWatch.update();
 	updatePhysics();
+
+	updateSynthesis();
+}
+
+void BallWorld::updateSynthesis()
+{
+	auto collisionsList = pd::List();
+
+	auto balls = getBalls();
+	for (auto &c : mBallBallCollisions) {
+		Ball& ball1 = balls[c.mBallIndex[0]];
+		Ball& ball2 = balls[c.mBallIndex[1]];
+
+		float velocity = length(ball1.getVel()) + length(ball2.getVel());
+		collisionsList.addFloat(velocity);
+	}
+
+	for (auto &c : mBallContourCollisions) {
+		Ball& ball = balls[c.mBallIndex];
+
+		float velocity = length(ball.getVel());
+		collisionsList.addFloat(velocity);
+	}
+
+	for (auto &c : mBallWorldCollisions) {
+		Ball& ball = balls[c.mBallIndex];
+
+		float velocity = length(ball.getVel());
+		collisionsList.addFloat(velocity);
+	}
+
+	mPd->sendList("ball-collisions", collisionsList);
 }
 
 int BallWorld::getBallIndex( const Ball& b ) const
@@ -887,3 +921,32 @@ void onBallWorldBoundaryCollide	( const Ball& )
 {
 
 }
+
+
+void BallWorld::setupSynthesis()
+{
+	mPd = PaperBounce3App::get()->mPd;
+	// Load synthesis patch
+
+	auto app = PaperBounce3App::get();
+	std::vector<fs::path> paths =
+	{
+		app->hotloadableAssetPath("synths/BallWorld/ball-world.pd"),
+		app->hotloadableAssetPath("synths/BallWorld/ball-voice.pd")
+	};
+
+	// Register file-watchers for all the major pd patch components
+	mFileWatch.load( paths, [this,app]()
+					{
+						// Reload the root patch
+						auto rootPatch = app->hotloadableAssetPath("synths/BallWorld/ball-world.pd");
+						mPd->closePatch(mPatch);
+						mPatch = mPd->loadPatch( DataSourcePath::create(rootPatch) ).get();
+					});
+}
+
+BallWorld::~BallWorld() {
+	// Close pong synthesis patch
+	mPd->closePatch(mPatch);
+}
+

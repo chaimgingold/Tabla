@@ -415,9 +415,6 @@ void MusicWorld::setupSynthesis()
 	// Create the synth engine
 	mPd = PaperBounce3App::get()->mPd;
 
-	// Lets us use lists to set arrays, which seems to cause less thread contention
-	mPd->setMaxMessageLength(1024);
-
 	cout << "loading patch..." << endl;
 
 	auto app = PaperBounce3App::get();

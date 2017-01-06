@@ -18,6 +18,7 @@
 #include "FileWatch.h"
 #include "GameWorld.h"
 #include "Contour.h"
+#include "PureDataNode.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -63,6 +64,7 @@ class BallWorld : public GameWorld
 public:
 	
 	BallWorld();
+	~BallWorld();
 	
 	string getSystemName() const override { return "BallWorld"; }
 	
@@ -128,7 +130,13 @@ public:
 
 	void drawBalls( DrawType, gl::GlslProgRef=0 ) const;
 	void drawRibbons( DrawType ) const;
-	// doing your own drawing? use these. these use geometry generated in prepareToDraw()	
+	// doing your own drawing? use these. these use geometry generated in prepareToDraw()
+
+	// synthesis
+	cipd::PureDataNodeRef mPd;
+	cipd::PatchRef	      mPatch;
+	virtual void setupSynthesis();
+	virtual void updateSynthesis();
 		
 protected:
 
@@ -209,7 +217,8 @@ private:
 	
 	// asset loading
 	FileWatch mFileWatch; // hotload our shaders; in this class so when class dies all the callbacks expire.
-	
+
+
 } ;
 
 class BallWorldCartridge : public GameCartridge
