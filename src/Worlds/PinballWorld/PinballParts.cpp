@@ -493,6 +493,8 @@ void Target::addTo3dScene( Scene& s )
 
 void Target::setIsLit( bool v )
 {
+	
+
 	if (v && !mIsLit) {
 		getWorld().sendGameEvent( GameEvent::ATargetTurnedOn );
 		vec2 param = getWorld().normalizeToPlayfieldBBox(mLightLoc);

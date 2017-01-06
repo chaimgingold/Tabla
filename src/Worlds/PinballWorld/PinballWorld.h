@@ -70,6 +70,8 @@ public:
 
 	const PartVec& getParts() const { return mParts; }
 
+	const PartCensus& getPartCensus() const { return mPartCensus; }
+
 	cipd::PureDataNodeRef getPd() { return mPd; }
 
 	vec2 getScreenShake() const { return mPauseBallWorld ? vec2() : mScreenShakeVec; }

@@ -226,6 +226,10 @@ void PinballWorld::onGameEvent( GameEvent e )
 		case GameEvent::ServeBall:
 			mPd->sendBang("serve-ball");
 			break;
+
+		case GameEvent::ATargetTurnedOn:
+			mPd->sendFloat("rollover-count", getPartCensus().mNumTargetsOn);
+			break;
 		default:break;
 	}
 }
