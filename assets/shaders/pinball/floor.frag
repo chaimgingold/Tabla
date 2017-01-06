@@ -7,6 +7,7 @@ out vec4 fragColor;
 
 
 uniform float uTime;
+uniform float uGameOverProgress;
 
 float cos01(float phase) {
 	return cos(phase) * 0.5 + 0.5;
@@ -28,8 +29,21 @@ float hash11(float p) {
 
 void main()
 {
-	float uGradientFreq = 5;
-	vec2 uGradientCenter = vec2(0.5);
+
+	float gradientFreq = 5;
+	vec2 gradientCenter = vec2(0.5);
+	float gradientSpeed = 1;
+	float gridBrightness = .55;
+	if (uGameOverProgress > 0) {
+		gridBrightness = 1;
+		gradientCenter = vec2(1, 0.5);
+		gradientFreq = 10;
+		gradientSpeed = 5;
+	}
+
+
+
+
 	float uSeed = 1;
 	vec2 st = gl_FragCoord.xy / vec2(1024, 768);
 
@@ -53,18 +67,18 @@ void main()
 	float k =.05;
 	if (xy.x>k) xy.x=0; else xy.x=1;
 	if (xy.y>k) xy.y=0; else xy.y=1;
-	float gridMask = max(xy.x,xy.y) * .55;
+	float gridMask = max(xy.x,xy.y) * gridBrightness;
 	vec3 gridColor = vec3(0.1,0.9,0.4);
 	vec3 bgColor = vec3(0.0,0.0,0.0);
 
 
 	float t = uSeed;
 
-	vec2 gradientCenter = vec2(hash11(t), hash11(t+2.));
+//	gradientCenter = vec2(hash11(t), hash11(t+2.));
 
 	// Radial gradient
-	float theta = distance(st, uGradientCenter);
-	float phase = theta * PI*2. * uGradientFreq - uTime - uGradientFreq;
+	float theta = distance(st, gradientCenter);
+	float phase = theta * PI*2. * gradientFreq - uTime*gradientSpeed - gradientFreq;
 
 	// Phase-shifted cosine gradients
 	float minScale = .5;

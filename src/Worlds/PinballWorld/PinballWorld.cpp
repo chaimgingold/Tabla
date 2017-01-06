@@ -200,12 +200,21 @@ void PinballWorld::onGameEvent( GameEvent e )
 			break;
 		case GameEvent::LostLastMultiBall:
 			mPd->sendBang("game-over");
+			beginGameOver();
 			break;
 		case GameEvent::ServeBall:
 			mPd->sendBang("serve-ball");
 			break;
 		default:break;
 	}
+}
+void PinballWorld::beginGameOver() {
+	mGameOverBegan = (float)ci::app::getElapsedSeconds();
+}
+
+float PinballWorld::getGameOverProgress() const {
+	float timeSinceGameOver = (float)ci::app::getElapsedSeconds() - mGameOverBegan;
+	return timeSinceGameOver < 2 ? timeSinceGameOver : -1;
 }
 
 void PinballWorld::addScreenShake( float intensity )

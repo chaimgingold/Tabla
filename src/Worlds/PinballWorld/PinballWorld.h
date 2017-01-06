@@ -191,8 +191,12 @@ private:
 	// game pad
 	GamepadManager mGamepadManager;
 	map<unsigned int,string> mGamepadButtons;
-	
-	
+
+	// game over state
+	float mGameOverBegan = -1;
+	float getGameOverProgress() const;
+	void beginGameOver();
+
 	// --- Sound Synthesis ---
 	bool mSoundEnabled=true;
 	
