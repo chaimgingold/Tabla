@@ -386,8 +386,24 @@ void PongWorld::strobeBalls()
 void PongWorld::setupSynthesis()
 {
 	mPd = PaperBounce3App::get()->mPd;
+
 	// Load pong synthesis patch
-	mPatch = mPd->loadPatch( DataSourcePath::create(getAssetPath("synths/PongWorld/pong-world.pd")) ).get();
+	auto app = PaperBounce3App::get();
+	std::vector<fs::path> paths =
+	{
+		app->hotloadableAssetPath("synths/PongWorld/pong-world.pd"),
+		app->hotloadableAssetPath("synths/PongWorld/pong-voice.pd"),
+		app->hotloadableAssetPath("synths/PongWorld/score-voice.pd")
+	};
+
+	// Register file-watchers for all the major pd patch components
+	mFileWatch.load( paths, [this,app]()
+					{
+						// Reload the root patch
+						auto rootPatch = app->hotloadableAssetPath("synths/PongWorld/pong-world.pd");
+						mPd->closePatch(mPatch);
+						mPatch = mPd->loadPatch( DataSourcePath::create(rootPatch) ).get();
+					});
 }
 
 PongWorld::~PongWorld() {

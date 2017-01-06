@@ -10,7 +10,6 @@
 #define PongWorld_hpp
 
 #include "BallWorld.h"
-#include "PureDataNode.h"
 
 class PongWorld : public BallWorld
 {
@@ -33,6 +32,7 @@ protected:
 	virtual void onBallWorldBoundaryCollide	( const Ball& ) override;
 
 private:
+	FileWatch mFileWatch;
 	
 	void drawScore( int player, vec2 dotStart, vec2 dotStep, float dotRadius, int score, int maxScore ) const ;
 	
@@ -109,7 +109,8 @@ private:
 	cipd::PureDataNodeRef	mPd;	// synth engine
 	cipd::PatchRef			mPatch;			// pong patch
 	
-	void setupSynthesis();
+	void setupSynthesis() override;
+	void updateSynthesis() override {};
 };
 
 class PongWorldCartridge : public GameCartridge

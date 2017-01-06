@@ -1,7 +1,7 @@
 <BallWorld>
 	<!-- cm -->
 	<NumIntegrationSteps>	1 </NumIntegrationSteps>
-	<DefaultNumBalls>			100 </DefaultNumBalls>
+	<DefaultNumBalls>			10 </DefaultNumBalls>
 	<BallDefaultRadius>			.5 </BallDefaultRadius>
 	<BallDefaultMaxRadius>		2 </BallDefaultMaxRadius>
 	<BallMaxVel>				.2 </BallMaxVel>

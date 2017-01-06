@@ -199,14 +199,13 @@ private:
 
 	// --- Sound Synthesis ---
 	bool mSoundEnabled=true;
+
 	
-	cipd::PureDataNodeRef	mPd;	// synth engine
-	cipd::PatchRef			mPatch;			// pong patch
-	
-	void setupSynthesis();
+	void setupSynthesis() override;
+	void updateSynthesis() override {};
 	void shutdownSynthesis();
 	
-	void updateBallSynthesis();	
+	void updateBallSynthesis();
 };
 
 } // namespace Pinball

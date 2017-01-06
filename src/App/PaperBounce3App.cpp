@@ -248,6 +248,9 @@ void PaperBounce3App::setup()
 		mPd->addToSearchPath(p.path().string());
 	}
 
+	// Lets us use lists to set arrays, which seems to cause less thread contention
+	mPd->setMaxMessageLength(1024);
+
 	// ui stuff (do before making windows)
 	mTextureFont = gl::TextureFont::create( Font("Avenir",12) );
 	
