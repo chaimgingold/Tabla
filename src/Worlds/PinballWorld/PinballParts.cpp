@@ -409,28 +409,18 @@ void Target::draw()
 	}
 }
 
+void Target::onBallCollide( Ball& )
+{
+	if ( !mIsLit )
+	{
+		markCollision(.75f);
+		setIsLit(true);
+	}
+}
+
 void Target::tick()
 {
 	mLight = lerp( mLight, mIsLit ? 1.f : 0.f, .5f );
-	
-	const auto &balls = getWorld().getBalls();
-	
-/*	if (balls.empty())
-	{
-		setIsLit(false);
-	}
-	else*/ if ( !mIsLit )
-	{
-		for ( auto &b : balls )
-		{
-			if ( distance(b.mLoc,mLightLoc) < mRadius + b.mRadius )
-			{
-				markCollision(.75f);
-				setIsLit(true);
-				break;
-			}
-		}
-	}
 }
 
 float Target::getState() const
@@ -454,7 +444,8 @@ PolyLine2 Target::getCollisionPoly() const
 	mat2 m( -perp(mTriggerVec), mTriggerVec );
 	
 	float xd = size.y;
-	float v = xd * (1.f-getState());
+//	float v = xd * (1.f-getState()); // step forward...
+	float v = 0.f;
 	
 	p.push_back( mTriggerLoc + m * vec2(-size.x/2,v) );
 	p.push_back( mTriggerLoc + m * vec2( size.x/2,v) );
@@ -472,7 +463,23 @@ mat4 Target::getAnimTransform() const
 	
 	float strobe = getMyStrobe() * (1.f-getState());
 	
-	transform = glm::translate( vec3(0,0, lerp( 0.f, getWorld().getTableDepth()/2, strobe ) ) );
+	float rotateRad;
+	
+	if (mIsLit) rotateRad = powf(getState(),.5f) * M_PI * 8.f;
+	else {
+		const float kFreq = 4.f;
+		rotateRad = cos(
+			(fmod( ci::app::getElapsedSeconds(), kFreq ) + getStrobePhase()) * M_PI*2.f
+			)
+			* ( M_PI * .05f );
+	}
+	
+	vec3 rotateAbout = vec3(mTriggerLoc,getWorld().getTableDepth()/2.f);
+	transform *= glm::translate(rotateAbout);
+	transform *= glm::rotate( rotateRad, cross(vec3(mTriggerVec,0),vec3(0,0,1)) );
+	transform *= glm::translate(-rotateAbout);
+	
+	transform *= glm::translate( vec3(0,0, lerp( 0.f, getWorld().getTableDepth()/2, strobe ) ) );
 	
 	return transform;
 }
@@ -502,11 +509,12 @@ void Target::onGameEvent( GameEvent e )
 	{
 		case GameEvent::NewGame:
 			setIsLit(false);
+			markCollision(1.f);
 			break;
 		
 //		case GameEvent::LostBall:
 		case GameEvent::LostLastMultiBall:
-			if (!mIsLit) markCollision(3.f);
+			if (!mIsLit) markCollision(2.f);
 			break;
 			
 		case GameEvent::NewPart:

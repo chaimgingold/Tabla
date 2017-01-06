@@ -172,6 +172,7 @@ protected:
 	float getCollisionFade() const;
 	float getStrobe( float strobeFreqSlow, float strobeFreqFast ) const;
 	void setStrobePhase( int nparts );
+	float getStrobePhase() const { return mStrobePhase; }
 	
 private:
 	PartType mType;
@@ -247,6 +248,7 @@ public:
 	virtual void tick() override;
 	virtual void addTo3dScene( Scene& ) override;
 	virtual PolyLine2 getCollisionPoly() const override;
+	virtual void onBallCollide( Ball& ) override;
 
 	virtual bool getShouldMergeWithOldPart( const PartRef oldPart ) const override;
 
@@ -275,7 +277,7 @@ private:
 	void setIsLit( bool );
 	
 	bool  mIsLit=false; // discrete goal
-	float mLight=0.f; // continues, current anim state.
+	float mLight=0.f; // continues, current anim state. (deprecated)
 
 	Color getTriggerColor() const;
 	

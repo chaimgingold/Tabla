@@ -69,7 +69,7 @@
 		<BumperOnColor>00CCFF</BumperOnColor>
 		<BumperStrobeColor>FFCC22</BumperStrobeColor>
 		
-		<TargetRadius>1</TargetRadius>
+		<TargetRadius>1.5</TargetRadius>
 		<TargetMinWallDist>1</TargetMinWallDist>
 		<TargetDynamicRadius>1</TargetDynamicRadius>
 
