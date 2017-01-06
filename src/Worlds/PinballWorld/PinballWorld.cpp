@@ -803,7 +803,7 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 		{
 			// non-hole:
 			
-			// make rollover target
+			// make target
 			auto filter = [this,contours]( const Contour& c ) -> bool {
 				return !shouldContourBeAPart(c,contours);
 			};
@@ -828,7 +828,11 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 				
 				if (mPartParams.mTargetDynamicRadius)
 				{
-					r = min( mPartParams.mTargetRadius*4.f, max( r, distance(closestPt,c.mCenter) - c.mRadius ) );
+					float r = distance(closestPt,c.mCenter) - c.mRadius;
+					
+					r = constrain(r, mPartParams.mTargetRadius, mPartParams.mTargetRadius*4.f );
+					r = mPartParams.mTargetRadius;
+					
 					far = r;
 				}
 				
