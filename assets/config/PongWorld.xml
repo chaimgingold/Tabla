@@ -4,8 +4,8 @@
 	<BallDefaultMaxRadius>		2 </BallDefaultMaxRadius>
 	<BallMaxVel>				1 </BallMaxVel>
 	<BallContourImpactNormalVelImpulse>.1</BallContourImpactNormalVelImpulse>
-	<BallDefaultColor>			FF0000 </BallDefaultColor>
-	<BallDefaultRibbonColor>			FF8833 </BallDefaultRibbonColor>
+	<BallDefaultColor>			00FFFF </BallDefaultColor>
+	<BallDefaultRibbonColor>			CCFFFF </BallDefaultRibbonColor>
 	
 	<Ribbon>
 		<Enabled>1</Enabled>
