@@ -128,6 +128,7 @@ void PinballWorld::setParams( XmlTree xml )
 	getXml(xml, "DejitterContourMaxDist", mDejitterContourMaxDist );
 	
 	// gamepad
+	mGamepadButtons.clear();
 	if (xml.hasChild("Gamepad"))
 	{
 		XmlTree keys = xml.getChild("Gamepad");
@@ -147,6 +148,7 @@ void PinballWorld::setParams( XmlTree xml )
 	}
 	
 	// keyboard
+	mKeyToInput.clear();
 	if (xml.hasChild("KeyMap"))
 	{
 		XmlTree keys = xml.getChild("KeyMap");
@@ -221,24 +223,40 @@ void PinballWorld::onGameEvent( GameEvent e )
 			break;
 		case GameEvent::LostLastMultiBall:
 			mPd->sendBang("game-over");
-			beginGameOver();
+			beginParty(0);
+			mTargetCount=0;
 			break;
+			
+		case GameEvent::ServeMultiBall:
+			mPd->sendBang("multi-ball");
+			beginParty(1); // trigger shader effect
+			break;
+			
 		case GameEvent::ServeBall:
 			mPd->sendBang("serve-ball");
 			break;
 
 		case GameEvent::ATargetTurnedOn:
-			mPd->sendFloat("rollover-count", getPartCensus().mNumTargetsOn);
+			mTargetCount++;
+			mPd->sendFloat("rollover-count", mTargetCount);
 			break;
+			
 		default:break;
 	}
 }
-void PinballWorld::beginGameOver() {
-	mGameOverBegan = (float)ci::app::getElapsedSeconds();
+void PinballWorld::beginParty( int type ) {
+	mPartyBegan = (float)ci::app::getElapsedSeconds();
+	mPartyType = type;
 }
 
-float PinballWorld::getGameOverProgress() const {
-	float timeSinceGameOver = (float)ci::app::getElapsedSeconds() - mGameOverBegan;
+vec2 PinballWorld::getPartyLoc() const
+{
+	if (mPartyType==0) return vec2(1, 0.5);
+	else return vec2(0,.5);
+}
+
+float PinballWorld::getPartyProgress() const {
+	float timeSinceGameOver = (float)ci::app::getElapsedSeconds() - mPartyBegan;
 	return timeSinceGameOver < 2 ? timeSinceGameOver : -1;
 }
 
@@ -267,6 +285,16 @@ void PinballWorld::update()
 	// take census
 	mPartCensus = PartCensus();
 	for( auto p : mParts ) p->updateCensus(mPartCensus);
+	
+	// enter multiball?
+	{
+		int numTargets = getPartCensus().getPop(PartType::Target);
+		
+		if ( numTargets>0 && getPartCensus().mNumTargetsOn==numTargets ) {
+			// start multi-ball
+			serveBall();
+		}
+	}
 	
 	// input
 	mGamepadManager.tick();
