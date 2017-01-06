@@ -25,6 +25,7 @@ public:
 		Obj();
 		Obj( TriMeshRef m ) : mMesh(m) {}
 		Obj( TriMeshRef m, mat4 x ) : mMesh(m), mTransform(x) {}
+		Obj( TriMeshRef m, const mat4* x ) : mMesh(m) { if (x) mTransform=*x; }
 		
 		TriMeshRef mMesh;
 		mat4	   mTransform;

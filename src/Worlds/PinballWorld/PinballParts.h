@@ -23,6 +23,7 @@ class Scene;
 enum class GameEvent
 {
 	// game-wide
+	NewGame,
 	ServeBall, // 0 => 1
 	ServeMultiBall, // >0 => +1
 	LostBall, // n => n-1
@@ -117,7 +118,6 @@ public:
 	// we could save some cpu by having a get/set and caching it internally, but who cares right now
 	
 	virtual vec2 getAdjSpaceOrigin() const { return mContourLoc; }
-	virtual bool isValidLocForTarget( vec2 loc, float r ) const { return true; }
 	
 	PinballWorld& getWorld() const { return mWorld; }
 	PartType getType() const { return mType; }
@@ -135,7 +135,7 @@ public:
 		// might be most logical to just store the whole Contour, so a vector of Contours we are based on.
 
 protected:
-	void addExtrudedCollisionPolyToScene( Scene&, ColorA ) const;
+	void addExtrudedCollisionPolyToScene( Scene&, ColorA, const mat4* postTransform=0 ) const;
 	void setType( PartType t ) { mType=t; }
 
 	void markCollision( float decay );
@@ -168,10 +168,6 @@ public:
 	virtual PolyLine2 getCollisionPoly() const override;
 
 	virtual void onBallCollide( Ball& ) override;
-
-	virtual bool isValidLocForTarget( vec2 loc, float r ) const override {
-		return distance(loc,mLoc) > r + mFlipperLength;
-	}
 	
 private:
 	vec2 getAccelForBall( vec2 ) const;
@@ -197,10 +193,6 @@ public:
 
 	virtual PolyLine2 getCollisionPoly() const override;
 
-	virtual bool isValidLocForTarget( vec2 loc, float r ) const override {
-		return distance(loc,mLoc) > r + mRadius;
-	}
-
 protected:
 	void onGameEvent( GameEvent ) override;
 
@@ -219,19 +211,19 @@ private:
 class Target : public Part
 {
 public:
-	Target( PinballWorld& world, vec2 pin, float radius );
+	Target( PinballWorld& world, vec2 triggerloc, vec2 triggervec, vec2 lightloc, float radius );
 
 	virtual void draw() override;
 	virtual void tick() override;
-
-	virtual bool isValidLocForTarget( vec2 loc, float r ) const override {
-		return distance(loc,mLoc) > r + mRadius;
-	}
+	virtual void addTo3dScene( Scene& ) override;
+	virtual PolyLine2 getCollisionPoly() const override;
 
 	virtual bool getShouldMergeWithOldPart( const PartRef oldPart ) const override;
 
 	float mRadius;
-	vec2  mLoc;
+	vec2  mTriggerLoc;
+	vec2  mTriggerVec;
+	vec2  mLightLoc;
 	PolyLine2 mContourPoly; // so we can strobe it!
 	
 	ColorA mColorOff, mColorOn, mColorStrobe;
@@ -240,10 +232,17 @@ protected:
 	void onGameEvent( GameEvent ) override;
 	
 private:
+	Color getLightColor() const;
+	float getMyStrobe() const;
+	float getState() const;
+	mat4 getAnimTransform() const;
+	
 	void setIsLit( bool );
 	
 	bool  mIsLit=false; // discrete goal
 	float mLight=0.f; // continues, current anim state.
+
+	Color getTriggerColor() const;
 	
 };
 

@@ -85,11 +85,13 @@ private:
 	float mGravity=0.1f;
 	float mBallReclaimAreaHeight = 10.f;
 		
-	// playfield layout	
+	// playfield layout
+public:
 	vec2  toPlayfieldSpace  ( vec2 p ) const { return vec2( dot(p,getRightVec()), dot(p,getUpVec()) ); }
 	vec2  fromPlayfieldSpace( vec2 p ) const { return getRightVec() * p.x + getUpVec() * p.y ; }
 		// could make this into two matrices
 	
+private:
 	Rectf getPlayfieldBoundingBox( const ContourVec& ) const; // min/max of all points in playfield space
 	Rectf toPlayfieldBoundingBox ( const PolyLine2& ) const; // just for one poly
 	
@@ -112,8 +114,8 @@ private:
 	PartRef findPartForContour( const Contour& ) const;
 	PartRef findPartForContour( int contourIndex ) const;
 	
-	void rolloverTest();
-	bool isValidRolloverLoc( vec2 loc, float r, const PartVec& ) const;
+//	void rolloverTest();
+//	bool isValidRolloverLoc( vec2 loc, float r, const PartVec& ) const;
 	
 	// simulation
 	void updateBallWorldContours();
@@ -195,6 +197,7 @@ private:
 	// game over state
 	float mGameOverBegan = -1;
 	float getGameOverProgress() const;
+	bool  getIsInGameOverState() const { return getGameOverProgress() > 0.f ; }
 	void beginGameOver();
 
 	// --- Sound Synthesis ---
