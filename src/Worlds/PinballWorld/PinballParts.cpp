@@ -509,6 +509,7 @@ void Target::onGameEvent( GameEvent e )
 {
 	switch(e)
 	{
+		case GameEvent::ServeMultiBall:
 		case GameEvent::NewGame:
 			setIsLit(false);
 			markCollision(1.f);

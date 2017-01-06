@@ -223,6 +223,12 @@ void PinballWorld::onGameEvent( GameEvent e )
 			mPd->sendBang("game-over");
 			beginGameOver();
 			break;
+			
+		case GameEvent::ServeMultiBall:
+			mPd->sendBang("multi-ball");
+			beginGameOver(); // trigger shader effect
+			break;
+			
 		case GameEvent::ServeBall:
 			mPd->sendBang("serve-ball");
 			break;
@@ -230,6 +236,7 @@ void PinballWorld::onGameEvent( GameEvent e )
 		case GameEvent::ATargetTurnedOn:
 			mPd->sendFloat("rollover-count", getPartCensus().mNumTargetsOn);
 			break;
+			
 		default:break;
 	}
 }
@@ -267,6 +274,12 @@ void PinballWorld::update()
 	// take census
 	mPartCensus = PartCensus();
 	for( auto p : mParts ) p->updateCensus(mPartCensus);
+	
+	// enter multiball?
+	if (getPartCensus().mNumTargetsOn==getPartCensus().getPop(PartType::Target)) {
+		// start multi-ball
+		serveBall();
+	}
 	
 	// input
 	mGamepadManager.tick();
