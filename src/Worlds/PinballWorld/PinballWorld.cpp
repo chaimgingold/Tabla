@@ -128,6 +128,7 @@ void PinballWorld::setParams( XmlTree xml )
 	getXml(xml, "DejitterContourMaxDist", mDejitterContourMaxDist );
 	
 	// gamepad
+	mGamepadButtons.clear();
 	if (xml.hasChild("Gamepad"))
 	{
 		XmlTree keys = xml.getChild("Gamepad");
@@ -147,6 +148,7 @@ void PinballWorld::setParams( XmlTree xml )
 	}
 	
 	// keyboard
+	mKeyToInput.clear();
 	if (xml.hasChild("KeyMap"))
 	{
 		XmlTree keys = xml.getChild("KeyMap");
