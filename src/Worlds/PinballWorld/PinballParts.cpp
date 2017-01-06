@@ -40,7 +40,8 @@ void PartParams::set( const XmlTree& xml )
 	getXml(xml, "TargetMinWallDist",mTargetMinWallDist);
 	getXml(xml, "TargetOnColor",mTargetOnColor);
 	getXml(xml, "TargetOffColor",mTargetOffColor);
-	getXml(xml, "TargetStrobeColor",mTargetStrobeColor);
+	getXml(xml, "TargetOnStrobeColor",mTargetOnStrobeColor);
+	getXml(xml, "TargetOffStrobeColor",mTargetOffStrobeColor);
 	getXml(xml, "TargetDynamicRadius",mTargetDynamicRadius);
 }
 
@@ -330,7 +331,7 @@ Target::Target( PinballWorld& world, vec2 triggerloc, vec2 triggervec, vec2 ligh
 {
 	mColorOff = getWorld().mPartParams.mTargetOffColor;
 	mColorOn  = getWorld().mPartParams.mTargetOnColor;
-	mColorStrobe = getWorld().mPartParams.mTargetStrobeColor;
+	mColorStrobe = getWorld().mPartParams.mTargetOffStrobeColor;
 
 	setStrobePhase(2);
 }
@@ -356,21 +357,28 @@ Color Target::getLightColor() const
 
 	ColorA lightColor = lerp(
 		lerp(mColorOff,mColorOn,mLight),
-		lerp(mColorStrobe,mColorOff,mLight),
+		lerp(mColorStrobe,getWorld().mPartParams.mTargetOnStrobeColor,mLight),
 		strobe );
 		
 	return lightColor;
 }
 
+Color Target::getTriggerColor() const
+{
+	return getLightColor();
+}
+
 void Target::draw()
 {
 //	const float collideFade = getCollisionFade();
-
-	Color lightColor = getLightColor();
+	
+	Color triggerColor = getTriggerColor();
 	
 	// draw light on floor
 	if (0)
 	{
+		Color lightColor = getLightColor();
+
 		gl::pushModelView();
 		gl::translate( 0, 0, getWorld().getTableDepth() -.01f); // epsilon so we don't z-clip behind table back
 		
@@ -386,7 +394,7 @@ void Target::draw()
 		// we are at wrong z...
 		// the objects should manage that themselves
 		gl::ScopedDepth depthTest(false);
-		gl::color(lightColor);
+		gl::color(triggerColor);
 
 		gl::drawSolid(mContourPoly);
 	}
@@ -396,7 +404,7 @@ void Target::draw()
 		gl::ScopedModelMatrix mat;
 		gl::multModelMatrix(getAnimTransform());
 		
-		gl::color( getTriggerColor() );
+		gl::color( triggerColor );
 		gl::drawSolid( getCollisionPoly() );
 	}
 }
@@ -480,7 +488,8 @@ void Target::setIsLit( bool v )
 {
 	if (v && !mIsLit) {
 		getWorld().sendGameEvent( GameEvent::ATargetTurnedOn );
-		getWorld().getPd()->sendFloat("hit-rollover", int( getWorld().toPlayfieldSpace(mLightLoc).y ));
+		vec2 param = getWorld().normalizeToPlayfieldBBox(mLightLoc);
+		getWorld().getPd()->sendFloat("hit-rollover", (int)(param.y * 12.f) );
 	}
 	
 	mIsLit=v;
@@ -522,11 +531,6 @@ bool Target::getShouldMergeWithOldPart( const PartRef old ) const
 			// so we know the contour is the same, so we can be liberal here.
 	}
 	else return true;
-}
-
-Color Target::getTriggerColor() const
-{
-	return getLightColor();
 }
 
 Plunger::Plunger( PinballWorld& world, vec2 pin, float radius )

@@ -69,9 +69,12 @@ void PinballWorld::setupControls()
 		
 		if (getBalls().empty() && state==1 && !getIsInGameOverState() ) serveBall();
 		
-		mPd->sendFloat("flipper-change", state);
-		
-		if (state) this->addScreenShake(mFlipperScreenShake);
+		if ( mPartCensus.getPop( flipperIndexToType(side) ) > 0 )
+		{
+			mPd->sendFloat("flipper-change", state);
+			
+			if (state) this->addScreenShake(mFlipperScreenShake);
+		}
 	};
 	
 	mInputToFunction["flippers-left-down"]  = [this,flipperChange]() { flipperChange(0,1); };
@@ -177,6 +180,24 @@ Rectf PinballWorld::toPlayfieldBoundingBox ( const PolyLine2 &poly ) const
 	return Rectf(pts);
 }
 
+vec2 PinballWorld::normalizeToPlayfieldBBox( vec2 worldSpace ) const
+{
+	vec2 p = toPlayfieldSpace(worldSpace);
+	
+	p.x = (p.x - mPlayfieldBoundingBox.x1) / mPlayfieldBoundingBox.getWidth();
+	p.y = (p.y - mPlayfieldBoundingBox.y1) / mPlayfieldBoundingBox.getHeight();
+	
+	return p;
+}
+
+vec2 PinballWorld::fromNormalizedPlayfieldBBox( vec2 p ) const
+{
+	p.x = mPlayfieldBoundingBox.x1 + mPlayfieldBoundingBox.getWidth()*p.x;
+	p.y = mPlayfieldBoundingBox.y1 + mPlayfieldBoundingBox.getWidth()*p.y;
+	
+	return fromPlayfieldSpace(p);
+}
+
 void PinballWorld::gameWillLoad()
 {
 	// most important thing is to prevent BallWorld from doing its default thing.
@@ -238,6 +259,10 @@ void PinballWorld::updateScreenShake()
 void PinballWorld::update()
 {
 	mFileWatch.update();
+
+	// take census
+	mPartCensus = PartCensus();
+	for( auto p : mParts ) p->updateCensus(mPartCensus);
 	
 	// input
 	mGamepadManager.tick();

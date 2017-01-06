@@ -74,8 +74,10 @@
 		<TargetDynamicRadius>1</TargetDynamicRadius>
 
 		<TargetOnColor>22FF55</TargetOnColor>
+		<TargetOnStrobeColor>00FFFF</TargetOnStrobeColor>
+
 		<TargetOffColor>0055CC</TargetOffColor>
-		<TargetStrobeColor>FF00FF</TargetStrobeColor>
+		<TargetOffStrobeColor>FF00FF</TargetOffStrobeColor>
 		
 		<FlipperMinLength>1</FlipperMinLength>
 		<FlipperMaxLength>10</FlipperMaxLength>

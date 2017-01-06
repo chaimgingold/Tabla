@@ -90,6 +90,8 @@ public:
 	vec2  toPlayfieldSpace  ( vec2 p ) const { return vec2( dot(p,getRightVec()), dot(p,getUpVec()) ); }
 	vec2  fromPlayfieldSpace( vec2 p ) const { return getRightVec() * p.x + getUpVec() * p.y ; }
 		// could make this into two matrices
+	vec2  normalizeToPlayfieldBBox( vec2 worldSpace ) const;
+	vec2  fromNormalizedPlayfieldBBox( vec2 ) const;
 	
 private:
 	Rectf getPlayfieldBoundingBox( const ContourVec& ) const; // min/max of all points in playfield space
@@ -108,7 +110,8 @@ private:
 	
 	PartVec mParts;
 	ContourToPartMap mContoursToParts;
-
+	PartCensus mPartCensus;
+	
 	void getContoursFromParts( const PartVec&, ContourVec& contours, ContourToPartMap* c2pm=0 ) const; // for physics simulation
 	
 	PartRef findPartForContour( const Contour& ) const;
