@@ -575,7 +575,6 @@ each time;
 #X connect 121 0 118 0;
 #X connect 122 0 73 0;
 #X connect 123 0 161 0;
-#X connect 123 0 163 0;
 #X connect 124 0 126 0;
 #X connect 125 0 126 0;
 #X connect 127 0 125 0;
