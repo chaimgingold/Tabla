@@ -253,7 +253,7 @@ void PaperBounce3App::setup()
 
 	// Build a virtual clacker
 	auto rootPatch = hotloadableAssetPath("synths/clacker.pd");
-	mAVClacker = mPd->loadPatch( DataSourcePath::create(rootPatch) ).get();
+	mAVClackerPatch = mPd->loadPatch( DataSourcePath::create(rootPatch) ).get();
 
 
 	// ui stuff (do before making windows)
@@ -762,6 +762,8 @@ void PaperBounce3App::update()
 		mGameWorld->update();
 		mGameWorld->prepareToDraw();
 	}
+	
+	if (mAVClacker>0.f) mAVClacker = max(0.f,mAVClacker-.1f);
 }
 
 void PaperBounce3App::updateVision()
@@ -1016,6 +1018,11 @@ void PaperBounce3App::keyDown( KeyEvent event )
 				mDrawPipeline = !mDrawPipeline;
 				break;
 				
+			case KeyEvent::KEY_s:
+				mPd->sendBang("clack-clacker");
+				mAVClacker=1.f;
+				break;
+			
 			default:
 				caught=false;
 				break;

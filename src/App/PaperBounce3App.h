@@ -136,6 +136,7 @@ class PaperBounce3App : public App {
 
 	FPS mAppFPS;
 	FPS mCaptureFPS;
+	float mAVClacker=0.f;
 	
 	// to help us visualize
 	void addProjectorPipelineStages();
@@ -199,7 +200,7 @@ class PaperBounce3App : public App {
 	
 	// Synthesis
 	cipd::PureDataNodeRef mPd;
-	cipd::PatchRef mAVClacker;
+	cipd::PatchRef mAVClackerPatch;
 	
 private: /* starting to make some stuff private... start somewhere */
 	void updateVision();

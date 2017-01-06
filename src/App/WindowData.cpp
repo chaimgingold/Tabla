@@ -248,6 +248,13 @@ void WindowData::draw()
 				r.getLowerLeft() + vec2(2,-mApp.mTextureFont->getDescent()) ) ;
 		}
 	}
+
+	// AV clacker
+	if ( mApp.mAVClacker>0.f )
+	{
+		gl::color(1,1,1,mApp.mAVClacker);
+		gl::drawSolidRect( Rectf(vec2(0,0),getWindowSize()) );
+	}
 }
 
 void WindowData::mouseDown( MouseEvent event )
