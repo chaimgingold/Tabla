@@ -251,6 +251,11 @@ void PaperBounce3App::setup()
 	// Lets us use lists to set arrays, which seems to cause less thread contention
 	mPd->setMaxMessageLength(1024);
 
+	// Build a virtual clacker
+	auto rootPatch = hotloadableAssetPath("synths/clacker.pd");
+	mAVClacker = mPd->loadPatch( DataSourcePath::create(rootPatch) ).get();
+
+
 	// ui stuff (do before making windows)
 	mTextureFont = gl::TextureFont::create( Font("Avenir",12) );
 	

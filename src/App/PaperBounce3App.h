@@ -199,6 +199,7 @@ class PaperBounce3App : public App {
 	
 	// Synthesis
 	cipd::PureDataNodeRef mPd;
+	cipd::PatchRef mAVClacker;
 	
 private: /* starting to make some stuff private... start somewhere */
 	void updateVision();
