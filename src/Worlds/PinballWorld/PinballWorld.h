@@ -199,12 +199,15 @@ private:
 	GamepadManager mGamepadManager;
 	map<unsigned int,string> mGamepadButtons;
 
-	// game over state
-	float mGameOverBegan = -1;
-	float getGameOverProgress() const;
-	bool  getIsInGameOverState() const { return getGameOverProgress() > 0.f ; }
-	void beginGameOver();
-
+	// party state
+	float mPartyBegan = -1;
+	int   mPartyType;
+	float getPartyProgress() const;
+	vec2  getPartyLoc() const;
+	bool  getIsInGameOverState() const { return getPartyProgress() > 0.f ; }
+	void  beginParty( int type );
+	int   mTargetCount=0;
+	
 	// --- Sound Synthesis ---
 	bool mSoundEnabled=true;
 

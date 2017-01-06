@@ -7,7 +7,8 @@ out vec4 fragColor;
 
 
 uniform float uTime;
-uniform float uGameOverProgress;
+uniform float uPartyProgress;
+uniform vec2  uPartyLoc;
 
 float cos01(float phase) {
 	return cos(phase) * 0.5 + 0.5;
@@ -34,9 +35,9 @@ void main()
 	vec2 gradientCenter = vec2(0.5);
 	float gradientSpeed = 1;
 	float gridBrightness = .55;
-	if (uGameOverProgress > 0) {
+	if (uPartyProgress > 0) {
 		gridBrightness = 1;
-		gradientCenter = vec2(1, 0.5);
+		gradientCenter = uPartyLoc;
 		gradientFreq = 10;
 		gradientSpeed = 15;
 	}
@@ -87,7 +88,7 @@ void main()
 						, rescale01(minScale, 1., cos01(phase*hash11(t+2.) + hash11(t+3.)))
 						);
 	
-	if (uGameOverProgress>0.) gradient = pow( gradient, vec3(2.) );
+	if (uPartyProgress>0.) gradient = pow( gradient, vec3(2.) );
 
 	// Background color
 

@@ -591,8 +591,8 @@ void PinballView::draw3dFloor() const
 		gl::ScopedGlslProg glslScp(mFloorShader);
 		
 		mFloorShader->uniform( "uTime", (float)ci::app::getElapsedSeconds() );
-		mFloorShader->uniform( "uGameOverProgress", mWorld.getGameOverProgress());
-		
+		mFloorShader->uniform( "uPartyProgress", mWorld.getPartyProgress());
+		mFloorShader->uniform( "uPartyLoc", mWorld.getPartyLoc());
 
 		gl::pushModelView();
 		gl::translate(0,0,m3dTableDepth);
