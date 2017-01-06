@@ -40,7 +40,8 @@ void PartParams::set( const XmlTree& xml )
 	getXml(xml, "TargetMinWallDist",mTargetMinWallDist);
 	getXml(xml, "TargetOnColor",mTargetOnColor);
 	getXml(xml, "TargetOffColor",mTargetOffColor);
-	getXml(xml, "TargetStrobeColor",mTargetStrobeColor);
+	getXml(xml, "TargetOnStrobeColor",mTargetOnStrobeColor);
+	getXml(xml, "TargetOffStrobeColor",mTargetOffStrobeColor);
 	getXml(xml, "TargetDynamicRadius",mTargetDynamicRadius);
 }
 
@@ -64,7 +65,7 @@ bool Part::getShouldMergeWithOldPart( const PartRef old ) const
 		;
 }
 
-void Part::addExtrudedCollisionPolyToScene( Scene& s, ColorA c ) const
+void Part::addExtrudedCollisionPolyToScene( Scene& s, ColorA c, const mat4* transform ) const
 {
 	float znear = 0.f;
 	float zfar  = getWorld().getTableDepth();
@@ -83,7 +84,7 @@ void Part::addExtrudedCollisionPolyToScene( Scene& s, ColorA c ) const
 		>> geom::Translate(0,0,extrudeDepth/2+znear)
 		>> geom::ColorFromAttrib( geom::POSITION, posToColor ));
 	
-	s.mWalls.push_back( mesh );
+	s.mWalls.push_back( Scene::Obj(mesh,transform) );
 }
 
 void Part::markCollision( float decay )
@@ -321,14 +322,16 @@ void Bumper::onBallCollide( Ball& ball )
 	getWorld().getPd()->sendFloat("hit-bumper", length( getWorld().getDenoisedBallVel(ball)*10.f ) );
 }
 
-Target::Target( PinballWorld& world, vec2 pin, float radius )
+Target::Target( PinballWorld& world, vec2 triggerloc, vec2 triggervec, vec2 lightloc, float radius )
 	: Part(world,PartType::Target)
-	, mLoc(pin)
+	, mTriggerLoc(triggerloc)
+	, mTriggerVec(triggervec)
+	, mLightLoc(lightloc)
 	, mRadius(radius)
 {
 	mColorOff = getWorld().mPartParams.mTargetOffColor;
 	mColorOn  = getWorld().mPartParams.mTargetOnColor;
-	mColorStrobe = getWorld().mPartParams.mTargetStrobeColor;
+	mColorStrobe = getWorld().mPartParams.mTargetOffStrobeColor;
 
 	setStrobePhase(2);
 }
@@ -343,36 +346,66 @@ float Part::getStrobe( float strobeFreqSlow, float strobeFreqFast ) const
 	);
 }
 
+float Target::getMyStrobe() const
+{
+	return getStrobe( mIsLit ? .75f : 1.5f, .15f );
+}
+
+Color Target::getLightColor() const
+{
+	const float strobe = getMyStrobe();
+
+	ColorA lightColor = lerp(
+		lerp(mColorOff,mColorOn,mLight),
+		lerp(mColorStrobe,getWorld().mPartParams.mTargetOnStrobeColor,mLight),
+		strobe );
+		
+	return lightColor;
+}
+
+Color Target::getTriggerColor() const
+{
+	return getLightColor();
+}
+
 void Target::draw()
 {
-	gl::pushModelView();
-	gl::translate( 0, 0, getWorld().getTableDepth() -.01f); // epsilon so we don't z-clip behind table back
+//	const float collideFade = getCollisionFade();
+	
+	Color triggerColor = getTriggerColor();
+	
+	// draw light on floor
+	if (0)
+	{
+		Color lightColor = getLightColor();
 
-	float collideFade = getCollisionFade();
-	
-	float strobe = getStrobe( mIsLit ? .75f : 1.5f, .15f );
-	
-	ColorA c = lerp(
-		lerp(mColorOff,mColorOn,mLight),
-		lerp(mColorStrobe,mColorOff,mLight),
-		strobe );
-	
-	gl::color(c);
-	gl::drawSolidCircle(mLoc, mRadius);
+		gl::pushModelView();
+		gl::translate( 0, 0, getWorld().getTableDepth() -.01f); // epsilon so we don't z-clip behind table back
+		
+		gl::color(lightColor);
+		gl::drawSolidCircle(mLightLoc, mRadius);
 
-	gl::popModelView();
+		gl::popModelView();
+	}
 	
+	// highlight input contour
 	if ( mContourPoly.size()>0 )
 	{
 		// we are at wrong z...
 		// the objects should manage that themselves
 		gl::ScopedDepth depthTest(false);
-//		gl::color( mColorOn * ColorA(1,1,1,collideFade) );
+		gl::color(triggerColor);
 
-		if ( collideFade > 0.f ) gl::color(c);
-		else gl::color( lerp(mColorStrobe,mColorOff,mLight) * strobe );
-//		gl::color( c );
 		gl::drawSolid(mContourPoly);
+	}
+	
+	//
+	{
+		gl::ScopedModelMatrix mat;
+		gl::multModelMatrix(getAnimTransform());
+		
+		gl::color( triggerColor );
+		gl::drawSolid( getCollisionPoly() );
 	}
 }
 
@@ -382,15 +415,15 @@ void Target::tick()
 	
 	const auto &balls = getWorld().getBalls();
 	
-	if (balls.empty())
+/*	if (balls.empty())
 	{
 		setIsLit(false);
 	}
-	else //if ( !mIsLit )
+	else*/ if ( !mIsLit )
 	{
 		for ( auto &b : balls )
 		{
-			if ( distance(b.mLoc,mLoc) < mRadius + b.mRadius )
+			if ( distance(b.mLoc,mLightLoc) < mRadius + b.mRadius )
 			{
 				markCollision(.75f);
 				setIsLit(true);
@@ -400,11 +433,63 @@ void Target::tick()
 	}
 }
 
+float Target::getState() const
+{
+	if (mIsLit) return 1.f - getCollisionFade();
+	else return 0.f;
+}
+
+PolyLine2 Target::getCollisionPoly() const
+{
+	PolyLine2 p;
+	
+	vec2 size(mRadius*2.f,mRadius*.5f);
+	
+	//    ^ mTriggerVec
+	/* 0-----1
+	   |     |   > xvec
+	   3--x--2
+	*/
+	
+	mat2 m( -perp(mTriggerVec), mTriggerVec );
+	
+	float xd = size.y;
+	float v = xd * (1.f-getState());
+	
+	p.push_back( mTriggerLoc + m * vec2(-size.x/2,v) );
+	p.push_back( mTriggerLoc + m * vec2( size.x/2,v) );
+	p.push_back( mTriggerLoc + m * vec2( size.x/2,size.y+v) );
+	p.push_back( mTriggerLoc + m * vec2(        0,size.y+v+xd) );
+	p.push_back( mTriggerLoc + m * vec2(-size.x/2,size.y+v) );
+	p.setClosed();
+	
+	return p;
+}
+
+mat4 Target::getAnimTransform() const
+{
+	mat4 transform;
+	
+	float strobe = getMyStrobe() * (1.f-getState());
+	
+	transform = glm::translate( vec3(0,0, lerp( 0.f, getWorld().getTableDepth()/2, strobe ) ) );
+	
+	return transform;
+}
+
+void Target::addTo3dScene( Scene& s )
+{
+	mat4 transform = getAnimTransform();
+	
+	addExtrudedCollisionPolyToScene(s, lerp(getTriggerColor(),Color(1,1,1),.5f), &transform );
+}
+
 void Target::setIsLit( bool v )
 {
 	if (v && !mIsLit) {
 		getWorld().sendGameEvent( GameEvent::ATargetTurnedOn );
-		getWorld().getPd()->sendFloat("hit-rollover", int(mLoc.y));
+		vec2 param = getWorld().normalizeToPlayfieldBBox(mLightLoc);
+		getWorld().getPd()->sendFloat("hit-rollover", (int)(param.y * 12.f) );
 	}
 	
 	mIsLit=v;
@@ -415,12 +500,13 @@ void Target::onGameEvent( GameEvent e )
 {
 	switch(e)
 	{
-		case GameEvent::LostBall:
-			markCollision(1.f);
+		case GameEvent::NewGame:
+			setIsLit(false);
 			break;
-			
+		
+//		case GameEvent::LostBall:
 		case GameEvent::LostLastMultiBall:
-			markCollision(3.f);
+			if (!mIsLit) markCollision(3.f);
 			break;
 			
 		case GameEvent::NewPart:
@@ -439,7 +525,7 @@ bool Target::getShouldMergeWithOldPart( const PartRef old ) const
 	{
 		auto o = dynamic_cast<Target*>(old.get());
 		assert(o);
-		return distance( o->mLoc, mLoc ) < min( mRadius, o->mRadius ) ;
+		return distance( o->mTriggerLoc, mTriggerLoc ) < min( mRadius, o->mRadius ) ;
 			// this constant needs to be bigger than mPartTrackLocMaxDist otherwise it jitters.
 			// why? because as the angle of the contour jitters it shoots us off far away.
 			// so we know the contour is the same, so we can be liberal here.

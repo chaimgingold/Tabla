@@ -800,11 +800,8 @@ void PinballView::draw3d( GameWorld::DrawType drawType )
 	drawBallCullLine(m3dTableDepth - .01f);
 
 	// balls
-	vec3 eyeLoc = 
-		  vec3( mWorld.getWorldBoundsPoly().calcCentroid(), -mCubeMapEyeHeight )
-		+ vec3( mWorld.getDownVec(), 0 ) * mCubeMapEyeHeight * m3dZSkew ;
-		// some slight of hand here... 
-		
+	vec3 eyeLoc = vec3( mWorld.fromNormalizedPlayfieldBBox( vec2(.5,0) ), -mCubeMapEyeHeight );
+	
 	draw3dBalls(eyeLoc);
 	draw3dRibbons(drawType);
 	if (mDebugDrawCubeMaps) drawBallOrientationMarkers();

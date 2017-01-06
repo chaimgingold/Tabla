@@ -67,11 +67,14 @@ void PinballWorld::setupControls()
 	{
 		mIsFlipperDown[side] = state;
 		
-		if (getBalls().empty() && state==1) serveBall(); 
+		if (getBalls().empty() && state==1 && !getIsInGameOverState() ) serveBall();
 		
-		mPd->sendFloat("flipper-change", state);
-		
-		if (state) this->addScreenShake(mFlipperScreenShake);
+		if ( mPartCensus.getPop( flipperIndexToType(side) ) > 0 )
+		{
+			mPd->sendFloat("flipper-change", state);
+			
+			if (state) this->addScreenShake(mFlipperScreenShake);
+		}
 	};
 	
 	mInputToFunction["flippers-left-down"]  = [this,flipperChange]() { flipperChange(0,1); };
@@ -177,6 +180,24 @@ Rectf PinballWorld::toPlayfieldBoundingBox ( const PolyLine2 &poly ) const
 	return Rectf(pts);
 }
 
+vec2 PinballWorld::normalizeToPlayfieldBBox( vec2 worldSpace ) const
+{
+	vec2 p = toPlayfieldSpace(worldSpace);
+	
+	p.x = (p.x - mPlayfieldBoundingBox.x1) / mPlayfieldBoundingBox.getWidth();
+	p.y = (p.y - mPlayfieldBoundingBox.y1) / mPlayfieldBoundingBox.getHeight();
+	
+	return p;
+}
+
+vec2 PinballWorld::fromNormalizedPlayfieldBBox( vec2 p ) const
+{
+	p.x = mPlayfieldBoundingBox.x1 + mPlayfieldBoundingBox.getWidth()*p.x;
+	p.y = mPlayfieldBoundingBox.y1 + mPlayfieldBoundingBox.getWidth()*p.y;
+	
+	return fromPlayfieldSpace(p);
+}
+
 void PinballWorld::gameWillLoad()
 {
 	// most important thing is to prevent BallWorld from doing its default thing.
@@ -238,6 +259,10 @@ void PinballWorld::updateScreenShake()
 void PinballWorld::update()
 {
 	mFileWatch.update();
+
+	// take census
+	mPartCensus = PartCensus();
+	for( auto p : mParts ) p->updateCensus(mPartCensus);
 	
 	// input
 	mGamepadManager.tick();
@@ -311,6 +336,7 @@ void PinballWorld::serveBall()
 	
 	sendGameEvent(GameEvent::ServeBall);
 	if (oldCount>0) sendGameEvent(GameEvent::ServeMultiBall);
+	if (oldCount==0) sendGameEvent(GameEvent::NewGame);
 }
 
 void PinballWorld::cullBalls()
@@ -461,8 +487,6 @@ void PinballWorld::prepareToDraw()
 void PinballWorld::draw( DrawType dt )
 {
 	mView.draw(dt);
-
-	if (0) rolloverTest();
 }
 
 void PinballWorld::worldBoundsPolyDidChange()
@@ -504,11 +528,6 @@ void PinballWorld::keyUp( KeyEvent event )
 
 void PinballWorld::mouseClick( vec2 loc )
 {
-	PartRef part( new Target( *this, loc, mPartParams.mTargetRadius ) );
-	
-	part->setShouldAlwaysPersist(true);
-	
-	mParts.push_back(part);
 }
 
 void PinballWorld::getCullLine( vec2 v[2] ) const
@@ -792,14 +811,16 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 			float dist;
 			vec2 closestPt;
 			
-			contours.findClosestContour(c.mCenter,&closestPt,&dist,filter);
 			
-			vec2 rolloverLoc = c.mCenter;
+			
+			vec2 lightLoc = c.mCenter;
 			float r = mPartParams.mTargetRadius;
 			
 			const float kMaxDist = mPartParams.mTargetDynamicRadius*4.f;
 			
-			if ( closestPt != c.mCenter && dist < kMaxDist )
+			if ( contours.findClosestContour(c.mCenter,&closestPt,&dist,filter)
+			  && closestPt != c.mCenter
+			  && dist < kMaxDist )
 			{
 				vec2 dir = normalize( closestPt - c.mCenter );
 
@@ -811,9 +832,12 @@ PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
 					far = r;
 				}
 				
-				rolloverLoc = closestPt + dir * (r+far);
-
-				auto rt = new Target(*this,rolloverLoc,r);
+				lightLoc = closestPt + dir * (r+far);
+				
+				vec2 triggerLoc = closestPt;
+				vec2 triggerVec = dir;
+				
+				auto rt = new Target(*this,triggerLoc,triggerVec,lightLoc,r);
 				rt->mContourPoly = c.mPolyLine;
 				
 				add( rt );
@@ -880,6 +904,7 @@ PinballWorld::mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newPa
 			bool doIt=true;
 			
 			// are we an expired trigger?
+			/*
 			if ( p->getType()==PartType::Target )
 			{
 				auto rt = dynamic_cast<Target*>(p.get());
@@ -887,7 +912,8 @@ PinballWorld::mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newPa
 				{
 //					doIt=false;
 				}
-			}
+			}*/
+			// this whole concept of procedurally generating and retiring them is deprecated
 			
 			if (doIt) parts.push_back(p);
 		}
@@ -912,7 +938,7 @@ void PinballWorld::getContoursFromParts( const PartVec& parts, ContourVec& conto
 		}
 	}
 }
-
+/*
 bool PinballWorld::isValidRolloverLoc( vec2 loc, float r, const PartVec& parts ) const
 {
 	// outside?
@@ -956,7 +982,7 @@ void PinballWorld::rolloverTest()
 		gl::color( isValidRolloverLoc(p, r, mParts) ? Color(0,1,0) : Color(1,0,0) );
 		gl::drawSolidCircle(p, r);
 	}
-}
+}*/
 
 Contour PinballWorld::contourFromPoly( PolyLine2 poly ) const
 {

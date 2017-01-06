@@ -38,7 +38,7 @@ void main()
 		gridBrightness = 1;
 		gradientCenter = vec2(1, 0.5);
 		gradientFreq = 10;
-		gradientSpeed = 5;
+		gradientSpeed = 15;
 	}
 
 
@@ -86,6 +86,8 @@ void main()
 						, rescale01(minScale, 1., cos01(phase*hash11(t+1.) + hash11(t+2.)))
 						, rescale01(minScale, 1., cos01(phase*hash11(t+2.) + hash11(t+3.)))
 						);
+	
+	if (uGameOverProgress>0.) gradient = pow( gradient, vec3(2.) );
 
 	// Background color
 
