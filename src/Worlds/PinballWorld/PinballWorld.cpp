@@ -280,9 +280,14 @@ void PinballWorld::updateBallSynthesis() {
 	vector<Ball>& balls = getBalls();
 	
 	auto ballVels = pd::List();
-	
-	for( Ball &b : balls ) {
-		ballVels.addFloat(length(b.getVel()) * 10);
+
+	// Send no velocities when paused to keep balls silent
+	bool shouldSynthesizeBalls = !mPauseBallWorld;
+
+	if (shouldSynthesizeBalls) {
+		for( Ball &b : balls ) {
+			ballVels.addFloat(length(b.getVel()) * 10);
+		}
 	}
 	
 	mPd->sendList("ball-velocities", ballVels );
