@@ -489,7 +489,7 @@ void Target::setIsLit( bool v )
 	if (v && !mIsLit) {
 		getWorld().sendGameEvent( GameEvent::ATargetTurnedOn );
 		vec2 param = getWorld().normalizeToPlayfieldBBox(mLightLoc);
-		getWorld().getPd()->sendFloat("hit-rollover", (int)(param.y * 12.f) );
+		getWorld().getPd()->sendFloat("hit-rollover", (int)(param.y * 24.f) );
 	}
 	
 	mIsLit=v;
