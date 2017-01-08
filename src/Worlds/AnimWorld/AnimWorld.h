@@ -120,6 +120,8 @@ private:
 	float mWorldUnitsToSeconds=10.f;
 	float mAnimLengthQuantizeToSec=.5f;
 	float mMaxFrameDist=10.f; // for same anim
+	float mMaxScreenToFrameDist=20.f;
+	bool mFillCurrentFrame=true;
 	bool mDebugDrawTopology=false;
 	bool mEqualizeImages=false;
 	int  mBlankEdgePixels=0;

@@ -36,12 +36,14 @@
 	
 	
 	<TimeVec>-1 0</TimeVec>
-	<WorldUnitsToSeconds>20</WorldUnitsToSeconds>
+	<WorldUnitsToSeconds>85</WorldUnitsToSeconds>
 	<MaxFrameDist>20</MaxFrameDist>
+	<MaxScreenToFrameDist>50</MaxScreenToFrameDist>
 	<DebugDrawTopology>0</DebugDrawTopology>
-	<AnimLengthQuantizeToSec>.01</AnimLengthQuantizeToSec>
+	<AnimLengthQuantizeToSec>.05</AnimLengthQuantizeToSec>
 	<EqualizeImages>0</EqualizeImages>
 	<BlankEdgePixels>2</BlankEdgePixels>
+	<FillCurrentFrame>0</FillCurrentFrame>
 
 	
 </AnimWorld>

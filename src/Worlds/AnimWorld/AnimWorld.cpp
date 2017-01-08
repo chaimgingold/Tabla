@@ -31,10 +31,12 @@ void AnimWorld::setParams( XmlTree xml )
 	getXml(xml,"TimeVec",mTimeVec);
 	getXml(xml,"WorldUnitsToSeconds",mWorldUnitsToSeconds);
 	getXml(xml,"MaxFrameDist",mMaxFrameDist);
+	getXml(xml,"MaxScreenToFrameDist",mMaxScreenToFrameDist);
 	getXml(xml,"DebugDrawTopology",mDebugDrawTopology);
 	getXml(xml,"AnimLengthQuantizeToSec",mAnimLengthQuantizeToSec);
 	getXml(xml,"EqualizeImages",mEqualizeImages);
 	getXml(xml,"BlankEdgePixels",mBlankEdgePixels);
+	getXml(xml,"FillCurrentFrame",mFillCurrentFrame);
 	
 	mLocalToGlobal = mat2( getTimeVec(), getUpVec() );
 	mGlobalToLocal = inverse( mLocalToGlobal );
@@ -296,7 +298,7 @@ int
 AnimWorld::getFirstFrameIndexOfAnimForScreen_Closest( const Frame& screen, const FrameVec& frames ) const
 {
 	int besti=-1;
-	float bestd=mMaxFrameDist; // reuse this const for proximity
+	float bestd=mMaxScreenToFrameDist; // reuse this const for proximity
 	
 	for( const auto &f : frames )
 	{
@@ -438,7 +440,26 @@ void AnimWorld::draw( DrawType drawType )
 
 			if ( isCurrentFrame ) {
 				gl::color( ColorA(color, drawType==DrawType::Projector ? 1.f : .5f) );
-				gl::drawSolid(f.mRectPoly);
+				if (mFillCurrentFrame) gl::drawSolid(f.mRectPoly);
+				else {
+					// fast solution to thick rectangle
+					PolyLine2 mask;
+					vec2 c = f.mRectPoly.calcCentroid();
+					float k = 2.f;
+					for ( int i=0; i<f.mRectPoly.size(); ++i )
+					{
+						vec2 in = f.mRectPoly.getPoints()[i];
+						vec2 q = in + normalize(c-in) * k;
+						mask.push_back(q);
+					}
+					mask.setClosed();
+					
+					gl::drawSolid(f.mRectPoly);
+					gl::color(0,0,0);
+					gl::drawSolid(mask);
+					
+//					gl::draw(f.mRectPoly);
+				}
 			} else {
 				gl::color(color);
 				gl::draw(f.mRectPoly);
@@ -448,8 +469,8 @@ void AnimWorld::draw( DrawType drawType )
 		{
 			if (drawType == DrawType::Projector)
 			{
-//				gl::color(1,1,1); // bathe screen in light
-//				gl::draw(f.mRectPoly);
+				gl::color(1,1,1); // bathe screen in light
+				gl::draw(f.mRectPoly);
 				drawScreen(f,1.f);
 			}
 			else
