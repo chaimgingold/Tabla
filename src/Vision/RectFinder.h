@@ -34,6 +34,9 @@ public:
 		float mMaxGainAreaFrac=.2f; // when doing superset, how much bigger can rect be?
 		float mSubsetRectMinPerimOverlapFrac=.8f; // when doing subset, how much do edge perimeter need to overlap?
 		float mEdgeOverlapDistAttenuate=1.f; // when doing subset edge perimeter test, how far is far away?
+		float mFragmentParallelLinesMaxLengthRatio = 5.f; 
+		
+
 	};
 	Params mParams;
 	

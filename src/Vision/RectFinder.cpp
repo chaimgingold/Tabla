@@ -29,6 +29,7 @@ void RectFinder::Params::set( XmlTree xml )
 	getXml(xml,"MaxGainAreaFrac",mMaxGainAreaFrac);
 	getXml(xml,"SubsetRectMinPerimOverlapFrac",mSubsetRectMinPerimOverlapFrac);
 	getXml(xml,"EdgeOverlapDistAttenuate",mEdgeOverlapDistAttenuate);
+	getXml(xml,"FragmentParallelLinesMaxLengthRatio", mFragmentParallelLinesMaxLengthRatio );
 
 	getXml(xml,"MinRectWidth",mMinRectWidth);
 	getXml(xml,"MinRectArea",mMinRectArea);
@@ -396,9 +397,11 @@ RectFinder::getFragmentCandidates( const PolyLine2& poly ) const
 	CandidateVec result;
 	
 	vector<vec2> norms(n);
+	vector<float> lengths(n);
 	for( int i=0; i<n; ++i )
 	{
 		const int j = (i+1) % n;
+		lengths[i] = distance(pts[i],pts[j]);
 		norms[i] = normalize( pts[j] - pts[i] ); 
 	}
 
@@ -432,12 +435,8 @@ RectFinder::getFragmentCandidates( const PolyLine2& poly ) const
 		return fabs( dot(n1,n2) ) < kDotEps;
 	};
 
-	auto isColinear = [&]( int i, int j ) -> bool
+	auto isValidWidth = [&]( int i, int j ) -> bool
 	{
-		// TODO: replace with a heuristic that checks if they are the RIGHT distance
-		// apart... >= mMinRectWidth
-		// Rename isValidWidth
-		
 		const vec2 p = perp(norms[i]);
 		
 		float d = max(
@@ -445,11 +444,40 @@ RectFinder::getFragmentCandidates( const PolyLine2& poly ) const
 			fabs( dot( pts[(j+1)%n] - pts[i], p ) )
 			); 
 			
-		return d < mParams.mMinRectWidth * .8f;
-		// TODO: optimize by making it return true sometimes; needs a threshold tuning value
-		// base the value on min width / 2 (tada!) 
-		// we can assume isParallel(i,j) -> true 
-//		return false;
+		return d >= mParams.mMinRectWidth;
+	};
+	
+	auto isProportional = [&]( int i, int j ) -> bool
+	{
+		float lo = lengths[i];
+		float hi = lengths[j];
+		
+		if (lo>hi) swap(lo,hi);
+		
+		return (hi / lo < mParams.mFragmentParallelLinesMaxLengthRatio);
+	};
+
+	auto isBracketed = [&]( int i, int j, int c ) -> bool
+	{
+		vec2 v = -perp( norms[j] );
+		
+		float x = dot( pts[i]     - pts[j], v );
+		// [i,j] interval goes from [x,0]
+		
+		float w1 = dot( pts[c] - pts[j], v );
+		float w2 = dot( pts[(c+1)%n] - pts[j], v );
+
+		if (x<0) {
+			// necessary?
+			x  *= -1.f;
+			w1 *= -1.f;
+			w2 *= -1.f;
+		}
+		
+		float eps = 1.f;
+		
+		return w1 <= x+eps  && w2 <= x+eps
+		    && w1 >= -eps   && w2 >= -eps;
 	};
 	
 	auto getCorner = [&]( int i, int j ) -> vec2
@@ -480,17 +508,17 @@ RectFinder::getFragmentCandidates( const PolyLine2& poly ) const
 	for( int j=i+1; j<n  ; ++j )
 	{
 		// i,j parallel?
-		if ( isParallel(norms[i],norms[j]) && !isColinear(i,j) )
+		if ( isParallel(norms[i],norms[j]) && isValidWidth(i,j) && isProportional(i,j) )
 		{
 			for( int k=0; k<n-1; ++k )
 			{
 				// k orthogonal?
-				if ( isOrthogonal(norms[i],norms[k]) )
+				if ( isOrthogonal(norms[i],norms[k]) && isBracketed(i,j,k) )
 				{
 					for( int l=k+1; l<n; ++l )
 					{
 						// l orthogonal?
-						if ( isParallel(norms[k],norms[l]) && !isColinear(k,l) )
+						if ( isParallel(norms[k],norms[l]) && isValidWidth(k,l) && isBracketed(i,j,l) )
 						{
 							if ( isUnique(i,j,k,l) )
 							{

@@ -19,8 +19,8 @@
 	<RectFinder>
 
 <!--	What strategies to allow	-->
-		<AllowSubset>1</AllowSubset>
-		<AllowSuperset>1</AllowSuperset>
+		<AllowSubset>0</AllowSubset>
+		<AllowSuperset>0</AllowSuperset>
 		<AllowFragment>1</AllowFragment>
 
 <!--	Filters. (Last two should/could be identical to Vision/Contours)	-->
@@ -32,6 +32,7 @@
 		<MaxGainAreaFrac>.3</MaxGainAreaFrac>
 		<SubsetRectMinPerimOverlapFrac>.8</SubsetRectMinPerimOverlapFrac>
 		<EdgeOverlapDistAttenuate>1</EdgeOverlapDistAttenuate>
+		<FragmentParallelLinesMaxLengthRatio>4</FragmentParallelLinesMaxLengthRatio>
 		
 	</RectFinder>
 	
