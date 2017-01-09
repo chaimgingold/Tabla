@@ -410,6 +410,9 @@ RectFinder::getFragmentCandidates( const PolyLine2& poly ) const
 	auto isUnique = [&]( int i, int j, int k, int l ) -> bool {
 		// this effectively cuts candidates in half,
 		// eliminating the same box, but rotated 90-degrees
+		// (note: i,j and k,l should always be in the same order, so really
+		// it is redundant (ij, kl) and (kl, ij) orderings we need to eliminate--
+		// the below is a bit overkill)   
 		vector<int> v;
 		v.push_back(i);
 		v.push_back(j);
@@ -508,17 +511,24 @@ RectFinder::getFragmentCandidates( const PolyLine2& poly ) const
 	for( int j=i+1; j<n  ; ++j )
 	{
 		// i,j parallel?
-		if ( isParallel(norms[i],norms[j]) && isValidWidth(i,j) && isProportional(i,j) )
+		if ( isParallel(norms[i],norms[j])
+		  && isValidWidth(i,j)
+		  && isProportional(i,j) )
 		{
 			for( int k=0; k<n-1; ++k )
 			{
 				// k orthogonal?
-				if ( isOrthogonal(norms[i],norms[k]) && isBracketed(i,j,k) )
+				if ( isOrthogonal(norms[i],norms[k])
+				  && isBracketed(i,j,k) )
 				{
 					for( int l=k+1; l<n; ++l )
 					{
 						// l orthogonal?
-						if ( isParallel(norms[k],norms[l]) && isValidWidth(k,l) && isBracketed(i,j,l) )
+						if ( isParallel(norms[k],norms[l])
+						  && isValidWidth(k,l)
+						  && isBracketed(i,j,l)
+						  && isProportional(k,l)
+						  )
 						{
 							if ( isUnique(i,j,k,l) )
 							{
