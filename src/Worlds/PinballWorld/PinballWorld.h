@@ -69,7 +69,7 @@ public:
 	float getStrobe( float phase, float freq ) const;
 	
 	float getFlipperState( int side ) const { assert(side==0||side==1); return mFlipperState[side]; }
-	float getFlipperAngularVel( int side ) const; // TODO: make radians per second
+	float getFlipperAngularVel( int side ) const; // returns in radians per sim frame
 
 	const PartVec& getParts() const { return mParts; }
 

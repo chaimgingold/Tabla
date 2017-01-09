@@ -359,11 +359,11 @@ float PinballWorld::getStrobe( float phase, float freq ) const
 float PinballWorld::getFlipperAngularVel( int side ) const
 {
 	const float eps = .1f;
-	const float radPerSec = (M_PI/2.f) / 6.f; // assume 6 steps per 90 deg of motion
+	const float radPerFrame = (M_PI/2.f) / 6.f; // assume 6 steps per 90 deg of motion
 	const float sign[2] = {1.f,-1.f};
 	
-	if ( mInput.isFlipperDown(side) && mFlipperState[side] < 1.f-eps ) return radPerSec * sign[side];
-	else if ( !mInput.isFlipperDown(side) && mFlipperState[side] > eps ) return -radPerSec * sign[side];
+	if ( mInput.isFlipperDown(side) && mFlipperState[side] < 1.f-eps ) return radPerFrame * sign[side];
+	else if ( !mInput.isFlipperDown(side) && mFlipperState[side] > eps ) return -radPerFrame * sign[side];
 	else return 0.f;
 }
 

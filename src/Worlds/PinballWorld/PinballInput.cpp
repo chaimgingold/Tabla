@@ -43,15 +43,20 @@ PinballInput::PinballInput( PinballWorld& world ) : mWorld(world)
 	// inputs
 	auto flipperChange = [this]( int side, int state )
 	{
+		bool oldState = mIsFlipperDown[side]; 
+		
 		mIsFlipperDown[side] = state;
 		
-		if (state) mWorld.serveBallIfNone();
-		
-		if ( mWorld.getPartCensus().getPop( flipperIndexToType(side) ) > 0 )
+		if ( state != oldState ) // i think we need this for repeat key-down events, but not gamepad
 		{
-			mWorld.getPd()->sendFloat("flipper-change", state);
+			if (state) mWorld.serveBallIfNone();
 			
-			if (state) mWorld.doFlipperScreenShake();
+			if ( mWorld.getPartCensus().getPop( flipperIndexToType(side) ) > 0 )
+			{
+				mWorld.getPd()->sendFloat("flipper-change", state);
+				
+				if (state) mWorld.doFlipperScreenShake();
+			}
 		}
 	};
 	
