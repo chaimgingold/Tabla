@@ -248,9 +248,13 @@ void PinballWorld::updateBallSynthesis() {
 	// Send no velocities when paused to keep balls silent
 	bool shouldSynthesizeBalls = !isPaused();
 
+//	const float scale = 10.f / (float)balls.size();
+	const float scale = 10.f;
+	
 	if (shouldSynthesizeBalls) {
 		for( Ball &b : balls ) {
-			ballVels.addFloat(length(getDenoisedBallVel(b)) * 10.f);
+//			cout << length(getDenoisedBallVel(b)) << endl;
+			ballVels.addFloat(length(getDenoisedBallVel(b)) * scale);
 		}
 	}
 	
