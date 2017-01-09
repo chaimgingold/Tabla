@@ -250,7 +250,7 @@ void PinballWorld::updateBallSynthesis() {
 
 	if (shouldSynthesizeBalls) {
 		for( Ball &b : balls ) {
-			ballVels.addFloat(length(b.getVel()) * 10);
+			ballVels.addFloat(length(getDenoisedBallVel(b)) * 10.f);
 		}
 	}
 	
