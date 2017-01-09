@@ -6,7 +6,7 @@
 //
 //
 
-#include "PaperBounce3App.h" // for hotloadable file paths
+#include "TablaApp.h" // for hotloadable file paths
 #include "MusicWorld.h"
 #include "geom.h"
 #include "cinder/rand.h"
@@ -26,16 +26,16 @@ MusicWorld::MusicWorld()
 {
 	// TODO: refactor so easy to load more
 	mFileWatch.loadShader(
-		PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / "additive.vert" ),
-		PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / "additive.frag" ),
+		TablaApp::get()->hotloadableAssetPath( fs::path("shaders") / "additive.vert" ),
+		TablaApp::get()->hotloadableAssetPath( fs::path("shaders") / "additive.frag" ),
 		[this](gl::GlslProgRef prog)
 	{
 		mAdditiveShader = prog; // allows null, so we can easily see if we broke it
 	});
 
 	mFileWatch.loadShader(
-		PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / "rainbow.vert" ),
-		PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / "rainbow.frag" ),
+		TablaApp::get()->hotloadableAssetPath( fs::path("shaders") / "rainbow.vert" ),
+		TablaApp::get()->hotloadableAssetPath( fs::path("shaders") / "rainbow.frag" ),
 		[this](gl::GlslProgRef prog)
 	{
 		mRainbowShader = prog; // allows null, so we can easily see if we broke it
@@ -172,7 +172,7 @@ MusicWorld::loadInstrumentIcons()
 		{
 			string fileName = instr.mIconFileName;
 			
-			fs::path path = PaperBounce3App::get()->hotloadableAssetPath( fs::path("music-icons") / fileName );
+			fs::path path = TablaApp::get()->hotloadableAssetPath( fs::path("music-icons") / fileName );
 			
 			mFileWatch.load( path, [this,fileName]( fs::path path )
 			{
@@ -413,11 +413,11 @@ void MusicWorld::setupSynthesis()
 	killAllNotes();
 
 	// Create the synth engine
-	mPd = PaperBounce3App::get()->mPd;
+	mPd = TablaApp::get()->mPd;
 
 	cout << "loading patch..." << endl;
 
-	auto app = PaperBounce3App::get();
+	auto app = TablaApp::get();
 	std::vector<fs::path> paths =
 	{
 		app->hotloadableAssetPath("synths/MusicWorld/music-world.pd"),

@@ -7,7 +7,7 @@
 //
 
 #include "PipelineStageView.h"
-#include "PaperBounce3App.h"
+#include "TablaApp.h"
 
 void PipelineStageView::draw()
 {

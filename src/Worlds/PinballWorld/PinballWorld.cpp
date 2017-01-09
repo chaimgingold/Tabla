@@ -6,7 +6,7 @@
 //
 //
 
-#include "PaperBounce3App.h"
+#include "TablaApp.h"
 #include "glm/glm.hpp"
 #include "PinballWorld.h"
 #include "PinballParts.h"
@@ -223,13 +223,13 @@ void PinballWorld::onGameEvent( GameEvent e )
 			break;
 		case GameEvent::LostLastMultiBall:
 			mPd->sendBang("game-over");
-			beginParty(0);
+			beginParty(PartyType::GameOver);
 			mTargetCount=0;
 			break;
 			
 		case GameEvent::ServeMultiBall:
 			mPd->sendBang("multi-ball");
-			beginParty(1); // trigger shader effect
+			beginParty(PartyType::Multiball); // trigger shader effect
 			break;
 			
 		case GameEvent::ServeBall:
@@ -244,14 +244,14 @@ void PinballWorld::onGameEvent( GameEvent e )
 		default:break;
 	}
 }
-void PinballWorld::beginParty( int type ) {
+void PinballWorld::beginParty( PartyType type ) {
 	mPartyBegan = (float)ci::app::getElapsedSeconds();
 	mPartyType = type;
 }
 
 vec2 PinballWorld::getPartyLoc() const
 {
-	if (mPartyType==0) return vec2(1, 0.5);
+	if (mPartyType==PartyType::GameOver) return vec2(1, 0.5);
 	else return vec2(0,.5);
 }
 
@@ -1071,7 +1071,7 @@ void PinballWorld::addContourToVec( Contour c, ContourVec& contours ) const
 void PinballWorld::setupSynthesis()
 {
 	// Register file-watchers for all the major pd patch components
-	auto app = PaperBounce3App::get();
+	auto app = TablaApp::get();
 
 	mPd = app->mPd;
 

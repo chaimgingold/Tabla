@@ -200,17 +200,23 @@ private:
 	map<unsigned int,string> mGamepadButtons;
 
 	// party state
+	enum class PartyType
+	{
+		None,
+		Multiball,
+		GameOver
+	};
+	
 	float mPartyBegan = -1;
-	int   mPartyType;
+	PartyType mPartyType = PartyType::None;
 	float getPartyProgress() const;
 	vec2  getPartyLoc() const;
-	bool  getIsInGameOverState() const { return getPartyProgress() > 0.f ; }
-	void  beginParty( int type );
+	bool  getIsInGameOverState() const { return getPartyProgress() > 0.f && mPartyType==PartyType::GameOver; }
+	void  beginParty( PartyType type );
 	int   mTargetCount=0;
 	
 	// --- Sound Synthesis ---
 	bool mSoundEnabled=true;
-
 	
 	void setupSynthesis() override;
 	void updateSynthesis() override {};

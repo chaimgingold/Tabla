@@ -15,7 +15,7 @@
 using namespace std;
 using namespace ci;
 
-class PaperBounce3App;
+class TablaApp;
 
 class GameLibraryView : public View
 {

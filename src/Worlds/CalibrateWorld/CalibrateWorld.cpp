@@ -7,7 +7,7 @@
 //
 
 #include "CalibrateWorld.h"
-#include "PaperBounce3App.h" // for config
+#include "TablaApp.h" // for config
 #include "ocv.h"
 #include "xml.h"
 
@@ -167,7 +167,7 @@ void CalibrateWorld::tryToSolveWithKnownBoards( cv::Size imageSize )
 			cout << "*** Calibration done! ***" << endl;
 			
 			// call out to app to configure
-			auto app = PaperBounce3App::get();
+			auto app = TablaApp::get();
 			if (app)
 			{
 				app->mLightLink.getCaptureProfile().mDistCoeffs = distCoeffs;

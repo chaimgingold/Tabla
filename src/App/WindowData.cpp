@@ -7,14 +7,14 @@
 //
 
 #include "WindowData.h"
-#include "PaperBounce3App.h"
+#include "TablaApp.h"
 #include "geom.h" // getPointsAsPoly
 #include "GameLibraryView.h"
 
 const float kZNear =  100.f;
 const float kZFar  = -100.f;
 
-WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app )
+WindowData::WindowData( WindowRef window, bool isUIWindow, TablaApp& app )
 	: mApp(app)
 	, mWindow(window)
 	, mIsUIWindow(isUIWindow)
@@ -51,7 +51,7 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& app 
 		// - √ set data after editing (lambda?)
 		// - √ specify native coordinate system
 
-		auto updateLightLink = []( PaperBounce3App& app )
+		auto updateLightLink = []( TablaApp& app )
 		{
 			// for some reason the recursive lambda capture (doing a capture in this function)
 			// causes everything to explode, so just passing in a param.

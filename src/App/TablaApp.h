@@ -1,13 +1,13 @@
 //
-//  PaperBounce3App.h
+//  TablaApp.h
 //  PaperBounce3
 //
 //  Created by Chaim Gingold on 9/12/16.
 //
 //
 
-#ifndef PaperBounce3App_h
-#define PaperBounce3App_h
+#ifndef TablaApp_h
+#define TablaApp_h
 
 #include <memory>
 
@@ -39,11 +39,11 @@ using namespace ci;
 using namespace ci::app;
 using namespace std;
 
-class PaperBounce3App : public App {
+class TablaApp : public App {
   public:
-	~PaperBounce3App();
+	~TablaApp();
 	
-	static PaperBounce3App* get() { return dynamic_cast<PaperBounce3App*>(AppBase::get()); }
+	static TablaApp* get() { return dynamic_cast<TablaApp*>(AppBase::get()); }
 	
 	void setup() override;
 	void mouseDown( MouseEvent event ) override;
@@ -211,4 +211,4 @@ private: /* starting to make some stuff private... start somewhere */
 	void saveUserSettings();
 };
 
-#endif /* PaperBounce3App_h */
+#endif /* TablaApp_h */

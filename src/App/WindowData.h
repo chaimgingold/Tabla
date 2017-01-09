@@ -13,13 +13,13 @@
 #include "PipelineStageView.h"
 #include <memory>
 
-class PaperBounce3App;
+class TablaApp;
 class GameLibraryView;
 
 class WindowData {
 public:
 
-	WindowData( WindowRef window, bool isUIWindow, PaperBounce3App& ) ;
+	WindowData( WindowRef window, bool isUIWindow, TablaApp& ) ;
 	
 	void draw();
 	void mouseDown( MouseEvent event );
@@ -55,7 +55,7 @@ private:
 	
 	vector<ViewRef> mPipelineViews;
 	
-	PaperBounce3App& mApp; // hacky transitional refactor thing.
+	TablaApp& mApp; // hacky transitional refactor thing.
 
 };
 

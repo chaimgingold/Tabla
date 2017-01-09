@@ -6,7 +6,7 @@
 //
 //
 
-#include "PaperBounce3App.h"
+#include "TablaApp.h"
 #include "BallWorld.h"
 #include "geom.h"
 #include "cinder/Rand.h"
@@ -15,8 +15,8 @@
 BallWorld::BallWorld()
 {
 	mFileWatch.loadShader(
-		PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / "circle.vert" ),
-		PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / "circle.frag" ),
+		TablaApp::get()->hotloadableAssetPath( fs::path("shaders") / "circle.vert" ),
+		TablaApp::get()->hotloadableAssetPath( fs::path("shaders") / "circle.frag" ),
 		[this](gl::GlslProgRef prog)
 	{
 		mCircleShader = prog; // allows null, so we can easily see if we broke it
@@ -925,10 +925,10 @@ void onBallWorldBoundaryCollide	( const Ball& )
 
 void BallWorld::setupSynthesis()
 {
-	mPd = PaperBounce3App::get()->mPd;
+	mPd = TablaApp::get()->mPd;
 	// Load synthesis patch
 
-	auto app = PaperBounce3App::get();
+	auto app = TablaApp::get();
 	std::vector<fs::path> paths =
 	{
 		app->hotloadableAssetPath("synths/BallWorld/ball-world.pd"),

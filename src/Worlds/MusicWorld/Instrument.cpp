@@ -5,7 +5,7 @@
 //  Created by Luke Iannini on 11/14/16.
 //
 //
-#include "PaperBounce3App.h" // for hotloadable file paths
+#include "TablaApp.h" // for hotloadable file paths
 #include "geom.h"
 #include "cinder/rand.h"
 #include "cinder/audio/Context.h"

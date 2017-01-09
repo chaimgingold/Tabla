@@ -11,7 +11,7 @@
 #include "cinder/rand.h"
 #include "cinder/audio/Context.h"
 #include "cinder/audio/Source.h"
-#include "PaperBounce3App.h"
+#include "TablaApp.h"
 
 PongWorld::PongWorld()
 {
@@ -385,10 +385,10 @@ void PongWorld::strobeBalls()
 // Synthesis
 void PongWorld::setupSynthesis()
 {
-	mPd = PaperBounce3App::get()->mPd;
+	mPd = TablaApp::get()->mPd;
 
 	// Load pong synthesis patch
-	auto app = PaperBounce3App::get();
+	auto app = TablaApp::get();
 	std::vector<fs::path> paths =
 	{
 		app->hotloadableAssetPath("synths/PongWorld/pong-world.pd"),

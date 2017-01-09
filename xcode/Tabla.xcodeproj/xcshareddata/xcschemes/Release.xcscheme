@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "8D1107260486CEB800E47090"
-               BuildableName = "PaperBounce3.app"
-               BlueprintName = "PaperBounce3"
-               ReferencedContainer = "container:PaperBounce3.xcodeproj">
+               BuildableName = "Tabla.app"
+               BlueprintName = "Tabla"
+               ReferencedContainer = "container:Tabla.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8D1107260486CEB800E47090"
-            BuildableName = "PaperBounce3.app"
-            BlueprintName = "PaperBounce3"
-            ReferencedContainer = "container:PaperBounce3.xcodeproj">
+            BuildableName = "Tabla.app"
+            BlueprintName = "Tabla"
+            ReferencedContainer = "container:Tabla.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -56,9 +56,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8D1107260486CEB800E47090"
-            BuildableName = "PaperBounce3.app"
-            BlueprintName = "PaperBounce3"
-            ReferencedContainer = "container:PaperBounce3.xcodeproj">
+            BuildableName = "Tabla.app"
+            BlueprintName = "Tabla"
+            ReferencedContainer = "container:Tabla.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <EnvironmentVariables>
@@ -82,9 +82,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8D1107260486CEB800E47090"
-            BuildableName = "PaperBounce3.app"
-            BlueprintName = "PaperBounce3"
-            ReferencedContainer = "container:PaperBounce3.xcodeproj">
+            BuildableName = "Tabla.app"
+            BlueprintName = "Tabla"
+            ReferencedContainer = "container:Tabla.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

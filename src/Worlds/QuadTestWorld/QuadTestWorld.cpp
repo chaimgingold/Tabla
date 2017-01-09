@@ -6,7 +6,7 @@
 //
 //
 
-#include "PaperBounce3App.h" // for text
+#include "TablaApp.h" // for text
 #include "QuadTestWorld.h"
 #include "ocv.h"
 #include "geom.h"
@@ -134,7 +134,7 @@ void QuadTestWorld::draw( DrawType drawType )
 //			if ( !f.mIsValid && f.mConvexHull.size()>0 )
 			if (1)
 			{
-				PaperBounce3App::get()->mTextureFont->drawString(
+				TablaApp::get()->mTextureFont->drawString(
 				//	toString(f.mConvexHull.size()) + " " + toString(f.mContourPoly.calcArea()),	
 					toString(floorf(f.mOverlapScore*100.f)) + "%",
 					//f.mConvexHull.getPoints()[0] + vec2(0,-1),

@@ -17,7 +17,7 @@
 using namespace std;
 using namespace ci;
 
-class PaperBounce3App;
+class TablaApp;
 
 class PipelineStageView : public View
 {
@@ -50,7 +50,7 @@ private:
 class MainImageView : public View
 {
 public:
-	MainImageView( PaperBounce3App& app )
+	MainImageView( TablaApp& app )
 		: mApp(app)
 //		: mPipeline(p)
 //		, mGameWorld(w)
@@ -96,7 +96,7 @@ private:
 	GameWorld* getGameWorld() const;
 	Pipeline&  getPipeline () const;
 
-	PaperBounce3App& mApp;
+	TablaApp& mApp;
 	string			mStageName;
 
 	ColorA			mFrameColor=ColorA(0,0,0,0); // none by default

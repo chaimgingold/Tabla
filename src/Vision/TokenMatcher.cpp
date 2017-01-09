@@ -6,7 +6,7 @@
 //
 //
 
-#include "PaperBounce3App.h"
+#include "TablaApp.h"
 #include "TokenMatcher.h"
 #include "ocv.h"
 #include "geom.h"
@@ -28,7 +28,7 @@ void TokenMatcher::Params::set( XmlTree xml )
 		{
 			fs::path path = i->getChild("Path").getValue();
 			
-			path = PaperBounce3App::get()->hotloadableAssetPath(path);
+			path = TablaApp::get()->hotloadableAssetPath(path);
 			
 			mTokenLibraryPaths.push_back(path);
 

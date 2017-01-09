@@ -27,6 +27,8 @@
 		23756771BB404A04991A26CB /* b2PolygonAndCircleContact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6B648D73A5D453781A11E34 /* b2PolygonAndCircleContact.cpp */; };
 		24F2003E479C4BC49D1F7374 /* b2WheelJoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 627E59F1B82E4F36ABF0DE48 /* b2WheelJoint.cpp */; };
 		262A88751DB594B700FE2336 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 262A88741DB594B700FE2336 /* CoreMIDI.framework */; };
+		262FCDCC1E234CB100FC5D66 /* PinballVision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 262FCDCA1E234CB100FC5D66 /* PinballVision.cpp */; };
+		262FCDCF1E234DDF00FC5D66 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 262FCDCE1E234DDF00FC5D66 /* Images.xcassets */; };
 		2673CD5E1E1D791C0036C02D /* PinballView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2673CD5C1E1D791C0036C02D /* PinballView.cpp */; };
 		26CCA2D31E089DE7005F7C24 /* BallWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2B21E089DE7005F7C24 /* BallWorld.cpp */; };
 		26CCA2D41E089DE7005F7C24 /* CalibrateWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2B51E089DE7005F7C24 /* CalibrateWorld.cpp */; };
@@ -51,7 +53,7 @@
 		26CCA30B1E089EB8005F7C24 /* GamepadManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3001E089EB8005F7C24 /* GamepadManager.cpp */; };
 		26CCA30C1E089EB8005F7C24 /* RtMidi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3061E089EB8005F7C24 /* RtMidi.cpp */; };
 		26CCA30D1E089EB8005F7C24 /* rtmidi_c.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3081E089EB8005F7C24 /* rtmidi_c.cpp */; };
-		26CCA3191E089EE3005F7C24 /* PaperBounce3App.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3101E089EE3005F7C24 /* PaperBounce3App.cpp */; };
+		26CCA3191E089EE3005F7C24 /* TablaApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3101E089EE3005F7C24 /* TablaApp.cpp */; };
 		26CCA31A1E089EE3005F7C24 /* PipelineStageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3131E089EE3005F7C24 /* PipelineStageView.cpp */; };
 		26CCA31B1E089EE3005F7C24 /* View.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3151E089EE3005F7C24 /* View.cpp */; };
 		26CCA31C1E089EE3005F7C24 /* WindowData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3171E089EE3005F7C24 /* WindowData.cpp */; };
@@ -209,6 +211,9 @@
 		1967F5787DB34245B2B91CBA /* b2EdgeAndCircleContact.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = b2EdgeAndCircleContact.h; path = ../blocks/Box2D/src/Box2D/Dynamics/Contacts/b2EdgeAndCircleContact.h; sourceTree = "<group>"; };
 		1DCA2C3FD6C84A6DAB24027E /* b2DistanceJoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2DistanceJoint.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Joints/b2DistanceJoint.cpp; sourceTree = "<group>"; };
 		262A88741DB594B700FE2336 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
+		262FCDCA1E234CB100FC5D66 /* PinballVision.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PinballVision.cpp; sourceTree = "<group>"; };
+		262FCDCB1E234CB100FC5D66 /* PinballVision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PinballVision.h; sourceTree = "<group>"; };
+		262FCDCE1E234DDF00FC5D66 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Tabla/Images.xcassets; sourceTree = "<group>"; };
 		2673CD5C1E1D791C0036C02D /* PinballView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PinballView.cpp; sourceTree = "<group>"; };
 		2673CD5D1E1D791C0036C02D /* PinballView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PinballView.h; sourceTree = "<group>"; };
 		26CCA2B21E089DE7005F7C24 /* BallWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BallWorld.cpp; sourceTree = "<group>"; };
@@ -261,8 +266,8 @@
 		26CCA3081E089EB8005F7C24 /* rtmidi_c.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtmidi_c.cpp; sourceTree = "<group>"; };
 		26CCA3091E089EB8005F7C24 /* rtmidi_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtmidi_c.h; sourceTree = "<group>"; };
 		26CCA30E1E089EC7005F7C24 /* xml.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = xml.h; sourceTree = "<group>"; };
-		26CCA3101E089EE3005F7C24 /* PaperBounce3App.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PaperBounce3App.cpp; sourceTree = "<group>"; };
-		26CCA3111E089EE3005F7C24 /* PaperBounce3App.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PaperBounce3App.h; sourceTree = "<group>"; };
+		26CCA3101E089EE3005F7C24 /* TablaApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TablaApp.cpp; sourceTree = "<group>"; };
+		26CCA3111E089EE3005F7C24 /* TablaApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TablaApp.h; sourceTree = "<group>"; };
 		26CCA3131E089EE3005F7C24 /* PipelineStageView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PipelineStageView.cpp; sourceTree = "<group>"; };
 		26CCA3141E089EE3005F7C24 /* PipelineStageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PipelineStageView.h; sourceTree = "<group>"; };
 		26CCA3151E089EE3005F7C24 /* View.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = View.cpp; sourceTree = "<group>"; };
@@ -337,7 +342,7 @@
 		84C080BFFD7A499F82217C0E /* b2ContactSolver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = b2ContactSolver.h; path = ../blocks/Box2D/src/Box2D/Dynamics/Contacts/b2ContactSolver.h; sourceTree = "<group>"; };
 		86F66B42A9B5407DB9FBBFAA /* b2CircleContact.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2CircleContact.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Contacts/b2CircleContact.cpp; sourceTree = "<group>"; };
 		8927AC5E65894FE2921DAA0E /* b2Joint.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = b2Joint.h; path = ../blocks/Box2D/src/Box2D/Dynamics/Joints/b2Joint.h; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* PaperBounce3.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PaperBounce3.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* Tabla.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tabla.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8F5FF6F267B047B895187640 /* b2Rope.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2Rope.cpp; path = ../blocks/Box2D/src/Box2D/Rope/b2Rope.cpp; sourceTree = "<group>"; };
 		90E651EF3C984342BFF06A5C /* b2Distance.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2Distance.cpp; path = ../blocks/Box2D/src/Box2D/Collision/b2Distance.cpp; sourceTree = "<group>"; };
 		99272C9FB12348B89B20638D /* b2TimeStep.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = b2TimeStep.h; path = ../blocks/Box2D/src/Box2D/Dynamics/b2TimeStep.h; sourceTree = "<group>"; };
@@ -791,7 +796,7 @@
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8D1107320486CEB800E47090 /* PaperBounce3.app */,
+				8D1107320486CEB800E47090 /* Tabla.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -867,6 +872,8 @@
 				26CCA2C71E089DE7005F7C24 /* PinballParts.h */,
 				2673CD5C1E1D791C0036C02D /* PinballView.cpp */,
 				2673CD5D1E1D791C0036C02D /* PinballView.h */,
+				262FCDCA1E234CB100FC5D66 /* PinballVision.cpp */,
+				262FCDCB1E234CB100FC5D66 /* PinballVision.h */,
 			);
 			path = PinballWorld;
 			sourceTree = "<group>";
@@ -961,8 +968,8 @@
 		26CCA30F1E089EE3005F7C24 /* App */ = {
 			isa = PBXGroup;
 			children = (
-				26CCA3101E089EE3005F7C24 /* PaperBounce3App.cpp */,
-				26CCA3111E089EE3005F7C24 /* PaperBounce3App.h */,
+				26CCA3101E089EE3005F7C24 /* TablaApp.cpp */,
+				26CCA3111E089EE3005F7C24 /* TablaApp.h */,
 				26CCA3121E089EE3005F7C24 /* View */,
 				26CCA3171E089EE3005F7C24 /* WindowData.cpp */,
 				26CCA3181E089EE3005F7C24 /* WindowData.h */,
@@ -1036,6 +1043,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				262FCDCE1E234DDF00FC5D66 /* Images.xcassets */,
 				82014830F55D4DEF9E322AC7 /* CinderApp.icns */,
 				CBED44E9F44F448D8514086A /* Info.plist */,
 			);
@@ -2520,9 +2528,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		8D1107260486CEB800E47090 /* PaperBounce3 */ = {
+		8D1107260486CEB800E47090 /* Tabla */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "PaperBounce3" */;
+			buildConfigurationList = C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "Tabla" */;
 			buildPhases = (
 				8D1107290486CEB800E47090 /* Resources */,
 				8D11072C0486CEB800E47090 /* Sources */,
@@ -2533,10 +2541,10 @@
 			dependencies = (
 				C2EC77961DA715AA00DB39C8 /* PBXTargetDependency */,
 			);
-			name = PaperBounce3;
+			name = Tabla;
 			productInstallPath = "$(HOME)/Applications";
 			productName = PaperBounce3;
-			productReference = 8D1107320486CEB800E47090 /* PaperBounce3.app */;
+			productReference = 8D1107320486CEB800E47090 /* Tabla.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -2547,7 +2555,7 @@
 			attributes = {
 				LastUpgradeCheck = 0810;
 			};
-			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "PaperBounce3" */;
+			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Tabla" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
@@ -2567,7 +2575,7 @@
 			);
 			projectRoot = "";
 			targets = (
-				8D1107260486CEB800E47090 /* PaperBounce3 */,
+				8D1107260486CEB800E47090 /* Tabla */,
 			);
 		};
 /* End PBXProject section */
@@ -2594,6 +2602,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				262FCDCF1E234DDF00FC5D66 /* Images.xcassets in Resources */,
 				26FA36431D53C05700C64A00 /* research in Resources */,
 				C29A0ACF1DF1FE12008A26A1 /* .gitignore in Resources */,
 				26FA36501D5519DA00C64A00 /* assets in Resources */,
@@ -2656,10 +2665,11 @@
 				8E2F70EF3C5D4609A2286FD3 /* b2Island.cpp in Sources */,
 				93B67C671E2D48FA99301AE1 /* b2World.cpp in Sources */,
 				C2C874941DDBB2D40067E07D /* serial.cc in Sources */,
-				26CCA3191E089EE3005F7C24 /* PaperBounce3App.cpp in Sources */,
+				26CCA3191E089EE3005F7C24 /* TablaApp.cpp in Sources */,
 				592BF86CF6B441DD954AA794 /* b2WorldCallbacks.cpp in Sources */,
 				985F9999D6EC4BAE8A3E317B /* b2ChainAndCircleContact.cpp in Sources */,
 				E5E02FC84C1B4061A672D169 /* b2ChainAndPolygonContact.cpp in Sources */,
+				262FCDCC1E234CB100FC5D66 /* PinballVision.cpp in Sources */,
 				26CCA2D81E089DE7005F7C24 /* MusicVision.cpp in Sources */,
 				26CCA2F81E089E3F005F7C24 /* Vision.cpp in Sources */,
 				065D029E5180471999C3E354 /* b2CircleContact.cpp in Sources */,
@@ -2720,6 +2730,7 @@
 		C01FCF4B08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
@@ -2727,7 +2738,7 @@
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = PaperBounce3_Prefix.pch;
+				GCC_PREFIX_HEADER = Tabla_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -2745,7 +2756,7 @@
 					"\"-lz\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.libcinder.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = PaperBounce3;
+				PRODUCT_NAME = Tabla;
 				SYMROOT = ./build;
 				USER_HEADER_SEARCH_PATHS = "\"$(CINDER_PATH)/include\" ../include ../blocks/OpenCV3-Contrib/include/** ../blocks/OpenCV3/include ../src/**";
 				WRAPPER_EXTENSION = app;
@@ -2755,6 +2766,7 @@
 		C01FCF4C08A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2763,7 +2775,7 @@
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = PaperBounce3_Prefix.pch;
+				GCC_PREFIX_HEADER = Tabla_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"NDEBUG=1",
 					"$(inherited)",
@@ -2781,7 +2793,7 @@
 					"\"-lz\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.libcinder.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = PaperBounce3;
+				PRODUCT_NAME = Tabla;
 				STRIP_INSTALLED_PRODUCT = YES;
 				SYMROOT = ./build;
 				USER_HEADER_SEARCH_PATHS = "\"$(CINDER_PATH)/include\" ../include ../blocks/OpenCV3-Contrib/include/** ../blocks/OpenCV3/include ../src/**";
@@ -2880,7 +2892,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "PaperBounce3" */ = {
+		C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "Tabla" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C01FCF4B08A954540054247B /* Debug */,
@@ -2889,7 +2901,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "PaperBounce3" */ = {
+		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Tabla" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C01FCF4F08A954540054247B /* Debug */,

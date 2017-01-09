@@ -9,7 +9,7 @@
 #include "PinballWorld.h"
 #include "PinballView.h"
 
-#include "PaperBounce3App.h"
+#include "TablaApp.h"
 #include "glm/glm.hpp"
 #include "PinballParts.h"
 #include "geom.h"
@@ -37,8 +37,8 @@ void PinballView::setup()
 	auto load = [this]( string name, gl::GlslProgRef* to, std::function<void(void)> f )
 	{
 		mFileWatch.loadShader(
-			PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / "pinball" / (name + ".vert") ),
-			PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / "pinball" / (name + ".frag") ),
+			TablaApp::get()->hotloadableAssetPath( fs::path("shaders") / "pinball" / (name + ".vert") ),
+			TablaApp::get()->hotloadableAssetPath( fs::path("shaders") / "pinball" / (name + ".frag") ),
 			[this,to,f](gl::GlslProgRef prog)
 		{
 			*to = prog; // allows null, so we can easily see if we broke it
@@ -52,7 +52,7 @@ void PinballView::setup()
 	load( "sky", &mSkyShader, 0 );
 	load( "ball-shadow", &mBallShadowShader, 0 );
 	
-	mFileWatch.load( PaperBounce3App::get()->hotloadableAssetPath( fs::path("images") / "env_map.jpg" ),
+	mFileWatch.load( TablaApp::get()->hotloadableAssetPath( fs::path("images") / "env_map.jpg" ),
 		[this]( fs::path path ){
 			try {
 				mCubeMap = gl::TextureCubeMap::create( loadImage(path),

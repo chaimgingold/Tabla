@@ -10,15 +10,15 @@
 #include "ocv.h"
 #include "geom.h"
 #include "xml.h"
-#include "PaperBounce3App.h"
+#include "TablaApp.h"
 
 using namespace std;
 
 RibbonWorld::RibbonWorld()
 {
 	mFileWatch.loadShader(
-						  PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / "ribbon.vert" ),
-						  PaperBounce3App::get()->hotloadableAssetPath( fs::path("shaders") / "ribbon.frag" ),
+						  TablaApp::get()->hotloadableAssetPath( fs::path("shaders") / "ribbon.vert" ),
+						  TablaApp::get()->hotloadableAssetPath( fs::path("shaders") / "ribbon.frag" ),
 						  [this](gl::GlslProgRef prog)
 						  {
 							  mRibbonShader = prog; // allows null, so we can easily see if we broke it

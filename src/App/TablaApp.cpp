@@ -1,4 +1,4 @@
-#include "PaperBounce3App.h"
+#include "TablaApp.h"
 
 #include "BallWorld.h"
 #include "PongWorld.h"
@@ -29,12 +29,12 @@ const vec2 kDefaultWindowSize( 640, 480 );
 
 const string kDocumentsDirectoryName = "PaperES";
 
-void PaperBounce3App::FPS::start()
+void TablaApp::FPS::start()
 {
 	mLastFrameTime = ci::app::getElapsedSeconds();
 }
 
-void PaperBounce3App::FPS::mark()
+void TablaApp::FPS::mark()
 {
 	double now = ci::app::getElapsedSeconds();
 	
@@ -45,7 +45,7 @@ void PaperBounce3App::FPS::mark()
 	mFPS = 1.f / mLastFrameLength;
 }
 
-PaperBounce3App::~PaperBounce3App()
+TablaApp::~TablaApp()
 {
 	cout << "Shutting down..." << endl;
 
@@ -56,29 +56,29 @@ PaperBounce3App::~PaperBounce3App()
 	//
 }
 
-PolyLine2 PaperBounce3App::getWorldBoundsPoly() const
+PolyLine2 TablaApp::getWorldBoundsPoly() const
 {
 	PolyLine2 p = getPointsAsPoly( mLightLink.getCaptureProfile().mCaptureWorldSpaceCoords, 4 );
 	p.setClosed();
 	return p;
 }
 
-fs::path PaperBounce3App::getDocsPath() const
+fs::path TablaApp::getDocsPath() const
 {
 	return getDocumentsDirectory() / kDocumentsDirectoryName ;
 }
 
-fs::path PaperBounce3App::getUserLightLinkFilePath() const
+fs::path TablaApp::getUserLightLinkFilePath() const
 {
 	return getDocsPath() / "LightLink.xml" ;
 }
 
-fs::path PaperBounce3App::getUserSettingsFilePath() const
+fs::path TablaApp::getUserSettingsFilePath() const
 {
 	return getDocsPath() / "settings.xml" ;
 }
 
-void PaperBounce3App::setup()
+void TablaApp::setup()
 {
 	auto overloadAssetPath = [this]( string p )
 	{
@@ -329,7 +329,7 @@ void PaperBounce3App::setup()
 	}
 }
 
-void PaperBounce3App::setupGameLibrary()
+void TablaApp::setupGameLibrary()
 {
 	mGameLibrary.push_back( make_shared<BallWorldCartridge>() );
 	mGameLibrary.push_back( make_shared<PinballWorldCartridge>() );
@@ -342,7 +342,7 @@ void PaperBounce3App::setupGameLibrary()
 	mGameLibrary.push_back( make_shared<AnimWorldCartridge>() );
 }
 
-void PaperBounce3App::setupRFIDValueToFunction()
+void TablaApp::setupRFIDValueToFunction()
 {
 	mRFIDValueToFunction.clear();
 	
@@ -361,7 +361,7 @@ void PaperBounce3App::setupRFIDValueToFunction()
 	}
 }
 
-bool PaperBounce3App::ensureLightLinkHasLocalDeviceProfiles()
+bool TablaApp::ensureLightLinkHasLocalDeviceProfiles()
 {
 	bool dirty=false;
 	
@@ -423,7 +423,7 @@ bool PaperBounce3App::ensureLightLinkHasLocalDeviceProfiles()
 	return false;
 }
 
-void PaperBounce3App::lightLinkDidChange( bool saveToFile )
+void TablaApp::lightLinkDidChange( bool saveToFile )
 {
 	// start-up (and maybe choose) a valid capture device
 	if ( !setupCaptureDevice() )
@@ -444,7 +444,7 @@ void PaperBounce3App::lightLinkDidChange( bool saveToFile )
 	}
 }
 
-bool PaperBounce3App::tryToSetupValidCaptureDevice()
+bool TablaApp::tryToSetupValidCaptureDevice()
 {
 	// try other profiles...
 	for ( auto i : mLightLink.mCaptureProfiles )
@@ -457,7 +457,7 @@ bool PaperBounce3App::tryToSetupValidCaptureDevice()
 	return false;
 }
 
-bool PaperBounce3App::setupCaptureDevice()
+bool TablaApp::setupCaptureDevice()
 {
 	mDebugFrame.reset();
 	
@@ -528,7 +528,7 @@ bool PaperBounce3App::setupCaptureDevice()
 	}
 }
 
-void PaperBounce3App::setupNextValidCaptureProfile()
+void TablaApp::setupNextValidCaptureProfile()
 {
 	int n=0;
 	
@@ -557,7 +557,7 @@ void PaperBounce3App::setupNextValidCaptureProfile()
 	// mega-fail
 }
 
-void PaperBounce3App::loadDefaultGame( string byName )
+void TablaApp::loadDefaultGame( string byName )
 {
 	if ( !mGameLibrary.empty() )
 	{
@@ -573,7 +573,7 @@ void PaperBounce3App::loadDefaultGame( string byName )
 	}
 }
 
-void PaperBounce3App::loadGame( int libraryIndex )
+void TablaApp::loadGame( int libraryIndex )
 {
 	assert( libraryIndex >=0 && libraryIndex < mGameLibrary.size() );
 	
@@ -612,7 +612,7 @@ void PaperBounce3App::loadGame( int libraryIndex )
 	saveUserSettings();
 }
 
-void PaperBounce3App::loadAdjacentGame( int libraryIndexDelta )
+void TablaApp::loadAdjacentGame( int libraryIndexDelta )
 {
 	if ( !mGameLibrary.empty() )
 	{
@@ -625,7 +625,7 @@ void PaperBounce3App::loadAdjacentGame( int libraryIndexDelta )
 	}
 }
 
-int PaperBounce3App::findCartridgeByName( string name )
+int TablaApp::findCartridgeByName( string name )
 {
 	for( size_t i=0; i<mGameLibrary.size(); ++i )
 	{
@@ -635,12 +635,12 @@ int PaperBounce3App::findCartridgeByName( string name )
 }
 
 fs::path
-PaperBounce3App::getXmlConfigPathForGame( string name )
+TablaApp::getXmlConfigPathForGame( string name )
 {
 	return hotloadableAssetPath("config") / (name + ".xml") ;
 }
 
-void PaperBounce3App::setGameWorldXmlParams( XmlTree xml )
+void TablaApp::setGameWorldXmlParams( XmlTree xml )
 {
 	if ( mGameWorld )
 	{
@@ -666,33 +666,33 @@ void PaperBounce3App::setGameWorldXmlParams( XmlTree xml )
 }
 
 fs::path
-PaperBounce3App::hotloadableAssetPath( fs::path p ) const
+TablaApp::hotloadableAssetPath( fs::path p ) const
 {
 	if ( mOverloadedAssetPath.empty() ) return getAssetPath(p);
 	else return fs::path(mOverloadedAssetPath) / p ;
 }
 
-void PaperBounce3App::mouseDown( MouseEvent event )
+void TablaApp::mouseDown( MouseEvent event )
 {
 	if (getWindowData()) getWindowData()->mouseDown(event);
 }
 
-void PaperBounce3App::mouseUp( MouseEvent event )
+void TablaApp::mouseUp( MouseEvent event )
 {
 	if (getWindowData()) getWindowData()->mouseUp(event);
 }
 
-void PaperBounce3App::mouseMove( MouseEvent event )
+void TablaApp::mouseMove( MouseEvent event )
 {
 	if (getWindowData()) getWindowData()->mouseMove(event);
 }
 
-void PaperBounce3App::mouseDrag( MouseEvent event )
+void TablaApp::mouseDrag( MouseEvent event )
 {
 	if (getWindowData()) getWindowData()->mouseDrag(event);
 }
 
-void PaperBounce3App::fileDrop( FileDropEvent event )
+void TablaApp::fileDrop( FileDropEvent event )
 {
 	auto files = event.getFiles();
 	if (files.size() > 0) {
@@ -722,7 +722,7 @@ void PaperBounce3App::fileDrop( FileDropEvent event )
 	}
 }
 
-void PaperBounce3App::updateDebugFrameCaptureDevicesWithPxPerWorldUnit( float x )
+void TablaApp::updateDebugFrameCaptureDevicesWithPxPerWorldUnit( float x )
 {
 	bool dirty=false;
 	
@@ -738,7 +738,7 @@ void PaperBounce3App::updateDebugFrameCaptureDevicesWithPxPerWorldUnit( float x 
 	if (dirty) lightLinkDidChange();
 }
 
-void PaperBounce3App::addProjectorPipelineStages()
+void TablaApp::addProjectorPipelineStages()
 {
 	// set that image
 	mPipeline.then( "projector", mLightLink.getProjectorProfile().mProjectorSize ) ;
@@ -749,7 +749,7 @@ void PaperBounce3App::addProjectorPipelineStages()
 			mLightLink.getProjectorProfile().mProjectorWorldSpaceCoords ));
 }
 
-void PaperBounce3App::update()
+void TablaApp::update()
 {
 	mAppFPS.mark();
 	
@@ -766,7 +766,7 @@ void PaperBounce3App::update()
 	if (mAVClacker>0.f) mAVClacker = max(0.f,mAVClacker-.1f);
 }
 
-void PaperBounce3App::updateVision()
+void TablaApp::updateVision()
 {
 	if (   (mCapture && mCapture->checkNewFrame())
 		|| (mDebugFrame && (mDebugFrameSkip<2 || getElapsedFrames()%mDebugFrameSkip==0)) )
@@ -820,11 +820,11 @@ void PaperBounce3App::updateVision()
 	}
 }
 
-void PaperBounce3App::cleanup() {
+void TablaApp::cleanup() {
 	if (mGameWorld) mGameWorld->cleanup();
 }
 
-void PaperBounce3App::updateMainImageTransform( WindowRef w )
+void TablaApp::updateMainImageTransform( WindowRef w )
 {
 	if (w)
 	{
@@ -835,7 +835,7 @@ void PaperBounce3App::updateMainImageTransform( WindowRef w )
 	}
 }
 
-void PaperBounce3App::resize()
+void TablaApp::resize()
 {
 	updateMainImageTransform(getWindow());
 
@@ -848,7 +848,7 @@ void PaperBounce3App::resize()
 	}
 }
 
-void PaperBounce3App::drawWorld( GameWorld::DrawType drawType )
+void TablaApp::drawWorld( GameWorld::DrawType drawType )
 {
 	WindowData *win = getWindow()->getUserData<WindowData>();
 	
@@ -956,7 +956,7 @@ void PaperBounce3App::drawWorld( GameWorld::DrawType drawType )
 	}
 }
 
-void PaperBounce3App::draw()
+void TablaApp::draw()
 {
 	// draw window
 	WindowData* win = getWindow()->getUserData<WindowData>() ;
@@ -964,7 +964,7 @@ void PaperBounce3App::draw()
 	if (win) win->draw();
 }
 
-void PaperBounce3App::keyDown( KeyEvent event )
+void TablaApp::keyDown( KeyEvent event )
 {
 	// string aggregation -- still allow it to cascade to later handlers though
 	if ( !event.isMetaDown() && !event.isControlDown() && !event.isAltDown() )
@@ -1082,12 +1082,12 @@ void PaperBounce3App::keyDown( KeyEvent event )
 	}
 }
 
-void PaperBounce3App::keyUp( KeyEvent event )
+void TablaApp::keyUp( KeyEvent event )
 {
 	if (mGameWorld) mGameWorld->keyUp(event);
 }
 
-bool PaperBounce3App::parseKeyboardString( string str )
+bool TablaApp::parseKeyboardString( string str )
 {
 	bool handled = false;
 	
@@ -1134,7 +1134,7 @@ bool PaperBounce3App::parseKeyboardString( string str )
 	return handled;
 }
 
-void PaperBounce3App::loadUserSettingsFromXml( XmlTree xml )
+void TablaApp::loadUserSettingsFromXml( XmlTree xml )
 {
 	cout << "loadUserSettingsFromXml." << endl;
 	
@@ -1182,7 +1182,7 @@ void PaperBounce3App::loadUserSettingsFromXml( XmlTree xml )
 	getWindowBounds( "MainWindowBounds", mMainWindow );
 }
 
-XmlTree PaperBounce3App::getUserSettingsXml() const
+XmlTree TablaApp::getUserSettingsXml() const
 {
 	XmlTree xml("settings","");
 	
@@ -1203,15 +1203,15 @@ XmlTree PaperBounce3App::getUserSettingsXml() const
 	return xml;
 }
 
-void PaperBounce3App::saveUserSettings()
+void TablaApp::saveUserSettings()
 {
 	XmlTree t = getUserSettingsXml();
 	t.write( writeFile(getUserSettingsFilePath()) );
 }
 
-CINDER_APP( PaperBounce3App, RendererGl(RendererGl::Options().msaa(8)), [&]( App::Settings *settings ) {
+CINDER_APP( TablaApp, RendererGl(RendererGl::Options().msaa(8)), [&]( App::Settings *settings ) {
 	settings->setFrameRate(kRequestFrameRate);
 	settings->setWindowSize(kDefaultWindowSize);
 	settings->setPowerManagementEnabled(true); // contrary to intuition, 'true' means "disable sleep/idle"
-	settings->setTitle("See Paper") ;
+	settings->setTitle("Tabla") ;
 })

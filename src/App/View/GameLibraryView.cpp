@@ -7,7 +7,7 @@
 //
 
 #include "GameLibraryView.h"
-#include "PaperBounce3App.h"
+#include "TablaApp.h"
 
 const vec2 kTextOffset(4,-4);
 
@@ -16,8 +16,8 @@ void GameLibraryView::layout( Rectf windowRect )
 	vec2 lowerRight = windowRect.getLowerRight() + vec2(-8,-8);
 	vec2 size(100,
 		roundf(
-		PaperBounce3App::get()->mTextureFont->getAscent()
-		+ PaperBounce3App::get()->mTextureFont->getDescent()
+		TablaApp::get()->mTextureFont->getAscent()
+		+ TablaApp::get()->mTextureFont->getDescent()
 		+ 4.f) );
 	Rectf r( lowerRight - size, lowerRight );
 	
@@ -27,9 +27,9 @@ void GameLibraryView::layout( Rectf windowRect )
 
 void GameLibraryView::draw()
 {
-	if (!PaperBounce3App::get()) return;
+	if (!TablaApp::get()) return;
 	
-	const auto &app = *(PaperBounce3App::get());
+	const auto &app = *(TablaApp::get());
 	const auto &games = app.mGameLibrary;
 
 	gl::color(1,1,1,1);
@@ -89,9 +89,9 @@ void GameLibraryView::mouseUp  ( MouseEvent e )
 	const int highlight = getHighlightIndex( rootToChild(e.getPos()) );
 
 	// only do something if changed
-	if (highlight != PaperBounce3App::get()->mGameWorldCartridgeIndex )
+	if (highlight != TablaApp::get()->mGameWorldCartridgeIndex )
 	{
-		PaperBounce3App::get()->loadGame(highlight);
+		TablaApp::get()->loadGame(highlight);
 	}
 }
 
@@ -102,7 +102,7 @@ vec2 GameLibraryView::getItemSize() const
 
 Rectf GameLibraryView::getMenuRect() const
 {
-	const auto &app = *(PaperBounce3App::get());
+	const auto &app = *(TablaApp::get());
 	const auto &games = app.mGameLibrary;
 	
 	const float itemwidth = getBounds().getWidth();
@@ -127,5 +127,5 @@ int GameLibraryView::getHighlightIndex( vec2 p ) const
 		
 		return -p.y;
 	}
-	else return PaperBounce3App::get()->mGameWorldCartridgeIndex;
+	else return TablaApp::get()->mGameWorldCartridgeIndex;
 }
