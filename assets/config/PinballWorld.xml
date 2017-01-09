@@ -49,15 +49,17 @@
 	<MaxScreenShake>1</MaxScreenShake>
 
 <!-- Vision	-->
-	<PartMaxContourRadius>5</PartMaxContourRadius>
-	<PartMaxContourAspectRatio>2</PartMaxContourAspectRatio> <!-- 0 means no parts! 100+ means all parts; 2 is a reasonable #. -->
-	<HolePartMaxContourRadius>2</HolePartMaxContourRadius>
-	<FlipperDistToEdge>4</FlipperDistToEdge>
-	
-	<PartTrackRadiusMaxDist>1</PartTrackRadiusMaxDist>
-	<PartTrackLocMaxDist>.5</PartTrackLocMaxDist>
-	
-	<DejitterContourMaxDist>0</DejitterContourMaxDist> <!-- 0 for off -->
+	<PinballVision>
+		<PartMaxContourRadius>5</PartMaxContourRadius>
+		<PartMaxContourAspectRatio>2</PartMaxContourAspectRatio> <!-- 0 means no parts! 100+ means all parts; 2 is a reasonable #. -->
+		<HolePartMaxContourRadius>2</HolePartMaxContourRadius>
+		<FlipperDistToEdge>4</FlipperDistToEdge>
+		
+		<PartTrackRadiusMaxDist>1</PartTrackRadiusMaxDist>
+		<PartTrackLocMaxDist>.5</PartTrackLocMaxDist>
+		
+		<DejitterContourMaxDist>0</DejitterContourMaxDist> <!-- 0 for off -->
+	</PinballVision>
 	
 	<Parts>
 		<BumperMinRadius>1</BumperMinRadius>
@@ -128,53 +130,52 @@
 
 	</View>
 	
-<!-- Controls	-->
-<!-- TODO... Note manufacturer/model and support multiple profiles; this is for PS4 -->
-	<Gamepad>
-		<button id="4" do="flippers-left"/>
-		<button id="6" do="flippers-left"/>
-		<button id="5" do="flippers-right"/>
-		<button id="7" do="flippers-right"/>
-		<button id="8" do="serve-multiball"/>
-		<button id="9" do="pause-ball-world"/>
-<!--	13 is big PS4 touch pad	-->
-	</Gamepad>
+	<Input>
+	<!-- Controls	-->
+	<!-- TODO... Note manufacturer/model and support multiple profiles; this is for PS4 -->
+		<Gamepad>
+			<button id="4" do="flippers-left"/>
+			<button id="6" do="flippers-left"/>
+			<button id="5" do="flippers-right"/>
+			<button id="7" do="flippers-right"/>
+			<button id="8" do="serve-multiball"/>
+			<button id="9" do="pause-ball-world"/>
+	<!--	13 is big PS4 touch pad	-->
+		</Gamepad>
 
-
-
-<!-- Keyboard deprecated... -->
-	<KeyMap>
-	
-		<Key>
-			<char>b</char>
-			<input>serve-multiball</input>
-		</Key>
+		<KeyMap>
 		
-		<Key>
-			<char>.</char>
-			<input>pause-ball-world</input>
-		</Key>
-		
-<!-- Left flipper	-->
-		<Key>
-			<char>n</char>
-			<input>flippers-left</input>
-		</Key>
-		<Key>
-			<char>l</char>
-			<input>flippers-left</input>
-		</Key>
+			<Key>
+				<char>b</char>
+				<input>serve-multiball</input>
+			</Key>
+			
+			<Key>
+				<char>.</char>
+				<input>pause-ball-world</input>
+			</Key>
+			
+	<!-- Left flipper	-->
+			<Key>
+				<char>n</char>
+				<input>flippers-left</input>
+			</Key>
+			<Key>
+				<char>l</char>
+				<input>flippers-left</input>
+			</Key>
 
-<!-- Right flipper -->
-		<Key>
-			<char>m</char>
-			<input>flippers-right</input>
-		</Key>
-		<Key>
-			<char>r</char>
-			<input>flippers-right</input>
-		</Key>
-		
-	</KeyMap>
+	<!-- Right flipper -->
+			<Key>
+				<char>m</char>
+				<input>flippers-right</input>
+			</Key>
+			<Key>
+				<char>r</char>
+				<input>flippers-right</input>
+			</Key>
+			
+		</KeyMap>
+	</Input>
 	
 </PinballWorld>

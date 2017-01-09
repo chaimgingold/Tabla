@@ -14,7 +14,6 @@
 #include "cinder/rand.h"
 #include "cinder/audio/Context.h"
 #include "cinder/audio/Source.h"
-#include "Gamepad.h"
 #include "xml.h"
 
 using namespace ci;
@@ -26,63 +25,14 @@ using namespace Pinball;
 
 PinballWorld::PinballWorld()
 	: mView(*this)
+	, mVision(*this)
+	, mInput(*this)
 {
 	setupSynthesis();
-	setupControls();
 	mView.setup();
-}
 
-void PinballWorld::setupControls()
-{
-	mIsFlipperDown[0] = false;
-	mIsFlipperDown[1] = false;
-	
 	mFlipperState[0] = 0.f;
 	mFlipperState[1] = 0.f;
-	
-	auto button = [this]( unsigned int id, string postfix )
-	{
-		auto i = mGamepadButtons.find(id);
-		if (i!=mGamepadButtons.end())
-		{			
-			processInputEvent( i->second + postfix );
-		}
-	};
-	
-	
-	mGamepadManager.mOnButtonDown = [this,button]( const GamepadManager::Event& event )
-	{
-		cout << "down " << event.mId << endl;
-		button(event.mId,"-down");
-	};
-
-	mGamepadManager.mOnButtonUp = [this,button]( const GamepadManager::Event& event )
-	{
-		cout << "up "  << event.mId << endl;
-		button(event.mId,"-up");
-	};
-	
-	// inputs
-	auto flipperChange = [this]( int side, int state )
-	{
-		mIsFlipperDown[side] = state;
-		
-		if (getBalls().empty() && state==1 && !getIsInGameOverState() ) serveBall();
-		
-		if ( mPartCensus.getPop( flipperIndexToType(side) ) > 0 )
-		{
-			mPd->sendFloat("flipper-change", state);
-			
-			if (state) this->addScreenShake(mFlipperScreenShake);
-		}
-	};
-	
-	mInputToFunction["flippers-left-down"]  = [this,flipperChange]() { flipperChange(0,1); };
-	mInputToFunction["flippers-left-up"]    = [this,flipperChange]() { flipperChange(0,0); };
-	mInputToFunction["flippers-right-down"] = [this,flipperChange]() { flipperChange(1,1); };
-	mInputToFunction["flippers-right-up"]   = [this,flipperChange]() { flipperChange(1,0); };
-	mInputToFunction["pause-ball-world-down"]    = [this](){ mPauseBallWorld = !mPauseBallWorld; };
-	mInputToFunction["serve-multiball-down"]     = [this](){ serveBall(); }; 
 }
 
 PinballWorld::~PinballWorld()
@@ -104,6 +54,10 @@ void PinballWorld::setParams( XmlTree xml )
 		mView.setParams(xml.getChild("View"));
 	}
 	
+	if ( xml.hasChild("PinballVision") ) {
+		mVision.setParams( xml.getChild("PinballVision") );
+	}
+	
 	bool wasSoundEnabled = mSoundEnabled;
 	getXml(xml, "SoundEnabled", mSoundEnabled);
 	if (wasSoundEnabled!=mSoundEnabled) setupSynthesis();
@@ -117,56 +71,9 @@ void PinballWorld::setParams( XmlTree xml )
 	getXml(xml, "Gravity", mGravity );
 	getXml(xml, "BallReclaimAreaHeight", mBallReclaimAreaHeight );
 
-	// vision
-	getXml(xml, "FlipperDistToEdge", mFlipperDistToEdge );	
-	getXml(xml, "PartMaxContourRadius", mPartMaxContourRadius );
-	getXml(xml, "PartMaxContourAspectRatio", mPartMaxContourAspectRatio );
-	getXml(xml, "HolePartMaxContourRadius",mHolePartMaxContourRadius);
 	
-	getXml(xml, "PartTrackLocMaxDist", mPartTrackLocMaxDist );
-	getXml(xml, "PartTrackRadiusMaxDist", mPartTrackRadiusMaxDist );
-	getXml(xml, "DejitterContourMaxDist", mDejitterContourMaxDist );
-	
-	// gamepad
-	mGamepadButtons.clear();
-	if (xml.hasChild("Gamepad"))
-	{
-		XmlTree keys = xml.getChild("Gamepad");
-		
-		for( auto item = keys.begin("button"); item != keys.end(); ++item )
-		{
-			if (item->hasAttribute("id") && item->hasAttribute("do"))
-			{
-				unsigned int id = item->getAttributeValue<unsigned int>("id");
-				string _do = item->getAttributeValue<string>("do");
-				
-				cout << id << " -> " << _do << endl;
-				
-				mGamepadButtons[id] = _do;
-			}
-		}
-	}
-	
-	// keyboard
-	mKeyToInput.clear();
-	if (xml.hasChild("KeyMap"))
-	{
-		XmlTree keys = xml.getChild("KeyMap");
-		
-		for( auto item = keys.begin("Key"); item != keys.end(); ++item )
-		{
-			if ( item->hasChild("char") && item->hasChild("input") )
-			{
-				string	charkey	= item->getChild("char").getValue<string>();
-				string	input	= item->getChild("input").getValue();
-				
-				char ckey = charkey.front();
-				
-				cout << ckey << ", " << input << endl;
-
-				mKeyToInput[ckey] = input;
-			}
-		}
+	if ( xml.hasChild("Input") ) {
+		mInput.setParams( xml.getChild("Input") );
 	}
 }
 
@@ -297,10 +204,10 @@ void PinballWorld::update()
 	}
 	
 	// input
-	mGamepadManager.tick();
+	mInput.tick();
 	tickFlipperState();
 
-	if (!mPauseBallWorld) updateScreenShake();
+	if (!isPaused()) updateScreenShake();
 	
 	// tick parts
 	for( auto p : mParts ) p->tick();
@@ -316,7 +223,7 @@ void PinballWorld::update()
 	
 	// sim balls
 	cullBalls();
-	if (!mPauseBallWorld) BallWorld::update();
+	if (!isPaused()) BallWorld::update();
 		// TODO: To make pinball flippers super robust in terms of tunneling (especially at the tips),
 		// we should make attachments for BallWorld contours (a parallel vector)
 		// that specifies angular rotation (center, radians per second)--basically what
@@ -339,7 +246,7 @@ void PinballWorld::updateBallSynthesis() {
 	auto ballVels = pd::List();
 
 	// Send no velocities when paused to keep balls silent
-	bool shouldSynthesizeBalls = !mPauseBallWorld;
+	bool shouldSynthesizeBalls = !isPaused();
 
 	if (shouldSynthesizeBalls) {
 		for( Ball &b : balls ) {
@@ -369,6 +276,19 @@ void PinballWorld::serveBall()
 	sendGameEvent(GameEvent::ServeBall);
 	if (oldCount>0) sendGameEvent(GameEvent::ServeMultiBall);
 	if (oldCount==0) sendGameEvent(GameEvent::NewGame);
+}
+
+void PinballWorld::serveBallCheat()
+{
+	serveBall();
+}
+
+void PinballWorld::serveBallIfNone()
+{
+	if ( getBalls().empty() && !getIsInGameOverState() ) 
+	{
+		serveBall();
+	}
 }
 
 void PinballWorld::cullBalls()
@@ -409,9 +329,9 @@ void PinballWorld::tickFlipperState()
 		{
 			// non-linear, creates lots of tunneling
 			float frac[2] = { .35f, .5f };
-			int fraci = mIsFlipperDown[i] ? 0 : 1;
+			int fraci = mInput.isFlipperDown(i) ? 0 : 1;
 			
-			mFlipperState[i] = lerp( mFlipperState[i], mIsFlipperDown[i] ? 1.f : 0.f, frac[fraci] );
+			mFlipperState[i] = lerp( mFlipperState[i], mInput.isFlipperDown(i) ? 1.f : 0.f, frac[fraci] );
 		}
 		else
 		{
@@ -419,7 +339,7 @@ void PinballWorld::tickFlipperState()
 			// linear, to help me debug physics
 			float step = (1.f / 60.f) * ( 1.f / .1f );
 			
-			if ( mIsFlipperDown[i] ) mFlipperState[i] += step;
+			if ( mInput.isFlipperDown(i) ) mFlipperState[i] += step;
 			else mFlipperState[i] -= step;
 			
 			mFlipperState[i] = constrain( mFlipperState[i], 0.f, 1.f );
@@ -442,8 +362,8 @@ float PinballWorld::getFlipperAngularVel( int side ) const
 	const float radPerSec = (M_PI/2.f) / 6.f; // assume 6 steps per 90 deg of motion
 	const float sign[2] = {1.f,-1.f};
 	
-	if ( mIsFlipperDown[side] && mFlipperState[side] < 1.f-eps ) return radPerSec * sign[side];
-	else if ( !mIsFlipperDown[side] && mFlipperState[side] > eps ) return -radPerSec * sign[side];
+	if ( mInput.isFlipperDown(side) && mFlipperState[side] < 1.f-eps ) return radPerSec * sign[side];
+	else if ( !mInput.isFlipperDown(side) && mFlipperState[side] > eps ) return -radPerSec * sign[side];
 	else return 0.f;
 }
 
@@ -525,41 +445,35 @@ void PinballWorld::worldBoundsPolyDidChange()
 {
 }
 
-void PinballWorld::processInputEvent( string name )
-{
-	cout << "-> " << name << endl;
-
-	auto j = mInputToFunction.find(name);
-	if (j!=mInputToFunction.end())
-	{
-		j->second();
-	}
-}
-
-void PinballWorld::processKeyEvent( KeyEvent event, string suffix )
-{
-	char c = event.getChar();
-	
-	auto i = mKeyToInput.find(c);
-	
-	if (i!=mKeyToInput.end())
-	{
-		processInputEvent(i->second + suffix);
-	}
-}
-
 void PinballWorld::keyDown( KeyEvent event )
 {
-	processKeyEvent(event, "-down");
+	mInput.keyDown(event);
 }
 
 void PinballWorld::keyUp( KeyEvent event )
 {
-	processKeyEvent(event, "-up");
+	mInput.keyUp(event);
 }
 
 void PinballWorld::mouseClick( vec2 loc )
 {
+}
+
+void PinballWorld::updateVision( const Vision::Output& visionOut, Pipeline& p )
+{
+	// run our vision
+	PinballVision::Output out;
+	
+	out = mVision.update( visionOut, p, mParts, &mVisionContours );
+	
+	mVisionContours = out.mVisionContours;
+	mParts = out.mParts;
+	
+	// playfield layout
+	updatePlayfieldLayout(mVisionContours);	
+	
+	// log cube maps, allow it to capture images
+	mView.updateVision(p);
 }
 
 void PinballWorld::getCullLine( vec2 v[2] ) const
@@ -574,7 +488,7 @@ Rectf PinballWorld::getPlayfieldBoundingBox( const ContourVec& cs ) const
 	
 	for( const auto& c : cs )
 	{
-		if (c.mTreeDepth==0 && !shouldContourBeAPart(c,cs))
+		if (c.mTreeDepth==0 && !mVision.shouldContourBeAPart(c,cs))
 		{
 			pts.insert(pts.end(),c.mPolyLine.getPoints().begin(), c.mPolyLine.end());
 		}
@@ -625,264 +539,11 @@ void PinballWorld::updateBallWorldContours()
 	for( int i=0; i<mVisionContours.size(); ++i )
 	{
 		// ...except vision contours that became parts
-		mask[i] = !shouldContourBeAPart(physicsContours[i],physicsContours);
+		mask[i] = !mVision.shouldContourBeAPart(physicsContours[i],physicsContours);
 	}
 	
 	// tell ball world
 	BallWorld::setContours(physicsContours,ContourVec::getMaskFilter(mask));
-}
-
-ContourVec PinballWorld::dejitterVisionContours( ContourVec in, ContourVec old ) const
-{
-	ContourVec out = in;
-	
-	for( auto &c : out )
-	{
-		// find closest contour to compare ourselves against
-		float bestscore = MAXFLOAT;
-		const Contour* match = 0;
-		
-		for( auto &o : old )
-		{
-			if (o.mIsHole != c.mIsHole) continue;
-			if (o.mTreeDepth != c.mTreeDepth) continue;
-			
-			float score = distance( c.mCenter, o.mCenter )
-				+ fabs( c.mRadius - o.mRadius )
-				;
-			
-			if (score < bestscore)
-			{
-				bestscore=score;
-				match = &o;
-			}
-		}
-		
-		// match points
-		if (match)
-		{
-			for( auto &p : c.mPolyLine.getPoints() )
-			{
-				float bestscore = mDejitterContourMaxDist;
-				
-				for ( auto op : match->mPolyLine.getPoints() )
-				{
-					float score = distance(p,op);
-					if (score<bestscore)
-					{
-						bestscore = score;
-						p = op;
-					}
-				}
-			}
-		}
-	}
-	
-	return out;
-}
-
-void PinballWorld::updateVision( const Vision::Output& visionOut, Pipeline& p )
-{
-	// capture contours, so we can later pass them into BallWorld (after merging in part shapes)
-	if ( mDejitterContourMaxDist > 0.f ) {
-		mVisionContours = dejitterVisionContours( visionOut.mContours, mVisionContours );
-	} else {
-		mVisionContours = visionOut.mContours;
-	}
-	
-	// playfield layout
-	updatePlayfieldLayout(visionOut.mContours);
-	
-	// generate parts
-	PartVec newParts = getPartsFromContours(visionOut.mContours);
-	mParts = mergeOldAndNewParts(mParts, newParts);
-	
-	// log cube maps, allow it to capture images
-	mView.updateVision(p);
-}
-
-bool PinballWorld::shouldContourBeAPart( const Contour& c, const ContourVec& cs ) const
-{
-	{
-		float lo = c.mRotatedBoundingRect.mSize.x;
-		float hi = c.mRotatedBoundingRect.mSize.y;
-		
-		if (hi<lo) swap(lo,hi);
-		
-		// not round enough
-		if (hi>lo*mPartMaxContourAspectRatio) return false;
-	}
-	
-	if ( c.mIsHole ) {
-		return c.mTreeDepth>0 && c.mRadius < mPartMaxContourRadius;
-	}
-	else {
-		bool depthOK;
-		
-		if (c.mTreeDepth==0) depthOK=true; // ok
-		else if (c.mTreeDepth==2) // allow them to be nested 1 deep, but only if parent contour isn't a part!
-		{
-			auto p = cs.getParent(c);
-			assert(p);
-			depthOK = !shouldContourBeAPart(*p,cs);
-		}
-		else depthOK=false;
-		
-		return depthOK && c.mRadius < mHolePartMaxContourRadius;
-	}
-}
-
-AdjSpace
-PinballWorld::getAdjacentSpace( vec2 loc, const ContourVector& cs ) const
-{
-	const Contour* leaf = cs.findLeafContourContainingPoint(loc);
-	
-	return getAdjacentSpace(leaf, loc, cs);
-}
-
-AdjSpace
-PinballWorld::getAdjacentSpace( const Contour* leaf, vec2 loc, const ContourVector& cs ) const
-{
-	AdjSpace result;
-
-	if (leaf)
-	{
-		float far = leaf->mRadius * 2.f;
-		
-		auto calcSize = [&]( vec2 vec, float& result )
-		{
-			float t;
-			if ( leaf->rayIntersection(loc + vec * far, -vec, &t) ) {
-				result = far - t;
-			}
-		};
-		
-		calcSize( getLeftVec(), result.mWidthLeft );
-		calcSize( getRightVec(), result.mWidthRight );
-		calcSize( getUpVec(), result.mWidthUp );
-		calcSize( getDownVec(), result.mWidthDown );
-	}
-	
-	auto filter = [&]( const Contour& c ) -> bool
-	{
-		// 1. not self
-		//if ( c.mIsHole && c.contains(loc) ) return false;
-		if ( &c == leaf ) return false; // supposed to be optimized version of c.mIsHole && c.contains(loc)
-		// 2. not other parts
-		else if ( shouldContourBeAPart(c,cs) ) return false; // could be a part
-		// OK
-		else return true;
-	};
-	
-	cs.rayIntersection( loc, getRightVec(), &result.mRight, filter );
-	cs.rayIntersection( loc, getLeftVec (), &result.mLeft , filter );
-	cs.rayIntersection( loc, getUpVec(),    &result.mUp , filter );
-	cs.rayIntersection( loc, getDownVec(),  &result.mDown , filter );
-	
-	// bake in contour width into adjacent space calc
-	result.mLeft  -= result.mWidthLeft;
-	result.mRight -= result.mWidthRight;
-	result.mUp    -= result.mWidthUp;
-	result.mDown  -= result.mWidthDown;
-	
-	return result;
-}
-
-PartVec PinballWorld::getPartsFromContours( const ContourVector& contours )
-{
-	PartVec parts;
-	
-	for( const auto &c : contours )
-	{
-		if ( !shouldContourBeAPart(c,contours) ) continue;
-
-
-		AdjSpace adjSpace = getAdjacentSpace(&c,c.mCenter,contours);
-
-		auto add = [&c,&parts,adjSpace]( Part* p )
-		{
-			p->mContourLoc = c.mCenter;
-			p->mContourRadius = c.mRadius;
-			parts.push_back( PartRef(p) );
-		};
-		
-
-		if ( c.mIsHole )
-		{
-			// flipper orientation
-			const bool closeToRight  = adjSpace.mRight < mFlipperDistToEdge;
-			const bool closeToLeft   = adjSpace.mLeft  < mFlipperDistToEdge;
-//			const bool closeToBottom = adjSpace.mDown  < mFlipperDistToEdge;
-			
-			if ( closeToRight && !closeToLeft )
-			{
-				add( new Flipper(*this, c.mCenter, c.mRadius, PartType::FlipperRight) );
-			}
-			else if ( closeToLeft && !closeToRight )
-			{
-				add( new Flipper(*this, c.mCenter, c.mRadius, PartType::FlipperLeft) );
-			}
-//			else if ( closeToLeft && closeToRight && closeToBottom )
-//			{
-//				 add( new Plunger( *this, c.mCenter, c.mRadius ) );
-//			}
-			else
-			{
-				add( new Bumper( *this, c.mCenter, c.mRadius, adjSpace ) );
-			}
-		} // hole
-		else
-		{
-			// non-hole:
-			
-			// make target
-			auto filter = [this,contours]( const Contour& c ) -> bool {
-				return !shouldContourBeAPart(c,contours);
-			};
-			
-			float dist;
-			vec2 closestPt;
-			
-			
-			
-			vec2 lightLoc = c.mCenter;
-			float r = mPartParams.mTargetRadius;
-			
-			const float kMaxDist = mPartParams.mTargetDynamicRadius*4.f;
-			
-			if ( contours.findClosestContour(c.mCenter,&closestPt,&dist,filter)
-			  && closestPt != c.mCenter
-			  && dist < kMaxDist )
-			{
-				vec2 dir = normalize( closestPt - c.mCenter );
-
-				float far=0.f;
-				
-				if (mPartParams.mTargetDynamicRadius)
-				{
-					float r = distance(closestPt,c.mCenter) - c.mRadius;
-					
-					r = constrain(r, mPartParams.mTargetRadius, mPartParams.mTargetRadius*4.f );
-					r = mPartParams.mTargetRadius;
-					
-					far = r;
-				}
-				
-				lightLoc = closestPt + dir * (r+far);
-				
-				vec2 triggerLoc = closestPt;
-				vec2 triggerVec = dir;
-				
-				auto rt = new Target(*this,triggerLoc,triggerVec,lightLoc,r);
-				rt->mContourPoly = c.mPolyLine;
-				
-				add( rt );
-			}
-		}
-		
-	} // for
-	
-	return parts;
 }
 
 PartRef PinballWorld::findPartForContour( const Contour& c ) const
@@ -896,66 +557,6 @@ PartRef PinballWorld::findPartForContour( int contouridx ) const
 	
 	if (i==mContoursToParts.end()) return 0;
 	else return i->second;
-}
-
-PartVec
-PinballWorld::mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const
-{
-	PartVec parts = newParts;
-	
-	// match old parts to new ones
-	for( PartRef &p : parts )
-	{
-		// does it match an old part?
-		bool wasMatched = false;
-		
-		for( const PartRef& old : oldParts )
-		{
-			if ( !old->getShouldAlwaysPersist() && p->getShouldMergeWithOldPart(old) )
-			{
-				// matched.
-				bool replace=true;
-				
-				// but...
-				// replace=false
-				
-				// replace with old.
-				// (we are simply shifting pointers rather than copying contents, but i think this is fine)
-				if (replace) {
-					p = old;
-					wasMatched = true;
-				}
-			}
-		}
-		
-		//
-		if (!wasMatched) p->onGameEvent(GameEvent::NewPart);
-	}
-	
-	// carry forward any old parts that should be
-	for( const PartRef &p : oldParts )
-	{
-		if (p->getShouldAlwaysPersist())
-		{
-			bool doIt=true;
-			
-			// are we an expired trigger?
-			/*
-			if ( p->getType()==PartType::Target )
-			{
-				auto rt = dynamic_cast<Target*>(p.get());
-				if ( rt && !isValidRolloverLoc( rt->mLoc, rt->mRadius, oldParts ) )
-				{
-//					doIt=false;
-				}
-			}*/
-			// this whole concept of procedurally generating and retiring them is deprecated
-			
-			if (doIt) parts.push_back(p);
-		}
-	}
-	
-	return parts;
 }
 
 void PinballWorld::getContoursFromParts( const PartVec& parts, ContourVec& contours, ContourToPartMap* c2p ) const

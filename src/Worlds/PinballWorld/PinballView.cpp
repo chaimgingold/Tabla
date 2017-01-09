@@ -299,7 +299,7 @@ void PinballView::drawAdjSpaceRays( const PartVec& parts ) const
 	{
 		vec2 loc = p->getAdjSpaceOrigin();
 		
-		const AdjSpace space = mWorld.getAdjacentSpace(loc,mWorld.getVisionContours());
+		const AdjSpace space = mWorld.mVision.getAdjacentSpace(loc,mWorld.getVisionContours());
 
 		auto draw = [&]( ColorA color, vec2 vec, float width, float m )
 		{
@@ -466,7 +466,7 @@ void PinballView::beginDraw3d() const
 		
 		recurseTree = [&]( const Contour& c ) -> void
 		{
-			if ( !mWorld.shouldContourBeAPart(c,mWorld.getVisionContours()) )
+			if ( !mWorld.mVision.shouldContourBeAPart(c,mWorld.getVisionContours()) )
 			{
 				// draw me
 				const bool punchOut = !c.mIsHole;
@@ -570,7 +570,7 @@ void PinballView::prepare3dScene()
 	// 3d contours
 	for( const auto &c : mWorld.getVisionContours() )
 	{
-		if ( !mWorld.shouldContourBeAPart(c,mWorld.getVisionContours()) )
+		if ( !mWorld.mVision.shouldContourBeAPart(c,mWorld.getVisionContours()) )
 		{
 			mDrawScene.mWalls.push_back( get3dMeshForPoly(c.mPolyLine,0.f,m3dTableDepth) );
 		}
@@ -612,7 +612,7 @@ void PinballView::draw3dFloor() const
 			// only fill in precisely the right places
 			for( const auto &c : mWorld.getVisionContours() )
 			{
-				if ( !c.mIsHole && !mWorld.shouldContourBeAPart(c,mWorld.getVisionContours()) )
+				if ( !c.mIsHole && !mWorld.mVision.shouldContourBeAPart(c,mWorld.getVisionContours()) )
 				{
 					gl::drawSolid(c.mPolyLine);
 				}

@@ -60,8 +60,8 @@ void Part::setStrobePhase( int nparts )
 bool Part::getShouldMergeWithOldPart( const PartRef old ) const
 {
 	return old->getType() == getType() &&
-		 distance( old->mContourLoc, mContourLoc ) < getWorld().mPartTrackLocMaxDist &&
-		 fabs( old->mContourRadius - mContourRadius ) < getWorld().mPartTrackRadiusMaxDist
+		 distance( old->mContourLoc, mContourLoc ) < getWorld().mVision.mPartTrackLocMaxDist &&
+		 fabs( old->mContourRadius - mContourRadius ) < getWorld().mVision.mPartTrackRadiusMaxDist
 		;
 }
 

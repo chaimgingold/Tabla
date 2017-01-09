@@ -14,6 +14,8 @@
 #include "GamepadManager.h"
 #include "PinballParts.h"
 #include "PinballView.h"
+#include "PinballVision.h"
+#include "PinballInput.h"
 #include "FileWatch.h"
 
 namespace Pinball
@@ -44,9 +46,8 @@ public:
 
 	PartParams mPartParams;
 	PinballView mView;
+	PinballVision mVision;
 	
-public:
-
 	// world orientation
 	vec2 getUpVec() const { return mUpVec; }
 	vec2 getLeftVec() const { return vec2(cross(vec3(mUpVec,0),vec3(0,0,1))); }
@@ -59,6 +60,8 @@ public:
 	
 	// state
 	void sendGameEvent( GameEvent );
+	
+	bool isPaused() const { return mInput.isPaused(); }
 	
 	float getTime() const { return ci::app::getElapsedSeconds(); } // use this time so we can locally modulate it (eg slow down, pause, etc...)
 	
@@ -74,9 +77,21 @@ public:
 
 	cipd::PureDataNodeRef getPd() { return mPd; }
 
-	vec2 getScreenShake() const { return mPauseBallWorld ? vec2() : mScreenShakeVec; }
+	vec2 getScreenShake() const { return mInput.isPaused() ? vec2() : mScreenShakeVec; }
+
+	const ContourVec& getVisionContours() const { return mVisionContours ; }
+
+	// input callbacks
+	void serveBallCheat();
+	void serveBallIfNone();
+	void doFlipperScreenShake() { addScreenShake(mFlipperScreenShake); }
 	
 private:
+
+	void tickFlipperState();	
+	float mFlipperState[2]; // left, right; 0..1	
+
+	PinballInput mInput;
 	
 	friend class PinballView; // for getContoursFromParts
 	
@@ -86,6 +101,10 @@ private:
 	vec2  mUpVec = vec2(0,1);
 	float mGravity=0.1f;
 	float mBallReclaimAreaHeight = 10.f;
+
+	float mFlipperScreenShake=.05f;
+	float mBallVelScreenShakeK=1.f;
+	float mMaxScreenShake=2.f;
 		
 	// playfield layout
 public:
@@ -118,87 +137,35 @@ private:
 	
 	PartRef findPartForContour( const Contour& ) const;
 	PartRef findPartForContour( int contourIndex ) const;
+
+	// parts + contours
+	ContourVec mVisionContours;
+	Contour contourFromPoly( PolyLine2 ) const; // area, radius, center, bounds, etc... is approximate
+	void addContourToVec( Contour, ContourVec& ) const; // for accumulating physics contours from Parts
 	
 //	void rolloverTest();
 //	bool isValidRolloverLoc( vec2 loc, float r, const PartVec& ) const;
 	
-	// simulation
+	
+	// --- Simulation ---
 	void updateBallWorldContours();
 	void processCollisions();
 	void serveBall();
 	void cullBalls(); // cull dropped balls
 	
+	void onGameEvent( GameEvent );
+	
+	
+	
+	
+	// ---- Effects ----
+
+	// screen shake
 	float mScreenShakeValue=0.f;
 	vec2 mScreenShakeVec;
 	void addScreenShake( float intensity );
 	void updateScreenShake();
 	
-	void onGameEvent( GameEvent );
-	
-	// --- Vision ---
-	//
-
-public:
-	// - inter-frame coherence params
-	float mPartTrackLocMaxDist = 1.f;
-	float mPartTrackRadiusMaxDist = .5f;
-	float mDejitterContourMaxDist = 0.f;	
-
-private:
-	// - params
-	float mPartMaxContourRadius = 5.f; // contour radius lt => part
-	float mPartMaxContourAspectRatio = 2.f;
-	float mHolePartMaxContourRadius = 2.f;
-	float mFlipperDistToEdge = 10.f; // how close to the edge does a flipper appear?
-
-	float mFlipperScreenShake=.05f;
-	float mBallVelScreenShakeK=1.f;
-	float mMaxScreenShake=2.f;
-	
-	// - do it
-	PartVec getPartsFromContours( const ContourVector& ); // only reason this is non-const is b/c parts point to the world
-	PartVec mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const;
-	
-public:
-	AdjSpace getAdjacentSpace( const Contour*, vec2, const ContourVector& ) const ;
-	AdjSpace getAdjacentSpace( vec2, const ContourVector& ) const ; // how much adjacent space is to the left, right?
-
-	bool shouldContourBeAPart( const Contour&, const ContourVector& ) const;
-	const ContourVec& getVisionContours() const { return mVisionContours ; }
-	
-private:
-	ContourVec dejitterVisionContours( ContourVec in, ContourVec old ) const;
-	
-	// - state
-	ContourVec mVisionContours;
-	Contour contourFromPoly( PolyLine2 ) const; // area, radius, center, bounds, etc... is approximate
-	void addContourToVec( Contour, ContourVec& ) const; // for accumulating physics contours from Parts
-	
-	
-	// --- Input ---
-	//
-	
-	// are flippers depressed
-	bool  mIsFlipperDown[2]; // left, right
-	float mFlipperState[2]; // left, right; 0..1
-	
-	void tickFlipperState();	
-	
-	bool mPauseBallWorld=false;
-	
-	// generic
-	void setupControls();
-	map<string,function<void()>> mInputToFunction; // maps input names to code handlers
-	void processInputEvent( string name );
-	
-	// keyboard map
-	map<char,string> mKeyToInput; // maps keystrokes to input names
-	void processKeyEvent( KeyEvent, string suffix );
-
-	// game pad
-	GamepadManager mGamepadManager;
-	map<unsigned int,string> mGamepadButtons;
-
 	// party state
 	enum class PartyType
 	{
@@ -213,9 +180,11 @@ private:
 	vec2  getPartyLoc() const;
 	bool  getIsInGameOverState() const { return getPartyProgress() > 0.f && mPartyType==PartyType::GameOver; }
 	void  beginParty( PartyType type );
-	int   mTargetCount=0;
+	int   mTargetCount=0; // for sound pitching
+	
 	
 	// --- Sound Synthesis ---
+	
 	bool mSoundEnabled=true;
 	
 	void setupSynthesis() override;
