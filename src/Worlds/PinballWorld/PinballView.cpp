@@ -699,7 +699,7 @@ void PinballView::draw3dBalls( vec3 eyeLoc, int skipBall, gl::TextureCubeMapRef 
 			
 			const Ball& b = mWorld.getBalls()[i];
 			
-			float ballz = m3dTableDepth-b.mRadius/2;
+			float ballz = m3dTableDepth-b.mRadius;
 			
 			mBallShader->uniform("inBallLoc", vec3( b.mLoc, ballz ) );
 			
