@@ -193,37 +193,46 @@ void PinballWorld::update()
 	mPartCensus = PartCensus();
 	for( auto p : mParts ) p->updateCensus(mPartCensus);
 	
-	// enter multiball?
-	{
-		int numTargets = getPartCensus().getPop(PartType::Target);
-		
-		if ( numTargets>0 && getPartCensus().mNumTargetsOn==numTargets ) {
-			// start multi-ball
-			serveBall();
-		}
-	}
-	
 	// input
 	mInput.tick();
 	tickFlipperState();
 
-	if (!isPaused()) updateScreenShake();
+	// sim
+	if (!isPaused())
+	{
+		// enter multiball?
+		{
+			int numTargets = getPartCensus().getPop(PartType::Target);
+			
+			if ( numTargets>0 && getPartCensus().mNumTargetsOn==numTargets ) {
+				// start multi-ball
+				serveBall();
+			}
+		}
 	
-	// tick parts
-	for( auto p : mParts ) p->tick();
+		if (!isPaused()) updateScreenShake();
+		
+		// tick parts
+		for( auto p : mParts ) p->tick();
 
-	// update contours, merging in physics shapes from our parts
-	updateBallWorldContours();
+		// update contours, merging in physics shapes from our parts
+		updateBallWorldContours();
+	
+		//
+		cullBalls();
 
-	// gravity
-	vector<Ball>& balls = getBalls();
-	for( Ball &b : balls ) {
-		b.mAccel += getGravityVec() * mGravity;
+		// gravity
+		vector<Ball>& balls = getBalls();
+		for( Ball &b : balls ) {
+			b.mAccel += getGravityVec() * mGravity;
+		}
+		
+		// balls
+		BallWorld::update();
+
+		// respond to collisions
+		processCollisions();
 	}
-	
-	// sim balls
-	cullBalls();
-	if (!isPaused()) BallWorld::update();
 		// TODO: To make pinball flippers super robust in terms of tunneling (especially at the tips),
 		// we should make attachments for BallWorld contours (a parallel vector)
 		// that specifies angular rotation (center, radians per second)--basically what
@@ -231,10 +240,7 @@ void PinballWorld::update()
 		// the contour itself. So we'd set the flipper to its rotation for the last frame,
 		// and specify the rotation to be the rotation that will get us to its rotation for this frame,
 		// and BallWorld will handle the granular integration itself.
-	
-	// respond to collisions
-	processCollisions();
-	
+		
 	updateBallSynthesis();
 	
 	mView.update();
