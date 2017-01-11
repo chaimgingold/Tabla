@@ -26,6 +26,7 @@
 - Music instrument character wrangling can be hard. Proper solution probably involves tokens for instruments placed next to scores.
 
 ## Pinball
+- [ ] Audio sometimes blows up then drops out; culprit seems to be updateBallSynthesis(). To reproduce, load "pinball 1.png" test image in Pinball and spawn multiple balls (with b key).
 - Ball could sometimes tunnel through tip of flipper. Flipper rotation done in BallWorld (for finer integration and less tunneling). Proper fix (and architecture) would be to allow a parallel index of rotational transforms for contours that BallWorld does itself (and can do finer integrations of). 
 - Small spurious awkward spaces trap the ball (eg groups of white go stones, your hands, etc...). Solution: reject these spaces, perhaps comparing to perimeter/area of a circle that comfortably fits a ball (or more).
 - Flippers penetrate walls. Fix: dynamically size them! Only respond to walls, not parts--or things could get crazy.

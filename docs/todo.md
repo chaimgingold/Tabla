@@ -1,31 +1,28 @@
 # Packaging
 - [ ] License
 - [ ] Documentation
-	- How many files for this? Probably different ones for game modes... Or maybe not.
 	- What is this? (about.md)
 	- How to build/set up/install? (installation.md)
 		- Hardware list
-	- Projection mapping system (get photo Luke took of my explanation).
-	- App architecture (architecture.md)
-	- For game worlds
-	- Misc notes on this...
-		- What it is.
-		- How to install, calibrate and use.
-        - Hardware needed.
             - Camera
             - Projector
             - Table you can black out
+		- How to build project
+			- libcinder only external dependency (I think)
+		- How to install hardware
         - Software setup.
             - How to calibrate
-                - Concepts
-                    - Coordinate spaces
-                        - World space units
                 - Polygons
                 - Xml Files
                 - RFID information
             - Advanced
                 - xml config blocks per game world. (Music being the most important!)
-        - How to play… Explanation of modes, behaviors.
+	- App architecture (architecture.md); this could be folded into installation or programmer's guide--or maybe it really does belong in its own section.
+		- Who is this for? If you want to hack on Tabla's host app, or go deeper into ideas touched upon in programming or installation guides. 
+		- Projection mapping system (get photo Luke took of my explanation).
+			- Coordinate spaces (table/world, projector, camera, etc...)		
+	- Programming guide (for game worlds)
+	- How to play. Explanation of modes, behaviors.
 - [ ] Contributors
 	- Who made this? Who has done what?
 - [ ] Flesh out Related Work
@@ -57,3 +54,4 @@
 
 ## Pinball
 - [ ] Score, ball count, high score.
+- [ ] Remove static cube map file from project, and don't load it.
