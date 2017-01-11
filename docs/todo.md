@@ -1,30 +1,12 @@
 # Packaging
 - [ ] License
-- [ ] Documentation
-	- What is this? (about.md)
-	- How to build/set up/install? (installation.md)
-		- Hardware list
-            - Camera
-            - Projector
-            - Table you can black out
-		- How to build project
-			- libcinder only external dependency (I think)
-		- How to install hardware
-        - Software setup.
-            - How to calibrate
-                - Polygons
-                - Xml Files
-                - RFID information
-            - Advanced
-                - xml config blocks per game world. (Music being the most important!)
-	- App architecture (architecture.md); this could be folded into installation or programmer's guide--or maybe it really does belong in its own section.
-		- Who is this for? If you want to hack on Tabla's host app, or go deeper into ideas touched upon in programming or installation guides. 
-		- Projection mapping system (get photo Luke took of my explanation).
-			- Coordinate spaces (table/world, projector, camera, etc...)		
-	- Programming guide (for game worlds)
-	- How to play. Explanation of modes, behaviors.
-- [ ] Contributors
-	- Who made this? Who has done what?
+- Documentation
+	- [ ] About; finish it.
+	- [ ] Installation; finish it.
+	- [ ] App architecture; write it.		
+	- [ ] Programming guide (for game worlds); write it.
+	- [ ] How to play. Explanation of modes, behaviors; write it.
+- [ ] Contributors; Write it: Who made this? Who has done what?
 - [ ] Flesh out Related Work
 
 # Application
