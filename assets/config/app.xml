@@ -11,7 +11,7 @@
 		<DrawContours>				0 </DrawContours>
 		<DrawContoursFilled>		0 </DrawContoursFilled>
 		<DrawMouseDebugInfo>		1 </DrawMouseDebugInfo>
-		<DrawContourMousePick>		1 </DrawContourMousePick>
+		<DrawContourMousePick>		0 </DrawContourMousePick>
 		<DrawPolyBoundingRect>		0 </DrawPolyBoundingRect>
 		<DrawContourTree>			0 </DrawContourTree>
 		<DrawPipeline>				0 </DrawPipeline>
