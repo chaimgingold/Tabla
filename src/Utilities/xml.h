@@ -176,6 +176,54 @@ inline bool getXml( const XmlTree &xml, string name, vec2 var[], int len )
 	else return false ;
 }
 
+
+inline vector<vec2> getVec2sFromXml( const XmlTree &xml, string name )
+{
+	vector<vec2> vs;
+
+	for( auto i = xml.begin( name + "/v" ); i != xml.end(); ++i )
+	{		
+		vec2 v;
+		if ( sscanf( i->getValue().c_str(), "%f %f", &v.x, &v.y ) == 2 )
+		{
+			vs.push_back(v);
+		}
+	}
+	
+	return vs;
+}
+
+inline bool getVec2sFromXml( const XmlTree &xml, string name, vec2 var[], int len )
+{
+	vector<vec2> vs = getVec2sFromXml(xml,name);
+
+	if (vs.size()==len)
+	{
+		for( int i=0; i<len; ++i ) var[i] = vs[i];
+		return true;
+	}
+	else return false;
+}
+
+inline XmlTree vec2sToXml( string name, vector<vec2> vs )
+{
+	XmlTree xml(name,"");
+	for( auto v : vs ) {
+		xml.push_back( XmlTree("v", toString(v.x) + " " + toString(v.y) ) );
+	}
+	return xml;
+}
+
+inline XmlTree vec2sToXml( string name, const vec2* vs, int n )
+{
+	XmlTree xml(name,"");
+	for ( int i=0; i<n; ++i ) {
+		vec2 v = vs[i];
+		xml.push_back( XmlTree("v", toString(v.x) + " " + toString(v.y) ) );
+	}
+	return xml;
+}
+
 inline bool getXml( const XmlTree &xml, string name, ColorAf& var )
 {
 	auto n = xml.begin(name);

@@ -14,18 +14,13 @@ static string vecToString( vec2 v )
 	return toString(v.x) + " " + toString(v.y);
 };
 
-static string vecsToString( const vec2* a, int n )
+static string noNewline( string str )
 {
-	string s;
-	
-	for( int i=0; i<n; ++i )
-	{
-		s += vecToString(a[i]) + "\n";
+	for( auto &c : str ) {
+		if (c=='\n'||c=='\r') c=' ';
 	}
-	
-	return s;
-};
-
+	return str;
+}
 
 static vector<float> stringToFloatVec( string value )
 {
@@ -101,8 +96,16 @@ void LightLink::CaptureProfile::setParams( XmlTree xml )
 	getXml(xml, "DeviceName",mDeviceName);
 	getXml(xml, "FileName",mFilePath);
 	getXml(xml, "CaptureSize",mCaptureSize);
-	getXml(xml, "CaptureCoords", mCaptureCoords, 4 );
-	getXml(xml, "CaptureWorldSpaceCoords", mCaptureWorldSpaceCoords, 4 );
+
+	if ( !getVec2sFromXml(xml, "CaptureCoords", mCaptureCoords, 4 ) ) {
+		// backwards compatibility
+		getXml(xml, "CaptureCoords", mCaptureCoords, 4 );
+	}
+	
+	if ( !getVec2sFromXml(xml, "CaptureWorldSpaceCoords", mCaptureWorldSpaceCoords, 4 ) ) {
+		// backwards compatibility
+		getXml(xml, "CaptureWorldSpaceCoords", mCaptureWorldSpaceCoords, 4 );
+	}
 
 	if ( xml.hasChild("DistCoeffs") )
 	{
@@ -137,21 +140,21 @@ XmlTree LightLink::CaptureProfile::getParams() const
 	t.push_back( XmlTree( "DeviceName", mDeviceName) );
 	t.push_back( XmlTree( "FileName", mFilePath) );
 	t.push_back( XmlTree( "CaptureSize", vecToString(mCaptureSize) ) );
-	t.push_back( XmlTree( "CaptureCoords", vecsToString(mCaptureCoords,4) ));
-	t.push_back( XmlTree( "CaptureWorldSpaceCoords", vecsToString(mCaptureWorldSpaceCoords,4) ));
+	t.push_back( vec2sToXml( "CaptureCoords", mCaptureCoords,4 ) ) ;
+	t.push_back( vec2sToXml( "CaptureWorldSpaceCoords", mCaptureWorldSpaceCoords, 4 ) );
 
 	if ( mDistCoeffs.rows==1 )
 	{
 		std::ostringstream ss;
 		ss << mDistCoeffs;
-		t.push_back( XmlTree( "DistCoeffs", ss.str() ) );
+		t.push_back( XmlTree( "DistCoeffs", noNewline(ss.str()) ) );
 	}
 
 	if ( !mCameraMatrix.empty() )
 	{
 		std::ostringstream ss;
 		ss << mCameraMatrix;
-		t.push_back( XmlTree( "CameraMatrix", ss.str() ) );
+		t.push_back( XmlTree( "CameraMatrix", noNewline(ss.str()) ) );
 	}
 	
 	return t;
@@ -183,9 +186,18 @@ LightLink::ProjectorProfile::ProjectorProfile( string name, vec2 size, const vec
 void LightLink::ProjectorProfile::setParams( XmlTree xml )
 {
 	getXml(xml, "Name",mName);
-	getXml(xml, "ProjectorWorldSpaceCoords", mProjectorWorldSpaceCoords, 4 );
+
+	if ( !getVec2sFromXml(xml, "ProjectorWorldSpaceCoords", mProjectorWorldSpaceCoords, 4 ) ) {
+		// backwards compatibility
+		getXml(xml, "ProjectorWorldSpaceCoords", mProjectorWorldSpaceCoords, 4 );
+	}
+
 	getXml(xml, "ProjectorSize", mProjectorSize);
-	getXml(xml, "ProjectorCoords", mProjectorCoords, 4 );
+	
+	if ( !getVec2sFromXml(xml, "ProjectorCoords", mProjectorCoords, 4 ) ) {
+		// backwards compatibility
+		getXml(xml, "ProjectorCoords", mProjectorCoords, 4 );
+	}	
 }
 
 XmlTree LightLink::ProjectorProfile::getParams() const
@@ -193,9 +205,9 @@ XmlTree LightLink::ProjectorProfile::getParams() const
 	XmlTree t("Profile","");
 	
 	t.push_back( XmlTree( "Name", mName) );
-	t.push_back( XmlTree( "ProjectorWorldSpaceCoords", vecsToString(mProjectorWorldSpaceCoords,4) ));
+	t.push_back( vec2sToXml( "ProjectorWorldSpaceCoords", mProjectorWorldSpaceCoords,4) );
 	t.push_back( XmlTree( "ProjectorSize", vecToString(mProjectorSize)) );
-	t.push_back( XmlTree( "ProjectorCoords", vecsToString(mProjectorCoords,4) ));
+	t.push_back( vec2sToXml( "ProjectorCoords", mProjectorCoords,4) );
 	
 	return t;
 }
@@ -228,14 +240,20 @@ XmlTree LightLink::getParams() const
 {
 	XmlTree t("LightLink","");
 	
+	t.push_back( XmlTree("","  Active Profiles  ",0,XmlTree::NODE_COMMENT) );
+
 	t.push_back( XmlTree("CaptureProfile", mActiveCaptureProfileName) );
 	t.push_back( XmlTree("ProjectorProfile", mActiveProjectorProfileName) );
+	
+	t.push_back( XmlTree("","  Capture Profiles  ",0,XmlTree::NODE_COMMENT) );
 	
 	XmlTree capture("Capture","");
 	for( const auto& p : mCaptureProfiles ) {
 		capture.push_back( p.second.getParams() );
 	}
 	t.push_back(capture);
+
+	t.push_back( XmlTree("","  Projector Profiles  ",0,XmlTree::NODE_COMMENT) );
 
 	XmlTree projector("Projector","");
 	for( const auto& p : mProjectorProfiles ) {
