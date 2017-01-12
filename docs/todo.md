@@ -11,6 +11,12 @@
 
 # Application
 
+- Firewall Game Worlds from one another and the main app. Make it easy to see that people checking in game worlds aren't modifying files outside of the scope of that game world.
+	- [ ] Instantiate static cartridge objects that add themselves to a global list.
+		- [ ] Get rid of left/right keys; replace with a reset gameworld metakey.
+	- [ ] Put assets for each world in their own folder
+		- [ ] Add a GameWorld::getAssetPath() function, and use this to pluck the proper file paths.
+	- [ ] Restrict include path search so that #include must be more explicit about which file. Do this to prevent accidental includes across GameWorlds. So, #include "tabla/Vision.h" vs. #include "worlds/music/MusicVision.h"
 - [ ] Put lightlink.xml in settings.xml (i think it's a good idea...; maybe not?)
 - [x] Make polygon xml into a list of vertices inside of polygon block: e.g. <v>x1 y1</v> <v>x2 y2</v> etc... (will make file look less crazy).
 - [ ] Move settings to /Library
@@ -20,6 +26,7 @@
 	- [ ] Move to App, not just Pinball
 	- [ ] allow multiple controller profiles (PS4, Xbox, etc...).
 - [ ] Move RectFinder into Vision pipeline
+- [ ] Finish token system
 
 # Game Worlds
 

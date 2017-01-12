@@ -271,7 +271,7 @@ AnimWorld::getFirstFrameIndexOfAnimForScreen_Above( const Frame& screen, const F
 	// cout << screenr << endl;
 	
 	int besti=-1;
-	float bestd=mMaxFrameDist; // reuse this const for proximity
+	float bestd=mMaxScreenToFrameDist;
 	
 	for( const auto &f : frames )
 	{
@@ -298,7 +298,7 @@ int
 AnimWorld::getFirstFrameIndexOfAnimForScreen_Closest( const Frame& screen, const FrameVec& frames ) const
 {
 	int besti=-1;
-	float bestd=mMaxScreenToFrameDist; // reuse this const for proximity
+	float bestd=mMaxScreenToFrameDist;
 	
 	for( const auto &f : frames )
 	{

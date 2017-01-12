@@ -27,6 +27,8 @@ void PinballVision::setParams( XmlTree xml )
 
 ContourVec PinballVision::dejitterVisionContours( ContourVec in, ContourVec old ) const
 {
+	// To really properly work this needs to fit new points into old line segments, not just old vertices.
+
 	ContourVec out = in;
 	
 	for( auto &c : out )
@@ -99,6 +101,10 @@ PinballVision::update(
 
 bool PinballVision::shouldContourBeAPart( const Contour& c, const ContourVec& cs ) const
 {
+	// no children?
+//	if (!c.mChild.empty()) return false; // seems logical; or does it matter? is this just annoying?
+	
+	// round enough?
 	{
 		float lo = c.mRotatedBoundingRect.mSize.x;
 		float hi = c.mRotatedBoundingRect.mSize.y;
