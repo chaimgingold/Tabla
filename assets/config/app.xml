@@ -10,7 +10,7 @@
 		<DrawCameraImage>			1 </DrawCameraImage>
 		<DrawContours>				0 </DrawContours>
 		<DrawContoursFilled>		0 </DrawContoursFilled>
-		<DrawMouseDebugInfo>		1 </DrawMouseDebugInfo>
+		<DrawMouseDebugInfo>		0 </DrawMouseDebugInfo>
 		<DrawContourMousePick>		0 </DrawContourMousePick>
 		<DrawPolyBoundingRect>		0 </DrawPolyBoundingRect>
 		<DrawContourTree>			0 </DrawContourTree>
@@ -48,7 +48,7 @@
 
 		<tag>
 			<id>17325860</id>
-			<value>cartridge/CalibrateWorld</value>
+			<value>cartridge/CameraCalibrateWorld</value>
 		</tag>
 		
 		<tag>

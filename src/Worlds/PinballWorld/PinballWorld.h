@@ -196,16 +196,4 @@ private:
 
 } // namespace Pinball
 
-
-class PinballWorldCartridge : public GameCartridge
-{
-public:
-	virtual string getSystemName() const override { return "PinballWorld"; }
-
-	virtual std::shared_ptr<GameWorld> load() const override
-	{
-		return std::make_shared<Pinball::PinballWorld>();
-	}
-};
-
 #endif /* PinballWorld_hpp */

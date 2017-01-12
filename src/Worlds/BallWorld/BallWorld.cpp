@@ -12,6 +12,10 @@
 #include "cinder/Rand.h"
 #include "xml.h"
 
+static GameCartridgeSimple sCartridge("BallWorld", [](){
+	return std::make_shared<BallWorld>();
+});
+
 BallWorld::BallWorld()
 {
 	mFileWatch.loadShader(

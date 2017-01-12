@@ -1,15 +1,5 @@
 #include "TablaApp.h"
 
-#include "BallWorld.h"
-#include "PongWorld.h"
-#include "MusicWorld.h"
-#include "CalibrateWorld.h"
-#include "PinballWorld.h"
-#include "TokenWorld.h"
-#include "RibbonWorld.h"
-#include "AnimWorld.h"
-#include "QuadTestWorld.h"
-
 #include "geom.h"
 #include "xml.h"
 #include "View.h"
@@ -309,8 +299,7 @@ void TablaApp::setup()
 		mUIWindow->getSignalResize().connect( [&]{ this->saveUserSettings(); });
 	}
 	
-	// load the games, rfid functions
-	setupGameLibrary();
+	// setup rfid functions
 	setupRFIDValueToFunction();
 
 	// settings (generic)
@@ -329,34 +318,18 @@ void TablaApp::setup()
 	}
 }
 
-void TablaApp::setupGameLibrary()
-{
-	mGameLibrary.push_back( make_shared<BallWorldCartridge>() );
-	mGameLibrary.push_back( make_shared<PinballWorldCartridge>() );
-	mGameLibrary.push_back( make_shared<PongWorldCartridge>() );
-	mGameLibrary.push_back( make_shared<TokenWorldCartridge>() );
-	mGameLibrary.push_back( make_shared<CalibrateWorldCartridge>() );
-	mGameLibrary.push_back( make_shared<QuadTestWorldCartridge>() );
-	mGameLibrary.push_back( make_shared<MusicWorldCartridge>() );
-	mGameLibrary.push_back( make_shared<RibbonWorldCartridge>() );
-	mGameLibrary.push_back( make_shared<AnimWorldCartridge>() );
-}
-
 void TablaApp::setupRFIDValueToFunction()
 {
 	mRFIDValueToFunction.clear();
 	
 	// game loader functions
-	for( auto i : mGameLibrary )
+	for( auto i : GameCartridge::getLibrary() )
 	{
-		string name = i->getSystemName();
+		string name = i.first;
 		
 		mRFIDValueToFunction[ string("cartridge/") + name ] = [this,name]()
 		{
-			int cartNum = findCartridgeByName(name);
-			
-			if (cartNum==-1) cout << "Failed to find cartridge '" << name << "'" << endl;
-			else if (cartNum!=mGameWorldCartridgeIndex) this->loadGame(cartNum);
+			this->loadGame(name);
 		};
 	}
 }
@@ -557,29 +530,17 @@ void TablaApp::setupNextValidCaptureProfile()
 	// mega-fail
 }
 
-void TablaApp::loadDefaultGame( string byName )
+void TablaApp::loadGame( string systemName )
 {
-	if ( !mGameLibrary.empty() )
-	{
-		int index=0;
-		
-		if (!byName.empty())
-		{
-			int i = findCartridgeByName(byName);
-			if (i!=-1) index=i;
-		}
-		
-		loadGame(index);
+	auto cart = GameCartridge::getLibrary().find(systemName);
+	if (cart==GameCartridge::getLibrary().end()) {
+		cout << "loadGame('" << systemName << "'), failed to find game."  << endl;
+		return;
 	}
-}
-
-void TablaApp::loadGame( int libraryIndex )
-{
-	assert( libraryIndex >=0 && libraryIndex < mGameLibrary.size() );
 	
-	mGameWorldCartridgeIndex = libraryIndex ;
+	mGameWorldCartridgeName = systemName ;
 	
-	mGameWorld = mGameLibrary[libraryIndex]->load();
+	mGameWorld = cart->second->load();
 	
 	if ( mGameWorld )
 	{
@@ -612,26 +573,41 @@ void TablaApp::loadGame( int libraryIndex )
 	saveUserSettings();
 }
 
-void TablaApp::loadAdjacentGame( int libraryIndexDelta )
+void TablaApp::loadDefaultGame( string systemName )
 {
-	if ( !mGameLibrary.empty() )
+	// first?
+	if ( systemName.empty() && GameCartridge::getLibrary().empty() )
 	{
-		int i = mGameWorldCartridgeIndex + libraryIndexDelta;
-		
-		if ( i >= (int)mGameLibrary.size() ) i = i % (int)mGameLibrary.size();
-		if ( i < 0 ) i = (int)mGameLibrary.size() - ((-i) % (int)mGameLibrary.size()) ;
-		
-		loadGame(i);
+		systemName = GameCartridge::getLibrary().begin()->first;
 	}
+	
+	// try
+	loadGame(systemName);	
 }
 
-int TablaApp::findCartridgeByName( string name )
+void TablaApp::loadAdjacentGame( int libraryIndexDelta )
 {
-	for( size_t i=0; i<mGameLibrary.size(); ++i )
+	auto lib = GameCartridge::getLibrary();
+	auto begin = lib.begin();
+	auto end = lib.end();
+	auto i = lib.find( mGameWorldCartridgeName );
+	
+	if ( i!=end )
 	{
-		if ( mGameLibrary[i]->getSystemName() == name ) return i;
+		while (libraryIndexDelta>0) {
+			i = ++i;
+			if (i==end) i = begin;
+			libraryIndexDelta--;
+		}
+		while (libraryIndexDelta<0) {
+			// this negative wrap is busted (*shrug*)
+			if (i==begin) i = --end;
+			else i = --i;
+			libraryIndexDelta++;
+		}
+		
+		if (i!=end) loadGame(i->first);
 	}
-	return -1;
 }
 
 fs::path
@@ -950,7 +926,7 @@ void TablaApp::drawWorld( GameWorld::DrawType drawType )
 	if (mGameWorld) mGameWorld->draw(drawType);
 	
 	// mouse debug info
-	if ( (mDrawMouseDebugInfo||isUIWindow) && isMouseInWindow && mGameWorld )
+	if ( (mDrawMouseDebugInfo&&isUIWindow) && isMouseInWindow && mGameWorld )
 	{
 		mGameWorld->drawMouseDebugInfo(mouseInWorld);
 	}
@@ -1056,13 +1032,13 @@ void TablaApp::keyDown( KeyEvent event )
 				saveUserSettings();
 				break;
 			
-			case KeyEvent::KEY_LEFT:
-				loadAdjacentGame(-1);
-				break;
-			
-			case KeyEvent::KEY_RIGHT:
-				loadAdjacentGame(1);
-				break;
+//			case KeyEvent::KEY_LEFT:
+//				loadAdjacentGame(-1);
+//				break;
+//			case KeyEvent::KEY_RIGHT:
+//				loadAdjacentGame(1);
+//				break;
+				
 			case KeyEvent::KEY_ESCAPE:
 				{
 					mDebugFrame.reset();
@@ -1144,14 +1120,9 @@ void TablaApp::loadUserSettingsFromXml( XmlTree xml )
 		
 		if ( !mGameWorld || mGameWorld->getSystemName() != name )
 		{
-			int i = findCartridgeByName(name);
+			cout << "loadUserSettingsFromXml: going to game world '" << name << "'" << endl;
 			
-			if (i!=-1)
-			{
-				cout << "loadUserSettingsFromXml: going to game world " << name << endl;
-				loadGame(i);
-			}
-			else cout << "loadUserSettingsFromXml: unknown game world " << name << endl;
+			loadGame(name);
 		}
 	}
 	

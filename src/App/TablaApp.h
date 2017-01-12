@@ -83,14 +83,11 @@ class TablaApp : public App {
 	void updateDebugFrameCaptureDevicesWithPxPerWorldUnit( float );
 	
 	// game library
-	void setupGameLibrary();
-	void loadDefaultGame( string byName="" );
-	void loadGame( int libraryIndex );
+	void loadGame( string systemName );
+	void loadDefaultGame( string systemName="" );
 	void loadAdjacentGame( int libraryIndexDelta );
-	int  findCartridgeByName( string ); // -1 for fail
 	
-	vector<GameCartridgeRef> mGameLibrary;
-	int mGameWorldCartridgeIndex=-1; // what index of mGameLibrary did mGameWorld come from?
+	string mGameWorldCartridgeName; // what name of mGameLibrary did mGameWorld come from?
 
 	// game xml params
 	void				setGameWorldXmlParams( XmlTree );

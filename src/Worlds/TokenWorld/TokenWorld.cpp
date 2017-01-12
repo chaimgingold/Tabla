@@ -16,6 +16,10 @@ using namespace std;
 
 // http://docs.opencv.org/2.4/doc/tutorials/features2d/feature_homography/feature_homography.html
 
+static GameCartridgeSimple sCartridge("TokenWorld", [](){
+	return std::make_shared<TokenWorld>();
+});
+
 TokenWorld::TokenWorld()
 {
 	mTokenMatcher = TokenMatcher();

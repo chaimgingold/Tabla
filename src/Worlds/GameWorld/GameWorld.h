@@ -73,9 +73,21 @@ private:
 class GameCartridge
 {
 public:
-	virtual string getSystemName() const { return "GameWorld"; } // should match GameWorld name
-	virtual string getUserName() const { return getSystemName(); }
+	GameCartridge( string systemName ); // should match GameWorld name
+	virtual ~GameCartridge();
+	
+	string getSystemName() const { return mSystemName; }
+	string getUserName() const { return getSystemName(); }
 	virtual std::shared_ptr<GameWorld> load() const { return 0; }
+
+	typedef map<string,const GameCartridge*> Library;
+	static const Library& getLibrary();
+	
+private:
+	static Library& getLibraryW();
+
+	string mSystemName = "GameWorld";
+	static Library* mLibrary;
 	
 };
 typedef std::shared_ptr<GameCartridge> GameCartridgeRef;
@@ -85,7 +97,7 @@ class GameCartridgeSimple : public GameCartridge
 public:
 	typedef function< std::shared_ptr<GameWorld>() > tLoaderFunc;
 
-	GameCartridgeSimple( tLoaderFunc f ) {mLoader=f;}
+	GameCartridgeSimple( string systemName, tLoaderFunc f ) : GameCartridge(systemName) {mLoader=f;}
 	
 	virtual std::shared_ptr<GameWorld> load() const override
 	{

@@ -14,6 +14,10 @@
 using namespace std;
 using namespace Anim;
 
+static GameCartridgeSimple sCartridge("AnimWorld", [](){
+	return std::make_shared<Anim::AnimWorld>();
+});
+
 gl::TextureRef Frame::getAsTexture()
 {
 	if ( !mTexture && !mImageCV.empty() ) {

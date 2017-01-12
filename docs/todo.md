@@ -12,8 +12,9 @@
 # Application
 
 - Firewall Game Worlds from one another and the main app. Make it easy to see that people checking in game worlds aren't modifying files outside of the scope of that game world.
-	- [ ] Instantiate static cartridge objects that add themselves to a global list.
-		- [ ] Get rid of left/right keys; replace with a reset gameworld metakey.
+	- [x] Instantiate static cartridge objects that add themselves to a global list.
+		- [x] Get rid of left/right keys;
+		- [ ] Replace with a reset gameworld metakey. (or force worlds to deal with this use case themselves.)
 	- [ ] Put assets for each world in their own folder
 		- [ ] Add a GameWorld::getAssetPath() function, and use this to pluck the proper file paths.
 	- [ ] Restrict include path search so that #include must be more explicit about which file. Do this to prevent accidental includes across GameWorlds. So, #include "tabla/Vision.h" vs. #include "worlds/music/MusicVision.h"
@@ -21,7 +22,7 @@
 - [x] Make polygon xml into a list of vertices inside of polygon block: e.g. <v>x1 y1</v> <v>x2 y2</v> etc... (will make file look less crazy).
 - [ ] Move settings to /Library
 - [ ] Each GameWorld can have their own settings (either in settings.xml, or in per-game files). e.g. for which way is up
-- [ ] Automatic projector calibration. (And rename CalibateWorld to CameraCalibrateWorld; add a ProjectorCalibrateWorld that does this). Simply project a box in known projector space, find it in world space, then use that perspective transform to set the projector profile's mProjectorCoords.
+- [ ] Automatic projector calibration. (And rename CalibateWorld to CameraCameraCalibrateWorld; add a ProjectorCameraCalibrateWorld that does this). Simply project a box in known projector space, find it in world space, then use that perspective transform to set the projector profile's mProjectorCoords.
 - Game controller
 	- [ ] Move to App, not just Pinball
 	- [ ] allow multiple controller profiles (PS4, Xbox, etc...).

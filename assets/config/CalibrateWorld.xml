@@ -1,4 +1,4 @@
-<CalibrateWorld>
+<CameraCalibrateWorld>
 
 	<BoardCols>8</BoardCols>
 	<BoardRows>8</BoardRows>
@@ -21,4 +21,4 @@
 		</Contours>
 	</Vision>
 
-</CalibrateWorld>
+</CameraCalibrateWorld>

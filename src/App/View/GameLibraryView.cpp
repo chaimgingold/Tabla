@@ -30,7 +30,7 @@ void GameLibraryView::draw()
 	if (!TablaApp::get()) return;
 	
 	const auto &app = *(TablaApp::get());
-	const auto &games = app.mGameLibrary;
+	const auto &games = GameCartridge::getLibrary();
 
 	gl::color(1,1,1,1);
 	gl::drawSolidRect( getBounds() );
@@ -45,13 +45,17 @@ void GameLibraryView::draw()
 		const int highlight = getHighlightIndex( rootToChild(mMouseLoc) );
 		
 		const vec2 itemSize = getItemSize();
-		const int   n = games.size();
+//		const int   n = games.size();
 		const Rectf menuRect = getMenuRect();
 		
 		gl::color(1,1,1,1);
 		gl::drawSolidRect(menuRect);
 		
-		for( int i=0; i<n; ++i )
+		auto c = games.begin();
+		
+		for( int i=0;
+			 c != games.end();
+			 ++i, ++c )
 		{
 			vec2 itemUL = getBounds().getUpperLeft() + vec2(0,-itemSize.y);
 			
@@ -68,7 +72,7 @@ void GameLibraryView::draw()
 				gl::color(0,0,0,1);
 			}
 			
-			string worldName = games[i]->getUserName();
+			string worldName = c->first;
 			app.mTextureFont->drawString( worldName, r.getLowerLeft() + kTextOffset );
 		}
 	}
@@ -76,7 +80,16 @@ void GameLibraryView::draw()
 
 void GameLibraryView::mouseDown( MouseEvent )
 {
-
+	auto lib = GameCartridge::getLibrary();
+	auto i = lib.begin();
+	
+	mMouseDownIndex=0;
+	
+	while ( i != lib.end() && i->first != TablaApp::get()->mGameWorldCartridgeName )
+	{
+		++i;
+		mMouseDownIndex++;
+	}
 }
 
 void GameLibraryView::mouseDrag( MouseEvent e )
@@ -89,9 +102,14 @@ void GameLibraryView::mouseUp  ( MouseEvent e )
 	const int highlight = getHighlightIndex( rootToChild(e.getPos()) );
 
 	// only do something if changed
-	if (highlight != TablaApp::get()->mGameWorldCartridgeIndex )
+	if (highlight != mMouseDownIndex)
 	{
-		TablaApp::get()->loadGame(highlight);
+		auto lib = GameCartridge::getLibrary();
+		auto i = lib.begin();
+		
+		for( int j=0; j<highlight && i !=lib.end(); ++j ) ++i;
+		
+		if ( i!=lib.end() ) TablaApp::get()->loadGame(i->first);
 	}
 }
 
@@ -102,8 +120,7 @@ vec2 GameLibraryView::getItemSize() const
 
 Rectf GameLibraryView::getMenuRect() const
 {
-	const auto &app = *(TablaApp::get());
-	const auto &games = app.mGameLibrary;
+	const auto &games = GameCartridge::getLibrary();
 	
 	const float itemwidth = getBounds().getWidth();
 	const float itemheight = getBounds().getHeight();
@@ -127,5 +144,5 @@ int GameLibraryView::getHighlightIndex( vec2 p ) const
 		
 		return -p.y;
 	}
-	else return TablaApp::get()->mGameWorldCartridgeIndex;
+	else return mMouseDownIndex;
 }

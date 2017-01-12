@@ -11,6 +11,8 @@
 #include "GameWorld.h"
 #include "geom.h"
 
+GameCartridge::Library* GameCartridge::mLibrary=0;
+
 vec2 GameWorld::getRandomPointInWorldBoundsPoly() const
 {
 	PolyLine2 wb = getWorldBoundsPoly();
@@ -31,3 +33,30 @@ vec2 GameWorld::getRandomPointInWorldBoundsPoly() const
 	}
 }
 
+GameCartridge::GameCartridge( string systemName )
+	: mSystemName(systemName)
+{
+	assert( getLibrary().find(systemName) == getLibrary().end() );
+	
+	getLibraryW()[mSystemName] = this;
+}
+
+const GameCartridge::Library& GameCartridge::getLibrary()
+{
+	return getLibraryW();
+}
+
+GameCartridge::Library& GameCartridge::getLibraryW()
+{
+	if (!mLibrary) mLibrary = new Library();
+	return *mLibrary;
+} 
+
+GameCartridge::~GameCartridge()
+{
+	auto i = getLibraryW().find(mSystemName);
+	
+	assert( i != getLibraryW().end() );
+	
+	getLibraryW().erase(i);
+}

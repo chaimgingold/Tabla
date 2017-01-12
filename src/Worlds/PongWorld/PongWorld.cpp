@@ -13,6 +13,10 @@
 #include "cinder/audio/Source.h"
 #include "TablaApp.h"
 
+static GameCartridgeSimple sCartridge("PongWorld", [](){
+	return std::make_shared<PongWorld>();
+});
+
 PongWorld::PongWorld()
 {
 	mStateEnterTime = ci::app::getElapsedSeconds();

@@ -21,6 +21,9 @@
 using namespace std::chrono;
 using namespace ci::gl;
 
+static GameCartridgeSimple sCartridge("MusicWorld", [](){
+	return std::make_shared<MusicWorld>();
+});
 
 MusicWorld::MusicWorld()
 {

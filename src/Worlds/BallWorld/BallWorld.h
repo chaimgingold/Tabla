@@ -221,15 +221,4 @@ private:
 
 } ;
 
-class BallWorldCartridge : public GameCartridge
-{
-public:
-	virtual string getSystemName() const override { return "BallWorld"; }
-
-	virtual std::shared_ptr<GameWorld> load() const override
-	{
-		return std::make_shared<BallWorld>();
-	}
-};
-
 #endif /* Balls_hpp */

@@ -14,6 +14,10 @@
 
 using namespace std;
 
+static GameCartridgeSimple sCartridge("RibbonWorld", [](){
+	return std::make_shared<RibbonWorld>();
+});
+
 RibbonWorld::RibbonWorld()
 {
 	mFileWatch.loadShader(

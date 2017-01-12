@@ -78,16 +78,4 @@ private:
 	float mWidthDivision=10;
 };
 
-class RibbonWorldCartridge : public GameCartridge
-{
-public:
-	virtual string getSystemName() const override { return "RibbonWorld"; }
-
-	virtual std::shared_ptr<GameWorld> load() const override
-	{
-		return std::make_shared<RibbonWorld>();
-	}
-};
-
-
 #endif /* RibbonWorld_h */

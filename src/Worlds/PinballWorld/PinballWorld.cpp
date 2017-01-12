@@ -23,6 +23,10 @@ using namespace Pinball;
 
 //const bool kLogButtons = true; // we will need them to configure new controllers :P
 
+static GameCartridgeSimple sCartridge("PinballWorld", [](){
+	return std::make_shared<PinballWorld>();
+});
+
 PinballWorld::PinballWorld()
 	: mView(*this)
 	, mVision(*this)

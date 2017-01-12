@@ -35,6 +35,8 @@ private:
 	Rectf getMenuRect() const;
 	int getHighlightIndex( vec2 ) const;
 	
+	int mMouseDownIndex=-1;
+	
 };
 
 #endif /* GameLibraryView_hpp */

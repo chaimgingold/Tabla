@@ -1,17 +1,21 @@
 //
-//  CalibrateWorld.cpp
+//  CameraCalibrateWorld.cpp
 //  PaperBounce3
 //
 //  Created by Chaim Gingold on 11/1/16.
 //
 //
 
-#include "CalibrateWorld.h"
+#include "CameraCalibrateWorld.h"
 #include "TablaApp.h" // for config
 #include "ocv.h"
 #include "xml.h"
 
-void CalibrateWorld::setParams( XmlTree xml )
+static GameCartridgeSimple sCartridge("CameraCalibrateWorld", [](){
+	return std::make_shared<CameraCalibrateWorld>();
+});
+
+void CameraCalibrateWorld::setParams( XmlTree xml )
 {
 	int cols=7,rows=7;
 	getXml(xml, "BoardCols", cols);
@@ -27,11 +31,11 @@ void CalibrateWorld::setParams( XmlTree xml )
 	getXml(xml, "MinSecsBetweenCameraSamples", mMinSecsBetweenCameraSamples );
 }
 
-void CalibrateWorld::update()
+void CameraCalibrateWorld::update()
 {
 }
 
-void CalibrateWorld::updateVision( const Vision::Output& visionOut, Pipeline& pipeline )
+void CameraCalibrateWorld::updateVision( const Vision::Output& visionOut, Pipeline& pipeline )
 {
 	// too many boards?
 	if ( mKnownBoards.size() >= mNumBoardsToSolve ) return;
@@ -116,7 +120,7 @@ void CalibrateWorld::updateVision( const Vision::Output& visionOut, Pipeline& pi
 	}
 }
 
-void CalibrateWorld::tryToSolveWithKnownBoards( cv::Size imageSize )
+void CameraCalibrateWorld::tryToSolveWithKnownBoards( cv::Size imageSize )
 {
 	if (mVerbose) cout << "solving... (" << mKnownBoards.size() << " boards)" << endl;
 	
@@ -186,7 +190,7 @@ void CalibrateWorld::tryToSolveWithKnownBoards( cv::Size imageSize )
 	}
 }
 
-bool CalibrateWorld::areBoardCornersUnique( vector<cv::Point2f> c ) const
+bool CameraCalibrateWorld::areBoardCornersUnique( vector<cv::Point2f> c ) const
 {
 	const float kErrThresh = mUniqueBoardDiffThresh * (float)c.size();
 	float bestErr=MAXFLOAT;
@@ -215,7 +219,7 @@ bool CalibrateWorld::areBoardCornersUnique( vector<cv::Point2f> c ) const
 	return bestErr > kErrThresh;
 }
 
-void CalibrateWorld::draw( DrawType drawType )
+void CameraCalibrateWorld::draw( DrawType drawType )
 {
 	vec2 center = getWorldBoundsPoly().calcCentroid();
 	
@@ -289,7 +293,7 @@ void CalibrateWorld::draw( DrawType drawType )
 	}
 }
 
-void CalibrateWorld::drawChessboard( vec2 c, vec2 size  ) const
+void CameraCalibrateWorld::drawChessboard( vec2 c, vec2 size  ) const
 {
 	vec2 squareSize = size / vec2(mBoardNumCorners.x,mBoardNumCorners.y);
 	vec2 topleft = c - size*.5f;

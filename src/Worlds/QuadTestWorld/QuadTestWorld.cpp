@@ -25,6 +25,10 @@ PolyLine2 QuadTestWorld::Frame::getQuadAsPoly() const
 	return p;
 }*/
 
+static GameCartridgeSimple sCartridge("QuadTestWorld", [](){
+	return std::make_shared<QuadTestWorld>();
+});
+
 QuadTestWorld::QuadTestWorld()
 {
 }

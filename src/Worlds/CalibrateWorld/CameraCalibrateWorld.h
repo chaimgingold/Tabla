@@ -1,24 +1,24 @@
 //
-//  CalibrateWorld.hpp
+//  CameraCalibrateWorld.hpp
 //  PaperBounce3
 //
 //  Created by Chaim Gingold on 11/1/16.
 //
 //
 
-#ifndef CalibrateWorld_hpp
-#define CalibrateWorld_hpp
+#ifndef CameraCalibrateWorld_hpp
+#define CameraCalibrateWorld_hpp
 
 #include "BallWorld.h"
 
-class CalibrateWorld : public BallWorld
+class CameraCalibrateWorld : public GameWorld
 {
 public:
 
-//	CalibrateWorld();
-//	~CalibrateWorld();
+//	CameraCalibrateWorld();
+//	~CameraCalibrateWorld();
 	
-	string getSystemName() const override { return "CalibrateWorld"; }
+	string getSystemName() const override { return "CameraCalibrateWorld"; }
 	void setParams( XmlTree ) override;
 
 //	void gameWillLoad() override;
@@ -60,15 +60,4 @@ private:
 	
 };
 
-class CalibrateWorldCartridge : public GameCartridge
-{
-public:
-	virtual string getSystemName() const override { return "CalibrateWorld"; }
-
-	virtual std::shared_ptr<GameWorld> load() const override
-	{
-		return std::make_shared<CalibrateWorld>();
-	}
-};
-
-#endif /* CalibrateWorld_hpp */
+#endif /* CameraCalibrateWorld_hpp */

@@ -33,7 +33,7 @@
 		262FCDCF1E234DDF00FC5D66 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 262FCDCE1E234DDF00FC5D66 /* Images.xcassets */; };
 		2673CD5E1E1D791C0036C02D /* PinballView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2673CD5C1E1D791C0036C02D /* PinballView.cpp */; };
 		26CCA2D31E089DE7005F7C24 /* BallWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2B21E089DE7005F7C24 /* BallWorld.cpp */; };
-		26CCA2D41E089DE7005F7C24 /* CalibrateWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2B51E089DE7005F7C24 /* CalibrateWorld.cpp */; };
+		26CCA2D41E089DE7005F7C24 /* CameraCalibrateWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2B51E089DE7005F7C24 /* CameraCalibrateWorld.cpp */; };
 		26CCA2D51E089DE7005F7C24 /* GameWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2B81E089DE7005F7C24 /* GameWorld.cpp */; };
 		26CCA2D61E089DE7005F7C24 /* Instrument.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2BB1E089DE7005F7C24 /* Instrument.cpp */; };
 		26CCA2D71E089DE7005F7C24 /* MusicStamp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2BD1E089DE7005F7C24 /* MusicStamp.cpp */; };
@@ -220,8 +220,8 @@
 		2673CD5D1E1D791C0036C02D /* PinballView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PinballView.h; sourceTree = "<group>"; };
 		26CCA2B21E089DE7005F7C24 /* BallWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BallWorld.cpp; sourceTree = "<group>"; };
 		26CCA2B31E089DE7005F7C24 /* BallWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BallWorld.h; sourceTree = "<group>"; };
-		26CCA2B51E089DE7005F7C24 /* CalibrateWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CalibrateWorld.cpp; sourceTree = "<group>"; };
-		26CCA2B61E089DE7005F7C24 /* CalibrateWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CalibrateWorld.h; sourceTree = "<group>"; };
+		26CCA2B51E089DE7005F7C24 /* CameraCalibrateWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CameraCalibrateWorld.cpp; sourceTree = "<group>"; };
+		26CCA2B61E089DE7005F7C24 /* CameraCalibrateWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CameraCalibrateWorld.h; sourceTree = "<group>"; };
 		26CCA2B81E089DE7005F7C24 /* GameWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GameWorld.cpp; sourceTree = "<group>"; };
 		26CCA2B91E089DE7005F7C24 /* GameWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameWorld.h; sourceTree = "<group>"; };
 		26CCA2BB1E089DE7005F7C24 /* Instrument.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Instrument.cpp; sourceTree = "<group>"; };
@@ -804,7 +804,7 @@
 				26CCA2B71E089DE7005F7C24 /* GameWorld */,
 				26CCA3231E08AD8E005F7C24 /* AnimWorld */,
 				26CCA2B11E089DE7005F7C24 /* BallWorld */,
-				26CCA2B41E089DE7005F7C24 /* CalibrateWorld */,
+				26CCA2B41E089DE7005F7C24 /* CameraCalibrateWorld */,
 				26CCA2BA1E089DE7005F7C24 /* MusicWorld */,
 				26CCA2C51E089DE7005F7C24 /* PinballWorld */,
 				26CCA2CA1E089DE7005F7C24 /* PongWorld */,
@@ -825,12 +825,13 @@
 			path = BallWorld;
 			sourceTree = "<group>";
 		};
-		26CCA2B41E089DE7005F7C24 /* CalibrateWorld */ = {
+		26CCA2B41E089DE7005F7C24 /* CameraCalibrateWorld */ = {
 			isa = PBXGroup;
 			children = (
-				26CCA2B51E089DE7005F7C24 /* CalibrateWorld.cpp */,
-				26CCA2B61E089DE7005F7C24 /* CalibrateWorld.h */,
+				26CCA2B51E089DE7005F7C24 /* CameraCalibrateWorld.cpp */,
+				26CCA2B61E089DE7005F7C24 /* CameraCalibrateWorld.h */,
 			);
+			name = CameraCalibrateWorld;
 			path = CalibrateWorld;
 			sourceTree = "<group>";
 		};
@@ -2701,7 +2702,7 @@
 				26CCA2D61E089DE7005F7C24 /* Instrument.cpp in Sources */,
 				26CCA30A1E089EB8005F7C24 /* FileWatch.cpp in Sources */,
 				368A4C049D4240A9A2AB6B0B /* b2RopeJoint.cpp in Sources */,
-				26CCA2D41E089DE7005F7C24 /* CalibrateWorld.cpp in Sources */,
+				26CCA2D41E089DE7005F7C24 /* CameraCalibrateWorld.cpp in Sources */,
 				E3E1015154A147BC9674C8ED /* b2WeldJoint.cpp in Sources */,
 				24F2003E479C4BC49D1F7374 /* b2WheelJoint.cpp in Sources */,
 				26CCA2D51E089DE7005F7C24 /* GameWorld.cpp in Sources */,

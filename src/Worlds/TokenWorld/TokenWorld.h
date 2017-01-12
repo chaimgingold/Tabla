@@ -77,16 +77,4 @@ private:
 	void drawGlobalKeypoints();
 };
 
-class TokenWorldCartridge : public GameCartridge
-{
-public:
-	virtual string getSystemName() const override { return "TokenWorld"; }
-
-	virtual std::shared_ptr<GameWorld> load() const override
-	{
-		return std::make_shared<TokenWorld>();
-	}
-};
-
-
 #endif /* TokenWorld_h */
