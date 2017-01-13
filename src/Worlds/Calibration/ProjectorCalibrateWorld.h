@@ -56,6 +56,7 @@ private:
 
 	Pipeline::StageRef mProjectorStage;
 	ContourVec mContours;
+	ContourVec mFoundContours;
 	
 	Found mFound;
 	int mWaitFrames=0;

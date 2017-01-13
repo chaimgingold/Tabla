@@ -18,6 +18,10 @@
 	- Storing it in app specific settings. Although an up-for-editor-mode type things (Music, Animation) that spans apps might be called for. And a second for long game tables (Pong, Pinball) might also make sense. But more elegant might be per mode. I can imagine a future day in which modes mix more freely (use speed token to define speed for ANY mode, in which case a more general OS type sensibility of shared settings might make more sense)
 - [x] mDrawMouseDebugInfo not being respected in BallWorld -- drawMouseDebugInfo still getting called for some reason.
 
+## Projector Calibration
+
+- [ ] Rotationally off
+
 ## BallWorld
 - Detect, flag, and possibly stabilize or fix stuck balls (in spaces that are too small). Do this in ball world. Track old velocities for last three frames could do the trick. (see if it is oscillating wildly, and maybe even track for how long...; then we have rules for what to do about it when detected.)
 

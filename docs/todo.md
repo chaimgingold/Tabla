@@ -31,6 +31,10 @@
 
 # Game Worlds
 
+## Projector Calibration
+- [ ] Use cv::cornerSubPix for more accuracy
+- [ ] Account for situations where centered rect is off the table... (use mouse to position it?)
+
 ## Music
 - [ ] Easily configurable for different instrument setups.
 - [ ] Built in synths

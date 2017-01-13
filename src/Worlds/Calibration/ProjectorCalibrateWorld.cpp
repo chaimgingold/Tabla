@@ -52,6 +52,7 @@ void ProjectorCalibrateWorld::updateVision( const Vision::Output& visionOut, Pip
 	if ( f.isComplete() && (!mFound.isComplete() || mWaitFrames-- < 0) )
 	{
 		mFound = f;
+		mFoundContours = mContours;
 
 		updateCalibration(
 			mProjectRect,
@@ -65,6 +66,7 @@ void ProjectorCalibrateWorld::updateVision( const Vision::Output& visionOut, Pip
 void ProjectorCalibrateWorld::updateCalibration ( Rectf in, PolyLine2 out, int outStart )
 {
 	vec2 image[4] = { in.getUpperLeft(), in.getUpperRight(), in.getLowerRight(), in.getLowerLeft() };
+//	vec2 image[4] = { in.getLowerRight(), in.getLowerLeft(), in.getUpperLeft(), in.getUpperRight() };
 	vec2 world[4];
 	
 	for( int i=0; i<4; ++i ) world[i] = out.getPoints()[ (i+outStart)%4 ];
@@ -149,7 +151,6 @@ void ProjectorCalibrateWorld::draw( DrawType drawType )
 	if (!mProjectorStage) return;
 
 	// draw registration marks in projector space
-	if ( drawType==DrawType::Projector || !(TablaApp::get()->mDebugFrame) )
 	{
 		// undo the world transform, so we draw in projector image space
 		gl::ScopedViewMatrix matscope;
@@ -176,9 +177,12 @@ void ProjectorCalibrateWorld::draw( DrawType drawType )
 		}
 		
 		// draw registration marks
-		gl::color(1,1,1);
+		float alpha = 1.f;
+		if ( drawType!=DrawType::Projector && TablaApp::get()->mDebugFrame ) alpha=.25f;
+		
+		gl::color(1,1,1,alpha);
 		gl::drawSolidRect(mProjectRect);
-		gl::color(0,0,0);
+		gl::color(0,0,0,alpha);
 		gl::drawSolidRect(mProjectRectHole);
 		
 		//
@@ -203,18 +207,18 @@ void ProjectorCalibrateWorld::draw( DrawType drawType )
 		if ( mFound.mRect!=-1 )
 		{
 			gl::color(0,1,1);
-			gl::draw(mContours[mFound.mRect].mPolyLine);
+			gl::draw(mFoundContours[mFound.mRect].mPolyLine);
 		}
 		if ( mFound.mHole!=-1 )
 		{
 			gl::color(1,0,0);
-			gl::draw(mContours[mFound.mHole].mPolyLine);
+			gl::draw(mFoundContours[mFound.mHole].mPolyLine);
 		}
 		if ( mFound.mCorner!=-1 )
 		{
 			gl::color(1,0,0);
-			gl::drawSolidCircle(
-				mContours[mFound.mRect].mPolyLine.getPoints()[mFound.mCorner],
+			gl::drawStrokedCircle(
+				mFoundContours[mFound.mRect].mPolyLine.getPoints()[mFound.mCorner],
 				1.f );
 		}
 	}

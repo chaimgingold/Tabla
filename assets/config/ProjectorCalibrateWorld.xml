@@ -4,7 +4,7 @@
 
 	<RectSize>100</RectSize>
 	<HoleSize>20</HoleSize>
-	<HoleOffset>20</HoleOffset>
+	<HoleOffset>10</HoleOffset>
 	<WaitFrameCount>20</WaitFrameCount>
 	
 	<!-- cm -->
