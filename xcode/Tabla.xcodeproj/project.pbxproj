@@ -32,8 +32,6 @@
 		262FCDCC1E234CB100FC5D66 /* PinballVision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 262FCDCA1E234CB100FC5D66 /* PinballVision.cpp */; };
 		262FCDCF1E234DDF00FC5D66 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 262FCDCE1E234DDF00FC5D66 /* Images.xcassets */; };
 		2673CD5E1E1D791C0036C02D /* PinballView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2673CD5C1E1D791C0036C02D /* PinballView.cpp */; };
-		2687D4851E288D34002C3A9B /* CameraCalibrateWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2687D4831E288D34002C3A9B /* CameraCalibrateWorld.cpp */; };
-		2687D4881E288D53002C3A9B /* ProjectorCalibrateWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2687D4861E288D53002C3A9B /* ProjectorCalibrateWorld.cpp */; };
 		26CCA2D31E089DE7005F7C24 /* BallWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2B21E089DE7005F7C24 /* BallWorld.cpp */; };
 		26CCA2D51E089DE7005F7C24 /* GameWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2B81E089DE7005F7C24 /* GameWorld.cpp */; };
 		26CCA2D61E089DE7005F7C24 /* Instrument.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2BB1E089DE7005F7C24 /* Instrument.cpp */; };
@@ -66,6 +64,8 @@
 		26E30EA91E0B4F0600AA9F97 /* ocv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E30EA81E0B4F0600AA9F97 /* ocv.cpp */; };
 		26E30EAE1E0C567100AA9F97 /* QuadTestWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E30EAC1E0C567100AA9F97 /* QuadTestWorld.cpp */; };
 		26E30EB21E0C9A3600AA9F97 /* RectFinder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E30EB01E0C9A3600AA9F97 /* RectFinder.cpp */; };
+		26F0E2EA1E28AF390083FB22 /* CameraCalibrateWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26F0E2E61E28AF390083FB22 /* CameraCalibrateWorld.cpp */; };
+		26F0E2EB1E28AF390083FB22 /* ProjectorCalibrateWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26F0E2E81E28AF390083FB22 /* ProjectorCalibrateWorld.cpp */; };
 		26F3234B1DF74D8900EC9559 /* Gamepad_macosx.c in Sources */ = {isa = PBXBuildFile; fileRef = 26F323491DF74D8900EC9559 /* Gamepad_macosx.c */; };
 		26F3234C1DF74D8900EC9559 /* Gamepad_private.c in Sources */ = {isa = PBXBuildFile; fileRef = 26F3234A1DF74D8900EC9559 /* Gamepad_private.c */; };
 		26FA36501D5519DA00C64A00 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 26FA364F1D5519DA00C64A00 /* assets */; };
@@ -219,10 +219,6 @@
 		262FCDCE1E234DDF00FC5D66 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Tabla/Images.xcassets; sourceTree = "<group>"; };
 		2673CD5C1E1D791C0036C02D /* PinballView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PinballView.cpp; sourceTree = "<group>"; };
 		2673CD5D1E1D791C0036C02D /* PinballView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PinballView.h; sourceTree = "<group>"; };
-		2687D4831E288D34002C3A9B /* CameraCalibrateWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CameraCalibrateWorld.cpp; path = ../Calibration/CameraCalibrateWorld.cpp; sourceTree = "<group>"; };
-		2687D4841E288D34002C3A9B /* CameraCalibrateWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CameraCalibrateWorld.h; path = ../Calibration/CameraCalibrateWorld.h; sourceTree = "<group>"; };
-		2687D4861E288D53002C3A9B /* ProjectorCalibrateWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ProjectorCalibrateWorld.cpp; path = ../Calibration/ProjectorCalibrateWorld.cpp; sourceTree = "<group>"; };
-		2687D4871E288D53002C3A9B /* ProjectorCalibrateWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProjectorCalibrateWorld.h; path = ../Calibration/ProjectorCalibrateWorld.h; sourceTree = "<group>"; };
 		26CCA2B21E089DE7005F7C24 /* BallWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BallWorld.cpp; sourceTree = "<group>"; };
 		26CCA2B31E089DE7005F7C24 /* BallWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BallWorld.h; sourceTree = "<group>"; };
 		26CCA2B81E089DE7005F7C24 /* GameWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GameWorld.cpp; sourceTree = "<group>"; };
@@ -289,6 +285,10 @@
 		26E30EAD1E0C567100AA9F97 /* QuadTestWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QuadTestWorld.h; sourceTree = "<group>"; };
 		26E30EB01E0C9A3600AA9F97 /* RectFinder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RectFinder.cpp; sourceTree = "<group>"; };
 		26E30EB11E0C9A3600AA9F97 /* RectFinder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RectFinder.h; sourceTree = "<group>"; };
+		26F0E2E61E28AF390083FB22 /* CameraCalibrateWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CameraCalibrateWorld.cpp; sourceTree = "<group>"; };
+		26F0E2E71E28AF390083FB22 /* CameraCalibrateWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CameraCalibrateWorld.h; sourceTree = "<group>"; };
+		26F0E2E81E28AF390083FB22 /* ProjectorCalibrateWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ProjectorCalibrateWorld.cpp; sourceTree = "<group>"; };
+		26F0E2E91E28AF390083FB22 /* ProjectorCalibrateWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProjectorCalibrateWorld.h; sourceTree = "<group>"; };
 		26F323491DF74D8900EC9559 /* Gamepad_macosx.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Gamepad_macosx.c; path = "../blocks/Cinder-Gamepad/src/Gamepad_macosx.c"; sourceTree = "<group>"; };
 		26F3234A1DF74D8900EC9559 /* Gamepad_private.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Gamepad_private.c; path = "../blocks/Cinder-Gamepad/src/Gamepad_private.c"; sourceTree = "<group>"; };
 		26F3234D1DF74D9500EC9559 /* Gamepad.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Gamepad.h; path = "../blocks/Cinder-Gamepad/include/Gamepad.h"; sourceTree = "<group>"; };
@@ -807,7 +807,7 @@
 				26CCA2B71E089DE7005F7C24 /* GameWorld */,
 				26CCA3231E08AD8E005F7C24 /* AnimWorld */,
 				26CCA2B11E089DE7005F7C24 /* BallWorld */,
-				26CCA2B41E089DE7005F7C24 /* Calibration */,
+				26F0E2E51E28AF390083FB22 /* Calibration */,
 				26CCA2BA1E089DE7005F7C24 /* MusicWorld */,
 				26CCA2C51E089DE7005F7C24 /* PinballWorld */,
 				26CCA2CA1E089DE7005F7C24 /* PongWorld */,
@@ -826,18 +826,6 @@
 				26CCA2B31E089DE7005F7C24 /* BallWorld.h */,
 			);
 			path = BallWorld;
-			sourceTree = "<group>";
-		};
-		26CCA2B41E089DE7005F7C24 /* Calibration */ = {
-			isa = PBXGroup;
-			children = (
-				2687D4831E288D34002C3A9B /* CameraCalibrateWorld.cpp */,
-				2687D4841E288D34002C3A9B /* CameraCalibrateWorld.h */,
-				2687D4861E288D53002C3A9B /* ProjectorCalibrateWorld.cpp */,
-				2687D4871E288D53002C3A9B /* ProjectorCalibrateWorld.h */,
-			);
-			name = Calibration;
-			path = CalibrateWorld;
 			sourceTree = "<group>";
 		};
 		26CCA2B71E089DE7005F7C24 /* GameWorld */ = {
@@ -1012,6 +1000,17 @@
 				26E30EAD1E0C567100AA9F97 /* QuadTestWorld.h */,
 			);
 			path = QuadTestWorld;
+			sourceTree = "<group>";
+		};
+		26F0E2E51E28AF390083FB22 /* Calibration */ = {
+			isa = PBXGroup;
+			children = (
+				26F0E2E61E28AF390083FB22 /* CameraCalibrateWorld.cpp */,
+				26F0E2E71E28AF390083FB22 /* CameraCalibrateWorld.h */,
+				26F0E2E81E28AF390083FB22 /* ProjectorCalibrateWorld.cpp */,
+				26F0E2E91E28AF390083FB22 /* ProjectorCalibrateWorld.h */,
+			);
+			path = Calibration;
 			sourceTree = "<group>";
 		};
 		26F323471DF74D5700EC9559 /* Gamepad */ = {
@@ -2623,14 +2622,14 @@
 				26F3234B1DF74D8900EC9559 /* Gamepad_macosx.c in Sources */,
 				26CCA2DC1E089DE7005F7C24 /* PinballWorld.cpp in Sources */,
 				26E30EA61E0B4E3D00AA9F97 /* geom.cpp in Sources */,
-				2687D4881E288D53002C3A9B /* ProjectorCalibrateWorld.cpp in Sources */,
+				26F0E2EB1E28AF390083FB22 /* ProjectorCalibrateWorld.cpp in Sources */,
 				CB13ED488BF746B1BE951350 /* b2BroadPhase.cpp in Sources */,
 				26CCA3261E08AD8E005F7C24 /* AnimWorld.cpp in Sources */,
 				3A09A46A8AF949E89CBDD5B5 /* b2CollideCircle.cpp in Sources */,
 				C84DC4502D0A4C2384BE60F8 /* b2CollideEdge.cpp in Sources */,
 				26E30EAE1E0C567100AA9F97 /* QuadTestWorld.cpp in Sources */,
 				C2EC76FF1DA7157F00DB39C8 /* PdTypes.cpp in Sources */,
-				2687D4851E288D34002C3A9B /* CameraCalibrateWorld.cpp in Sources */,
+				26F0E2EA1E28AF390083FB22 /* CameraCalibrateWorld.cpp in Sources */,
 				741A16EB71BE4A308C86D708 /* b2CollidePolygon.cpp in Sources */,
 				509D1EB4420C46A3BB6D751D /* b2Collision.cpp in Sources */,
 				C2C874911DDBB2D40067E07D /* list_ports_win.cc in Sources */,

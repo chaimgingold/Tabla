@@ -65,11 +65,17 @@ void ProjectorCalibrateWorld::updateVision( const Vision::Output& visionOut, Pip
 
 void ProjectorCalibrateWorld::updateCalibration ( Rectf in, PolyLine2 out, int outStart )
 {
-	vec2 image[4] = { in.getUpperLeft(), in.getUpperRight(), in.getLowerRight(), in.getLowerLeft() };
-//	vec2 image[4] = { in.getLowerRight(), in.getLowerLeft(), in.getUpperLeft(), in.getUpperRight() };
 	vec2 world[4];
-	
-	for( int i=0; i<4; ++i ) world[i] = out.getPoints()[ (i+outStart)%4 ];
+	vec2 image[4] = { in.getUpperLeft(), in.getLowerLeft(), in.getLowerRight(), in.getUpperRight() };	
+//	vec2 image[4] = { in.getUpperLeft(), in.getUpperRight(), in.getLowerRight(), in.getLowerLeft() };
+
+	for( int i=0; i<4; ++i ) world[(i+2)%4] = out.getPoints()[ (i+outStart)%4 ];
+//	for( int i=0; i<4; ++i ) world[i] = out.getPoints()[ (i+outStart)%4 ];
+
+	// NOTE: To my logic, the proper code SHOULD be the two commented out lines;
+	// But in practice, it is the other two lines of code that actually works... Go figure.
+	// It could be that OpenCV clockwise orientation is reversed from how we think of our rectangles.
+	// That would explain image[] inversion. But the 180 degree off is also puzzling.  
 	
 	// we assume input starts at x1,y1
 	mat4 mat = getOcvPerspectiveTransform(world,image);
