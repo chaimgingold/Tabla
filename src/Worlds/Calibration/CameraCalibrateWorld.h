@@ -9,7 +9,7 @@
 #ifndef CameraCalibrateWorld_hpp
 #define CameraCalibrateWorld_hpp
 
-#include "BallWorld.h"
+#include "GameWorld.h"
 
 class CameraCalibrateWorld : public GameWorld
 {

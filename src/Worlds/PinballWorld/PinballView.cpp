@@ -506,17 +506,14 @@ void PinballView::beginDraw3d() const
 		
 		skew *= glm::translate( vec3( mWorld.getScreenShake(), 0 ) );
 		
-		gl::pushModelView();
-//		gl::setViewMatrix( gl::getModelView()
-		gl::multModelMatrix(skew);
-		
-//		gl::pushmode
+		gl::pushViewMatrix();
+		gl::multViewMatrix(skew);
 	}
 }
 
 void PinballView::endDraw3d() const
 {
-	gl::popModelView();
+	gl::popViewMatrix();
 
 	gl::enableDepthRead(false);
 	gl::enableDepthWrite(false);

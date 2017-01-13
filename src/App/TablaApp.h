@@ -72,7 +72,7 @@ class TablaApp : public App {
 	CaptureRef			mCapture;	// input device		->
 	Vision				mVision ;	// edge detection	->
 	Vision::Output		mVisionOutput; // contours, tokens ->
-	std::shared_ptr<GameWorld> mGameWorld ;// world simulation
+	GameWorldRef		mGameWorld ;// world simulation
 	
 	Pipeline			mPipeline; // traces processing
 

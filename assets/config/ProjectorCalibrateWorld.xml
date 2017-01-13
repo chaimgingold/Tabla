@@ -1,0 +1,21 @@
+<ProjectorCalibrateWorld>
+
+	<Verbose>1</Verbose>
+
+	<RectSize>100</RectSize>
+	<HoleSize>20</HoleSize>
+	<HoleOffset>20</HoleOffset>
+	<WaitFrameCount>20</WaitFrameCount>
+	
+	<!-- cm -->
+	<Vision>
+		<Contours>
+			<ContourGetExactMinCircle>	0	</ContourGetExactMinCircle>
+			<ContourMinRadius>			0	</ContourMinRadius>
+			<ContourMinArea>			0	</ContourMinArea>
+			<ContourDPEpsilon>			1	</ContourDPEpsilon>
+			<ContourMinWidth>			0	</ContourMinWidth>
+		</Contours>
+	</Vision>
+
+</ProjectorCalibrateWorld>

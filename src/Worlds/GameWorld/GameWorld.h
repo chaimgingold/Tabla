@@ -68,6 +68,7 @@ private:
 	PolyLine2		mWorldBoundsPoly;
 	
 };
+typedef std::shared_ptr<GameWorld> GameWorldRef;
 
 
 class GameCartridge
@@ -78,7 +79,7 @@ public:
 	
 	string getSystemName() const { return mSystemName; }
 	string getUserName() const { return getSystemName(); }
-	virtual std::shared_ptr<GameWorld> load() const { return 0; }
+	virtual GameWorldRef load() const { return 0; }
 
 	typedef map<string,const GameCartridge*> Library;
 	static const Library& getLibrary();
@@ -95,11 +96,11 @@ typedef std::shared_ptr<GameCartridge> GameCartridgeRef;
 class GameCartridgeSimple : public GameCartridge
 {
 public:
-	typedef function< std::shared_ptr<GameWorld>() > tLoaderFunc;
+	typedef function< GameWorldRef() > tLoaderFunc;
 
 	GameCartridgeSimple( string systemName, tLoaderFunc f ) : GameCartridge(systemName) {mLoader=f;}
 	
-	virtual std::shared_ptr<GameWorld> load() const override
+	virtual GameWorldRef load() const override
 	{
 		if (mLoader) return mLoader();
 		else return 0;
