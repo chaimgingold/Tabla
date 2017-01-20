@@ -41,9 +41,6 @@ void RibbonWorld::setParams( XmlTree xml )
 
 void RibbonWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeline )
 {
-	mWorld = pipeline.getStage("clipped");
-	if ( !mWorld || mWorld->mImageCV.empty() ) return;
-
 	mContours = visionOut.mContours;
 
 

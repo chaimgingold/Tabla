@@ -52,11 +52,15 @@ void CameraCalibrateWorld::updateVision( const Vision::Output& visionOut, Pipeli
 	//
 	cv::Size boardSize(mBoardNumCorners.x,mBoardNumCorners.y);
 	
+
+	cv::UMat input_gray;
+	cv::cvtColor( world->mImageCV, input_gray, CV_BGR2GRAY);
+	pipeline.then( "input_gray", input_gray );
 	
 	//
 	vector<cv::Point2f> corners; // in image space
 	
-	bool findResult = cv::findChessboardCorners( world->mImageCV, boardSize, corners, 0
+	bool findResult = cv::findChessboardCorners( input_gray, boardSize, corners, 0
 //		+ cv::CALIB_CB_ADAPTIVE_THRESH
 //		+ cv::CALIB_CB_NORMALIZE_IMAGE
 //		+ cv::CALIB_CB_FAST_CHECK
@@ -85,7 +89,7 @@ void CameraCalibrateWorld::updateVision( const Vision::Output& visionOut, Pipeli
 		if (allCornersFound)
 		{
 			// refine
-			cv::cornerSubPix( world->mImageCV, corners,
+			cv::cornerSubPix( input_gray, corners,
 				cv::Size(11, 11), cv::Size(-1, -1),
 				cv::TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1) );
 
@@ -102,7 +106,7 @@ void CameraCalibrateWorld::updateVision( const Vision::Output& visionOut, Pipeli
 				
 				if ( mKnownBoards.size() >= mNumBoardsToSolve )
 				{
-					tryToSolveWithKnownBoards( cv::Size( world->mImageCV.cols, world->mImageCV.rows ) );
+					tryToSolveWithKnownBoards( cv::Size( input_gray.cols, input_gray.rows ) );
 				}
 			}
 		}

@@ -64,7 +64,6 @@ private:
 	FileWatch mFileWatch;
 	gl::GlslProgRef mRibbonShader;
 
-	Pipeline::StageRef mWorld;
 	ContourVector mContours;
 
 	vector<Ribbon> mRibbons;

@@ -101,26 +101,25 @@ Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 	// ---- Input ----
 	
 	// make cv frame
-	cv::UMat input_color = toOcvRef((Surface &)surface).getUMat(cv::ACCESS_READ); // we type-cast to non-const so this works. :P
-	cv::UMat input;
-	cv::UMat gray, clipped;
+	cv::UMat input = toOcvRef((Surface &)surface).getUMat(cv::ACCESS_READ); // we type-cast to non-const so this works. :P
+	cv::UMat clipped;
 		// toOcvRef is much, much faster than toOcv, which does a lot of dumb bit twiddling.
 		// this requires a cast to non-const, but hopefully cv::ACCESS_READ semantics makes this kosher enough.
 		// Just noting this inconsistency.
  
-	cv::cvtColor(input_color, input, CV_BGR2GRAY);
-	// net performance of doing color -> grey conversion on CPU vs GPU is negligible.
-	// the main impact is downloading the data, which we may be able to do faster if we rewrite toOcv.
-	// but at least we now have color frame in the pipeline at the same total performance cost, so that's a net gain.
-	// might want to make it a setting, whether to do it on CPU or GPU.
-	
-	pipeline.then( "input_color", input_color );
+	pipeline.then( "input", input );
 	
 	pipeline.setImageToWorldTransform( getOcvPerspectiveTransform(
 		mCaptureProfile.mCaptureCoords,
 		mCaptureProfile.mCaptureWorldSpaceCoords ) );
 
-	pipeline.then( "input", input );
+//	cv::cvtColor(input_color, input, CV_BGR2GRAY);
+	// net performance of doing color -> grey conversion on CPU vs GPU is negligible.
+	// the main impact is downloading the data, which we may be able to do faster if we rewrite toOcv.
+	// but at least we now have color frame in the pipeline at the same total performance cost, so that's a net gain.
+	// might want to make it a setting, whether to do it on CPU or GPU.
+
+//	pipeline.then( "input", input );
 	
 	// undistort
 	cv::UMat undistorted;
@@ -189,12 +188,17 @@ Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 		glm::mat4 imageToWorld = glm::scale( vec3( 1.f / pixelScale, 1.f / pixelScale, 1.f ) );
 		
 		pipeline.setImageToWorldTransform( imageToWorld );
+		
+		// grey
+		cv::UMat clipped_gray;
+		cv::cvtColor(clipped, clipped_gray, CV_BGR2GRAY);
+		pipeline.then( "clipped_gray", clipped_gray );
 	}
 	
 	// find contours
 	Vision::Output output;
 	
-	auto clippedStage = pipeline.getStages().back();
+	auto clippedStage = pipeline.getStages().back(); // gets "clipped_gray"
 	
 	output.mContours = mContourVision.findContours( clippedStage, pipeline, contourPixelToWorld );
 	

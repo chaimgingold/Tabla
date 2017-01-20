@@ -36,7 +36,7 @@ void TokenWorld::setParams( XmlTree xml )
 
 void TokenWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeline )
 {
-	mWorld = pipeline.getStage("clipped");
+	mWorld = pipeline.getStage("clipped_gray");
 	if ( !mWorld || mWorld->mImageCV.empty() ) return;
 
 	switch (mMode) {

@@ -44,19 +44,14 @@ void QuadTestWorld::setParams( XmlTree xml )
 
 void QuadTestWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeline )
 {
-	const Pipeline::StageRef source = pipeline.getStage("clipped");
-	if ( !source || source->mImageCV.empty() ) return;
-
-	mFrames = getFrames( source, visionOut.mContours, pipeline );
+	mFrames = getFrames( visionOut.mContours, pipeline );
 }
 
 QuadTestWorld::FrameVec QuadTestWorld::getFrames(
-	const Pipeline::StageRef world,
 	const ContourVector &contours,
 	Pipeline& pipeline ) const
 {
 	FrameVec frames;
-	if ( !world || world->mImageCV.empty() ) return frames;
 
 	for ( auto c : contours )
 	{

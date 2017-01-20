@@ -55,7 +55,6 @@ private:
 	FrameVec mFrames;
 	
 	FrameVec getFrames(
-		const Pipeline::StageRef world,
 		const ContourVector &contours,
 		Pipeline& pipeline ) const;
 	
