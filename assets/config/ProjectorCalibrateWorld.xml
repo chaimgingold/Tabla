@@ -10,10 +10,11 @@
 	<!-- cm -->
 	<Vision>
 		<Contours>
+			<Threshold>90</Threshold>
 			<ContourGetExactMinCircle>	0	</ContourGetExactMinCircle>
 			<ContourMinRadius>			0	</ContourMinRadius>
 			<ContourMinArea>			0	</ContourMinArea>
-			<ContourDPEpsilon>			1	</ContourDPEpsilon>
+			<ContourDPEpsilon>			2	</ContourDPEpsilon>
 			<ContourMinWidth>			0	</ContourMinWidth>
 		</Contours>
 	</Vision>

@@ -15,9 +15,12 @@ namespace Pinball
 void PinballVision::setParams( XmlTree xml )
 {
 	getXml(xml, "FlipperDistToEdge", mFlipperDistToEdge );	
+	getXml(xml, "PartMinContourRadius", mPartMinContourRadius );
 	getXml(xml, "PartMaxContourRadius", mPartMaxContourRadius );
 	getXml(xml, "PartMaxContourAspectRatio", mPartMaxContourAspectRatio );
-	getXml(xml, "HolePartMaxContourRadius",mHolePartMaxContourRadius);
+	
+	getXml(xml, "HolePartMaxContourRadius", mHolePartMaxContourRadius);
+	getXml(xml, "HolePartMinContourRadius", mHolePartMinContourRadius);
 	
 	getXml(xml, "PartTrackLocMaxDist", mPartTrackLocMaxDist );
 	getXml(xml, "PartTrackRadiusMaxDist", mPartTrackRadiusMaxDist );
@@ -116,7 +119,7 @@ bool PinballVision::shouldContourBeAPart( const Contour& c, const ContourVec& cs
 	}
 	
 	if ( c.mIsHole ) {
-		return c.mTreeDepth>0 && c.mRadius < mPartMaxContourRadius;
+		return c.mTreeDepth>0 && c.mRadius > mPartMinContourRadius && c.mRadius < mPartMaxContourRadius;
 	}
 	else {
 		bool depthOK;
@@ -130,7 +133,7 @@ bool PinballVision::shouldContourBeAPart( const Contour& c, const ContourVec& cs
 		}
 		else depthOK=false;
 		
-		return depthOK && c.mRadius < mHolePartMaxContourRadius;
+		return depthOK && c.mRadius > mHolePartMinContourRadius && c.mRadius < mHolePartMaxContourRadius;
 	}
 }
 

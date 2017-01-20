@@ -51,8 +51,10 @@ private:
 	float mDejitterContourMaxDist = 0.f;	
 
 	// - params
+	float mPartMinContourRadius = 0.f;
 	float mPartMaxContourRadius = 5.f; // contour radius lt => part
 	float mPartMaxContourAspectRatio = 2.f;
+	float mHolePartMinContourRadius = 0.f;
 	float mHolePartMaxContourRadius = 2.f;
 	float mFlipperDistToEdge = 10.f; // how close to the edge does a flipper appear?
 	

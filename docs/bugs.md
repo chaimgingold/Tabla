@@ -28,6 +28,7 @@
 ## Music
 - Robit serial connection isn't robust; sometimes need to restart computer to get it to see the arduino.
 - Music instrument character wrangling can be hard. Proper solution probably involves tokens for instruments placed next to scores.
+- [ ] Low register of additive synth is hard to hear.
 
 ## Pinball
 - [ ] Audio sometimes blows up then drops out; culprit seems to be updateBallSynthesis(). To reproduce, load "pinball 1.png" test image in Pinball and spawn multiple balls (with b key).
