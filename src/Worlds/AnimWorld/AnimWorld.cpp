@@ -18,6 +18,19 @@ static GameCartridgeSimple sCartridge("AnimWorld", [](){
 	return std::make_shared<Anim::AnimWorld>();
 });
 
+PolyLine2 Frame::getQuadAsPoly() const
+{
+	PolyLine2 p;
+	for( int i=0; i<4; ++i ) p.push_back(mQuad[i]);
+	p.setClosed();
+	return p;
+}
+
+vec2 Frame::calcQuadCenter() const
+{
+	return (mQuad[0]+mQuad[1]+mQuad[2]+mQuad[3])*.25f;
+}
+
 gl::TextureRef Frame::getAsTexture()
 {
 	if ( !mTexture && !mImageCV.empty() ) {
@@ -217,16 +230,33 @@ AnimWorld::getFrameTopology( const FrameVec& in ) const
 		if ( f.mPrevFrameIndex==-1 ) // is first
 		{
 			// first (and get length)
-			int count=1;
+			int count=1; // 1 indexed
+			
+			int lastn=-1;
 			
 			for( int n = f.mIndex; n!=-1; n = out[n].mNextFrameIndex )
 			{
+				// sanity check to make sure no cyclical next/prev loops (it happens for some reason sometime!)
+				if ( out[n].mFirstFrameIndex == f.mIndex )
+				{
+					cout << "Cyclical next/prev loop!!!" << endl;
+					
+					// break the cycle
+					if (lastn!=-1) out[lastn].mNextFrameIndex = -1;
+					f.mPrevFrameIndex = -1;
+					break;
+				}
+				
+				// set
 				out[n].mFirstFrameIndex = f.mIndex;
 				out[n].mSeqFrameNum = count++;
+				
+				//
+				lastn=n;
 			}
 			
 			// set length
-			int length = count-1;
+			int length = count-1; // count is 1 indexed, so -1
 			
 			for( int n = f.mIndex; n!=-1; n = out[n].mNextFrameIndex )
 			{
@@ -340,16 +370,15 @@ int AnimWorld::getAdjacentFrameIndex( const Frame& f, const FrameVec& fs, vec2 d
 	int best=-1;
 	float bestdist=MAXFLOAT;
 	
-	vec2 origin = f.mContour.mCenter;
+	vec2 origin = f.calcQuadCenter();
 	
 	for( int i=0; i<fs.size(); ++i )
 	{
-		//if ( &fs[i] != &f )
 		if ( fs[i].mIndex != f.mIndex )
 		{
 			float t;
 			
-			if ( fs[i].mContour.rayIntersection(origin, direction, &t) && t < bestdist )
+			if ( rayIntersectPoly( fs[i].getQuadAsPoly(), origin, direction, &t) && t < bestdist )
 			{
 				bestdist = t;
 				best=i;

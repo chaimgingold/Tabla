@@ -262,10 +262,15 @@ void TablaApp::setup()
 
 	if ( displays.size()>1 && mAutoFullScreenProjector )
 	{
-		// move to 2nd display
-		mMainWindow->setPos( displays[1]->getBounds().getUL() );
+		// move to 2nd display + fullscreen
+		mMainWindow->setPos( displays[1]->getBounds().getUL() + ivec2(10,10) );
 		
-		mMainWindow->setFullScreen(true) ;
+		mMainWindow->setFullScreen( true, FullScreenOptions()
+			.kioskMode(true)
+			.secondaryDisplayBlanking(false)
+			.exclusive(true)
+			.display(displays[1])
+			 ) ;
 	}
 
 	mMainWindow->getSignalMove()  .connect( [&]{ this->saveUserSettings(); });

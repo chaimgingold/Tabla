@@ -51,6 +51,9 @@ public:
 	bool isFirstAnimFrame() const { return isAnimFrame() && mFirstFrameIndex==mIndex; }
 	
 	gl::TextureRef getAsTexture();
+
+	PolyLine2 getQuadAsPoly() const;
+	vec2 calcQuadCenter() const;
 	
 	// topology
 	int		mIndex=-1;
