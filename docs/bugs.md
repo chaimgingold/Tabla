@@ -31,7 +31,16 @@
 
 ## Pinball
 - [ ] Audio sometimes blows up then drops out; culprit seems to be updateBallSynthesis(). To reproduce, load "pinball 1.png" test image in Pinball and spawn multiple balls (with b key).
+- Lattice background is hard coded to our setup--in pixel space. So rotation will be wrong in many setups, gradient effect locations, and ball reflection is wrong. To fix:
+	- [ ] Lattice should be in world space, oriented to up vector.
+	- [ ] Win/lose gradient effects need to respond.
+- Not using mipmap for ball reflection. So different tunings and resolutions will not look good.
 - Ball could sometimes tunnel through tip of flipper. Flipper rotation done in BallWorld (for finer integration and less tunneling). Proper fix (and architecture) would be to allow a parallel index of rotational transforms for contours that BallWorld does itself (and can do finer integrations of). 
 - Small spurious awkward spaces trap the ball (eg groups of white go stones, your hands, etc...). Solution: reject these spaces, perhaps comparing to perimeter/area of a circle that comfortably fits a ball (or more).
 - Flippers penetrate walls. Fix: dynamically size them! Only respond to walls, not parts--or things could get crazy.
-- Pinball "palm" rejection. People sometimes rest against table. Detect these awkward edge spaces and reject. Probably need a mask array for contours that defines who is a wall; could have another for who is a part. Or unify these into one list, with types (ignored, wall, part)--i like.
+- Pinball "palm" rejection. People sometimes rest against table. Detect these awkward edge spaces and reject. Probably need a mask array for contours that defines who is a wall; could have another for who is a part. Or unify these into one list, with types (ignored, wall, part)--i like, and we could peel mask functions off of it. Basically !shouldBePart() is used as shouldBeSpace(), and we need the latter to open up the semantic possibilities for contour rejection, UI, etc... Types:
+	- Part (could even point to part...)
+	- Space (Hole/Space or Non-Hole/Obstacle; implicit with contour type, but we could make it fully explicit in our typing system.)
+	- Ignore (Rejected)
+	- UI (Score, Balls Remaining, Top Score, etc...)
+	- ...future expansion (eg wiring elements)

@@ -49,3 +49,4 @@
 ## Pinball
 - [ ] Score, ball count, high score.
 - [ ] Remove static cube map file from project, and don't load it.
+- [ ] Make flipper speed tunable.
