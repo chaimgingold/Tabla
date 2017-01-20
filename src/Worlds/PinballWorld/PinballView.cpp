@@ -466,7 +466,7 @@ void PinballView::beginDraw3d() const
 		
 		recurseTree = [&]( const Contour& c ) -> void
 		{
-			if ( !mWorld.mVision.shouldContourBeAPart(c,mWorld.getVisionContours()) )
+			if ( mWorld.getVisionContourType(c) == PinballVision::ContourType::Space )
 			{
 				// draw me
 				const bool punchOut = !c.mIsHole;
@@ -567,7 +567,7 @@ void PinballView::prepare3dScene()
 	// 3d contours
 	for( const auto &c : mWorld.getVisionContours() )
 	{
-		if ( !mWorld.mVision.shouldContourBeAPart(c,mWorld.getVisionContours()) )
+		if ( mWorld.getVisionContourType(c) == PinballVision::ContourType::Space )
 		{
 			mDrawScene.mWalls.push_back( get3dMeshForPoly(c.mPolyLine,0.f,m3dTableDepth) );
 		}
@@ -609,7 +609,7 @@ void PinballView::draw3dFloor() const
 			// only fill in precisely the right places
 			for( const auto &c : mWorld.getVisionContours() )
 			{
-				if ( !c.mIsHole && !mWorld.mVision.shouldContourBeAPart(c,mWorld.getVisionContours()) )
+				if ( !c.mIsHole && mWorld.getVisionContourType(c) == PinballVision::ContourType::Space )
 				{
 					gl::drawSolid(c.mPolyLine);
 				}

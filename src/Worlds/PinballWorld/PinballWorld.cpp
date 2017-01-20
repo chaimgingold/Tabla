@@ -481,13 +481,22 @@ void PinballWorld::updateVision( const Vision::Output& visionOut, Pipeline& p )
 	out = mVision.update( visionOut, p, mParts, &mVisionContours );
 	
 	mVisionContours = out.mVisionContours;
+	mVisionContourTypes = out.mContourTypes;
 	mParts = out.mParts;
 	
 	// playfield layout
-	updatePlayfieldLayout(mVisionContours);	
+	updatePlayfieldLayoutWithVisionContours();	
 	
 	// log cube maps, allow it to capture images
 	mView.updateVision(p);
+}
+
+PinballVision::ContourType
+PinballWorld::getVisionContourType( const Contour& c ) const
+{
+	assert( c.mIndex >= 0 && c.mIndex < mVisionContourTypes.size() );
+	
+	return mVisionContourTypes[c.mIndex];
 }
 
 void PinballWorld::getCullLine( vec2 v[2] ) const
@@ -496,13 +505,13 @@ void PinballWorld::getCullLine( vec2 v[2] ) const
 	v[1] = fromPlayfieldSpace(vec2(mPlayfieldBallReclaimX[1],mPlayfieldBallReclaimY));
 }
 
-Rectf PinballWorld::getPlayfieldBoundingBox( const ContourVec& cs ) const
+Rectf PinballWorld::calcPlayfieldBoundingBox() const
 {
 	vector<vec2> pts;
 	
-	for( const auto& c : cs )
+	for( const auto& c : mVisionContours )
 	{
-		if (c.mTreeDepth==0 && !mVision.shouldContourBeAPart(c,cs))
+		if (c.mTreeDepth==0 && getVisionContourType(c)==PinballVision::ContourType::Space)
 		{
 			pts.insert(pts.end(),c.mPolyLine.getPoints().begin(), c.mPolyLine.end());
 		}
@@ -516,9 +525,9 @@ Rectf PinballWorld::getPlayfieldBoundingBox( const ContourVec& cs ) const
 	return Rectf(pts);
 }
 
-void PinballWorld::updatePlayfieldLayout( const ContourVec& contours )
+void PinballWorld::updatePlayfieldLayoutWithVisionContours()
 {
-	mPlayfieldBoundingBox = getPlayfieldBoundingBox(contours);
+	mPlayfieldBoundingBox = calcPlayfieldBoundingBox();
 //	cout << "min/max y: " << mPlayfieldBoundingBox.y1 << " " << mPlayfieldBoundingBox.y2 << endl;
 	mPlayfieldBallReclaimY = mPlayfieldBoundingBox.y1 + mBallReclaimAreaHeight;
 	
@@ -528,12 +537,12 @@ void PinballWorld::updatePlayfieldLayout( const ContourVec& contours )
 	float t;
 	vec2 vleft  = vec2(mPlayfieldBallReclaimX[0],mPlayfieldBallReclaimY);
 	vec2 vright = vec2(mPlayfieldBallReclaimX[1],mPlayfieldBallReclaimY);
-	if ( contours.rayIntersection( fromPlayfieldSpace(vleft), getRightVec(), &t ) )
+	if ( mVisionContours.rayIntersection( fromPlayfieldSpace(vleft), getRightVec(), &t ) )
 	{
 		mPlayfieldBallReclaimX[0] = (vleft + toPlayfieldSpace(getRightVec() * t)).x;
 	}
 	
-	if ( contours.rayIntersection( fromPlayfieldSpace(vright), getLeftVec(), &t ) )
+	if ( mVisionContours.rayIntersection( fromPlayfieldSpace(vright), getLeftVec(), &t ) )
 	{
 		mPlayfieldBallReclaimX[1] = (vright + toPlayfieldSpace(getLeftVec() * t)).x;
 	}
@@ -552,8 +561,8 @@ void PinballWorld::updateBallWorldContours()
 	ContourVec::Mask mask(physicsContours.size(),true); // all true...
 	for( int i=0; i<mVisionContours.size(); ++i )
 	{
-		// ...except vision contours that became parts
-		mask[i] = !mVision.shouldContourBeAPart(physicsContours[i],physicsContours);
+		// only contours that define space
+		mask[i] = getVisionContourType(mVisionContours[i]) == PinballVision::ContourType::Space;
 	}
 	
 	// tell ball world

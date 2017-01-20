@@ -80,7 +80,8 @@ public:
 	vec2 getScreenShake() const { return mInput.isPaused() ? vec2() : mScreenShakeVec; }
 
 	const ContourVec& getVisionContours() const { return mVisionContours ; }
-
+	PinballVision::ContourType getVisionContourType( const Contour& ) const;
+	
 	// input callbacks
 	void serveBallCheat();
 	void serveBallIfNone();
@@ -115,7 +116,7 @@ public:
 	vec2  fromNormalizedPlayfieldBBox( vec2 ) const;
 	
 private:
-	Rectf getPlayfieldBoundingBox( const ContourVec& ) const; // min/max of all points in playfield space
+	Rectf calcPlayfieldBoundingBox() const; // min/max of all mVisionContours of type ContourType::Space 
 	Rectf toPlayfieldBoundingBox ( const PolyLine2& ) const; // just for one poly
 	
 	Rectf mPlayfieldBoundingBox; // min/max of non-hole contours in playfield coordinate space (up/right vectors)
@@ -123,7 +124,7 @@ private:
 	float mPlayfieldBallReclaimY; // at what playfield y do we reclaim balls?
 	float mPlayfieldBallReclaimX[2]; // left, right edges for drawing...
 	
-	void updatePlayfieldLayout( const ContourVec& );
+	void updatePlayfieldLayoutWithVisionContours();
 	
 	
 	// parts
@@ -140,6 +141,7 @@ private:
 
 	// parts + contours
 	ContourVec mVisionContours;
+	PinballVision::ContourTypes mVisionContourTypes;
 	Contour contourFromPoly( PolyLine2 ) const; // area, radius, center, bounds, etc... is approximate
 	void addContourToVec( Contour, ContourVec& ) const; // for accumulating physics contours from Parts
 	

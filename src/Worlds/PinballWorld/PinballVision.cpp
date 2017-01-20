@@ -99,6 +99,20 @@ PinballVision::update(
 	PartVec newParts = getPartsFromContours(out.mVisionContours);
 	out.mParts = mergeOldAndNewParts( oldParts, newParts );
 	
+	// set contour types (should probably be rolled into getPartsFromContours,
+	// but leaving here for now for minimal disruption)
+	out.mContourTypes.resize(out.mVisionContours.size());
+	for( int i=0; i<out.mContourTypes.size(); ++i )
+	{
+		bool isPart = shouldContourBeAPart(out.mVisionContours[i],out.mVisionContours);
+		
+		ContourType t;
+		if (isPart) t = ContourType::Part;
+		else t = ContourType::Space;
+		
+		out.mContourTypes[i] = t;
+	}
+	
 	return out;
 }
 

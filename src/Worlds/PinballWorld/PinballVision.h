@@ -25,11 +25,21 @@ public:
 	
 	void setParams( XmlTree );
 	
+	enum class ContourType
+	{
+		Part,  // flipper, bumper, or target input contour (not physics contours genrerated by parts)
+		Space, // open space/obstacle
+		Ignore, // rejected
+		UI // for UI!
+	};
+	typedef vector<ContourType> ContourTypes;
+	
 	class Output
 	{
 	public:
 		PartVec mParts;
 		ContourVec mVisionContours;
+		ContourTypes mContourTypes;
 	};
 	
 	PinballVision::Output update(
@@ -41,14 +51,14 @@ public:
 	AdjSpace getAdjacentSpace( const Contour*, vec2, const ContourVector& ) const ;
 	AdjSpace getAdjacentSpace( vec2, const ContourVector& ) const ; // how much adjacent space is to the left, right?
 
-	bool shouldContourBeAPart( const Contour&, const ContourVector& ) const;
-
 	// - inter-frame coherence params
 	float mPartTrackLocMaxDist = 1.f;
 	float mPartTrackRadiusMaxDist = .5f;
 	
 private:
-	float mDejitterContourMaxDist = 0.f;	
+	bool shouldContourBeAPart( const Contour&, const ContourVector& ) const;
+
+	float mDejitterContourMaxDist = 0.f;
 
 	// - params
 	float mPartMinContourRadius = 0.f;
