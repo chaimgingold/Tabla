@@ -369,24 +369,21 @@ PartVec PinballVision::getPartsFromContours( const ContourVector& contours, cons
 			{
 				vec2 dir = normalize( closestPt - c.mCenter );
 
-				float far=0.f;
-				
 				if (mWorld.mPartParams.mTargetDynamicRadius)
 				{
 					float r = distance(closestPt,c.mCenter) - c.mRadius;
 					
 					r = constrain(r, mWorld.mPartParams.mTargetRadius, mWorld.mPartParams.mTargetRadius*4.f );
-					r = mWorld.mPartParams.mTargetRadius;
-					
-					far = r;
 				}
-				
-				lightLoc = closestPt + dir * (r+far);
+				else
+				{
+					r = mWorld.mPartParams.mTargetRadius;
+				}
 				
 				vec2 triggerLoc = closestPt;
 				vec2 triggerVec = dir;
 				
-				auto rt = new Target(mWorld,triggerLoc,triggerVec,lightLoc,r);
+				auto rt = new Target(mWorld,triggerLoc,triggerVec,r);
 				rt->mContourPoly = c.mPolyLine;
 				
 				add( rt );

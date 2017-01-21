@@ -246,7 +246,7 @@ private:
 class Target : public Part
 {
 public:
-	Target( PinballWorld& world, vec2 triggerloc, vec2 triggervec, vec2 lightloc, float radius );
+	Target( PinballWorld& world, vec2 triggerloc, vec2 triggervec, float radius );
 
 	virtual void draw() override;
 	virtual void tick() override;
@@ -259,7 +259,6 @@ public:
 	float mRadius;
 	vec2  mTriggerLoc;
 	vec2  mTriggerVec;
-	vec2  mLightLoc;
 	PolyLine2 mContourPoly; // so we can strobe it!
 	
 	ColorA mColorOff, mColorOn, mColorStrobe;

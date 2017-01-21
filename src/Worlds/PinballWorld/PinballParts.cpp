@@ -322,11 +322,10 @@ void Bumper::onBallCollide( Ball& ball )
 	getWorld().getPd()->sendFloat("hit-bumper", length( getWorld().getDenoisedBallVel(ball)*10.f ) );
 }
 
-Target::Target( PinballWorld& world, vec2 triggerloc, vec2 triggervec, vec2 lightloc, float radius )
+Target::Target( PinballWorld& world, vec2 triggerloc, vec2 triggervec, float radius )
 	: Part(world,PartType::Target)
 	, mTriggerLoc(triggerloc)
 	, mTriggerVec(triggervec)
-	, mLightLoc(lightloc)
 	, mRadius(radius)
 {
 	mColorOff = getWorld().mPartParams.mTargetOffColor;
@@ -373,20 +372,6 @@ void Target::draw()
 //	const float collideFade = getCollisionFade();
 	
 	Color triggerColor = getTriggerColor();
-	
-	// draw light on floor
-	if (0)
-	{
-		Color lightColor = getLightColor();
-
-		gl::pushModelView();
-		gl::translate( 0, 0, getWorld().getTableDepth() -.01f); // epsilon so we don't z-clip behind table back
-		
-		gl::color(lightColor);
-		gl::drawSolidCircle(mLightLoc, mRadius);
-
-		gl::popModelView();
-	}
 	
 	// highlight input contour
 	if ( mContourPoly.size()>0 )
@@ -493,16 +478,13 @@ void Target::addTo3dScene( Scene& s )
 
 void Target::setIsLit( bool v )
 {
-	
-
 	if (v && !mIsLit) {
 		getWorld().sendGameEvent( GameEvent::ATargetTurnedOn );
-		vec2 param = getWorld().normalizeToPlayfieldBBox(mLightLoc);
+		vec2 param = getWorld().normalizeToPlayfieldBBox(mTriggerLoc);
 		getWorld().getPd()->sendFloat("hit-rollover", (int)(param.y * 24.f) );
 	}
 	
 	mIsLit=v;
-//	setType( v ? PartType::TargetOn : PartType::TargetOff );
 }
 
 void Target::onGameEvent( GameEvent e )
