@@ -57,6 +57,7 @@ public:
 	
 	float getTableDepth() const { return mView.m3dTableDepth; }
 	void  getCullLine( vec2 v[2] ) const;
+	float getBallRadius() const { return mBallDefaultRadius; }
 	
 	// state
 	void sendGameEvent( GameEvent );

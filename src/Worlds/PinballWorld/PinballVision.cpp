@@ -30,9 +30,13 @@ void PinballVision::setParams( XmlTree xml )
 }
 
 
-ContourVec PinballVision::dejitterVisionContours( ContourVec in, ContourVec old ) const
+ContourVec PinballVision::dejitterContours( ContourVec in, ContourVec old ) const
 {
 	ContourVec out = in;
+
+	// Limitation of this function is that it doesn't fix up area, bounding rect, rotated bounding rect, etc...
+	// But for our purposes, this should be fine.
+	// There might be some weird edge cases where BallWorld uses bounding box for optimization and we should update that...
 	
 	for( auto &c : out )
 	{
@@ -67,6 +71,9 @@ ContourVec PinballVision::dejitterVisionContours( ContourVec in, ContourVec old 
 				
 				if ( dist < mDejitterContourMaxDist ) p = lerp( p, x, mDejitterContourLerpFrac ) ;
 			}
+			
+			// patch up some params, this one might be important to BallWorld's heuristics
+			c.mBoundingRect = Rectf( c.mPolyLine.getPoints() );
 		}
 	}
 	
@@ -82,14 +89,14 @@ PinballVision::update(
 {
 	Output out;
 	
-	// capture contours, so we can later pass them into BallWorld (after merging in part shapes)
+	// dejitter (optional)
 	if ( mDejitterContourMaxDist > 0.f && oldVisionContours ) {
-		out.mVisionContours = dejitterVisionContours( visionOut.mContours, *oldVisionContours );
+		out.mVisionContours = dejitterContours( visionOut.mContours, *oldVisionContours );
 	} else {
 		out.mVisionContours = visionOut.mContours;
 	}
 	
-	// classify parts
+	// classify contours
 	out.mContourTypes = classifyContours(out.mVisionContours);
 	
 	// generate parts
@@ -108,16 +115,46 @@ PinballVision::classifyContours( const ContourVec& cs ) const
 	
 	for( int i=0; i<ct.size(); ++i )
 	{
-		bool isPart = shouldContourBeAPart(cs[i],cs);
-		
 		ContourType t;
-		if (isPart) t = ContourType::Part;
-		else t = ContourType::Space;
+
+		if      ( shouldContourBeAPart(cs[i],cs) ) t = ContourType::Part;
+		else if ( shouldContourBeASpace(cs[i])   ) t = ContourType::Space;
+		else t = ContourType::Ignore;
 		
 		ct[i] = t;
 	}
 	
 	return ct;
+}
+
+bool PinballVision::shouldContourBeASpace( const Contour& c ) const
+{
+	const float ballRadius = mWorld.getBallRadius();
+	const float ballArea = M_PI * ballRadius * ballRadius;
+	const float ballPerim = 2.f * M_PI * ballRadius;
+	const float maxq = ballPerim / ballArea;
+	// TODO: precompute this! (but who cares?)
+
+	// minimum dimension
+	{
+		const float minDim = min(c.mRotatedBoundingRect.mSize.x,c.mRotatedBoundingRect.mSize.y);
+		
+		if ( minDim < ballRadius*2.f ) return false;
+	}
+	
+	// area to perimeter ratio
+	// (not sure this is ever triggered)
+	// ...there is probably a better way to do this heuristic. AND we should account for area of holes inside
+	// (not sure how often that ever really happens though).
+ 	{
+		const float q = c.mPerimeter / c.mArea;
+		
+		if ( q > maxq ) return false;
+	}
+	
+	// TODO: some random sampling inside, see if ball will even fit!
+	
+	return true;
 }
 
 bool PinballVision::shouldContourBeAPart( const Contour& c, const ContourVec& cs ) const

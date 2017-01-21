@@ -55,7 +55,8 @@ public:
 private:
 	AdjSpace getAdjacentSpace( const Contour*, vec2, const ContourVector&, const ContourTypes& ) const ;
 
-	bool shouldContourBeAPart( const Contour&, const ContourVec& ) const;
+	bool shouldContourBeASpace( const Contour& ) const;
+	bool shouldContourBeAPart ( const Contour&, const ContourVec& ) const;
 	ContourTypes classifyContours( const ContourVec& ) const;
 	
 	float mDejitterContourMaxDist = 0.f;
@@ -73,7 +74,7 @@ private:
 	PartVec getPartsFromContours( const ContourVec&, const ContourTypes& ); // only reason this is non-const is b/c parts point to the world
 	PartVec mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const;
 	
-	ContourVec dejitterVisionContours( ContourVec in, ContourVec old ) const;
+	ContourVec dejitterContours( ContourVec in, ContourVec old ) const;
 	
 	PinballWorld& mWorld;
 	
