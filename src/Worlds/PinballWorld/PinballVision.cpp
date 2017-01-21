@@ -8,6 +8,7 @@
 
 #include "PinballVision.h"
 #include "PinballWorld.h"
+#include "geom.h"
 
 namespace Pinball
 {
@@ -25,13 +26,12 @@ void PinballVision::setParams( XmlTree xml )
 	getXml(xml, "PartTrackLocMaxDist", mPartTrackLocMaxDist );
 	getXml(xml, "PartTrackRadiusMaxDist", mPartTrackRadiusMaxDist );
 	getXml(xml, "DejitterContourMaxDist", mDejitterContourMaxDist );
+	getXml(xml, "DejitterContourLerpFrac", mDejitterContourLerpFrac );
 }
 
 
 ContourVec PinballVision::dejitterVisionContours( ContourVec in, ContourVec old ) const
 {
-	// To really properly work this needs to fit new points into old line segments, not just old vertices.
-
 	ContourVec out = in;
 	
 	for( auto &c : out )
@@ -61,17 +61,11 @@ ContourVec PinballVision::dejitterVisionContours( ContourVec in, ContourVec old 
 		{
 			for( auto &p : c.mPolyLine.getPoints() )
 			{
-				float bestscore = mDejitterContourMaxDist;
+				float dist;
 				
-				for ( auto op : match->mPolyLine.getPoints() )
-				{
-					float score = distance(p,op);
-					if (score<bestscore)
-					{
-						bestscore = score;
-						p = op;
-					}
-				}
+				vec2 x = closestPointOnPoly( p, match->mPolyLine, 0, 0, &dist );
+				
+				if ( dist < mDejitterContourMaxDist ) p = lerp( p, x, mDejitterContourLerpFrac ) ;
 			}
 		}
 	}

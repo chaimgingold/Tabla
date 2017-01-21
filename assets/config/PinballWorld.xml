@@ -60,7 +60,8 @@
 		<PartTrackRadiusMaxDist>1</PartTrackRadiusMaxDist>
 		<PartTrackLocMaxDist>.5</PartTrackLocMaxDist>
 		
-		<DejitterContourMaxDist>0</DejitterContourMaxDist> <!-- 0 for off -->
+		<DejitterContourMaxDist>1</DejitterContourMaxDist> <!-- 0 for off -->
+		<DejitterContourLerpFrac>.9</DejitterContourLerpFrac>
 	</PinballVision>
 	
 	<Parts>

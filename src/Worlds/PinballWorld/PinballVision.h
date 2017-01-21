@@ -59,7 +59,8 @@ private:
 	ContourTypes classifyContours( const ContourVec& ) const;
 	
 	float mDejitterContourMaxDist = 0.f;
-
+	float mDejitterContourLerpFrac = 0.f;
+	
 	// - params
 	float mPartMinContourRadius = 0.f;
 	float mPartMaxContourRadius = 5.f; // contour radius lt => part
