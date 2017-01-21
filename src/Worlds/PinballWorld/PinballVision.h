@@ -55,6 +55,7 @@ public:
 private:
 	AdjSpace getAdjacentSpace( const Contour*, vec2, const ContourVector&, const ContourTypes& ) const ;
 
+	bool shouldContourBeAUI   ( const Contour& ) const;
 	bool shouldContourBeASpace( const Contour& ) const;
 	bool shouldContourBeAPart ( const Contour&, const ContourVec& ) const;
 	ContourTypes classifyContours( const ContourVec& ) const;

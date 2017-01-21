@@ -117,8 +117,9 @@ PinballVision::classifyContours( const ContourVec& cs ) const
 	{
 		ContourType t;
 
-		if      ( shouldContourBeAPart(cs[i],cs) ) t = ContourType::Part;
-		else if ( shouldContourBeASpace(cs[i])   ) t = ContourType::Space;
+		if      ( shouldContourBeAPart (cs[i],cs) ) t = ContourType::Part;
+		else if ( shouldContourBeASpace(cs[i])    ) t = ContourType::Space;
+		else if ( shouldContourBeAUI   (cs[i])    ) t = ContourType::UI; 
 		else t = ContourType::Ignore;
 		
 		ct[i] = t;
@@ -127,14 +128,38 @@ PinballVision::classifyContours( const ContourVec& cs ) const
 	return ct;
 }
 
+bool PinballVision::shouldContourBeAUI( const Contour& c ) const
+{
+	// --- STUB --- 
+	// --- Disabled for now ---
+	return false;
+	// ---------------------------------
+
+	// root
+	if ( c.mTreeDepth > 0 ) return false;
+	
+	// no children
+	if ( c.mChild.size() > 0 ) return false; 
+
+	// rectangular?
+	// mRectFinder...
+		
+	// not bigger than X% of world
+	
+	// above or below major components 
+	// (allow anywhere?)
+	
+	// OK!
+	return true;
+}
+
 bool PinballVision::shouldContourBeASpace( const Contour& c ) const
 {
 	const float ballRadius = mWorld.getBallRadius();
-	const float ballArea = M_PI * ballRadius * ballRadius;
-	const float ballPerim = 2.f * M_PI * ballRadius;
-	const float maxq = ballPerim / ballArea;
-	// TODO: precompute this! (but who cares?)
 
+	// holes are always OK (small walls are fine!)
+	if ( c.mIsHole ) return true;
+	
 	// minimum dimension
 	{
 		const float minDim = min(c.mRotatedBoundingRect.mSize.x,c.mRotatedBoundingRect.mSize.y);
@@ -143,16 +168,48 @@ bool PinballVision::shouldContourBeASpace( const Contour& c ) const
 	}
 	
 	// area to perimeter ratio
-	// (not sure this is ever triggered)
+	// (not sure this is ever false)
 	// ...there is probably a better way to do this heuristic. AND we should account for area of holes inside
 	// (not sure how often that ever really happens though).
+	if (0)
  	{
+		const float ballArea = M_PI * ballRadius * ballRadius;
+		const float ballPerim = 2.f * M_PI * ballRadius;
+		const float maxq = ballPerim / ballArea;
+		// TODO: precompute this! (but who cares?)
+		// And do we even need ballRadius in here?
+
 		const float q = c.mPerimeter / c.mArea;
 		
 		if ( q > maxq ) return false;
 	}
 	
-	// TODO: some random sampling inside, see if ball will even fit!
+	// perimeter test #2
+	{
+		// If we take c's area, and imagine it as a rectangle that
+		// tightly holds a set of boxes...
+		
+		/* +------+
+		   |( )( )|
+		   +------+
+		*/
+
+		// What size box is needed to hold these balls?
+		// What is the perimeter of that box? If our perimeter is greater,
+		// than this should, in theory, be too small of a space to hold the balls. 
+		
+		const float netArea = c.mArea; // TODO: use actual net area
+		const float est_height = (ballRadius*2.f);   
+		const float est_width  = netArea / est_height;
+		const float est_perim  = (est_height + est_width) * 2.f;
+		
+		if ( c.mPerimeter > est_perim ) return false;
+	}
+	
+	// TODO: try some random sampling inside, see if ball will even fit!
+	// In effect, we would like to run the simulation AS IF a ball is inside,
+	// and see if it freaks out. If it freaks out, then we want to reject the shape.
+	// Maybe OpenCV has been contour analytical techniques for us...
 	
 	return true;
 }
@@ -161,6 +218,7 @@ bool PinballVision::shouldContourBeAPart( const Contour& c, const ContourVec& cs
 {
 	// no children?
 //	if (!c.mChild.empty()) return false; // seems logical; or does it matter? is this just annoying?
+	// TBD design question. We should try this and see if it's problematic.
 	
 	// round enough?
 	{
