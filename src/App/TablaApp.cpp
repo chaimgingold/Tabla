@@ -39,11 +39,7 @@ TablaApp::~TablaApp()
 {
 	cout << "Shutting down..." << endl;
 
-//	mGameWorld.reset();
-
 	if (mCapture) mCapture->stop();
-
-	//
 }
 
 PolyLine2 TablaApp::getWorldBoundsPoly() const
@@ -70,10 +66,81 @@ fs::path TablaApp::getUserSettingsFilePath() const
 
 void TablaApp::setup()
 {
-	auto overloadAssetPath = [this]( string p )
+	cout << getAppPath() << endl;
+
+	mOverloadedAssetPath = getOverloadedAssetPath();
+	
+	//
+	mAppFPS.start();
+	mCaptureFPS.start();
+
+	// enumerate hardware
+	enumerateDisplaysAndCamerasToConsole();
+	
+	// make docs folder if needed
+	if ( !fs::exists(getDocsPath()) ) fs::create_directory(getDocsPath());
+	
+	// app config
+	mFileWatch.loadXml( hotloadableAssetPath("config") / "app.xml", [this]( XmlTree xml ) {
+		loadAppConfigXml(xml);
+	});
+
+	// user LightLink (overloads one in app.xml)
+	mFileWatch.loadXml( getUserLightLinkFilePath(), [this]( XmlTree xml ) {
+		loadLightLinkXml(xml);
+	});
+
+	// Pure Data
+	setupPureData();
+
+	// ui stuff (do before making windows)
+	mTextureFont = gl::TextureFont::create( Font("Avenir",12) );
+	
+	// setup main window
+	setupWindows();
+
+	// setup rfid functions
+	setupRFIDValueToFunction();
+
+	// user settings
+	mFileWatch.loadXml( getUserSettingsFilePath(), [this]( XmlTree xml )
+	{
+		if ( xml.hasChild("settings") ) {
+			loadUserSettingsFromXml(xml.getChild("settings"));
+		}
+	});
+	
+	// load default game (or command line arg)
+	string cmdLineArgGameName = getCommandLineArgValue("-gameworld");
+	
+	if ( !mGameWorld || !cmdLineArgGameName.empty() ) { // because loadUserSettingsFromXml might have done it
+		loadDefaultGame(cmdLineArgGameName);
+	}
+}
+
+string TablaApp::getCommandLineArgValue( string param ) const
+{
+	auto args = getCommandLineArgs();
+	
+	for( size_t a=0; a<args.size(); ++a )
+	{
+		if ( args[a]==param && args.size()>a )
+		{
+			return args[a+1];
+		}
+	}
+	
+	return string();
+}
+
+string TablaApp::getOverloadedAssetPath() const
+{
+	string r;
+	
+	auto overloadAssetPath = [this,&r]( string p )
 	{
 		cout << "OverloadedAssetPath: " << p << endl;
-		mOverloadedAssetPath = p;
+		r = p;
 	};
 	
 	// env vars for hotloading assets
@@ -84,172 +151,111 @@ void TablaApp::setup()
 		}
 	}
 	
-	cout << getAppPath() << endl;
-	
 	// command line args
-	string cmdLineArgGameName; // empty means 0th, by default
+	string cmdline = getCommandLineArgValue("-assets");
 	
-	auto args = getCommandLineArgs();
-	
-	for( size_t a=0; a<args.size(); ++a )
-	{
-		if ( args[a]=="-assets" && args.size()>a )
-		{
-			string overloadedAssetPath = args[a+1];
-			if ( fs::exists(overloadedAssetPath) ) {
-				overloadAssetPath( overloadedAssetPath );
-			}
-		}
-
-		if ( args[a]=="-gameworld" && args.size()>a )
-		{
-			cmdLineArgGameName = args[a+1];
-		}
-	}
+	if (!cmdline.empty()) overloadAssetPath( cmdline );
 	
 	//
-	mAppFPS.start();
-	mCaptureFPS.start();
+	return r;
+}
 
-	// enumerate hardware
+void TablaApp::enumerateDisplaysAndCamerasToConsole() const
+{
+	auto displays = Display::getDisplays() ;
+	cout << displays.size() << " Displays" << endl ;
+	for ( auto d : displays )
 	{
-		auto displays = Display::getDisplays() ;
-		cout << displays.size() << " Displays" << endl ;
-		for ( auto d : displays )
-		{
-			cout << "\t '" << d->getName() << "' " << d->getBounds() << endl ;
-		}
+		cout << "\t '" << d->getName() << "' " << d->getBounds() << endl ;
+	}
 
-		auto cameras = Capture::getDevices() ;
-		cout << cameras.size() << " Cameras" << endl ;
-		for ( auto c : cameras )
-		{
-			cout << "\t '" << c->getName() << "' '" << c->getUniqueId() << "'" << endl ;
-		}
+	auto cameras = Capture::getDevices() ;
+	cout << cameras.size() << " Cameras" << endl ;
+	for ( auto c : cameras )
+	{
+		cout << "\t '" << c->getName() << "' '" << c->getUniqueId() << "'" << endl ;
+	}
+}
+
+void TablaApp::loadAppConfigXml( XmlTree xml )
+{
+	// 1. get params
+	if (xml.hasChild("PaperBounce3/LightLink") && !fs::exists(getUserLightLinkFilePath()) )
+	{
+		mLightLink.setParams(xml.getChild("PaperBounce3/LightLink"));
+		ensureLightLinkHasLocalDeviceProfiles();
+		lightLinkDidChange(); // allow saving, since user settings version doesn't exist yet
+		// Note: To simplify logic, we could just have this save the data to getUserLightLinkFilePath()
+		// and let the code below load it. (If somehow it was necessary to be so robust that we can't save
+		// user data it might be useful, but that's a questionable scenario.)
 	}
 	
-	// make docs folder if needed
-	if ( !fs::exists(getDocsPath()) ) fs::create_directory(getDocsPath());
-	
-	// configuration
-	mFileWatch.loadXml( hotloadableAssetPath("config") / "app.xml", [this]( XmlTree xml )
+	if (xml.hasChild("PaperBounce3/App"))
 	{
-		// 1. get params
-		if (xml.hasChild("PaperBounce3/LightLink") && !fs::exists(getUserLightLinkFilePath()) )
-		{
-			mLightLink.setParams(xml.getChild("PaperBounce3/LightLink"));
-			ensureLightLinkHasLocalDeviceProfiles();
-			lightLinkDidChange(); // allow saving, since user settings version doesn't exist yet
-			// Note: To simplify logic, we could just have this save the data to getUserLightLinkFilePath()
-			// and let the code below load it. (If somehow it was necessary to be so robust that we can't save
-			// user data it might be useful, but that's a questionable scenario.)
-		}
+		XmlTree app = xml.getChild("PaperBounce3/App");
 		
-		if (xml.hasChild("PaperBounce3/App"))
-		{
-			XmlTree app = xml.getChild("PaperBounce3/App");
-			
-			getXml(app,"AutoFullScreenProjector",mAutoFullScreenProjector);
-			getXml(app,"DrawCameraImage",mDrawCameraImage);
-			getXml(app,"DrawContours",mDrawContours);
-			getXml(app,"DrawContoursFilled",mDrawContoursFilled);
-			getXml(app,"DrawMouseDebugInfo",mDrawMouseDebugInfo);
-			getXml(app,"DrawPolyBoundingRect",mDrawPolyBoundingRect);
-			getXml(app,"DrawContourTree",mDrawContourTree);
-			getXml(app,"DrawPipeline",mDrawPipeline);
-			getXml(app,"DrawContourMousePick",mDrawContourMousePick);
-			
-			getXml(app,"ConfigWindowMainImagDrawBkgndImage",mConfigWindowMainImagDrawBkgndImage);
-			
-			getXml(app,"HasConfigWindow",mHasConfigWindow);
-			getXml(app,"ConfigWindowPipelineWidth",mConfigWindowPipelineWidth);
-			getXml(app,"ConfigWindowPipelineGutter",mConfigWindowPipelineGutter);
-			getXml(app,"ConfigWindowMainImageMargin",mConfigWindowMainImageMargin);
-			
-			getXml(app,"KeyboardStringTimeout",mKeyboardStringTimeout);
-			
-			getXml(app,"DefaultPixelsPerWorldUnit",mDefaultPixelsPerWorldUnit);
-			getXml(app,"DebugFrameSkip",mDebugFrameSkip);
-		}
+		getXml(app,"AutoFullScreenProjector",mAutoFullScreenProjector);
+		getXml(app,"DrawCameraImage",mDrawCameraImage);
+		getXml(app,"DrawContours",mDrawContours);
+		getXml(app,"DrawContoursFilled",mDrawContoursFilled);
+		getXml(app,"DrawMouseDebugInfo",mDrawMouseDebugInfo);
+		getXml(app,"DrawPolyBoundingRect",mDrawPolyBoundingRect);
+		getXml(app,"DrawContourTree",mDrawContourTree);
+		getXml(app,"DrawPipeline",mDrawPipeline);
+		getXml(app,"DrawContourMousePick",mDrawContourMousePick);
 		
-		if (xml.hasChild("PaperBounce3/RFID"))
+		getXml(app,"ConfigWindowMainImagDrawBkgndImage",mConfigWindowMainImagDrawBkgndImage);
+		
+		getXml(app,"HasConfigWindow",mHasConfigWindow);
+		getXml(app,"ConfigWindowPipelineWidth",mConfigWindowPipelineWidth);
+		getXml(app,"ConfigWindowPipelineGutter",mConfigWindowPipelineGutter);
+		getXml(app,"ConfigWindowMainImageMargin",mConfigWindowMainImageMargin);
+		
+		getXml(app,"KeyboardStringTimeout",mKeyboardStringTimeout);
+		
+		getXml(app,"DefaultPixelsPerWorldUnit",mDefaultPixelsPerWorldUnit);
+		getXml(app,"DebugFrameSkip",mDebugFrameSkip);
+	}
+	
+	if (xml.hasChild("PaperBounce3/RFID"))
+	{
+		XmlTree rfid = xml.getChild("PaperBounce3/RFID");
+		
+		for( auto item = rfid.begin("tag"); item != rfid.end(); ++item )
 		{
-			XmlTree rfid = xml.getChild("PaperBounce3/RFID");
-			
-			for( auto item = rfid.begin("tag"); item != rfid.end(); ++item )
+			if ( item->hasChild("id") && item->hasChild("value") )
 			{
-				if ( item->hasChild("id") && item->hasChild("value") )
-				{
-					int		id		= item->getChild("id").getValue<int>();
-					string	value	= item->getChild("value").getValue();
-					
-					mRFIDKeyToValue[id] = value;
-				}
+				int		id		= item->getChild("id").getValue<int>();
+				string	value	= item->getChild("value").getValue();
+				
+				mRFIDKeyToValue[id] = value;
 			}
 		}
-		
-		// 2. respond
-		updateDebugFrameCaptureDevicesWithPxPerWorldUnit(mDefaultPixelsPerWorldUnit);
-		
-		// TODO:
-		// - get a new camera capture object so that resolution can change live (I think I do that now)
-		// - respond to fullscreen projector flag
-		// - aux display config
-	});
+	}
+	
+	// 2. respond
+	updateDebugFrameCaptureDevicesWithPxPerWorldUnit(mDefaultPixelsPerWorldUnit);
+	
+	// TODO:
+	// - get a new camera capture object so that resolution can change live (I think I do that now)
+	// - respond to fullscreen projector flag
+	// - aux display config
+}
 
-	// settings: LightLink
-	mFileWatch.loadXml( getUserLightLinkFilePath(), [this]( XmlTree xml )
+void TablaApp::loadLightLinkXml( XmlTree xml )
+{
+	// this overloads the one in config.xml
+	if ( xml.hasChild("LightLink") )
 	{
-		// this overloads the one in config.xml
-		if ( xml.hasChild("LightLink") )
-		{
-			mLightLink.setParams(xml.getChild("LightLink"));
-			bool didChange = ensureLightLinkHasLocalDeviceProfiles();
-			lightLinkDidChange(didChange);
-			// don't save, since we are responding to a load, unless ensureLightLinkHasLocalDeviceProfiles() changed.
-		}
-	});
-
-	// Pure Data
-	auto ctx = audio::master();
-	
-	cout << "Frames per block: " << endl;
-	for (auto &device : ctx->deviceManager()->getDevices()) {
-		int currentFramesPerBlock = ctx->deviceManager()->getFramesPerBlock(device);
-		cout << "\t" << device->getName() << " - " << currentFramesPerBlock << endl;
-
-//		ctx->deviceManager()->setFramesPerBlock(device, 1024);
-//		ctx->deviceManager()->setFramesPerBlock(device, 512);
+		mLightLink.setParams(xml.getChild("LightLink"));
+		bool didChange = ensureLightLinkHasLocalDeviceProfiles();
+		lightLinkDidChange(didChange);
+		// don't save, since we are responding to a load, unless ensureLightLinkHasLocalDeviceProfiles() changed.
 	}
-	
+}
 
-	// Create the synth engine
-	mPd = ctx->makeNode( new cipd::PureDataNode( audio::Node::Format().autoEnable() ) );
-
-	// Connect synth to master output
-	mPd >> audio::master()->getOutput();
-
-	// Enable Cinder audio
-	ctx->enable();
-	
-	mPd->addToSearchPath(hotloadableAssetPath("synths").string());
-	
-	for (auto p : fs::directory_iterator(hotloadableAssetPath("synths"))) {
-		mPd->addToSearchPath(p.path().string());
-	}
-
-	// Lets us use lists to set arrays, which seems to cause less thread contention
-	mPd->setMaxMessageLength(1024);
-
-	// Build a virtual clacker
-	auto rootPatch = hotloadableAssetPath("synths/clacker.pd");
-	mAVClackerPatch = mPd->loadPatch( DataSourcePath::create(rootPatch) ).get();
-
-
-	// ui stuff (do before making windows)
-	mTextureFont = gl::TextureFont::create( Font("Avenir",12) );
-	
-	// setup main window
+void TablaApp::setupWindows()
+{
 	mMainWindow = getWindow();
 	mMainWindow->setTitle("Projector");
 	mMainWindow->setUserData( new WindowData(mMainWindow,false,*this) );
@@ -306,24 +312,43 @@ void TablaApp::setup()
 		mUIWindow->getSignalMove()  .connect( [&]{ this->saveUserSettings(); });
 		mUIWindow->getSignalResize().connect( [&]{ this->saveUserSettings(); });
 	}
-	
-	// setup rfid functions
-	setupRFIDValueToFunction();
+}
 
-	// settings (generic)
-	mFileWatch.loadXml( getUserSettingsFilePath(), [this]( XmlTree xml )
-	{
-		// this overloads the one in config.xml
-		if ( xml.hasChild("settings") )
-		{
-			loadUserSettingsFromXml(xml.getChild("settings"));
-		}
-	});
+void TablaApp::setupPureData()
+{
+	auto ctx = audio::master();
 	
-	// load default game (or command line arg)
-	if ( !mGameWorld || !cmdLineArgGameName.empty() ) { // because loadUserSettingsFromXml might have done it
-		loadDefaultGame(cmdLineArgGameName);
+	cout << "Frames per block: " << endl;
+	for (auto &device : ctx->deviceManager()->getDevices()) {
+		int currentFramesPerBlock = ctx->deviceManager()->getFramesPerBlock(device);
+		cout << "\t" << device->getName() << " - " << currentFramesPerBlock << endl;
+
+//		ctx->deviceManager()->setFramesPerBlock(device, 1024);
+//		ctx->deviceManager()->setFramesPerBlock(device, 512);
 	}
+	
+
+	// Create the synth engine
+	mPd = ctx->makeNode( new cipd::PureDataNode( audio::Node::Format().autoEnable() ) );
+
+	// Connect synth to master output
+	mPd >> audio::master()->getOutput();
+
+	// Enable Cinder audio
+	ctx->enable();
+	
+	mPd->addToSearchPath(hotloadableAssetPath("synths").string());
+	
+	for (auto p : fs::directory_iterator(hotloadableAssetPath("synths"))) {
+		mPd->addToSearchPath(p.path().string());
+	}
+
+	// Lets us use lists to set arrays, which seems to cause less thread contention
+	mPd->setMaxMessageLength(1024);
+
+	// Build a virtual clacker
+	auto rootPatch = hotloadableAssetPath("synths/clacker.pd");
+	mAVClackerPatch = mPd->loadPatch( DataSourcePath::create(rootPatch) ).get();
 }
 
 void TablaApp::setupRFIDValueToFunction()

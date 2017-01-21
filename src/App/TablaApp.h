@@ -202,6 +202,18 @@ class TablaApp : public App {
 private: /* starting to make some stuff private... start somewhere */
 	void updateVision();
 
+	string getOverloadedAssetPath() const;
+
+	void setupPureData();
+	void setupWindows();
+	
+	void loadAppConfigXml( XmlTree );
+	void loadLightLinkXml( XmlTree );
+	void enumerateDisplaysAndCamerasToConsole() const;
+	
+	string getCommandLineArgValue( string param ) const;
+	// e.g. Tabla -param returnValue
+	
 	//
 	void loadUserSettingsFromXml( XmlTree );
 	XmlTree getUserSettingsXml() const;

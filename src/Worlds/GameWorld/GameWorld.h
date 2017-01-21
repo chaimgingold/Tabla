@@ -21,6 +21,8 @@ class Pipeline;
 class GameWorld
 {
 public:
+	virtual ~GameWorld() {} // make sure children can overload destructor
+	
 	virtual string getSystemName() const { return "GameWorld"; } // for xml param block name
 	virtual string getUserName() const { return getSystemName(); }
 	

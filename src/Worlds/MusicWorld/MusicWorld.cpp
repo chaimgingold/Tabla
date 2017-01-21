@@ -446,6 +446,7 @@ void MusicWorld::cleanup() {
 
 	// Clean up synth engine
 	mPd->closePatch(mPatch);
+	mPatch.reset();
 }
 
 MusicWorld::~MusicWorld() {
