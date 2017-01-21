@@ -147,8 +147,6 @@ public:
 	virtual PolyLine2 getCollisionPoly() const { return PolyLine2(); }
 	// we could save some cpu by having a get/set and caching it internally, but who cares right now
 	
-	virtual vec2 getAdjSpaceOrigin() const { return mContourLoc; }
-	
 	PinballWorld& getWorld() const { return mWorld; }
 	PartType getType() const { return mType; }
 	
@@ -157,13 +155,11 @@ public:
 	void setShouldAlwaysPersist( bool v ) { mShouldAlwaysPersist=v; }
 	virtual bool getShouldMergeWithOldPart( const PartRef oldPart ) const;
 	
-	vec2  mContourLoc;
-	float mContourRadius=0.f;
-		// contour origin info
-		// (when we do composite parts--multiple bumpers combined into one, we'll want to make this into a vector with a particular ordering
-		// for easy comparisons)
-		// might be most logical to just store the whole Contour, so a vector of Contours we are based on.
-
+	void setSourceContour( vec2 loc, float r ) { mContourLoc=loc; mContourRadius=r; }
+	virtual vec2 getAdjSpaceOrigin() const { return mContourLoc; }
+	AdjSpace getAdjSpace() const { return mAdjSpace; }
+	void     setAdjSpace( AdjSpace s ) { mAdjSpace=s; }
+	
 protected:
 	void addExtrudedCollisionPolyToScene( Scene&, ColorA, const mat4* postTransform=0 ) const;
 	void setType( PartType t ) { mType=t; }
@@ -184,6 +180,14 @@ private:
 	float mCollideTime = -10.f;
 	float mCollideDecay=0.f;
 
+	vec2  mContourLoc;
+	float mContourRadius=0.f;
+		// contour origin info
+		// (when we do composite parts--multiple bumpers combined into one, we'll want to make this into a vector with a particular ordering
+		// for easy comparisons)
+		// might be most logical to just store the whole Contour, so a vector of Contours we are based on.
+
+	AdjSpace mAdjSpace;
 };
 
 

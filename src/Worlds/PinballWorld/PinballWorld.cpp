@@ -652,7 +652,8 @@ Contour PinballWorld::contourFromPoly( PolyLine2 poly ) const
 	c.mBoundingRect = Rectf( poly.getPoints() );
 	c.mRadius = max( c.mBoundingRect.getWidth(), c.mBoundingRect.getHeight() ) * .5f ;
 	c.mArea = M_PI * c.mRadius * c.mRadius; // use circle approximation for area
-
+	c.mPerimeter = 1.f ; // pinball world doesn't care about this... :D
+	
 	c.mPolyLine.setClosed(); // ensure this is true in case any parts fail to do this right (ray casting cares) 
 	
 	// TODO: rotated bounding box correctly

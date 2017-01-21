@@ -48,16 +48,16 @@ public:
 		const PartVec& oldParts,
 		const ContourVec* oldVisionContours=0 );
 	
-	AdjSpace getAdjacentSpace( const Contour*, vec2, const ContourVector& ) const ;
-	AdjSpace getAdjacentSpace( vec2, const ContourVector& ) const ; // how much adjacent space is to the left, right?
-
 	// - inter-frame coherence params
 	float mPartTrackLocMaxDist = 1.f;
 	float mPartTrackRadiusMaxDist = .5f;
 	
 private:
-	bool shouldContourBeAPart( const Contour&, const ContourVector& ) const;
+	AdjSpace getAdjacentSpace( const Contour*, vec2, const ContourVector&, const ContourTypes& ) const ;
 
+	bool shouldContourBeAPart( const Contour&, const ContourVec& ) const;
+	ContourTypes classifyContours( const ContourVec& ) const;
+	
 	float mDejitterContourMaxDist = 0.f;
 
 	// - params
@@ -69,7 +69,7 @@ private:
 	float mFlipperDistToEdge = 10.f; // how close to the edge does a flipper appear?
 	
 	// - do it
-	PartVec getPartsFromContours( const ContourVector& ); // only reason this is non-const is b/c parts point to the world
+	PartVec getPartsFromContours( const ContourVec&, const ContourTypes& ); // only reason this is non-const is b/c parts point to the world
 	PartVec mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const;
 	
 	ContourVec dejitterVisionContours( ContourVec in, ContourVec old ) const;

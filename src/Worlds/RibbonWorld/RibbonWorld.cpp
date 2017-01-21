@@ -81,7 +81,8 @@ void RibbonWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeli
 
 			// Vary width with sine wave
 //			float width = (sin(progress*10) + 1.5) * 1;
-			float width = c.mArea/mWidthDivision;
+//			float width = c.mArea/mWidthDivision;
+			float width = c.mRadius*2.f;
 
 			// Rotate two spread points in direction of new point
 			float angle = atan2(pointDiff.y, pointDiff.x) + M_PI/2;

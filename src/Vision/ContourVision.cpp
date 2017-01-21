@@ -97,6 +97,7 @@ ContourVec ContourVision::findContours( const Pipeline::StageRef input, Pipeline
 				// scale polyline to world space (from pixel space)
 				for( auto &p : myc.mPolyLine.getPoints() ) p *= contourPixelToWorld ;
 
+				myc.mPerimeter = cv::arcLength(c,true) * contourPixelToWorld;
 				myc.mRadius = radius ;
 				myc.mCenter = center ;
 				myc.mArea   = area ;

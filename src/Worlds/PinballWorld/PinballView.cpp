@@ -299,7 +299,7 @@ void PinballView::drawAdjSpaceRays( const PartVec& parts ) const
 	{
 		vec2 loc = p->getAdjSpaceOrigin();
 		
-		const AdjSpace space = mWorld.mVision.getAdjacentSpace(loc,mWorld.getVisionContours());
+		const AdjSpace& space = p->getAdjSpace();
 
 		auto draw = [&]( ColorA color, vec2 vec, float width, float m )
 		{

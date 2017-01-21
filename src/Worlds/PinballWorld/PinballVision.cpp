@@ -95,25 +95,35 @@ PinballVision::update(
 		out.mVisionContours = visionOut.mContours;
 	}
 	
+	// classify parts
+	out.mContourTypes = classifyContours(out.mVisionContours);
+	
 	// generate parts
-	PartVec newParts = getPartsFromContours(out.mVisionContours);
+	PartVec newParts = getPartsFromContours(out.mVisionContours,out.mContourTypes);
 	out.mParts = mergeOldAndNewParts( oldParts, newParts );
 	
-	// set contour types (should probably be rolled into getPartsFromContours,
-	// but leaving here for now for minimal disruption)
-	out.mContourTypes.resize(out.mVisionContours.size());
-	for( int i=0; i<out.mContourTypes.size(); ++i )
+	return out;
+}
+
+PinballVision::ContourTypes
+PinballVision::classifyContours( const ContourVec& cs ) const
+{
+	ContourTypes ct;
+	
+	ct.resize(cs.size());
+	
+	for( int i=0; i<ct.size(); ++i )
 	{
-		bool isPart = shouldContourBeAPart(out.mVisionContours[i],out.mVisionContours);
+		bool isPart = shouldContourBeAPart(cs[i],cs);
 		
 		ContourType t;
 		if (isPart) t = ContourType::Part;
 		else t = ContourType::Space;
 		
-		out.mContourTypes[i] = t;
+		ct[i] = t;
 	}
 	
-	return out;
+	return ct;
 }
 
 bool PinballVision::shouldContourBeAPart( const Contour& c, const ContourVec& cs ) const
@@ -152,15 +162,7 @@ bool PinballVision::shouldContourBeAPart( const Contour& c, const ContourVec& cs
 }
 
 AdjSpace
-PinballVision::getAdjacentSpace( vec2 loc, const ContourVector& cs ) const
-{
-	const Contour* leaf = cs.findLeafContourContainingPoint(loc);
-	
-	return getAdjacentSpace(leaf, loc, cs);
-}
-
-AdjSpace
-PinballVision::getAdjacentSpace( const Contour* leaf, vec2 loc, const ContourVector& cs ) const
+PinballVision::getAdjacentSpace( const Contour* leaf, vec2 loc, const ContourVector& cs, const ContourTypes& ctypes ) const
 {
 	AdjSpace result;
 
@@ -184,13 +186,17 @@ PinballVision::getAdjacentSpace( const Contour* leaf, vec2 loc, const ContourVec
 	
 	auto filter = [&]( const Contour& c ) -> bool
 	{
+		return ctypes[c.mIndex]==ContourType::Space;
+		
+		/*
 		// 1. not self
 		//if ( c.mIsHole && c.contains(loc) ) return false;
 		if ( &c == leaf ) return false; // supposed to be optimized version of c.mIsHole && c.contains(loc)
 		// 2. not other parts
-		else if ( shouldContourBeAPart(c,cs) ) return false; // could be a part
+		else if ( ctypes[c.mIndex]==ContourType::Part ) return false; // could be a part
 		// OK
 		else return true;
+		*/
 	};
 	
 	cs.rayIntersection( loc, mWorld.getRightVec(), &result.mRight, filter );
@@ -207,21 +213,20 @@ PinballVision::getAdjacentSpace( const Contour* leaf, vec2 loc, const ContourVec
 	return result;
 }
 
-PartVec PinballVision::getPartsFromContours( const ContourVector& contours )
+PartVec PinballVision::getPartsFromContours( const ContourVector& contours, const ContourTypes& ctypes )
 {
 	PartVec parts;
 	
 	for( const auto &c : contours )
 	{
-		if ( !shouldContourBeAPart(c,contours) ) continue;
+		if ( ctypes[c.mIndex] != ContourType::Part ) continue;
 
-
-		AdjSpace adjSpace = getAdjacentSpace(&c,c.mCenter,contours);
+		AdjSpace adjSpace = getAdjacentSpace(&c,c.mCenter,contours,ctypes);
 
 		auto add = [&c,&parts,adjSpace]( Part* p )
 		{
-			p->mContourLoc = c.mCenter;
-			p->mContourRadius = c.mRadius;
+			p->setSourceContour( c.mCenter, c.mRadius );
+			p->setAdjSpace( adjSpace );
 			parts.push_back( PartRef(p) );
 		};
 		
@@ -255,8 +260,8 @@ PartVec PinballVision::getPartsFromContours( const ContourVector& contours )
 			// non-hole:
 			
 			// make target
-			auto filter = [this,contours]( const Contour& c ) -> bool {
-				return !shouldContourBeAPart(c,contours);
+			auto filter = [this,contours,ctypes]( const Contour& c ) -> bool {
+				return ctypes[c.mIndex] == ContourType::Space;
 			};
 			
 			float dist;

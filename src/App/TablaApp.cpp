@@ -271,6 +271,8 @@ void TablaApp::setup()
 			.exclusive(true)
 			.display(displays[1])
 			 ) ;
+		
+//		mMainWindow->hide(); // try to fix our weird bug...
 	}
 
 	mMainWindow->getSignalMove()  .connect( [&]{ this->saveUserSettings(); });
@@ -1155,7 +1157,7 @@ void TablaApp::loadUserSettingsFromXml( XmlTree xml )
 	};
 	
 	getWindowBounds( "UIWindowBounds", mUIWindow );
-	getWindowBounds( "MainWindowBounds", mMainWindow );
+	if (!mMainWindow->isFullScreen()) getWindowBounds( "MainWindowBounds", mMainWindow );
 }
 
 XmlTree TablaApp::getUserSettingsXml() const

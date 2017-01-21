@@ -27,8 +27,9 @@ public:
 	PolyLine2	mPolyLine ;
 	vec2		mCenter ;
 	Rectf		mBoundingRect ;
-	float		mRadius ;
-	float		mArea ;
+	float		mRadius=0.f;
+	float		mArea=0.f;
+	float		mPerimeter=0.f;
 	
 	struct tRotatedRect
 	{
