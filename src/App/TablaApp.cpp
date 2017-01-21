@@ -262,9 +262,11 @@ void TablaApp::setup()
 
 	if ( displays.size()>1 && mAutoFullScreenProjector )
 	{
-		// move to 2nd display + fullscreen
-		mMainWindow->setPos( displays[1]->getBounds().getUL() + ivec2(10,10) );
+		// workaround for cinder multi-window fullscreen bug... :P
+//		mMainWindow->setPos( displays[1]->getBounds().getUL() + ivec2(10,10) ); // redundant to .display(displays[1]); could hide by putting outside of window or something
+		mMainWindow->hide(); // must hide before, not after, fullscreening.
 		
+		// fullscreen on 2nd display
 		mMainWindow->setFullScreen( true, FullScreenOptions()
 			.kioskMode(true)
 			.secondaryDisplayBlanking(false)
@@ -272,7 +274,6 @@ void TablaApp::setup()
 			.display(displays[1])
 			 ) ;
 		
-//		mMainWindow->hide(); // try to fix our weird bug...
 	}
 
 	mMainWindow->getSignalMove()  .connect( [&]{ this->saveUserSettings(); });
