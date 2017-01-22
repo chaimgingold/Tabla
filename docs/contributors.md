@@ -9,4 +9,9 @@
 
 # Libraries used
 
+# Fonts
+
+Atari by Genshichi Yasui.
+http://www.fontspace.com/genshichi-yasui/atari-font
+
 # Institutions

@@ -8,10 +8,16 @@
 
 #include "cinder/Rand.h"
 
+#include "TablaApp.h"
 #include "GameWorld.h"
 #include "geom.h"
 
 GameCartridge::Library* GameCartridge::mLibrary=0;
+
+fs::path GameWorld::getAssetPath( fs::path p ) const
+{
+	return TablaApp::get()->hotloadableAssetPath(p);
+}
 
 vec2 GameWorld::getRandomPointInWorldBoundsPoly() const
 {

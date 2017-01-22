@@ -59,11 +59,11 @@ private:
 	bool shouldContourBeASpace( const Contour& ) const;
 	bool shouldContourBeAPart ( const Contour&, const ContourVec& ) const;
 	ContourTypes classifyContours( const ContourVec& ) const;
-	
+		
+	// - params
 	float mDejitterContourMaxDist = 0.f;
 	float mDejitterContourLerpFrac = 0.f;
-	
-	// - params
+
 	float mPartMinContourRadius = 0.f;
 	float mPartMaxContourRadius = 5.f; // contour radius lt => part
 	float mPartMaxContourAspectRatio = 2.f;

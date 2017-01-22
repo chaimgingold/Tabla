@@ -101,6 +101,8 @@ private:
 
 	gl::TextureRef mSkyTexture;
 	
+	gl::TextureFontRef mUIFont;
+	
 	// - params
 	string mSkyPipelineStageName; // what stage of pipeline to use?
 	float mSkyHeight=0.f;
@@ -117,6 +119,7 @@ private:
 	bool mCubeMapDrawFloor = true;
 	bool mCubeMapDrawBalls = true;
 	bool mCubeMapDrawRibbons = false;
+	bool mCubeMapMipMap = true;
 	float mCubeMapEyeHeight = 50.f;
 	float mCubeMapLightHeight = 50.f;
 	ColorA mCubeMapLightColor = ColorA(1,1,1,1);
@@ -133,7 +136,6 @@ private:
 	int getNumCircleVerts( float r ) const;
 
 	// - cube maps
-	gl::TextureCubeMapRef mCubeMap; // static
 	vector<gl::FboCubeMapRef> mCubeMaps; // dynamic
 	vector<gl::TextureCubeMapRef> mCubeMapTextures;
 	

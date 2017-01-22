@@ -37,8 +37,8 @@ void PinballView::setup()
 	auto load = [this]( string name, gl::GlslProgRef* to, std::function<void(void)> f )
 	{
 		mFileWatch.loadShader(
-			TablaApp::get()->hotloadableAssetPath( fs::path("shaders") / "pinball" / (name + ".vert") ),
-			TablaApp::get()->hotloadableAssetPath( fs::path("shaders") / "pinball" / (name + ".frag") ),
+			mWorld.getAssetPath( fs::path("shaders") / "pinball" / (name + ".vert") ),
+			mWorld.getAssetPath( fs::path("shaders") / "pinball" / (name + ".frag") ),
 			[this,to,f](gl::GlslProgRef prog)
 		{
 			*to = prog; // allows null, so we can easily see if we broke it
@@ -52,16 +52,12 @@ void PinballView::setup()
 	load( "sky", &mSkyShader, 0 );
 	load( "ball-shadow", &mBallShadowShader, 0 );
 	
-	mFileWatch.load( TablaApp::get()->hotloadableAssetPath( fs::path("images") / "env_map.jpg" ),
-		[this]( fs::path path ){
-			try {
-				mCubeMap = gl::TextureCubeMap::create( loadImage(path),
-					gl::TextureCubeMap::Format().mipmap() );
-			} catch (...) {
-				mCubeMap = 0;
-			}
-		}
-	);
+	try {
+		mUIFont = gl::TextureFont::create( Font(loadFile(mWorld.getAssetPath("fonts/atari.ttf")),12) );
+	} catch (...) {
+		cout << "Couldn't load Pinball ui font" << endl;
+		mUIFont = TablaApp::get()->mTextureFont; // default to
+	}
 }
 
 void PinballView::setParams( XmlTree xml )
@@ -88,6 +84,7 @@ void PinballView::setParams( XmlTree xml )
 	getXml(xml, "CubeMap/DrawFloor", mCubeMapDrawFloor );
 	getXml(xml, "CubeMap/DrawBalls", mCubeMapDrawBalls );
 	getXml(xml, "CubeMap/DrawRibbons", mCubeMapDrawRibbons );
+	getXml(xml, "CubeMap/MipMap", mCubeMapMipMap );
 	getXml(xml, "CubeMap/EyeHeight", mCubeMapEyeHeight );
 	getXml(xml, "CubeMap/LightHeight", mCubeMapLightHeight );
 	getXml(xml, "CubeMap/LightColor", mCubeMapLightColor );
@@ -170,8 +167,6 @@ gl::TextureCubeMapRef PinballView::getCubeMapForBall( int i ) const
 	} else if (!mCubeMapTextures.empty()) {
 		env = mCubeMapTextures[ i % mCubeMapTextures.size() ];
 	}
-	
-	if (!env) env = mCubeMap;
 	
 	return env;
 }
@@ -260,8 +255,9 @@ gl::FboCubeMapRef PinballView::updateCubeMap( gl::FboCubeMapRef fbo, vec3 eye, i
 		gl::FboCubeMap::Format format;
 		format.textureCubeMapFormat(
 			gl::TextureCubeMap::Format()
+			.mipmap(mCubeMapMipMap)
 			.magFilter(GL_LINEAR)
-			.minFilter(GL_LINEAR) );
+			.minFilter( mCubeMapMipMap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR) );
 		
 		fbo = gl::FboCubeMap::create( mCubeMapSize, mCubeMapSize, format );
 	}
@@ -672,17 +668,18 @@ void PinballView::draw3dBalls( vec3 eyeLoc, int skipBall, gl::TextureCubeMapRef 
 	{
 		gl::ScopedGlslProg glslScp(mBallShader);
 		
-		if (mCubeMap && !mCubeMapDynamic) {
-			mCubeMap->bind();
-			mBallShader->uniform( "uCubeMapTex", 0 );
-		}
-		
+//		if (mCubeMap && !mCubeMapDynamic) {
+//			mCubeMap->bind();
+//			mBallShader->uniform( "uCubeMapTex", 0 );
+//		}
+//		
 		vec3 lightLoc = vec3( mWorld.getWorldBoundsPoly().calcCentroid(), -mCubeMapLightHeight ) ;
 		
 		mBallShader->uniform( "uCubeMapTex", 0 );
 		mBallShader->uniform( "inLightLoc", lightLoc);
 		mBallShader->uniform( "inEyeLoc", eyeLoc);
 		mBallShader->uniform( "uLightColor", mCubeMapLightColor );
+		mBallShader->uniform( "uCubeMapTex", 0 );
 		
 		for( int i=0; i<mWorld.getBalls().size(); ++i )
 		{

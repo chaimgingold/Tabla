@@ -18,6 +18,7 @@
 	- [ ] Put assets for each world in their own folder
 		- [ ] Add a GameWorld::getAssetPath() function, and use this to pluck the proper file paths.
 	- [ ] Restrict include path search so that #include must be more explicit about which file. Do this to prevent accidental includes across GameWorlds. So, #include "tabla/Vision.h" vs. #include "worlds/music/MusicVision.h"
+	- [ ] Remove "World" naming all over the place. So just "World/Pinball/Pinball.h" and "Pinball".
 - [ ] Put lightlink.xml in settings.xml (i think it's a good idea...; maybe not?)
 - [x] Make polygon xml into a list of vertices inside of polygon block: e.g. <v>x1 y1</v> <v>x2 y2</v> etc... (will make file look less crazy).
 - [ ] Move settings to /Library
@@ -48,5 +49,5 @@
 
 ## Pinball
 - [ ] Score, ball count, high score.
-- [ ] Remove static cube map file from project, and don't load it.
+- [x] Remove static cube map file from project, and don't load it.
 - [ ] Make flipper speed tunable.

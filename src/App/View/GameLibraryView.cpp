@@ -64,9 +64,9 @@ void GameLibraryView::draw()
 			
 			if (highlight==i)
 			{
-				gl::color(.35,.35,.35,1.);
+				gl::color(.25,.5,.5,1.);
 				gl::drawSolidRect(r);
-				gl::color(0,0,0,1);
+				gl::color(1,1,1,1);
 			}
 			else {
 				gl::color(0,0,0,1);

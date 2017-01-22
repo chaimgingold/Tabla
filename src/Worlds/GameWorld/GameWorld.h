@@ -64,7 +64,10 @@ public:
 	virtual void mouseClick( vec2 ){}
 	virtual void keyDown( KeyEvent ){}
 	virtual void keyUp( KeyEvent ){}
-	
+
+protected:
+	fs::path getAssetPath( fs::path ) const; // TODO: make relative to game world asset directory
+
 private:
 	Vision::Params	mVisionParams;
 	PolyLine2		mWorldBoundsPoly;
