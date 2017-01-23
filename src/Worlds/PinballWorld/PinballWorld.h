@@ -72,15 +72,16 @@ public:
 	float getFlipperState( int side ) const { assert(side==0||side==1); return mFlipperState[side]; }
 	float getFlipperAngularVel( int side ) const; // returns in radians per sim frame
 
-	const PartVec& getParts() const { return mParts; }
-
+	const PartVec& getParts() const { return mVisionOutput.mParts; }
+	const PinballVision::UIBoxes getUI() const { return mVisionOutput.mUI; }
+	
 	const PartCensus& getPartCensus() const { return mPartCensus; }
 
 	cipd::PureDataNodeRef getPd() { return mPd; }
 
 	vec2 getScreenShake() const { return mInput.isPaused() ? vec2() : mScreenShakeVec; }
 
-	const ContourVec& getVisionContours() const { return mVisionContours ; }
+	const ContourVec& getVisionContours() const { return mVisionOutput.mContours ; }
 	PinballVision::ContourType getVisionContourType( const Contour& ) const;
 	
 	// input callbacks
@@ -131,7 +132,6 @@ private:
 	// parts
 	typedef map<int,PartRef> ContourToPartMap;
 	
-	PartVec mParts;
 	ContourToPartMap mContoursToParts;
 	PartCensus mPartCensus;
 	
@@ -141,14 +141,9 @@ private:
 	PartRef findPartForContour( int contourIndex ) const;
 
 	// parts + contours
-	ContourVec mVisionContours;
-	PinballVision::ContourTypes mVisionContourTypes;
+	PinballVision::Output mVisionOutput; // contains parts, contours, ui elements, etc...
 	Contour contourFromPoly( PolyLine2 ) const; // area, radius, center, bounds, etc... is approximate
-	void addContourToVec( Contour, ContourVec& ) const; // for accumulating physics contours from Parts
-	
-//	void rolloverTest();
-//	bool isValidRolloverLoc( vec2 loc, float r, const PartVec& ) const;
-	
+	void addContourToVec( Contour, ContourVec& ) const; // for accumulating physics contours from Parts	
 	
 	// --- Simulation ---
 	void updateBallWorldContours();

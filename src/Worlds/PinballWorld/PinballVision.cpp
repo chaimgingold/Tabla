@@ -27,8 +27,13 @@ void PinballVision::setParams( XmlTree xml )
 	getXml(xml, "PartTrackRadiusMaxDist", mPartTrackRadiusMaxDist );
 	getXml(xml, "DejitterContourMaxDist", mDejitterContourMaxDist );
 	getXml(xml, "DejitterContourLerpFrac", mDejitterContourLerpFrac );
-}
 
+	getXml(xml, "EnableUI", mEnableUI );
+	
+	if ( xml.hasChild("RectFinder") ) {
+		mRectFinder.mParams.set( xml.getChild("RectFinder") );
+	}
+}
 
 ContourVec PinballVision::dejitterContours( ContourVec in, ContourVec old ) const
 {
@@ -84,24 +89,27 @@ PinballVision::Output
 PinballVision::update(
 	const Vision::Output& visionOut,
 	Pipeline& p,
-	const PartVec& oldParts,
-	const ContourVec* oldVisionContours )
+	Output& lastOutput )
 {
 	Output out;
 	
 	// dejitter (optional)
-	if ( mDejitterContourMaxDist > 0.f && oldVisionContours ) {
-		out.mVisionContours = dejitterContours( visionOut.mContours, *oldVisionContours );
+	if ( mDejitterContourMaxDist > 0.f && !lastOutput.mContours.empty() ) {
+		out.mContours = dejitterContours( visionOut.mContours, lastOutput.mContours );
 	} else {
-		out.mVisionContours = visionOut.mContours;
+		out.mContours = visionOut.mContours;
 	}
 	
 	// classify contours
-	out.mContourTypes = classifyContours(out.mVisionContours);
+	out.mContourTypes = classifyContours(out.mContours);
 	
 	// generate parts
-	PartVec newParts = getPartsFromContours(out.mVisionContours,out.mContourTypes);
-	out.mParts = mergeOldAndNewParts( oldParts, newParts );
+	PartVec newParts = getPartsFromContours(out.mContours,out.mContourTypes);
+	out.mParts = mergeOldAndNewParts( lastOutput.mParts, newParts );
+	
+	// get ui components
+	UIBoxes uiboxes = getUIBoxesFromContours(out.mContours,out.mContourTypes);
+	out.mUI = uiboxes;
 	
 	return out;
 }
@@ -118,8 +126,8 @@ PinballVision::classifyContours( const ContourVec& cs ) const
 		ContourType t;
 
 		if      ( shouldContourBeAPart (cs[i],cs) ) t = ContourType::Part;
+		else if ( shouldContourBeAUI   (cs[i])    ) t = ContourType::UI;
 		else if ( shouldContourBeASpace(cs[i])    ) t = ContourType::Space;
-		else if ( shouldContourBeAUI   (cs[i])    ) t = ContourType::UI; 
 		else t = ContourType::Ignore;
 		
 		ct[i] = t;
@@ -128,28 +136,53 @@ PinballVision::classifyContours( const ContourVec& cs ) const
 	return ct;
 }
 
-bool PinballVision::shouldContourBeAUI( const Contour& c ) const
+bool PinballVision::shouldContourBeAUI( const Contour& c, UIBox* out ) const
 {
-	// --- STUB --- 
-	// --- Disabled for now ---
-	return false;
-	// ---------------------------------
-
+	// enabled?
+	if ( !mEnableUI ) return false;
+	
 	// root
 	if ( c.mTreeDepth > 0 ) return false;
 	
 	// no children
 	if ( c.mChild.size() > 0 ) return false; 
+	
+	// 
+	if ( c.mIsHole ) return false;
 
-	// rectangular?
-	// mRectFinder...
-		
+	// is rectangle
+	PolyLine2 quadpoly;
+	if ( !mRectFinder.getRectFromPoly(c.mPolyLine,quadpoly) ) return false;
+	
+	// check rectangle
+	UIBox box;
+	box.mQuad.getPoints().resize(4);
+	vec2 *quad = &box.mQuad.getPoints()[0];
+	if ( !getOrientedQuadFromPolyLine( quadpoly, mWorld.getRightVec(), quad ) ) return false; 	
+	
+	// not too tilted
+	if ( dot( normalize(quad[2]-quad[3]), mWorld.getRightVec() ) < .0f ) return false;
+	
+	// good aspect ratio
+	box.mSize = vec2( distance(quad[3],quad[2]), distance(quad[0],quad[3]) );
+	if ( box.mSize.y > box.mSize.x * 2.f ) return false;
+	
+	// size big enough
+	//if ( size.y > mWorld. )
+	
 	// not bigger than X% of world
 	
 	// above or below major components 
 	// (allow anywhere?)
 	
 	// OK!
+	if (out)
+	{
+		box.mXAxis = normalize( quad[2] - quad[3] );
+		box.mYAxis = normalize( quad[0] - quad[3] );
+		*out = box;
+	}
+
 	return true;
 }
 
@@ -302,7 +335,27 @@ PinballVision::getAdjacentSpace( const Contour* leaf, vec2 loc, const ContourVec
 	return result;
 }
 
-PartVec PinballVision::getPartsFromContours( const ContourVector& contours, const ContourTypes& ctypes )
+PinballVision::UIBoxes
+PinballVision::getUIBoxesFromContours( const ContourVec& cs, const ContourTypes& ct ) const
+{
+	UIBoxes ui;
+	
+	for( int i=0; i<ct.size(); ++i )
+	{
+		if ( ct[i] == ContourType::UI )
+		{
+			UIBox e;
+			if ( shouldContourBeAUI(cs[i],&e) ) // this test is redundant, but, whatever...
+			{
+				ui[i] = e ;
+			}
+		}
+	}
+	
+	return ui;
+}
+
+PartVec PinballVision::getPartsFromContours( const ContourVector& contours, const ContourTypes& ctypes ) const
 {
 	PartVec parts;
 	

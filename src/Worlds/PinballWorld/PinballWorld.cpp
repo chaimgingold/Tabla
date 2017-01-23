@@ -120,7 +120,7 @@ void PinballWorld::sendGameEvent( GameEvent e )
 {
 	onGameEvent(e);
 	
-	for( auto p : mParts ) {
+	for( auto p : mVisionOutput.mParts ) {
 		p->onGameEvent(e);
 	}
 }
@@ -195,7 +195,7 @@ void PinballWorld::update()
 
 	// take census
 	mPartCensus = PartCensus();
-	for( auto p : mParts ) p->updateCensus(mPartCensus);
+	for( auto p : mVisionOutput.mParts ) p->updateCensus(mPartCensus);
 	
 	// input
 	mInput.tick();
@@ -217,7 +217,7 @@ void PinballWorld::update()
 		if (!isPaused()) updateScreenShake();
 		
 		// tick parts
-		for( auto p : mParts ) p->tick();
+		for( auto p : mVisionOutput.mParts ) p->tick();
 
 		// update contours, merging in physics shapes from our parts
 		updateBallWorldContours();
@@ -476,13 +476,7 @@ void PinballWorld::mouseClick( vec2 loc )
 void PinballWorld::updateVision( const Vision::Output& visionOut, Pipeline& p )
 {
 	// run our vision
-	PinballVision::Output out;
-	
-	out = mVision.update( visionOut, p, mParts, &mVisionContours );
-	
-	mVisionContours = out.mVisionContours;
-	mVisionContourTypes = out.mContourTypes;
-	mParts = out.mParts;
+	mVisionOutput = mVision.update( visionOut, p, mVisionOutput );
 	
 	// playfield layout
 	updatePlayfieldLayoutWithVisionContours();	
@@ -494,9 +488,9 @@ void PinballWorld::updateVision( const Vision::Output& visionOut, Pipeline& p )
 PinballVision::ContourType
 PinballWorld::getVisionContourType( const Contour& c ) const
 {
-	assert( c.mIndex >= 0 && c.mIndex < mVisionContourTypes.size() );
+	assert( c.mIndex >= 0 && c.mIndex < mVisionOutput.mContours.size() );
 	
-	return mVisionContourTypes[c.mIndex];
+	return mVisionOutput.mContourTypes[c.mIndex];
 }
 
 void PinballWorld::getCullLine( vec2 v[2] ) const
@@ -509,7 +503,7 @@ Rectf PinballWorld::calcPlayfieldBoundingBox() const
 {
 	vector<vec2> pts;
 	
-	for( const auto& c : mVisionContours )
+	for( const auto& c : mVisionOutput.mContours )
 	{
 		if (c.mTreeDepth==0 && getVisionContourType(c)==PinballVision::ContourType::Space)
 		{
@@ -537,12 +531,12 @@ void PinballWorld::updatePlayfieldLayoutWithVisionContours()
 	float t;
 	vec2 vleft  = vec2(mPlayfieldBallReclaimX[0],mPlayfieldBallReclaimY);
 	vec2 vright = vec2(mPlayfieldBallReclaimX[1],mPlayfieldBallReclaimY);
-	if ( mVisionContours.rayIntersection( fromPlayfieldSpace(vleft), getRightVec(), &t ) )
+	if ( mVisionOutput.mContours.rayIntersection( fromPlayfieldSpace(vleft), getRightVec(), &t ) )
 	{
 		mPlayfieldBallReclaimX[0] = (vleft + toPlayfieldSpace(getRightVec() * t)).x;
 	}
 	
-	if ( mVisionContours.rayIntersection( fromPlayfieldSpace(vright), getLeftVec(), &t ) )
+	if ( mVisionOutput.mContours.rayIntersection( fromPlayfieldSpace(vright), getLeftVec(), &t ) )
 	{
 		mPlayfieldBallReclaimX[1] = (vright + toPlayfieldSpace(getLeftVec() * t)).x;
 	}
@@ -552,17 +546,17 @@ void PinballWorld::updateBallWorldContours()
 {
 	// modify vision out for ball world
 	// (we add contours to convey the new shapes to simulate)
-	ContourVec physicsContours = mVisionContours;
+	ContourVec physicsContours = mVisionOutput.mContours;
 
-	getContoursFromParts( mParts, physicsContours, &mContoursToParts );
+	getContoursFromParts( mVisionOutput.mParts, physicsContours, &mContoursToParts );
 	
 	// which contours to use?
 	// (we could move this computation into updateVision(), but its cheap and convenient to do it here)
 	ContourVec::Mask mask(physicsContours.size(),true); // all true...
-	for( int i=0; i<mVisionContours.size(); ++i )
+	for( int i=0; i<mVisionOutput.mContours.size(); ++i )
 	{
 		// only contours that define space
-		mask[i] = getVisionContourType(mVisionContours[i]) == PinballVision::ContourType::Space;
+		mask[i] = getVisionContourType(mVisionOutput.mContours[i]) == PinballVision::ContourType::Space;
 	}
 	
 	// tell ball world
@@ -598,51 +592,6 @@ void PinballWorld::getContoursFromParts( const PartVec& parts, ContourVec& conto
 		}
 	}
 }
-/*
-bool PinballWorld::isValidRolloverLoc( vec2 loc, float r, const PartVec& parts ) const
-{
-	// outside?
-	if ( ! mVisionContours.findLeafContourContainingPoint(loc) ) {
-		return false;
-	}
-
-	// too close to edge?
-	float closestContourDist;
-	if ( mVisionContours.findClosestContour(loc,0,&closestContourDist)
-	  && closestContourDist < mPartParams.mTargetMinWallDist + r )
-	{
-		return false;
-	}
-	
-	// parts
-	for( const auto &p : parts ) {
-		if ( !p->isValidLocForTarget(loc,r) ) return false;
-	}
-	
-	// ok
-	return true;
-}
-
-void PinballWorld::rolloverTest()
-{
-	const Rectf playfieldbb = toPlayfieldBoundingBox(getWorldBoundsPoly());
-	
-	Rand rgen(0);
-	
-	for ( int i=0; i<200; ++i )
-	{
-		vec2 p( rgen.nextFloat(), rgen.nextFloat() );
-		
-		p.x = lerp( playfieldbb.x1, playfieldbb.x2, p.x );
-		p.y = lerp( playfieldbb.y1, playfieldbb.y2, p.y );
-		
-		p = fromPlayfieldSpace(p);
-		float r = mPartParams.mTargetRadius;
-		
-		gl::color( isValidRolloverLoc(p, r, mParts) ? Color(0,1,0) : Color(1,0,0) );
-		gl::drawSolidCircle(p, r);
-	}
-}*/
 
 Contour PinballWorld::contourFromPoly( PolyLine2 poly ) const
 {

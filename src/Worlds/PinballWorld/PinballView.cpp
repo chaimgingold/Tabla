@@ -402,6 +402,9 @@ void PinballView::draw2d( GameWorld::DrawType drawType )
 	// balls
 	mWorld.BallWorld::drawRibbons(drawType);
 	mWorld.BallWorld::drawBalls(drawType);
+	
+	//
+	drawUI();
 }
 
 void PinballView::beginDraw3d() const
@@ -802,6 +805,51 @@ void PinballView::draw3d( GameWorld::DrawType drawType )
 
 	// done with 3d
 	endDraw3d();
+	
+	drawUI();
+}
+
+void PinballView::drawUI() const
+{
+	vector<string> msgs = { "1,234,567,890", "MULTIBALL!!", "Balls 3" };
+	
+	for( const auto &ui : mWorld.getUI() )
+	{
+		const PinballVision::UIBox& box = ui.second; 
+		
+		// fill background
+		if (0)
+		{
+			gl::color(0,1,1);
+			gl::drawSolid( box.mQuad );
+		}
+		
+		// draw text
+		if (mUIFont)
+		{
+			string msg = msgs[ui.first % msgs.size()];
+			
+			const vec2 strsize = mUIFont->measureString(msg,gl::TextureFont::DrawOptions().pixelSnap(false));
+			
+			float scale = box.mSize.y/strsize.y;
+			
+			if ( box.mSize.x < strsize.x ) scale = min( scale, box.mSize.x / strsize.x );
+			
+			gl::color(0,1,1);
+			gl::pushModelMatrix();
+			gl::multModelMatrix(
+				glm::translate(vec3(box.getPoints()[3],0))
+				*
+				mat4( mat2(box.mXAxis,-box.mYAxis) ) // in cinder world, y+ is down, so flip it. 
+			);
+			mUIFont->drawString(
+				msg,
+				vec2(0,-mUIFont->getDescent()*scale),
+				gl::TextureFont::DrawOptions().scale(scale).pixelSnap(false)
+				);
+			gl::popModelMatrix();
+		}
+	}
 }
 
 

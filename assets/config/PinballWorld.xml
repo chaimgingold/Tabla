@@ -62,6 +62,27 @@
 		
 		<DejitterContourMaxDist>1</DejitterContourMaxDist> <!-- 0 for off -->
 		<DejitterContourLerpFrac>.9</DejitterContourLerpFrac>
+
+		<EnableUI>0</EnableUI>
+		
+		<RectFinder>
+	<!--	For	finding ui components -->
+	
+	<!--	What strategies to allow	-->
+			<AllowSubset>1</AllowSubset>
+			<AllowSuperset>1</AllowSuperset>
+
+	<!--	Filters. (Last two should/could be identical to Vision/Contours)	-->
+			<InteriorAngleMaxDelta>5</InteriorAngleMaxDelta>
+			<MinRectWidth>3</MinRectWidth>
+			<MinRectArea>9</MinRectArea>
+			
+	<!--	Tuning params	-->
+			<MaxGainAreaFrac>.2</MaxGainAreaFrac>
+			<SubsetRectMinPerimOverlapFrac>.8</SubsetRectMinPerimOverlapFrac>
+			<EdgeOverlapDistAttenuate>1</EdgeOverlapDistAttenuate>
+		</RectFinder>
+		
 	</PinballVision>
 	
 	<Parts>

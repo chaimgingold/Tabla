@@ -97,6 +97,8 @@ private:
 	void drawBallCullLine( float z=0.f ) const;
 	void drawSky() const;
 	
+	void drawUI() const;
+	
 	Scene mDrawScene;
 
 	gl::TextureRef mSkyTexture;

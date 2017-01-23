@@ -20,6 +20,7 @@
 	- Interface for setting direction (can imagine joystick helping here, but that's limited.)
 	- Storing it in app specific settings. Although an up-for-editor-mode type things (Music, Animation) that spans apps might be called for. And a second for long game tables (Pong, Pinball) might also make sense. But more elegant might be per mode. I can imagine a future day in which modes mix more freely (use speed token to define speed for ANY mode, in which case a more general OS type sensibility of shared settings might make more sense)
 - [x] mDrawMouseDebugInfo not being respected in BallWorld -- drawMouseDebugInfo still getting called for some reason.
+- [ ] If hotloaded (or even post-relaunch) test image changes size, then image will update but size will remain stuck at old one. We need to detect this and update the capture profile to reflect the new size. 
 
 ## Projector Calibration
 
