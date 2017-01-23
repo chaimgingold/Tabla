@@ -129,21 +129,34 @@ void PinballWorld::onGameEvent( GameEvent e )
 {
 	switch(e)
 	{
+		case GameEvent::NewGame:
+			mScore=0;
+			mBallsLeft=3;
+			mTargetCount=0;
+			break;
+		
+		case GameEvent::GameOver:
+			break;
+		
 		case GameEvent::LostBall:
 //			addScreenShake(1.f);
 			break;
+			
 		case GameEvent::LostLastMultiBall:
 			mPd->sendBang("game-over");
 			beginParty(PartyType::GameOver);
-			mTargetCount=0;
+			if (mBallsLeft==0) sendGameEvent(GameEvent::GameOver);
 			break;
 			
 		case GameEvent::ServeMultiBall:
+			addToScore(10000);
 			mPd->sendBang("multi-ball");
 			beginParty(PartyType::Multiball); // trigger shader effect
 			break;
 			
 		case GameEvent::ServeBall:
+			if (mBallsLeft>0) mBallsLeft--;
+			else sendGameEvent(GameEvent::NewGame); 
 			mPd->sendBang("serve-ball");
 			break;
 
@@ -155,6 +168,14 @@ void PinballWorld::onGameEvent( GameEvent e )
 		default:break;
 	}
 }
+
+void PinballWorld::addToScore( int pts )
+{
+	mScore += pts;
+	
+	mHighScore = max( mScore, mHighScore );
+}
+
 void PinballWorld::beginParty( PartyType type ) {
 	mPartyBegan = (float)ci::app::getElapsedSeconds();
 	mPartyType = type;
@@ -289,7 +310,6 @@ void PinballWorld::serveBall()
 	
 	sendGameEvent(GameEvent::ServeBall);
 	if (oldCount>0) sendGameEvent(GameEvent::ServeMultiBall);
-	if (oldCount==0) sendGameEvent(GameEvent::NewGame);
 }
 
 void PinballWorld::serveBallCheat()

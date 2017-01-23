@@ -63,7 +63,7 @@
 		<DejitterContourMaxDist>1</DejitterContourMaxDist> <!-- 0 for off -->
 		<DejitterContourLerpFrac>.9</DejitterContourLerpFrac>
 
-		<EnableUI>0</EnableUI>
+		<EnableUI>1</EnableUI>
 		
 		<RectFinder>
 	<!--	For	finding ui components -->

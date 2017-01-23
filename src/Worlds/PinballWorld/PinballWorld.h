@@ -84,6 +84,13 @@ public:
 	const ContourVec& getVisionContours() const { return mVisionOutput.mContours ; }
 	PinballVision::ContourType getVisionContourType( const Contour& ) const;
 	
+	void  addToScore( int pts );
+	int   getScore() const { return mScore; }
+	int   getHighScore() const { return mHighScore; }
+	void  resetHighSCore() { mHighScore=0; }
+	int   getBallsLeft() const { return mBallsLeft; }
+	int   getNumTargetsHit() const { return mTargetCount; }
+	
 	// input callbacks
 	void serveBallCheat();
 	void serveBallIfNone();
@@ -178,8 +185,12 @@ private:
 	vec2  getPartyLoc() const;
 	bool  getIsInGameOverState() const { return getPartyProgress() > 0.f && mPartyType==PartyType::GameOver; }
 	void  beginParty( PartyType type );
-	int   mTargetCount=0; // for sound pitching
 	
+	// game state/score
+	int   mScore=0;
+	int   mHighScore=0;
+	int   mBallsLeft=0;
+	int   mTargetCount=0; // for sound pitching
 	
 	// --- Sound Synthesis ---
 	

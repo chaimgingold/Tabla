@@ -24,6 +24,7 @@ enum class GameEvent
 {
 	// game-wide
 	NewGame,
+	GameOver,
 	ServeBall, // 0 => 1
 	ServeMultiBall, // >0 => +1
 	LostBall, // n => n-1

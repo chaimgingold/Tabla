@@ -9,6 +9,7 @@
 #include "PinballVision.h"
 #include "PinballWorld.h"
 #include "geom.h"
+#include <queue>
 
 namespace Pinball
 {
@@ -109,7 +110,7 @@ PinballVision::update(
 	
 	// get ui components
 	UIBoxes uiboxes = getUIBoxesFromContours(out.mContours,out.mContourTypes);
-	out.mUI = uiboxes;
+	out.mUI = assignNamesToUIBoxes( uiboxes, lastOutput.mUI );
 	
 	return out;
 }
@@ -353,6 +354,65 @@ PinballVision::getUIBoxesFromContours( const ContourVec& cs, const ContourTypes&
 	}
 	
 	return ui;
+}
+
+PinballVision::UIBoxes
+PinballVision::assignNamesToUIBoxes( const UIBoxes in, const UIBoxes old ) const
+{
+	// this algorithm will fail to give fully correct answer sometimes since it is lazy and greedy
+	// we need to do all pairs distances
+	// sort by closest
+	// in order, assign closest (as long as assignment doesn't exist)
+	
+	UIBoxes out = in;
+	
+	queue<string> names;
+	names.push("balls");
+	names.push("score");
+	names.push("high");
+	
+	set<string> used;
+	
+	for( const auto &j : old )
+	{
+		vec2 from  = j.second.mQuad.calcCentroid();
+		float best = MAXFLOAT; // might want to be some other number...
+		int choice = -1;
+		
+		for( auto &i : out )
+		{			
+			float dist = distance( from, i.second.mQuad.calcCentroid() );
+			
+			if (dist<best)
+			{
+				best=dist;
+				choice = i.first;
+			}
+		}
+		
+		if ( choice != -1 )
+		{
+			out[choice].mName = j.second.mName;
+			used.insert(j.second.mName);
+		}
+	}
+	
+	// assign from scratch, in priority order
+	// (might want to persist some locations across frames for better robustness)
+	for( auto &i : out )
+	{
+		if ( i.second.mName.empty() )
+		{
+			while ( !names.empty() && used.find(names.front())==used.end() )
+			{
+				i.second.mName = names.front();
+				names.pop();
+				used.insert(i.second.mName);
+			}
+		}
+	}
+	
+	return out;
 }
 
 PartVec PinballVision::getPartsFromContours( const ContourVector& contours, const ContourTypes& ctypes ) const

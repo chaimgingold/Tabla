@@ -12,3 +12,4 @@
 - https://youtu.be/mJ08diPUv6A?t=172
 - http://www.musicainformatica.org/topics/upic.php
 - http://daily.redbullmusicacademy.com/2012/08/history-soviet-synth-ans
+- Mann et al. (2009) "The Tactus: a Tangible, Rhythmic Grid Interface Using Found-Objects."

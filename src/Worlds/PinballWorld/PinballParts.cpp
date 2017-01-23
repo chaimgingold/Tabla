@@ -320,6 +320,8 @@ void Bumper::onBallCollide( Ball& ball )
 	ball.mAccel += v * getWorld().mPartParams.mBumperKickAccel ;
 	
 	getWorld().getPd()->sendFloat("hit-bumper", length( getWorld().getDenoisedBallVel(ball)*10.f ) );
+	
+	getWorld().addToScore(50);
 }
 
 Target::Target( PinballWorld& world, vec2 triggerloc, vec2 triggervec, float radius )
@@ -400,6 +402,7 @@ void Target::onBallCollide( Ball& )
 	{
 		markCollision(.75f);
 		setIsLit(true);
+		getWorld().addToScore( getWorld().getNumTargetsHit() * 100 );
 	}
 }
 

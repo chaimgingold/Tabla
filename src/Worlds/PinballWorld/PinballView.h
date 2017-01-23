@@ -97,6 +97,8 @@ private:
 	void drawBallCullLine( float z=0.f ) const;
 	void drawSky() const;
 	
+	static string numToStringWithCommas( int );
+	static string padStringLeft( string, int minwidth );
 	void drawUI() const;
 	
 	Scene mDrawScene;

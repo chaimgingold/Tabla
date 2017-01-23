@@ -38,6 +38,7 @@ public:
 	class UIBox
 	{
 	public:
+		string mName;
 		PolyLine2 mQuad; // [4]; in getOrientedQuadFromPolyLine() order
 		const vec2* getPoints() const { return &mQuad.getPoints()[0]; }
 		vec2 mSize;
@@ -91,6 +92,7 @@ private:
 	PartVec mergeOldAndNewParts( const PartVec& oldParts, const PartVec& newParts ) const;
 	
 	UIBoxes getUIBoxesFromContours( const ContourVec&, const ContourTypes& ) const;
+	UIBoxes assignNamesToUIBoxes( const UIBoxes in, const UIBoxes old ) const;
 	
 	ContourVec dejitterContours( ContourVec in, ContourVec old ) const;
 	

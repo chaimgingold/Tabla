@@ -270,7 +270,7 @@ gl::FboCubeMapRef PinballView::updateCubeMap( gl::FboCubeMapRef fbo, vec3 eye, i
 			.mipmap(mCubeMapMipMap)
 			.wrap(GL_CLAMP_TO_EDGE) // default
 			.magFilter(GL_LINEAR)
-			.minFilter(GL_LINEAR)  // no sampler artifact at top of ball
+//			.minFilter(GL_LINEAR)  // no sampler artifact at top of ball
 //			.minFilter(GL_NEAREST) // no sampler artifact at top of ball
 //			.minFilter(GL_LINEAR_MIPMAP_NEAREST) // artifact
 //			.minFilter(GL_LINEAR_MIPMAP_LINEAR) // artifact
@@ -829,10 +829,70 @@ void PinballView::draw3d( GameWorld::DrawType drawType )
 	drawUI();
 }
 
+string PinballView::numToStringWithCommas( int num )
+{
+	string s;
+	
+	int len=0;
+	
+	do
+	{
+		if (len>0 && len%3==0) s = string(",") + s;		
+
+		int x = num % 10;
+		
+		char c = '0' + x;
+
+		s = string(1,c) + s;
+				
+		num /= 10;
+		
+		len++;
+	}
+	while (num>0);	
+	
+	return s;
+}
+
+string PinballView::padStringLeft( string s, int minwidth )
+{
+	while (s.length()<minwidth)
+	{
+		s = string(" ") + s;
+	}
+	
+	return s;
+}
+
 void PinballView::drawUI() const
 {
-	vector<string> msgs = { "1,234,567,890", "MULTIBALL!!", "Balls 3" };
+	// generation
+	map<string,function<string()>> msgs;
 	
+	msgs["score"] = [this]() {
+		return string("Score ") + padStringLeft( numToStringWithCommas(mWorld.getScore()), 12 ) ;
+	};
+	
+	msgs["balls"] = [this]() {
+		return string("Balls ") + to_string(mWorld.getBallsLeft());
+	};
+	
+	msgs["high"] = [this]() {
+		return string("High ") + padStringLeft( numToStringWithCommas(mWorld.getHighScore()), 12 );
+	};
+	
+	auto getMsg = [&]( string ui ) -> string
+	{
+		auto imsg = msgs.find(ui);
+		if (imsg==msgs.end())
+		{
+			if (ui.empty()) return "Pinball!!!";
+			else return ui;
+		}
+		else return imsg->second();
+	};
+	
+	// drawing
 	for( const auto &ui : mWorld.getUI() )
 	{
 		const PinballVision::UIBox& box = ui.second; 
@@ -847,7 +907,7 @@ void PinballView::drawUI() const
 		// draw text
 		if (mUIFont)
 		{
-			string msg = msgs[ui.first % msgs.size()];
+			string msg = getMsg(ui.second.mName);
 			
 			const vec2 strsize = mUIFont->measureString(msg,gl::TextureFont::DrawOptions().pixelSnap(false));
 			
