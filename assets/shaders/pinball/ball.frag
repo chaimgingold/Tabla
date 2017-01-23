@@ -20,10 +20,13 @@ void main()
 	
 	fragColor = texture( uCubeMapTex, reflectedEyeWorldSpace );
 	
-	float shiny = 1.2 * pow( max( 0, dot(reflectedEyeWorldSpace, normalize(LightVec)) ), 4.5 );
-	
-	fragColor = fragColor + uLightColor*shiny + ambLight;
-	fragColor = min( fragColor, vec4(1,1,1,1) );
+	if (true)
+	{
+		float shiny = 1.2 * pow( max( 0, dot(reflectedEyeWorldSpace, normalize(LightVec)) ), 4.5 );
+		
+		fragColor = fragColor + uLightColor*shiny + ambLight;
+		fragColor = min( fragColor, vec4(1,1,1,1) );
+	}
 //	fragColor = vec4(NormalWorldSpace,1);
 //	fragColor = vec4(EyeDirWorldSpace,1);
 //	fragColor = vec4(reflectedEyeWorldSpace,1);

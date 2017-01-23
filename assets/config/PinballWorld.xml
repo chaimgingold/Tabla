@@ -123,8 +123,8 @@
 		<3d>
 			<Enable>1</Enable>
 			<BackfaceCull>0</BackfaceCull>
-			<TableDepth>2</TableDepth>
-			<ZSkew>.75</ZSkew>			
+			<TableDepth>3</TableDepth>
+			<ZSkew>.5</ZSkew>			
 		</3d>
 
 		<CubeMap>
@@ -140,11 +140,14 @@
 			<EyeHeight>50</EyeHeight>
 			<LightHeight>200</LightHeight>
 			<LightColor>DDFFEE</LightColor>
-				<!--	.8,1.,.7	Specular color! TODO: Put ambient in here, name them, ...-->
+			
+			<!--	.8,1.,.7	Specular color. TODO; Put ambient in here, name them. -->
+			
 		</CubeMap>
 
 		<SkyPipelineStageName></SkyPipelineStageName>
-		<SkyHeight>5</SkyHeight>
+		<SkyHeight>7</SkyHeight>
+		<SkyScale>.8</SkyScale>
 <!--	How far in -Z from table top does sky draw for balls... -->
 
 		<!-- Debug -->

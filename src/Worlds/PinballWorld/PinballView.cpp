@@ -91,6 +91,7 @@ void PinballView::setParams( XmlTree xml )
 	
 	getXml(xml, "SkyPipelineStageName", mSkyPipelineStageName);
 	getXml(xml, "SkyHeight", mSkyHeight);
+	getXml(xml, "SkyScale", mSkyScale );
 }
 
 void PinballView::update()
@@ -621,18 +622,19 @@ void PinballView::draw3dFloor() const
 
 void PinballView::drawSky() const
 {
-	if (mSkyTexture) //&&mSkyShader)
+	if (mSkyTexture)
 	{
 		gl::ScopedFaceCulling cull(false);
-		
-//		mSkyTexture->bind();
-//		mDrawScene.mSky
 		
 		gl::ScopedModelMatrix mat;
 		gl::translate(0,0,-mSkyHeight);
 		
-		Rectf r(  mWorld.getWorldBoundsPoly().getPoints() );
+		Rectf r( mWorld.getWorldBoundsPoly().getPoints() );
 		
+		r.inflate(r.getSize()*mSkyScale);
+		// try to get full coverage, so no matter where ball points it sees texture...
+		
+		gl::color(1,1,1);
 		gl::draw(mSkyTexture, r );
 	}
 }

@@ -108,6 +108,7 @@ private:
 	// - params
 	string mSkyPipelineStageName; // what stage of pipeline to use?
 	float mSkyHeight=0.f;
+	float mSkyScale=0.f;
 	
 	int mCircleMinVerts=8;
 	int mCircleMaxVerts=100;
