@@ -92,6 +92,8 @@ void LightLink::CaptureProfile::flipCaptureCoordsHorizontally()
 
 void LightLink::CaptureProfile::setParams( XmlTree xml )
 {
+	const bool kVerbose = false;
+	
 	getXml(xml, "Name",mName);
 	getXml(xml, "DeviceName",mDeviceName);
 	getXml(xml, "FileName",mFilePath);
@@ -111,7 +113,7 @@ void LightLink::CaptureProfile::setParams( XmlTree xml )
 	{
 		vector<float> f = stringToFloatVec( xml.getChild("DistCoeffs").getValue() );
 		
-		if (f.size() > 0)
+		if (f.size() > 0 && kVerbose)
 		{
 			mDistCoeffs = cv::Mat(1,f.size(),CV_32F);
 			for( int i=0; i<f.size(); ++i ) mDistCoeffs.at<float>(i) = f[i];
@@ -123,7 +125,7 @@ void LightLink::CaptureProfile::setParams( XmlTree xml )
 	{
 		vector<float> f = stringToFloatVec( xml.getChild("CameraMatrix").getValue() );
 		
-		if (f.size() == 9)
+		if (f.size() == 9 && kVerbose)
 		{
 			mCameraMatrix = cv::Mat(3,3,CV_32F);
 			for( int i=0; i<f.size(); ++i ) mCameraMatrix.at<float>(i) = f[i];

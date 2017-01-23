@@ -19,11 +19,14 @@ void RectFinder::Params::set( XmlTree xml )
 	if ( getXml(xml,"InteriorAngleMaxDelta",mInteriorAngleMaxDelta) ) {
 		mInteriorAngleMaxDelta = toRadians(mInteriorAngleMaxDelta);
 		
-		cout << "mInteriorAngleMaxDelta: " << endl
-			<< "\t" << mInteriorAngleMaxDelta << endl
-			<< "\tcos = " << cos(mInteriorAngleMaxDelta) << endl
-			<< "\tacos = " << acos(mInteriorAngleMaxDelta) << endl
-			;
+		if (0)
+		{
+			cout << "mInteriorAngleMaxDelta: " << endl
+				<< "\t" << mInteriorAngleMaxDelta << endl
+				<< "\tcos = " << cos(mInteriorAngleMaxDelta) << endl
+				<< "\tacos = " << acos(mInteriorAngleMaxDelta) << endl
+				;
+		}
 	}	
 
 	getXml(xml,"MaxGainAreaFrac",mMaxGainAreaFrac);

@@ -359,56 +359,75 @@ PinballVision::getUIBoxesFromContours( const ContourVec& cs, const ContourTypes&
 PinballVision::UIBoxes
 PinballVision::assignNamesToUIBoxes( const UIBoxes in, const UIBoxes old ) const
 {
-	// this algorithm will fail to give fully correct answer sometimes since it is lazy and greedy
-	// we need to do all pairs distances
-	// sort by closest
+	// all pairs distances
+	// (inject defaults for any missing names, in UI priority order)
+	// sort by closest (priority queue)
 	// in order, assign closest (as long as assignment doesn't exist)
+	
+	struct match
+	{
+		match( float dist, string name, int cn )
+		: dist(dist)
+		, cold(name)
+		, cnew(cn) {}
+		
+		float dist;
+		string cold;
+		int cnew;
+	};
+	
+	auto comp = []( match a, match b ){ return a.dist > b.dist; };
+	
+	priority_queue< match , vector<match>, decltype( comp ) > match_pq( comp );
 	
 	UIBoxes out = in;
 	
-	queue<string> names;
-	names.push("balls");
-	names.push("score");
-	names.push("high");
-	
-	set<string> used;
-	
-	for( const auto &j : old )
+	// default values
+	// (might want to persist some locations across frames for better robustness, and just
+	// pre-seed these. also we need to prioritize them in this order, too.)
 	{
-		vec2 from  = j.second.mQuad.calcCentroid();
-		float best = MAXFLOAT; // might want to be some other number...
-		int choice = -1;
+		vector<string> names = { "balls", "score", "high" };
 		
-		for( auto &i : out )
-		{			
-			float dist = distance( from, i.second.mQuad.calcCentroid() );
-			
-			if (dist<best)
-			{
-				best=dist;
-				choice = i.first;
-			}
-		}
-		
-		if ( choice != -1 )
+		for( int i=0; i<names.size(); ++i )
 		{
-			out[choice].mName = j.second.mName;
-			used.insert(j.second.mName);
+			for( auto j : out )
+			{
+				float dist = 2000.f + i * 200.f;
+				// +2000 gets us beyond inter-frame matching scores
+				// +i*k prioritizes in order of list
+				match_pq.push( match(dist,names[i],j.first) );
+			}
 		}
 	}
 	
-	// assign from scratch, in priority order
-	// (might want to persist some locations across frames for better robustness)
-	for( auto &i : out )
+	// all distances
+	for( const auto &j : old )
 	{
-		if ( i.second.mName.empty() )
+		vec2 from  = j.second.mQuad.calcCentroid();
+		
+		for( const auto &i : out )
+		{			
+			float dist = distance( from, i.second.mQuad.calcCentroid() );
+			
+			match_pq.push( match(dist,j.second.mName,i.first) );
+		}
+	}
+	
+	// assign
+	set<string> used;	
+
+	while ( !match_pq.empty() )
+	{
+		const match m = match_pq.top();
+		match_pq.pop();
+		
+		string name = m.cold;
+		
+		if ( out[m.cnew].mName.empty()
+		  && used.find(name) == used.end() )
 		{
-			while ( !names.empty() && used.find(names.front())==used.end() )
-			{
-				i.second.mName = names.front();
-				names.pop();
-				used.insert(i.second.mName);
-			}
+			out[m.cnew].mName = name;
+			used.insert(name);
 		}
 	}
 	
