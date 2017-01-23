@@ -128,7 +128,6 @@
 		</3d>
 
 		<CubeMap>
-			<Dynamic>1</Dynamic>
 			<Size>32</Size>
 			<MaxCount>4</MaxCount>
 			<FrameSkip>2</FrameSkip>
@@ -136,16 +135,16 @@
 			<DrawFloor>1</DrawFloor>
 			<DrawBalls>1</DrawBalls>
 			<DrawRibbons>0</DrawRibbons>
-			<MipMap>1</MipMap>
+			<MipMap>0</MipMap>
 			<EyeHeight>50</EyeHeight>
 			<LightHeight>200</LightHeight>
-			<LightColor>DDFFEE</LightColor>
-			
-			<!--	.8,1.,.7	Specular color. TODO; Put ambient in here, name them. -->
+
+			<!--	.8,1.,.7	Specular color. TODO; Put ambient in here, name them properly. -->
+			<LightColor>DDFFEE</LightColor>			
 			
 		</CubeMap>
 
-		<SkyPipelineStageName></SkyPipelineStageName>
+		<SkyPipelineStageName>input</SkyPipelineStageName>
 		<SkyHeight>7</SkyHeight>
 		<SkyScale>.8</SkyScale>
 <!--	How far in -Z from table top does sky draw for balls... -->

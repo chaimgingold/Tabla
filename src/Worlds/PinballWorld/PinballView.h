@@ -117,7 +117,6 @@ private:
 	int mCubeMapSize = 256;
 	int mCubeMapFrameSkip = 0;
 	int mCubeMapMaxCount = 10;
-	bool mCubeMapDynamic = false;
 
 	bool mCubeMapDrawFloor = true;
 	bool mCubeMapDrawBalls = true;

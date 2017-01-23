@@ -62,6 +62,9 @@ void PinballView::setup()
 
 void PinballView::setParams( XmlTree xml )
 {	
+	bool hadMipMap = mCubeMapMipMap;
+	int  oldCubeMapSize = mCubeMapSize;
+	
 	getXml(xml, "DebugDrawGeneratedContours", mDebugDrawGeneratedContours);
 	getXml(xml, "DebugDrawAdjSpaceRays", mDebugDrawAdjSpaceRays );
 	getXml(xml, "DebugDrawFlipperAccelHairs", mDebugDrawFlipperAccelHairs );
@@ -79,7 +82,6 @@ void PinballView::setParams( XmlTree xml )
 	getXml(xml, "CubeMap/FrameSkip",mCubeMapFrameSkip);
 	getXml(xml, "CubeMap/Size", mCubeMapSize );
 	getXml(xml, "CubeMap/MaxCount",mCubeMapMaxCount);
-	getXml(xml, "CubeMap/Dynamic", mCubeMapDynamic );
 
 	getXml(xml, "CubeMap/DrawFloor", mCubeMapDrawFloor );
 	getXml(xml, "CubeMap/DrawBalls", mCubeMapDrawBalls );
@@ -92,6 +94,15 @@ void PinballView::setParams( XmlTree xml )
 	getXml(xml, "SkyPipelineStageName", mSkyPipelineStageName);
 	getXml(xml, "SkyHeight", mSkyHeight);
 	getXml(xml, "SkyScale", mSkyScale );
+	
+	// discard cube maps if settings changed
+	// (this creates a one frame flicker, but it is more robust--allowing us to respond to mipmap--
+	// than doing it each time we go to draw it)
+	if ( hadMipMap != mCubeMapMipMap || oldCubeMapSize != mCubeMapSize )
+	{
+		mCubeMaps.clear();
+		mCubeMapTextures.clear();
+	}
 }
 
 void PinballView::update()
@@ -251,14 +262,22 @@ void PinballView::updateCubeMaps()
 
 gl::FboCubeMapRef PinballView::updateCubeMap( gl::FboCubeMapRef fbo, vec3 eye, int skipBall ) const
 {
-	if ( !fbo || fbo->getSize() != ivec2(mCubeMapSize, mCubeMapSize) )
+	if ( !fbo )
 	{
 		gl::FboCubeMap::Format format;
 		format.textureCubeMapFormat(
 			gl::TextureCubeMap::Format()
 			.mipmap(mCubeMapMipMap)
+			.wrap(GL_CLAMP_TO_EDGE) // default
 			.magFilter(GL_LINEAR)
-			.minFilter( mCubeMapMipMap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR) );
+			.minFilter(GL_LINEAR)  // no sampler artifact at top of ball
+//			.minFilter(GL_NEAREST) // no sampler artifact at top of ball
+//			.minFilter(GL_LINEAR_MIPMAP_NEAREST) // artifact
+//			.minFilter(GL_LINEAR_MIPMAP_LINEAR) // artifact
+//			.minFilter(GL_NEAREST_MIPMAP_NEAREST) // artifact
+//			.minFilter(GL_NEAREST_MIPMAP_LINEAR) // artifact
+			.minFilter( mCubeMapMipMap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR)
+			);
 		
 		fbo = gl::FboCubeMap::create( mCubeMapSize, mCubeMapSize, format );
 	}
@@ -338,8 +357,7 @@ void PinballView::prepareToDraw()
 {
 	if (m3dEnable) {
 		prepare3dScene();
-		if (mCubeMapDynamic) updateCubeMaps();
-		else mCubeMaps.clear();
+		updateCubeMaps();
 	}
 }
 
@@ -634,8 +652,13 @@ void PinballView::drawSky() const
 		r.inflate(r.getSize()*mSkyScale);
 		// try to get full coverage, so no matter where ball points it sees texture...
 		
-		gl::color(1,1,1);
-		gl::draw(mSkyTexture, r );
+		if (1) {
+			gl::color(1,1,1);
+			gl::draw(mSkyTexture, r );
+		} else {
+			gl::color(0,1,0);
+			gl::drawSolidRect(r);
+		}
 	}
 }
 
@@ -669,15 +692,12 @@ void PinballView::draw3dScene() const
 
 void PinballView::draw3dBalls( vec3 eyeLoc, int skipBall, gl::TextureCubeMapRef skipMap ) const
 {
+	const bool kSquashAndStretch = false;
+	
 	if (mBallShader)
 	{
 		gl::ScopedGlslProg glslScp(mBallShader);
 		
-//		if (mCubeMap && !mCubeMapDynamic) {
-//			mCubeMap->bind();
-//			mBallShader->uniform( "uCubeMapTex", 0 );
-//		}
-//		
 		vec3 lightLoc = vec3( mWorld.getWorldBoundsPoly().calcCentroid(), -mCubeMapLightHeight ) ;
 		
 		mBallShader->uniform( "uCubeMapTex", 0 );
@@ -690,11 +710,9 @@ void PinballView::draw3dBalls( vec3 eyeLoc, int skipBall, gl::TextureCubeMapRef 
 		{
 			if (i==skipBall) continue;
 			
-			if (mCubeMapDynamic)
-			{
-				gl::TextureCubeMapRef env = getCubeMapForBall(i);
-				if (env&&env!=skipMap) env->bind();
-			}
+			gl::TextureCubeMapRef env = getCubeMapForBall(i);
+			if (env==skipMap) continue;
+			if (env) env->bind();
 			
 			const Ball& b = mWorld.getBalls()[i];
 			
@@ -703,7 +721,7 @@ void PinballView::draw3dBalls( vec3 eyeLoc, int skipBall, gl::TextureCubeMapRef 
 			mBallShader->uniform("inBallLoc", vec3( b.mLoc, ballz ) );
 			
 			gl::ScopedModelMatrix model;
-			if (!mCubeMapDynamic) gl::multModelMatrix( mWorld.getBallTransform(b) );
+			if (kSquashAndStretch) gl::multModelMatrix( mWorld.getBallTransform(b) );
 			else
 			{
 				// no deform, for testing
