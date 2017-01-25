@@ -51,3 +51,4 @@
 - [ ] Score, ball count, high score.
 - [x] Remove static cube map file from project, and don't load it.
 - [ ] Make flipper speed tunable.
+- [ ] Make contour dejittering/reshaping more responsive; if contour moves enough (sum of all points) then just jump it.

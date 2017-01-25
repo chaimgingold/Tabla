@@ -84,6 +84,8 @@ private:
 	float mFlipperDistToEdge = 10.f; // how close to the edge does a flipper appear?
 
 	bool mEnableUI = true;	
+	float mUIMinAspectRatio = 2.f;
+	vec2  mUIMinSize = vec2(0,0);
 	
 	RectFinder mRectFinder;
 	

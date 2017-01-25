@@ -91,6 +91,7 @@ void PinballView::setParams( XmlTree xml )
 	getXml(xml, "CubeMap/LightHeight", mCubeMapLightHeight );
 	getXml(xml, "CubeMap/LightColor", mCubeMapLightColor );
 	
+	mSkyPipelineStageName.clear();
 	getXml(xml, "SkyPipelineStageName", mSkyPipelineStageName);
 	getXml(xml, "SkyHeight", mSkyHeight);
 	getXml(xml, "SkyScale", mSkyScale );
@@ -713,6 +714,7 @@ void PinballView::draw3dBalls( vec3 eyeLoc, int skipBall, gl::TextureCubeMapRef 
 			gl::TextureCubeMapRef env = getCubeMapForBall(i);
 			if (env==skipMap) continue;
 			if (env) env->bind();
+			else continue;
 			
 			const Ball& b = mWorld.getBalls()[i];
 			

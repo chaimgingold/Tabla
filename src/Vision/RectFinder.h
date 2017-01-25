@@ -26,6 +26,7 @@ public:
 		bool mAllowFragment=false;
 		
 		// filters we always apply
+		float mApproxPolyDP = 0.f;
 		float mInteriorAngleMaxDelta = ci::toRadians(10.f); // how strict are corner angles? (0 = most strict)
 		float mMinRectWidth=0.f;
 		float mMinRectArea=0.f;

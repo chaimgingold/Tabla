@@ -8,6 +8,7 @@
 
 #include "RectFinder.h"
 #include "geom.h"
+#include "ocv.h"
 #include "xml.h"
 
 void RectFinder::Params::set( XmlTree xml )
@@ -15,6 +16,9 @@ void RectFinder::Params::set( XmlTree xml )
 	getXml(xml,"AllowSubset",mAllowSubset);
 	getXml(xml,"AllowSuperset",mAllowSuperset);
 	getXml(xml,"AllowFragment",mAllowFragment);
+	
+	mApproxPolyDP=0.f;
+	getXml(xml,"ApproxPolyDP",mApproxPolyDP);
 	
 	if ( getXml(xml,"InteriorAngleMaxDelta",mInteriorAngleMaxDelta) ) {
 		mInteriorAngleMaxDelta = toRadians(mInteriorAngleMaxDelta);
@@ -38,9 +42,15 @@ void RectFinder::Params::set( XmlTree xml )
 	getXml(xml,"MinRectArea",mMinRectArea);
 }
 
-bool RectFinder::getRectFromPoly( const PolyLine2& in, PolyLine2& out, CandidateVec* oCandidates ) const
+bool RectFinder::getRectFromPoly( const PolyLine2& in_raw, PolyLine2& out, CandidateVec* oCandidates ) const
 {
-	if ( getRectFromPoly_Intrinsic(in, out, oCandidates) ) return true;
+	// approx
+	PolyLine2 in;
+	if ( mParams.mApproxPolyDP > 0.f ) in = approxPolyDP(in_raw, mParams.mApproxPolyDP );
+	else in = in_raw;
+
+	// already ok?
+	if ( getRectFromPoly_Intrinsic(in_raw, out, oCandidates) ) return true;
 	
 	// convex hull strategy
 	if ( mParams.mAllowSuperset )

@@ -64,7 +64,9 @@
 		<DejitterContourLerpFrac>.9</DejitterContourLerpFrac>
 
 		<EnableUI>1</EnableUI>
-		
+		<UIMinAspectRatio>2</UIMinAspectRatio>
+		<UIMinSize>10 3</UIMinSize>
+	
 		<RectFinder>
 	<!--	For	finding ui components -->
 	
@@ -73,6 +75,7 @@
 			<AllowSuperset>1</AllowSuperset>
 
 	<!--	Filters. (Last two should/could be identical to Vision/Contours)	-->
+			<ApproxPolyDP>3</ApproxPolyDP>
 			<InteriorAngleMaxDelta>5</InteriorAngleMaxDelta>
 			<MinRectWidth>3</MinRectWidth>
 			<MinRectArea>9</MinRectArea>
@@ -144,7 +147,7 @@
 			
 		</CubeMap>
 
-		<SkyPipelineStageName>input</SkyPipelineStageName>
+<!--		<SkyPipelineStageName>input</SkyPipelineStageName>-->
 		<SkyHeight>7</SkyHeight>
 		<SkyScale>.8</SkyScale>
 <!--	How far in -Z from table top does sky draw for balls... -->

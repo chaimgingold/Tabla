@@ -19,8 +19,8 @@ namespace cinder {
 	void vec2toOCV_4( vec2 in[4], cv::Point2f o[4] );
 	
 	vector<vec2> fromOcv( vector<cv::Point> pts );
-
 	vector<vec2> fromOcv( vector<cv::Point2f> pts );
+	vector<cv::Point2f> toOcv( vector<vec2> pts );
 
 	// stuff below doesn't really belong in cinder namespace, but whatever.
 	glm::mat3x3 fromOcvMat3x3( const cv::Mat& m );
@@ -50,6 +50,8 @@ namespace cinder {
 	
 	gl::TextureRef matToTexture( cv::UMat mat );
 	gl::TextureRef matToTexture( cv::Mat mat );
+
+	PolyLine2 approxPolyDP( const PolyLine2&, float eps );
 	
 	void getSubMatWithQuad(
 		cv::InputArray,

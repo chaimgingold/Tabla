@@ -30,6 +30,8 @@ void PinballVision::setParams( XmlTree xml )
 	getXml(xml, "DejitterContourLerpFrac", mDejitterContourLerpFrac );
 
 	getXml(xml, "EnableUI", mEnableUI );
+	getXml(xml, "UIMinAspectRatio", mUIMinAspectRatio );
+	getXml(xml, "UIMinSize", mUIMinSize );
 	
 	if ( xml.hasChild("RectFinder") ) {
 		mRectFinder.mParams.set( xml.getChild("RectFinder") );
@@ -69,6 +71,9 @@ ContourVec PinballVision::dejitterContours( ContourVec in, ContourVec old ) cons
 		// match points
 		if (match)
 		{
+			// TODO: If movement per-vertex is over a threshold over entire thing,
+			// then abandon dejitter and just do fast update.
+			
 			for( auto &p : c.mPolyLine.getPoints() )
 			{
 				float dist;
@@ -166,10 +171,10 @@ bool PinballVision::shouldContourBeAUI( const Contour& c, UIBox* out ) const
 	
 	// good aspect ratio
 	box.mSize = vec2( distance(quad[3],quad[2]), distance(quad[0],quad[3]) );
-	if ( box.mSize.y > box.mSize.x * 2.f ) return false;
+	if ( box.mSize.x < box.mSize.y * mUIMinAspectRatio ) return false;
 	
 	// size big enough
-	//if ( size.y > mWorld. )
+	if ( box.mSize.x < mUIMinSize.x || box.mSize.y < mUIMinSize.y ) return false;
 	
 	// not bigger than X% of world
 	

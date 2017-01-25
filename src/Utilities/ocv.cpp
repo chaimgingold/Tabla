@@ -29,6 +29,13 @@ namespace cinder {
 		return v;
 	}
 
+	vector<cv::Point2f> toOcv( vector<vec2> pts )
+	{
+		vector<cv::Point2f> v;
+		for( auto p : pts ) v.push_back(cv::Point2f(p.x,p.y));
+		return v;
+	}
+
 	// stuff below doesn't really belong in cinder namespace, but whatever.
 	glm::mat3x3 fromOcvMat3x3( const cv::Mat& m )
 	{
@@ -167,6 +174,19 @@ namespace cinder {
 		cv::warpPerspective( in, out, xform, cv::Size(outsize.x,outsize.y) );
 		
 		outputImageToWorld = getOcvPerspectiveTransform(dstpt,quad);				
+	}
+
+	PolyLine2 approxPolyDP( const PolyLine2& p, float eps )
+	{
+		vector<cv::Point2f> approx ;
+		
+		cv::approxPolyDP( toOcv(p.getPoints()), approx, eps, p.isClosed() );
+
+		PolyLine2 out;
+		
+		out.getPoints() = fromOcv(approx);
+		out.setClosed(p.isClosed());
+		return out;
 	}
 	
 }
