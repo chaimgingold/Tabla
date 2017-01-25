@@ -113,11 +113,11 @@ void LightLink::CaptureProfile::setParams( XmlTree xml )
 	{
 		vector<float> f = stringToFloatVec( xml.getChild("DistCoeffs").getValue() );
 		
-		if (f.size() > 0 && kVerbose)
+		if (f.size() > 0)
 		{
 			mDistCoeffs = cv::Mat(1,f.size(),CV_32F);
 			for( int i=0; i<f.size(); ++i ) mDistCoeffs.at<float>(i) = f[i];
-			cout << "DistCoeffs: " << mDistCoeffs << endl;
+			if (kVerbose) cout << "DistCoeffs: " << mDistCoeffs << endl;
 		}
 	}
 
@@ -125,11 +125,11 @@ void LightLink::CaptureProfile::setParams( XmlTree xml )
 	{
 		vector<float> f = stringToFloatVec( xml.getChild("CameraMatrix").getValue() );
 		
-		if (f.size() == 9 && kVerbose)
+		if (f.size() == 9)
 		{
 			mCameraMatrix = cv::Mat(3,3,CV_32F);
 			for( int i=0; i<f.size(); ++i ) mCameraMatrix.at<float>(i) = f[i];
-			cout << "CameraMatrix: " << mCameraMatrix << endl;
+			if (kVerbose) cout << "CameraMatrix: " << mCameraMatrix << endl;
 		}
 	}
 }
