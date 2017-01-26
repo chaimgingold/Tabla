@@ -199,11 +199,11 @@ void PinballView::updateVision( Pipeline& p )
 
 void PinballView::appendToVisionPipeline( Pipeline& p ) const
 {
-	for( int i=0; i<mCubeMaps.size(); ++i )
+	for( int i=0; i<mCubeMapTextures.size(); ++i )
 	{
-		if (mCubeMaps[i])
+		if (mCubeMapTextures[i])
 		{
-			p.then( string("mCubeMaps[")+toString(i)+"]", mCubeMaps[i]->getTextureCubeMap() );
+			p.then( string("mCubeMapTextures[")+toString(i)+"]", mCubeMapTextures[i] );
 		}
 	}
 }
@@ -220,38 +220,28 @@ void PinballView::updateCubeMaps()
 	// we need to save the current FBO because we'll be calling bindFramebufferFace() below
 	
 
-	if (0)
+	// re-allocate
+	int targetnum = min( mCubeMapMaxCount, (int)mWorld.getBalls().size() ); 
+	
+	mCubeMaps.resize(targetnum);
+	mCubeMapTextures.resize(targetnum);
+	
+	// update
+	for( int i=0; i<mCubeMaps.size(); ++i )
 	{
-		mCubeMaps.resize(1);
-		
-		mCubeMaps[0] = updateCubeMap( mCubeMaps[0], vec3(mWorld.getWorldBoundsPoly().calcCentroid(),mWorld.getTableDepth()/2.f) );
-	}
-	else
-	{
-		// re-allocate
-		int targetnum = min( mCubeMapMaxCount, (int)mWorld.getBalls().size() ); 
-		
-		if (targetnum != mCubeMaps.size()) mCubeMaps.resize( targetnum );
-		
-		mCubeMapTextures.resize(mCubeMaps.size(),0);
-		
-		// update
-		for( int i=0; i<mCubeMaps.size(); ++i )
+		if ( mCubeMapFrameSkip<1 || ((ci::app::getElapsedFrames()+i) % mCubeMapFrameSkip) == 0 )
 		{
-			if ( mCubeMapFrameSkip<1 || ((ci::app::getElapsedFrames()+i) % mCubeMapFrameSkip) == 0 )
-			{
-				const auto& ball = mWorld.getBalls()[i];
-				
-				mCubeMaps[i] = updateCubeMap(
-					mCubeMaps[i],
-					vec3( ball.mLoc, mWorld.getTableDepth() - ball.mRadius ),
-					i
-					);
-				
-				// bake
-				if (mCubeMaps[i]) {
-					mCubeMapTextures[i] = mCubeMaps[i]->getTextureCubeMap();
-				}
+			const auto& ball = mWorld.getBalls()[i];
+			
+			mCubeMaps[i] = updateCubeMap(
+				mCubeMaps[i],
+				vec3( ball.mLoc, mWorld.getTableDepth() - ball.mRadius ),
+				i
+				);
+			
+			// bake
+			if (mCubeMaps[i]) {
+				mCubeMapTextures[i] = mCubeMaps[i]->getTextureCubeMap();
 			}
 		}
 	}
@@ -299,7 +289,7 @@ gl::FboCubeMapRef PinballView::updateCubeMap( gl::FboCubeMapRef fbo, vec3 eye, i
 			gl::clear();
 			
 			if (mCubeMapDrawFloor) draw3dFloor();
-			if (mCubeMapDrawBalls) draw3dBalls( eye, skipBall, fbo->getTextureCubeMap());
+			if (mCubeMapDrawBalls) draw3dBalls( eye, skipBall, mCubeMapTextures[skipBall] );
 			if (mCubeMapDrawRibbons) draw3dRibbons(GameWorld::DrawType::CubeMap);
 			draw3dScene();
 			drawSky();

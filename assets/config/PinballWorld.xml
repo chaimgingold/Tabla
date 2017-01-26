@@ -138,7 +138,7 @@
 			<DrawFloor>1</DrawFloor>
 			<DrawBalls>1</DrawBalls>
 			<DrawRibbons>0</DrawRibbons>
-			<MipMap>0</MipMap>
+			<MipMap>1</MipMap>
 			<EyeHeight>50</EyeHeight>
 			<LightHeight>200</LightHeight>
 
@@ -173,39 +173,14 @@
 	<!--	13 is big PS4 touch pad	-->
 		</Gamepad>
 
-		<KeyMap>
-		
-			<Key>
-				<char>b</char>
-				<input>serve-multiball</input>
-			</Key>
-			
-			<Key>
-				<char>.</char>
-				<input>pause-ball-world</input>
-			</Key>
-			
-	<!-- Left flipper	-->
-			<Key>
-				<char>n</char>
-				<input>flippers-left</input>
-			</Key>
-			<Key>
-				<char>l</char>
-				<input>flippers-left</input>
-			</Key>
-
-	<!-- Right flipper -->
-			<Key>
-				<char>m</char>
-				<input>flippers-right</input>
-			</Key>
-			<Key>
-				<char>r</char>
-				<input>flippers-right</input>
-			</Key>
-			
-		</KeyMap>
+		<Keys>
+			<key char="b" do="serve-multiball"/>			
+			<key char="." do="pause-ball-world"/>
+			<key char="n" do="flippers-left"/>
+			<key char="l" do="flippers-left"/>
+			<key char="m" do="flippers-right"/>
+			<key char="r" do="flippers-right"/>			
+		</Keys>
 	</Input>
 	
 </PinballWorld>

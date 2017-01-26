@@ -70,6 +70,8 @@ PinballInput::PinballInput( PinballWorld& world ) : mWorld(world)
 
 void PinballInput::setParams( XmlTree xml )
 {
+	const bool kVerbose = false;
+	
 	// gamepad
 	mGamepadButtons.clear();
 	if (xml.hasChild("Gamepad"))
@@ -83,7 +85,7 @@ void PinballInput::setParams( XmlTree xml )
 				unsigned int id = item->getAttributeValue<unsigned int>("id");
 				string _do = item->getAttributeValue<string>("do");
 				
-				cout << id << " -> " << _do << endl;
+				if (kVerbose) cout << id << " -> " << _do << endl;
 				
 				mGamepadButtons[id] = _do;
 			}
@@ -92,20 +94,20 @@ void PinballInput::setParams( XmlTree xml )
 	
 	// keyboard
 	mKeyToInput.clear();
-	if (xml.hasChild("KeyMap"))
+	if (xml.hasChild("Keys"))
 	{
-		XmlTree keys = xml.getChild("KeyMap");
+		XmlTree keys = xml.getChild("Keys");
 		
-		for( auto item = keys.begin("Key"); item != keys.end(); ++item )
+		for( auto item = keys.begin("key"); item != keys.end(); ++item )
 		{
-			if ( item->hasChild("char") && item->hasChild("input") )
+			if ( item->hasAttribute("char") && item->hasAttribute("do") )
 			{
-				string	charkey	= item->getChild("char").getValue<string>();
-				string	input	= item->getChild("input").getValue();
+				string	charkey	= item->getAttributeValue<string>("char");
+				string	input	= item->getAttributeValue<string>("do");
 				
 				char ckey = charkey.front();
 				
-				cout << ckey << ", " << input << endl;
+				if (kVerbose) cout << ckey << ", " << input << endl;
 
 				mKeyToInput[ckey] = input;
 			}
