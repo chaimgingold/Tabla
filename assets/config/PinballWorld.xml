@@ -31,6 +31,8 @@
 	<!-- cm -->
 	<Vision>
 		<Contours>
+<!--			<ThresholdStyle>OtsuInput</ThresholdStyle> -->
+<!--			<FixedThreshold>100</FixedThreshold>-->
 			<ContourMinRadius>			.5	</ContourMinRadius>
 			<ContourMinArea>			1	</ContourMinArea>
 			<ContourDPEpsilon>			1	</ContourDPEpsilon>

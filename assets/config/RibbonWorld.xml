@@ -4,8 +4,9 @@
 	<!-- cm -->
 	<Vision>
 		<Contours>
-<!--			<Threshold>10</Threshold>-->
-			<Threshold>110</Threshold>
+<!--			<FixedThreshold>10</FixedThreshold>-->
+			<ThresholdStyle>Fixed</ThresholdStyle> 
+			<FixedThreshold>110</FixedThreshold>
 <!--	-1 it OTSU, otherwise 0..255 -->
 
 			<ContourGetExactMinCircle>	0	</ContourGetExactMinCircle>

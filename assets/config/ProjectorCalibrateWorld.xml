@@ -10,7 +10,8 @@
 	<!-- cm -->
 	<Vision>
 		<Contours>
-			<Threshold>90</Threshold>
+			<ThresholdStyle>Fixed</ThresholdStyle> 
+			<FixedThreshold>90</FixedThreshold>
 			<ContourGetExactMinCircle>	0	</ContourGetExactMinCircle>
 			<ContourMinRadius>			0	</ContourMinRadius>
 			<ContourMinArea>			0	</ContourMinArea>

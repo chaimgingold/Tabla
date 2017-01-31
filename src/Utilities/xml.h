@@ -63,6 +63,7 @@ inline bool getXml( const XmlTree &xml, string name, string& var )
 	if (n!=xml.end())
 	{
 		var = n->getValue() ;
+		return true;
 	}
 	
 	return false;

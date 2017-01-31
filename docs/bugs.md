@@ -7,7 +7,8 @@
 	- Another possible workaround: fullscreen, then un-fullscreen the second bogus blank window. (Can we do this programatically?)
 	- Might be a cinder limitation that requires us to drop into the OS ourselves:
 		https://forum.libcinder.org/topic/extra-blank-window-hiding-behind-main-window-in-default-fullscreen-mode
-- When table is blank, OTSU algorithm freaks out.
+- [x] When table is blank, OTSU algorithm freaks out.
+	- Solution implemented: Compute OTSU value on camera input image, and apply to clipped area.
 	- Known workarounds:
 		- Set thresholding constant in <Vision> to something between 0..255 (-1 or undefined means OTSU).
 		- Put blank paper on the table

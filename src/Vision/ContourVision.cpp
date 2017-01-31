@@ -9,35 +9,121 @@
 #include "ContourVision.h"
 #include "ocv.h"
 
+static map<string,ContourVision::ThresholdStyle> sStrToTresholdStyle;
+
+ContourVision::Params::Params()
+{
+	if (sStrToTresholdStyle.empty())
+	{
+		sStrToTresholdStyle["Fixed"] = ContourVision::ThresholdStyle::Fixed;
+		sStrToTresholdStyle["OtsuClipped"] = ContourVision::ThresholdStyle::OtsuClipped;
+		sStrToTresholdStyle["OtsuInput"] = ContourVision::ThresholdStyle::OtsuInput;
+		sStrToTresholdStyle["AdaptiveGaussian"] = ContourVision::ThresholdStyle::AdaptiveGaussian;
+		sStrToTresholdStyle["AdaptiveMean"] = ContourVision::ThresholdStyle::AdaptiveMean;
+	}
+}
+
 void ContourVision::Params::set( XmlTree xml )
 {
+	*this = Params(); // defaults
+	
 	getXml(xml,"ContourMinRadius",mContourMinRadius);
 	getXml(xml,"ContourMinArea",mContourMinArea);
 	getXml(xml,"ContourDPEpsilon",mContourDPEpsilon);
 	getXml(xml,"ContourMinWidth",mContourMinWidth);
 	getXml(xml,"ContourGetExactMinCircle",mContourGetExactMinCircle);
-	getXml(xml,"Threshold",mThreshold);
+	getXml(xml,"FixedThreshold",mFixedThreshold);
+	
+	string threshStyle;
+	if ( getXml(xml,"ThresholdStyle",threshStyle) )
+	{
+		auto i = sStrToTresholdStyle.find(threshStyle);
+		if ( i != sStrToTresholdStyle.end() ) mThresholdStyle = i->second;
+		else {
+			cout << "ContourVision::Params::set unknown <ThresholdStyle> << '" << threshStyle << "'"
+				 << "; valid values:" << endl;
+			for ( auto s : sStrToTresholdStyle ) cout << "\t'" << s.first << "'" << endl;
+		}
+	}
 }
 
 ContourVec ContourVision::findContours( const Pipeline::StageRef input, Pipeline& pipeline, float contourPixelToWorld )
 {
 	cv::Mat thresholded; // if I make this a UMat, then threshold sometimes crashes (!)
 	ContourVec output;
-	
+
+	// fail hard
+	if ( !input || input->mImageCV.empty() )
+	{
+		cout << "ContourVision::findContours input image missing!" << endl;
+		return output;
+	}
+		
 	// blur
 //	cv::GaussianBlur( clipped, gray, cv::Size(5,5), 0 );
 //	pipeline.then( gray, "gray" );
 
 	// threshold
-	if ( mParams.mThreshold < 0.f ) {
-		cv::threshold( input->mImageCV, thresholded, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU );
+	{
+		switch( mParams.mThresholdStyle )
+		{
+			case ThresholdStyle::OtsuClipped:
+				cv::threshold(	input->mImageCV, thresholded,
+								0, 255,
+								cv::THRESH_BINARY + cv::THRESH_OTSU );
+				break;
+				
+			case ThresholdStyle::Fixed:
+				cv::threshold(	input->mImageCV, thresholded,
+								mParams.mFixedThreshold,
+								255, cv::THRESH_BINARY );
+				break;
+				
+			case ThresholdStyle::OtsuInput:
+				{
+					const float kScaleFactor = .2;
+					
+					const auto cinput = pipeline.getStage("input");
+					if ( cinput && !cinput->mImageCV.empty() )
+					{
+						// shrink + gray
+						cv::UMat resized, gray;
+						cv::resize( cinput->mImageCV, resized, cv::Size(),
+							kScaleFactor, kScaleFactor, cv::INTER_LINEAR );
+						cv::cvtColor( resized, gray, CV_BGR2GRAY);
+						pipeline.then( "input gray", gray );
+						pipeline.setImageToWorldTransform(
+							cinput->mImageToWorld * glm::scale( 1.f / vec3(kScaleFactor, kScaleFactor, 1) ) );
+						
+						// compute threshold value for input
+						double thresh = cv::threshold( gray, thresholded, 0, 255,
+								cv::THRESH_BINARY + cv::THRESH_OTSU );
+						pipeline.then( "input thresholded", thresholded );
+						
+						// apply to clipped
+						cv::threshold( input->mImageCV, thresholded,
+								thresh,
+								255, cv::THRESH_BINARY );
+					}
+				}
+				break;
+
+			case ThresholdStyle::AdaptiveGaussian:				
+				cv::adaptiveThreshold( input->mImageCV, thresholded,
+					255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY,
+					10, 10);
+				break;
+				
+			case ThresholdStyle::AdaptiveMean:
+				cv::adaptiveThreshold( input->mImageCV, thresholded,
+					255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY,
+					32, -10);
+				break;
+
+		}
+		pipeline.then( "thresholded", thresholded );
+		pipeline.setImageToWorldTransform( input->mImageToWorld );
 	}
-	else {
-		cv::threshold( input->mImageCV, thresholded, mParams.mThreshold, 255, cv::THRESH_BINARY );
-	}
-//	cv::adaptiveThreshold(clipped, thresholded, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 10, 10);
-//	cv::adaptiveThreshold(clipped, thresholded, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 32, -10);
-	pipeline.then( "thresholded", thresholded );
 	
 	// contour detect
 	vector<vector<cv::Point> > contours;

@@ -17,13 +17,25 @@
 class ContourVision
 {
 public:
+
+	enum class ThresholdStyle
+	{
+		Fixed,
+		OtsuClipped,
+		OtsuInput,
+		AdaptiveGaussian,
+		AdaptiveMean
+	};	
 	
 	class Params
 	{
 	public:
+		Params();
+		
 		void set( XmlTree );
 		
-		float mThreshold=-1.f; // -1 is otsu, otherwise 0..255
+		ThresholdStyle mThresholdStyle = ThresholdStyle::OtsuInput;
+		float mFixedThreshold=-1.f;
 		
 		float mContourMinRadius	=	3;
 		float mContourMinArea	=	100;
@@ -41,7 +53,6 @@ public:
 	
 private:
 	Params mParams;
-	
 };
 
 #endif /* ContourVision_hpp */
