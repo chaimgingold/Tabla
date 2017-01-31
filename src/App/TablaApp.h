@@ -67,11 +67,14 @@ class TablaApp : public App {
 private:
 	bool ensureLightLinkHasLocalDeviceProfiles(); // returns if mLightLink changed
 	bool setupCaptureDevice(); // specified by mLightLink.mCameraIndex
+	bool setupCaptureDevice_Camera( const LightLink::CaptureProfile& );
+	bool setupCaptureDevice_File  ( const LightLink::CaptureProfile& );
 	void setupNextValidCaptureProfile(); // iterate through them
 	bool tryToSetupValidCaptureDevice();
 		// called once by lightLinkDidChange if setupCaptureDevice fails
 		// it tries a
-
+	void setProjectorWorldSpaceCoordsFromCaptureProfile();
+	
 public:	
 	LightLink			mLightLink; // calibration for camera <> world <> projector
 	CaptureRef			mCapture;	// input device		->
