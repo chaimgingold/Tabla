@@ -62,7 +62,7 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, TablaApp& app )
 		{
 			std::shared_ptr<PolyEditView> cameraPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
-					mApp.mPipeline,
+					mApp.getPipeline(),
 					[this](){ return getPointsAsPoly(mApp.mLightLink.getCaptureProfile().mCaptureCoords,4); },
 					"undistorted"
 					)
@@ -84,7 +84,7 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, TablaApp& app )
 			// convert to input coords
 			std::shared_ptr<PolyEditView> projPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
-					mApp.mPipeline,
+					mApp.getPipeline(),
 					[&](){ return getPointsAsPoly(mApp.mLightLink.getProjectorProfile().mProjectorCoords,4); },
 					"projector"
 					)
@@ -106,7 +106,7 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, TablaApp& app )
 		{
 			std::shared_ptr<PolyEditView> projPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
-					mApp.mPipeline,
+					mApp.getPipeline(),
 					[&](){ return getPointsAsPoly(mApp.mLightLink.getCaptureProfile().mCaptureWorldSpaceCoords,4); },
 					"world-boundaries"
 					)
@@ -327,7 +327,7 @@ void WindowData::updateMainImageTransform()
 
 void WindowData::updatePipelineViews()
 {
-	const auto stages = mApp.mPipeline.getStages();
+	const auto stages = mApp.getPipeline().getStages();
 	
 	vec2 pos = vec2(1,1) * mApp.mConfigWindowPipelineGutter;
 	const float left = pos.x;
@@ -341,7 +341,7 @@ void WindowData::updatePipelineViews()
 	// cull views
 	for( auto v : oldPipelineViews )
 	{
-		if ( !mApp.mDrawPipeline || !mApp.mPipeline.getStage(v->getName()) )
+		if ( !mApp.mDrawPipeline || !mApp.getPipeline().getStage(v->getName()) )
 		{
 			mViews.removeView(v);
 		}
@@ -357,7 +357,7 @@ void WindowData::updatePipelineViews()
 		// make a new one?
 		if ( !view && mApp.mDrawPipeline )
 		{
-			PipelineStageView psv( mApp.mPipeline, s->mName );
+			PipelineStageView psv( mApp.getPipeline(), s->mName );
 			psv.setWorldDrawFunc( [&](){
 				mApp.drawWorld( GameWorld::DrawType::UIPipelineThumb );
 			});

@@ -29,6 +29,7 @@
 	- [ ] allow multiple controller profiles (PS4, Xbox, etc...).
 - [ ] Move RectFinder into Vision pipeline
 - [ ] Finish token system
+- [ ] Pull down menu with valid capture options
 
 # Game Worlds
 

@@ -77,6 +77,10 @@ private:
 	
 public:	
 	LightLink			mLightLink; // calibration for camera <> world <> projector
+	
+	Pipeline& getPipeline() { return mPipeline; }
+	// todo: should be const, except Pipeline carries state for current thumb! shlould fix.
+	
 	CaptureRef			mCapture;	// input device		->
 	Vision				mVision ;	// edge detection	->
 	Vision::Output		mVisionOutput; // contours, tokens ->
@@ -84,7 +88,6 @@ public:
 	
 	Pipeline			mPipeline; // traces processing
 
-	
 	// static debug frame
 	SurfaceRef mDebugFrame;
 	FileWatch  mDebugFrameFileWatch;
