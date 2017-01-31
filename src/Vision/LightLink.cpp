@@ -49,6 +49,7 @@ static vector<float> stringToFloatVec( string value )
 
 LightLink::CaptureProfile::CaptureProfile( string name, vec2 size, float pixelsPerWorldUnit )
 	: mName(name)
+	, mCaptureSize(size)
 {
 	mCaptureCoords[0] = vec2(0,0) * size;
 	mCaptureCoords[1] = vec2(1,0) * size;

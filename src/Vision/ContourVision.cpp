@@ -91,14 +91,14 @@ ContourVec ContourVision::findContours( const Pipeline::StageRef input, Pipeline
 						cv::resize( cinput->mImageCV, resized, cv::Size(),
 							kScaleFactor, kScaleFactor, cv::INTER_LINEAR );
 						cv::cvtColor( resized, gray, CV_BGR2GRAY);
-						pipeline.then( "input gray", gray );
+						pipeline.then( "(otsu) input gray", gray );
 						pipeline.setImageToWorldTransform(
 							cinput->mImageToWorld * glm::scale( 1.f / vec3(kScaleFactor, kScaleFactor, 1) ) );
 						
 						// compute threshold value for input
 						double thresh = cv::threshold( gray, thresholded, 0, 255,
 								cv::THRESH_BINARY + cv::THRESH_OTSU );
-						pipeline.then( "input thresholded", thresholded );
+						pipeline.then( "(otsu) input thresholded", thresholded );
 						
 						// apply to clipped
 						cv::threshold( input->mImageCV, thresholded,

@@ -79,7 +79,7 @@ void MainImageView::draw()
 	bool drawWorld = true;
 	
 	// vision pipeline image
-	if ( !mIsProjectorView && mApp.mConfigWindowMainImagDrawBkgndImage )
+	if ( !mIsProjectorView && mApp.mConfigWindowMainImageDrawBkgndImage )
 	{
 		if ( stage && stage->getGLImage() )
 		{

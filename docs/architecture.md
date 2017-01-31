@@ -18,6 +18,31 @@ What is the light link? It establishes correspondences between the camera, proje
 
 ### Coordinate Spaces
 
+	/* Coordinates spaces, there are a few:
+		
+		UI (window coordinates, in points, not pixels)
+			- pixels
+			- points
+			
+		Image
+			- Camera
+				e.g. pixel location in capture image
+			- Projector
+				e.g. pixel location on a screen
+			- Arbitrary
+				e.g. supersampled camera image subset
+				e.g. location of a pixel on a shown image
+		
+		World
+			(sim size, unbounded)	eg. location of a bouncing ball
+	 
+	 
+	Transforms
+		UI    <> Image -- handled by View objects
+		Image <> World -- currently handled by Pipeline::Stage transforms
+
+	*/
+	
 ### Linking Coordinate Spaces
 
 - Projection mapping system (get photo Luke took of my explanation).

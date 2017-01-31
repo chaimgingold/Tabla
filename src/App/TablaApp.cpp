@@ -204,7 +204,7 @@ void TablaApp::loadAppConfigXml( XmlTree xml )
 		getXml(app,"DrawPipeline",mDrawPipeline);
 		getXml(app,"DrawContourMousePick",mDrawContourMousePick);
 		
-		getXml(app,"ConfigWindowMainImagDrawBkgndImage",mConfigWindowMainImagDrawBkgndImage);
+		getXml(app,"ConfigWindowMainImageDrawBkgndImage",mConfigWindowMainImageDrawBkgndImage);
 		
 		getXml(app,"HasConfigWindow",mHasConfigWindow);
 		getXml(app,"ConfigWindowPipelineWidth",mConfigWindowPipelineWidth);
@@ -429,10 +429,10 @@ bool TablaApp::ensureLightLinkHasLocalDeviceProfiles()
 	return false;
 }
 
-void TablaApp::lightLinkDidChange( bool saveToFile )
+void TablaApp::lightLinkDidChange( bool saveToFile, bool doSetupCaptureDevice )
 {
 	// start-up (and maybe choose) a valid capture device
-	if ( !setupCaptureDevice() )
+	if ( doSetupCaptureDevice && !setupCaptureDevice() )
 	{
 		tryToSetupValidCaptureDevice();
 	}
@@ -473,27 +473,34 @@ bool TablaApp::setupCaptureDevice()
 
 	const LightLink::CaptureProfile &profile = mLightLink.getCaptureProfile();
 	
-	// try to update world mapping for projector
-	if ( !mLightLink.mProjectorProfiles.empty() )
-	{
-		auto &p = mLightLink.getProjectorProfile();
-		
-		for( int i=0; i<4; ++i ) {
-			p.mProjectorWorldSpaceCoords[i] = profile.mCaptureWorldSpaceCoords[i];
-		}
-	}
-	
+	// debug image
 	if (!profile.mFilePath.empty())
 	{
 		cout << "Trying to load capture profile '" << profile.mName << "' for file '" << profile.mFilePath << "'" << endl;
 		
 		mDebugFrameFileWatch = FileWatch();
 		
-		mDebugFrameFileWatch.load( profile.mFilePath, [&]( fs::path )
+		mDebugFrameFileWatch.load( profile.mFilePath, [this,profile]( fs::path )
 		{
 			try
 			{
 				mDebugFrame = make_shared<Surface>( loadImage(profile.mFilePath) );
+				
+				// check for image size change
+				if ( 1 && mDebugFrame->getSize() != ivec2(profile.mCaptureSize) )
+				{
+					// update it
+					mLightLink.getCaptureProfile() = LightLink::CaptureProfile(
+						fs::path(profile.mFilePath),
+						vec2(mDebugFrame->getSize())
+					);
+					// note: we aren't successfully saving new size to LightLink.xml
+					// if we call lightLinkDidChange, we crash; it could be a number of factors.
+					// but clearly it's messy to do so... we could be recursively in mFileWatch::load,
+					// or enter a loop, or some craziness... 
+					// in any event, whoever calls setupCaptureDevice() should be handling the saving!
+				}
+				
 			} catch (...){
 				mDebugFrame.reset();
 			}
@@ -505,6 +512,7 @@ bool TablaApp::setupCaptureDevice()
 		// that hard, but might not be that important.
 		// we also might want to always return true so that user can escape missing files (removing from list)
 	}
+	// live camera feed
 	else
 	{
 		cout << "Trying to load capture profile '" << profile.mName << "' for '" << profile.mDeviceName << "'" << endl;
@@ -531,6 +539,16 @@ bool TablaApp::setupCaptureDevice()
 			return true; // lazily true
 		}
 		else return false;
+	}
+
+	// try to update world mapping for projector
+	if ( !mLightLink.mProjectorProfiles.empty() )
+	{
+		auto &p = mLightLink.getProjectorProfile();
+		
+		for( int i=0; i<4; ++i ) {
+			p.mProjectorWorldSpaceCoords[i] = profile.mCaptureWorldSpaceCoords[i];
+		}
 	}
 }
 

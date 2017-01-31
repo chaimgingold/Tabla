@@ -21,7 +21,7 @@
 		<ConfigWindowMainImageMargin> 32 </ConfigWindowMainImageMargin>
 		<ConfigWindowPipelineGutter> 8 </ConfigWindowPipelineGutter>
 		<ConfigWindowPipelineWidth> 64 </ConfigWindowPipelineWidth>
-		<ConfigWindowMainImagDrawBkgndImage>	1 </ConfigWindowMainImagDrawBkgndImage>
+		<ConfigWindowMainImageDrawBkgndImage>	1 </ConfigWindowMainImageDrawBkgndImage>
 		
 		<KeyboardStringTimeout>.2</KeyboardStringTimeout>
 		

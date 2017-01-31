@@ -59,15 +59,20 @@ class TablaApp : public App {
 	void cleanup() override;
 	
 	void drawWorld( GameWorld::DrawType );
-	
+
+
+	// Light link management
+	void lightLinkDidChange( bool saveToFile=true, bool doSetupCaptureDevice=true ); // calls setupCaptureDevice, tells mVision, tells mGameWorld, saves it to disk
+
+private:
 	bool ensureLightLinkHasLocalDeviceProfiles(); // returns if mLightLink changed
-	void lightLinkDidChange( bool saveToFile=true ); // calls setupCaptureDevice, tells mVision, tells mGameWorld, saves it to disk
 	bool setupCaptureDevice(); // specified by mLightLink.mCameraIndex
 	void setupNextValidCaptureProfile(); // iterate through them
 	bool tryToSetupValidCaptureDevice();
 		// called once by lightLinkDidChange if setupCaptureDevice fails
 		// it tries a
-	
+
+public:	
 	LightLink			mLightLink; // calibration for camera <> world <> projector
 	CaptureRef			mCapture;	// input device		->
 	Vision				mVision ;	// edge detection	->
@@ -99,6 +104,7 @@ class TablaApp : public App {
 		// For all practical purposes, this is identical to the projector world polygon mapping.
 	
 	
+private:
 	// keyboard input (for RFID device code parsing)
 	string	mKeyboardString; // aggregate keystrokes here
 	float	mLastKeyEventTime=-MAXFLOAT; // when was last keystroke?
@@ -111,9 +117,11 @@ class TablaApp : public App {
 	void setupRFIDValueToFunction(); // scans game library and binds loader code to rfid values
 	
 	// ui
+public:
 	Font				mFont;
 	gl::TextureFontRef	mTextureFont;
 	
+private:
 	WindowRef			mMainWindow;// projector
 	WindowRef			mUIWindow; // for other debug info, on computer screen
 	
@@ -131,41 +139,22 @@ class TablaApp : public App {
 		float				mFPS=0.f;
 	};
 
+public:
 	FPS mAppFPS;
 	FPS mCaptureFPS;
+
 	float mAVClacker=0.f;
+	
+private:
 	
 	// to help us visualize
 	void addProjectorPipelineStages();
 		
 	void updateMainImageTransform( WindowRef );
-	
-	/* Coordinates spaces, there are a few:
-		
-		UI (window coordinates, in points, not pixels)
-			- pixels
-			- points
-			
-		Image
-			- Camera
-				e.g. pixel location in capture image
-			- Projector
-				e.g. pixel location on a screen
-			- Arbitrary
-				e.g. supersampled camera image subset
-				e.g. location of a pixel on a shown image
-		
-		World
-			(sim size, unbounded)	eg. location of a bouncing ball
-	 
-	 
-	Transforms
-		UI    <> Image -- handled by View objects
-		Image <> World -- currently handled by Pipeline::Stage transforms
 
-	*/
 	
 	// settings
+public:
 	bool mAutoFullScreenProjector = false ;
 	bool mDrawCameraImage = false ;
 	bool mDrawContours = false ;
@@ -175,7 +164,7 @@ class TablaApp : public App {
 	bool mDrawContourTree = false ;
 	bool mDrawPipeline = false;
 	bool mDrawContourMousePick = false;
-	bool mConfigWindowMainImagDrawBkgndImage = true;
+	bool mConfigWindowMainImageDrawBkgndImage = true;
 	
 	bool  mHasConfigWindow = true;
 	float mConfigWindowMainImageMargin = 32.f;
@@ -186,7 +175,10 @@ class TablaApp : public App {
 	
 	int mDebugFrameSkip = 30;
 	
+public:
 	fs::path hotloadableAssetPath( fs::path ) const ; // prepends the appropriate thing...
+
+private:
 	string mOverloadedAssetPath;
 	
 	FileWatch mFileWatch;
@@ -196,7 +188,9 @@ class TablaApp : public App {
 	fs::path getUserSettingsFilePath() const;
 	
 	// Synthesis
+public:
 	cipd::PureDataNodeRef mPd;
+private:
 	cipd::PatchRef mAVClackerPatch;
 	
 private: /* starting to make some stuff private... start somewhere */

@@ -1,7 +1,9 @@
 # Application
 
 ## Major Bugs
-- Projector window sometimes comes up blank.
+- [?] Projector window sometimes comes up blank.
+	- Solution implemented: hide window before fullscreening it. (!)
+	- Needs more testing to verify this did it; It might not be that robust of a fix.
 	- Seems like full-screening that second window sometimes results in two zombie windows for the projector (a fullscreen one, and a second windowed one). Probably a libcinder issue, or a misuse of libcinder; perhaps a simple change of flags on that window will do the trick? 
 	- Known workaround: disable <HasConfigWindow> in app.xml.
 	- Another possible workaround: fullscreen, then un-fullscreen the second bogus blank window. (Can we do this programatically?)
