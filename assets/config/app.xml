@@ -27,6 +27,8 @@
 		
 		<DefaultPixelsPerWorldUnit>8</DefaultPixelsPerWorldUnit>
 		<DebugFrameSkip>10</DebugFrameSkip>
+		
+		<DefaultGameWorld>BallWorld</DefaultGameWorld>
 	</App>
 
 	<RFID>
@@ -66,7 +68,7 @@
 
 	<!-- Projector <> Camera <> World mapping
 			This just gives initial values for user configuration.
-			Configuration you do in app is saved and loaded from ~Documents/PaperES/.
+			Configuration you do in app is saved and loaded from ~Documents/LaTabla/.
 		-->
 	
 	<!-- Defaults for our YCR-OAK office setup -->
@@ -124,25 +126,6 @@
 				<CameraMatrix>[1072.3177, 0, 314.25284;
 				 0, 1062.8184, 234.11261;
 				 0, 0, 1]</CameraMatrix>
-			 
-			</Profile>
-
-			<Profile>
-				<Name>FaceTime built in</Name>
-				<DeviceName>FaceTime HD Camera (Built-in)</DeviceName>
-				<CaptureSize>640 480</CaptureSize>
-
-				<CaptureCoords>0 0
-				640 0
-				640 480
-				0 480
-				</CaptureCoords>
-			
-				<CaptureWorldSpaceCoords>0 0
-				126 0
-				126 69.5
-				0 69.5
-				</CaptureWorldSpaceCoords>
 			 
 			</Profile>
 			

@@ -32,6 +32,9 @@ public:
 		CaptureProfile( string name, string deviceName, vec2 size, float pixelsPerWorldUnit ); // makes a default dummy
 		CaptureProfile( fs::path, vec2 size, float pixelsPerWorldUnit=1.f ); // you should have loaded it already so you can tell us the size
 		
+		void setCaptureCoords( vec2 size );
+		void flipCaptureCoordsVertically();
+		void flipCaptureCoordsHorizontally();
 		void setWorldCoordsFromCaptureCoords( float pixelsPerWorldUnit );
 		
 		void setParams( XmlTree );
@@ -46,8 +49,6 @@ public:
 		
 		//  • Clip/Deskew
 		vec2 mCaptureCoords[4];
-		void flipCaptureCoordsVertically();
-		void flipCaptureCoordsHorizontally();
 		
 		//  • Map to World Space
 		vec2 mCaptureWorldSpaceCoords[4];

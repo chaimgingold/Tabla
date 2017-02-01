@@ -17,7 +17,7 @@
 const int  kRequestFrameRate = 60 ; // was 120, don't think it matters/we got there
 const vec2 kDefaultWindowSize( 640, 480 );
 
-const string kDocumentsDirectoryName = "PaperES";
+const string kDocumentsDirectoryName = "LaTabla";
 
 void TablaApp::FPS::start()
 {
@@ -110,12 +110,8 @@ void TablaApp::setup()
 		}
 	});
 	
-	// load default game (or command line arg)
-	string cmdLineArgGameName = getCommandLineArgValue("-gameworld");
-	
-	if ( !mGameWorld || !cmdLineArgGameName.empty() ) { // because loadUserSettingsFromXml might have done it
-		loadDefaultGame(cmdLineArgGameName);
-	}
+	// load default game, if none loaded (loadUserSettingsFromXml might have done it)
+	if ( !mGameWorld ) loadDefaultGame();
 }
 
 string TablaApp::getCommandLineArgValue( string param ) const
@@ -215,6 +211,8 @@ void TablaApp::loadAppConfigXml( XmlTree xml )
 		
 		getXml(app,"DefaultPixelsPerWorldUnit",mDefaultPixelsPerWorldUnit);
 		getXml(app,"DebugFrameSkip",mDebugFrameSkip);
+		
+		getXml(app,"DefaultGameWorld",mDefaultGameWorld);
 	}
 	
 	if (xml.hasChild("PaperBounce3/RFID"))
@@ -385,10 +383,12 @@ bool TablaApp::ensureLightLinkHasLocalDeviceProfiles()
 		{
 			if ( mLightLink.getCaptureProfilesForDevice(d->getName()).empty() )
 			{
+				vec2 size(640,480); // help! how do i find out the default sizes?
+				
 				LightLink::CaptureProfile profile(
 					string("Default ") + d->getName(),
 					d->getName(),
-					vec2(640,480),
+					size,
 					mDefaultPixelsPerWorldUnit
 					);
 				
@@ -638,16 +638,24 @@ void TablaApp::loadGame( string systemName )
 	saveUserSettings();
 }
 
-void TablaApp::loadDefaultGame( string systemName )
+void TablaApp::loadDefaultGame()
 {
+	string systemName;
+	
+	// command line?
+	systemName = getCommandLineArgValue("-gameworld");
+	
+	// default (BallWorld)
+	if ( systemName.empty() ) systemName = mDefaultGameWorld;
+	
 	// first?
-	if ( systemName.empty() && GameCartridge::getLibrary().empty() )
+	if ( systemName.empty() && !GameCartridge::getLibrary().empty() )
 	{
 		systemName = GameCartridge::getLibrary().begin()->first;
 	}
 	
 	// try
-	loadGame(systemName);	
+	if ( !systemName.empty() ) loadGame(systemName);
 }
 
 void TablaApp::loadAdjacentGame( int libraryIndexDelta )

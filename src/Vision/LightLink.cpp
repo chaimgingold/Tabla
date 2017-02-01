@@ -51,11 +51,7 @@ LightLink::CaptureProfile::CaptureProfile( string name, vec2 size, float pixelsP
 	: mName(name)
 	, mCaptureSize(size)
 {
-	mCaptureCoords[0] = vec2(0,0) * size;
-	mCaptureCoords[1] = vec2(1,0) * size;
-	mCaptureCoords[2] = vec2(1,1) * size;
-	mCaptureCoords[3] = vec2(0,1) * size;
-
+	setCaptureCoords(mCaptureSize);
 	setWorldCoordsFromCaptureCoords(pixelsPerWorldUnit);
 }
 
@@ -69,6 +65,14 @@ LightLink::CaptureProfile::CaptureProfile( fs::path path, vec2 size, float pixel
 	: CaptureProfile(path.string(),size,pixelsPerWorldUnit)
 {
 	mFilePath = path.string();
+}
+
+void LightLink::CaptureProfile::setCaptureCoords( vec2 size )
+{
+	mCaptureCoords[0] = vec2(0,0) * size;
+	mCaptureCoords[1] = vec2(1,0) * size;
+	mCaptureCoords[2] = vec2(1,1) * size;
+	mCaptureCoords[3] = vec2(0,1) * size;
 }
 
 void LightLink::CaptureProfile::setWorldCoordsFromCaptureCoords( float pixelsPerWorldUnit )

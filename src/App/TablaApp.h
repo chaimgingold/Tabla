@@ -95,7 +95,7 @@ public:
 	
 	// game library
 	void loadGame( string systemName );
-	void loadDefaultGame( string systemName="" );
+	void loadDefaultGame();
 	void loadAdjacentGame( int libraryIndexDelta );
 	
 	string mGameWorldCartridgeName; // what name of mGameLibrary did mGameWorld come from?
@@ -180,6 +180,9 @@ public:
 	float mDefaultPixelsPerWorldUnit = 10.f; // doesn't quite hot-load; you need to 
 	
 	int mDebugFrameSkip = 30;
+	
+private:
+	string mDefaultGameWorld = "BallWorld";
 	
 public:
 	fs::path hotloadableAssetPath( fs::path ) const ; // prepends the appropriate thing...
