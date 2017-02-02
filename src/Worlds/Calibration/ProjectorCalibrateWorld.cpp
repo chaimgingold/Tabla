@@ -15,7 +15,9 @@
 Q: Do we need >1 registration hole to fully register this thing? My sense is no, as the projector and camera must always be aligned in terms of clockwise vertex ordering. The only way this could happen is if the projector was somehow under the table and the camera was on top...
 
 Q: TODO: We will probably want to use subpixel precision for the found corner vertices.
- 
+
+Uh: We probably want to use a built-in OpenCV pattern, like the dots that Toby uses. That will be more robust. :P
+
 */
 
 static GameCartridgeSimple sCartridge("ProjectorCalibrateWorld", [](){
@@ -154,10 +156,18 @@ ProjectorCalibrateWorld::findRegistrationRect( const ContourVec& cs ) const
 
 void ProjectorCalibrateWorld::draw( DrawType drawType )
 {
-	if (!mProjectorStage) return;
+	bool invertPattern = true;
 
+	if (!mProjectorStage) return;
+	
 	// draw registration marks in projector space
 	{
+		if (invertPattern)
+		{
+			gl::color(1,1,1, drawType==DrawType::Projector ? 1.f : .1f );
+			gl::drawSolid(getWorldBoundsPoly());
+		}
+		
 		// undo the world transform, so we draw in projector image space
 		gl::ScopedViewMatrix matscope;
 		gl::multViewMatrix(mProjectorStage->mImageToWorld);
@@ -183,13 +193,24 @@ void ProjectorCalibrateWorld::draw( DrawType drawType )
 		}
 		
 		// draw registration marks
-		float alpha = 1.f;
-		if ( drawType!=DrawType::Projector && TablaApp::get()->mDebugFrame ) alpha=.25f;
-		
-		gl::color(1,1,1,alpha);
-		gl::drawSolidRect(mProjectRect);
-		gl::color(0,0,0,alpha);
-		gl::drawSolidRect(mProjectRectHole);
+		if (invertPattern)
+		{
+			float alpha = drawType==DrawType::Projector ? 1.f : .25f;
+			
+			gl::color(0,0,0,alpha);
+			gl::drawSolidRect(mProjectRect);
+			gl::color(1,1,1,alpha);
+			gl::drawSolidRect(mProjectRectHole);
+		}
+		else
+		{
+			float alpha = drawType==DrawType::Projector ? 1.f : .25f;
+
+			gl::color(1,1,1,alpha);
+			gl::drawSolidRect(mProjectRect);
+			gl::color(0,0,0,alpha);
+			gl::drawSolidRect(mProjectRectHole);
+		}
 		
 		//
 		if ( drawType!=DrawType::Projector )
@@ -200,11 +221,14 @@ void ProjectorCalibrateWorld::draw( DrawType drawType )
 	}
 	
 	// draw any contours, to show quality of registration
-	gl::color(0,1,1);
-	
-	for ( const auto &c : mContours )
+	if (0)
 	{
-		if ( c.mPolyLine.size() != 4 ) gl::draw(c.mPolyLine);
+		gl::color(0,1,1, drawType==DrawType::Projector ? .25f : .5f );
+		
+		for ( const auto &c : mContours )
+		{
+			if ( c.mPolyLine.size() != 4 ) gl::draw(c.mPolyLine);
+		}
 	}
 	
 	// feedback on registration capture

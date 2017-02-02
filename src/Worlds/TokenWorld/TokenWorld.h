@@ -70,8 +70,7 @@ private:
 	vector<cv::KeyPoint> mGlobalKeypoints;
 	vector<cv::Mat>      mGlobalDescriptors;
 
-	vector<TokenCandidate> 	       mTokens;
-	vector<MatchingTokenIndexPair> mMatches;
+	vector<TokenMatch> 	       mTokens;
 	
 	void drawMatchingKeypoints();
 	void drawGlobalKeypoints();

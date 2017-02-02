@@ -28,6 +28,7 @@ public:
 private:
 
 	// params
+	
 	bool	mVerbose=true;
 	float	mRectSize = 100.f;
 	float	mHoleSize = 20.f;

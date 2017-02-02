@@ -202,19 +202,13 @@ Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 	
 	output.mContours = mContourVision.findContours( clippedStage, pipeline, contourPixelToWorld );
 	
-	if (mTokenMatcher.getTokenLibrary().empty())
+	if (!mTokenMatcher.getTokenLibrary().empty())
 	{
-		output.mTokens = TokenMatches();
-	}
-	else
-	{
-//		vector<TokenCandidate> candidates = mTokenMatcher.findTokenCandidates( clippedStage, output.mContours, pipeline );
-//		vector<TokenFeatures>  candidateFeatures;
-//		for (auto &candidate : candidates) {
-//			candidateFeatures.push_back(candidate.features);
-//		}
-//		vector<MatchingTokenIndexPair> matches = mTokenMatcher.matchTokens(mTokenMatcher.getTokenLibrary(), candidateFeatures);
-//		cout << matches.size() << endl;
+		vector<AnalyzedToken> candidates = mTokenMatcher.tokensFromContours( clippedStage, output.mContours, pipeline );
+		vector<TokenMatch> matches = mTokenMatcher.matchTokens(candidates);
+		cout << matches.size() << endl;
+		output.mTokens = matches;
+
 	}
 	
 	

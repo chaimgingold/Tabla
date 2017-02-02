@@ -10,11 +10,12 @@
 	<!-- cm -->
 	<Vision>
 		<Contours>
-			<ThresholdStyle>Fixed</ThresholdStyle> 
-			<FixedThreshold>90</FixedThreshold>
+			<ThresholdStyle>Fixed</ThresholdStyle>
+<!--			<ThresholdStyle>OtsuClipped</ThresholdStyle>-->
+			<FixedThreshold>220</FixedThreshold>
 			<ContourGetExactMinCircle>	0	</ContourGetExactMinCircle>
 			<ContourMinRadius>			0	</ContourMinRadius>
-			<ContourMinArea>			0	</ContourMinArea>
+			<ContourMinArea>			1	</ContourMinArea>
 			<ContourDPEpsilon>			2	</ContourDPEpsilon>
 			<ContourMinWidth>			0	</ContourMinWidth>
 		</Contours>

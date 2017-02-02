@@ -349,27 +349,29 @@ void BallWorld::updateSynthesis()
 {
 	auto collisionsList = pd::List();
 
+	const float scale = getNumIntegrationSteps();
+	
 	auto balls = getBalls();
 	for (auto &c : mBallBallCollisions) {
 		Ball& ball1 = balls[c.mBallIndex[0]];
 		Ball& ball2 = balls[c.mBallIndex[1]];
 
-		float velocity = length(ball1.getVel()) + length(ball2.getVel());
-		collisionsList.addFloat(velocity);
+		float velocity = length(getDenoisedBallVel(ball1)) + length(getDenoisedBallVel(ball2));
+		collisionsList.addFloat(scale*velocity);
 	}
 
 	for (auto &c : mBallContourCollisions) {
 		Ball& ball = balls[c.mBallIndex];
 
-		float velocity = length(ball.getVel());
-		collisionsList.addFloat(velocity);
+		float velocity = length(getDenoisedBallVel(ball));
+		collisionsList.addFloat(scale*velocity);
 	}
 
 	for (auto &c : mBallWorldCollisions) {
 		Ball& ball = balls[c.mBallIndex];
 
-		float velocity = length(ball.getVel());
-		collisionsList.addFloat(velocity);
+		float velocity = length(getDenoisedBallVel(ball));
+		collisionsList.addFloat(scale*velocity);
 	}
 
 	mPd->sendList("ball-collisions", collisionsList);
