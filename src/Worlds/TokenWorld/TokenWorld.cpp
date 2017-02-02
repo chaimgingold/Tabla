@@ -50,16 +50,16 @@ void TokenWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipelin
 		{
 			cout << "*****" << endl;
 			for (auto &match : visionOut.mTokens) {
-				cout << match.mName << endl;
+				cout << match.first.name << endl;
 			}
-//			mTokens = visionOut.mTokens;
+			mTokens = visionOut.mTokens;
 
-//			mTokens = mTokenMatcher.findTokenCandidates(mWorld, visionOut.mContours, pipeline);
+//			mTokens = mTokenMatcher.tokensFromContours(mWorld, visionOut.mContours, pipeline);
 
 			// N-to-N matching:
 			// we want to match each found token with every other found token.
-//			vector <TokenFeatures> features;
-//			for (TokenCandidate &token : mTokens) {
+//			vector <AnalyzedToken> features;
+//			for (TokenContour &token : mTokens) {
 //				features.push_back(token.features);
 //			}
 //			mMatches = mTokenMatcher.matchTokens(features, features);
@@ -104,11 +104,14 @@ void TokenWorld::drawGlobalKeypoints() {
 void TokenWorld::drawMatchingKeypoints() {
 	// DEBUG: Drawing contours
 	{
-		for ( auto token: mTokens )
+		cout << "************drawMatchingKeypoints()************" << endl;
+		for ( auto match: mTokens )
 		{
+			cout << match.first.name << endl;
+			auto token = match.second;
 			// Draw bounding box
 			{
-				Rectf rw = token.boundingRect ; // world space
+				Rectf rw = token.fromContour.boundingRect ; // world space
 				Rectf r  = Rectf(rw.getLowerLeft(),
 								 rw.getUpperRight());
 
@@ -120,47 +123,47 @@ void TokenWorld::drawMatchingKeypoints() {
 			// Draw polyline
 			{
 				gl::color(ColorAf(1,1,1));
-				gl::draw(token.polyLine);
+				gl::draw(token.fromContour.polyLine);
 			}
 
 
 			// Draw keypoints
-			float hue = (float)token.features.index / mTokens.size();
+			float hue = (float)token.index / mTokens.size();
 			gl::color(cinder::hsvToRgb(vec3(hue, 0.7, 0.9)));
-			for (auto keypoint : token.features.keypoints)
+			for (auto keypoint : token.keypoints)
 			{
-				gl::drawSolidCircle(transformPoint(token.tokenToWorld, fromOcv(keypoint.pt)),
+				gl::drawSolidCircle(transformPoint(token.fromContour.tokenToWorld, fromOcv(keypoint.pt)),
 									//keypoint.size * 0.01);
 									0.8);
 			}
 
 
 			gl::color(cinder::hsvToRgb(vec3(hue + 0.03, 0.7, 0.9)));
-			for (auto keypoint : token.matched)
+			for (auto keypoint : token.fromContour.matched)
 			{
-				gl::drawSolidCircle(transformPoint(token.tokenToWorld, fromOcv(keypoint.pt)),
+				gl::drawSolidCircle(transformPoint(token.fromContour.tokenToWorld, fromOcv(keypoint.pt)),
 									0.6);
 			}
 
 			gl::color(cinder::hsvToRgb(vec3(hue + 0.06, 0.7, 0.9)));
-			for (auto keypoint : token.inliers)
+			for (auto keypoint : token.fromContour.inliers)
 			{
-				gl::drawSolidCircle(transformPoint(token.tokenToWorld, fromOcv(keypoint.pt)),
+				gl::drawSolidCircle(transformPoint(token.fromContour.tokenToWorld, fromOcv(keypoint.pt)),
 									0.4);
 			}
 
 		}
 	}
 
-	for (auto matchingPair : mMatches ) {
-
-		TokenCandidate &token1 = mTokens[matchingPair.first];
-		TokenCandidate &token2 = mTokens[matchingPair.second];
-
-		float hue = (float)token1.features.index / mTokens.size();
-		gl::color(cinder::hsvToRgb(vec3(hue, 0.7, 0.9)));
-		gl::drawLine(token1.boundingRect.getCenter(), token2.boundingRect.getCenter());
-	}
+//	for (auto matchingPair : mMatches ) {
+//
+//		TokenContour &token1 = mTokens[matchingPair.first];
+//		TokenContour &token2 = mTokens[matchingPair.second];
+//
+//		float hue = (float)token1.index / mTokens.size();
+//		gl::color(cinder::hsvToRgb(vec3(hue, 0.7, 0.9)));
+//		gl::drawLine(token1.boundingRect.getCenter(), token2.boundingRect.getCenter());
+//	}
 }
 
 void TokenWorld::keyDown( KeyEvent event )

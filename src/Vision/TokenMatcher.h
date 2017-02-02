@@ -28,17 +28,10 @@ using namespace cv;
 
 typedef cv::Ptr<cv::Feature2D> Feature2DRef;
 
-typedef pair<int, int> MatchingTokenIndexPair;
 
-struct TokenFeatures {
-	vector<KeyPoint> keypoints;
-	Mat              descriptors;
-	int              index=0;
-};
 
-struct TokenCandidate {
-	// Set during feature detection
-	TokenFeatures    features;
+struct TokenContour {
+
 	PolyLine2        polyLine;
 	Rectf            boundingRect;
 	mat4             tokenToWorld;
@@ -50,12 +43,16 @@ struct TokenCandidate {
 	vector<DMatch>   good_matches;
 };
 
-struct TokenMatch
-{
-	vec2   mLoc;
-	string mName;
+struct AnalyzedToken {
+	string			 name;
+	int              index=0;
+//	Mat              image;
+	Mat              descriptors;
+	vector<KeyPoint> keypoints;
+	TokenContour     fromContour;
 };
-typedef vector<TokenMatch> TokenMatches;
+
+typedef pair<AnalyzedToken, AnalyzedToken> TokenMatch;
 
 class TokenMatcher {
 public:
@@ -86,22 +83,20 @@ public:
 	void setParams( Params );
 	TokenMatcher();
 
-	TokenFeatures featuresFromImage(Mat tokenImage);
+	AnalyzedToken analyzeToken(Mat tokenImage);
 
-	vector<TokenCandidate> findTokenCandidates(  const Pipeline::StageRef world,
+	vector<AnalyzedToken> tokensFromContours(
+							   const Pipeline::StageRef world,
 							   const ContourVector &contours,
 							   Pipeline&pipeline );
 
-	vector<MatchingTokenIndexPair> matchTokens( vector<TokenFeatures> tokenLibrary,
-												vector<TokenFeatures> candidates );
-
-	TokenMatches getMatches( vector<TokenCandidate> );
+	vector<TokenMatch> matchTokens( vector<AnalyzedToken> candidates );
 	
-	const vector<TokenFeatures>& getTokenLibrary() const { return mTokenLibrary; }
+	const vector<AnalyzedToken>& getTokenLibrary() const { return mTokenLibrary; }
 	
 private:
 	Params mParams;
-	vector<TokenFeatures> mTokenLibrary;
+	vector<AnalyzedToken> mTokenLibrary;
 	
 };
 

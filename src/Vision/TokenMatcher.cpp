@@ -74,12 +74,12 @@ Feature2DRef TokenMatcher::getFeatureDetector() {
 	return mFeatureDetectors[mCurrentDetector].second;
 }
 
-vector<TokenCandidate> TokenMatcher::findTokenCandidates( const Pipeline::StageRef world,
+vector<AnalyzedToken> TokenMatcher::tokensFromContours( const Pipeline::StageRef world,
 										const ContourVector &contours,
 										Pipeline&pipeline )
 {
 	// Detect features for each region and create Token objects from them
-	vector<TokenCandidate> tokens;
+	vector<AnalyzedToken> tokens;
 
 	if ( !world || world->mImageCV.empty() ) return tokens;
 
@@ -89,11 +89,7 @@ vector<TokenCandidate> TokenMatcher::findTokenCandidates( const Pipeline::StageR
 			continue;
 		}
 
-		int tokenIndex = tokens.size();
-		TokenCandidate token;
 
-		token.polyLine = c.mPolyLine;
-		token.boundingRect = c.mBoundingRect;
 
 		Rectf boundingRect = c.mBoundingRect;
 
@@ -105,42 +101,61 @@ vector<TokenCandidate> TokenMatcher::findTokenCandidates( const Pipeline::StageR
 			continue;
 		}
 
+		mat4 tokenToWorld = getRectMappingAsMatrix(imageSpaceRect, boundingRect);
+
 		UMat tokenContourImage = world->mImageCV(cropRect);
 
 		imageSpaceRect.offset(-imageSpaceRect.getUpperLeft());
-		token.tokenToWorld = getRectMappingAsMatrix(imageSpaceRect, boundingRect);
 
-		pipeline.then(string("ContourImage ") + tokenIndex, tokenContourImage);
-		pipeline.setImageToWorldTransform( token.tokenToWorld );
-		pipeline.getStages().back()->mLayoutHintScale = .5f;
-		pipeline.getStages().back()->mLayoutHintOrtho = true;
 
-		Mat tokenContourImageEqualized;
-		equalizeHist(tokenContourImage, tokenContourImageEqualized);
-		pipeline.then(string("ContourImage equalized ") + tokenIndex, tokenContourImageEqualized);
-		pipeline.getStages().back()->mLayoutHintScale = .5f;
-		pipeline.getStages().back()->mLayoutHintOrtho = true;
+//		pipeline.then(string("ContourImage ") + tokenIndex, tokenContourImage);
+//		pipeline.setImageToWorldTransform( tokenToWorld );
+//		pipeline.getStages().back()->mLayoutHintScale = .5f;
+//		pipeline.getStages().back()->mLayoutHintOrtho = true;
+//
+//		Mat tokenContourImageEqualized;
+//		equalizeHist(tokenContourImage, tokenContourImageEqualized);
+//		pipeline.then(string("ContourImage equalized ") + tokenIndex, tokenContourImageEqualized);
+//		pipeline.getStages().back()->mLayoutHintScale = .5f;
+//		pipeline.getStages().back()->mLayoutHintOrtho = true;
 
-		token.features = featuresFromImage(tokenContourImageEqualized);
-		token.features.index = tokens.size();
-		tokens.push_back(token);
+
+//		AnalyzedToken analyzedToken = analyzeToken(tokenContourImageEqualized);
+
+		AnalyzedToken analyzedToken = analyzeToken(tokenContourImage.getMat(ACCESS_READ));
+		analyzedToken.index = tokens.size();
+
+
+		TokenContour tokenContour;
+
+		tokenContour.polyLine = c.mPolyLine;
+		tokenContour.boundingRect = c.mBoundingRect;
+		tokenContour.tokenToWorld = tokenToWorld;
+
+
+		analyzedToken.fromContour = tokenContour;
+		analyzedToken.index = tokens.size();
+
+		tokens.push_back(analyzedToken);
 	}
 	return tokens;
 }
 
-TokenFeatures TokenMatcher::featuresFromImage(Mat tokenImage) {
-	TokenFeatures features;
+AnalyzedToken TokenMatcher::analyzeToken(Mat tokenImage) {
+	AnalyzedToken analyzedToken;
+//	analyzedToken.image = tokenImage;
 	getFeatureDetector()->detectAndCompute(tokenImage,
 										   noArray(),
-										   features.keypoints,
-										   features.descriptors);
-	return features;
+										   analyzedToken.keypoints,
+										   analyzedToken.descriptors);
+
+	return analyzedToken;
 }
 
-vector<MatchingTokenIndexPair> TokenMatcher::matchTokens( vector<TokenFeatures> tokenLibrary,
-														  vector<TokenFeatures> candidates )
+vector<TokenMatch> TokenMatcher::matchTokens( vector<AnalyzedToken> candidates )
 {
-	vector<MatchingTokenIndexPair> matches;
+	vector <AnalyzedToken> tokenLibrary = mTokenLibrary;
+	vector <TokenMatch> matches;
 
 	// Compare each token against every other for matches
 	// (first round starts with
@@ -150,14 +165,14 @@ vector<MatchingTokenIndexPair> TokenMatcher::matchTokens( vector<TokenFeatures> 
 	// and so on which handles all unique pairs.)
 	for ( int i=0; i < tokenLibrary.size(); i++ )
 	{
-		TokenFeatures focusedToken = tokenLibrary[i];
+		AnalyzedToken libraryToken = tokenLibrary[i];
 		for ( int j=0; j < candidates.size(); j++ ) {
 
-			TokenFeatures candidateToken = candidates[j];
+			AnalyzedToken candidateToken = candidates[j];
 
 			// nn_matches will be same size as focusedToken.keypoints.
 			vector<vector<DMatch>> nn_matches;
-			mMatcher.knnMatch(focusedToken.descriptors,
+			mMatcher.knnMatch(libraryToken.descriptors,
 							  candidateToken.descriptors,
 							  nn_matches,
 							  2);
@@ -198,7 +213,7 @@ vector<MatchingTokenIndexPair> TokenMatcher::matchTokens( vector<TokenFeatures> 
 			// Check if the number of matches with minimum distance is a reasonable percentage
 			// of the total number of matches
 			if (numMatches > nn_matches.size() * mParams.mNNMatchPercentage) {
-				matches.push_back(make_pair(focusedToken.index, candidateToken.index));
+				matches.push_back(make_pair(libraryToken, candidateToken));
 			}
 
 
@@ -248,12 +263,6 @@ vector<MatchingTokenIndexPair> TokenMatcher::matchTokens( vector<TokenFeatures> 
 	return matches;
 }
 
-TokenMatches TokenMatcher::getMatches( vector<TokenCandidate> )
-{
-	TokenMatches r;
-	return r;
-}
-
 void TokenMatcher::setParams( Params p )
 {
 	mParams=p;
@@ -267,9 +276,9 @@ void TokenMatcher::setParams( Params p )
 		{
 			input = Mat( toOcv( Channel( loadImage(path) ) ) );
 			
-			TokenFeatures features = featuresFromImage(input);
+			AnalyzedToken features = analyzeToken(input);
 			features.index = mTokenLibrary.size();
-			
+			features.name = path.string();
 			mTokenLibrary.push_back( features );
 		}
 		catch (...) {

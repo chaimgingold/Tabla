@@ -51,7 +51,7 @@ public:
 	{
 	public:
 		ContourVector mContours;
-		TokenMatches  mTokens;
+		vector<TokenMatch>  mTokens;
 	};
 
 	// configure
