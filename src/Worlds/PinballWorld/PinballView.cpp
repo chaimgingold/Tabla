@@ -219,18 +219,52 @@ void PinballView::updateCubeMaps()
 	gl::context()->pushFramebuffer();
 	// we need to save the current FBO because we'll be calling bindFramebufferFace() below
 	
-
+	
+	const bool kKludge = true;
+	
 	// re-allocate
 	int targetnum = min( mCubeMapMaxCount, (int)mWorld.getBalls().size() ); 
+	
+	if (kKludge) targetnum++; // kludge
 	
 	mCubeMaps.resize(targetnum);
 	mCubeMapTextures.resize(targetnum);
 	
+	// kludgy hack--do one because first is messed...
+	bool didKludgeIt = false;
+	auto kludgeOne = [&didKludgeIt,this]()
+	{
+		if (!didKludgeIt)
+		{
+			if ( !mWorld.getBalls().empty() )
+			{
+				int i = mCubeMaps.size()-1;
+				
+				mCubeMaps[i] = updateCubeMap(
+						mCubeMaps[i],
+						vec3(0,0,0),
+						i
+						);
+				
+				// bake
+				if (mCubeMaps[i]) {
+					mCubeMapTextures[i] = mCubeMaps[i]->getTextureCubeMap();
+				}
+			}
+			
+			didKludgeIt=true;
+		}
+	};
+	
 	// update
-	for( int i=0; i<mCubeMaps.size(); ++i )
+	int kludge = kKludge ? 1 : 0;
+	
+	for( int i=0; i<mCubeMaps.size()-kludge; ++i )
 	{
 		if ( mCubeMapFrameSkip<1 || ((ci::app::getElapsedFrames()+i) % mCubeMapFrameSkip) == 0 )
 		{
+			kludgeOne();
+			
 			const auto& ball = mWorld.getBalls()[i];
 			
 			mCubeMaps[i] = updateCubeMap(
