@@ -16,6 +16,8 @@
 		- Set thresholding constant in <Vision> to something between 0..255 (-1 or undefined means OTSU).
 		- Put blank paper on the table
 	- Notes on proper solution: If we did thresholding before clipping to the table we'd probably get better results. Or analyze full histogram and manually set the threshold. (Avoid doing 2x clipping transforms of the full image and also the thresholded image--that would be lame.)
+- [ ] Clear pipeline between game worlds...
+	- To repro: play pinball, then switch to anim; cube maps still around...??? Or just the active seletion?
 
 # Game Worlds
 
@@ -32,6 +34,9 @@
 
 ## BallWorld
 - Detect, flag, and possibly stabilize or fix stuck balls (in spaces that are too small). Do this in ball world. Track old velocities for last three frames could do the trick. (see if it is oscillating wildly, and maybe even track for how long...; then we have rules for what to do about it when detected.)
+
+## Anim
+- Sometimes screen draws on computer, but not table! Maybe after pinball mode to repro?
 
 ## Music
 - Robit serial connection isn't robust; sometimes need to restart computer to get it to see the arduino.
