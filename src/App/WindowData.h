@@ -11,6 +11,7 @@
 
 #include "View.h"
 #include "PipelineStageView.h"
+#include "CaptureProfileMenuView.h"
 #include <memory>
 
 class TablaApp;
@@ -52,6 +53,9 @@ private:
 
 	std::shared_ptr<MainImageView> mMainImageView; // main view, with image in it.
 	std::shared_ptr<GameLibraryView> mGameLibraryView;
+	std::shared_ptr<CaptureProfileMenuView> mCaptureMenuView;
+	
+	void layoutMenus();
 	
 	vector<ViewRef> mPipelineViews;
 	

@@ -61,6 +61,7 @@
 		26CCA31C1E089EE3005F7C24 /* WindowData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3171E089EE3005F7C24 /* WindowData.cpp */; };
 		26CCA3211E089F98005F7C24 /* GameLibraryView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA31F1E089F98005F7C24 /* GameLibraryView.cpp */; };
 		26CCA3261E08AD8E005F7C24 /* AnimWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3241E08AD8E005F7C24 /* AnimWorld.cpp */; };
+		26D17D8F1E453CF7006B3FB1 /* CaptureProfileMenuView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26D17D8D1E453CF7006B3FB1 /* CaptureProfileMenuView.cpp */; };
 		26E30EA61E0B4E3D00AA9F97 /* geom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E30EA51E0B4E3D00AA9F97 /* geom.cpp */; };
 		26E30EA91E0B4F0600AA9F97 /* ocv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E30EA81E0B4F0600AA9F97 /* ocv.cpp */; };
 		26E30EAE1E0C567100AA9F97 /* QuadTestWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E30EAC1E0C567100AA9F97 /* QuadTestWorld.cpp */; };
@@ -282,6 +283,8 @@
 		26CCA3201E089F98005F7C24 /* GameLibraryView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameLibraryView.h; sourceTree = "<group>"; };
 		26CCA3241E08AD8E005F7C24 /* AnimWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AnimWorld.cpp; sourceTree = "<group>"; };
 		26CCA3251E08AD8E005F7C24 /* AnimWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnimWorld.h; sourceTree = "<group>"; };
+		26D17D8D1E453CF7006B3FB1 /* CaptureProfileMenuView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CaptureProfileMenuView.cpp; sourceTree = "<group>"; };
+		26D17D8E1E453CF7006B3FB1 /* CaptureProfileMenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CaptureProfileMenuView.h; sourceTree = "<group>"; };
 		26E30EA51E0B4E3D00AA9F97 /* geom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = geom.cpp; sourceTree = "<group>"; };
 		26E30EA81E0B4F0600AA9F97 /* ocv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ocv.cpp; sourceTree = "<group>"; };
 		26E30EAC1E0C567100AA9F97 /* QuadTestWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = QuadTestWorld.cpp; sourceTree = "<group>"; };
@@ -985,6 +988,8 @@
 				26CCA3201E089F98005F7C24 /* GameLibraryView.h */,
 				26308E5F1E44113C00DB8371 /* PopUpMenuView.cpp */,
 				26308E601E44113C00DB8371 /* PopUpMenuView.h */,
+				26D17D8D1E453CF7006B3FB1 /* CaptureProfileMenuView.cpp */,
+				26D17D8E1E453CF7006B3FB1 /* CaptureProfileMenuView.h */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -2624,6 +2629,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				26D17D8F1E453CF7006B3FB1 /* CaptureProfileMenuView.cpp in Sources */,
 				26F3234B1DF74D8900EC9559 /* Gamepad_macosx.c in Sources */,
 				26CCA2DC1E089DE7005F7C24 /* PinballWorld.cpp in Sources */,
 				26E30EA61E0B4E3D00AA9F97 /* geom.cpp in Sources */,

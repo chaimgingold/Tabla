@@ -16,9 +16,6 @@ using namespace ci;
 
 class GameLibraryView : public PopUpMenuView
 {
-public:
-	virtual void layout( Rectf windowRect ) override;
-
 protected:
 	virtual int getDefaultItem() const override;
 	virtual vector<string> getItems() const override;

@@ -9,21 +9,6 @@
 #include "GameLibraryView.h"
 #include "TablaApp.h"
 
-void GameLibraryView::layout( Rectf windowRect )
-{
-	// TODO: move some of this to PopUpMenuView
-	vec2 lowerRight = windowRect.getLowerRight() + vec2(-8,-8);
-	vec2 size(100,
-		roundf(
-		TablaApp::get()->mTextureFont->getAscent()
-		+ TablaApp::get()->mTextureFont->getDescent()
-		+ 4.f) );
-	Rectf r( lowerRight - size, lowerRight );
-	
-	setFrame(r);
-	setBounds(r - r.getUpperLeft());
-}
-
 int GameLibraryView::getDefaultItem() const
 {
 	auto lib = GameCartridge::getLibrary();

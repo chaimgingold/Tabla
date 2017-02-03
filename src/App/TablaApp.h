@@ -62,6 +62,9 @@ class TablaApp : public App {
 
 
 	// Light link management
+	const LightLink& getLightLink() const { return mLightLink; }
+	void setCaptureProfile( string );
+	
 	void lightLinkDidChange( bool saveToFile=true, bool doSetupCaptureDevice=true ); // calls setupCaptureDevice, tells mVision, tells mGameWorld, saves it to disk
 
 private:

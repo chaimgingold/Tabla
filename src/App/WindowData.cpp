@@ -125,12 +125,18 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, TablaApp& app )
 		}
 	}
 	
-	// game library widget
+	// menus
 	if ( mIsUIWindow )
 	{
+		// game library widget
 		mGameLibraryView = std::make_shared<GameLibraryView>();
 		mViews.addView( mGameLibraryView );
-		mGameLibraryView->layout( window->getBounds() );
+		
+		// capture device
+		mCaptureMenuView = std::make_shared<CaptureProfileMenuView>();
+		mViews.addView( mCaptureMenuView );
+
+		layoutMenus();
 	}
 }
 
@@ -403,10 +409,26 @@ void WindowData::updatePipelineViews()
 
 void WindowData::resize()
 {
-	if (mGameLibraryView)
-	{
-		mGameLibraryView->layout(mWindow->getBounds());
-	}
+	layoutMenus();
 	
 	mViews.resize();
+}
+
+void WindowData::layoutMenus()
+{
+	const vec2 kGutter = vec2(8.f);
+	vec2 lowerRight = Rectf(getWindow()->getBounds()).getLowerRight() - kGutter;
+	vec2 size( 100, PopUpMenuView::getHeightWhenClosed() );
+
+	if (mGameLibraryView)
+	{
+		mGameLibraryView->layout( Rectf( lowerRight - size, lowerRight ) );
+
+		lowerRight = mGameLibraryView->getFrame().getLowerLeft() + vec2(-kGutter.x,0);
+	}
+
+	if (mCaptureMenuView)
+	{
+		mCaptureMenuView->layout( Rectf( lowerRight - size, lowerRight ) );
+	}
 }

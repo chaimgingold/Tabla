@@ -21,7 +21,8 @@ class PopUpMenuView : public View
 {
 public:
 
-	virtual void layout( Rectf windowRect ) = 0;
+	void layout( Rectf windowRect );
+	static float getHeightWhenClosed();
 	
 	void draw() override;
 	void mouseDown( MouseEvent ) override;

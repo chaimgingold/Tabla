@@ -62,7 +62,7 @@ LightLink::CaptureProfile::CaptureProfile( string name, string deviceName, vec2 
 }
 
 LightLink::CaptureProfile::CaptureProfile( fs::path path, vec2 size, float pixelsPerWorldUnit )
-	: CaptureProfile(path.string(),size,pixelsPerWorldUnit)
+	: CaptureProfile(path.filename().string(),size,pixelsPerWorldUnit)
 {
 	mFilePath = path.string();
 }

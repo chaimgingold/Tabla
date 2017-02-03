@@ -386,7 +386,7 @@ bool TablaApp::ensureLightLinkHasLocalDeviceProfiles()
 				vec2 size(640,480); // help! how do i find out the default sizes?
 				
 				LightLink::CaptureProfile profile(
-					string("Default ") + d->getName(),
+					/*string("Default ") + */d->getName(),
 					d->getName(),
 					size,
 					mDefaultPixelsPerWorldUnit
@@ -427,6 +427,13 @@ bool TablaApp::ensureLightLinkHasLocalDeviceProfiles()
 	if (mLightLink.ensureActiveProfilesAreValid()) dirty=true;
 	
 	return false;
+}
+
+void TablaApp::setCaptureProfile( string name )
+{
+	// Remember old one and switch back if name doesn't work out?
+	mLightLink.setCaptureProfile(name);
+	lightLinkDidChange();
 }
 
 void TablaApp::lightLinkDidChange( bool saveToFile, bool doSetupCaptureDevice )
@@ -476,7 +483,7 @@ bool TablaApp::setupCaptureDevice()
 	
 	setProjectorWorldSpaceCoordsFromCaptureProfile();
 	
-	if ( profile.mFilePath.empty() ) {
+	if ( profile.isCamera() ) {
 		return setupCaptureDevice_Camera(profile);
 	} else {
 		return setupCaptureDevice_File(profile);
@@ -1044,7 +1051,7 @@ void TablaApp::keyDown( KeyEvent event )
 	};
 	
 	// meta chars
-	if ( event.isAltDown() )
+	if ( event.isMetaDown() )
 	{
 		bool caught=true;
 		
@@ -1060,10 +1067,6 @@ void TablaApp::keyDown( KeyEvent event )
 				openFile( getUserLightLinkFilePath() );
 				break;
 
-			case KeyEvent::KEY_TAB:
-				setupNextValidCaptureProfile();
-				break;
-				
 			case KeyEvent::KEY_c:
 				mDrawContours = !mDrawContours;
 				break;

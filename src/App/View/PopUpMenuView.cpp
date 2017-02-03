@@ -11,6 +11,20 @@
 
 const vec2 kTextOffset(4,-4);
 
+void PopUpMenuView::layout( Rectf r )
+{
+	setFrame(r);
+	setBounds(r - r.getUpperLeft());
+}
+
+float PopUpMenuView::getHeightWhenClosed()
+{
+	return roundf(
+		TablaApp::get()->mTextureFont->getAscent()
+		+ TablaApp::get()->mTextureFont->getDescent()
+		+ 4.f);
+}
+
 string PopUpMenuView::getDefaultItemName() const
 {
 	// slower than what you might override and do, but it works.
@@ -100,11 +114,9 @@ vec2 PopUpMenuView::getItemSize() const
 
 Rectf PopUpMenuView::getMenuRect() const
 {
-	const auto &games = GameCartridge::getLibrary();
-	
 	const float itemwidth = getBounds().getWidth();
 	const float itemheight = getBounds().getHeight();
-	const int   n = games.size();
+	const int   n = getItems().size();
 
 	const vec2 menuSize( itemwidth, (float)n * itemheight );
 	const vec2 menuUL = getBounds().getUpperLeft() + vec2(0,-menuSize.y);
