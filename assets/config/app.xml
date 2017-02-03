@@ -33,36 +33,12 @@
 
 	<RFID>
 	<!-- Expects RFID reader to be a USB keyboard that emits digits + a newline char -->
-		<tag>
-			<id>17317668</id>
-			<value>cartridge/BallWorld</value>
-		</tag>
-
-		<tag>
-			<id>17308708</id>
-			<value>cartridge/PongWorld</value>
-		</tag>
-
-		<tag>
-			<id>17317412</id>
-			<value>cartridge/MusicWorld</value>
-		</tag>
-
-		<tag>
-			<id>17325860</id>
-			<value>cartridge/CameraCalibrateWorld</value>
-		</tag>
-		
-		<tag>
-			<id>17326116</id>
-			<value>cartridge/PinballWorld</value>
-		</tag>
-		
-		<tag>
-			<id>17322276</id>
-			<value>cartridge/AnimWorld</value>
-		</tag>
-		
+		<tag id="17317668" do="cartridge/BallWorld"/>
+		<tag id="17308708" do="cartridge/PongWorld"/>
+		<tag id="17317412" do="cartridge/MusicWorld"/>
+		<tag id="17325860" do="cartridge/CameraCalibrateWorld"/>
+		<tag id="17326116" do="cartridge/PinballWorld"/>
+		<tag id="17322276" do="cartridge/AnimWorld"/>
 	</RFID>
 
 

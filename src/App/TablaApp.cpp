@@ -221,10 +221,10 @@ void TablaApp::loadAppConfigXml( XmlTree xml )
 		
 		for( auto item = rfid.begin("tag"); item != rfid.end(); ++item )
 		{
-			if ( item->hasChild("id") && item->hasChild("value") )
+			if ( item->hasAttribute("id") && item->hasAttribute("do") )
 			{
-				int		id		= item->getChild("id").getValue<int>();
-				string	value	= item->getChild("value").getValue();
+				int		id		= item->getAttribute("id").getValue<int>();
+				string	value	= item->getAttribute("do").getValue();
 				
 				mRFIDKeyToValue[id] = value;
 			}
@@ -1097,10 +1097,6 @@ void TablaApp::keyDown( KeyEvent event )
 	{
 		switch ( event.getCode() )
 		{
-			case KeyEvent::KEY_f:
-				cout << "Frame rate: " << getFrameRate() << endl ;
-				break ;
-
 			case KeyEvent::KEY_x:
 				openFile( getXmlConfigPathForGame( mGameWorld->getSystemName() ) );
 				break ;
