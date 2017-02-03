@@ -91,6 +91,8 @@ void PinballView::setParams( XmlTree xml )
 	getXml(xml, "CubeMap/LightHeight", mCubeMapLightHeight );
 	getXml(xml, "CubeMap/LightColor", mCubeMapLightColor );
 	
+	getXml(xml, "CubeMap/FirstBustedKludge", mFirstCubeMapBustedKludge );
+	
 	mSkyPipelineStageName.clear();
 	getXml(xml, "SkyPipelineStageName", mSkyPipelineStageName);
 	getXml(xml, "SkyHeight", mSkyHeight);
@@ -175,10 +177,14 @@ gl::TextureCubeMapRef PinballView::getCubeMapForBall( int i ) const
 {
 	gl::TextureCubeMapRef env;
 
-	if ( mCubeMapTextures.size() > i && mCubeMapTextures[i] ) {
+	int n = mCubeMapTextures.size();
+	
+	if (mFirstCubeMapBustedKludge) n--; // last stores bogus kludge map
+	
+	if ( n > i && mCubeMapTextures[i] ) {
 		env = mCubeMapTextures[i];
 	} else if (!mCubeMapTextures.empty()) {
-		env = mCubeMapTextures[ i % mCubeMapTextures.size() ];
+		env = mCubeMapTextures[ i % n ];
 	}
 	
 	return env;
@@ -220,12 +226,13 @@ void PinballView::updateCubeMaps()
 	// we need to save the current FBO because we'll be calling bindFramebufferFace() below
 	
 	
-	const bool kKludge = true;
+	const bool kKludge = mFirstCubeMapBustedKludge;
+	const bool verbose = false;
 	
 	// re-allocate
 	int targetnum = min( mCubeMapMaxCount, (int)mWorld.getBalls().size() ); 
 	
-	if (kKludge) targetnum++; // kludge
+	if (kKludge) targetnum++;
 	
 	mCubeMaps.resize(targetnum);
 	mCubeMapTextures.resize(targetnum);
@@ -243,8 +250,11 @@ void PinballView::updateCubeMaps()
 				mCubeMaps[i] = updateCubeMap(
 						mCubeMaps[i],
 						vec3(0,0,0),
-						i
+						i,
+						true
 						);
+
+				if (verbose) cout << "updating kludge map " << i << endl;
 				
 				// bake
 				if (mCubeMaps[i]) {
@@ -263,7 +273,7 @@ void PinballView::updateCubeMaps()
 	{
 		if ( mCubeMapFrameSkip<1 || ((ci::app::getElapsedFrames()+i) % mCubeMapFrameSkip) == 0 )
 		{
-			kludgeOne();
+			if (kKludge) kludgeOne();
 			
 			const auto& ball = mWorld.getBalls()[i];
 			
@@ -272,6 +282,8 @@ void PinballView::updateCubeMaps()
 				vec3( ball.mLoc, mWorld.getTableDepth() - ball.mRadius ),
 				i
 				);
+			
+			if (verbose) cout << "updating cube map " << i << endl;
 			
 			// bake
 			if (mCubeMaps[i]) {
@@ -285,7 +297,7 @@ void PinballView::updateCubeMaps()
 	gl::enableDepthWrite(false);
 }
 
-gl::FboCubeMapRef PinballView::updateCubeMap( gl::FboCubeMapRef fbo, vec3 eye, int skipBall ) const
+gl::FboCubeMapRef PinballView::updateCubeMap( gl::FboCubeMapRef fbo, vec3 eye, int skipBall, bool kludge ) const
 {
 	if ( !fbo )
 	{
@@ -313,11 +325,15 @@ gl::FboCubeMapRef PinballView::updateCubeMap( gl::FboCubeMapRef fbo, vec3 eye, i
 
 		for( uint8_t dir = 0; dir < 6; ++dir )
 		{
+//			if (kludge) continue;
+
 			ci::CameraPersp camera( fbo->getWidth(), fbo->getHeight(), 90.0f, 1, 1000 );
 			gl::setProjectionMatrix( camera.getProjectionMatrix() );
 			gl::setViewMatrix( fbo->calcViewMatrix( GL_TEXTURE_CUBE_MAP_POSITIVE_X + dir, eye ) );
 			
 			fbo->bindFramebufferFace( GL_TEXTURE_CUBE_MAP_POSITIVE_X + dir );
+			
+//			if (kludge) continue;
 			
 			gl::clearDepth(1.f);
 			gl::clear();

@@ -147,6 +147,8 @@
 			<!--	.8,1.,.7	Specular color. TODO; Put ambient in here, name them properly. -->
 			<LightColor>DDFFEE</LightColor>			
 			
+			<FirstBustedKludge>0</FirstBustedKludge>
+			
 		</CubeMap>
 
 <!--		<SkyPipelineStageName>input</SkyPipelineStageName>-->
