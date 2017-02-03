@@ -217,6 +217,8 @@ private: /* starting to make some stuff private... start somewhere */
 	string getCommandLineArgValue( string param ) const;
 	// e.g. Tabla -param returnValue
 	
+	void saveCameraImageToDisk();
+	
 	//
 	void loadUserSettingsFromXml( XmlTree );
 	XmlTree getUserSettingsXml() const;

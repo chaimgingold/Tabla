@@ -466,6 +466,7 @@ bool TablaApp::tryToSetupValidCaptureDevice()
 bool TablaApp::setupCaptureDevice()
 {
 	mDebugFrame.reset();
+	mDebugFrameFileWatch.clear();
 	
 	if ( mLightLink.mCaptureProfiles.empty() ) {
 		return false;
@@ -485,8 +486,6 @@ bool TablaApp::setupCaptureDevice()
 bool TablaApp::setupCaptureDevice_File( const LightLink::CaptureProfile& profile )
 {
 	cout << "Trying to load file capture profile '" << profile.mName << "' for file '" << profile.mFilePath << "'" << endl;
-	
-	mDebugFrameFileWatch = FileWatch();
 	
 	mDebugFrameFileWatch.load( profile.mFilePath, [this,profile]( fs::path )
 	{
@@ -1104,17 +1103,15 @@ void TablaApp::keyDown( KeyEvent event )
 				else mPipeline.setQuery( mPipeline.getNextStageName(mPipeline.getQuery() ) );
 				saveUserSettings();
 				break;
-			
-//			case KeyEvent::KEY_LEFT:
-//				loadAdjacentGame(-1);
-//				break;
-//			case KeyEvent::KEY_RIGHT:
-//				loadAdjacentGame(1);
-//				break;
+
+			case KeyEvent::KEY_s:
+				if (!mDebugFrame) saveCameraImageToDisk();
+				break;
 				
 			case KeyEvent::KEY_ESCAPE:
 				{
 					mDebugFrame.reset();
+					mDebugFrameFileWatch.clear();
 					
 					if ( !mLightLink.getCaptureProfile().mFilePath.empty() )
 					{
@@ -1251,6 +1248,25 @@ void TablaApp::saveUserSettings()
 {
 	XmlTree t = getUserSettingsXml();
 	t.write( writeFile(getUserSettingsFilePath()) );
+}
+
+void TablaApp::saveCameraImageToDisk()
+{
+	auto savestage = mPipeline.getStage("clipped");
+	if (!savestage) return;
+	auto saveglimage = savestage->getGLImage();
+	if (!saveglimage) return;
+	
+	vector<string> allowedExtensions = {"png"};
+	
+	fs::path savepath = getSaveFilePath(fs::path(),allowedExtensions);
+	
+	if (!savepath.empty())
+	{
+		if (savepath.extension() != ".png") savepath.append(".png");
+		
+		writeImage( savepath, Surface8u(saveglimage->createSource()) );
+	}
 }
 
 CINDER_APP( TablaApp, RendererGl(RendererGl::Options().msaa(8)), [&]( App::Settings *settings ) {

@@ -26,6 +26,7 @@ public:
 	typedef function<void(XmlTree)> tXmlCallback;
 	typedef function<void(gl::GlslProgRef)> tGlslProgCallback;
 
+	void	clear() { *this = FileWatch(); }
 	void	update(); // periodically does file scan
 	void	scanFiles(); // does a file scan
 	
