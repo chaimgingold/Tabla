@@ -9,10 +9,9 @@
 #include "GameLibraryView.h"
 #include "TablaApp.h"
 
-const vec2 kTextOffset(4,-4);
-
 void GameLibraryView::layout( Rectf windowRect )
 {
+	// TODO: move some of this to PopUpMenuView
 	vec2 lowerRight = windowRect.getLowerRight() + vec2(-8,-8);
 	vec2 size(100,
 		roundf(
@@ -25,124 +24,45 @@ void GameLibraryView::layout( Rectf windowRect )
 	setBounds(r - r.getUpperLeft());
 }
 
-void GameLibraryView::draw()
-{
-	if (!TablaApp::get()) return;
-	
-	const auto &app = *(TablaApp::get());
-	const auto &games = GameCartridge::getLibrary();
-
-	gl::color(1,1,1,1);
-	gl::drawSolidRect( getBounds() );
-	
-	gl::color(0,0,0, getHasMouseDown() ? .5 : 1.f );
-	string worldName = app.mGameWorld ? app.mGameWorld->getUserName() : "——";
-	app.mTextureFont->drawString( worldName, getBounds().getLowerLeft() + kTextOffset );
-
-	
-	if ( getHasMouseDown() )
-	{
-		const int highlight = getHighlightIndex( rootToChild(mMouseLoc) );
-		
-		const vec2 itemSize = getItemSize();
-//		const int   n = games.size();
-		const Rectf menuRect = getMenuRect();
-		
-		gl::color(1,1,1,1);
-		gl::drawSolidRect(menuRect);
-		
-		auto c = games.begin();
-		
-		for( int i=0;
-			 c != games.end();
-			 ++i, ++c )
-		{
-			vec2 itemUL = getBounds().getUpperLeft() + vec2(0,-itemSize.y);
-			
-			Rectf r( itemUL, itemUL+itemSize );
-			r += vec2(0,-(float)i*itemSize.y);
-			
-			if (highlight==i)
-			{
-				gl::color(.25,.5,.5,1.);
-				gl::drawSolidRect(r);
-				gl::color(1,1,1,1);
-			}
-			else {
-				gl::color(0,0,0,1);
-			}
-			
-			string worldName = c->first;
-			app.mTextureFont->drawString( worldName, r.getLowerLeft() + kTextOffset );
-		}
-	}
-}
-
-void GameLibraryView::mouseDown( MouseEvent )
+int GameLibraryView::getDefaultItem() const
 {
 	auto lib = GameCartridge::getLibrary();
 	auto i = lib.begin();
-	
-	mMouseDownIndex=0;
+
+	int item=0;
 	
 	while ( i != lib.end() && i->first != TablaApp::get()->mGameWorldCartridgeName )
 	{
 		++i;
-		mMouseDownIndex++;
+		item++;
 	}
+	
+	return item;
 }
 
-void GameLibraryView::mouseDrag( MouseEvent e )
-{
-	mMouseLoc = e.getPos();
-}
-
-void GameLibraryView::mouseUp  ( MouseEvent e )
-{
-	const int highlight = getHighlightIndex( rootToChild(e.getPos()) );
-
-	// only do something if changed
-	if (highlight != mMouseDownIndex)
-	{
-		auto lib = GameCartridge::getLibrary();
-		auto i = lib.begin();
-		
-		for( int j=0; j<highlight && i !=lib.end(); ++j ) ++i;
-		
-		if ( i!=lib.end() ) TablaApp::get()->loadGame(i->first);
-	}
-}
-
-vec2 GameLibraryView::getItemSize() const
-{
-	return getBounds().getSize();
-}
-
-Rectf GameLibraryView::getMenuRect() const
+vector<string> GameLibraryView::getItems() const
 {
 	const auto &games = GameCartridge::getLibrary();
 	
-	const float itemwidth = getBounds().getWidth();
-	const float itemheight = getBounds().getHeight();
-	const int   n = games.size();
-
-	const vec2 menuSize( itemwidth, (float)n * itemheight );
-	const vec2 menuUL = getBounds().getUpperLeft() + vec2(0,-menuSize.y);
-	Rectf menuRect( menuUL, menuUL + menuSize );
-
-	return menuRect;
+	vector<string> items;
+	
+	for( auto g : games ) items.push_back( g.first );
+	
+	return items;
 }
 
-int GameLibraryView::getHighlightIndex( vec2 p ) const
+void GameLibraryView::userChoseItem( int item )
 {
-	Rectf r = getMenuRect();
+	auto lib = GameCartridge::getLibrary();
+	auto i = lib.begin();
 	
-	if ( r.contains(p) )
-	{
-		p -= r.getLowerLeft();
-		p.y /= getItemSize().y;
-		
-		return -p.y;
-	}
-	else return mMouseDownIndex;
+	for( int j=0; j<item && i !=lib.end(); ++j ) ++i;
+	
+	if ( i!=lib.end() ) TablaApp::get()->loadGame(i->first);
+}
+
+string GameLibraryView::getDefaultItemName() const
+{
+	const auto &app = *(TablaApp::get());
+	return app.mGameWorld ? app.mGameWorld->getUserName() : "——";
 }

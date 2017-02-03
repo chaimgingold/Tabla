@@ -542,9 +542,15 @@ bool TablaApp::setupCaptureDevice_Camera ( const LightLink::CaptureProfile& prof
 				mCapture = 0;
 			}
 			
-			mCapture = Capture::create(profile.mCaptureSize.x, profile.mCaptureSize.y,device);
-			mCapture->start();
-			return true;
+			try
+			{
+				mCapture = Capture::create(profile.mCaptureSize.x, profile.mCaptureSize.y,device);
+				mCapture->start();
+				return true;
+			} catch (...) {
+				cout << "Failed to init capture device " << profile.mDeviceName << endl;
+				return false;
+			}
 		}
 		return true; // lazily true
 	}
@@ -1066,11 +1072,15 @@ void TablaApp::keyDown( KeyEvent event )
 				mDrawPipeline = !mDrawPipeline;
 				break;
 				
-			case KeyEvent::KEY_s:
+			case KeyEvent::KEY_k:
 				mPd->sendBang("clack-clacker");
 				mAVClacker=1.f;
 				break;
-			
+
+			case KeyEvent::KEY_s:
+				if (!mDebugFrame) saveCameraImageToDisk();
+				break;
+				
 			default:
 				caught=false;
 				break;
@@ -1104,10 +1114,6 @@ void TablaApp::keyDown( KeyEvent event )
 				saveUserSettings();
 				break;
 
-			case KeyEvent::KEY_s:
-				if (!mDebugFrame) saveCameraImageToDisk();
-				break;
-				
 			case KeyEvent::KEY_ESCAPE:
 				{
 					mDebugFrame.reset();
