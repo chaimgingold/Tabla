@@ -26,7 +26,7 @@ class Contour {
 public:
 	PolyLine2	mPolyLine ;
 	vec2		mCenter ;
-	Rectf		mBoundingRect ;
+	Rectf		mBoundingRect=Rectf(0,0,0,0) ;
 	float		mRadius=0.f;
 	float		mArea=0.f;
 	float		mPerimeter=0.f;

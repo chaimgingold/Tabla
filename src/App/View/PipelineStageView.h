@@ -100,7 +100,7 @@ private:
 	string			mStageName;
 
 	ColorA			mFrameColor=ColorA(0,0,0,0); // none by default
-	Rectf			mMargin; // we will place the image inset into this margin (css style margin for each side)
+	Rectf			mMargin=Rectf(0,0,0,0); // we will place the image inset into this margin (css style margin for each side)
 	
 	gl::TextureFontRef mTextureFont;
 };
