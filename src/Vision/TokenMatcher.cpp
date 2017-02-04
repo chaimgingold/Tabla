@@ -74,15 +74,15 @@ Feature2DRef TokenMatcher::getFeatureDetector() {
 	return mFeatureDetectors[mCurrentDetector].second;
 }
 
+// Detects features for each given countour and create AnalyzedToken objects from them
 vector<AnalyzedToken> TokenMatcher::tokensFromContours( const Pipeline::StageRef world,
 										const ContourVector &contours,
 										Pipeline&pipeline )
 {
-	// Detect features for each region and create Token objects from them
 	vector<AnalyzedToken> tokens;
 
 	if ( !world || world->mImageCV.empty() ) return tokens;
-
+	
 	for ( auto c: contours )
 	{
 		if (c.mIsHole||c.mTreeDepth>0) {
@@ -90,51 +90,39 @@ vector<AnalyzedToken> TokenMatcher::tokensFromContours( const Pipeline::StageRef
 		}
 
 
-
+		// Calculate a rect to crop out the interior
 		Rectf boundingRect = c.mBoundingRect;
 
 		Rectf imageSpaceRect = boundingRect.transformed(mat4to3(world->mWorldToImage));
 
 		cv::Rect cropRect = toOcv(Area(imageSpaceRect));
 
+		// Skip tiny objects
 		if (cropRect.size().width < 2 || cropRect.size().height < 2) {
 			continue;
 		}
 
-		mat4 tokenToWorld = getRectMappingAsMatrix(imageSpaceRect, boundingRect);
-
+		// Create an image by cropping the contour's interior
 		UMat tokenContourImage = world->mImageCV(cropRect);
 
-		imageSpaceRect.offset(-imageSpaceRect.getUpperLeft());
-
-
-//		pipeline.then(string("ContourImage ") + tokenIndex, tokenContourImage);
-//		pipeline.setImageToWorldTransform( tokenToWorld );
-//		pipeline.getStages().back()->mLayoutHintScale = .5f;
-//		pipeline.getStages().back()->mLayoutHintOrtho = true;
-//
-//		Mat tokenContourImageEqualized;
-//		equalizeHist(tokenContourImage, tokenContourImageEqualized);
-//		pipeline.then(string("ContourImage equalized ") + tokenIndex, tokenContourImageEqualized);
-//		pipeline.getStages().back()->mLayoutHintScale = .5f;
-//		pipeline.getStages().back()->mLayoutHintOrtho = true;
-
-
-//		AnalyzedToken analyzedToken = analyzeToken(tokenContourImageEqualized);
-
-		AnalyzedToken analyzedToken = analyzeToken(tokenContourImage.getMat(ACCESS_READ));
+		// Run keypoint analysis on the cropped image
+		// (creating a copy to avoid issues with UMat->Mat leaving dangling references)
+		Mat imageCopy;
+		tokenContourImage.getMat(ACCESS_READ).copyTo(imageCopy);
+		AnalyzedToken analyzedToken = analyzeToken(imageCopy);
 		analyzedToken.index = tokens.size();
 
-
+		// Record the original contour the token arose from
 		TokenContour tokenContour;
-
 		tokenContour.polyLine = c.mPolyLine;
 		tokenContour.boundingRect = c.mBoundingRect;
-		tokenContour.tokenToWorld = tokenToWorld;
 
+		// Remove the offset of the imageSpaceRect, we don't need it
+		imageSpaceRect.offset(-imageSpaceRect.getUpperLeft());
+		// Get a matrix for mapping points drawn relative to the token back into world-space
+		tokenContour.tokenToWorld = getRectMappingAsMatrix(imageSpaceRect, boundingRect);
 
 		analyzedToken.fromContour = tokenContour;
-		analyzedToken.index = tokens.size();
 
 		tokens.push_back(analyzedToken);
 	}
@@ -148,6 +136,7 @@ AnalyzedToken TokenMatcher::analyzeToken(Mat tokenImage) {
 										   noArray(),
 										   analyzedToken.keypoints,
 										   analyzedToken.descriptors);
+	analyzedToken.image = tokenImage;
 
 	return analyzedToken;
 }
@@ -206,8 +195,10 @@ vector<TokenMatch> TokenMatcher::matchTokens( vector<AnalyzedToken> candidates )
 					numMatches++;
 				}
 			}
-			cout << "# Keypoints: " << nn_matches.size() << endl;
-			cout << "# Matches: " << numMatches << endl;
+
+			cout << libraryToken.name << " vs " << candidateToken.name << endl;
+			cout << "\t# Keypoints: " << nn_matches.size() << endl;
+			cout << "\t# Matches: " << numMatches << endl;
 
 
 			// Check if the number of matches with minimum distance is a reasonable percentage

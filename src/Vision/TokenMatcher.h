@@ -46,7 +46,7 @@ struct TokenContour {
 struct AnalyzedToken {
 	string			 name;
 	int              index=0;
-//	Mat              image;
+	Mat              image;
 	Mat              descriptors;
 	vector<KeyPoint> keypoints;
 	TokenContour     fromContour;

@@ -110,23 +110,23 @@ void TokenWorld::drawMatchingKeypoints() {
 			cout << match.first.name << endl;
 			auto token = match.second;
 			// Draw bounding box
-			{
-				Rectf rw = token.fromContour.boundingRect ; // world space
-				Rectf r  = Rectf(rw.getLowerLeft(),
-								 rw.getUpperRight());
-
-
-				gl::color(0.1, 0.2, 0.3);
-
-				gl::drawStrokedRect(r);
-			}
-			// Draw polyline
-			{
-				gl::color(ColorAf(1,1,1));
-				gl::draw(token.fromContour.polyLine);
-			}
-
-
+//			{
+//				Rectf rw = token.fromContour.boundingRect ; // world space
+//				Rectf r  = Rectf(rw.getLowerLeft(),
+//								 rw.getUpperRight());
+//
+//
+//				gl::color(0.1, 0.2, 0.3);
+//
+//				gl::drawStrokedRect(r);
+//			}
+//			// Draw polyline
+//			{
+//				gl::color(ColorAf(1,1,1));
+//				gl::draw(token.fromContour.polyLine);
+//			}
+//
+//
 			// Draw keypoints
 			float hue = (float)token.index / mTokens.size();
 			gl::color(cinder::hsvToRgb(vec3(hue, 0.7, 0.9)));
@@ -137,20 +137,20 @@ void TokenWorld::drawMatchingKeypoints() {
 									0.8);
 			}
 
-
-			gl::color(cinder::hsvToRgb(vec3(hue + 0.03, 0.7, 0.9)));
-			for (auto keypoint : token.fromContour.matched)
-			{
-				gl::drawSolidCircle(transformPoint(token.fromContour.tokenToWorld, fromOcv(keypoint.pt)),
-									0.6);
-			}
-
-			gl::color(cinder::hsvToRgb(vec3(hue + 0.06, 0.7, 0.9)));
-			for (auto keypoint : token.fromContour.inliers)
-			{
-				gl::drawSolidCircle(transformPoint(token.fromContour.tokenToWorld, fromOcv(keypoint.pt)),
-									0.4);
-			}
+//
+//			gl::color(cinder::hsvToRgb(vec3(hue + 0.03, 0.7, 0.9)));
+//			for (auto keypoint : token.fromContour.matched)
+//			{
+//				gl::drawSolidCircle(transformPoint(token.fromContour.tokenToWorld, fromOcv(keypoint.pt)),
+//									0.6);
+//			}
+//
+//			gl::color(cinder::hsvToRgb(vec3(hue + 0.06, 0.7, 0.9)));
+//			for (auto keypoint : token.fromContour.inliers)
+//			{
+//				gl::drawSolidCircle(transformPoint(token.fromContour.tokenToWorld, fromOcv(keypoint.pt)),
+//									0.4);
+//			}
 
 		}
 	}
