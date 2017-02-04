@@ -136,6 +136,7 @@ private:
 	float m3dTableDepth  = 10.f;
 	float m3dZSkew       = .5f;
 	
+	bool mFirstCubeMapBustedKludge=false;
 
 	int getNumCircleVerts( float r ) const;
 
@@ -144,7 +145,7 @@ private:
 	vector<gl::TextureCubeMapRef> mCubeMapTextures;
 	
 	void updateCubeMaps();
-	gl::FboCubeMapRef updateCubeMap( gl::FboCubeMapRef, vec3 eye, int skipBall=-1 ) const; // updateCubeMaps sets up appropriate state, so don't call without that!
+	gl::FboCubeMapRef updateCubeMap( gl::FboCubeMapRef, vec3 eye, int skipBall=-1, bool kludge=false ) const; // updateCubeMaps sets up appropriate state, so don't call without that!
 	gl::TextureCubeMapRef getCubeMapForBall( int ball ) const;
 	
 	// - shaders

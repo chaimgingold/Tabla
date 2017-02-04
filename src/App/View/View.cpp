@@ -91,6 +91,8 @@ void ViewCollection::mouseUp( MouseEvent event )
 		mMouseDownView->setHasMouseDown(false);
 		mMouseDownView=0;
 	}
+	
+	updateRollover(event.getPos());
 }
 
 void ViewCollection::mouseMove( MouseEvent event )
@@ -99,14 +101,16 @@ void ViewCollection::mouseMove( MouseEvent event )
 	{
 		mMouseDownView->mouseMove(event);
 	}
-	else
-	{
-		if (mRolloverView) mRolloverView->setHasRollover(false);
-		
-		mRolloverView = pickView( event.getPos() );
-		
-		if (mRolloverView) mRolloverView->setHasRollover(true);
-	}
+	else updateRollover(event.getPos());
+}
+
+void ViewCollection::updateRollover( vec2 pos )
+{
+	if (mRolloverView) mRolloverView->setHasRollover(false);
+	
+	mRolloverView = pickView(pos);
+	
+	if (mRolloverView) mRolloverView->setHasRollover(true);
 }
 
 void ViewCollection::mouseDrag( MouseEvent event )

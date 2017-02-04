@@ -60,8 +60,10 @@ class TablaApp : public App {
 	
 	void drawWorld( GameWorld::DrawType );
 
-
 	// Light link management
+	const LightLink& getLightLink() const { return mLightLink; }
+	void setCaptureProfile( string );
+	
 	void lightLinkDidChange( bool saveToFile=true, bool doSetupCaptureDevice=true ); // calls setupCaptureDevice, tells mVision, tells mGameWorld, saves it to disk
 
 private:
@@ -74,6 +76,8 @@ private:
 		// called once by lightLinkDidChange if setupCaptureDevice fails
 		// it tries a
 	void setProjectorWorldSpaceCoordsFromCaptureProfile();
+	
+	vec2 getMousePosInWorld() const; // uses current window (ci::getWindow())
 	
 public:	
 	LightLink			mLightLink; // calibration for camera <> world <> projector
@@ -133,6 +137,8 @@ private:
 	
 	WindowData*			getWindowData() { return getWindow() ? getWindow()->getUserData<WindowData>() : 0 ; }
 	// for front window
+
+	void drawContours( bool filled, bool mousePickInfo, bool worldBounds ) const;
 	
 	class FPS
 	{
@@ -216,6 +222,8 @@ private: /* starting to make some stuff private... start somewhere */
 	
 	string getCommandLineArgValue( string param ) const;
 	// e.g. Tabla -param returnValue
+	
+	void saveCameraImageToDisk();
 	
 	//
 	void loadUserSettingsFromXml( XmlTree );

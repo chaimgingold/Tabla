@@ -221,10 +221,10 @@ void TablaApp::loadAppConfigXml( XmlTree xml )
 		
 		for( auto item = rfid.begin("tag"); item != rfid.end(); ++item )
 		{
-			if ( item->hasChild("id") && item->hasChild("value") )
+			if ( item->hasAttribute("id") && item->hasAttribute("do") )
 			{
-				int		id		= item->getChild("id").getValue<int>();
-				string	value	= item->getChild("value").getValue();
+				int		id		= item->getAttribute("id").getValue<int>();
+				string	value	= item->getAttribute("do").getValue();
 				
 				mRFIDKeyToValue[id] = value;
 			}
@@ -386,7 +386,7 @@ bool TablaApp::ensureLightLinkHasLocalDeviceProfiles()
 				vec2 size(640,480); // help! how do i find out the default sizes?
 				
 				LightLink::CaptureProfile profile(
-					string("Default ") + d->getName(),
+					/*string("Default ") + */d->getName(),
 					d->getName(),
 					size,
 					mDefaultPixelsPerWorldUnit
@@ -429,6 +429,13 @@ bool TablaApp::ensureLightLinkHasLocalDeviceProfiles()
 	return false;
 }
 
+void TablaApp::setCaptureProfile( string name )
+{
+	// Remember old one and switch back if name doesn't work out?
+	mLightLink.setCaptureProfile(name);
+	lightLinkDidChange();
+}
+
 void TablaApp::lightLinkDidChange( bool saveToFile, bool doSetupCaptureDevice )
 {
 	// start-up (and maybe choose) a valid capture device
@@ -466,6 +473,7 @@ bool TablaApp::tryToSetupValidCaptureDevice()
 bool TablaApp::setupCaptureDevice()
 {
 	mDebugFrame.reset();
+	mDebugFrameFileWatch.clear();
 	
 	if ( mLightLink.mCaptureProfiles.empty() ) {
 		return false;
@@ -475,7 +483,7 @@ bool TablaApp::setupCaptureDevice()
 	
 	setProjectorWorldSpaceCoordsFromCaptureProfile();
 	
-	if ( profile.mFilePath.empty() ) {
+	if ( profile.isCamera() ) {
 		return setupCaptureDevice_Camera(profile);
 	} else {
 		return setupCaptureDevice_File(profile);
@@ -485,8 +493,6 @@ bool TablaApp::setupCaptureDevice()
 bool TablaApp::setupCaptureDevice_File( const LightLink::CaptureProfile& profile )
 {
 	cout << "Trying to load file capture profile '" << profile.mName << "' for file '" << profile.mFilePath << "'" << endl;
-	
-	mDebugFrameFileWatch = FileWatch();
 	
 	mDebugFrameFileWatch.load( profile.mFilePath, [this,profile]( fs::path )
 	{
@@ -543,9 +549,15 @@ bool TablaApp::setupCaptureDevice_Camera ( const LightLink::CaptureProfile& prof
 				mCapture = 0;
 			}
 			
-			mCapture = Capture::create(profile.mCaptureSize.x, profile.mCaptureSize.y,device);
-			mCapture->start();
-			return true;
+			try
+			{
+				mCapture = Capture::create(profile.mCaptureSize.x, profile.mCaptureSize.y,device);
+				mCapture->start();
+				return true;
+			} catch (...) {
+				cout << "Failed to init capture device " << profile.mDeviceName << endl;
+				return false;
+			}
 		}
 		return true; // lazily true
 	}
@@ -897,12 +909,20 @@ void TablaApp::resize()
 	}
 }
 
-void TablaApp::drawWorld( GameWorld::DrawType drawType )
+vec2 TablaApp::getMousePosInWorld() const
 {
 	WindowData *win = getWindow()->getUserData<WindowData>();
 	
 	const vec2 mouseInWindow   = win->getMousePosInWindow();
 	const vec2 mouseInWorld    = win->getMainImageView()->windowToWorld(mouseInWindow);
+	
+	return mouseInWorld;
+}
+
+void TablaApp::drawWorld( GameWorld::DrawType drawType )
+{
+	WindowData *win = getWindow()->getUserData<WindowData>();
+
 	const bool isMouseInWindow = win->getWindow()->getBounds().contains(win->getMousePosInWindow());
 	
 	const bool isUIWindow = win->getIsUIWindow();
@@ -929,71 +949,15 @@ void TablaApp::drawWorld( GameWorld::DrawType drawType )
 	// draw contours
 	if ( mDrawContours || isUIWindow )
 	{
-		// filled
-		if ( mDrawContoursFilled )
-		{
-			// TODO make fill colors tunable
-			ColorA holecolor(.0f,.0f,.0f,.8f);
-			ColorA fillcolor(.2f,.2f,.4f,.5f);
-			
-			// recursive tree
-			function<void(const Contour&)> drawOne = [&]( const Contour& c )
-			{
-				if ( c.mIsHole ) gl::color( holecolor );
-				else gl::color( fillcolor );
-				
-				gl::drawSolid(c.mPolyLine);
-				
-				for( auto childIndex : c.mChild )
-				{
-					drawOne( mVisionOutput.mContours[childIndex] ) ;
-				}
-			};
-			
-			for( auto const &c : mVisionOutput.mContours )
-			{
-				if ( c.mTreeDepth==0 )
-				{
-					drawOne(c) ;
-				}
-			}
-		}
-		// outlines
-		else
-		{
-			for( auto c : mVisionOutput.mContours )
-			{
-				ColorAf color ;
-				
-				if ( !c.mIsHole ) color = ColorAf(1,1,1);
-				else color = ColorAf::hex( 0xF19878 ) ;
-				
-				gl::color(color) ;
-				gl::draw(c.mPolyLine) ;
-			}
-		}
-
-		if ( mDrawContourMousePick || isUIWindow )
-		{
-			// picked highlight
-			const Contour* picked = mVisionOutput.mContours.findLeafContourContainingPoint( mouseInWorld ) ;
-			
-			if (picked)
-			{
-				if (picked->mIsHole) gl::color(6.f,.4f,.2f);
-				else gl::color(.2f,.6f,.4f,.8f);
-				
-				gl::draw(picked->mPolyLine);
-				
-				if (0)
-				{
-					vec2 x = closestPointOnPoly(mouseInWorld,picked->mPolyLine);
-					gl::color(.5f,.1f,.3f,.9f);
-					gl::drawSolidCircle(x, 5.f);
-				}
-			}
-		}
+		drawContours( mDrawContoursFilled, mDrawContourMousePick || isUIWindow, false );
 	}
+	else if (drawType==GameWorld::DrawType::Projector
+			&& mUIWindow
+			&& mUIWindow->getUserData<WindowData>()->isInteractingWithCalibrationPoly() )
+	{
+		drawContours( false, false, true );
+	}
+
 	
 	// draw balls
 	if (mGameWorld) mGameWorld->draw(drawType);
@@ -1001,7 +965,94 @@ void TablaApp::drawWorld( GameWorld::DrawType drawType )
 	// mouse debug info
 	if ( (mDrawMouseDebugInfo&&isUIWindow) && isMouseInWindow && mGameWorld )
 	{
-		mGameWorld->drawMouseDebugInfo(mouseInWorld);
+		mGameWorld->drawMouseDebugInfo( getMousePosInWorld() );
+	}
+}
+
+void TablaApp::drawContours( bool filled, bool mousePickInfo, bool worldBounds ) const
+{
+	// filled
+	if ( filled )
+	{
+		// TODO make fill colors tunable
+		ColorA holecolor(.0f,.0f,.0f,.8f);
+		ColorA fillcolor(.2f,.2f,.4f,.5f);
+		
+		// recursive tree
+		function<void(const Contour&)> drawOne = [&]( const Contour& c )
+		{
+			if ( c.mIsHole ) gl::color( holecolor );
+			else gl::color( fillcolor );
+			
+			gl::drawSolid(c.mPolyLine);
+			
+			for( auto childIndex : c.mChild )
+			{
+				drawOne( mVisionOutput.mContours[childIndex] ) ;
+			}
+		};
+		
+		for( auto const &c : mVisionOutput.mContours )
+		{
+			if ( c.mTreeDepth==0 )
+			{
+				drawOne(c) ;
+			}
+		}
+	}
+	// outlines
+	else
+	{
+		for( auto c : mVisionOutput.mContours )
+		{
+			ColorAf color ;
+			
+			if ( !c.mIsHole ) color = ColorAf(1,1,1);
+			else color = ColorAf::hex( 0xF19878 ) ;
+			
+			gl::color(color) ;
+			gl::draw(c.mPolyLine) ;
+		}
+	}
+
+	// outline capture area
+	if (worldBounds)
+	{
+		gl::color(0,1,1);
+		gl::draw(getWorldBoundsPoly());
+		
+		vec2 k(1.f);
+		
+		auto v = getWorldBoundsPoly().getPoints(); // for some reason i have to put this here..., not in for ()
+		
+		for( auto p : v )
+		{
+			Rectf r(p-k,p+k);
+			gl::drawSolidRect(r);
+		}
+	}
+
+	if ( mousePickInfo )
+	{
+		vec2 mouseInWorld = getMousePosInWorld();
+		
+		// picked highlight
+		const Contour* picked = mVisionOutput.mContours.findLeafContourContainingPoint( mouseInWorld ) ;
+		
+		if (picked)
+		{
+			if (picked->mIsHole) gl::color(6.f,.4f,.2f);
+			else gl::color(.2f,.6f,.4f,.8f);
+			
+			gl::draw(picked->mPolyLine);
+			
+			if (0)
+			{
+				vec2 x = closestPointOnPoly(mouseInWorld,picked->mPolyLine);
+				gl::color(.5f,.1f,.3f,.9f);
+				gl::drawSolidCircle(x, 5.f);
+			}
+		}
 	}
 }
 
@@ -1039,7 +1090,7 @@ void TablaApp::keyDown( KeyEvent event )
 	};
 	
 	// meta chars
-	if ( event.isAltDown() )
+	if ( event.isMetaDown() )
 	{
 		bool caught=true;
 		
@@ -1055,10 +1106,6 @@ void TablaApp::keyDown( KeyEvent event )
 				openFile( getUserLightLinkFilePath() );
 				break;
 
-			case KeyEvent::KEY_TAB:
-				setupNextValidCaptureProfile();
-				break;
-				
 			case KeyEvent::KEY_c:
 				mDrawContours = !mDrawContours;
 				break;
@@ -1067,11 +1114,15 @@ void TablaApp::keyDown( KeyEvent event )
 				mDrawPipeline = !mDrawPipeline;
 				break;
 				
-			case KeyEvent::KEY_s:
+			case KeyEvent::KEY_k:
 				mPd->sendBang("clack-clacker");
 				mAVClacker=1.f;
 				break;
-			
+
+			case KeyEvent::KEY_s:
+				if (!mDebugFrame) saveCameraImageToDisk();
+				break;
+				
 			default:
 				caught=false;
 				break;
@@ -1085,10 +1136,6 @@ void TablaApp::keyDown( KeyEvent event )
 	{
 		switch ( event.getCode() )
 		{
-			case KeyEvent::KEY_f:
-				cout << "Frame rate: " << getFrameRate() << endl ;
-				break ;
-
 			case KeyEvent::KEY_x:
 				openFile( getXmlConfigPathForGame( mGameWorld->getSystemName() ) );
 				break ;
@@ -1104,17 +1151,11 @@ void TablaApp::keyDown( KeyEvent event )
 				else mPipeline.setQuery( mPipeline.getNextStageName(mPipeline.getQuery() ) );
 				saveUserSettings();
 				break;
-			
-//			case KeyEvent::KEY_LEFT:
-//				loadAdjacentGame(-1);
-//				break;
-//			case KeyEvent::KEY_RIGHT:
-//				loadAdjacentGame(1);
-//				break;
-				
+
 			case KeyEvent::KEY_ESCAPE:
 				{
 					mDebugFrame.reset();
+					mDebugFrameFileWatch.clear();
 					
 					if ( !mLightLink.getCaptureProfile().mFilePath.empty() )
 					{
@@ -1251,6 +1292,25 @@ void TablaApp::saveUserSettings()
 {
 	XmlTree t = getUserSettingsXml();
 	t.write( writeFile(getUserSettingsFilePath()) );
+}
+
+void TablaApp::saveCameraImageToDisk()
+{
+	auto savestage = mPipeline.getStage("clipped");
+	if (!savestage) return;
+	auto saveglimage = savestage->getGLImage();
+	if (!saveglimage) return;
+	
+	vector<string> allowedExtensions = {"png"};
+	
+	fs::path savepath = getSaveFilePath(fs::path(),allowedExtensions);
+	
+	if (!savepath.empty())
+	{
+		if (savepath.extension() != ".png") savepath.append(".png");
+		
+		writeImage( savepath, Surface8u(saveglimage->createSource()) );
+	}
 }
 
 CINDER_APP( TablaApp, RendererGl(RendererGl::Options().msaa(8)), [&]( App::Settings *settings ) {

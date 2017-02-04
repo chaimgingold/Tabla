@@ -31,6 +31,7 @@
 		262A88751DB594B700FE2336 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 262A88741DB594B700FE2336 /* CoreMIDI.framework */; };
 		262FCDCC1E234CB100FC5D66 /* PinballVision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 262FCDCA1E234CB100FC5D66 /* PinballVision.cpp */; };
 		262FCDCF1E234DDF00FC5D66 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 262FCDCE1E234DDF00FC5D66 /* Images.xcassets */; };
+		26308E611E44113C00DB8371 /* PopUpMenuView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26308E5F1E44113C00DB8371 /* PopUpMenuView.cpp */; };
 		2673CD5E1E1D791C0036C02D /* PinballView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2673CD5C1E1D791C0036C02D /* PinballView.cpp */; };
 		26CCA2D31E089DE7005F7C24 /* BallWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2B21E089DE7005F7C24 /* BallWorld.cpp */; };
 		26CCA2D51E089DE7005F7C24 /* GameWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2B81E089DE7005F7C24 /* GameWorld.cpp */; };
@@ -60,6 +61,7 @@
 		26CCA31C1E089EE3005F7C24 /* WindowData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3171E089EE3005F7C24 /* WindowData.cpp */; };
 		26CCA3211E089F98005F7C24 /* GameLibraryView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA31F1E089F98005F7C24 /* GameLibraryView.cpp */; };
 		26CCA3261E08AD8E005F7C24 /* AnimWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3241E08AD8E005F7C24 /* AnimWorld.cpp */; };
+		26D17D8F1E453CF7006B3FB1 /* CaptureProfileMenuView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26D17D8D1E453CF7006B3FB1 /* CaptureProfileMenuView.cpp */; };
 		26E30EA61E0B4E3D00AA9F97 /* geom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E30EA51E0B4E3D00AA9F97 /* geom.cpp */; };
 		26E30EA91E0B4F0600AA9F97 /* ocv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E30EA81E0B4F0600AA9F97 /* ocv.cpp */; };
 		26E30EAE1E0C567100AA9F97 /* QuadTestWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E30EAC1E0C567100AA9F97 /* QuadTestWorld.cpp */; };
@@ -217,6 +219,8 @@
 		262FCDCA1E234CB100FC5D66 /* PinballVision.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PinballVision.cpp; sourceTree = "<group>"; };
 		262FCDCB1E234CB100FC5D66 /* PinballVision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PinballVision.h; sourceTree = "<group>"; };
 		262FCDCE1E234DDF00FC5D66 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Tabla/Images.xcassets; sourceTree = "<group>"; };
+		26308E5F1E44113C00DB8371 /* PopUpMenuView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PopUpMenuView.cpp; sourceTree = "<group>"; };
+		26308E601E44113C00DB8371 /* PopUpMenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PopUpMenuView.h; sourceTree = "<group>"; };
 		2673CD5C1E1D791C0036C02D /* PinballView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PinballView.cpp; sourceTree = "<group>"; };
 		2673CD5D1E1D791C0036C02D /* PinballView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PinballView.h; sourceTree = "<group>"; };
 		26CCA2B21E089DE7005F7C24 /* BallWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BallWorld.cpp; sourceTree = "<group>"; };
@@ -279,6 +283,8 @@
 		26CCA3201E089F98005F7C24 /* GameLibraryView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameLibraryView.h; sourceTree = "<group>"; };
 		26CCA3241E08AD8E005F7C24 /* AnimWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AnimWorld.cpp; sourceTree = "<group>"; };
 		26CCA3251E08AD8E005F7C24 /* AnimWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnimWorld.h; sourceTree = "<group>"; };
+		26D17D8D1E453CF7006B3FB1 /* CaptureProfileMenuView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CaptureProfileMenuView.cpp; sourceTree = "<group>"; };
+		26D17D8E1E453CF7006B3FB1 /* CaptureProfileMenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CaptureProfileMenuView.h; sourceTree = "<group>"; };
 		26E30EA51E0B4E3D00AA9F97 /* geom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = geom.cpp; sourceTree = "<group>"; };
 		26E30EA81E0B4F0600AA9F97 /* ocv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ocv.cpp; sourceTree = "<group>"; };
 		26E30EAC1E0C567100AA9F97 /* QuadTestWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = QuadTestWorld.cpp; sourceTree = "<group>"; };
@@ -980,6 +986,10 @@
 				26CCA3161E089EE3005F7C24 /* View.h */,
 				26CCA31F1E089F98005F7C24 /* GameLibraryView.cpp */,
 				26CCA3201E089F98005F7C24 /* GameLibraryView.h */,
+				26308E5F1E44113C00DB8371 /* PopUpMenuView.cpp */,
+				26308E601E44113C00DB8371 /* PopUpMenuView.h */,
+				26D17D8D1E453CF7006B3FB1 /* CaptureProfileMenuView.cpp */,
+				26D17D8E1E453CF7006B3FB1 /* CaptureProfileMenuView.h */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -2619,6 +2629,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				26D17D8F1E453CF7006B3FB1 /* CaptureProfileMenuView.cpp in Sources */,
 				26F3234B1DF74D8900EC9559 /* Gamepad_macosx.c in Sources */,
 				26CCA2DC1E089DE7005F7C24 /* PinballWorld.cpp in Sources */,
 				26E30EA61E0B4E3D00AA9F97 /* geom.cpp in Sources */,
@@ -2643,6 +2654,7 @@
 				7D4B6A1410EE43358255E704 /* b2TimeOfImpact.cpp in Sources */,
 				26CCA31C1E089EE3005F7C24 /* WindowData.cpp in Sources */,
 				2673CD5E1E1D791C0036C02D /* PinballView.cpp in Sources */,
+				26308E611E44113C00DB8371 /* PopUpMenuView.cpp in Sources */,
 				36991D11792C4997967FCEC7 /* b2ChainShape.cpp in Sources */,
 				26CCA2F61E089E3F005F7C24 /* Pipeline.cpp in Sources */,
 				819C4FF415DF49DCAEA34DC7 /* b2CircleShape.cpp in Sources */,
