@@ -104,10 +104,10 @@ void TokenWorld::drawGlobalKeypoints() {
 void TokenWorld::drawMatchingKeypoints() {
 	// DEBUG: Drawing contours
 	{
-		cout << "************drawMatchingKeypoints()************" << endl;
+//		cout << "************drawMatchingKeypoints()************" << endl;
 		for ( auto match: mTokens )
 		{
-			cout << match.first.name << endl;
+
 			auto token = match.second;
 			// Draw bounding box
 //			{

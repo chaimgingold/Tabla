@@ -131,7 +131,6 @@ vector<AnalyzedToken> TokenMatcher::tokensFromContours( const Pipeline::StageRef
 
 AnalyzedToken TokenMatcher::analyzeToken(Mat tokenImage) {
 	AnalyzedToken analyzedToken;
-//	analyzedToken.image = tokenImage;
 	getFeatureDetector()->detectAndCompute(tokenImage,
 										   noArray(),
 										   analyzedToken.keypoints,
@@ -143,115 +142,53 @@ AnalyzedToken TokenMatcher::analyzeToken(Mat tokenImage) {
 
 vector<TokenMatch> TokenMatcher::matchTokens( vector<AnalyzedToken> candidates )
 {
-	vector <AnalyzedToken> tokenLibrary = mTokenLibrary;
+
 	vector <TokenMatch> matches;
 
-	// Compare each token against every other for matches
-	// (first round starts with
-	// ab, ac .. af, then
-	// bc, bd.. bf,
-	// cd, ce.. cf
-	// and so on which handles all unique pairs.)
-	for ( int i=0; i < tokenLibrary.size(); i++ )
+	cout << "***Scoring images..." << endl;
+	for ( AnalyzedToken candidateToken : candidates )
 	{
-		AnalyzedToken libraryToken = tokenLibrary[i];
-		for ( int j=0; j < candidates.size(); j++ ) {
+		float bestMatchScore = 0;
+		AnalyzedToken bestMatch;
 
-			AnalyzedToken candidateToken = candidates[j];
+		cout << "Scoring image..." << endl;
+		for ( AnalyzedToken libraryToken : mTokenLibrary ) {
 
-			// nn_matches will be same size as focusedToken.keypoints.
-			vector<vector<DMatch>> nn_matches;
-			mMatcher.knnMatch(libraryToken.descriptors,
-							  candidateToken.descriptors,
-							  nn_matches,
-							  2);
 
-			// If way fewer keypoints in one token vs the other, skip
+			int numMatched = doKnnMatch(libraryToken.descriptors, candidateToken.descriptors);
+			
+			float finalMatchScore = numMatched;
 
-//			float smaller = (float)MIN(focusedToken.keypoints.size(), candidateToken.keypoints.size());
-//			float larger = (float)MAX(focusedToken.keypoints.size(), candidateToken.keypoints.size());
-//			float ratio = smaller / larger;
-//			if (ratio < 0.8) {
-//				cout << "SKIPPING" << endl;
-//				continue;
-//			}
+			cout << "\t" << libraryToken.name << " : " << finalMatchScore << endl;
 
-//			cout << "*******************" << endl;
-//			cout << focusedToken.keypoints.size() << endl;
-//			cout << candidateToken.keypoints.size() << endl;
-//			cout << nn_matches.size() << endl;
-
-			int numMatches = 0;
-			for (size_t i = 0; i < nn_matches.size(); i++) {
-				if (nn_matches[i].size() < 2) {
-					continue;
-				}
-
-				//				DMatch first = nn_matches[i][0];
-				float dist1 = nn_matches[i][0].distance;
-				float dist2 = nn_matches[i][1].distance;
-
-				if(dist1 < (dist2 * mParams.mNNMatchRatio)) {
-					numMatches++;
-				}
+			if (bestMatchScore < finalMatchScore) {
+				bestMatchScore = finalMatchScore;
+				bestMatch = libraryToken;
 			}
-
-			cout << libraryToken.name << " vs " << candidateToken.name << endl;
-			cout << "\t# Keypoints: " << nn_matches.size() << endl;
-			cout << "\t# Matches: " << numMatches << endl;
-
-
-			// Check if the number of matches with minimum distance is a reasonable percentage
-			// of the total number of matches
-			if (numMatches > nn_matches.size() * mParams.mNNMatchPercentage) {
-				matches.push_back(make_pair(libraryToken, candidateToken));
-			}
-
-
-			/*
-			 // Find matching descriptors...
-			 for (size_t i = 0; i < nn_matches.size(); i++) {
-				if (nn_matches[i].size() < 2) {
-			 continue;
-				}
-
-				DMatch first = nn_matches[i][0];
-				float dist1 = nn_matches[i][0].distance;
-				float dist2 = nn_matches[i][1].distance;
-
-				if(dist1 < mNNMatchRatio * dist2) {
-			 focusedToken.matched.push_back(focusedToken.keypoints[first.queryIdx]);
-			 candidateToken.matched.push_back(candidateToken.keypoints[first.trainIdx]);
-				}
-			 }
-
-			 for (unsigned i = 0; i < focusedToken.matched.size(); i++) {
-
-				if (i >= candidateToken.matched.size()) {
-			 continue;
-				}
-				Mat col = Mat::ones(3, 1, CV_64F);
-				col.at<double>(0) = focusedToken.matched[i].pt.x;
-				col.at<double>(1) = focusedToken.matched[i].pt.y;
-
-				col /= col.at<double>(2);
-				double dist = sqrt( pow(col.at<double>(0) - candidateToken.matched[i].pt.x, 2) +
-			 pow(col.at<double>(1) - candidateToken.matched[i].pt.y, 2)
-			 );
-
-				if(dist < mInlierThreshold) {
-			 int new_i = static_cast<int>(focusedToken.inliers.size());
-			 focusedToken.inliers.push_back(focusedToken.matched[i]);
-			 candidateToken.inliers.push_back(candidateToken.matched[i]);
-			 focusedToken.good_matches.push_back(DMatch(new_i, new_i, 0));
-
-			 mMatches.push_back(make_pair(focusedToken.index, candidateToken.index));
-				}
-			 }
-			 */
 		}
+		matches.push_back(make_pair(bestMatch, candidateToken));
 	}
 	return matches;
+}
+
+// Via http://docs.opencv.org/3.0-beta/doc/tutorials/features2d/akaze_matching/akaze_matching.html#akazematching
+int TokenMatcher::doKnnMatch(Mat descriptorsA, Mat descriptorsB) {
+	// nn_matches will be same size as descriptorsA.keypoints.
+	vector<vector<DMatch>> nn_matches;
+	mMatcher.knnMatch(descriptorsA,
+				      descriptorsB,
+					  nn_matches,
+					  2);
+	int numMatched = 0;
+	for(size_t i = 0; i < nn_matches.size(); i++) {
+		float dist1 = nn_matches[i][0].distance;
+		float dist2 = nn_matches[i][1].distance;
+
+		if(dist1 < mParams.mNNMatchRatio * dist2) {
+			numMatched++;
+		}
+	}
+	return numMatched;
 }
 
 void TokenMatcher::setParams( Params p )

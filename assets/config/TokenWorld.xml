@@ -15,7 +15,7 @@
 		
 		<TokenMatcher>
 			<InlierThreshold>			1.5 </InlierThreshold>
-			<NNMatchRatio>			    0.9 </NNMatchRatio>
+			<NNMatchRatio>			    0.8 </NNMatchRatio>
 			<NNMatchPercentage>			0.3 </NNMatchPercentage>
 			
 			<Tokens>

@@ -97,6 +97,7 @@ public:
 private:
 	Params mParams;
 	vector<AnalyzedToken> mTokenLibrary;
+	int doKnnMatch(Mat descriptorsA, Mat descriptorsB);
 	
 };
 
