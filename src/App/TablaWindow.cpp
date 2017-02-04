@@ -1,12 +1,12 @@
 //
-//  WindowData.cpp
+//  TablaWindow.cpp
 //  PaperBounce3
 //
 //  Created by Chaim Gingold on 9/12/16.
 //
 //
 
-#include "WindowData.h"
+#include "TablaWindow.h"
 #include "TablaApp.h"
 #include "geom.h" // getPointsAsPoly
 #include "GameLibraryView.h"
@@ -14,11 +14,14 @@
 const float kZNear =  100.f;
 const float kZFar  = -100.f;
 
-WindowData::WindowData( WindowRef window, bool isUIWindow, TablaApp& app )
+TablaWindow::TablaWindow( WindowRef window, bool isUIWindow, TablaApp& app )
 	: mApp(app)
 	, mWindow(window)
 	, mIsUIWindow(isUIWindow)
 {
+	mWindow->setUserData(this);
+	mWindow->setTitle( isUIWindow ? "Configuration" : "Projector" );
+	
 	mMainImageView = make_shared<MainImageView>( MainImageView(mApp) );
 	mMainImageView->setIsProjectorView(!isUIWindow);
 	mMainImageView->mWorldDrawFunc = [this](){
@@ -140,7 +143,7 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, TablaApp& app )
 	}
 }
 
-void WindowData::draw()
+void TablaWindow::draw()
 {
 	gl::ScopedViewport viewport( ivec2( 0, 0 ), getWindow()->getSize() );
 
@@ -263,32 +266,34 @@ void WindowData::draw()
 	}
 }
 
-void WindowData::mouseDown( MouseEvent event )
+void TablaWindow::mouseDown( MouseEvent event )
 {
 	mMousePosInWindow = event.getPos();
 	mViews.mouseDown(event);
 }
 
-void WindowData::mouseUp  ( MouseEvent event )
+void TablaWindow::mouseUp  ( MouseEvent event )
 {
 	mMousePosInWindow = event.getPos();
 	mViews.mouseUp(event);
 }
 
-void WindowData::mouseMove( MouseEvent event )
+void TablaWindow::mouseMove( MouseEvent event )
 {
 	mMousePosInWindow = event.getPos();
 	mViews.mouseMove(event);
 }
 
-void WindowData::mouseDrag( MouseEvent event )
+void TablaWindow::mouseDrag( MouseEvent event )
 {
 	mMousePosInWindow = event.getPos();
 	mViews.mouseDrag(event);
 }
 
-void WindowData::updateMainImageTransform()
+void TablaWindow::updateMainImageTransform()
 {
+	if (!mMainImageView) return;
+	
 	// get content bounds
 	Rectf bounds;
 
@@ -331,7 +336,7 @@ void WindowData::updateMainImageTransform()
 	mMainImageView->setFrame( frame );
 }
 
-void WindowData::updatePipelineViews()
+void TablaWindow::updatePipelineViews()
 {
 	const auto stages = mApp.getPipeline().getStages();
 	
@@ -407,14 +412,16 @@ void WindowData::updatePipelineViews()
 	}
 }
 
-void WindowData::resize()
+void TablaWindow::resize()
 {
+	updateMainImageTransform();
+	
 	layoutMenus();
 	
 	mViews.resize();
 }
 
-void WindowData::layoutMenus()
+void TablaWindow::layoutMenus()
 {
 	const vec2 kGutter = vec2(8.f);
 	vec2 lowerRight = Rectf(getWindow()->getBounds()).getLowerRight() - kGutter;
@@ -433,7 +440,7 @@ void WindowData::layoutMenus()
 	}
 }
 
-bool WindowData::isInteractingWithCalibrationPoly() const
+bool TablaWindow::isInteractingWithCalibrationPoly() const
 {
 	auto is = []( const std::shared_ptr<PolyEditView>& v ) -> bool
 	{

@@ -58,7 +58,7 @@
 		26CCA3191E089EE3005F7C24 /* TablaApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3101E089EE3005F7C24 /* TablaApp.cpp */; };
 		26CCA31A1E089EE3005F7C24 /* PipelineStageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3131E089EE3005F7C24 /* PipelineStageView.cpp */; };
 		26CCA31B1E089EE3005F7C24 /* View.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3151E089EE3005F7C24 /* View.cpp */; };
-		26CCA31C1E089EE3005F7C24 /* WindowData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3171E089EE3005F7C24 /* WindowData.cpp */; };
+		26CCA31C1E089EE3005F7C24 /* TablaWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3171E089EE3005F7C24 /* TablaWindow.cpp */; };
 		26CCA3211E089F98005F7C24 /* GameLibraryView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA31F1E089F98005F7C24 /* GameLibraryView.cpp */; };
 		26CCA3261E08AD8E005F7C24 /* AnimWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3241E08AD8E005F7C24 /* AnimWorld.cpp */; };
 		26D17D8F1E453CF7006B3FB1 /* CaptureProfileMenuView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26D17D8D1E453CF7006B3FB1 /* CaptureProfileMenuView.cpp */; };
@@ -277,8 +277,8 @@
 		26CCA3141E089EE3005F7C24 /* PipelineStageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PipelineStageView.h; sourceTree = "<group>"; };
 		26CCA3151E089EE3005F7C24 /* View.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = View.cpp; sourceTree = "<group>"; };
 		26CCA3161E089EE3005F7C24 /* View.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = View.h; sourceTree = "<group>"; };
-		26CCA3171E089EE3005F7C24 /* WindowData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WindowData.cpp; sourceTree = "<group>"; };
-		26CCA3181E089EE3005F7C24 /* WindowData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WindowData.h; sourceTree = "<group>"; };
+		26CCA3171E089EE3005F7C24 /* TablaWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TablaWindow.cpp; sourceTree = "<group>"; };
+		26CCA3181E089EE3005F7C24 /* TablaWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TablaWindow.h; sourceTree = "<group>"; };
 		26CCA31F1E089F98005F7C24 /* GameLibraryView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GameLibraryView.cpp; sourceTree = "<group>"; };
 		26CCA3201E089F98005F7C24 /* GameLibraryView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameLibraryView.h; sourceTree = "<group>"; };
 		26CCA3241E08AD8E005F7C24 /* AnimWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AnimWorld.cpp; sourceTree = "<group>"; };
@@ -970,8 +970,8 @@
 				26CCA3101E089EE3005F7C24 /* TablaApp.cpp */,
 				26CCA3111E089EE3005F7C24 /* TablaApp.h */,
 				26CCA3121E089EE3005F7C24 /* View */,
-				26CCA3171E089EE3005F7C24 /* WindowData.cpp */,
-				26CCA3181E089EE3005F7C24 /* WindowData.h */,
+				26CCA3171E089EE3005F7C24 /* TablaWindow.cpp */,
+				26CCA3181E089EE3005F7C24 /* TablaWindow.h */,
 			);
 			name = App;
 			path = ../src/App;
@@ -2652,7 +2652,7 @@
 				FE95B791332E4B49916DF787 /* b2DynamicTree.cpp in Sources */,
 				26CCA30D1E089EB8005F7C24 /* rtmidi_c.cpp in Sources */,
 				7D4B6A1410EE43358255E704 /* b2TimeOfImpact.cpp in Sources */,
-				26CCA31C1E089EE3005F7C24 /* WindowData.cpp in Sources */,
+				26CCA31C1E089EE3005F7C24 /* TablaWindow.cpp in Sources */,
 				2673CD5E1E1D791C0036C02D /* PinballView.cpp in Sources */,
 				26308E611E44113C00DB8371 /* PopUpMenuView.cpp in Sources */,
 				36991D11792C4997967FCEC7 /* b2ChainShape.cpp in Sources */,

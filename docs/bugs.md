@@ -19,6 +19,9 @@
 - [ ] Clear pipeline between game worlds...
 	- To repro: play pinball, then switch to anim; cube maps still around...??? Or just the active seletion?
 
+## Minor Bugs
+- Use Scissor Rect on Pop up menu. Refactor code in PipelineStageView::draw() to be reusable.
+
 # Game Worlds
 
 ## General

@@ -254,12 +254,12 @@ void TablaApp::loadLightLinkXml( XmlTree xml )
 
 void TablaApp::setupWindows()
 {
-	mMainWindow = getWindow();
-	mMainWindow->setTitle("Projector");
-	mMainWindow->setUserData( new WindowData(mMainWindow,false,*this) );
+	mProjectorWin = TablaWindowRef( new TablaWindow(getWindow(),false,*this) );
 
 	// resize window
-	setWindowSize( mLightLink.getCaptureProfile().mCaptureSize.x, mLightLink.getCaptureProfile().mCaptureSize.y ) ;
+	mProjectorWin->getWindow()->setSize(
+		mLightLink.getCaptureProfile().mCaptureSize.x,
+		mLightLink.getCaptureProfile().mCaptureSize.y ) ;
 
 	// Fullscreen main window in secondary display
 	auto displays = Display::getDisplays() ;
@@ -267,11 +267,11 @@ void TablaApp::setupWindows()
 	if ( displays.size()>1 && mAutoFullScreenProjector )
 	{
 		// workaround for cinder multi-window fullscreen bug... :P
-//		mMainWindow->setPos( displays[1]->getBounds().getUL() + ivec2(10,10) ); // redundant to .display(displays[1]); could hide by putting outside of window or something
-		mMainWindow->hide(); // must hide before, not after, fullscreening.
+//		mProjectorWin->setPos( displays[1]->getBounds().getUL() + ivec2(10,10) ); // redundant to .display(displays[1]); could hide by putting outside of window or something
+		mProjectorWin->getWindow()->hide(); // must hide before, not after, fullscreening.
 		
 		// fullscreen on 2nd display
-		mMainWindow->setFullScreen( true, FullScreenOptions()
+		mProjectorWin->getWindow()->setFullScreen( true, FullScreenOptions()
 			.kioskMode(true)
 			.secondaryDisplayBlanking(false)
 			.exclusive(true)
@@ -280,10 +280,9 @@ void TablaApp::setupWindows()
 		
 	}
 
-	mMainWindow->getSignalMove()  .connect( [&]{ this->saveUserSettings(); });
-	mMainWindow->getSignalResize().connect( [&]{ this->saveUserSettings(); });
-	
-
+	mProjectorWin->getWindow()->getSignalMove()  .connect( [&]{ this->saveUserSettings(); });
+	mProjectorWin->getWindow()->getSignalResize().connect( [&]{ this->saveUserSettings(); });
+		
 	// aux UI display
 	if (mHasConfigWindow)
 	{
@@ -293,22 +292,23 @@ void TablaApp::setupWindows()
 		// for some reason this seems to sometimes create three windows once we fullscreen the main window :P
 		// and then one of those is blank. That is the reason (besides kiosk mode) for the mHasConfigWindow switch,
 		// as a workaround for that bug.
-		mUIWindow = createWindow( Window::Format().size(
+		WindowRef uiWindowRef = createWindow( Window::Format().size(
 			mLightLink.getCaptureProfile().mCaptureSize.x,
 			mLightLink.getCaptureProfile().mCaptureSize.y ) );
 		
-		mUIWindow->setTitle("Configuration");
-		mUIWindow->setUserData( new WindowData(mUIWindow,true,*this) );
+		mUIWindow = TablaWindowRef( new TablaWindow(uiWindowRef,true,*this) );
 		
 		// move it out of the way on one screen
-		if ( mMainWindow->getDisplay() == mUIWindow->getDisplay() )
+		if ( mProjectorWin->getWindow()->getDisplay() == mUIWindow->getWindow()->getDisplay() )
 		{
-			mUIWindow->setPos( mMainWindow->getPos() + ivec2( -mMainWindow->getWidth()-16,0) ) ;
+			mUIWindow->getWindow()->setPos(
+				mProjectorWin->getWindow()->getPos()
+				+ ivec2( -mProjectorWin->getWindow()->getWidth()-16,0) ) ;
 		}
 		
 		// save changes (do this AFTER we set it up, so we don't save initial conditions!)
-		mUIWindow->getSignalMove()  .connect( [&]{ this->saveUserSettings(); });
-		mUIWindow->getSignalResize().connect( [&]{ this->saveUserSettings(); });
+		mUIWindow->getWindow()->getSignalMove()  .connect( [&]{ this->saveUserSettings(); });
+		mUIWindow->getWindow()->getSignalResize().connect( [&]{ this->saveUserSettings(); });
 	}
 }
 
@@ -735,22 +735,22 @@ TablaApp::hotloadableAssetPath( fs::path p ) const
 
 void TablaApp::mouseDown( MouseEvent event )
 {
-	if (getWindowData()) getWindowData()->mouseDown(event);
+	if (getTablaWindow()) getTablaWindow()->mouseDown(event);
 }
 
 void TablaApp::mouseUp( MouseEvent event )
 {
-	if (getWindowData()) getWindowData()->mouseUp(event);
+	if (getTablaWindow()) getTablaWindow()->mouseUp(event);
 }
 
 void TablaApp::mouseMove( MouseEvent event )
 {
-	if (getWindowData()) getWindowData()->mouseMove(event);
+	if (getTablaWindow()) getTablaWindow()->mouseMove(event);
 }
 
 void TablaApp::mouseDrag( MouseEvent event )
 {
-	if (getWindowData()) getWindowData()->mouseDrag(event);
+	if (getTablaWindow()) getTablaWindow()->mouseDrag(event);
 }
 
 void TablaApp::fileDrop( FileDropEvent event )
@@ -871,13 +871,13 @@ void TablaApp::updateVision()
 		}
 		
 		// update pipeline visualization
-		if (mUIWindow && mUIWindow->getUserData<WindowData>() ) mUIWindow->getUserData<WindowData>()->updatePipelineViews();
+		if (mUIWindow) mUIWindow->updatePipelineViews();
 		
 		// since the pipeline stage we are drawing might have changed... (or come into existence)
 		// update the window mapping
 		// this is a little weird to put here, but ah well
-		updateMainImageTransform(mUIWindow);
-		updateMainImageTransform(mMainWindow);
+		if (mUIWindow) mUIWindow->updateMainImageTransform();
+		if (mProjectorWin) mProjectorWin->updateMainImageTransform();
 	}
 }
 
@@ -885,33 +885,14 @@ void TablaApp::cleanup() {
 	if (mGameWorld) mGameWorld->cleanup();
 }
 
-void TablaApp::updateMainImageTransform( WindowRef w )
-{
-	if (w)
-	{
-		WindowData *win = w->getUserData<WindowData>();
-		
-		// might not have been created yet (e.g., in setup)
-		if (win) win->updateMainImageTransform();
-	}
-}
-
 void TablaApp::resize()
 {
-	updateMainImageTransform(getWindow());
-
-	if (getWindow())
-	{
-		WindowData *win = getWindow()->getUserData<WindowData>();
-		
-		// might not have been created yet (e.g., in setup)
-		if (win) win->resize();
-	}
+	if ( getTablaWindow() ) getTablaWindow()->resize();
 }
 
 vec2 TablaApp::getMousePosInWorld() const
 {
-	WindowData *win = getWindow()->getUserData<WindowData>();
+	TablaWindow *win = getWindow()->getUserData<TablaWindow>();
 	
 	const vec2 mouseInWindow   = win->getMousePosInWindow();
 	const vec2 mouseInWorld    = win->getMainImageView()->windowToWorld(mouseInWindow);
@@ -921,7 +902,7 @@ vec2 TablaApp::getMousePosInWorld() const
 
 void TablaApp::drawWorld( GameWorld::DrawType drawType )
 {
-	WindowData *win = getWindow()->getUserData<WindowData>();
+	TablaWindow *win = getWindow()->getUserData<TablaWindow>();
 
 	const bool isMouseInWindow = win->getWindow()->getBounds().contains(win->getMousePosInWindow());
 	
@@ -953,7 +934,7 @@ void TablaApp::drawWorld( GameWorld::DrawType drawType )
 	}
 	else if (drawType==GameWorld::DrawType::Projector
 			&& mUIWindow
-			&& mUIWindow->getUserData<WindowData>()->isInteractingWithCalibrationPoly() )
+			&& mUIWindow->isInteractingWithCalibrationPoly() )
 	{
 		drawContours( false, false, true );
 	}
@@ -1059,7 +1040,7 @@ void TablaApp::drawContours( bool filled, bool mousePickInfo, bool worldBounds )
 void TablaApp::draw()
 {
 	// draw window
-	WindowData* win = getWindow()->getUserData<WindowData>() ;
+	TablaWindow* win = getWindow()->getUserData<TablaWindow>() ;
 	
 	if (win) win->draw();
 }
@@ -1246,7 +1227,7 @@ void TablaApp::loadUserSettingsFromXml( XmlTree xml )
 		mPipeline.setQuery(name);
 	}
 	
-	auto getWindowBounds = [&xml]( string xmlName, WindowRef win )
+	auto getWindowBounds = [&xml]( string xmlName, TablaWindowRef win )
 	{
 		if ( xml.hasChild(xmlName) && win )
 		{
@@ -1256,15 +1237,15 @@ void TablaApp::loadUserSettingsFromXml( XmlTree xml )
 				Area a;
 				if ( sscanf(val.c_str(), "(%d, %d)-(%d, %d)",&a.x1,&a.y1,&a.x2,&a.y2)==4 )
 				{
-					win->setSize(a.getSize());
-					win->setPos (a.getUL());
+					win->getWindow()->setSize(a.getSize());
+					win->getWindow()->setPos (a.getUL());
 				}
 			} catch (...) {}
 		}
 	};
 	
 	getWindowBounds( "UIWindowBounds", mUIWindow );
-	if (!mMainWindow->isFullScreen()) getWindowBounds( "MainWindowBounds", mMainWindow );
+	if (!mProjectorWin->getWindow()->isFullScreen()) getWindowBounds( "MainWindowBounds", mProjectorWin );
 }
 
 XmlTree TablaApp::getUserSettingsXml() const
@@ -1278,12 +1259,16 @@ XmlTree TablaApp::getUserSettingsXml() const
 	
 	xml.push_back( XmlTree("PipelineQuery",mPipeline.getQuery()) );
 	
-	auto setWindowBounds = [&xml]( string xmlName, WindowRef win ) {
-		if (win) xml.push_back( XmlTree(xmlName,  toString(win->getBounds()+win->getPos())) );
+	auto setWindowBounds = [&xml]( string xmlName, TablaWindowRef win ) {
+		if (win) {
+			xml.push_back( XmlTree(xmlName, toString(
+				win->getWindow()->getBounds() + win->getWindow()->getPos() ))
+			);
+		}
 	};
 	
 	setWindowBounds("UIWindowBounds",mUIWindow);
-	setWindowBounds("MainWindowBounds",mMainWindow);
+	setWindowBounds("MainWindowBounds",mProjectorWin);
 	
 	return xml;
 }

@@ -1,13 +1,13 @@
 //
-//  WindowData.hpp
+//  TablaWindow.hpp
 //  PaperBounce3
 //
 //  Created by Chaim Gingold on 9/12/16.
 //
 //
 
-#ifndef WindowData_hpp
-#define WindowData_hpp
+#ifndef TablaWindow_hpp
+#define TablaWindow_hpp
 
 #include "View.h"
 #include "PipelineStageView.h"
@@ -17,10 +17,11 @@
 class TablaApp;
 class GameLibraryView;
 
-class WindowData {
+class TablaWindow {
 public:
 
-	WindowData( WindowRef window, bool isUIWindow, TablaApp& ) ;
+	TablaWindow( WindowRef window, bool isUIWindow, TablaApp& ) ;
+	TablaWindow(const TablaWindow&) = delete; // no copy constructor! bad!
 	
 	void draw();
 	void mouseDown( MouseEvent event );
@@ -68,7 +69,7 @@ private:
 	TablaApp& mApp; // hacky transitional refactor thing.
 
 };
+typedef std::shared_ptr<TablaWindow> TablaWindowRef;
 
 
-
-#endif /* WindowData_hpp */
+#endif /* TablaWindow_hpp */

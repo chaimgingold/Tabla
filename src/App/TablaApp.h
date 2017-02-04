@@ -31,7 +31,7 @@
 #include "Pipeline.h"
 
 #include "PipelineStageView.h"
-#include "WindowData.h"
+#include "TablaWindow.h"
 
 #include "PureDataNode.h"
 
@@ -132,11 +132,11 @@ public:
 	gl::TextureFontRef	mTextureFont;
 	
 private:
-	WindowRef			mMainWindow;// projector
-	WindowRef			mUIWindow; // for other debug info, on computer screen
+	TablaWindowRef		mProjectorWin; // projector
+	TablaWindowRef		mUIWindow; // for other debug info, on computer screen
 	
-	WindowData*			getWindowData() { return getWindow() ? getWindow()->getUserData<WindowData>() : 0 ; }
-	// for front window
+	TablaWindow*		getTablaWindow( WindowRef w ) { return w ? w->getUserData<TablaWindow>() : 0 ; }
+	TablaWindow*		getTablaWindow() { return getTablaWindow(getWindow()); } // for front window
 
 	void drawContours( bool filled, bool mousePickInfo, bool worldBounds ) const;
 	
@@ -161,8 +161,6 @@ private:
 	
 	// to help us visualize
 	void addProjectorPipelineStages();
-		
-	void updateMainImageTransform( WindowRef );
 
 	
 	// settings
