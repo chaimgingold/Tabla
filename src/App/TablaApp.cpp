@@ -909,12 +909,20 @@ void TablaApp::resize()
 	}
 }
 
-void TablaApp::drawWorld( GameWorld::DrawType drawType )
+vec2 TablaApp::getMousePosInWorld() const
 {
 	WindowData *win = getWindow()->getUserData<WindowData>();
 	
 	const vec2 mouseInWindow   = win->getMousePosInWindow();
 	const vec2 mouseInWorld    = win->getMainImageView()->windowToWorld(mouseInWindow);
+	
+	return mouseInWorld;
+}
+
+void TablaApp::drawWorld( GameWorld::DrawType drawType )
+{
+	WindowData *win = getWindow()->getUserData<WindowData>();
+
 	const bool isMouseInWindow = win->getWindow()->getBounds().contains(win->getMousePosInWindow());
 	
 	const bool isUIWindow = win->getIsUIWindow();
@@ -941,71 +949,15 @@ void TablaApp::drawWorld( GameWorld::DrawType drawType )
 	// draw contours
 	if ( mDrawContours || isUIWindow )
 	{
-		// filled
-		if ( mDrawContoursFilled )
-		{
-			// TODO make fill colors tunable
-			ColorA holecolor(.0f,.0f,.0f,.8f);
-			ColorA fillcolor(.2f,.2f,.4f,.5f);
-			
-			// recursive tree
-			function<void(const Contour&)> drawOne = [&]( const Contour& c )
-			{
-				if ( c.mIsHole ) gl::color( holecolor );
-				else gl::color( fillcolor );
-				
-				gl::drawSolid(c.mPolyLine);
-				
-				for( auto childIndex : c.mChild )
-				{
-					drawOne( mVisionOutput.mContours[childIndex] ) ;
-				}
-			};
-			
-			for( auto const &c : mVisionOutput.mContours )
-			{
-				if ( c.mTreeDepth==0 )
-				{
-					drawOne(c) ;
-				}
-			}
-		}
-		// outlines
-		else
-		{
-			for( auto c : mVisionOutput.mContours )
-			{
-				ColorAf color ;
-				
-				if ( !c.mIsHole ) color = ColorAf(1,1,1);
-				else color = ColorAf::hex( 0xF19878 ) ;
-				
-				gl::color(color) ;
-				gl::draw(c.mPolyLine) ;
-			}
-		}
-
-		if ( mDrawContourMousePick || isUIWindow )
-		{
-			// picked highlight
-			const Contour* picked = mVisionOutput.mContours.findLeafContourContainingPoint( mouseInWorld ) ;
-			
-			if (picked)
-			{
-				if (picked->mIsHole) gl::color(6.f,.4f,.2f);
-				else gl::color(.2f,.6f,.4f,.8f);
-				
-				gl::draw(picked->mPolyLine);
-				
-				if (0)
-				{
-					vec2 x = closestPointOnPoly(mouseInWorld,picked->mPolyLine);
-					gl::color(.5f,.1f,.3f,.9f);
-					gl::drawSolidCircle(x, 5.f);
-				}
-			}
-		}
+		drawContours( mDrawContoursFilled, mDrawContourMousePick || isUIWindow );
 	}
+	else if (drawType==GameWorld::DrawType::Projector
+			&& mUIWindow
+			&& mUIWindow->getUserData<WindowData>()->isInteractingWithCalibrationPoly() )
+	{
+		drawContours( false, false );
+	}
+
 	
 	// draw balls
 	if (mGameWorld) mGameWorld->draw(drawType);
@@ -1013,7 +965,81 @@ void TablaApp::drawWorld( GameWorld::DrawType drawType )
 	// mouse debug info
 	if ( (mDrawMouseDebugInfo&&isUIWindow) && isMouseInWindow && mGameWorld )
 	{
-		mGameWorld->drawMouseDebugInfo(mouseInWorld);
+		mGameWorld->drawMouseDebugInfo( getMousePosInWorld() );
+	}
+}
+
+void TablaApp::drawContours( bool filled, bool mousePickInfo ) const
+{
+	// filled
+	if ( filled )
+	{
+		// TODO make fill colors tunable
+		ColorA holecolor(.0f,.0f,.0f,.8f);
+		ColorA fillcolor(.2f,.2f,.4f,.5f);
+		
+		// recursive tree
+		function<void(const Contour&)> drawOne = [&]( const Contour& c )
+		{
+			if ( c.mIsHole ) gl::color( holecolor );
+			else gl::color( fillcolor );
+			
+			gl::drawSolid(c.mPolyLine);
+			
+			for( auto childIndex : c.mChild )
+			{
+				drawOne( mVisionOutput.mContours[childIndex] ) ;
+			}
+		};
+		
+		for( auto const &c : mVisionOutput.mContours )
+		{
+			if ( c.mTreeDepth==0 )
+			{
+				drawOne(c) ;
+			}
+		}
+	}
+	// outlines
+	else
+	{
+		for( auto c : mVisionOutput.mContours )
+		{
+			ColorAf color ;
+			
+			if ( !c.mIsHole ) color = ColorAf(1,1,1);
+			else color = ColorAf::hex( 0xF19878 ) ;
+			
+			gl::color(color) ;
+			gl::draw(c.mPolyLine) ;
+		}
+	}
+
+	// outline capture area
+	gl::color(0,1,1);
+	gl::draw(getWorldBoundsPoly());
+
+	if ( mousePickInfo )
+	{
+		vec2 mouseInWorld = getMousePosInWorld();
+		
+		// picked highlight
+		const Contour* picked = mVisionOutput.mContours.findLeafContourContainingPoint( mouseInWorld ) ;
+		
+		if (picked)
+		{
+			if (picked->mIsHole) gl::color(6.f,.4f,.2f);
+			else gl::color(.2f,.6f,.4f,.8f);
+			
+			gl::draw(picked->mPolyLine);
+			
+			if (0)
+			{
+				vec2 x = closestPointOnPoly(mouseInWorld,picked->mPolyLine);
+				gl::color(.5f,.1f,.3f,.9f);
+				gl::drawSolidCircle(x, 5.f);
+			}
+		}
 	}
 }
 

@@ -38,7 +38,8 @@ public:
 	ViewCollection& getViews() { return mViews; }
 	
 	bool getIsUIWindow() const { return mIsUIWindow; }
-
+	bool isInteractingWithCalibrationPoly() const;
+	
 	void updatePipelineViews();
 	
 private:
@@ -54,6 +55,11 @@ private:
 	std::shared_ptr<MainImageView> mMainImageView; // main view, with image in it.
 	std::shared_ptr<GameLibraryView> mGameLibraryView;
 	std::shared_ptr<CaptureProfileMenuView> mCaptureMenuView;
+
+	std::shared_ptr<PolyEditView> mCameraPolyEditView;
+	std::shared_ptr<PolyEditView> mProjPolyEditView;
+	std::shared_ptr<PolyEditView> mWorldBoundsPolyEditView;
+	
 	
 	void layoutMenus();
 	

@@ -59,7 +59,7 @@ class TablaApp : public App {
 	void cleanup() override;
 	
 	void drawWorld( GameWorld::DrawType );
-
+	void drawContours( bool filled, bool mousePickInfo ) const;
 
 	// Light link management
 	const LightLink& getLightLink() const { return mLightLink; }
@@ -77,6 +77,8 @@ private:
 		// called once by lightLinkDidChange if setupCaptureDevice fails
 		// it tries a
 	void setProjectorWorldSpaceCoordsFromCaptureProfile();
+	
+	vec2 getMousePosInWorld() const; // uses current window (ci::getWindow())
 	
 public:	
 	LightLink			mLightLink; // calibration for camera <> world <> projector

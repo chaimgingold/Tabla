@@ -60,7 +60,7 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, TablaApp& app )
 		
 		// - camera capture coords
 		{
-			std::shared_ptr<PolyEditView> cameraPolyEditView = make_shared<PolyEditView>(
+			mCameraPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
 					mApp.getPipeline(),
 					[this](){ return getPointsAsPoly(mApp.mLightLink.getCaptureProfile().mCaptureCoords,4); },
@@ -68,21 +68,21 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, TablaApp& app )
 					)
 				);
 			
-			cameraPolyEditView->setSetPolyFunc( [&]( const PolyLine2& poly ){
+			mCameraPolyEditView->setSetPolyFunc( [&]( const PolyLine2& poly ){
 				setPointsFromPoly( mApp.mLightLink.getCaptureProfile().mCaptureCoords, 4, poly );
 				updateLightLink(mApp);
 			});
 			
-			cameraPolyEditView->setMainImageView( mMainImageView );
-			cameraPolyEditView->getEditableInStages().push_back("undistorted");
+			mCameraPolyEditView->setMainImageView( mMainImageView );
+			mCameraPolyEditView->getEditableInStages().push_back("undistorted");
 			
-			mViews.addView( cameraPolyEditView );
+			mViews.addView( mCameraPolyEditView );
 		}
 
 		// - projector mapping
 		{
 			// convert to input coords
-			std::shared_ptr<PolyEditView> projPolyEditView = make_shared<PolyEditView>(
+			mProjPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
 					mApp.getPipeline(),
 					[&](){ return getPointsAsPoly(mApp.mLightLink.getProjectorProfile().mProjectorCoords,4); },
@@ -90,21 +90,21 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, TablaApp& app )
 					)
 			);
 			
-			projPolyEditView->setSetPolyFunc( [&]( const PolyLine2& poly ){
+			mProjPolyEditView->setSetPolyFunc( [&]( const PolyLine2& poly ){
 				setPointsFromPoly( mApp.mLightLink.getProjectorProfile().mProjectorCoords, 4, poly );
 				updateLightLink(mApp);
 			});
 			
-			projPolyEditView->setMainImageView( mMainImageView );
-			projPolyEditView->getEditableInStages().push_back("projector");
+			mProjPolyEditView->setMainImageView( mMainImageView );
+			mProjPolyEditView->getEditableInStages().push_back("projector");
 			
-			mViews.addView( projPolyEditView );
+			mViews.addView( mProjPolyEditView );
 		}
 		
 		// - world boundaries
 		// (for both camera + projector)
 		{
-			std::shared_ptr<PolyEditView> projPolyEditView = make_shared<PolyEditView>(
+			mWorldBoundsPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
 					mApp.getPipeline(),
 					[&](){ return getPointsAsPoly(mApp.mLightLink.getCaptureProfile().mCaptureWorldSpaceCoords,4); },
@@ -112,16 +112,16 @@ WindowData::WindowData( WindowRef window, bool isUIWindow, TablaApp& app )
 					)
 			);
 			
-			projPolyEditView->setSetPolyFunc( [&]( const PolyLine2& poly ){
+			mWorldBoundsPolyEditView->setSetPolyFunc( [&]( const PolyLine2& poly ){
 				setPointsFromPoly( mApp.mLightLink.getCaptureProfile().mCaptureWorldSpaceCoords  , 4, poly );
 				setPointsFromPoly( mApp.mLightLink.getProjectorProfile().mProjectorWorldSpaceCoords, 4, poly );
 				updateLightLink(mApp);
 			});
 			
-			projPolyEditView->setMainImageView( mMainImageView );
-			projPolyEditView->getEditableInStages().push_back("world-boundaries");
+			mWorldBoundsPolyEditView->setMainImageView( mMainImageView );
+			mWorldBoundsPolyEditView->getEditableInStages().push_back("world-boundaries");
 			
-			mViews.addView( projPolyEditView );
+			mViews.addView( mWorldBoundsPolyEditView );
 		}
 	}
 	
@@ -431,4 +431,18 @@ void WindowData::layoutMenus()
 	{
 		mCaptureMenuView->layout( Rectf( lowerRight - size, lowerRight ) );
 	}
+}
+
+bool WindowData::isInteractingWithCalibrationPoly() const
+{
+	auto is = []( const std::shared_ptr<PolyEditView>& v ) -> bool
+	{
+		return v && (v->getHasRollover() || v->getHasMouseDown());
+	};
+	
+	if ( is(mCameraPolyEditView)
+	  || is(mProjPolyEditView)
+	  || is(mWorldBoundsPolyEditView) ) return true;
+	
+	return false;
 }
