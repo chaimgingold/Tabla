@@ -118,6 +118,8 @@ public:
 	ViewRef getRolloverView()  const { return mRolloverView; }
 	
 private:
+	void updateRollover( vec2 );
+	
 	ViewRef mMouseDownView;
 	ViewRef mRolloverView;
 	vector< ViewRef > mViews;

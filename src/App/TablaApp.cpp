@@ -949,13 +949,13 @@ void TablaApp::drawWorld( GameWorld::DrawType drawType )
 	// draw contours
 	if ( mDrawContours || isUIWindow )
 	{
-		drawContours( mDrawContoursFilled, mDrawContourMousePick || isUIWindow );
+		drawContours( mDrawContoursFilled, mDrawContourMousePick || isUIWindow, false );
 	}
 	else if (drawType==GameWorld::DrawType::Projector
 			&& mUIWindow
 			&& mUIWindow->getUserData<WindowData>()->isInteractingWithCalibrationPoly() )
 	{
-		drawContours( false, false );
+		drawContours( false, false, true );
 	}
 
 	
@@ -969,7 +969,7 @@ void TablaApp::drawWorld( GameWorld::DrawType drawType )
 	}
 }
 
-void TablaApp::drawContours( bool filled, bool mousePickInfo ) const
+void TablaApp::drawContours( bool filled, bool mousePickInfo, bool worldBounds ) const
 {
 	// filled
 	if ( filled )
@@ -1016,8 +1016,21 @@ void TablaApp::drawContours( bool filled, bool mousePickInfo ) const
 	}
 
 	// outline capture area
-	gl::color(0,1,1);
-	gl::draw(getWorldBoundsPoly());
+	if (worldBounds)
+	{
+		gl::color(0,1,1);
+		gl::draw(getWorldBoundsPoly());
+		
+		vec2 k(1.f);
+		
+		auto v = getWorldBoundsPoly().getPoints(); // for some reason i have to put this here..., not in for ()
+		
+		for( auto p : v )
+		{
+			Rectf r(p-k,p+k);
+			gl::drawSolidRect(r);
+		}
+	}
 
 	if ( mousePickInfo )
 	{

@@ -59,7 +59,6 @@ class TablaApp : public App {
 	void cleanup() override;
 	
 	void drawWorld( GameWorld::DrawType );
-	void drawContours( bool filled, bool mousePickInfo ) const;
 
 	// Light link management
 	const LightLink& getLightLink() const { return mLightLink; }
@@ -138,6 +137,8 @@ private:
 	
 	WindowData*			getWindowData() { return getWindow() ? getWindow()->getUserData<WindowData>() : 0 ; }
 	// for front window
+
+	void drawContours( bool filled, bool mousePickInfo, bool worldBounds ) const;
 	
 	class FPS
 	{
