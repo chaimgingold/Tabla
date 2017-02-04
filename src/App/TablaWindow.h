@@ -21,7 +21,9 @@ class TablaWindow {
 public:
 
 	TablaWindow( WindowRef window, bool isUIWindow, TablaApp& ) ;
+	
 	TablaWindow(const TablaWindow&) = delete; // no copy constructor! bad!
+	TablaWindow& operator=( const TablaWindow& ) = delete;	
 	
 	void draw();
 	void mouseDown( MouseEvent event );

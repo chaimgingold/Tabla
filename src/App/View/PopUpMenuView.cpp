@@ -47,7 +47,10 @@ void PopUpMenuView::draw()
 	gl::drawSolidRect( getBounds() );
 	
 	gl::color(0,0,0, getHasMouseDown() ? .5 : 1.f );
-	app.mTextureFont->drawString( getDefaultItemName(), getBounds().getLowerLeft() + kTextOffset );
+	{
+		gl::ScopedScissor scissor( getScissorLowerLeft(), getScissorSize() );
+		app.mTextureFont->drawString( getDefaultItemName(), getBounds().getLowerLeft() + kTextOffset );
+	}
 	
 	if ( getHasMouseDown() )
 	{
@@ -55,7 +58,10 @@ void PopUpMenuView::draw()
 		
 		const vec2 itemSize = getItemSize();
 		const Rectf menuRect = getMenuRect();
-		
+
+//		gl::ScopedScissor scissor( getScissorLowerLeft(menuRect), getScissorSize(menuRect) );
+// doesn't work right for some reason
+
 		gl::color(1,1,1,1);
 		gl::drawSolidRect(menuRect);
 		

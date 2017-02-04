@@ -20,7 +20,8 @@
 	- To repro: play pinball, then switch to anim; cube maps still around...??? Or just the active seletion?
 
 ## Minor Bugs
-- Use Scissor Rect on Pop up menu. Refactor code in PipelineStageView::draw() to be reusable.
+- [x] Use Scissor Rect on Pop up menu. Refactor code in PipelineStageView::draw() to be reusable.
+	- [ ] Button is clipped, but not menu.
 
 # Game Worlds
 

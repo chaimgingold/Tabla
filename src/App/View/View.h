@@ -83,7 +83,13 @@ public:
 	
 	bool getHasMouseDown() const { return mHasMouseDown; }
 	void setHasMouseDown( bool v ) { mHasMouseDown=v; }
-	
+
+protected:
+	ivec2 getScissorLowerLeft( Rectf ) const;
+	ivec2 getScissorSize( Rectf ) const;
+	ivec2 getScissorLowerLeft() const { return getScissorLowerLeft(getFrame()); }
+	ivec2 getScissorSize() const { return getScissorSize(getFrame()); }
+
 private:
 	bool	mHasRollover=false;
 	bool	mHasMouseDown=false;

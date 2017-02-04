@@ -20,6 +20,16 @@ mat4 View::getChildToRootMatrix() const
 	else return getChildToParentMatrix();
 }
 
+ivec2 View::getScissorLowerLeft( Rectf r ) const
+{
+	return ivec2( toPixels(r.x1), toPixels(getWindowHeight()) - toPixels(r.y2));
+}
+
+ivec2 View::getScissorSize( Rectf r ) const
+{
+	return ivec2( toPixels(r.getWidth()), toPixels(r.getHeight()) );
+}
+
 void ViewCollection::draw()
 {
 	for( const auto &v : mViews )
