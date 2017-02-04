@@ -93,10 +93,13 @@ public:
 	vector<TokenMatch> matchTokens( vector<AnalyzedToken> candidates );
 	
 	const vector<AnalyzedToken>& getTokenLibrary() const { return mTokenLibrary; }
+
+	void reanalyze();
 	
 private:
 	Params mParams;
 	vector<AnalyzedToken> mTokenLibrary;
+	vec2 mAverageLibraryTokenSize = vec2(0,0);
 	int doKnnMatch(Mat descriptorsA, Mat descriptorsB);
 	
 };

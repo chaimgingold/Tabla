@@ -43,6 +43,28 @@ TokenMatcher::TokenMatcher()
 	// for what NORM option to use with which algorithm here
 	mMatcher = cv::BFMatcher(NORM_HAMMING);
 
+
+	/** @brief The AKAZE constructor
+
+	 @param descriptor_type Type of the extracted descriptor: DESCRIPTOR_KAZE,
+	 DESCRIPTOR_KAZE_UPRIGHT, DESCRIPTOR_MLDB or DESCRIPTOR_MLDB_UPRIGHT.
+	 @param descriptor_size Size of the descriptor in bits. 0 -\> Full size
+	 @param descriptor_channels Number of channels in the descriptor (1, 2, 3)
+	 @param threshold Detector response threshold to accept point
+	 @param nOctaves Maximum octave evolution of the image
+	 @param nOctaveLayers Default number of sublevels per scale level
+	 @param diffusivity Diffusivity type. DIFF_PM_G1, DIFF_PM_G2, DIFF_WEICKERT or
+	 DIFF_CHARBONNIER
+	 */
+//	Feature2DRef akaze = cv::AKAZE::create(AKAZE::DESCRIPTOR_MLDB,
+//										   0, // descriptor_size
+//										   3, // descriptor_channels
+//										   0.0001f, // threshold
+//										   5, // nOctaves
+//										   5, // nOctaveLayers
+//										   KAZE::DIFF_CHARBONNIER // diffusivity
+//										   );
+//	mFeatureDetectors.push_back(make_pair("AKAZE", akaze));
 	mFeatureDetectors.push_back(make_pair("AKAZE", cv::AKAZE::create()));
 	mFeatureDetectors.push_back(make_pair("ORB",   cv::ORB::create()));
 	mFeatureDetectors.push_back(make_pair("BRISK", cv::BRISK::create()));
@@ -109,7 +131,16 @@ vector<AnalyzedToken> TokenMatcher::tokensFromContours( const Pipeline::StageRef
 		// (creating a copy to avoid issues with UMat->Mat leaving dangling references)
 		Mat imageCopy;
 		tokenContourImage.getMat(ACCESS_READ).copyTo(imageCopy);
-		AnalyzedToken analyzedToken = analyzeToken(imageCopy);
+
+		// Scale the cropped image to match the average library token size,
+		// since AKAZE finds more keypoints in larger images
+		vec2 croppedSize = vec2(imageCopy.cols, imageCopy.rows);
+		vec2 sizeRatio = mAverageLibraryTokenSize / croppedSize;
+		vec2 inverseSizeRatio = vec2(1.0) / sizeRatio;
+		Mat resized;
+		cv::resize(imageCopy, resized, cv::Size(0,0), sizeRatio.x, sizeRatio.y, INTER_CUBIC);
+
+		AnalyzedToken analyzedToken = analyzeToken(resized);
 		analyzedToken.index = tokens.size();
 
 		// Record the original contour the token arose from
@@ -120,7 +151,8 @@ vector<AnalyzedToken> TokenMatcher::tokensFromContours( const Pipeline::StageRef
 		// Remove the offset of the imageSpaceRect, we don't need it
 		imageSpaceRect.offset(-imageSpaceRect.getUpperLeft());
 		// Get a matrix for mapping points drawn relative to the token back into world-space
-		tokenContour.tokenToWorld = getRectMappingAsMatrix(imageSpaceRect, boundingRect);
+		tokenContour.tokenToWorld = getRectMappingAsMatrix(imageSpaceRect, boundingRect)
+			* glm::scale(vec3(inverseSizeRatio.x, inverseSizeRatio.y, 1 )); // Account for the scaling of the image
 
 		analyzedToken.fromContour = tokenContour;
 
@@ -152,7 +184,7 @@ vector<TokenMatch> TokenMatcher::matchTokens( vector<AnalyzedToken> candidates )
 		AnalyzedToken bestMatch;
 
 		cout << "Scoring image..." << endl;
-		for ( AnalyzedToken libraryToken : mTokenLibrary ) {
+		for ( AnalyzedToken &libraryToken : mTokenLibrary ) {
 
 
 			int numMatched = doKnnMatch(libraryToken.descriptors, candidateToken.descriptors);
@@ -184,11 +216,23 @@ int TokenMatcher::doKnnMatch(Mat descriptorsA, Mat descriptorsB) {
 		float dist1 = nn_matches[i][0].distance;
 		float dist2 = nn_matches[i][1].distance;
 
-		if(dist1 < mParams.mNNMatchRatio * dist2) {
+		// 0.8 seems to work well for us for mNNMatchRatio
+		if(dist1 < (dist2 * mParams.mNNMatchRatio)) {
 			numMatched++;
 		}
 	}
 	return numMatched;
+}
+
+void TokenMatcher::reanalyze() {
+	cout << "Foo: " << mTokenLibrary.size() << endl;
+	for (auto &token : mTokenLibrary) {
+		cout << "HELLOOOO" << endl;
+		getFeatureDetector()->detectAndCompute(token.image,
+											   noArray(),
+											   token.keypoints,
+											   token.descriptors);
+	}
 }
 
 void TokenMatcher::setParams( Params p )
@@ -196,6 +240,7 @@ void TokenMatcher::setParams( Params p )
 	mParams=p;
 	
 	mTokenLibrary.clear();
+	mAverageLibraryTokenSize = vec2(0,0);
 	for ( fs::path path : mParams.mTokenLibraryPaths )
 	{
 		cv::Mat input;
@@ -204,13 +249,18 @@ void TokenMatcher::setParams( Params p )
 		{
 			input = Mat( toOcv( Channel( loadImage(path) ) ) );
 			
-			AnalyzedToken features = analyzeToken(input);
-			features.index = mTokenLibrary.size();
-			features.name = path.string();
-			mTokenLibrary.push_back( features );
+			AnalyzedToken analyzedToken = analyzeToken(input);
+			analyzedToken.index = mTokenLibrary.size();
+			analyzedToken.name = path.stem().string();
+			mTokenLibrary.push_back( analyzedToken );
+			mAverageLibraryTokenSize += vec2(input.cols, input.rows);
 		}
 		catch (...) {
 			cout << "TokenMatcher failed to load library image " << path << endl;
 		} // try
 	} // for
+	if (mTokenLibrary.size() > 0) {
+		mAverageLibraryTokenSize /= vec2(mTokenLibrary.size());
+	}
+	cout << "Average token size in library: " << mAverageLibraryTokenSize << endl;
 }

@@ -129,13 +129,18 @@ void TokenWorld::drawMatchingKeypoints() {
 //
 			// Draw keypoints
 			float hue = (float)token.index / mTokens.size();
-			gl::color(cinder::hsvToRgb(vec3(hue, 0.7, 0.9)));
+			auto color = cinder::hsvToRgb(vec3(hue, 0.7, 0.9));
+			gl::color(color);
 			for (auto keypoint : token.keypoints)
 			{
 				gl::drawSolidCircle(transformPoint(token.fromContour.tokenToWorld, fromOcv(keypoint.pt)),
 									//keypoint.size * 0.01);
 									0.8);
 			}
+
+			gl::drawStringCentered(match.first.name,
+								   match.second.fromContour.polyLine.calcCentroid(),
+								   color);
 
 //
 //			gl::color(cinder::hsvToRgb(vec3(hue + 0.03, 0.7, 0.9)));
@@ -185,6 +190,7 @@ void TokenWorld::keyDown( KeyEvent event )
 			} else {
 				mTokenMatcher.mCurrentDetector = (mTokenMatcher.mCurrentDetector + 1) % mTokenMatcher.mFeatureDetectors.size();
 			}
+			mTokenMatcher.reanalyze();
 			cout << mTokenMatcher.mFeatureDetectors[mTokenMatcher.mCurrentDetector].first << endl;
 		}
 		break;
