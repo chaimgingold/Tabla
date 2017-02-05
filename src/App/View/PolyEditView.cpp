@@ -8,6 +8,7 @@
 
 #include "PolyEditView.h"
 #include "MainImageView.h"
+#include "TablaApp.h"
 
 const float kRadius = 8.f;
 
@@ -27,6 +28,20 @@ void PolyEditView::setMainImageView( std::shared_ptr<MainImageView> miv )
 void PolyEditView::draw()
 {
 	if ( !isEditable() ) return; // this trasnform seems to just hosed, so hide it to make things clearer.
+	
+	if (!mDrawPipelineStage.empty())
+	{
+		auto stage = mPipeline.getStage(mDrawPipelineStage);
+		
+		if (stage && stage->getGLImage())
+		{
+			gl::ScopedModelMatrix m;
+			gl::multModelMatrix( mPipeline.getCoordSpaceTransform(mDrawPipelineStage,mPolyCoordSpace) );
+			
+			gl::color(1,1,1,.5);
+			gl::draw(stage->getGLImage());
+		}
+	}
 	
 	//
 	const PolyLine2 poly = getPolyInImageSpace();
@@ -54,17 +69,17 @@ void PolyEditView::draw()
 			for( int i=0; i<poly.size(); ++i )
 			{
 				vec2 p = poly.getPoints()[i];
-
-				gl::color( ColorA( c[min(i,3)], getHasRollover() ? 1.f : .5f) );
 				
-				if (i==0)
-				{
-					gl::drawStrokedCircle( p, kRadius, 2.f );
-				}
-				else
-				{
-					gl::drawStrokedRect( getPointControlRect(p), 2.f );
-				}
+				float alpha; 
+				
+				if (!canEditVertex(i)) alpha = .1f;
+				else if (getHasRollover()) alpha = 1.f;
+				else alpha = .5f;
+				
+				gl::color( ColorA( c[min(i,3)], alpha ) );
+				
+				if (i==0) gl::drawStrokedCircle( p, kRadius, 2.f );
+				else	  gl::drawStrokedRect  ( getPointControlRect(p), 2.f );
 			}
 		}
 		else
@@ -75,6 +90,29 @@ void PolyEditView::draw()
 
 			for( vec2 p : poly ) gl::drawStrokedRect( getPointControlRect(p), 2.f );
 		}
+	}
+	
+	if (mDrawSize)
+	{
+		gl::color(1,1,1);
+		
+		auto font = TablaApp::get()->mTextureFont;
+		
+		const vec2 strsize = font->measureString("Test",gl::TextureFont::DrawOptions().pixelSnap(false));
+		const float scale = 15.f / strsize.y ;
+		const vec2 center = poly.calcCentroid(); 
+		const Rectf rect = Rectf( poly.getPoints() ); 
+		const auto options = gl::TextureFont::DrawOptions().scale(scale).pixelSnap(false);
+		
+		const float kGutter = 10.f;
+		
+		auto getStr = []( float f )
+		{
+			return toString(f) + " cm";
+		};
+		
+		font->drawString( getStr(rect.getWidth()), vec2(center.x,rect.y2+kGutter), options );
+		font->drawString( getStr(rect.getHeight()), vec2(rect.x2+kGutter,center.y), options );
 	}
 }
 
@@ -119,6 +157,8 @@ void PolyEditView::mouseDrag( MouseEvent event )
 			getImageToPolyTransform()
 			* vec4( mDragStartPoint + (pos - mDragStartMousePos), 0, 1 )
 			);
+			
+		mDragAtPoint = quantize(mDragAtPoint);
 	}
 	
 	if ( getDoLiveUpdate() && mSetPolyFunc) mSetPolyFunc( getPolyInPolySpace() );
@@ -130,7 +170,11 @@ int PolyEditView::pickPoint( vec2 p ) const
 	
 	for( size_t i=0; i<poly.getPoints().size(); ++i )
 	{
-		if ( getPointControlRect(poly.getPoints()[i]).contains(p) ) return i;
+		if ( canEditVertex(i)
+		  && getPointControlRect(poly.getPoints()[i]).contains(p) )
+		{
+			return i;
+		}
 	}
 	return -1;
 }
@@ -165,6 +209,8 @@ PolyLine2 PolyEditView::getPolyInPolySpace( bool withDrag ) const
 	if ( withDrag && mDragPointIndex >=0 && mDragPointIndex < p.size() )
 	{
 		p.getPoints()[mDragPointIndex] = mDragAtPoint;
+		
+		p = constrainToRect(p, mDragPointIndex);
 	}
 	
 	return p;
@@ -189,4 +235,36 @@ bool PolyEditView::isEditable() const
 	return mMainImageView && ( mEditableInStages.empty()
 		|| std::find( mEditableInStages.begin(), mEditableInStages.end(), mMainImageView->getPipelineStageName() ) != mEditableInStages.end()
 		);
+}
+
+float PolyEditView::quantize( float f ) const
+{
+	if (mQuantizeToUnit<=0.f) return f;
+	else return roundf( f / mQuantizeToUnit ) * mQuantizeToUnit; 
+}
+
+PolyLine2 PolyEditView::constrainToRect( PolyLine2 p, int i ) const
+{
+	if ( mConstrainToRect && p.size()==4 && i >=0 && i<4 )
+	{
+		vec2* v = &p.getPoints()[0];
+		
+		int x[4] = { 3, 2, 1, 0 };
+		int y[4] = { 1, 0, 3, 2 };
+		
+		int fx = x[i];
+		int fy = y[i];
+		
+		v[fx].x = v[i].x;
+		v[fy].y = v[i].y;
+	}
+	
+	return p;
+}
+
+bool PolyEditView::canEditVertex( int i ) const
+{
+	if ( mCanEditVertexMask.empty() ) return true;
+	else if ( i>=0 && i<mCanEditVertexMask.size() ) return mCanEditVertexMask[i];
+	else return false;
 }

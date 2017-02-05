@@ -128,6 +128,12 @@ TablaWindow::TablaWindow( WindowRef window, bool isUIWindow, TablaApp& app )
 			mWorldBoundsPolyEditView->setMainImageView( mMainImageView );
 			mWorldBoundsPolyEditView->getEditableInStages().push_back("world-boundaries");
 			
+			mWorldBoundsPolyEditView->setConstrainToRect(true);
+			mWorldBoundsPolyEditView->setQuantizeToUnit(1.f);
+			mWorldBoundsPolyEditView->setCanEditVertexMask( vector<bool>{ false, false, true, false } );
+			mWorldBoundsPolyEditView->setDrawSize(true);
+			mWorldBoundsPolyEditView->setDrawPipelineStage("clipped");
+			
 			mViews.addView( mWorldBoundsPolyEditView );
 		}
 	}

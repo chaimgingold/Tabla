@@ -34,7 +34,7 @@
 - [ ] Populate capture devices with appropriate resolutions (not just 640x480!)
 	- http://stackoverflow.com/questions/34640551/can-avcapturesession-use-custom-resolution
 - [ ] MIDI controller input!
-- [ ] World bounds poly editor shows camera image, dimensions in CM as text, snaps to CM, and constrained to rectangle.
+- [x] World bounds poly editor shows camera image, dimensions in CM as text, snaps to CM, and constrained to rectangle.
 - [ ] Refactor TablaWindow to manage all the WindowRef stuff, so move direct WindowRef interaction from TablaApp into TablaWindow 
 
 # Game Worlds
