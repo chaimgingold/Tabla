@@ -3,6 +3,7 @@
 #include "geom.h"
 #include "xml.h"
 #include "View.h"
+#include "MainImageView.h"
 #include "ocv.h"
 
 #include "cinder/audio/Context.h"

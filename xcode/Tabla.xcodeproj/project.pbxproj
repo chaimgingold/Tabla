@@ -62,6 +62,8 @@
 		26CCA3211E089F98005F7C24 /* GameLibraryView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA31F1E089F98005F7C24 /* GameLibraryView.cpp */; };
 		26CCA3261E08AD8E005F7C24 /* AnimWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA3241E08AD8E005F7C24 /* AnimWorld.cpp */; };
 		26D17D8F1E453CF7006B3FB1 /* CaptureProfileMenuView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26D17D8D1E453CF7006B3FB1 /* CaptureProfileMenuView.cpp */; };
+		26D254041E47078900A07330 /* PolyEditView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26D254021E47078900A07330 /* PolyEditView.cpp */; };
+		26D254081E47081C00A07330 /* MainImageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26D254061E47081C00A07330 /* MainImageView.cpp */; };
 		26E30EA61E0B4E3D00AA9F97 /* geom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E30EA51E0B4E3D00AA9F97 /* geom.cpp */; };
 		26E30EA91E0B4F0600AA9F97 /* ocv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E30EA81E0B4F0600AA9F97 /* ocv.cpp */; };
 		26E30EAE1E0C567100AA9F97 /* QuadTestWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E30EAC1E0C567100AA9F97 /* QuadTestWorld.cpp */; };
@@ -285,6 +287,10 @@
 		26CCA3251E08AD8E005F7C24 /* AnimWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnimWorld.h; sourceTree = "<group>"; };
 		26D17D8D1E453CF7006B3FB1 /* CaptureProfileMenuView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CaptureProfileMenuView.cpp; sourceTree = "<group>"; };
 		26D17D8E1E453CF7006B3FB1 /* CaptureProfileMenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CaptureProfileMenuView.h; sourceTree = "<group>"; };
+		26D254021E47078900A07330 /* PolyEditView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PolyEditView.cpp; sourceTree = "<group>"; };
+		26D254031E47078900A07330 /* PolyEditView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PolyEditView.h; sourceTree = "<group>"; };
+		26D254061E47081C00A07330 /* MainImageView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MainImageView.cpp; sourceTree = "<group>"; };
+		26D254071E47081C00A07330 /* MainImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainImageView.h; sourceTree = "<group>"; };
 		26E30EA51E0B4E3D00AA9F97 /* geom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = geom.cpp; sourceTree = "<group>"; };
 		26E30EA81E0B4F0600AA9F97 /* ocv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ocv.cpp; sourceTree = "<group>"; };
 		26E30EAC1E0C567100AA9F97 /* QuadTestWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = QuadTestWorld.cpp; sourceTree = "<group>"; };
@@ -990,6 +996,10 @@
 				26308E601E44113C00DB8371 /* PopUpMenuView.h */,
 				26D17D8D1E453CF7006B3FB1 /* CaptureProfileMenuView.cpp */,
 				26D17D8E1E453CF7006B3FB1 /* CaptureProfileMenuView.h */,
+				26D254021E47078900A07330 /* PolyEditView.cpp */,
+				26D254031E47078900A07330 /* PolyEditView.h */,
+				26D254061E47081C00A07330 /* MainImageView.cpp */,
+				26D254071E47081C00A07330 /* MainImageView.h */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -2675,6 +2685,7 @@
 				1ED98A3C2FF949B38C6A00D3 /* b2ContactManager.cpp in Sources */,
 				79D90302F4CB4826B60D2A4D /* b2Fixture.cpp in Sources */,
 				8E2F70EF3C5D4609A2286FD3 /* b2Island.cpp in Sources */,
+				26D254041E47078900A07330 /* PolyEditView.cpp in Sources */,
 				93B67C671E2D48FA99301AE1 /* b2World.cpp in Sources */,
 				C2C874941DDBB2D40067E07D /* serial.cc in Sources */,
 				26CCA3191E089EE3005F7C24 /* TablaApp.cpp in Sources */,
@@ -2689,6 +2700,7 @@
 				BF8EA3BC1AE14D83A5112094 /* b2Contact.cpp in Sources */,
 				9E53F22939EC46629ECD511A /* b2ContactSolver.cpp in Sources */,
 				3F51BFBD57064C0FBBDC06D5 /* b2EdgeAndCircleContact.cpp in Sources */,
+				26D254081E47081C00A07330 /* MainImageView.cpp in Sources */,
 				26CCA2DA1E089DE7005F7C24 /* Score.cpp in Sources */,
 				C2EC76FE1DA7157F00DB39C8 /* PdBase.cpp in Sources */,
 				708F4BB51EFC4EB29281662D /* b2EdgeAndPolygonContact.cpp in Sources */,

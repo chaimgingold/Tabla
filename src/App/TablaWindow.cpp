@@ -9,7 +9,11 @@
 #include "TablaWindow.h"
 #include "TablaApp.h"
 #include "geom.h" // getPointsAsPoly
+
 #include "GameLibraryView.h"
+#include "PolyEditView.h"
+#include "MainImageView.h"
+#include "CaptureProfileMenuView.h"
 
 const float kZNear =  100.f;
 const float kZFar  = -100.f;

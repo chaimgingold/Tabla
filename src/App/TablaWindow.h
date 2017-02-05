@@ -10,12 +10,13 @@
 #define TablaWindow_hpp
 
 #include "View.h"
-#include "PipelineStageView.h"
-#include "CaptureProfileMenuView.h"
 #include <memory>
 
 class TablaApp;
 class GameLibraryView;
+class PolyEditView;
+class MainImageView;
+class CaptureProfileMenuView;
 
 class TablaWindow {
 public:
