@@ -99,19 +99,19 @@ void PolyEditView::draw()
 		auto font = TablaApp::get()->mTextureFont;
 		
 		const vec2 strsize = font->measureString("Test",gl::TextureFont::DrawOptions().pixelSnap(false));
-		const float scale = 15.f / strsize.y ;
+		const float fontheight = strsize.y;
+		const float scale = 15.f / fontheight ;
 		const vec2 center = poly.calcCentroid(); 
 		const Rectf rect = Rectf( poly.getPoints() ); 
 		const auto options = gl::TextureFont::DrawOptions().scale(scale).pixelSnap(false);
 		
 		const float kGutter = 10.f;
 		
-		auto getStr = []( float f )
-		{
+		auto getStr = []( float f ) {
 			return toString(f) + " cm";
 		};
 		
-		font->drawString( getStr(rect.getWidth()), vec2(center.x,rect.y2+kGutter), options );
+		font->drawString( getStr(rect.getWidth()), vec2(center.x,rect.y2+kGutter+fontheight/2), options );
 		font->drawString( getStr(rect.getHeight()), vec2(rect.x2+kGutter,center.y), options );
 	}
 }
