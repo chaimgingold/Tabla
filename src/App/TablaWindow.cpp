@@ -128,7 +128,9 @@ TablaWindow::TablaWindow( WindowRef window, bool isUIWindow, TablaApp& app )
 			mWorldBoundsPolyEditView->setMainImageView( mMainImageView );
 			mWorldBoundsPolyEditView->getEditableInStages().push_back("world-boundaries");
 			
-			mWorldBoundsPolyEditView->setConstrainToRect(true);
+			mWorldBoundsPolyEditView->setConstrainToRect();
+//			mWorldBoundsPolyEditView->setConstrainToRectWithAspectRatioOfPipelineStage("undistorted");
+// this aspect ratio code works, except it's conceptually wrong headed! world bounds poly itself is what defines the aspect ratio ("clipped" size depends on world poly; and "undistorted" hasn't been clipped yet. :P). doh.
 			mWorldBoundsPolyEditView->setQuantizeToUnit(1.f);
 			mWorldBoundsPolyEditView->setCanEditVertexMask( vector<bool>{ false, false, true, false } );
 			mWorldBoundsPolyEditView->setDrawSize(true);

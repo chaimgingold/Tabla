@@ -210,6 +210,7 @@ PolyLine2 PolyEditView::getPolyInPolySpace( bool withDrag ) const
 	{
 		p.getPoints()[mDragPointIndex] = mDragAtPoint;
 		
+		p = constrainAspectRatio(p, mDragPointIndex);
 		p = constrainToRect(p, mDragPointIndex);
 	}
 	
@@ -243,20 +244,66 @@ float PolyEditView::quantize( float f ) const
 	else return roundf( f / mQuantizeToUnit ) * mQuantizeToUnit; 
 }
 
+void PolyEditView::setConstrainToRect( bool constrain )
+{
+	mConstrainToRect=constrain;
+	mConstrainToRectWithAspectRatioOfPipelineStage.clear();
+}
+
+void PolyEditView::setConstrainToRectWithAspectRatioOfPipelineStage( string s )
+{
+	mConstrainToRect=true;
+	mConstrainToRectWithAspectRatioOfPipelineStage=s;
+}
+
+PolyLine2 PolyEditView::constrainAspectRatio( PolyLine2 p, int i ) const
+{
+	if ( mConstrainToRect && !mConstrainToRectWithAspectRatioOfPipelineStage.empty() )
+	{
+		auto stage = mPipeline.getStage(mConstrainToRectWithAspectRatioOfPipelineStage);
+		
+		if ( stage && p.size()==4 && i >=0 && i<4 )
+		{
+			float fixAspectRatio = stage->mImageSize.x / stage->mImageSize.y;
+			cout << fixAspectRatio << endl; 
+
+			vec2* v = &p.getPoints()[0];
+
+			vec2 oldSize = glm::abs( v[(i+2)%4] - v[i] );
+			
+			bool lockW = true; // this should be adaptive to feel more consistent, but it works fine.
+			
+			// get new size
+			vec2 newSize = oldSize;
+			
+			if (lockW) newSize.y = oldSize.x / fixAspectRatio;
+			else	   newSize.x = fixAspectRatio * oldSize.y;
+			
+			vec2 dSize = newSize - oldSize;
+			
+			float sx[4] = { -1.f,  1.f, 1.f, -1.f };
+			float sy[4] = { -1.f, -1.f, 1.f,  1.f };
+			
+			v[i].x += dSize.x * sx[i];
+			v[i].y += dSize.y * sy[i];		
+		}
+	}
+	
+	return p;
+}
+
 PolyLine2 PolyEditView::constrainToRect( PolyLine2 p, int i ) const
 {
 	if ( mConstrainToRect && p.size()==4 && i >=0 && i<4 )
 	{
 		vec2* v = &p.getPoints()[0];
 		
+		// rect
 		int x[4] = { 3, 2, 1, 0 };
 		int y[4] = { 1, 0, 3, 2 };
 		
-		int fx = x[i];
-		int fy = y[i];
-		
-		v[fx].x = v[i].x;
-		v[fy].y = v[i].y;
+		v[x[i]].x = v[i].x;
+		v[y[i]].y = v[i].y;
 	}
 	
 	return p;

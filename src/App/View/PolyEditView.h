@@ -48,7 +48,8 @@ public:
 	bool isEditable() const ;
 	
 	void setQuantizeToUnit ( float f ) { mQuantizeToUnit=f; } // 0 for off
-	void setConstrainToRect( bool constrain=true ) { mConstrainToRect=constrain; }
+	void setConstrainToRect( bool constrain=true );
+	void setConstrainToRectWithAspectRatioOfPipelineStage( string );
 	void setCanEditVertexMask( vector<bool> m ) { mCanEditVertexMask=m; }
 	void setDrawSize( bool v=true ) { mDrawSize=v; }
 	void setDrawPipelineStage( string s ) { mDrawPipelineStage=s; } 
@@ -68,6 +69,7 @@ private:
 	float quantize( float  ) const;
 
 	PolyLine2 constrainToRect( PolyLine2 p, int fromIndex ) const;
+	PolyLine2 constrainAspectRatio( PolyLine2 p, int fromIndex ) const;
 	
 	bool canEditVertex( int ) const;
 	
@@ -93,6 +95,7 @@ private:
 	
 	float mQuantizeToUnit=0.f;
 	bool  mConstrainToRect=false;
+	string mConstrainToRectWithAspectRatioOfPipelineStage;
 	
 	bool  mDrawSize=false;
 	string mDrawPipelineStage;
