@@ -53,9 +53,13 @@
 - [ ] Tokens for instruments!
 	- [ ] Integrate with stamp system
 	- [ ] Multiple instruments per score!
+- [ ] Beats marked on additive synth
+- [ ] Mark beats, etc on scores with no instrument?
+- [ ] >1 Instrument per Score
 
 ## Pinball
-- [ ] Score, ball count, high score.
+- [x] Score, ball count, high score.
+- [ ] Make 4th+ UI element back into space, not UI.
 - [x] Remove static cube map file from project, and don't load it.
 - [ ] Make flipper speed tunable.
 - [ ] Make contour dejittering/reshaping more responsive; if contour moves enough (sum of all points) then just jump it.

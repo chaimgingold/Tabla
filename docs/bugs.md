@@ -46,6 +46,9 @@
 - Robit serial connection isn't robust; sometimes need to restart computer to get it to see the arduino.
 - Music instrument character wrangling can be hard. Proper solution probably involves tokens for instruments placed next to scores.
 - [ ] Low register of additive synth is hard to hear.
+- [ ] More robust character tracking
+	- [ ] Have a timeout before they jump home
+	- [ ] Do NxM scoring like in Pinball UI tracking
 
 ## Pinball
 - [ ] Audio sometimes blows up then drops out; culprit seems to be updateBallSynthesis(). To reproduce, load "pinball 1.png" test image in Pinball and spawn multiple balls (with b key).
@@ -64,3 +67,7 @@
 	- Ignore (Rejected)
 	- UI (Score, Balls Remaining, Top Score, etc...)
 	- ...future expansion (eg wiring elements)
+- Ball messed up
+	- [ ] Sometimes first ball is blank (so i did an awful kludge that seems to not really work)
+	- [ ] Sometimes ball appears messed up on projector (all white-ish) but fine in main display (!).
+		- Possible workaround would be to hide/show main window and see if that helps.
