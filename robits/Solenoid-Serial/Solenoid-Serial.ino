@@ -4,7 +4,7 @@ void setup() {
   Serial.begin(115200); //Start serial with baud rate 115200
   Serial.println("Serial begin <3"); 
 
-  for (int x = 2; x <= 13; x++) {
+  for (int x = 2; x <= 15; x++) {
     pinMode(x, OUTPUT);
     digitalWrite(x, LOW);
   }
@@ -27,7 +27,7 @@ void serialEvent() { // event listener
     while (command != 0) {
 
       if (command[0]) {
-        char pin = command[0];
+        int pin = command[0];
         ++command; // advance the pointer 
         int msg = atoi(command);
         solenoidSignal(pin,msg);
@@ -39,31 +39,10 @@ void serialEvent() { // event listener
 
 
 
-void solenoidSignal(char pinName,int msg) {
-  int pin;
-  switch (pinName) {
-    case 'A':
-      pin = 13;
-      break;
-    case 'B':
-      pin = 3; 
-      break;
-    case 'C':
-      pin = 4;
-      break;
-    case 'D':
-      pin = 5;
-      break;
-    case 'E':
-      pin = 6;
-      break;
-    case 'F':
-      pin = 7;
-      break;
-    case 'G':
-      pin = 8;
-      break;
-  }
+void solenoidSignal(int pinName,int msg) {
+  int pin = pinName - 63;
+//  Serial.print(pin);
+//  Serial.println(msg);
   digitalWrite(pin,msg);
 }
 
