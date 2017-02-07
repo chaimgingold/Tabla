@@ -27,6 +27,8 @@ BallWorld::BallWorld()
 	});
 
 	setupSynthesis();
+	
+	mMidiInput.openAllPorts();
 }
 
 void BallWorld::setParams( XmlTree xml )
@@ -343,6 +345,8 @@ void BallWorld::update()
 	updatePhysics();
 
 	updateSynthesis();
+	
+	mMidiInput.read();
 }
 
 void BallWorld::updateSynthesis()

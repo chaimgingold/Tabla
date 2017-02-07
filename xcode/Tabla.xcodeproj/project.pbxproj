@@ -32,6 +32,7 @@
 		262FCDCC1E234CB100FC5D66 /* PinballVision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 262FCDCA1E234CB100FC5D66 /* PinballVision.cpp */; };
 		262FCDCF1E234DDF00FC5D66 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 262FCDCE1E234DDF00FC5D66 /* Images.xcassets */; };
 		26308E611E44113C00DB8371 /* PopUpMenuView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26308E5F1E44113C00DB8371 /* PopUpMenuView.cpp */; };
+		266E2C6E1E495A3C00F92DAE /* MIDIInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 266E2C6C1E495A3C00F92DAE /* MIDIInput.cpp */; };
 		2673CD5E1E1D791C0036C02D /* PinballView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2673CD5C1E1D791C0036C02D /* PinballView.cpp */; };
 		26CCA2D31E089DE7005F7C24 /* BallWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2B21E089DE7005F7C24 /* BallWorld.cpp */; };
 		26CCA2D51E089DE7005F7C24 /* GameWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2B81E089DE7005F7C24 /* GameWorld.cpp */; };
@@ -223,6 +224,8 @@
 		262FCDCE1E234DDF00FC5D66 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Tabla/Images.xcassets; sourceTree = "<group>"; };
 		26308E5F1E44113C00DB8371 /* PopUpMenuView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PopUpMenuView.cpp; sourceTree = "<group>"; };
 		26308E601E44113C00DB8371 /* PopUpMenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PopUpMenuView.h; sourceTree = "<group>"; };
+		266E2C6C1E495A3C00F92DAE /* MIDIInput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MIDIInput.cpp; sourceTree = "<group>"; };
+		266E2C6D1E495A3C00F92DAE /* MIDIInput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MIDIInput.h; sourceTree = "<group>"; };
 		2673CD5C1E1D791C0036C02D /* PinballView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PinballView.cpp; sourceTree = "<group>"; };
 		2673CD5D1E1D791C0036C02D /* PinballView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PinballView.h; sourceTree = "<group>"; };
 		26CCA2B21E089DE7005F7C24 /* BallWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BallWorld.cpp; sourceTree = "<group>"; };
@@ -945,6 +948,8 @@
 				26CCA3041E089EB8005F7C24 /* ocv.h */,
 				26E30EA81E0B4F0600AA9F97 /* ocv.cpp */,
 				26CCA3051E089EB8005F7C24 /* rtmidi */,
+				266E2C6C1E495A3C00F92DAE /* MIDIInput.cpp */,
+				266E2C6D1E495A3C00F92DAE /* MIDIInput.h */,
 			);
 			name = Utilities;
 			path = ../src/Utilities;
@@ -2725,6 +2730,7 @@
 				26CCA2F51E089E3F005F7C24 /* LightLink.cpp in Sources */,
 				26CCA2F71E089E3F005F7C24 /* TokenMatcher.cpp in Sources */,
 				26CCA2F31E089E3F005F7C24 /* Contour.cpp in Sources */,
+				266E2C6E1E495A3C00F92DAE /* MIDIInput.cpp in Sources */,
 				26CCA2DF1E089DE7005F7C24 /* TokenWorld.cpp in Sources */,
 				C2C874951DDBB2D40067E07D /* SerialDevice.cpp in Sources */,
 				26CCA31B1E089EE3005F7C24 /* View.cpp in Sources */,

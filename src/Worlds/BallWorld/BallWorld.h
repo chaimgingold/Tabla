@@ -19,6 +19,7 @@
 #include "GameWorld.h"
 #include "Contour.h"
 #include "PureDataNode.h"
+#include "MIDIInput.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -218,6 +219,8 @@ private:
 	// asset loading
 	FileWatch mFileWatch; // hotload our shaders; in this class so when class dies all the callbacks expire.
 
+	// wacky midi input experiment
+	MIDIInput mMidiInput;
 
 } ;
 
