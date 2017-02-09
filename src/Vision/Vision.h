@@ -72,6 +72,11 @@ private:
 	ContourVision mContourVision;
 	TokenMatcher  mTokenMatcher;
 	
+	//
+	int mFrameCount=0;
+	int mTokenMatchSkip=30;
+	
+	vector<TokenMatch> mOldTokenMatcherOutput;
 };
 
 #endif /* Vision_hpp */

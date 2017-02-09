@@ -139,7 +139,7 @@ vector<AnalyzedToken> TokenMatcher::tokensFromContours( const Pipeline::StageRef
 		vec2 inverseSizeRatio = vec2(1.0) / sizeRatio;
 		Mat resized;
 		cv::resize(imageCopy, resized, cv::Size(0,0), sizeRatio.x, sizeRatio.y, INTER_CUBIC);
-
+		
 		AnalyzedToken analyzedToken = analyzeToken(resized);
 		analyzedToken.index = tokens.size();
 
@@ -157,6 +157,11 @@ vector<AnalyzedToken> TokenMatcher::tokensFromContours( const Pipeline::StageRef
 		analyzedToken.fromContour = tokenContour;
 
 		tokens.push_back(analyzedToken);
+		
+		//
+		pipeline.then( string("tokenContourImage ") + c.mIndex, tokenContourImage );
+		pipeline.setImageToWorldTransform( tokenContour.tokenToWorld );
+		
 	}
 	return tokens;
 }

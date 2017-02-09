@@ -21,7 +21,7 @@
 <!--	What strategies to allow	-->
 		<AllowSubset>1</AllowSubset>
 		<AllowSuperset>1</AllowSuperset>
-		<AllowFragment>1</AllowFragment>
+		<AllowFragment>0</AllowFragment>
 
 <!--	Filters. (Last two should/could be identical to Vision/Contours)	-->
 		<InteriorAngleMaxDelta>5</InteriorAngleMaxDelta>

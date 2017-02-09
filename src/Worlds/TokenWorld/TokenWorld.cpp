@@ -7,6 +7,7 @@
 //
 
 #include "TokenWorld.h"
+#include "TablaApp.h"
 #include "ocv.h"
 #include "geom.h"
 #include "xml.h"
@@ -32,6 +33,8 @@ void TokenWorld::setParams( XmlTree xml )
 //	TokenMatcher::Params params;
 //	params.set(xml);
 //	mTokenMatcher.setParams(params);
+	
+	getXml( xml, "DrawKeypoints", mDrawKeypoints );
 }
 
 void TokenWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipeline )
@@ -82,7 +85,7 @@ void TokenWorld::draw( DrawType drawType )
 			drawGlobalKeypoints();
 			break;
 		case TokenVisionMode::Matching:
-			drawMatchingKeypoints();
+			drawMatchingKeypoints( mDrawKeypoints && drawType==GameWorld::DrawType::UIMain );
 			break;
 		default:
 			break;
@@ -101,7 +104,7 @@ void TokenWorld::drawGlobalKeypoints() {
 	}
 }
 
-void TokenWorld::drawMatchingKeypoints() {
+void TokenWorld::drawMatchingKeypoints( bool drawKeypoints ) {
 	// DEBUG: Drawing contours
 	{
 //		cout << "************drawMatchingKeypoints()************" << endl;
@@ -127,20 +130,41 @@ void TokenWorld::drawMatchingKeypoints() {
 //			}
 //
 //
-			// Draw keypoints
 			float hue = (float)token.index / mTokens.size();
 			auto color = cinder::hsvToRgb(vec3(hue, 0.7, 0.9));
-			gl::color(color);
-			for (auto keypoint : token.keypoints)
+
+			// Draw keypoints
+			if (drawKeypoints)
 			{
-				gl::drawSolidCircle(transformPoint(token.fromContour.tokenToWorld, fromOcv(keypoint.pt)),
-									//keypoint.size * 0.01);
-									0.8);
+				gl::color(color);
+				for (auto keypoint : token.keypoints)
+				{
+					gl::drawSolidCircle(transformPoint(token.fromContour.tokenToWorld, fromOcv(keypoint.pt)),
+										//keypoint.size * 0.01);
+										0.5);
+				}
 			}
 
-			gl::drawStringCentered(match.first.name,
-								   match.second.fromContour.polyLine.calcCentroid(),
-								   color);
+			
+			auto font = TablaApp::get()->mTextureFont;
+			
+			if (font)
+			{
+				gl::color(color);
+				
+				vec2 size = font->measureString(match.first.name);
+				
+				float worldHeight = 5.f; // cm
+				float scale = worldHeight / size.y ;
+				
+				Rectf r(match.second.fromContour.polyLine.getPoints());
+				vec2 center = r.getCenter();
+				
+				font->drawString( match.first.name,
+								  vec2(center.x,r.y2) + vec2(-size.x/2.f,size.y)*scale,
+								  gl::TextureFont::DrawOptions().scale(scale).pixelSnap(false)
+									   );
+			}
 
 //
 //			gl::color(cinder::hsvToRgb(vec3(hue + 0.03, 0.7, 0.9)));

@@ -59,4 +59,5 @@
 		</TokenMatcher>
 	</Vision>
 
+	<DrawKeypoints>0</DrawKeypoints>
 </TokenWorld>

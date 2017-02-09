@@ -204,14 +204,19 @@ Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 	
 	if (!mTokenMatcher.getTokenLibrary().empty())
 	{
-		vector<AnalyzedToken> candidates = mTokenMatcher.tokensFromContours( clippedStage, output.mContours, pipeline );
-		vector<TokenMatch> matches = mTokenMatcher.matchTokens(candidates);
-		cout << matches.size() << endl;
-		output.mTokens = matches;
-
+		if ( mTokenMatchSkip<1 || mFrameCount % (mTokenMatchSkip+1)==0 )
+		{
+			vector<AnalyzedToken> candidates = mTokenMatcher.tokensFromContours( clippedStage, output.mContours, pipeline );
+			vector<TokenMatch> matches = mTokenMatcher.matchTokens(candidates);
+			cout << matches.size() << endl;
+			output.mTokens = matches;
+			
+			mOldTokenMatcherOutput = matches;
+		}
+		else output.mTokens = mOldTokenMatcherOutput;
 	}
 	
-	
 	// output
+	mFrameCount++;
 	return output;
 }

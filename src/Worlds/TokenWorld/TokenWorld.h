@@ -72,7 +72,9 @@ private:
 
 	vector<TokenMatch> 	       mTokens;
 	
-	void drawMatchingKeypoints();
+	bool mDrawKeypoints=false;
+	
+	void drawMatchingKeypoints( bool drawKeypoints );
 	void drawGlobalKeypoints();
 };
 
