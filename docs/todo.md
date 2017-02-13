@@ -11,7 +11,28 @@
 
 # Application
 
-- Firewall Game Worlds from one another and the main app. Make it easy to see that people checking in game worlds aren't modifying files outside of the scope of that game world.
+## New Features
+- [ ] Finish token system
+- [ ] MIDI controller input!
+- [ ] Each GameWorld can have their own settings (either in settings.xml, or in per-game files--latter, i think). e.g. for which way is up
+
+## Usability
+### Major
+- [ ] Configurable (or adaptive) up vector for modes... 
+- [ ] Automatic projector calibration. (And rename CalibateWorld to CameraCameraCalibrateWorld; add a ProjectorCameraCalibrateWorld that does this). Simply project a box in known projector space, find it in world space, then use that perspective transform to set the projector profile's mProjectorCoords.
+- [ ] Populate capture devices with appropriate resolutions (not just 640x480!)
+	- http://stackoverflow.com/questions/34640551/can-avcapturesession-use-custom-resolution
+- [x] World bounds poly editor shows camera image, dimensions in CM as text, snaps to CM, and constrained to rectangle.
+- [x] Pull down menu with capture options
+### Minor
+- [ ] Capture menu only shows valid options
+
+## Refactor
+### For Game Jam / New Contributors
+- Game controller
+	- [ ] Move to App, not just Pinball
+	- [ ] allow multiple controller profiles (PS4, Xbox, etc...).
+- Firewall game worlds from one another and the main app. Make it easy to see that people checking in game worlds aren't modifying files outside of the scope of that game world.
 	- [x] Instantiate static cartridge objects that add themselves to a global list.
 		- [x] Get rid of left/right keys;
 		- [ ] Replace with a reset gameworld metakey. (or force worlds to deal with this use case themselves.)
@@ -19,23 +40,13 @@
 		- [ ] Add a GameWorld::getAssetPath() function, and use this to pluck the proper file paths.
 	- [ ] Restrict include path search so that #include must be more explicit about which file. Do this to prevent accidental includes across GameWorlds. So, #include "tabla/Vision.h" vs. #include "worlds/music/MusicVision.h"
 	- [ ] Remove "World" naming all over the place. So just "World/Pinball/Pinball.h" and "Pinball".
+- [ ] Move settings to /Library. (Do before distributing it more widely, so we make migration later easier.)
+
+### Minor
+- [ ] Move RectFinder into Vision pipeline
+- [x] Refactor TablaWindow to manage all the WindowRef stuff, so move direct WindowRef interaction from TablaApp into TablaWindow 
 - [ ] ~~Put lightlink.xml in settings.xml (i think it's a good idea...; maybe not?)~~
 - [x] Make polygon xml into a list of vertices inside of polygon block: e.g. <v>x1 y1</v> <v>x2 y2</v> etc... (will make file look less crazy).
-- [ ] Move settings to /Library
-- [ ] Each GameWorld can have their own settings (either in settings.xml, or in per-game files--latter, i think). e.g. for which way is up
-- [ ] Automatic projector calibration. (And rename CalibateWorld to CameraCameraCalibrateWorld; add a ProjectorCameraCalibrateWorld that does this). Simply project a box in known projector space, find it in world space, then use that perspective transform to set the projector profile's mProjectorCoords.
-- Game controller
-	- [ ] Move to App, not just Pinball
-	- [ ] allow multiple controller profiles (PS4, Xbox, etc...).
-- [ ] Move RectFinder into Vision pipeline
-- [ ] Finish token system
-- [x] Pull down menu with capture options
-- [ ] Capture menu only shows valid options
-- [ ] Populate capture devices with appropriate resolutions (not just 640x480!)
-	- http://stackoverflow.com/questions/34640551/can-avcapturesession-use-custom-resolution
-- [ ] MIDI controller input!
-- [x] World bounds poly editor shows camera image, dimensions in CM as text, snaps to CM, and constrained to rectangle.
-- [ ] Refactor TablaWindow to manage all the WindowRef stuff, so move direct WindowRef interaction from TablaApp into TablaWindow 
 
 # Game Worlds
 
