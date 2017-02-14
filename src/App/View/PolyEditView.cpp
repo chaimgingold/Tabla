@@ -9,11 +9,12 @@
 #include "PolyEditView.h"
 #include "MainImageView.h"
 #include "TablaApp.h"
+#include "Pipeline.h"
 
 const float kRadius = 8.f;
 
-PolyEditView::PolyEditView( Pipeline& pipeline, function<PolyLine2()> getter, string polyCoordSpace )
-	: mPipeline(pipeline)
+PolyEditView::PolyEditView( TablaApp& app, function<PolyLine2()> getter, string polyCoordSpace )
+	: mApp(app)
 	, mGetPolyFunc(getter)
 	, mPolyCoordSpace(polyCoordSpace)
 {
@@ -31,12 +32,12 @@ void PolyEditView::draw()
 	
 	if (!mDrawPipelineStage.empty())
 	{
-		auto stage = mPipeline.getStage(mDrawPipelineStage);
+		auto stage = getPipeline().getStage(mDrawPipelineStage);
 		
 		if (stage && stage->getGLImage())
 		{
 			gl::ScopedModelMatrix m;
-			gl::multModelMatrix( mPipeline.getCoordSpaceTransform(mDrawPipelineStage,mPolyCoordSpace) );
+			gl::multModelMatrix( getPipeline().getCoordSpaceTransform(mDrawPipelineStage,mPolyCoordSpace) );
 			
 			gl::color(1,1,1,.5);
 			gl::draw(stage->getGLImage());
@@ -186,7 +187,7 @@ Rectf PolyEditView::getPointControlRect( vec2 p ) const
 
 mat4 PolyEditView::getPolyToImageTransform() const
 {
-	return mPipeline.getCoordSpaceTransform(
+	return getPipeline().getCoordSpaceTransform(
 		mPolyCoordSpace,
 		mMainImageView ? mMainImageView->getPipelineStageName() : "world"
 		);
@@ -194,7 +195,7 @@ mat4 PolyEditView::getPolyToImageTransform() const
 
 mat4 PolyEditView::getImageToPolyTransform() const
 {
-	return mPipeline.getCoordSpaceTransform(
+	return getPipeline().getCoordSpaceTransform(
 		mMainImageView ? mMainImageView->getPipelineStageName() : "world",
 		mPolyCoordSpace
 		);
@@ -260,7 +261,7 @@ PolyLine2 PolyEditView::constrainAspectRatio( PolyLine2 p, int i ) const
 {
 	if ( mConstrainToRect && !mConstrainToRectWithAspectRatioOfPipelineStage.empty() )
 	{
-		auto stage = mPipeline.getStage(mConstrainToRectWithAspectRatioOfPipelineStage);
+		auto stage = getPipeline().getStage(mConstrainToRectWithAspectRatioOfPipelineStage);
 		
 		if ( stage && p.size()==4 && i >=0 && i<4 )
 		{
@@ -314,4 +315,9 @@ bool PolyEditView::canEditVertex( int i ) const
 	if ( mCanEditVertexMask.empty() ) return true;
 	else if ( i>=0 && i<mCanEditVertexMask.size() ) return mCanEditVertexMask[i];
 	else return false;
+}
+
+const Pipeline& PolyEditView::getPipeline() const
+{
+	return mApp.getPipeline();
 }

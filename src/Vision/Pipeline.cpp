@@ -107,9 +107,10 @@ Pipeline::StageRef Pipeline::then( string name )
 	return mStages.back();
 }
 
-bool Pipeline::getShouldCacheImage( const StageRef s )
+bool Pipeline::getShouldCacheImage( const StageRef s ) const
 {
-	return (s->mName==mQuery) || mCaptureAllStageImages ;
+	return mCaptureAllStageImages
+	    || mCaptureStages.find(s->mName) != mCaptureStages.end();
 }
 
 void Pipeline::setImageToWorldTransform( const glm::mat4& m )

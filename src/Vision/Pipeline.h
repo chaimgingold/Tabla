@@ -31,8 +31,8 @@ public:
 	
 	bool empty() const { return mStages.empty(); }
 	
-	void	setQuery( string q ) { mQuery=q; } ;
-	string	getQuery() const { return mQuery; }
+//	void	setQuery( string q ) { mQuery=q; } ;
+//	string	getQuery() const { return mQuery; }
 	
 	string  getFirstStageName() const;
 	string  getLastStageName () const;
@@ -85,6 +85,8 @@ public:
 	const StageRef getStage( string name ) const;
 	
 	void setCaptureAllStageImages( bool v ) { mCaptureAllStageImages=v; }
+	set<string> getCaptureStages() const { return mCaptureStages; }
+	void setCaptureStages( set<string> s ) { mCaptureStages=s; }
 	
 	mat4 getCoordSpaceTransform( string from, string to ) const;
 		// from/to is name of coordinate space.
@@ -93,18 +95,17 @@ public:
 private:
 
 	bool mCaptureAllStageImages = false; // if false, then only extract query stage. true: capture all.
+	set<string> mCaptureStages;
 	
 	void then( function<gl::Texture2dRef()>, string name, vec2 size );
 		// so that we only fabricate the texture if it matches the query.
 		// this might be a silly optimization, and we should just cache them all.
 
-	bool	 getShouldCacheImage( const StageRef );
+	bool getShouldCacheImage( const StageRef ) const;
 	
 	string getAdjStageName( string, int adj ) const;
 
 	vector<StageRef> mStages;
-	
-	string		   mQuery ;
 	
 } ;
 

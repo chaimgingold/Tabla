@@ -69,7 +69,7 @@ TablaWindow::TablaWindow( WindowRef window, bool isUIWindow, TablaApp& app )
 		{
 			mCameraPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
-					mApp.getPipeline(),
+					mApp,
 					[this](){ return getPointsAsPoly(mApp.mLightLink.getCaptureProfile().mCaptureCoords,4); },
 					"undistorted"
 					)
@@ -91,7 +91,7 @@ TablaWindow::TablaWindow( WindowRef window, bool isUIWindow, TablaApp& app )
 			// convert to input coords
 			mProjPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
-					mApp.getPipeline(),
+					mApp,
 					[&](){ return getPointsAsPoly(mApp.mLightLink.getProjectorProfile().mProjectorCoords,4); },
 					"projector"
 					)
@@ -113,7 +113,7 @@ TablaWindow::TablaWindow( WindowRef window, bool isUIWindow, TablaApp& app )
 		{
 			mWorldBoundsPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
-					mApp.getPipeline(),
+					mApp,
 					[&](){ return getPointsAsPoly(mApp.mLightLink.getCaptureProfile().mCaptureWorldSpaceCoords,4); },
 					"world-boundaries"
 					)
@@ -246,9 +246,11 @@ void TablaWindow::draw()
 				fmod( c.b + inc.b, 1.f ) );
 		};
 		
-		for ( size_t i=0; i<mApp.mVisionOutput.mContours.size(); ++i, inc += .1f )
+		auto contours = mApp.getVisionOutput().mContours;
+		
+		for ( size_t i=0; i<contours.size(); ++i, inc += .1f )
 		{
-			const auto& c = mApp.mVisionOutput.mContours[i] ;
+			const auto& c = contours[i] ;
 			
 			Rectf rw = c.mBoundingRect ; // world space
 			Rectf r  = Rectf(
@@ -380,7 +382,7 @@ void TablaWindow::updatePipelineViews()
 		// make a new one?
 		if ( !view && mApp.mDrawPipeline )
 		{
-			PipelineStageView psv( mApp.getPipeline(), s->mName );
+			PipelineStageView psv( s->mName );
 			psv.setWorldDrawFunc( [&](){
 				mApp.drawWorld( GameWorld::DrawType::UIPipelineThumb );
 			});

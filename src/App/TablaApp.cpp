@@ -800,15 +800,29 @@ void TablaApp::updateDebugFrameCaptureDevicesWithPxPerWorldUnit( float x )
 	if (dirty) lightLinkDidChange();
 }
 
-void TablaApp::addProjectorPipelineStages()
+void TablaApp::addProjectorPipelineStages( Pipeline& p )
 {
 	// set that image
-	mPipeline.then( "projector", mLightLink.getProjectorProfile().mProjectorSize ) ;
+	p.then( "projector", mLightLink.getProjectorProfile().mProjectorSize ) ;
 	
-	mPipeline.setImageToWorldTransform(
+	p.setImageToWorldTransform(
 		getOcvPerspectiveTransform(
 			mLightLink.getProjectorProfile().mProjectorCoords,
 			mLightLink.getProjectorProfile().mProjectorWorldSpaceCoords ));
+}
+
+void TablaApp::selectPipelineStage( string s )
+{
+	string old = mPipelineStageSelection;
+	
+	mPipelineStageSelection=s;
+	
+	if (old!=s) saveUserSettings();
+}
+
+string TablaApp::getPipelineStageSelection() const
+{
+	return mPipelineStageSelection;
 }
 
 void TablaApp::update()
@@ -836,7 +850,7 @@ void TablaApp::updateVision()
 		mCaptureFPS.mark();
 		
 		// start pipeline
-		if ( mPipeline.getQuery().empty() ) mPipeline.setQuery("undistorted");
+		if ( getPipelineStageSelection().empty() ) selectPipelineStage("undistorted");
 		mPipeline.setCaptureAllStageImages(true);
 			// reality is, we now need to capture all because even contour extraction
 			// relies on images captured in the pipeline.
@@ -863,7 +877,7 @@ void TablaApp::updateVision()
 		mVisionOutput = mVision.processFrame(frame,mPipeline);
 		
 		// finish off the pipeline with draw stage
-		addProjectorPipelineStages();
+		addProjectorPipelineStages(mPipeline);
 		
 		// pass contours to ballworld (probably don't need to store here)
 		if (mGameWorld)
@@ -1123,16 +1137,26 @@ void TablaApp::keyDown( KeyEvent event )
 				break ;
 			
 			case KeyEvent::KEY_UP:
-				if (event.isMetaDown()) mPipeline.setQuery( mPipeline.getFirstStageName() );
-				else mPipeline.setQuery( mPipeline.getPrevStageName(mPipeline.getQuery() ) );
-				saveUserSettings();
-				break;
+			{
+				string stage;
+
+				if (event.isMetaDown()) stage = getPipeline().getFirstStageName() ;
+				else stage = getPipeline().getPrevStageName( getPipelineStageSelection() );
+				
+				selectPipelineStage(stage);
+			}
+			break;
 				
 			case KeyEvent::KEY_DOWN:
-				if (event.isMetaDown()) mPipeline.setQuery( mPipeline.getLastStageName() );
-				else mPipeline.setQuery( mPipeline.getNextStageName(mPipeline.getQuery() ) );
-				saveUserSettings();
-				break;
+			{
+				string stage;
+
+				if (event.isMetaDown()) stage = getPipeline().getLastStageName() ;
+				else stage = getPipeline().getNextStageName( getPipelineStageSelection() );
+
+				selectPipelineStage(stage);				
+			}
+			break;
 
 			case KeyEvent::KEY_ESCAPE:
 				{
@@ -1225,7 +1249,7 @@ void TablaApp::loadUserSettingsFromXml( XmlTree xml )
 	if ( xml.hasChild("PipelineQuery") )
 	{
 		string name = xml.getChild("PipelineQuery").getValue();
-		mPipeline.setQuery(name);
+		selectPipelineStage(name);
 	}
 	
 	auto getWindowBounds = [&xml]( string xmlName, TablaWindowRef win )
@@ -1258,7 +1282,7 @@ XmlTree TablaApp::getUserSettingsXml() const
 		xml.push_back( XmlTree("GameWorld",mGameWorld->getSystemName()) );
 	}
 	
-	xml.push_back( XmlTree("PipelineQuery",mPipeline.getQuery()) );
+	xml.push_back( XmlTree("PipelineQuery", getPipelineStageSelection() ) );
 	
 	auto setWindowBounds = [&xml]( string xmlName, TablaWindowRef win ) {
 		if (win) {

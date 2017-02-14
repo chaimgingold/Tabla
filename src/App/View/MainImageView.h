@@ -67,7 +67,7 @@ private:
 	bool	mIsProjectorView=true;
 	
 	GameWorld* getGameWorld() const;
-	Pipeline&  getPipeline () const;
+	const Pipeline&  getPipeline () const;
 
 	TablaApp& mApp;
 	string			mStageName;

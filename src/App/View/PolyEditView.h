@@ -9,7 +9,6 @@
 #ifndef PolyEditView_hpp
 #define PolyEditView_hpp
 
-#include "Pipeline.h"
 #include "GameWorld.h"
 #include "View.h"
 #include <string>
@@ -24,7 +23,7 @@ class PolyEditView : public View
 {
 public:
 
-	PolyEditView( Pipeline&, function<PolyLine2()>, string polyCoordSpace );
+	PolyEditView( TablaApp&, function<PolyLine2()>, string polyCoordSpace );
 	
 	void draw() override;
 	bool pick( vec2 ) override;
@@ -70,13 +69,14 @@ private:
 
 	PolyLine2 constrainToRect( PolyLine2 p, int fromIndex ) const;
 	PolyLine2 constrainAspectRatio( PolyLine2 p, int fromIndex ) const;
-	
+
+	const Pipeline& getPipeline() const;	
 	bool canEditVertex( int ) const;
 	
 	std::shared_ptr<MainImageView> mMainImageView;	
 	
-	Pipeline& mPipeline;
-
+	TablaApp& mApp;
+	
 	string mPolyCoordSpace;
 	
 	function<PolyLine2()> mGetPolyFunc;

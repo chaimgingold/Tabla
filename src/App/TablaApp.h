@@ -45,6 +45,7 @@ class TablaApp : public App {
 	
 	static TablaApp* get() { return dynamic_cast<TablaApp*>(AppBase::get()); }
 	
+	// cinder app
 	void setup() override;
 	void mouseDown( MouseEvent event ) override;
 	void mouseUp( MouseEvent event ) override;
@@ -58,6 +59,7 @@ class TablaApp : public App {
 	void keyUp( KeyEvent event ) override;
 	void cleanup() override;
 	
+	//
 	void drawWorld( GameWorld::DrawType );
 
 	// Light link management
@@ -65,6 +67,13 @@ class TablaApp : public App {
 	void setCaptureProfile( string );
 	
 	void lightLinkDidChange( bool saveToFile=true, bool doSetupCaptureDevice=true ); // calls setupCaptureDevice, tells mVision, tells mGameWorld, saves it to disk
+
+
+	// Vision pipeline
+	const Pipeline& getPipeline() { return mPipeline; }
+
+	void   selectPipelineStage( string s );
+	string getPipelineStageSelection() const;
 
 private:
 	bool ensureLightLinkHasLocalDeviceProfiles(); // returns if mLightLink changed
@@ -80,25 +89,33 @@ private:
 	vec2 getMousePosInWorld() const; // uses current window (ci::getWindow())
 	
 public:	
+	
+	const Vision::Output& getVisionOutput() const { return mVisionOutput; } // for debug visualization
+
+	// world info
+	PolyLine2 getWorldBoundsPoly() const;
+		// This is actually the camera world polygon mapping.
+		// For all practical purposes, this is identical to the projector world polygon mapping.
+
 	LightLink			mLightLink; // calibration for camera <> world <> projector
 	
-	Pipeline& getPipeline() { return mPipeline; }
-	// todo: should be const, except Pipeline carries state for current thumb! shlould fix.
+	GameWorldRef		getGameWorld() const { return mGameWorld; }
 	
+private:
 	CaptureRef			mCapture;	// input device		->
 	Vision				mVision ;	// edge detection	->
 	Vision::Output		mVisionOutput; // contours, tokens ->
 	GameWorldRef		mGameWorld ;// world simulation
 	
-	Pipeline			mPipeline; // traces processing
-
 	// static debug frame
 	SurfaceRef mDebugFrame;
 	FileWatch  mDebugFrameFileWatch;
 	void updateDebugFrameCaptureDevicesWithPxPerWorldUnit( float );
 	
 	// game library
+public:
 	void loadGame( string systemName );
+private:
 	void loadDefaultGame();
 	void loadAdjacentGame( int libraryIndexDelta );
 	
@@ -107,12 +124,6 @@ public:
 	// game xml params
 	void				setGameWorldXmlParams( XmlTree );
 	fs::path			getXmlConfigPathForGame( string );
-	
-	// world info
-	PolyLine2 getWorldBoundsPoly() const;
-		// This is actually the camera world polygon mapping.
-		// For all practical purposes, this is identical to the projector world polygon mapping.
-	
 	
 private:
 	// keyboard input (for RFID device code parsing)
@@ -159,9 +170,11 @@ public:
 	
 private:
 	
-	// to help us visualize
-	void addProjectorPipelineStages();
-
+	// to help us visualize, and to calibrate projection 
+	void addProjectorPipelineStages( Pipeline& );
+	
+	Pipeline mPipeline; // traces processing	
+	string mPipelineStageSelection;
 	
 	// settings
 public:
@@ -190,6 +203,7 @@ private:
 	
 public:
 	fs::path hotloadableAssetPath( fs::path ) const ; // prepends the appropriate thing...
+	// TODO: move all game assets into their own directories and then make this private
 
 private:
 	string mOverloadedAssetPath;

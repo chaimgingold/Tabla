@@ -15,7 +15,7 @@ void PipelineStageView::draw()
 	// this will fail to work right if we are nested in other transforms
 	gl::ScopedScissor scissor( getScissorLowerLeft(), getScissorSize() );
 	
-	const Pipeline::StageRef stage = mPipeline.getStage(mStageName);
+	const Pipeline::StageRef stage = TablaApp::get()->getPipeline().getStage(mStageName);
 
 	bool drawWorld = true;
 	
@@ -57,12 +57,12 @@ void PipelineStageView::draw()
 
 void PipelineStageView::mouseDown( MouseEvent )
 {
-	mPipeline.setQuery(mStageName);
+	TablaApp::get()->selectPipelineStage(mStageName);
 }
 
 void PipelineStageView::drawFrame()
 {
-	if ( mStageName == mPipeline.getQuery() ) gl::color(.7f,.3f,.5f);
+	if ( mStageName == TablaApp::get()->getPipelineStageSelection() ) gl::color(.7f,.3f,.5f);
 	else if ( getHasRollover() ) gl::color(1,1,1,1.f);
 	else gl::color(1,1,1,.5f);
 	

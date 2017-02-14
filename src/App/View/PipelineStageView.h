@@ -23,9 +23,8 @@ class PipelineStageView : public View
 {
 public:
 
-	PipelineStageView( Pipeline& p, string stageName )
-		: mPipeline(p)
-		, mStageName(stageName)
+	PipelineStageView( string stageName )
+		: mStageName(stageName)
 	{
 	}
 
@@ -41,7 +40,6 @@ public:
 	
 private:
 	fDraw			mWorldDrawFunc;
-	Pipeline&		mPipeline; // not const so we can set the stage; but that state should move into app.
 	string			mStageName;
 	
 };

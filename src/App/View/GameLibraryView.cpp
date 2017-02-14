@@ -16,7 +16,11 @@ int GameLibraryView::getDefaultItem() const
 
 	int item=0;
 	
-	while ( i != lib.end() && i->first != TablaApp::get()->mGameWorldCartridgeName )
+	auto game = TablaApp::get()->getGameWorld();
+	if (!game) return -1;
+	string gameName = game->getUserName();
+	
+	while ( i != lib.end() && i->first != gameName )
 	{
 		++i;
 		item++;
@@ -49,5 +53,5 @@ void GameLibraryView::userChoseItem( int item )
 string GameLibraryView::getDefaultItemName() const
 {
 	const auto &app = *(TablaApp::get());
-	return app.mGameWorld ? app.mGameWorld->getUserName() : "——";
+	return app.getGameWorld() ? app.getGameWorld()->getUserName() : "——";
 }

@@ -92,7 +92,7 @@ void MainImageView::setPipelineStageName( string n )
 
 string MainImageView::getPipelineStageName() const
 {
-	return mStageName.empty() ? mApp.mPipeline.getQuery() : mStageName;
+	return mStageName.empty() ? mApp.getPipelineStageSelection() : mStageName;
 }
 
 const Pipeline::StageRef MainImageView::getPipelineStage() const
@@ -131,10 +131,10 @@ vec2 MainImageView::worldToWindow( vec2 p )
 
 GameWorld* MainImageView::getGameWorld() const
 {
-	return mApp.mGameWorld.get();
+	return mApp.getGameWorld().get();
 }
 
-Pipeline&  MainImageView::getPipeline() const
+const Pipeline&  MainImageView::getPipeline() const
 {
-	return mApp.mPipeline;
+	return mApp.getPipeline();
 }
