@@ -62,6 +62,7 @@ public:
 	float discretize( float ) const; // still a fractional value, but rounded off to # of discrete states
 	
 	int mNumDiscreteStates=-1;
+	float mDefaultValue=0.f; // 0..1
 };
 
 

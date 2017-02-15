@@ -99,6 +99,7 @@
 	
 	<NumOctaves>5</NumOctaves> <!-- Number of octaves available for shifting when moving scores in zone along Y -->
 	<RootNote>60</RootNote>
+	<DefaultTempo>120</DefaultTempo>
 	<MaxTempo>400</MaxTempo>
 
 	<PokieRobitPulseTime>0.01</PokieRobitPulseTime>

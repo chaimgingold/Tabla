@@ -67,7 +67,10 @@ void MusicWorld::setParams( XmlTree xml )
 	getXml(xml,"RootNote",mRootNote);
 	getXml(xml,"NumOctaves",mNumOctaves);
 	getXml(xml,"PokieRobitPulseTime",mPokieRobitPulseTime);
+	
 	getXml(xml,"MaxTempo",mMaxTempo);
+	getXml(xml,"DefaultTempo",mDefaultTempo);
+	mTempo=mDefaultTempo;
 	
 	getXml(xml,"BeatsPerMeasure",mBeatsPerMeasure);
 	getXml(xml,"BeatQuantization",mBeatQuantization);
@@ -324,13 +327,25 @@ MusicWorld::getMetaParamInfo( MetaParam p ) const
 {
 	MetaParamInfo info;
 
-	if ( p==MetaParam::Scale )
+	switch(p)
 	{
-		info.mNumDiscreteStates = mScales.size();
-	}
-	else if ( p==MetaParam::RootNote )
-	{
-		info.mNumDiscreteStates = 12;
+		case MetaParam::Scale:
+			info.mNumDiscreteStates = mScales.size();
+			info.mDefaultValue = 0.f; // this just works for now, not tuned. assuming 0 is it.
+			break;
+			
+		case MetaParam::RootNote:
+			info.mNumDiscreteStates = 12;
+			info.mDefaultValue = 0.f; // this just works for now, not tuned. assuming 0 is it.
+			break;
+
+		case MetaParam::Tempo:
+			info.mNumDiscreteStates = -1;
+			info.mDefaultValue = (float)mDefaultTempo / (float)mMaxTempo;
+			break;
+			
+		default:
+			break;
 	}
 
 	return info;

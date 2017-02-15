@@ -603,8 +603,8 @@ float MusicVision::getSliderValueFromQuantizedImageData( const Score& s )
 
 	if ( sumw==0.f )
 	{
-		// uh-oh! fall back to last frame value
-		value = oldSliderValue;
+//		value = oldSliderValue; // uh-oh! fall back to last frame value
+		value = s.mInstrument->mMetaParamInfo.mDefaultValue;
 	}
 	
 	return value;

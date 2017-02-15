@@ -68,10 +68,10 @@
 	- [x] Remember last seen polygon, to help with interframe tracking. Draw it. To help player see it, and me improve the algorithm. Maybe poly<>poly intersection, or poly<>poly distance, or poly<>poly similar min bounding rect location, size, orientation (look at difference across all three axes--size being most important, location and orientation can change more). So pull up ocv rotated bounding box function so we can easily get to it.
 	- [x] Timeout for stamp going home... show the timer counting down. (visually, somehow). Maybe fill last seen polygon white, with black stamp on it and flicker stamp (like a damaged video game character).  
 - Meta params
-	- [ ] Default values
-		- Encoded in xml.
-		- Go back to them when empty pixel data (no average possible), or there is no slider. (This will require a little refactor to automatically set to default when it is absent; or just another process watching to see if metaparam slider is absent, and set it then; that'd be easiest).
-		- Show it on the slider (so we know where normal is).
+	- [x] Default values
+		- [ ] Encoded in xml. (Only have DefaultTempo; others we are assuming is zero--not necessarily true).
+		- [x] Go back to them when empty pixel data (no average possible), or there is no slider. (This will require a little refactor to automatically set to default when it is absent; or just another process watching to see if metaparam slider is absent, and set it then; that'd be easiest).
+		- [ ] Show it on the slider (so we know where normal is).
 	- [ ] Adaptive horizontal or vertical
 	- [ ] Try max, not average.
 - [x] ~~Beats marked on additive synth?~~ No. Luke says it's not what it's about.
