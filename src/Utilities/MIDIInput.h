@@ -35,7 +35,7 @@ public:
 	void discoverControls( vector<string> userNames );
 	void setControlLambda( string name, tControlChangeLambda f ) { mControlChangeLambdas[name]=f; }
 	
-	void setVerbose( bool v ) { mVerbose=v; }
+	void setVerbose( bool v=true ) { mVerbose=v; }
 	bool isVerbose() const { return mVerbose; }
 	
 private:
