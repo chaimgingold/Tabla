@@ -608,6 +608,12 @@ void TablaApp::loadGame( string systemName )
 	saveUserSettings();
 }
 
+string TablaApp::getCurrentGameSystemName() const
+{
+	if ( mGameWorld ) return mGameWorld->getSystemName();
+	else return string();
+}
+
 void TablaApp::loadDefaultGame()
 {
 	string systemName;
@@ -630,12 +636,10 @@ void TablaApp::loadDefaultGame()
 
 void TablaApp::loadAdjacentGame( int libraryIndexDelta )
 {
-	if ( !mGameWorld ) return;
-	
 	auto lib = GameCartridge::getLibrary();
 	auto begin = lib.begin();
 	auto end = lib.end();
-	auto i = lib.find( mGameWorld->getSystemName() );
+	auto i = lib.find( getCurrentGameSystemName() );
 	
 	if ( i!=end )
 	{
@@ -1077,7 +1081,12 @@ void TablaApp::keyDown( KeyEvent event )
 			case KeyEvent::KEY_s:
 				if (!mDebugFrame) saveCameraImageToDisk();
 				break;
-				
+			
+			case KeyEvent::KEY_r:
+				// reset game world
+				loadGame( getCurrentGameSystemName() );
+				break;
+			
 			default:
 				caught=false;
 				break;

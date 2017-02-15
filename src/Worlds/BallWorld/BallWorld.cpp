@@ -28,7 +28,18 @@ BallWorld::BallWorld()
 
 	setupSynthesis();
 	
+	// midi input
+	mMidiInput.setVerbose(true);
 	mMidiInput.openAllPorts();
+	mMidiInput.discoverControls( vector<string>{"size","speed"} );
+	
+	bool verbose=true;
+	mMidiInput.setControlLambda( "size", [this,verbose]( const MIDIInput::Control& control ){
+		if (verbose) cout << "size = " << control.mFloatValue << endl;
+	});
+	mMidiInput.setControlLambda( "speed", [this,verbose]( const MIDIInput::Control& control ){
+		if (verbose) cout << "speed = " << control.mFloatValue << endl;
+	});
 }
 
 void BallWorld::setParams( XmlTree xml )

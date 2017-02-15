@@ -151,6 +151,7 @@ private:
 	// game library
 	void loadDefaultGame();
 	void loadAdjacentGame( int libraryIndexDelta );
+	string getCurrentGameSystemName() const;
 	
 	// game xml params
 	void		setGameWorldXmlParams( XmlTree );
