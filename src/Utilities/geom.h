@@ -65,4 +65,6 @@ PolyLine2 getConvexHull( const PolyLine2& ); // does the right thing with closed
 
 float calcPolyEdgeOverlapFrac( const PolyLine2& a, const PolyLine2& b, float distanceAttenuate );
 
+bool doPolygonsIntersect( const PolyLine2&, const PolyLine2& );
+
 #endif /* geom_h */

@@ -81,6 +81,8 @@
 		<DoCircleLayout>0</DoCircleLayout>
 		<DebugDrawSearch>0</DebugDrawSearch>
 		<SnapHomeWhenLost>1</SnapHomeWhenLost>
+		<DoLostPolySearch>1</DoLostPolySearch>
+		<DoLostPolySearchTime>4</DoLostPolySearchTime>
 	</Stamps>
 	
 

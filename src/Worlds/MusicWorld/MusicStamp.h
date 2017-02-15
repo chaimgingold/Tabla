@@ -132,7 +132,28 @@ public:
 	bool mHasContour=false;
 	bool mLastHasContour=false;
 	
+	enum class State
+	{
+		Home,  // waiting to be picked up
+		Bound, // attached to a score or contour
+		Lost   // lost my score
+	};
+	State getState() const { return mState; }
+	void  goToState( State );
+	float getInStateLength() const;
+	
+	void setLastBoundToScorePoly( PolyLine2 p ) { mLastBoundToScorePoly=p; }
+	PolyLine2 getLastBoundToScorePoly() const { return mLastBoundToScorePoly; }
+	void setDrawLastBoundToScorePoly( float f ) { mDrawLastBoundToScorePoly=f; }
+	
 private:
+	
+	State mState = State::Home;
+	float mStateEnterTime;
+	
+	PolyLine2 mLastBoundToScorePoly;
+	float mDrawLastBoundToScorePoly=0.f;
+	
 	void drawInstrumentIcon( vec2 worldx, tIconAnimState pose ) const;
 	
 };
@@ -152,7 +173,9 @@ private:
 	
 	void decollide();
 	void decollideScores( const ScoreVec& );
+	void updateBoundState();
 	void snapHomeIfLost();
+	void updateLostPolyDraw();
 	void updateAnimWithScore( MusicStamp&, const Score& ) const;
 	void updateIdleAnims( float globalPhase, float globalBeatDuration );
 	void updateSearch( const ContourVector& );
@@ -168,6 +191,8 @@ private:
 	bool mDoCircleLayout=true;
 	bool mDebugDrawSearch=false;
 	bool mSnapHomeWhenLost=false;
+	bool mDoLostPolySearch=true;
+	float mDoLostPolySearchTime=3.f;
 	
 };
 
