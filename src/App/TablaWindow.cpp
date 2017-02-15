@@ -38,11 +38,11 @@ TablaWindow::TablaWindow( WindowRef window, bool isUIWindow, TablaApp& app )
 	if ( mIsUIWindow )
 	{
 		// margin
-		Rectf margin = Rectf(1,1,1,1) * mApp.mConfigWindowMainImageMargin;
-		margin.x1 = max( margin.x1, mApp.mConfigWindowPipelineWidth + mApp.mConfigWindowPipelineGutter*2.f );
+		Rectf margin = Rectf(1,1,1,1) * mApp.getParams().mConfigWindowMainImageMargin;
+		margin.x1 = max( margin.x1, mApp.getParams().mConfigWindowPipelineWidth + mApp.getParams().mConfigWindowPipelineGutter*2.f );
 		mMainImageView->setMargin( margin );
 		mMainImageView->setFrameColor( ColorA(1,1,1,.35f) );
-		mMainImageView->setFont(mApp.mTextureFont);
+		mMainImageView->setFont(mApp.getFont());
 	}
 	else
 	{
@@ -70,13 +70,13 @@ TablaWindow::TablaWindow( WindowRef window, bool isUIWindow, TablaApp& app )
 			mCameraPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
 					mApp,
-					[this](){ return getPointsAsPoly(mApp.mLightLink.getCaptureProfile().mCaptureCoords,4); },
+					[this](){ return getPointsAsPoly(mApp.getLightLink().getCaptureProfile().mCaptureCoords,4); },
 					"undistorted"
 					)
 				);
 			
 			mCameraPolyEditView->setSetPolyFunc( [&]( const PolyLine2& poly ){
-				setPointsFromPoly( mApp.mLightLink.getCaptureProfile().mCaptureCoords, 4, poly );
+				setPointsFromPoly( mApp.getLightLink().getCaptureProfile().mCaptureCoords, 4, poly );
 				updateLightLink(mApp);
 			});
 			
@@ -92,13 +92,13 @@ TablaWindow::TablaWindow( WindowRef window, bool isUIWindow, TablaApp& app )
 			mProjPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
 					mApp,
-					[&](){ return getPointsAsPoly(mApp.mLightLink.getProjectorProfile().mProjectorCoords,4); },
+					[&](){ return getPointsAsPoly(mApp.getLightLink().getProjectorProfile().mProjectorCoords,4); },
 					"projector"
 					)
 			);
 			
 			mProjPolyEditView->setSetPolyFunc( [&]( const PolyLine2& poly ){
-				setPointsFromPoly( mApp.mLightLink.getProjectorProfile().mProjectorCoords, 4, poly );
+				setPointsFromPoly( mApp.getLightLink().getProjectorProfile().mProjectorCoords, 4, poly );
 				updateLightLink(mApp);
 			});
 			
@@ -114,14 +114,14 @@ TablaWindow::TablaWindow( WindowRef window, bool isUIWindow, TablaApp& app )
 			mWorldBoundsPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
 					mApp,
-					[&](){ return getPointsAsPoly(mApp.mLightLink.getCaptureProfile().mCaptureWorldSpaceCoords,4); },
+					[&](){ return getPointsAsPoly(mApp.getLightLink().getCaptureProfile().mCaptureWorldSpaceCoords,4); },
 					"world-boundaries"
 					)
 			);
 			
 			mWorldBoundsPolyEditView->setSetPolyFunc( [&]( const PolyLine2& poly ){
-				setPointsFromPoly( mApp.mLightLink.getCaptureProfile().mCaptureWorldSpaceCoords  , 4, poly );
-				setPointsFromPoly( mApp.mLightLink.getProjectorProfile().mProjectorWorldSpaceCoords, 4, poly );
+				setPointsFromPoly( mApp.getLightLink().getCaptureProfile().mCaptureWorldSpaceCoords  , 4, poly );
+				setPointsFromPoly( mApp.getLightLink().getProjectorProfile().mProjectorWorldSpaceCoords, 4, poly );
 				updateLightLink(mApp);
 			});
 			
@@ -184,7 +184,9 @@ void TablaWindow::draw()
 	
 	// this, below, could become its own view
 	// it would need a shared_ptr to MainImageView (no biggie)
-	if ( mIsUIWindow && mApp.mDrawMouseDebugInfo )//&& getWindowBounds().contains(getMousePosInWindow()) )
+	auto font = mApp.getFont();
+	
+	if ( mIsUIWindow && mApp.getParams().mDrawMouseDebugInfo )//&& getWindowBounds().contains(getMousePosInWindow()) )
 	{
 		const vec2 pt = getMousePosInWindow();
 		
@@ -195,45 +197,45 @@ void TablaWindow::draw()
 		for( int i=0; i<2; ++i )
 		{
 			gl::color( c[i] );
-			mApp.mTextureFont->drawString(
+			font->drawString(
 //				"Window: " + toString(pt) + "\t" +
 				"Image: "  + toString( mMainImageView->windowToImage(pt) ) +
 				"\tWorld: " + toString( mMainImageView->windowToWorld(pt) )
-				, o[i]+vec2( 8.f, getWindowSize().y - mApp.mTextureFont->getAscent()+mApp.mTextureFont->getDescent()) ) ;
+				, o[i]+vec2( 8.f, getWindowSize().y - font->getAscent()+font->getDescent()) ) ;
 		}
 	}
 	
 	if ( mIsUIWindow )
 	{
 		{
-			string str = toString( (int)roundf(mApp.mCaptureFPS.mFPS) ) + " capture fps";
+			string str = toString( (int)roundf(mApp.getCaptureFPS()) ) + " capture fps";
 			
-			vec2 size = mApp.mTextureFont->measureString(str);
+			vec2 size = font->measureString(str);
 			
 			//vec2 loc( vec2(getWindowSize().x - size.x - 8.f, getWindowSize().y - 8.f ) );
 			vec2 loc( vec2(getWindowSize().x - size.x - 8.f, size.y + 8.f ) );
 
 			gl::color(1,1,1,.8);
-			mApp.mTextureFont->drawString( str, loc );
+			font->drawString( str, loc );
 		}
 		
 		const float targetFPS = mApp.getFrameRate();
 		
-		if ( targetFPS - mApp.mAppFPS.mFPS >= targetFPS*.1f )
+		if ( targetFPS - mApp.getFPS() >= targetFPS*.1f )
 		{
-			string str = toString( (int)roundf(mApp.mAppFPS.mFPS) ) + " fps";
+			string str = toString( (int)roundf(mApp.getFPS()) ) + " fps";
 			
-			vec2 size = mApp.mTextureFont->measureString(str);
+			vec2 size = font->measureString(str);
 			
 			vec2 loc( vec2(getWindowSize().x - size.x - 8.f, size.y + 24.f ) );
 
 			gl::color(1,1,1,.8);
-			mApp.mTextureFont->drawString( str, loc );
+			font->drawString( str, loc );
 		}
 	}
 	
 	// draw contour debug info
-	if (mApp.mDrawContourTree)
+	if (mApp.getParams().mDrawContourTree)
 	{
 		const float k = 16.f ;
 		Color inc(0,0,0);
@@ -267,15 +269,15 @@ void TablaWindow::draw()
 			gl::drawSolidRect(r) ;
 			
 			gl::color(.8,.8,.7);
-			mApp.mTextureFont->drawString( to_string(i) + " (" + to_string(c.mParent) + ")",
-				r.getLowerLeft() + vec2(2,-mApp.mTextureFont->getDescent()) ) ;
+			font->drawString( to_string(i) + " (" + to_string(c.mParent) + ")",
+				r.getLowerLeft() + vec2(2,-font->getDescent()) ) ;
 		}
 	}
 
 	// AV clacker
-	if ( mApp.mAVClacker>0.f )
+	if ( mApp.getAVClacker()>0.f )
 	{
-		gl::color(1,1,1,mApp.mAVClacker);
+		gl::color(1,1,1,mApp.getAVClacker());
 		gl::drawSolidRect( Rectf(vec2(0,0),getWindowSize()) );
 	}
 }
@@ -326,8 +328,9 @@ void TablaWindow::updateMainImageTransform()
 		}
 		else
 		{
-			// world by default. (not really sure what this even means anymore; should never happen.)
-			drawSize = Rectf( mApp.getWorldBoundsPoly().getPoints() ).getSize();
+			// world by default. (this should never happen.)
+			assert(mApp.getGameWorld());
+			drawSize = Rectf( mApp.getGameWorld()->getWorldBoundsPoly().getPoints() ).getSize();
 		}
 		
 		bounds = Rectf( 0, 0, drawSize.x, drawSize.y );
@@ -354,7 +357,7 @@ void TablaWindow::updatePipelineViews()
 {
 	const auto stages = mApp.getPipeline().getStages();
 	
-	vec2 pos = vec2(1,1) * mApp.mConfigWindowPipelineGutter;
+	vec2 pos = vec2(1,1) * mApp.getParams().mConfigWindowPipelineGutter;
 	const float left = pos.x;
 	
 	ViewRef lastView;
@@ -366,7 +369,7 @@ void TablaWindow::updatePipelineViews()
 	// cull views
 	for( auto v : oldPipelineViews )
 	{
-		if ( !mApp.mDrawPipeline || !mApp.getPipeline().getStage(v->getName()) )
+		if ( !mApp.getParams().mDrawPipeline || !mApp.getPipeline().getStage(v->getName()) )
 		{
 			mViews.removeView(v);
 		}
@@ -380,7 +383,7 @@ void TablaWindow::updatePipelineViews()
 		ViewRef view = mViews.getViewByName(s->mName);
 		
 		// make a new one?
-		if ( !view && mApp.mDrawPipeline )
+		if ( !view && mApp.getParams().mDrawPipeline )
 		{
 			PipelineStageView psv( s->mName );
 			psv.setWorldDrawFunc( [&](){
@@ -399,10 +402,10 @@ void TablaWindow::updatePipelineViews()
 		if (view)
 		{
 			// compute size
-			vec2 size = s->mImageSize * ((mApp.mConfigWindowPipelineWidth * s->mLayoutHintScale) / s->mImageSize.x) ;
+			vec2 size = s->mImageSize * ((mApp.getParams().mConfigWindowPipelineWidth * s->mLayoutHintScale) / s->mImageSize.x) ;
 			
 			// too tall?
-			const float kMaxHeight = mApp.mConfigWindowPipelineWidth*2.f*s->mLayoutHintScale;
+			const float kMaxHeight = mApp.getParams().mConfigWindowPipelineWidth*2.f*s->mLayoutHintScale;
 			
 			if (size.y > kMaxHeight) size = s->mImageSize * (kMaxHeight / s->mImageSize.y) ;
 			
@@ -411,7 +414,7 @@ void TablaWindow::updatePipelineViews()
 			// do ortho layout
 			if (lastView && wasLastViewOrtho && s->mLayoutHintOrtho)
 			{
-				usepos = lastView->getFrame().getUpperRight() + vec2(1,0) * mApp.mConfigWindowPipelineGutter;
+				usepos = lastView->getFrame().getUpperRight() + vec2(1,0) * mApp.getParams().mConfigWindowPipelineGutter;
 			}
 			
 			view->setFrame ( Rectf(usepos, usepos + size) );
@@ -421,7 +424,7 @@ void TablaWindow::updatePipelineViews()
 			wasLastViewOrtho = s->mLayoutHintOrtho;
 			
 			// next pos
-			pos = vec2( left, view->getFrame().y2 + mApp.mConfigWindowPipelineGutter ) ;
+			pos = vec2( left, view->getFrame().y2 + mApp.getParams().mConfigWindowPipelineGutter ) ;
 		}
 	}
 }

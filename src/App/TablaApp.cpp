@@ -20,22 +20,6 @@ const vec2 kDefaultWindowSize( 640, 480 );
 
 const string kDocumentsDirectoryName = "LaTabla";
 
-void TablaApp::FPS::start()
-{
-	mLastFrameTime = ci::app::getElapsedSeconds();
-}
-
-void TablaApp::FPS::mark()
-{
-	double now = ci::app::getElapsedSeconds();
-	
-	mLastFrameLength = now - mLastFrameTime ;
-	
-	mLastFrameTime = now;
-	
-	mFPS = 1.f / mLastFrameLength;
-}
-
 TablaApp::~TablaApp()
 {
 	cout << "Shutting down..." << endl;
@@ -189,31 +173,7 @@ void TablaApp::loadAppConfigXml( XmlTree xml )
 	
 	if (xml.hasChild("PaperBounce3/App"))
 	{
-		XmlTree app = xml.getChild("PaperBounce3/App");
-		
-		getXml(app,"AutoFullScreenProjector",mAutoFullScreenProjector);
-		getXml(app,"DrawCameraImage",mDrawCameraImage);
-		getXml(app,"DrawContours",mDrawContours);
-		getXml(app,"DrawContoursFilled",mDrawContoursFilled);
-		getXml(app,"DrawMouseDebugInfo",mDrawMouseDebugInfo);
-		getXml(app,"DrawPolyBoundingRect",mDrawPolyBoundingRect);
-		getXml(app,"DrawContourTree",mDrawContourTree);
-		getXml(app,"DrawPipeline",mDrawPipeline);
-		getXml(app,"DrawContourMousePick",mDrawContourMousePick);
-		
-		getXml(app,"ConfigWindowMainImageDrawBkgndImage",mConfigWindowMainImageDrawBkgndImage);
-		
-		getXml(app,"HasConfigWindow",mHasConfigWindow);
-		getXml(app,"ConfigWindowPipelineWidth",mConfigWindowPipelineWidth);
-		getXml(app,"ConfigWindowPipelineGutter",mConfigWindowPipelineGutter);
-		getXml(app,"ConfigWindowMainImageMargin",mConfigWindowMainImageMargin);
-		
-		getXml(app,"KeyboardStringTimeout",mKeyboardStringTimeout);
-		
-		getXml(app,"DefaultPixelsPerWorldUnit",mDefaultPixelsPerWorldUnit);
-		getXml(app,"DebugFrameSkip",mDebugFrameSkip);
-		
-		getXml(app,"DefaultGameWorld",mDefaultGameWorld);
+		mParams.set( xml.getChild("PaperBounce3/App") );
 	}
 	
 	if (xml.hasChild("PaperBounce3/RFID"))
@@ -233,7 +193,7 @@ void TablaApp::loadAppConfigXml( XmlTree xml )
 	}
 	
 	// 2. respond
-	updateDebugFrameCaptureDevicesWithPxPerWorldUnit(mDefaultPixelsPerWorldUnit);
+	updateDebugFrameCaptureDevicesWithPxPerWorldUnit(getParams().mDefaultPixelsPerWorldUnit);
 	
 	// TODO:
 	// - get a new camera capture object so that resolution can change live (I think I do that now)
@@ -265,7 +225,7 @@ void TablaApp::setupWindows()
 	// Fullscreen main window in secondary display
 	auto displays = Display::getDisplays() ;
 
-	if ( displays.size()>1 && mAutoFullScreenProjector )
+	if ( displays.size()>1 && getParams().mAutoFullScreenProjector )
 	{
 		// workaround for cinder multi-window fullscreen bug... :P
 //		mProjectorWin->setPos( displays[1]->getBounds().getUL() + ivec2(10,10) ); // redundant to .display(displays[1]); could hide by putting outside of window or something
@@ -277,15 +237,14 @@ void TablaApp::setupWindows()
 			.secondaryDisplayBlanking(false)
 			.exclusive(true)
 			.display(displays[1])
-			 ) ;
-		
+			) ;
 	}
 
 	mProjectorWin->getWindow()->getSignalMove()  .connect( [&]{ this->saveUserSettings(); });
 	mProjectorWin->getWindow()->getSignalResize().connect( [&]{ this->saveUserSettings(); });
 		
 	// aux UI display
-	if (mHasConfigWindow)
+	if (getParams().mHasConfigWindow)
 	{
 		// note: would be nice to have this value hot-load, but not sure how to sequence
 		// light link loading with that, and this is good enough for now.
@@ -390,7 +349,7 @@ bool TablaApp::ensureLightLinkHasLocalDeviceProfiles()
 					/*string("Default ") + */d->getName(),
 					d->getName(),
 					size,
-					mDefaultPixelsPerWorldUnit
+					getParams().mDefaultPixelsPerWorldUnit
 					);
 				
 				mLightLink.mCaptureProfiles[profile.mName] = profile;
@@ -508,7 +467,7 @@ bool TablaApp::setupCaptureDevice_File( const LightLink::CaptureProfile& profile
 				mLightLink.getCaptureProfile() = LightLink::CaptureProfile(
 					fs::path(profile.mFilePath),
 					vec2(mDebugFrame->getSize()),
-					mDefaultPixelsPerWorldUnit
+					getParams().mDefaultPixelsPerWorldUnit
 				);
 				// note: we aren't successfully saving new size to LightLink.xml
 				// if we call lightLinkDidChange, we crash; it could be a number of factors.
@@ -616,8 +575,6 @@ void TablaApp::loadGame( string systemName )
 		return;
 	}
 	
-	mGameWorldCartridgeName = systemName ;
-	
 	mGameWorld = cart->second->load();
 	
 	if ( mGameWorld )
@@ -659,7 +616,7 @@ void TablaApp::loadDefaultGame()
 	systemName = getCommandLineArgValue("-gameworld");
 	
 	// default (BallWorld)
-	if ( systemName.empty() ) systemName = mDefaultGameWorld;
+	if ( systemName.empty() ) systemName = getParams().mDefaultGameWorld;
 	
 	// first?
 	if ( systemName.empty() && !GameCartridge::getLibrary().empty() )
@@ -673,10 +630,12 @@ void TablaApp::loadDefaultGame()
 
 void TablaApp::loadAdjacentGame( int libraryIndexDelta )
 {
+	if ( !mGameWorld ) return;
+	
 	auto lib = GameCartridge::getLibrary();
 	auto begin = lib.begin();
 	auto end = lib.end();
-	auto i = lib.find( mGameWorldCartridgeName );
+	auto i = lib.find( mGameWorld->getSystemName() );
 	
 	if ( i!=end )
 	{
@@ -775,7 +734,7 @@ void TablaApp::fileDrop( FileDropEvent event )
 			
 			if (surf)
 			{
-				LightLink::CaptureProfile cp(file,surf->getSize(),mDefaultPixelsPerWorldUnit); 
+				LightLink::CaptureProfile cp(file,surf->getSize(),getParams().mDefaultPixelsPerWorldUnit); 
 				mLightLink.mCaptureProfiles[cp.mName] = cp;
 				mLightLink.setCaptureProfile(cp.mName);
 				lightLinkDidChange();
@@ -845,7 +804,7 @@ void TablaApp::update()
 void TablaApp::updateVision()
 {
 	if (   (mCapture && mCapture->checkNewFrame())
-		|| (mDebugFrame && (mDebugFrameSkip<2 || getElapsedFrames()%mDebugFrameSkip==0)) )
+		|| (mDebugFrame && (getParams().mDebugFrameSkip<2 || getElapsedFrames()%getParams().mDebugFrameSkip==0)) )
 	{
 		mCaptureFPS.mark();
 		
@@ -931,7 +890,7 @@ void TablaApp::drawWorld( GameWorld::DrawType drawType )
 	}
 
 	// draw contour bounding boxes, etc...
-	if (mDrawPolyBoundingRect)
+	if (getParams().mDrawPolyBoundingRect)
 	{
 		for( auto c : mVisionOutput.mContours )
 		{
@@ -943,9 +902,9 @@ void TablaApp::drawWorld( GameWorld::DrawType drawType )
 	}
 
 	// draw contours
-	if ( mDrawContours || isUIWindow )
+	if ( getParams().mDrawContours || isUIWindow )
 	{
-		drawContours( mDrawContoursFilled, mDrawContourMousePick || isUIWindow, false );
+		drawContours( getParams().mDrawContoursFilled, getParams().mDrawContourMousePick || isUIWindow, false );
 	}
 	else if (drawType==GameWorld::DrawType::Projector
 			&& mUIWindow
@@ -959,7 +918,7 @@ void TablaApp::drawWorld( GameWorld::DrawType drawType )
 	if (mGameWorld) mGameWorld->draw(drawType);
 	
 	// mouse debug info
-	if ( (mDrawMouseDebugInfo&&isUIWindow) && isMouseInWindow && mGameWorld )
+	if ( (getParams().mDrawMouseDebugInfo&&isUIWindow) && isMouseInWindow && mGameWorld )
 	{
 		mGameWorld->drawMouseDebugInfo( getMousePosInWorld() );
 	}
@@ -1067,7 +1026,7 @@ void TablaApp::keyDown( KeyEvent event )
 	{
 		float now = getElapsedSeconds();
 		
-		if ( now - mLastKeyEventTime > mKeyboardStringTimeout )
+		if ( now - mLastKeyEventTime > getParams().mKeyboardStringTimeout )
 		{
 			mKeyboardString.clear();
 		}
@@ -1103,11 +1062,11 @@ void TablaApp::keyDown( KeyEvent event )
 				break;
 
 			case KeyEvent::KEY_c:
-				mDrawContours = !mDrawContours;
+				mParams.mDrawContours = !mParams.mDrawContours;
 				break;
 
 			case KeyEvent::KEY_t:
-				mDrawPipeline = !mDrawPipeline;
+				mParams.mDrawPipeline = !mParams.mDrawPipeline;
 				break;
 				
 			case KeyEvent::KEY_k:

@@ -97,7 +97,7 @@ void PolyEditView::draw()
 	{
 		gl::color(1,1,1);
 		
-		auto font = TablaApp::get()->mTextureFont;
+		auto font = TablaApp::get()->getFont();
 		
 		const vec2 strsize = font->measureString("Test",gl::TextureFont::DrawOptions().pixelSnap(false));
 		const float fontheight = strsize.y;

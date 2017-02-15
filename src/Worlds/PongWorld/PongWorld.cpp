@@ -389,7 +389,7 @@ void PongWorld::strobeBalls()
 // Synthesis
 void PongWorld::setupSynthesis()
 {
-	mPd = TablaApp::get()->mPd;
+	mPd = TablaApp::get()->getPd();
 
 	// Load pong synthesis patch
 	auto app = TablaApp::get();

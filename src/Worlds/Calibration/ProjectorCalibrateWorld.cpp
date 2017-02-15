@@ -86,7 +86,7 @@ void ProjectorCalibrateWorld::updateCalibration ( Rectf in, PolyLine2 out, int o
 	
 	if (1)
 	{
-		LightLink::ProjectorProfile &prof = TablaApp::get()->mLightLink.getProjectorProfile();
+		LightLink::ProjectorProfile &prof = TablaApp::get()->getLightLink().getProjectorProfile();
 		
 		for( int i=0; i<4; ++i )
 		{
@@ -175,7 +175,7 @@ void ProjectorCalibrateWorld::draw( DrawType drawType )
 		if (0)
 		{
 			// debug help
-			const auto projprof = TablaApp::get()->mLightLink.getProjectorProfile();
+			const auto projprof = TablaApp::get()->getLightLink().getProjectorProfile();
 			const PolyLine2 projcoords( vector<vec2>(
 								projprof.mProjectorCoords,
 								projprof.mProjectorCoords+4) );

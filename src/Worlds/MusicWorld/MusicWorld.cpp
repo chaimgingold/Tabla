@@ -416,7 +416,7 @@ void MusicWorld::setupSynthesis()
 	killAllNotes();
 
 	// Create the synth engine
-	mPd = TablaApp::get()->mPd;
+	mPd = TablaApp::get()->getPd();
 
 	cout << "loading patch..." << endl;
 

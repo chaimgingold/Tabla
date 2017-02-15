@@ -20,8 +20,8 @@ void PopUpMenuView::layout( Rectf r )
 float PopUpMenuView::getHeightWhenClosed()
 {
 	return roundf(
-		TablaApp::get()->mTextureFont->getAscent()
-		+ TablaApp::get()->mTextureFont->getDescent()
+		TablaApp::get()->getFont()->getAscent()
+		+ TablaApp::get()->getFont()->getDescent()
 		+ 4.f);
 }
 
@@ -49,7 +49,7 @@ void PopUpMenuView::draw()
 	gl::color(0,0,0, getHasMouseDown() ? .5 : 1.f );
 	{
 		gl::ScopedScissor scissor( getScissorLowerLeft(), getScissorSize() );
-		app.mTextureFont->drawString( getDefaultItemName(), getBounds().getLowerLeft() + kTextOffset );
+		app.getFont()->drawString( getDefaultItemName(), getBounds().getLowerLeft() + kTextOffset );
 	}
 	
 	if ( getHasMouseDown() )
@@ -87,7 +87,7 @@ void PopUpMenuView::draw()
 			}
 			
 			string worldName = *c;
-			app.mTextureFont->drawString( worldName, r.getLowerLeft() + kTextOffset );
+			app.getFont()->drawString( worldName, r.getLowerLeft() + kTextOffset );
 		}
 	}
 }

@@ -146,7 +146,7 @@ void TokenWorld::drawMatchingKeypoints( bool drawKeypoints ) {
 			}
 
 			
-			auto font = TablaApp::get()->mTextureFont;
+			auto font = TablaApp::get()->getFont();
 			
 			if (font)
 			{

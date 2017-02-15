@@ -56,7 +56,7 @@ void PinballView::setup()
 		mUIFont = gl::TextureFont::create( Font(loadFile(mWorld.getAssetPath("fonts/atari.ttf")),12) );
 	} catch (...) {
 		cout << "Couldn't load Pinball ui font" << endl;
-		mUIFont = TablaApp::get()->mTextureFont; // default to
+		mUIFont = TablaApp::get()->getFont(); // default to
 	}
 }
 

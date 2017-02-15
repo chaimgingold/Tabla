@@ -34,6 +34,7 @@
 		26308E611E44113C00DB8371 /* PopUpMenuView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26308E5F1E44113C00DB8371 /* PopUpMenuView.cpp */; };
 		266E2C6E1E495A3C00F92DAE /* MIDIInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 266E2C6C1E495A3C00F92DAE /* MIDIInput.cpp */; };
 		2673CD5E1E1D791C0036C02D /* PinballView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2673CD5C1E1D791C0036C02D /* PinballView.cpp */; };
+		26A451641E54420600BCAC25 /* TablaAppParams.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26A451621E54420600BCAC25 /* TablaAppParams.cpp */; };
 		26CCA2D31E089DE7005F7C24 /* BallWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2B21E089DE7005F7C24 /* BallWorld.cpp */; };
 		26CCA2D51E089DE7005F7C24 /* GameWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2B81E089DE7005F7C24 /* GameWorld.cpp */; };
 		26CCA2D61E089DE7005F7C24 /* Instrument.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2BB1E089DE7005F7C24 /* Instrument.cpp */; };
@@ -228,6 +229,9 @@
 		266E2C6D1E495A3C00F92DAE /* MIDIInput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MIDIInput.h; sourceTree = "<group>"; };
 		2673CD5C1E1D791C0036C02D /* PinballView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PinballView.cpp; sourceTree = "<group>"; };
 		2673CD5D1E1D791C0036C02D /* PinballView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PinballView.h; sourceTree = "<group>"; };
+		26A4515F1E54390F00BCAC25 /* FPS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPS.h; sourceTree = "<group>"; };
+		26A451621E54420600BCAC25 /* TablaAppParams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TablaAppParams.cpp; sourceTree = "<group>"; };
+		26A451631E54420600BCAC25 /* TablaAppParams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TablaAppParams.h; sourceTree = "<group>"; };
 		26CCA2B21E089DE7005F7C24 /* BallWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BallWorld.cpp; sourceTree = "<group>"; };
 		26CCA2B31E089DE7005F7C24 /* BallWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BallWorld.h; sourceTree = "<group>"; };
 		26CCA2B81E089DE7005F7C24 /* GameWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GameWorld.cpp; sourceTree = "<group>"; };
@@ -983,6 +987,9 @@
 				26CCA3121E089EE3005F7C24 /* View */,
 				26CCA3171E089EE3005F7C24 /* TablaWindow.cpp */,
 				26CCA3181E089EE3005F7C24 /* TablaWindow.h */,
+				26A451621E54420600BCAC25 /* TablaAppParams.cpp */,
+				26A451631E54420600BCAC25 /* TablaAppParams.h */,
+				26A4515F1E54390F00BCAC25 /* FPS.h */,
 			);
 			name = App;
 			path = ../src/App;
@@ -2664,6 +2671,7 @@
 				26CCA2DB1E089DE7005F7C24 /* PinballParts.cpp in Sources */,
 				C2C874901DDBB2D40067E07D /* list_ports_osx.cc in Sources */,
 				58F3F572E622458BA5EA9B45 /* b2Distance.cpp in Sources */,
+				26A451641E54420600BCAC25 /* TablaAppParams.cpp in Sources */,
 				FE95B791332E4B49916DF787 /* b2DynamicTree.cpp in Sources */,
 				26CCA30D1E089EB8005F7C24 /* rtmidi_c.cpp in Sources */,
 				7D4B6A1410EE43358255E704 /* b2TimeOfImpact.cpp in Sources */,

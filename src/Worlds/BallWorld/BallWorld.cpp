@@ -935,7 +935,7 @@ void onBallWorldBoundaryCollide	( const Ball& )
 
 void BallWorld::setupSynthesis()
 {
-	mPd = TablaApp::get()->mPd;
+	mPd = TablaApp::get()->getPd();
 	// Load synthesis patch
 
 	auto app = TablaApp::get();

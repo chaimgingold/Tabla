@@ -178,8 +178,8 @@ void CameraCalibrateWorld::tryToSolveWithKnownBoards( cv::Size imageSize )
 			auto app = TablaApp::get();
 			if (app)
 			{
-				app->mLightLink.getCaptureProfile().mDistCoeffs = distCoeffs;
-				app->mLightLink.getCaptureProfile().mCameraMatrix = cameraMatrix;
+				app->getLightLink().getCaptureProfile().mDistCoeffs = distCoeffs;
+				app->getLightLink().getCaptureProfile().mCameraMatrix = cameraMatrix;
 				app->lightLinkDidChange();
 			}
 		}

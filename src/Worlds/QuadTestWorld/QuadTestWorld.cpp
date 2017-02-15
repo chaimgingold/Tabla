@@ -133,7 +133,7 @@ void QuadTestWorld::draw( DrawType drawType )
 //			if ( !f.mIsValid && f.mConvexHull.size()>0 )
 			if (1)
 			{
-				TablaApp::get()->mTextureFont->drawString(
+				TablaApp::get()->getFont()->drawString(
 				//	toString(f.mConvexHull.size()) + " " + toString(f.mContourPoly.calcArea()),	
 					toString(floorf(f.mOverlapScore*100.f)) + "%",
 					//f.mConvexHull.getPoints()[0] + vec2(0,-1),

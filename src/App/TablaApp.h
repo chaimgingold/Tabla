@@ -29,6 +29,8 @@
 #include "GameWorld.h"
 #include "FileWatch.h"
 #include "Pipeline.h"
+#include "FPS.h"
+#include "TablaAppParams.h"
 
 #include "PipelineStageView.h"
 #include "TablaWindow.h"
@@ -62,10 +64,16 @@ class TablaApp : public App {
 	//
 	void drawWorld( GameWorld::DrawType );
 
+	float getFPS() const { return mAppFPS.mFPS; }
+	float getCaptureFPS() const { return mCaptureFPS.mFPS; }	
+	float getAVClacker() const { return mAVClacker; }
+
 	// Light link management
 	const LightLink& getLightLink() const { return mLightLink; }
 	void setCaptureProfile( string );
-	
+
+		// TODO: abstract access, and make both of these private: 
+	LightLink& getLightLink() { return mLightLink; }	
 	void lightLinkDidChange( bool saveToFile=true, bool doSetupCaptureDevice=true ); // calls setupCaptureDevice, tells mVision, tells mGameWorld, saves it to disk
 
 
@@ -75,7 +83,48 @@ class TablaApp : public App {
 	void   selectPipelineStage( string s );
 	string getPipelineStageSelection() const;
 
+	const Vision::Output& getVisionOutput() const { return mVisionOutput; } // for debug visualization
+
+
+	// game
+	GameWorldRef getGameWorld() const { return mGameWorld; }
+	void loadGame( string systemName );
+	
+	// shared resources
+	cipd::PureDataNodeRef getPd() const { return mPd; }
+	gl::TextureFontRef getFont() const { return mTextureFont; }
+	const TablaAppParams& getParams() const { return mParams; }
+
+	fs::path hotloadableAssetPath( fs::path ) const ; // prepends the appropriate thing...
+	// TODO: move all game assets into their own directories and then make this private
+
+		
 private:
+	
+	
+	
+	// === Vision System ===
+
+	void updateVision();
+	
+	// main players
+	LightLink			mLightLink; // calibration for camera <> world <> projector
+	CaptureRef			mCapture;	// input device		->
+	Vision				mVision ;	// edge detection	->
+	Vision::Output		mVisionOutput; // contours, tokens ->
+	
+	// debug frame
+	SurfaceRef mDebugFrame;
+	FileWatch  mDebugFrameFileWatch;
+	void updateDebugFrameCaptureDevicesWithPxPerWorldUnit( float );
+	
+	// pipeline 
+	void addProjectorPipelineStages( Pipeline& );
+	
+	Pipeline mPipeline; // traces processing	
+	string mPipelineStageSelection;
+	
+	// capture device management
 	bool ensureLightLinkHasLocalDeviceProfiles(); // returns if mLightLink changed
 	bool setupCaptureDevice(); // specified by mLightLink.mCameraIndex
 	bool setupCaptureDevice_Camera( const LightLink::CaptureProfile& );
@@ -84,52 +133,36 @@ private:
 	bool tryToSetupValidCaptureDevice();
 		// called once by lightLinkDidChange if setupCaptureDevice fails
 		// it tries a
-	void setProjectorWorldSpaceCoordsFromCaptureProfile();
-	
-	vec2 getMousePosInWorld() const; // uses current window (ci::getWindow())
-	
-public:	
-	
-	const Vision::Output& getVisionOutput() const { return mVisionOutput; } // for debug visualization
 
-	// world info
+	// misc.
+	void setProjectorWorldSpaceCoordsFromCaptureProfile();
+	void enumerateDisplaysAndCamerasToConsole() const;
 	PolyLine2 getWorldBoundsPoly() const;
 		// This is actually the camera world polygon mapping.
 		// For all practical purposes, this is identical to the projector world polygon mapping.
-
-	LightLink			mLightLink; // calibration for camera <> world <> projector
 	
-	GameWorldRef		getGameWorld() const { return mGameWorld; }
 	
-private:
-	CaptureRef			mCapture;	// input device		->
-	Vision				mVision ;	// edge detection	->
-	Vision::Output		mVisionOutput; // contours, tokens ->
-	GameWorldRef		mGameWorld ;// world simulation
 	
-	// static debug frame
-	SurfaceRef mDebugFrame;
-	FileWatch  mDebugFrameFileWatch;
-	void updateDebugFrameCaptureDevicesWithPxPerWorldUnit( float );
+	// === Game Management ===
+	
+	// active world simulation
+	GameWorldRef mGameWorld;
 	
 	// game library
-public:
-	void loadGame( string systemName );
-private:
 	void loadDefaultGame();
 	void loadAdjacentGame( int libraryIndexDelta );
 	
-	string mGameWorldCartridgeName; // what name of mGameLibrary did mGameWorld come from?
-
 	// game xml params
-	void				setGameWorldXmlParams( XmlTree );
-	fs::path			getXmlConfigPathForGame( string );
+	void		setGameWorldXmlParams( XmlTree );
+	fs::path	getXmlConfigPathForGame( string );
 	
-private:
+	
+	
+	// === Keyboard (RFID) Input ===
+	
 	// keyboard input (for RFID device code parsing)
 	string	mKeyboardString; // aggregate keystrokes here
 	float	mLastKeyEventTime=-MAXFLOAT; // when was last keystroke?
-	float	mKeyboardStringTimeout=.2f; // how long to wait before clearing the keyboard string buffer?
 	bool	parseKeyboardString( string ); // returns true if successful
 	
 	map<int,string> mRFIDKeyToValue; // maps RFID #s to semantic strings
@@ -137,110 +170,64 @@ private:
 	
 	void setupRFIDValueToFunction(); // scans game library and binds loader code to rfid values
 	
-	// ui
-public:
+	
+	
+	// === UI Stuff ===
+	
 	Font				mFont;
 	gl::TextureFontRef	mTextureFont;
 	
-private:
 	TablaWindowRef		mProjectorWin; // projector
 	TablaWindowRef		mUIWindow; // for other debug info, on computer screen
 	
 	TablaWindow*		getTablaWindow( WindowRef w ) { return w ? w->getUserData<TablaWindow>() : 0 ; }
 	TablaWindow*		getTablaWindow() { return getTablaWindow(getWindow()); } // for front window
 
+	void setupWindows();
 	void drawContours( bool filled, bool mousePickInfo, bool worldBounds ) const;
+	vec2 getMousePosInWorld() const; // uses current window (ci::getWindow())
+	string getCommandLineArgValue( string param ) const; // e.g. Tabla -param returnValue
 	
-	class FPS
-	{
-	public:
-		void start(); // sets mLastFrameTime to now
-		void mark();
-		
-		double				mLastFrameTime = 0. ;
-		double				mLastFrameLength = 0.f ;
-		float				mFPS=0.f;
-	};
+	float mAVClacker=0.f;
 
-public:
 	FPS mAppFPS;
 	FPS mCaptureFPS;
 
-	float mAVClacker=0.f;
+	TablaAppParams mParams; 
 	
-private:
 	
-	// to help us visualize, and to calibrate projection 
-	void addProjectorPipelineStages( Pipeline& );
 	
-	Pipeline mPipeline; // traces processing	
-	string mPipelineStageSelection;
-	
-	// settings
-public:
-	bool mAutoFullScreenProjector = false ;
-	bool mDrawCameraImage = false ;
-	bool mDrawContours = false ;
-	bool mDrawContoursFilled = false ;
-	bool mDrawMouseDebugInfo = false ;
-	bool mDrawPolyBoundingRect = false ;
-	bool mDrawContourTree = false ;
-	bool mDrawPipeline = false;
-	bool mDrawContourMousePick = false;
-	bool mConfigWindowMainImageDrawBkgndImage = true;
-	
-	bool  mHasConfigWindow = true;
-	float mConfigWindowMainImageMargin = 32.f;
-	float mConfigWindowPipelineGutter = 8.f ;
-	float mConfigWindowPipelineWidth  = 64.f ;
-	
-	float mDefaultPixelsPerWorldUnit = 10.f; // doesn't quite hot-load; you need to 
-	
-	int mDebugFrameSkip = 30;
-	
-private:
-	string mDefaultGameWorld = "BallWorld";
-	
-public:
-	fs::path hotloadableAssetPath( fs::path ) const ; // prepends the appropriate thing...
-	// TODO: move all game assets into their own directories and then make this private
-
-private:
-	string mOverloadedAssetPath;
-	
+	// === File Management
+		
 	FileWatch mFileWatch;
 
+	// paths
 	fs::path getDocsPath() const;
 	fs::path getUserLightLinkFilePath() const;
 	fs::path getUserSettingsFilePath() const;
 	
-	// Synthesis
-public:
-	cipd::PureDataNodeRef mPd;
-private:
-	cipd::PatchRef mAVClackerPatch;
+	string getOverloadedAssetPath() const; // calculates it (from arguments, env vars)
+	string mOverloadedAssetPath; // => is stored here
 	
-private: /* starting to make some stuff private... start somewhere */
-	void updateVision();
-
-	string getOverloadedAssetPath() const;
-
-	void setupPureData();
-	void setupWindows();
-	
+	// loading 
 	void loadAppConfigXml( XmlTree );
 	void loadLightLinkXml( XmlTree );
-	void enumerateDisplaysAndCamerasToConsole() const;
 	
-	string getCommandLineArgValue( string param ) const;
-	// e.g. Tabla -param returnValue
-	
-	void saveCameraImageToDisk();
-	
-	//
+	// user settings
 	void loadUserSettingsFromXml( XmlTree );
 	XmlTree getUserSettingsXml() const;
 	void saveUserSettings();
+
+	// misc
+	void saveCameraImageToDisk();
+
+
+	
+	// === Audio Synthesis ===
+	cipd::PureDataNodeRef mPd;
+	cipd::PatchRef mAVClackerPatch;
+	
+	void setupPureData();
 };
 
 #endif /* TablaApp_h */

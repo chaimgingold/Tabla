@@ -667,7 +667,7 @@ void PinballWorld::setupSynthesis()
 	// Register file-watchers for all the major pd patch components
 	auto app = TablaApp::get();
 
-	mPd = app->mPd;
+	mPd = app->getPd();
 
 	std::vector<fs::path> paths =
 	{
