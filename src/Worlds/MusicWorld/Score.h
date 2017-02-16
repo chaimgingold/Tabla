@@ -116,7 +116,7 @@ class ScoreVec : public vector<Score>
 public:
 	const Score* pick( vec2 ) const;
 	Score* pick( vec2 );
-	
+	Score* getScoreForInstrument( InstrumentRef );
 };
 
 #endif /* Score_h */

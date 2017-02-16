@@ -61,6 +61,7 @@ private:
 	
 	// meta params
 	MetaParamInfo getMetaParamInfo( MetaParam ) const;
+	void updateMetaParamsWithDefaultsMaybe();
 	void updateMetaParameter(MetaParam metaParam, float value);
 	void updateScoresWithMetaParams();
 	Score* getScoreForMetaParam( MetaParam );

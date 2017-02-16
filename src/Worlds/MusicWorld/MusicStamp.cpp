@@ -174,6 +174,13 @@ void MusicStamp::goToState( State s )
 	mStateEnterTime = ci::app::getElapsedSeconds();
 }
 
+void MusicStamp::goHome()
+{
+	mLoc = mSearchForPaperLoc = mHomeLoc;
+	setLastBoundToScorePoly( PolyLine2() );
+	goToState( MusicStamp::State::Home );
+}
+
 void MusicStampVec::draw()
 {
 	for( const auto &s : *this ) s.draw(mDebugDrawSearch);
@@ -621,9 +628,7 @@ void MusicStampVec::snapHomeIfLost()
 				
 				if ( stamp.getInStateLength() > mDoLostPolySearchTime )
 				{
-					stamp.mLoc = stamp.mSearchForPaperLoc = stamp.mHomeLoc;
-					stamp.setLastBoundToScorePoly( PolyLine2() );
-					stamp.goToState( MusicStamp::State::Home );
+					stamp.goHome();
 				}
 			}
 		}
@@ -634,9 +639,7 @@ void MusicStampVec::snapHomeIfLost()
 		{
 			if ( stamp.getState()==MusicStamp::State::Lost )
 			{
-				stamp.mLoc = stamp.mSearchForPaperLoc = stamp.mHomeLoc;
-				stamp.setLastBoundToScorePoly( PolyLine2() );
-				stamp.goToState( MusicStamp::State::Home );
+				stamp.goHome();
 			}
 		}
 	}

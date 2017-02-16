@@ -213,7 +213,7 @@ Score* MusicWorld::getScoreForMetaParam( MetaParam p )
 {
 	for( int i=0; i<mScores.size(); ++i )
 	{
-		InstrumentRef instr = mScores[i].mInstrument; // getInstrumentForScore(mScores[i]);
+		InstrumentRef instr = mScores[i].mInstrument;
 
 		if ( instr && instr->mSynthType==Instrument::SynthType::Meta && instr->mMetaParam==p )
 		{
@@ -221,6 +221,26 @@ Score* MusicWorld::getScoreForMetaParam( MetaParam p )
 		}
 	}
 	return 0;
+}
+
+void MusicWorld::updateMetaParamsWithDefaultsMaybe()
+{
+	// if we no longer have a score for a meta param,
+	// make it default value again.
+	
+	for( auto i : mInstruments )
+	{
+		if ( i.second->mSynthType==Instrument::SynthType::Meta )
+		{
+			Score* s = mScores.getScoreForInstrument(i.second);
+			
+			if (!s)
+			{
+				auto info = i.second->mMetaParamInfo;
+				updateMetaParameter( i.second->mMetaParam, info.mDefaultValue );
+			}
+		}
+	}
 }
 
 void MusicWorld::updateScoresWithMetaParams() {
@@ -260,6 +280,7 @@ void MusicWorld::updateVision( const Vision::Output& visionOut, Pipeline &p )
 	mContours = visionOut.mContours;
 	mScores = mVision.updateVision(visionOut,p,mScores,mStamps);
 	
+	updateMetaParamsWithDefaultsMaybe();
 	updateScoresWithMetaParams();
 	updateAdditiveScoreSynthesis(); // update additive synths based on new image data
 	

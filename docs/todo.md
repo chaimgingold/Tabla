@@ -24,6 +24,8 @@
 	- http://stackoverflow.com/questions/34640551/can-avcapturesession-use-custom-resolution
 - [x] World bounds poly editor shows camera image, dimensions in CM as text, snaps to CM, and constrained to rectangle.
 - [x] Pull down menu with capture options
+- [ ] Can easily put Config window in a high performance mode (no gl textures drawn) for demo machine.
+
 ### Minor
 - [ ] Capture menu only shows valid options
 
@@ -70,6 +72,7 @@
 - Meta params
 	- [x] Default values
 		- [ ] Encoded in xml. (Only have DefaultTempo; others we are assuming is zero--not necessarily true).
+		- [x] If slider is removed, go back to default value.
 		- [x] Go back to them when empty pixel data (no average possible), or there is no slider. (This will require a little refactor to automatically set to default when it is absent; or just another process watching to see if metaparam slider is absent, and set it then; that'd be easiest).
 		- [ ] Show it on the slider (so we know where normal is).
 	- [ ] Adaptive horizontal or vertical
@@ -77,6 +80,7 @@
 - [x] ~~Beats marked on additive synth?~~ No. Luke says it's not what it's about.
 - [ ] Mark beats, etc on scores with no instrument?
 - [ ] >1 Instrument per Score
+- [ ] Can turn octave adjustment (with space) off in xml. Hide the dot. Octave=0 always
 
 ## Pinball
 - [x] Score, ball count, high score.
@@ -84,3 +88,4 @@
 - [x] Remove static cube map file from project, and don't load it.
 - [ ] Make flipper speed tunable.
 - [ ] Make contour dejittering/reshaping more responsive; if contour moves enough (sum of all points) then just jump it. This might be a bad idea, as we already have this working in local areas of the contour, not the whole thing, which might just be better.
+- [ ] Merge overlapping bumpers with convex hull 

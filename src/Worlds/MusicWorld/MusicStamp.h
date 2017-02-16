@@ -142,6 +142,8 @@ public:
 	void  goToState( State );
 	float getInStateLength() const;
 	
+	void goHome();
+	
 	void setLastBoundToScorePoly( PolyLine2 p ) { mLastBoundToScorePoly=p; }
 	PolyLine2 getLastBoundToScorePoly() const { return mLastBoundToScorePoly; }
 	void setDrawLastBoundToScorePoly( float f ) { mDrawLastBoundToScorePoly=f; }
