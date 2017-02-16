@@ -604,9 +604,16 @@ void MusicStampVec::decollideScores( const ScoreVec& scores )
 	//			stamp.mLoc = lerp( stamp.mLoc, stamp.mHomeLoc, .5f );
 				// problem: this doesn't complete properly, it works, but stamp just goes to the edge...
 
-				// just do it all the way
-				stamp.mLoc = stamp.mHomeLoc;
-				stamp.mSearchForPaperLoc = stamp.mLoc;
+				if (mDoLostPolySearch)
+				{
+					stamp.goHome();
+				}
+				else
+				{
+					// just do it all the way
+					stamp.mLoc = stamp.mHomeLoc;
+					stamp.mSearchForPaperLoc = stamp.mLoc;
+				}
 			}
 		}
 	}
