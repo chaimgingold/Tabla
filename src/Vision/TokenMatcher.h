@@ -52,7 +52,23 @@ struct AnalyzedToken {
 	TokenContour     fromContour;
 };
 
-typedef pair<AnalyzedToken, AnalyzedToken> TokenMatch;
+class TokenMatch
+{
+public:
+	TokenMatch( AnalyzedToken library, AnalyzedToken candidate )
+	: mLibrary(library)
+	, mCandidate(candidate){}
+
+	string getName() const { return mLibrary.name; }
+	PolyLine2 getPoly() const { return mCandidate.fromContour.polyLine; }
+	
+	const AnalyzedToken& getCandidate() const { return mCandidate; }
+	
+private:
+	AnalyzedToken mLibrary;
+	AnalyzedToken mCandidate;
+};
+typedef vector<TokenMatch> TokenMatchVec;
 
 class TokenMatcher {
 public:
@@ -69,6 +85,8 @@ public:
 	
 		void set( XmlTree );
 		
+		bool mIsEnabled = true;
+		
 		// Tuning
 		// Distance threshold to identify inliers
 		float mInlierThreshold=2.5;
@@ -77,12 +95,19 @@ public:
 		float mNNMatchPercentage=0.8;
 
 		// token library
-		vector<fs::path> mTokenLibraryPaths;
+		struct TokenDef
+		{
+			fs::path mPath;
+			string   mName;
+		};
+		vector<TokenDef> mTokenDefs;
 	};
 	
 	void setParams( Params );
 	TokenMatcher();
 
+	bool isEnabled() const { return mParams.mIsEnabled; }
+	
 	AnalyzedToken analyzeToken(Mat tokenImage);
 
 	vector<AnalyzedToken> tokensFromContours(
@@ -90,7 +115,7 @@ public:
 							   const ContourVector &contours,
 							   Pipeline&pipeline );
 
-	vector<TokenMatch> matchTokens( vector<AnalyzedToken> candidates );
+	TokenMatchVec matchTokens( vector<AnalyzedToken> candidates );
 	
 	const vector<AnalyzedToken>& getTokenLibrary() const { return mTokenLibrary; }
 

@@ -195,6 +195,7 @@ void MusicStampVec::setParams( XmlTree& xml )
 	getXml(xml,"SnapHomeWhenLost",mSnapHomeWhenLost);
 	getXml(xml,"DoLostPolySearch",mDoLostPolySearch);
 	getXml(xml,"DoLostPolySearchTime",mDoLostPolySearchTime);
+	getXml(xml,"EnableTokens",mEnableTokens);
 }
 
 void MusicStampVec::setup( const map<string,InstrumentRef>& instruments, PolyLine2 worldBounds, vec2 timeVec, gl::GlslProgRef rainbowShader )
@@ -302,6 +303,34 @@ MusicStampVec::getStampByInstrument( InstrumentRef instr )
 		if (i.mInstrument==instr) return &i;
 	}
 	return 0;
+}
+
+MusicStamp*
+MusicStampVec::getStampByInstrumentName( string name )
+{
+	for( auto &i : *this )
+	{
+		if (i.mInstrument->mName==name) return &i;
+	}
+	return 0;
+}
+
+void MusicStampVec::updateWithTokens( const TokenMatchVec& tokens )
+{
+	bool verbose = false;
+	
+	for ( auto t : tokens )
+	{
+		auto stamp = getStampByInstrumentName(t.getName());
+		
+		if (stamp)
+		{
+			if (verbose) cout << "Token! " << t.getName() << endl;
+			stamp->mLoc = stamp->mSearchForPaperLoc = stamp->mHomeLoc = t.getPoly().calcCentroid();
+			stamp->goHome();
+		}
+		else /*if (verbose)*/ cout << "No Instrument for Token! " << t.getName() << endl;
+	}
 }
 
 void MusicStampVec::tick( const ScoreVec& scores, const ContourVector& contours, float globalPhase, float globalBeatDuration )

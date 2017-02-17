@@ -52,7 +52,7 @@ public:
 		mutable gl::TextureRef	mImageGL;
 		gl::TextureCubeMapRef	mImageCubeMapGL;
 		
-		// layout hints
+		// layout hints (TODO: move to a separate struct so we can have a parallel CSS kind of thing)
 		float			mLayoutHintScale=1.f;
 		bool			mLayoutHintOrtho=false; // keep laying out in the same row?
 	};

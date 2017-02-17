@@ -214,7 +214,7 @@ Vision::processFrame( const Surface &surface )
 	
 	output.mContours = mContourVision.findContours( clippedStage, pipeline, contourPixelToWorld );
 	
-	if (!mTokenMatcher.getTokenLibrary().empty())
+	if (mTokenMatcher.isEnabled() && !mTokenMatcher.getTokenLibrary().empty())
 	{
 		if ( mTokenMatchSkip<1 || mFrameCount % (mTokenMatchSkip+1)==0 )
 		{

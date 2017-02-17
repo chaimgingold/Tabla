@@ -10,19 +10,56 @@
 		<CaptureAllPipelineStages>1</CaptureAllPipelineStages> <!-- So we can extract bitmaps -->
 
 		<Contours>
-			<ContourMinRadius>			5	</ContourMinRadius>
-			<ContourMinArea>			100	</ContourMinArea>
-			<ContourDPEpsilon>			5	</ContourDPEpsilon>
-			<ContourMinWidth>			5	</ContourMinWidth>
+			<ContourMinRadius>			2	</ContourMinRadius>
+			<ContourMinArea>			16	</ContourMinArea>
+			<ContourDPEpsilon>			1	</ContourDPEpsilon>
+			<ContourMinWidth>			4	</ContourMinWidth>
 		</Contours>
 
-		<Tokens>
+		<TokenMatcher enable="0">
+			<InlierThreshold>			1.5 </InlierThreshold>
+			<NNMatchRatio>			    0.8 </NNMatchRatio>
+			<NNMatchPercentage>			0.3 </NNMatchPercentage>
+			
+			<Tokens>
 				<Token>
-					<Image>Token123.png</Image>
-					<Name>Look Who's Token</Name>
+					<Path>music-icons-black/additive.png</Path>
+					<Name>3Additive</Name>
 				</Token>
-		</Tokens>
-
+				<Token>
+					<Path>music-icons-black/board.png</Path>
+					<Name>0Volca FM</Name>
+				</Token>
+				<Token>
+					<Path>music-icons-black/drumkit.png</Path>
+					<Name>2Volca Sample (Drums)</Name>
+				</Token>
+				<Token>
+					<Path>music-icons-black/keyboard.png</Path>
+					<Name>8Volca Keys</Name>
+				</Token>
+				<Token>
+					<Path>music-icons-black/keyboard2.png</Path>
+					<Name>6Volca Bass</Name>
+				</Token>
+				<Token>
+					<Path>music-icons-black/robit-pokie.png</Path>
+					<Name>1RobitPokie</Name>
+				</Token>
+				<Token>
+					<Path>music-icons-black/scale.png</Path>
+					<Name>Scale</Name>
+				</Token>
+				<Token>
+					<Path>music-icons-black/tempo.png</Path>
+					<Name>Tempo</Name>
+				</Token>
+				<Token>
+					<Path>music-icons-black/transpose.png</Path>
+					<Name>RootNote</Name>
+				</Token>
+			</Tokens>
+		</TokenMatcher>
 	</Vision>
 
 	<!-- Custom MusicVision tuning -->
@@ -61,8 +98,9 @@
 
 	<!--	Filters. (Last two should/could be identical to Vision/Contours)	-->
 			<InteriorAngleMaxDelta>5</InteriorAngleMaxDelta>
-			<MinRectWidth>3</MinRectWidth>
-			<MinRectArea>9</MinRectArea>
+			<MinRectWidth>4</MinRectWidth>
+			<MinRectArea>16</MinRectArea>
+			<ApproxPolyDP>3</ApproxPolyDP>
 			
 	<!--	Tuning params	-->
 			<MaxGainAreaFrac>.2</MaxGainAreaFrac>
@@ -76,6 +114,7 @@
 	
 	<!-- Graphics/UI Layout -->
 	<Stamps>
+		<EnableTokens>1</EnableTokens>
 		<IconWidth>5</IconWidth>
 		<PaletteGutter>1</PaletteGutter>
 		<DoCircleLayout>0</DoCircleLayout>

@@ -51,7 +51,7 @@ private:
 
 	int	  mBeatsPerMeasure=4;
 	int   mBeatQuantization=4;
-	
+
 	vector<float> mMeasureCounts; // what tempos do we support? 0 entries means free form, 1 entry means all are fixed.
 	
 	map<string,InstrumentRef> mInstruments;
@@ -69,6 +69,7 @@ private:
 	// vision
 	MusicVision mVision;
 	ContourVector mContours;
+	TokenMatchVec mTokens;
 	
 	// synthesis
 	PureDataNodeRef	mPd;	// synth engine

@@ -167,11 +167,15 @@ public:
 	void setParams( XmlTree& );
 	void setup( const map<string,InstrumentRef>&, PolyLine2 worldBounds, vec2 timeVec, gl::GlslProgRef rainbowShader );
 	
+	void updateWithTokens( const TokenMatchVec& );
 	void tick( const ScoreVec&, const ContourVector&, float globalPhase, float globalBeatDuration );
 	void draw();
 	
+	bool areTokensEnabled() const { return mEnableTokens; }
+	
 private:
 	MusicStamp* getStampByInstrument( InstrumentRef );
+	MusicStamp* getStampByInstrumentName( string );
 	
 	void decollide();
 	void decollideScores( const ScoreVec& );
@@ -195,6 +199,7 @@ private:
 	bool mSnapHomeWhenLost=false;
 	bool mDoLostPolySearch=true;
 	float mDoLostPolySearchTime=3.f;
+	bool  mEnableTokens=false;
 	
 };
 

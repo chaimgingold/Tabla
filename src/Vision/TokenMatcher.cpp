@@ -14,25 +14,33 @@
 
 void TokenMatcher::Params::set( XmlTree xml )
 {
+	if ( xml.hasAttribute("enable") )
+	{
+		mIsEnabled = xml.getAttribute("enable").getValue<bool>();
+	}
+	
 	getXml(xml,"InlierThreshold",mInlierThreshold);
 	getXml(xml,"NNMatchRatio",mNNMatchRatio);
 	getXml(xml,"NNMatchPercentage",mNNMatchPercentage);
 	
-	mTokenLibraryPaths.clear();
+	mTokenDefs.clear();
 	const bool kVerbose = true;
 	if (kVerbose) cout << "Tokens:" << endl;
 
 	for( auto i = xml.begin( "Tokens/Token" ); i != xml.end(); ++i )
 	{
-		if ( i->hasChild("Path") )
+		if ( i->hasChild("Path") && i->hasChild("Name") )
 		{
-			fs::path path = i->getChild("Path").getValue();
-			
-			path = TablaApp::get()->hotloadableAssetPath(path);
-			
-			mTokenLibraryPaths.push_back(path);
+			TokenDef def;
 
-			if (kVerbose) cout << "\t" << path << endl;
+			def.mPath = i->getChild("Path").getValue();
+			def.mName = i->getChild("Name").getValue();
+			
+			def.mPath = TablaApp::get()->hotloadableAssetPath(def.mPath);
+			
+			mTokenDefs.push_back(def);
+
+			if (kVerbose) cout << "\t" << def.mName << ": " << def.mPath << endl;
 		}
 	}
 }
@@ -203,7 +211,7 @@ vector<TokenMatch> TokenMatcher::matchTokens( vector<AnalyzedToken> candidates )
 				bestMatch = libraryToken;
 			}
 		}
-		matches.push_back(make_pair(bestMatch, candidateToken));
+		matches.push_back( TokenMatch(bestMatch, candidateToken));
 	}
 	return matches;
 }
@@ -246,22 +254,22 @@ void TokenMatcher::setParams( Params p )
 	
 	mTokenLibrary.clear();
 	mAverageLibraryTokenSize = vec2(0,0);
-	for ( fs::path path : mParams.mTokenLibraryPaths )
+	for ( auto token : mParams.mTokenDefs )
 	{
 		cv::Mat input;
 		
 		try
 		{
-			input = Mat( toOcv( Channel( loadImage(path) ) ) );
+			input = Mat( toOcv( Channel( loadImage(token.mPath) ) ) );
 			
 			AnalyzedToken analyzedToken = analyzeToken(input);
 			analyzedToken.index = mTokenLibrary.size();
-			analyzedToken.name = path.stem().string();
+			analyzedToken.name = token.mName;
 			mTokenLibrary.push_back( analyzedToken );
 			mAverageLibraryTokenSize += vec2(input.cols, input.rows);
 		}
 		catch (...) {
-			cout << "TokenMatcher failed to load library image " << path << endl;
+			cout << "TokenMatcher failed to load library image " << token.mPath << endl;
 		} // try
 	} // for
 	if (mTokenLibrary.size() > 0) {

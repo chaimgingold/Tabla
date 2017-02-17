@@ -13,6 +13,9 @@
 
 ## New Features
 - [ ] Finish token system
+	- XML Parsing
+		- [ ] Make Vision/Token XML entries into attributes
+		- [ ] put a path attribute in Tokens prepended to each Token path
 - [ ] MIDI controller input!
 - [ ] Each GameWorld can have their own settings (either in settings.xml, or in per-game files--latter, i think). e.g. for which way is up
 

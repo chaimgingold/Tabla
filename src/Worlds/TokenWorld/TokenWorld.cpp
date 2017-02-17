@@ -53,7 +53,7 @@ void TokenWorld::updateVision( const Vision::Output& visionOut, Pipeline&pipelin
 		{
 			cout << "*****" << endl;
 			for (auto &match : visionOut.mTokens) {
-				cout << match.first.name << endl;
+				cout << match.getName() << endl;
 			}
 			mTokens = visionOut.mTokens;
 
@@ -110,8 +110,10 @@ void TokenWorld::drawMatchingKeypoints( bool drawKeypoints ) {
 //		cout << "************drawMatchingKeypoints()************" << endl;
 		for ( auto match: mTokens )
 		{
-
-			auto token = match.second;
+			gl::color(0,1,1,.5);
+			gl::drawSolid(match.getPoly());
+			
+			auto token = match.getCandidate();
 			// Draw bounding box
 //			{
 //				Rectf rw = token.fromContour.boundingRect ; // world space
@@ -152,15 +154,15 @@ void TokenWorld::drawMatchingKeypoints( bool drawKeypoints ) {
 			{
 				gl::color(color);
 				
-				vec2 size = font->measureString(match.first.name);
+				vec2 size = font->measureString(match.getName());
 				
 				float worldHeight = 5.f; // cm
 				float scale = worldHeight / size.y ;
 				
-				Rectf r(match.second.fromContour.polyLine.getPoints());
+				Rectf r(match.getPoly().getPoints());
 				vec2 center = r.getCenter();
 				
-				font->drawString( match.first.name,
+				font->drawString( match.getName(),
 								  vec2(center.x,r.y2) + vec2(-size.x/2.f,size.y)*scale,
 								  gl::TextureFont::DrawOptions().scale(scale).pixelSnap(false)
 									   );

@@ -278,6 +278,8 @@ void MusicWorld::update()
 void MusicWorld::updateVision( const Vision::Output& visionOut, Pipeline &p )
 {
 	mContours = visionOut.mContours;
+	mTokens = visionOut.mTokens;
+	mStamps.updateWithTokens(mTokens);
 	mScores = mVision.updateVision(visionOut,p,mScores,mStamps);
 	
 	updateMetaParamsWithDefaultsMaybe();
@@ -434,6 +436,19 @@ void MusicWorld::updateAdditiveScoreSynthesis()
 
 void MusicWorld::draw( GameWorld::DrawType drawType )
 {
+	if (1)
+	{
+		for( const auto &t : mTokens )
+		{
+			if (mStamps.areTokensEnabled()) gl::color(1,1,1,.25);
+			else gl::color(1,1,0);
+			gl::drawSolid(t.getPoly());
+
+			gl::color(0,1,1);
+			gl::draw(t.getPoly());
+		}
+	}
+
 	// scores, stamps
 	for( const auto &s : mScores ) s.draw(drawType);
 	mStamps.draw();

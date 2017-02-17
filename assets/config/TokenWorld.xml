@@ -20,39 +20,39 @@
 			
 			<Tokens>
 				<Token>
-					<Path>music-icons-black/additive.png</Image>
+					<Path>music-icons-black/additive.png</Path>
 					<Name>Cloud</Name>
 				</Token>
 				<Token>
-					<Path>music-icons-black/board.png</Image>
+					<Path>music-icons-black/board.png</Path>
 					<Name>FMSynth</Name>
 				</Token>
 				<Token>
-					<Path>music-icons-black/drumkit.png</Image>
+					<Path>music-icons-black/drumkit.png</Path>
 					<Name>DrumSampler</Name>
 				</Token>
 				<Token>
-					<Path>music-icons-black/keyboard.png</Image>
+					<Path>music-icons-black/keyboard.png</Path>
 					<Name>Keys</Name>
 				</Token>
 				<Token>
-					<Path>music-icons-black/keyboard2.png</Image>
+					<Path>music-icons-black/keyboard2.png</Path>
 					<Name>Bass</Name>
 				</Token>
 				<Token>
-					<Path>music-icons-black/robit-pokie.png</Image>
+					<Path>music-icons-black/robit-pokie.png</Path>
 					<Name>Pokie</Name>
 				</Token>
 				<Token>
-					<Path>music-icons-black/scale.png</Image>
+					<Path>music-icons-black/scale.png</Path>
 					<Name>Scale</Name>
 				</Token>
 				<Token>
-					<Path>music-icons-black/tempo.png</Image>
+					<Path>music-icons-black/tempo.png</Path>
 					<Name>Tempo</Name>
 				</Token>
 				<Token>
-					<Path>music-icons-black/transpose.png</Image>
+					<Path>music-icons-black/transpose.png</Path>
 					<Name>Transpose</Name>
 				</Token>
 			</Tokens>
