@@ -49,11 +49,12 @@
 - [ ] More robust character tracking
 	- [ ] Have a timeout before they jump home
 	- [ ] Do NxM scoring like in Pinball UI tracking
+- [ ] Conflicts between stamp search poly and a score should send stamp home directly (instead of timing out, as it does now).
 
 ## Pinball
 - [ ] Audio sometimes blows up then drops out; culprit seems to be updateBallSynthesis(). To reproduce, load "pinball 1.png" test image in Pinball and spawn multiple balls (with b key).
 - [ ] Ball reflection texture map sometimes doesn't show up (seems to not even render, so it's black in debug view, too.). Not sure what this is... A workaround is that if you change MipMap then FBOS get recreated an it resolves itself... So might be an internal cinder issue. Maybe dont pull textures, or recreate fbos... 
-- [ ] Max multiball needed... (it can get stuck and keep spawning!) 
+- [ ] Max multiball needed... (it can get stuck and keep spawning!)
 - Lattice background is hard coded to our setup--in pixel space. So rotation will be wrong in many setups, gradient effect locations, and ball reflection is wrong. To fix:
 	- [ ] Lattice should be in world space, oriented to up vector.
 	- [ ] Win/lose gradient effects need to respond.

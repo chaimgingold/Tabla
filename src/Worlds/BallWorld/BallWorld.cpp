@@ -28,13 +28,37 @@ BallWorld::BallWorld()
 
 	setupSynthesis();
 	
+	// midi input
+//	mMidiInput.setVerbose();
 	mMidiInput.openAllPorts();
+	mMidiInput.discoverControls( vector<string>{"ball-count","size","speed"} );
+	
+	bool verbose=true;
+	mMidiInput.setControlLambda( "ball-count", [this,verbose]( const MIDIInput::Control& control )
+	{
+		float overdrive = 2.f ; // let control @ 50% = usual number of balls, so 100% = 2x
+		int n = (float)getTargetBallCount() * control.mFloatValue * overdrive;
+		setNumBalls( n );
+
+		if (verbose) {
+			cout << "ball-count = " << control.mFloatValue << endl;
+			cout << "\t= " << n << endl;
+		}
+		// TODO: store this modifier value--or just have getTargetBallCount() yank it out of MIDIInput,
+		// so these changes will continue to modulate even if world bounds change.
+	});
+	mMidiInput.setControlLambda( "size", [this,verbose]( const MIDIInput::Control& control ){
+		if (verbose) cout << "size = " << control.mFloatValue << endl;
+	});
+	mMidiInput.setControlLambda( "speed", [this,verbose]( const MIDIInput::Control& control ){
+		if (verbose) cout << "speed = " << control.mFloatValue << endl;
+	});
 }
 
 void BallWorld::setParams( XmlTree xml )
 {
 	getXml(xml,"NumIntegrationSteps",mNumIntegrationSteps);
-	getXml(xml,"DefaultNumBalls",mDefaultNumBalls);
+	getXml(xml,"BallDensity",mBallDensity);
 	getXml(xml,"BallDefaultRadius",mBallDefaultRadius);
 	getXml(xml,"BallDefaultMaxRadius",mBallDefaultMaxRadius);
 	getXml(xml,"BallDefaultColor",mBallDefaultColor);
@@ -53,6 +77,7 @@ void BallWorld::setParams( XmlTree xml )
 	getXml(xml,"Ribbon/AlphaExp",mRibbonAlphaExp);
 	
 	updateBallsWithRibbonParams();
+	setNumBalls(getTargetBallCount());
 }
 
 void BallWorld::updateBallsWithRibbonParams()
@@ -331,11 +356,41 @@ void BallWorld::drawRibbons( DrawType ) const
 	if (mRibbonMesh) gl::draw(*mRibbonMesh);
 }
 
+int BallWorld::getTargetBallCount() const
+{
+	float area = getWorldBoundsPoly().calcArea();
+	
+	float ballarea = M_PI * mBallDefaultMaxRadius * mBallDefaultMaxRadius;
+	
+	int n = (area * mBallDensity) / ballarea;
+	
+	return n;
+}
+
+void BallWorld::worldBoundsPolyDidChange()
+{
+	setNumBalls( getTargetBallCount() );
+}
+
 void BallWorld::gameWillLoad()
 {
-	for ( int i=0; i<mDefaultNumBalls; ++i )
+	setNumBalls( getTargetBallCount() );
+}
+
+void BallWorld::setNumBalls( int n )
+{
+	if ( n > mBalls.size() )
 	{
-		newRandomBall( getRandomPointInWorldBoundsPoly() );
+		int add = n - mBalls.size();
+		
+		for ( int i=0; i<add; ++i )
+		{
+			newRandomBall( getRandomPointInWorldBoundsPoly() );
+		}
+	}
+	else if ( n < mBalls.size() )
+	{
+		mBalls.resize(n);
 	}
 }
 
@@ -377,7 +432,7 @@ void BallWorld::updateSynthesis()
 		float velocity = length(getDenoisedBallVel(ball));
 		collisionsList.addFloat(scale*velocity);
 	}
-
+	
 	mPd->sendList("ball-collisions", collisionsList);
 }
 

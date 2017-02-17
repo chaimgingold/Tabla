@@ -67,7 +67,10 @@ void MusicWorld::setParams( XmlTree xml )
 	getXml(xml,"RootNote",mRootNote);
 	getXml(xml,"NumOctaves",mNumOctaves);
 	getXml(xml,"PokieRobitPulseTime",mPokieRobitPulseTime);
+	
 	getXml(xml,"MaxTempo",mMaxTempo);
+	getXml(xml,"DefaultTempo",mDefaultTempo);
+	mTempo=mDefaultTempo;
 	
 	getXml(xml,"BeatsPerMeasure",mBeatsPerMeasure);
 	getXml(xml,"BeatQuantization",mBeatQuantization);
@@ -210,7 +213,7 @@ Score* MusicWorld::getScoreForMetaParam( MetaParam p )
 {
 	for( int i=0; i<mScores.size(); ++i )
 	{
-		InstrumentRef instr = mScores[i].mInstrument; // getInstrumentForScore(mScores[i]);
+		InstrumentRef instr = mScores[i].mInstrument;
 
 		if ( instr && instr->mSynthType==Instrument::SynthType::Meta && instr->mMetaParam==p )
 		{
@@ -218,6 +221,26 @@ Score* MusicWorld::getScoreForMetaParam( MetaParam p )
 		}
 	}
 	return 0;
+}
+
+void MusicWorld::updateMetaParamsWithDefaultsMaybe()
+{
+	// if we no longer have a score for a meta param,
+	// make it default value again.
+	
+	for( auto i : mInstruments )
+	{
+		if ( i.second->mSynthType==Instrument::SynthType::Meta )
+		{
+			Score* s = mScores.getScoreForInstrument(i.second);
+			
+			if (!s)
+			{
+				auto info = i.second->mMetaParamInfo;
+				updateMetaParameter( i.second->mMetaParam, info.mDefaultValue );
+			}
+		}
+	}
 }
 
 void MusicWorld::updateScoresWithMetaParams() {
@@ -257,6 +280,7 @@ void MusicWorld::updateVision( const Vision::Output& visionOut, Pipeline &p )
 	mContours = visionOut.mContours;
 	mScores = mVision.updateVision(visionOut,p,mScores,mStamps);
 	
+	updateMetaParamsWithDefaultsMaybe();
 	updateScoresWithMetaParams();
 	updateAdditiveScoreSynthesis(); // update additive synths based on new image data
 	
@@ -324,13 +348,25 @@ MusicWorld::getMetaParamInfo( MetaParam p ) const
 {
 	MetaParamInfo info;
 
-	if ( p==MetaParam::Scale )
+	switch(p)
 	{
-		info.mNumDiscreteStates = mScales.size();
-	}
-	else if ( p==MetaParam::RootNote )
-	{
-		info.mNumDiscreteStates = 12;
+		case MetaParam::Scale:
+			info.mNumDiscreteStates = mScales.size();
+			info.mDefaultValue = 0.f; // this just works for now, not tuned. assuming 0 is it.
+			break;
+			
+		case MetaParam::RootNote:
+			info.mNumDiscreteStates = 12;
+			info.mDefaultValue = 0.f; // this just works for now, not tuned. assuming 0 is it.
+			break;
+
+		case MetaParam::Tempo:
+			info.mNumDiscreteStates = -1;
+			info.mDefaultValue = (float)mDefaultTempo / (float)mMaxTempo;
+			break;
+			
+		default:
+			break;
 	}
 
 	return info;

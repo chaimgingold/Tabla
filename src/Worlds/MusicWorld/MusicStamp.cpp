@@ -59,6 +59,15 @@ tIconAnimState::getIdleSway( float phaseInBeats, float beatDuration )
 
 void MusicStamp::draw( bool debugDrawSearch ) const
 {
+	if ( getState()==State::Lost && mDrawLastBoundToScorePoly>0.f )
+	{
+		gl::color(1,1,1,mDrawLastBoundToScorePoly*.5f);
+		gl::drawSolid(mLastBoundToScorePoly);
+
+		gl::color(0,1,1,mDrawLastBoundToScorePoly);
+		gl::draw(mLastBoundToScorePoly);
+	}
+	
 	drawInstrumentIcon( mXAxis, mIconPose );
 	
 	if (debugDrawSearch)
@@ -68,6 +77,12 @@ void MusicStamp::draw( bool debugDrawSearch ) const
 		gl::drawSolidCircle(mSearchForPaperLoc, 1.f);
 		gl::color(1,0,0);
 		gl::drawLine(mLoc, mSearchForPaperLoc);
+
+		if ( mLastBoundToScorePoly.size()>0 )
+		{
+			gl::color(0,1,1);
+			gl::draw(mLastBoundToScorePoly);
+		}
 	}
 }
 
@@ -148,6 +163,24 @@ void MusicStamp::drawInstrumentIcon( vec2 worldx, tIconAnimState pose ) const
 	gl::popModelMatrix();
 }
 
+float MusicStamp::getInStateLength() const
+{
+	return ci::app::getElapsedSeconds() - mStateEnterTime;
+}
+	
+void MusicStamp::goToState( State s )
+{
+	mState = s;
+	mStateEnterTime = ci::app::getElapsedSeconds();
+}
+
+void MusicStamp::goHome()
+{
+	mLoc = mSearchForPaperLoc = mHomeLoc;
+	setLastBoundToScorePoly( PolyLine2() );
+	goToState( MusicStamp::State::Home );
+}
+
 void MusicStampVec::draw()
 {
 	for( const auto &s : *this ) s.draw(mDebugDrawSearch);
@@ -160,6 +193,8 @@ void MusicStampVec::setParams( XmlTree& xml )
 	getXml(xml,"DoCircleLayout",mDoCircleLayout);
 	getXml(xml,"DebugDrawSearch",mDebugDrawSearch);
 	getXml(xml,"SnapHomeWhenLost",mSnapHomeWhenLost);
+	getXml(xml,"DoLostPolySearch",mDoLostPolySearch);
+	getXml(xml,"DoLostPolySearchTime",mDoLostPolySearchTime);
 }
 
 void MusicStampVec::setup( const map<string,InstrumentRef>& instruments, PolyLine2 worldBounds, vec2 timeVec, gl::GlslProgRef rainbowShader )
@@ -290,6 +325,7 @@ void MusicStampVec::tick( const ScoreVec& scores, const ContourVector& contours,
 		{
 			// mark it
 			stamp->mHasScore = true;
+			stamp->setLastBoundToScorePoly( score.getPolyLine() );
 			
 			// update search: new score to attach to?
 			if ( !stamp->mLastHasScore /* new! */ && findContour(contours,score.getCentroid()) /* not a zombie */ )
@@ -312,11 +348,60 @@ void MusicStampVec::tick( const ScoreVec& scores, const ContourVector& contours,
 	decollide();
 	decollideScores(scores);
 	
+	// Update state
+	updateBoundState();
+	
 	// Snap home?
 	if (mSnapHomeWhenLost) snapHomeIfLost();
 	
+	updateLostPolyDraw();
+	
 	// Tick stamps
 	for( auto &stamp : *this ) stamp.tick();
+}
+
+void MusicStampVec::updateLostPolyDraw()
+{
+	for( auto &s : *this )
+	{
+		float f;
+		
+		if ( s.getState()==MusicStamp::State::Lost && mDoLostPolySearch )
+		{
+			f = s.getInStateLength() / mDoLostPolySearchTime;
+			
+			f = constrain( f, 0.f, 1.f);
+			f = 1.f - f;
+			
+//			const float k = .1f;
+//			
+//			if ( f < k ) f *= 1.f / k;
+//			else f = 1.f - powf( (f - k)*((1.f-k)/1.f), 2.f );
+		}
+		else f = 0.f;
+		
+		s.setDrawLastBoundToScorePoly(f);
+	}
+}
+
+void MusicStampVec::updateBoundState()
+{
+	for( auto &s : *this )
+	{
+		const bool isBoundNow = s.mHasScore || s.mHasContour ;
+		
+		switch ( s.getState() )
+		{
+			case MusicStamp::State::Lost:
+			case MusicStamp::State::Home:
+				if ( isBoundNow ) s.goToState( MusicStamp::State::Bound );
+				break;
+				
+			case MusicStamp::State::Bound:
+				if ( !isBoundNow ) s.goToState( MusicStamp::State::Lost );
+				break;
+		}
+	}
 }
 
 void MusicStampVec::updateAnimWithScore( MusicStamp& stamp, const Score& score ) const
@@ -385,15 +470,39 @@ void MusicStampVec::updateSearch( const ContourVector& contours )
 		if ( stamp.isInstrumentAvailable() || stamp.mHasScore ) // very rare we don't ever try
 		{
 			// find  a contour to latch on to
-			const Contour* contains = findContour(contours,stamp.mSearchForPaperLoc);
+			vec2 searchLoc;
 			
-			// failed? find a close one instead...
+			if ( mDoLostPolySearch && stamp.getLastBoundToScorePoly().size()>0 ) {
+				searchLoc = stamp.getLastBoundToScorePoly().calcCentroid();
+			} else {
+				searchLoc = stamp.mSearchForPaperLoc;
+			}
+			
+			const Contour* contains = findContour(contours,searchLoc);
+			
+			// failed?
 			if ( !contains )
 			{
-				float dist;
-				contains = contours.findClosestContour(stamp.mSearchForPaperLoc,0,&dist);
-				float maxDist = stamp.mIconWidth * ((stamp.mLastHasContour || stamp.mLastHasScore) ? 5.f : 1.f ); 
-				if (dist>maxDist) contains=0;
+				if ( mDoLostPolySearch && stamp.getLastBoundToScorePoly().size()>0 )
+				{
+					// look for intersection with old score...
+					for( auto &i : contours )
+					{
+						if ( doPolygonsIntersect( stamp.getLastBoundToScorePoly(), i.mPolyLine ) )
+						{
+							contains = &i;
+							break;
+						}
+					}
+				}
+				else
+				{
+					// find a close one instead...
+					float dist;
+					contains = contours.findClosestContour(stamp.mSearchForPaperLoc,0,&dist);
+					float maxDist = stamp.mIconWidth * ((stamp.mLastHasContour || stamp.mLastHasScore) ? 5.f : 1.f ); 
+					if (dist>maxDist) contains=0;
+				}
 			}
 			
 			// check it and bind
@@ -495,9 +604,16 @@ void MusicStampVec::decollideScores( const ScoreVec& scores )
 	//			stamp.mLoc = lerp( stamp.mLoc, stamp.mHomeLoc, .5f );
 				// problem: this doesn't complete properly, it works, but stamp just goes to the edge...
 
-				// just do it all the way
-				stamp.mLoc = stamp.mHomeLoc;
-				stamp.mSearchForPaperLoc = stamp.mLoc;
+				if (mDoLostPolySearch)
+				{
+					stamp.goHome();
+				}
+				else
+				{
+					// just do it all the way
+					stamp.mLoc = stamp.mHomeLoc;
+					stamp.mSearchForPaperLoc = stamp.mLoc;
+				}
 			}
 		}
 	}
@@ -505,11 +621,33 @@ void MusicStampVec::decollideScores( const ScoreVec& scores )
 
 void MusicStampVec::snapHomeIfLost()
 {
-	for( auto &stamp : *this )
+	if (mDoLostPolySearch)
 	{
-		if ( !stamp.mHasScore && !stamp.mHasContour )
+		for( auto &stamp : *this )
 		{
-			stamp.mLoc = stamp.mSearchForPaperLoc = stamp.mHomeLoc;
+			if ( stamp.getState()==MusicStamp::State::Lost )
+			{
+				// make sure we are in
+				if ( stamp.getLastBoundToScorePoly().size() > 0 )
+				{
+					stamp.mLoc = stamp.mSearchForPaperLoc = stamp.getLastBoundToScorePoly().calcCentroid();
+				}
+				
+				if ( stamp.getInStateLength() > mDoLostPolySearchTime )
+				{
+					stamp.goHome();
+				}
+			}
+		}
+	}
+	else
+	{
+		for( auto &stamp : *this )
+		{
+			if ( stamp.getState()==MusicStamp::State::Lost )
+			{
+				stamp.goHome();
+			}
 		}
 	}
 }

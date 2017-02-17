@@ -61,6 +61,7 @@ private:
 	
 	// meta params
 	MetaParamInfo getMetaParamInfo( MetaParam ) const;
+	void updateMetaParamsWithDefaultsMaybe();
 	void updateMetaParameter(MetaParam metaParam, float value);
 	void updateScoresWithMetaParams();
 	Score* getScoreForMetaParam( MetaParam );
@@ -84,6 +85,7 @@ private:
 
 	// Global clock
 	float mPhase=0;
+	float mDefaultTempo=120;
 	float mTempo=120;
 	void  tickGlobalClock(float dt);
 	float getBeatDuration() const;

@@ -81,6 +81,8 @@ public:
 	void clearBalls() { mBalls.clear(); }
 	
 	float getBallDefaultRadius() const { return mBallDefaultRadius ; }
+	int   getTargetBallCount() const;
+	virtual void worldBoundsPolyDidChange() override;
 	
 	vec2 resolveCollisionWithContours		( vec2 p, float r, const Ball* b=0 );
 	vec2 resolveCollisionWithInverseContours( vec2 p, float r, const Ball* b=0 );
@@ -92,6 +94,8 @@ public:
 	void mouseClick( vec2 p ) override { newRandomBall(p) ; }
 	void keyDown( KeyEvent ) override;
 	void drawMouseDebugInfo( vec2 ) override;
+	
+	void setNumBalls( int );
 	
 	vector<Ball>& getBalls() { return mBalls; }
 	const vector<Ball>& getBalls() const { return mBalls; }
@@ -153,7 +157,7 @@ protected:
 	
 	// params
 	int		mNumIntegrationSteps	= 1;	
-	int		mDefaultNumBalls		= 5;
+	float	mBallDensity			= .1;
 	float	mBallDefaultRadius		= 8.f *  .5f ;
 	float	mBallDefaultMaxRadius	= 8.f * 4.f ;
 	float	mBallMaxVel				= 8.f ;

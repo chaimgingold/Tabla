@@ -828,3 +828,12 @@ Score* ScoreVec::pick( vec2 p )
 	}
 	return 0;
 }
+
+Score* ScoreVec::getScoreForInstrument( InstrumentRef instr )
+{
+	for( auto &s : *this )
+	{
+		if ( s.mInstrument==instr ) return &s;
+	}
+	return 0;
+}

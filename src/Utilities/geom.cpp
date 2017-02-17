@@ -9,6 +9,11 @@
 #include "geom.h"
 #include "cinder/ConvexHull.h"
 
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/point_xy.hpp>
+#include <boost/geometry/geometries/polygon.hpp>
+#include <boost/geometry/multi/multi.hpp>
+
 using namespace cinder;
 using namespace std;
 
@@ -299,4 +304,52 @@ float calcPolyEdgeOverlapFrac( const PolyLine2& a, const PolyLine2& b, float dis
 	}
 	
 	return totalfrac / totallen;
+}
+
+// from ci::PolyLine2.cpp
+namespace {
+typedef boost::geometry::model::polygon<boost::geometry::model::d2::point_xy<double> > polygon;
+
+template<typename T>
+polygon convertPolyLinesToBoostGeometry( const PolyLineT<T> &a )
+{
+	polygon result;
+	
+	for( auto ptIt = a.getPoints().begin(); ptIt != a.getPoints().end(); ++ptIt )
+		result.outer().push_back( boost::geometry::make<boost::geometry::model::d2::point_xy<double> >( ptIt->x, ptIt->y ) );
+	/*
+	for( typename std::vector<PolyLineT<T> >::const_iterator plIt = a.begin() + 1; plIt != a.end(); ++plIt ) {
+		polygon::ring_type ring;
+		for( typename std::vector<T>::const_iterator ptIt = plIt->getPoints().begin(); ptIt != plIt->getPoints().end(); ++ptIt )
+			ring.push_back( boost::geometry::make<boost::geometry::model::d2::point_xy<double> >( ptIt->x, ptIt->y ) );
+		result.inners().push_back( ring );
+	}*/
+	
+//	boost::geometry::correct( result ); // not needed since we have no inner geometry
+	
+	return result;
+}
+}
+
+bool doPolygonsIntersect( const PolyLine2& a, const PolyLine2& b )
+{
+	if (1)
+	{
+		try
+		{
+			std::vector<PolyLine2> d1,d2;
+			d1.push_back(a);
+			d2.push_back(b);
+			auto c = PolyLine2::calcIntersection(d1,d2);
+			return ( !c.empty() && c[0].size()>0 );
+		} catch (...) {
+			return false;
+		}
+	}
+	else
+	{
+		return boost::geometry::intersects(
+			convertPolyLinesToBoostGeometry(a),
+			convertPolyLinesToBoostGeometry(b) );
+	}
 }
