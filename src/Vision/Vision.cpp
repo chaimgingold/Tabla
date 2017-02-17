@@ -96,8 +96,22 @@ void Vision::setCaptureProfile( const LightLink::CaptureProfile& profile )
 }
 
 Vision::Output
-Vision::processFrame( const Surface &surface, Pipeline& pipeline )
+Vision::processFrame( const Surface &surface )
 {
+	Vision::Output output;
+	Pipeline& pipeline = output.mPipeline; // patch us in (refactor in progress)
+
+	// start pipeline
+	pipeline.setCaptureAllStageImages(true);
+		// reality is, we now need to capture all because even contour extraction
+		// relies on images captured in the pipeline.
+		// if we did need such an optimization, we could have everyone report the stages they want to capture,
+		// and have a list of stages to capture.
+//			    mDrawPipeline
+//			|| (!mGameWorld || mGameWorld->getVisionParams().mCaptureAllPipelineStages)
+//		);
+	pipeline.start();
+	
 	// ---- Input ----
 	
 	// make cv frame
@@ -135,7 +149,7 @@ Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 	pipeline.then( "undistorted", undistorted );
 	
 	// ---- World Boundaries ----
-	pipeline.then( "world-boundaries", vec2(4,4)*100.f ); // 4m^2 configurable area
+	pipeline.then( "world-boundaries", vec2(2.5,2.5)*100.f ); // Xm^2 configurable area
 	pipeline.setImageToWorldTransform( mat4() ); // identity; do it in world space
 		// this is here just so it can be configured by the user.
 	
@@ -195,9 +209,7 @@ Vision::processFrame( const Surface &surface, Pipeline& pipeline )
 		pipeline.then( "clipped_gray", clipped_gray );
 	}
 	
-	// find contours
-	Vision::Output output;
-	
+	// find contours	
 	auto clippedStage = pipeline.getStages().back(); // gets "clipped_gray"
 	
 	output.mContours = mContourVision.findContours( clippedStage, pipeline, contourPixelToWorld );

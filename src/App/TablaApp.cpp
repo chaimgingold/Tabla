@@ -88,6 +88,8 @@ void TablaApp::setup()
 	setupRFIDValueToFunction();
 
 	// user settings
+	mPipelineStageSelection = "undistorted"; // default (don't want it in header)
+	
 	mFileWatch.loadXml( getUserSettingsFilePath(), [this]( XmlTree xml )
 	{
 		if ( xml.hasChild("settings") ) {
@@ -811,19 +813,6 @@ void TablaApp::updateVision()
 		|| (mDebugFrame && (getParams().mDebugFrameSkip<2 || getElapsedFrames()%getParams().mDebugFrameSkip==0)) )
 	{
 		mCaptureFPS.mark();
-		
-		// start pipeline
-		if ( getPipelineStageSelection().empty() ) selectPipelineStage("undistorted");
-		mPipeline.setCaptureAllStageImages(true);
-			// reality is, we now need to capture all because even contour extraction
-			// relies on images captured in the pipeline.
-			// if we did need such an optimization, we could have everyone report the stages they want to capture,
-			// and have a list of stages to capture.
-//			    mDrawPipeline
-//			|| (!mGameWorld || mGameWorld->getVisionParams().mCaptureAllPipelineStages)
-//		);
-		mPipeline.start();
-
 
 		// get image
 		Surface frame;
@@ -832,20 +821,17 @@ void TablaApp::updateVision()
 		} else {
 			frame = *mCapture->getSurface();
 		}
-
-//		cout << "frame size: " << frame.getWidth() << ", " << frame.getHeight() << endl;
-		
 		
 		// vision it
-		mVisionOutput = mVision.processFrame(frame,mPipeline);
+		mVisionOutput = mVision.processFrame(frame);
 		
 		// finish off the pipeline with draw stage
-		addProjectorPipelineStages(mPipeline);
+		addProjectorPipelineStages(mVisionOutput.mPipeline);
 		
-		// pass contours to ballworld (probably don't need to store here)
+		// pass contours to ballworld
 		if (mGameWorld)
 		{
-			mGameWorld->updateVision( mVisionOutput, mPipeline );
+			mGameWorld->updateVision( mVisionOutput, mVisionOutput.mPipeline );
 		}
 		
 		// update pipeline visualization

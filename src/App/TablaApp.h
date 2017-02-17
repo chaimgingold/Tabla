@@ -78,7 +78,7 @@ class TablaApp : public App {
 
 
 	// Vision pipeline
-	const Pipeline& getPipeline() { return mPipeline; }
+	const Pipeline& getPipeline() { return mVisionOutput.mPipeline; }
 
 	void   selectPipelineStage( string s );
 	string getPipelineStageSelection() const;

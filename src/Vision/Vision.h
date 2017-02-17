@@ -50,6 +50,7 @@ public:
 	class Output
 	{
 	public:
+		Pipeline mPipeline;
 		ContourVector mContours;
 		vector<TokenMatch> mTokens;
 	};
@@ -59,7 +60,7 @@ public:
 	void setCaptureProfile( const LightLink::CaptureProfile& );
 
 	// push input through
-	Output processFrame( const Surface &surface, Pipeline& tracePipeline );
+	Output processFrame( const Surface &surface );
 	
 private:
 	Params		mParams;

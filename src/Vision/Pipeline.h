@@ -31,9 +31,6 @@ public:
 	
 	bool empty() const { return mStages.empty(); }
 	
-//	void	setQuery( string q ) { mQuery=q; } ;
-//	string	getQuery() const { return mQuery; }
-	
 	string  getFirstStageName() const;
 	string  getLastStageName () const;
 	
@@ -41,10 +38,6 @@ public:
 	string	getPrevStageName( string s ) const { return getAdjStageName(s,-1); }
 	
 	void setImageToWorldTransform( const glm::mat4& );
-	
-	// add types:
-	// - contour
-	// (maybe a class that slots into here and does drawing and eventually interaction)
 	
 	class Stage
 	{
