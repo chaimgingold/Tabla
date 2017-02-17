@@ -160,7 +160,7 @@ vector<AnalyzedToken> TokenMatcher::tokensFromContours( const Pipeline::StageRef
 		
 		//
 		pipeline.then( string("tokenContourImage ") + c.mIndex, tokenContourImage );
-		pipeline.setImageToWorldTransform( tokenContour.tokenToWorld );
+		pipeline.back()->setImageToWorldTransform( tokenContour.tokenToWorld );
 		
 	}
 	return tokens;

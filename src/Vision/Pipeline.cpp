@@ -22,10 +22,15 @@ gl::TextureRef Pipeline::Stage::getGLImage() const
 	return mImageGL;
 }
 
+void Pipeline::Stage::setImageToWorldTransform( const glm::mat4& m )
+{
+	mImageToWorld = m;
+	mWorldToImage = inverse(m);
+}
+
 void Pipeline::start()
 {
 	mStages.clear();
-//	mQueryIndex = -1;
 }
 
 Pipeline::StageRef Pipeline::then( string name, Surface &img )
@@ -111,13 +116,6 @@ bool Pipeline::getShouldCacheImage( const StageRef s ) const
 {
 	return mCaptureAllStageImages
 	    || mCaptureStages.find(s->mName) != mCaptureStages.end();
-}
-
-void Pipeline::setImageToWorldTransform( const glm::mat4& m )
-{
-	assert( !empty() );
-	mStages.back()->mImageToWorld = m;
-	mStages.back()->mWorldToImage = inverse(m);
 }
 
 string  Pipeline::getFirstStageName() const

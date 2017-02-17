@@ -56,6 +56,7 @@ void CameraCalibrateWorld::updateVision( const Vision::Output& visionOut, Pipeli
 	cv::UMat input_gray;
 	cv::cvtColor( world->mImageCV, input_gray, CV_BGR2GRAY);
 	pipeline.then( "input_gray", input_gray );
+	pipeline.back()->setImageToWorldTransform(mImageToWorld);
 	
 	//
 	vector<cv::Point2f> corners; // in image space

@@ -92,7 +92,7 @@ ContourVec ContourVision::findContours( const Pipeline::StageRef input, Pipeline
 							kScaleFactor, kScaleFactor, cv::INTER_LINEAR );
 						cv::cvtColor( resized, gray, CV_BGR2GRAY);
 						pipeline.then( "(otsu) input gray", gray );
-						pipeline.setImageToWorldTransform(
+						pipeline.back()->setImageToWorldTransform(
 							cinput->mImageToWorld * glm::scale( 1.f / vec3(kScaleFactor, kScaleFactor, 1) ) );
 						
 						// compute threshold value for input
@@ -122,7 +122,7 @@ ContourVec ContourVision::findContours( const Pipeline::StageRef input, Pipeline
 
 		}
 		pipeline.then( "thresholded", thresholded );
-		pipeline.setImageToWorldTransform( input->mImageToWorld );
+		pipeline.back()->setImageToWorldTransform( input->mImageToWorld );
 	}
 	
 	// contour detect

@@ -519,8 +519,8 @@ static void doTemporalMatBlend( Pipeline& pipeline, string scoreName, cv::Mat ol
 
 			cv::addWeighted( newimg, newWeight, oldimg, oldWeight, 0.f, newimg );
 			pipeline.then( scoreName + " temporally blended", newimg);
-			pipeline.getStages().back()->mLayoutHintScale = .5f;
-			pipeline.getStages().back()->mLayoutHintOrtho = true;
+			pipeline.back()->mLayoutHintScale = .5f;
+			pipeline.back()->mLayoutHintOrtho = true;
 		}
 	}
 	else if (verbose) cout << "no-blend " << diff << endl;
@@ -547,12 +547,12 @@ void MusicVision::quantizeImage( Pipeline& pipeline,
 	vec2 outsize = vec2( s.mImage.cols, s.mImage.rows );
 
 	pipeline.then( scoreName + " quantized", quantized);
-	pipeline.setImageToWorldTransform(
-		pipeline.getStages().back()->mImageToWorld
+	pipeline.back()->setImageToWorldTransform(
+		pipeline.back()->mImageToWorld
 			* glm::scale(vec3(outsize.x / (float)quantizeNumCols, outsize.y / (float)quantizeNumRows, 1))
 		);
-	pipeline.getStages().back()->mLayoutHintScale = .5f;
-	pipeline.getStages().back()->mLayoutHintOrtho = true;
+	pipeline.back()->mLayoutHintScale = .5f;
+	pipeline.back()->mLayoutHintOrtho = true;
 
 	// blend
 	if ( doTemporalBlend )
@@ -572,8 +572,8 @@ void MusicVision::quantizeImage( Pipeline& pipeline,
 	}
 
 	pipeline.then( scoreName + " thresholded", thresholded);
-	pipeline.getStages().back()->mLayoutHintScale = .5f;
-	pipeline.getStages().back()->mLayoutHintOrtho = true;
+	pipeline.back()->mLayoutHintScale = .5f;
+	pipeline.back()->mLayoutHintOrtho = true;
 
 
 	// output
@@ -635,9 +635,9 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& score
 		getSubMatWithQuad( world->mImageCV, s.mImage, s.mQuad, world->mWorldToImage, scoreImageToWorld );
 		
 		pipeline.then( scoreName, s.mImage);
-		pipeline.setImageToWorldTransform( scoreImageToWorld );
-		pipeline.getStages().back()->mLayoutHintScale = .5f;
-		pipeline.getStages().back()->mLayoutHintOrtho = true;
+		pipeline.back()->setImageToWorldTransform( scoreImageToWorld );
+		pipeline.back()->mLayoutHintScale = .5f;
+		pipeline.back()->mLayoutHintOrtho = true;
 
 		// blank out edges
 		if (mBlankEdgePixels>0)
@@ -645,8 +645,8 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& score
 			cv::rectangle(s.mImage, cv::Point(0,0), cv::Point(s.mImage.cols-1,s.mImage.rows-1), 255, mBlankEdgePixels );
 
 			pipeline.then( scoreName + " blanked edges", s.mImage );
-			pipeline.getStages().back()->mLayoutHintScale = .5f;
-			pipeline.getStages().back()->mLayoutHintOrtho = true;
+			pipeline.back()->mLayoutHintScale = .5f;
+			pipeline.back()->mLayoutHintOrtho = true;
 		}
 		
 		// quantize

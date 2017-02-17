@@ -37,11 +37,12 @@ public:
 	string	getNextStageName( string s ) const { return getAdjStageName(s, 1); }
 	string	getPrevStageName( string s ) const { return getAdjStageName(s,-1); }
 	
-	void setImageToWorldTransform( const glm::mat4& );
-	
 	class Stage
 	{
 	public:
+		void setImageToWorldTransform( const glm::mat4& );
+		gl::TextureRef getGLImage() const;
+
 		string			mName;
 		mat4			mImageToWorld;
 		mat4			mWorldToImage;
@@ -50,8 +51,6 @@ public:
 		cv::UMat			mImageCV;
 		mutable gl::TextureRef	mImageGL;
 		gl::TextureCubeMapRef	mImageCubeMapGL;
-		
-		gl::TextureRef getGLImage() const; // will convert mImageCV -> mImageGL if needed & possible.
 		
 		// layout hints
 		float			mLayoutHintScale=1.f;
@@ -74,8 +73,9 @@ public:
 	StageRef then( string name, gl::Texture2dRef ref );
 	StageRef then( string name, gl::TextureCubeMapRef ref );
 	
-	const vector<StageRef>& getStages() const { return mStages ; }
+	const vector<StageRef>& getStages() const { return mStages ; } // result needs to be non-writable!
 	const StageRef getStage( string name ) const;
+	StageRef back() { return mStages.empty() ? StageRef() : mStages.back(); } // eneds proper const version
 	
 	void setCaptureAllStageImages( bool v ) { mCaptureAllStageImages=v; }
 	set<string> getCaptureStages() const { return mCaptureStages; }

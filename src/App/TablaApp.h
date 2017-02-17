@@ -119,9 +119,7 @@ private:
 	void updateDebugFrameCaptureDevicesWithPxPerWorldUnit( float );
 	
 	// pipeline 
-	void addProjectorPipelineStages( Pipeline& );
-	
-	Pipeline mPipeline; // traces processing	
+	void addProjectorPipelineStages( Pipeline& );	
 	string mPipelineStageSelection;
 	
 	// capture device management

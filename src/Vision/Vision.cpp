@@ -123,7 +123,7 @@ Vision::processFrame( const Surface &surface )
  
 	pipeline.then( "input", input );
 	
-	pipeline.setImageToWorldTransform( getOcvPerspectiveTransform(
+	pipeline.back()->setImageToWorldTransform( getOcvPerspectiveTransform(
 		mCaptureProfile.mCaptureCoords,
 		mCaptureProfile.mCaptureWorldSpaceCoords ) );
 
@@ -150,7 +150,7 @@ Vision::processFrame( const Surface &surface )
 	
 	// ---- World Boundaries ----
 	pipeline.then( "world-boundaries", vec2(2.5,2.5)*100.f ); // Xm^2 configurable area
-	pipeline.setImageToWorldTransform( mat4() ); // identity; do it in world space
+	pipeline.back()->setImageToWorldTransform( mat4() ); // identity; do it in world space
 		// this is here just so it can be configured by the user.
 	
 	// ---- Clipped ----
@@ -201,7 +201,7 @@ Vision::processFrame( const Surface &surface )
 		
 		glm::mat4 imageToWorld = glm::scale( vec3( 1.f / pixelScale, 1.f / pixelScale, 1.f ) );
 		
-		pipeline.setImageToWorldTransform( imageToWorld );
+		pipeline.back()->setImageToWorldTransform( imageToWorld );
 		
 		// grey
 		cv::UMat clipped_gray;
@@ -210,7 +210,7 @@ Vision::processFrame( const Surface &surface )
 	}
 	
 	// find contours	
-	auto clippedStage = pipeline.getStages().back(); // gets "clipped_gray"
+	auto clippedStage = pipeline.back(); // gets "clipped_gray"
 	
 	output.mContours = mContourVision.findContours( clippedStage, pipeline, contourPixelToWorld );
 	

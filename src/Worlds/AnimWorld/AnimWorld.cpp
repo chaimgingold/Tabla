@@ -171,9 +171,9 @@ FrameVec AnimWorld::getFrames(
 		getSubMatWithQuad( world->mImageCV, frame.mImageCV, frame.mQuad, world->mWorldToImage, frame.mFrameImageToWorld );
 		
 		pipeline.then(string("Frame ") + frame.mIndex, frame.mImageCV);
-		pipeline.setImageToWorldTransform( frame.mFrameImageToWorld );
-		pipeline.getStages().back()->mLayoutHintScale = .5f;
-		pipeline.getStages().back()->mLayoutHintOrtho = true;
+		pipeline.back()->setImageToWorldTransform( frame.mFrameImageToWorld );
+		pipeline.back()->mLayoutHintScale = .5f;
+		pipeline.back()->mLayoutHintOrtho = true;
 		
 		// blank edges
 		if (mBlankEdgePixels>0)
@@ -181,8 +181,8 @@ FrameVec AnimWorld::getFrames(
 			cv::rectangle(frame.mImageCV, cv::Point(0,0), cv::Point(frame.mImageCV.cols-1,frame.mImageCV.rows-1), 255, mBlankEdgePixels );
 			
 			pipeline.then(string("Frame edge blanked") + frame.mIndex, frame.mImageCV);
-			pipeline.getStages().back()->mLayoutHintScale = .5f;
-			pipeline.getStages().back()->mLayoutHintOrtho = true;
+			pipeline.back()->mLayoutHintScale = .5f;
+			pipeline.back()->mLayoutHintOrtho = true;
 		}
 		
 		// equalize?
@@ -191,8 +191,8 @@ FrameVec AnimWorld::getFrames(
 			UMat frameContourImageEqualized;
 			equalizeHist(frame.mImageCV, frameContourImageEqualized);
 			pipeline.then(string("Frame equalized ") + frame.mIndex, frameContourImageEqualized);
-			pipeline.getStages().back()->mLayoutHintScale = .5f;
-			pipeline.getStages().back()->mLayoutHintOrtho = true;
+			pipeline.back()->mLayoutHintScale = .5f;
+			pipeline.back()->mLayoutHintOrtho = true;
 			frame.mImageCV = frameContourImageEqualized; // use that!
 		}
 

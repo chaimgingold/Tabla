@@ -770,7 +770,7 @@ void TablaApp::addProjectorPipelineStages( Pipeline& p )
 	// set that image
 	p.then( "projector", mLightLink.getProjectorProfile().mProjectorSize ) ;
 	
-	p.setImageToWorldTransform(
+	p.back()->setImageToWorldTransform(
 		getOcvPerspectiveTransform(
 			mLightLink.getProjectorProfile().mProjectorCoords,
 			mLightLink.getProjectorProfile().mProjectorWorldSpaceCoords ));
@@ -1260,7 +1260,7 @@ void TablaApp::saveUserSettings()
 
 void TablaApp::saveCameraImageToDisk()
 {
-	auto savestage = mPipeline.getStage("clipped");
+	auto savestage = getPipeline().getStage("clipped");
 	if (!savestage) return;
 	auto saveglimage = savestage->getGLImage();
 	if (!saveglimage) return;
