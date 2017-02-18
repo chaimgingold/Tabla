@@ -19,43 +19,16 @@
 			<NNMatchRatio>			    0.8 </NNMatchRatio>
 			<NNMatchPercentage>			0.3 </NNMatchPercentage>
 			
-			<Tokens>
-				<Token>
-					<Path>music-icons-black/additive.png</Path>
-					<Name>Cloud</Name>
-				</Token>
-				<Token>
-					<Path>music-icons-black/board.png</Path>
-					<Name>FMSynth</Name>
-				</Token>
-				<Token>
-					<Path>music-icons-black/drumkit.png</Path>
-					<Name>DrumSampler</Name>
-				</Token>
-				<Token>
-					<Path>music-icons-black/keyboard.png</Path>
-					<Name>Keys</Name>
-				</Token>
-				<Token>
-					<Path>music-icons-black/keyboard2.png</Path>
-					<Name>Bass</Name>
-				</Token>
-				<Token>
-					<Path>music-icons-black/robit-pokie.png</Path>
-					<Name>Pokie</Name>
-				</Token>
-				<Token>
-					<Path>music-icons-black/scale.png</Path>
-					<Name>Scale</Name>
-				</Token>
-				<Token>
-					<Path>music-icons-black/tempo.png</Path>
-					<Name>Tempo</Name>
-				</Token>
-				<Token>
-					<Path>music-icons-black/transpose.png</Path>
-					<Name>Transpose</Name>
-				</Token>
+			<Tokens path="music-icons-black/">
+				<Token name="Cloud" path="additive.png"/>
+				<Token name="FMSynth" path="board.png"/>
+				<Token name="DrumSampler" path="drumkit.png"/>
+				<Token name="Keys" path="keyboard.png"/>
+				<Token name="Bass" path="keyboard2.png"/>
+				<Token name="Pokie" path="robit-pokie.png"/>
+				<Token name="Scale" path="scale.png"/>
+				<Token name="Tempo" path="tempo.png"/>
+				<Token name="Transpose" path="transpose.png"/>
 			</Tokens>
 		</TokenMatcher>
 	</Vision>

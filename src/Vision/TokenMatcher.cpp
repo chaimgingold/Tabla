@@ -40,16 +40,29 @@ void TokenMatcher::Params::set( XmlTree xml )
 	mTokenDefs.clear();
 	if (mVerbose) cout << "Tokens:" << endl;
 
+	// get path root for token images
+	fs::path rootPath;
+	
+	if ( xml.hasChild("Tokens") )
+	{
+		auto tokens = xml.getChild("Tokens");
+		if (tokens.hasAttribute("path"))
+		{
+			rootPath = tokens.getAttribute("path");
+		}
+	}
+	
+	// get token defs
 	for( auto i = xml.begin( "Tokens/Token" ); i != xml.end(); ++i )
 	{
-		if ( i->hasChild("Path") && i->hasChild("Name") )
+		if ( i->hasAttribute("path") && i->hasAttribute("name") )
 		{
 			TokenDef def;
 
-			def.mPath = i->getChild("Path").getValue();
-			def.mName = i->getChild("Name").getValue();
+			def.mPath = i->getAttribute("path").getValue();
+			def.mName = i->getAttribute("name").getValue();
 			
-			def.mPath = TablaApp::get()->hotloadableAssetPath(def.mPath);
+			def.mPath = TablaApp::get()->hotloadableAssetPath( rootPath / def.mPath );
 			
 			mTokenDefs.push_back(def);
 

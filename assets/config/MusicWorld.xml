@@ -21,43 +21,16 @@
 			<NNMatchRatio>			    0.8 </NNMatchRatio>
 			<NNMatchPercentage>			0.3 </NNMatchPercentage>
 			
-			<Tokens>
-				<Token>
-					<Path>music-icons-black/additive.png</Path>
-					<Name>3Additive</Name>
-				</Token>
-				<Token>
-					<Path>music-icons-black/board.png</Path>
-					<Name>0Volca FM</Name>
-				</Token>
-				<Token>
-					<Path>music-icons-black/drumkit.png</Path>
-					<Name>2Volca Sample (Drums)</Name>
-				</Token>
-				<Token>
-					<Path>music-icons-black/keyboard.png</Path>
-					<Name>8Volca Keys</Name>
-				</Token>
-				<Token>
-					<Path>music-icons-black/keyboard2.png</Path>
-					<Name>6Volca Bass</Name>
-				</Token>
-				<Token>
-					<Path>music-icons-black/robit-pokie.png</Path>
-					<Name>1RobitPokie</Name>
-				</Token>
-				<Token>
-					<Path>music-icons-black/scale.png</Path>
-					<Name>Scale</Name>
-				</Token>
-				<Token>
-					<Path>music-icons-black/tempo.png</Path>
-					<Name>Tempo</Name>
-				</Token>
-				<Token>
-					<Path>music-icons-black/transpose.png</Path>
-					<Name>RootNote</Name>
-				</Token>
+			<Tokens path="music-icons-black/">
+				<Token name="3Additive" path="additive.png"/>
+				<Token name="0Volca FM" path="board.png"/>
+				<Token name="2Volca Sample (Drums)" path="drumkit.png"/>
+				<Token name="8Volca Keys" path="keyboard.png"/>
+				<Token name="6Volca Bass" path="keyboard2.png"/>
+				<Token name="1RobitPokie" path="robit-pokie.png"/>
+				<Token name="Scale" path="scale.png"/>
+				<Token name="Tempo" path="tempo.png"/>
+				<Token name="RootNote" path="transpose.png"/>
 			</Tokens>
 		</TokenMatcher>
 	</Vision>
