@@ -52,7 +52,7 @@ public:
 	public:
 		Pipeline mPipeline;
 		ContourVector mContours;
-		vector<TokenMatch> mTokens;
+		TokenMatchVec mTokens;
 	};
 
 	// configure
@@ -77,7 +77,7 @@ private:
 	int mFrameCount=0;
 	int mTokenMatchSkip=30;
 	
-	vector<TokenMatch> mOldTokenMatcherOutput;
+	TokenMatchVec mOldTokenMatcherOutput;
 };
 
 #endif /* Vision_hpp */

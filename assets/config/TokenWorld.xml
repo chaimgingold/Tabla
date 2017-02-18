@@ -14,6 +14,7 @@
 		</Contours>
 		
 		<TokenMatcher>
+			<Verbose>1</Verbose>
 			<InlierThreshold>			1.5 </InlierThreshold>
 			<NNMatchRatio>			    0.8 </NNMatchRatio>
 			<NNMatchPercentage>			0.3 </NNMatchPercentage>

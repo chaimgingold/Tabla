@@ -329,7 +329,7 @@ void MusicStampVec::updateWithTokens( const TokenMatchVec& tokens )
 			stamp->mLoc = stamp->mSearchForPaperLoc = stamp->mHomeLoc = t.getPoly().calcCentroid();
 			stamp->goHome();
 		}
-		else /*if (verbose)*/ cout << "No Instrument for Token! " << t.getName() << endl;
+		else /*if (verbose)*/ cout << "No Instrument for Token: '" << t.getName() << "'" << endl;
 	}
 }
 

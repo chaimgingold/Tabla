@@ -60,7 +60,7 @@ public:
 	, mCandidate(candidate){}
 
 	string getName() const { return mLibrary.name; }
-	PolyLine2 getPoly() const { return mCandidate.fromContour.polyLine; }
+	const PolyLine2& getPoly() const { return mCandidate.fromContour.polyLine; }
 	
 	const AnalyzedToken& getCandidate() const { return mCandidate; }
 	
@@ -68,7 +68,15 @@ private:
 	AnalyzedToken mLibrary;
 	AnalyzedToken mCandidate;
 };
-typedef vector<TokenMatch> TokenMatchVec;
+
+class TokenMatchVec : public vector<TokenMatch>
+{
+public:
+	const TokenMatch* doesOverlapToken( const PolyLine2& ) const;
+	// useful for filtering out contours that describe tokens
+	// What we do is N poly<>poly intersection tests.
+	
+};
 
 class TokenMatcher {
 public:
@@ -85,6 +93,7 @@ public:
 	
 		void set( XmlTree );
 		
+		bool mVerbose   = false;
 		bool mIsEnabled = true;
 		
 		// Tuning

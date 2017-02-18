@@ -354,7 +354,7 @@ MusicVision::updateVision(
 	const ScoreVec&			oldScores,
 	const vector<MusicStamp>& stamps ) const
 {
-	ScoreVec v = getScores(visionOut.mContours,oldScores,stamps);
+	ScoreVec v = getScores( visionOut.mContours, oldScores, stamps, visionOut.mTokens );
 	
 	updateScoresWithImageData(pipeline,v);
 	
@@ -362,7 +362,10 @@ MusicVision::updateVision(
 }
 
 ScoreVec
-MusicVision::getScoresFromContours( const ContourVector& contours, const vector<MusicStamp>& stamps ) const
+MusicVision::getScoresFromContours(
+	const ContourVector& contours,
+	const vector<MusicStamp>& stamps,
+	const TokenMatchVec& tokens ) const
 {
 	ScoreVec scores;
 	
@@ -370,7 +373,9 @@ MusicVision::getScoresFromContours( const ContourVector& contours, const vector<
 	{
 		PolyLine2 rectPoly;
 
-		if ( !c.mIsHole && c.mTreeDepth==0 && mRectFinder.getRectFromPoly(c.mPolyLine,rectPoly) )
+		if ( !c.mIsHole && c.mTreeDepth==0
+		   && mRectFinder.getRectFromPoly(c.mPolyLine,rectPoly)
+		   && !tokens.doesOverlapToken(rectPoly) )
 		{
 			Score score;
 
@@ -473,10 +478,14 @@ ScoreVec MusicVision::mergeOldAndNewScores(
 	return output;
 }
 
-ScoreVec MusicVision::getScores( const ContourVector& contours, const ScoreVec& oldScores, const vector<MusicStamp>& stamps ) const
+ScoreVec MusicVision::getScores(
+	const ContourVector& contours,
+	const ScoreVec& oldScores,
+	const vector<MusicStamp>& stamps,
+	const TokenMatchVec& tokens ) const
 {
 	// get new ones
-	ScoreVec newScores = getScoresFromContours(contours,stamps);
+	ScoreVec newScores = getScoresFromContours(contours,stamps,tokens);
 
 	// merge with old
 	newScores = mergeOldAndNewScores(oldScores,newScores,contours);

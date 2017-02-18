@@ -45,7 +45,6 @@ private:
 	int   mScoreTrackRejectNumSamples=10;
 	float mScoreTrackRejectSuccessThresh=.2f;
 	float mScoreTrackMaxError=1.f;
-//	float mScoreMaxInteriorAngleDeg=120.f;
 	float mScoreTrackTemporalBlendFrac=.5f; // 0 means off, so all new
 	float mScoreTrackTemporalBlendIfDiffFracLT=.1f; // only do blending if frames are similar enough; otherwise: fast no blend mode.
 
@@ -54,12 +53,19 @@ private:
 
 
 	// helpers
-	ScoreVec getScores( const ContourVector&, const ScoreVec& oldScores, const vector<MusicStamp>& stamps ) const;
-	ScoreVec getScoresFromContours( const ContourVector&, const vector<MusicStamp>& stamps ) const;
+	ScoreVec getScores(
+		const ContourVector&,
+		const ScoreVec& oldScores,
+		const vector<MusicStamp>& stamps,
+		const TokenMatchVec& ) const;
+	
+	ScoreVec getScoresFromContours( const ContourVector&, const vector<MusicStamp>& stamps, const TokenMatchVec& ) const;
+	
 	ScoreVec mergeOldAndNewScores(
 		const ScoreVec& oldScores,
 		const ScoreVec& newScores,
 		const ContourVector& contours ) const;
+	
 	void updateScoresWithImageData( Pipeline& pipeline, ScoreVec& scores ) const;
 	
 	float getNearestTempo( float ) const; // input -> closest mMeasureCounts[]

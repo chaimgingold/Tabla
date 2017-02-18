@@ -12,6 +12,19 @@
 #include "geom.h"
 #include "xml.h"
 
+const TokenMatch*
+TokenMatchVec::doesOverlapToken( const PolyLine2 &p ) const
+{
+	for( const TokenMatch &t : *this )
+	{
+		if ( doPolygonsIntersect(p,t.getPoly()) )
+		{
+			return &t;
+		}
+	}
+	return 0;
+}
+
 void TokenMatcher::Params::set( XmlTree xml )
 {
 	if ( xml.hasAttribute("enable") )
@@ -19,13 +32,13 @@ void TokenMatcher::Params::set( XmlTree xml )
 		mIsEnabled = xml.getAttribute("enable").getValue<bool>();
 	}
 	
+	getXml(xml,"Verbose",mVerbose);
 	getXml(xml,"InlierThreshold",mInlierThreshold);
 	getXml(xml,"NNMatchRatio",mNNMatchRatio);
 	getXml(xml,"NNMatchPercentage",mNNMatchPercentage);
 	
 	mTokenDefs.clear();
-	const bool kVerbose = true;
-	if (kVerbose) cout << "Tokens:" << endl;
+	if (mVerbose) cout << "Tokens:" << endl;
 
 	for( auto i = xml.begin( "Tokens/Token" ); i != xml.end(); ++i )
 	{
@@ -40,7 +53,7 @@ void TokenMatcher::Params::set( XmlTree xml )
 			
 			mTokenDefs.push_back(def);
 
-			if (kVerbose) cout << "\t" << def.mName << ": " << def.mPath << endl;
+			if (mVerbose) cout << "\t" << def.mName << ": " << def.mPath << endl;
 		}
 	}
 }
@@ -185,18 +198,17 @@ AnalyzedToken TokenMatcher::analyzeToken(Mat tokenImage) {
 	return analyzedToken;
 }
 
-vector<TokenMatch> TokenMatcher::matchTokens( vector<AnalyzedToken> candidates )
+TokenMatchVec TokenMatcher::matchTokens( vector<AnalyzedToken> candidates )
 {
+	TokenMatchVec matches;
 
-	vector <TokenMatch> matches;
-
-	cout << "***Scoring images..." << endl;
+	if (mParams.mVerbose) cout << "***Scoring images..." << endl;
 	for ( AnalyzedToken candidateToken : candidates )
 	{
 		float bestMatchScore = 0;
 		AnalyzedToken bestMatch;
 
-		cout << "Scoring image..." << endl;
+		if (mParams.mVerbose) cout << "Scoring image..." << endl;
 		for ( AnalyzedToken &libraryToken : mTokenLibrary ) {
 
 
@@ -204,7 +216,7 @@ vector<TokenMatch> TokenMatcher::matchTokens( vector<AnalyzedToken> candidates )
 			
 			float finalMatchScore = numMatched;
 
-			cout << "\t" << libraryToken.name << " : " << finalMatchScore << endl;
+			if (mParams.mVerbose) cout << "\t" << libraryToken.name << " : " << finalMatchScore << endl;
 
 			if (bestMatchScore < finalMatchScore) {
 				bestMatchScore = finalMatchScore;
@@ -238,9 +250,9 @@ int TokenMatcher::doKnnMatch(Mat descriptorsA, Mat descriptorsB) {
 }
 
 void TokenMatcher::reanalyze() {
-	cout << "Foo: " << mTokenLibrary.size() << endl;
+	if (mParams.mVerbose) cout << "Foo: " << mTokenLibrary.size() << endl;
 	for (auto &token : mTokenLibrary) {
-		cout << "HELLOOOO" << endl;
+		if (mParams.mVerbose) cout << "HELLOOOO" << endl;
 		getFeatureDetector()->detectAndCompute(token.image,
 											   noArray(),
 											   token.keypoints,
@@ -275,5 +287,5 @@ void TokenMatcher::setParams( Params p )
 	if (mTokenLibrary.size() > 0) {
 		mAverageLibraryTokenSize /= vec2(mTokenLibrary.size());
 	}
-	cout << "Average token size in library: " << mAverageLibraryTokenSize << endl;
+	if (mParams.mVerbose) cout << "Average token size in library: " << mAverageLibraryTokenSize << endl;
 }

@@ -219,7 +219,7 @@ Vision::processFrame( const Surface &surface )
 		if ( mTokenMatchSkip<1 || mFrameCount % (mTokenMatchSkip+1)==0 )
 		{
 			vector<AnalyzedToken> candidates = mTokenMatcher.tokensFromContours( clippedStage, output.mContours, pipeline );
-			vector<TokenMatch> matches = mTokenMatcher.matchTokens(candidates);
+			TokenMatchVec matches = mTokenMatcher.matchTokens(candidates);
 			cout << matches.size() << endl;
 			output.mTokens = matches;
 			
