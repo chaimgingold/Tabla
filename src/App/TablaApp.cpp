@@ -467,24 +467,20 @@ void Input::stop()
 	mDebugFrameFileWatch.clear();
 }
 
-bool Input::getFrame( Surface& frame )
+SurfaceRef Input::getFrame()
 {
-	// TODO: Return SurfaceRef to ensure we aren't copying without need
-	
 	if (   (mCapture && mCapture->checkNewFrame())
 		|| (mDebugFrame && (mDebugFrameSkip<2 || getElapsedFrames()%mDebugFrameSkip==0)) )
 	{
 		// get image
 		if (mDebugFrame) {
 			mDebugFrameFileWatch.update();
-			frame = *mDebugFrame.get();
+			return mDebugFrame;
 		} else {
-			frame = *mCapture->getSurface(); // !!!!! ARE WE COPYING????
+			return mCapture->getSurface();
 		}
-		
-		return true;
 	}
-	return false;
+	return SurfaceRef();
 }
 
 bool Input::setupWithFile( const LightLink::CaptureProfile& profile )
@@ -845,9 +841,9 @@ void TablaApp::update()
 
 void TablaApp::updateVision()
 {
-	Surface frame;
+	SurfaceRef frame = mVisionInput.getFrame();
 
-	if ( mVisionInput.getFrame(frame) )
+	if ( frame )
 	{
 		mCaptureFPS.mark();
 

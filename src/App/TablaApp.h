@@ -47,7 +47,7 @@ using namespace std;
 		bool setup( const LightLink::CaptureProfile& );
 		void stop();
 		
-		bool getFrame( Surface& );
+		SurfaceRef getFrame();
 		void setDebugFrameSkip( int n ) { mDebugFrameSkip=n; }
 		bool isFile() const { return mDebugFrame.get(); }
 		

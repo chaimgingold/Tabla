@@ -96,7 +96,7 @@ void Vision::setCaptureProfile( const LightLink::CaptureProfile& profile )
 }
 
 Vision::Output
-Vision::processFrame( const Surface &surface )
+Vision::processFrame( SurfaceRef surface )
 {
 	Vision::Output output;
 	Pipeline& pipeline = output.mPipeline; // patch us in (refactor in progress)
@@ -115,7 +115,7 @@ Vision::processFrame( const Surface &surface )
 	// ---- Input ----
 	
 	// make cv frame
-	cv::UMat input = toOcvRef((Surface &)surface).getUMat(cv::ACCESS_READ); // we type-cast to non-const so this works. :P
+	cv::UMat input = toOcvRef(*surface.get()).getUMat(cv::ACCESS_READ);
 	cv::UMat clipped;
 		// toOcvRef is much, much faster than toOcv, which does a lot of dumb bit twiddling.
 		// this requires a cast to non-const, but hopefully cv::ACCESS_READ semantics makes this kosher enough.

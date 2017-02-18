@@ -60,7 +60,7 @@ public:
 	void setCaptureProfile( const LightLink::CaptureProfile& );
 
 	// push input through
-	Output processFrame( const Surface &surface );
+	Output processFrame( SurfaceRef );
 	
 private:
 	Params		mParams;
