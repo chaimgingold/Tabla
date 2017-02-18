@@ -154,7 +154,10 @@ void TokenWorld::drawMatchingKeypoints( bool drawKeypoints ) {
 			{
 				gl::color(color);
 				
-				vec2 size = font->measureString(match.getName());
+				string name = match.getName();
+				if (name.empty()) name = "\"\""; // show empty strings
+				
+				vec2 size = font->measureString(name);
 				
 				float worldHeight = 5.f; // cm
 				float scale = worldHeight / size.y ;
@@ -162,7 +165,7 @@ void TokenWorld::drawMatchingKeypoints( bool drawKeypoints ) {
 				Rectf r(match.getPoly().getPoints());
 				vec2 center = r.getCenter();
 				
-				font->drawString( match.getName(),
+				font->drawString( name,
 								  vec2(center.x,r.y2) + vec2(-size.x/2.f,size.y)*scale,
 								  gl::TextureFont::DrawOptions().scale(scale).pixelSnap(false)
 									   );

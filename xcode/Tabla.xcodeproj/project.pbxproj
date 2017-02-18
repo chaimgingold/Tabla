@@ -70,6 +70,7 @@
 		26E30EA91E0B4F0600AA9F97 /* ocv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E30EA81E0B4F0600AA9F97 /* ocv.cpp */; };
 		26E30EAE1E0C567100AA9F97 /* QuadTestWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E30EAC1E0C567100AA9F97 /* QuadTestWorld.cpp */; };
 		26E30EB21E0C9A3600AA9F97 /* RectFinder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E30EB01E0C9A3600AA9F97 /* RectFinder.cpp */; };
+		26EAE98A1E57D6A5001475EA /* VisionInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26EAE9881E57D6A5001475EA /* VisionInput.cpp */; };
 		26F0E2EA1E28AF390083FB22 /* CameraCalibrateWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26F0E2E61E28AF390083FB22 /* CameraCalibrateWorld.cpp */; };
 		26F0E2EB1E28AF390083FB22 /* ProjectorCalibrateWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26F0E2E81E28AF390083FB22 /* ProjectorCalibrateWorld.cpp */; };
 		26F3234B1DF74D8900EC9559 /* Gamepad_macosx.c in Sources */ = {isa = PBXBuildFile; fileRef = 26F323491DF74D8900EC9559 /* Gamepad_macosx.c */; };
@@ -304,6 +305,8 @@
 		26E30EAD1E0C567100AA9F97 /* QuadTestWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QuadTestWorld.h; sourceTree = "<group>"; };
 		26E30EB01E0C9A3600AA9F97 /* RectFinder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RectFinder.cpp; sourceTree = "<group>"; };
 		26E30EB11E0C9A3600AA9F97 /* RectFinder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RectFinder.h; sourceTree = "<group>"; };
+		26EAE9881E57D6A5001475EA /* VisionInput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VisionInput.cpp; sourceTree = "<group>"; };
+		26EAE9891E57D6A5001475EA /* VisionInput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VisionInput.h; sourceTree = "<group>"; };
 		26F0E2E61E28AF390083FB22 /* CameraCalibrateWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = CameraCalibrateWorld.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		26F0E2E71E28AF390083FB22 /* CameraCalibrateWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CameraCalibrateWorld.h; sourceTree = "<group>"; };
 		26F0E2E81E28AF390083FB22 /* ProjectorCalibrateWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ProjectorCalibrateWorld.cpp; sourceTree = "<group>"; };
@@ -920,18 +923,20 @@
 		26CCA2E01E089E09005F7C24 /* Vision */ = {
 			isa = PBXGroup;
 			children = (
-				26CCA2E71E089E3F005F7C24 /* Contour.cpp */,
-				26CCA2E81E089E3F005F7C24 /* Contour.h */,
-				26CCA2E91E089E3F005F7C24 /* ContourVision.cpp */,
-				26CCA2EA1E089E3F005F7C24 /* ContourVision.h */,
 				26CCA2EB1E089E3F005F7C24 /* LightLink.cpp */,
 				26CCA2EC1E089E3F005F7C24 /* LightLink.h */,
 				26CCA2ED1E089E3F005F7C24 /* Pipeline.cpp */,
 				26CCA2EE1E089E3F005F7C24 /* Pipeline.h */,
-				26CCA2EF1E089E3F005F7C24 /* TokenMatcher.cpp */,
-				26CCA2F01E089E3F005F7C24 /* TokenMatcher.h */,
 				26CCA2F11E089E3F005F7C24 /* Vision.cpp */,
 				26CCA2F21E089E3F005F7C24 /* Vision.h */,
+				26EAE9881E57D6A5001475EA /* VisionInput.cpp */,
+				26EAE9891E57D6A5001475EA /* VisionInput.h */,
+				26CCA2E71E089E3F005F7C24 /* Contour.cpp */,
+				26CCA2E81E089E3F005F7C24 /* Contour.h */,
+				26CCA2E91E089E3F005F7C24 /* ContourVision.cpp */,
+				26CCA2EA1E089E3F005F7C24 /* ContourVision.h */,
+				26CCA2EF1E089E3F005F7C24 /* TokenMatcher.cpp */,
+				26CCA2F01E089E3F005F7C24 /* TokenMatcher.h */,
 				26E30EB01E0C9A3600AA9F97 /* RectFinder.cpp */,
 				26E30EB11E0C9A3600AA9F97 /* RectFinder.h */,
 			);
@@ -2679,6 +2684,7 @@
 				2673CD5E1E1D791C0036C02D /* PinballView.cpp in Sources */,
 				26308E611E44113C00DB8371 /* PopUpMenuView.cpp in Sources */,
 				36991D11792C4997967FCEC7 /* b2ChainShape.cpp in Sources */,
+				26EAE98A1E57D6A5001475EA /* VisionInput.cpp in Sources */,
 				26CCA2F61E089E3F005F7C24 /* Pipeline.cpp in Sources */,
 				819C4FF415DF49DCAEA34DC7 /* b2CircleShape.cpp in Sources */,
 				45BE040AA3C64DA6B477A384 /* b2EdgeShape.cpp in Sources */,

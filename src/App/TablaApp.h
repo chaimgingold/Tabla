@@ -25,6 +25,7 @@
 
 #include "LightLink.h"
 #include "Vision.h"
+#include "VisionInput.h"
 #include "Contour.h"
 #include "GameWorld.h"
 #include "FileWatch.h"
@@ -40,30 +41,6 @@
 using namespace ci;
 using namespace ci::app;
 using namespace std;
-
-	class Input
-	{
-	public:
-		bool setup( const LightLink::CaptureProfile& );
-		void stop();
-		
-		SurfaceRef getFrame();
-		void setDebugFrameSkip( int n ) { mDebugFrameSkip=n; }
-		bool isFile() const { return mDebugFrame.get(); }
-		
-	private:
-		bool setupWithCamera( const LightLink::CaptureProfile& );
-		bool setupWithFile  ( const LightLink::CaptureProfile& );
-
-		// camera
-		CaptureRef mCapture;
-
-		// file (debug frame)
-		int		   mDebugFrameSkip=0;
-		SurfaceRef mDebugFrame;
-		FileWatch  mDebugFrameFileWatch;
-		
-	};
 
 class TablaApp : public App {
   public:
@@ -133,7 +110,7 @@ private:
 	LightLink			mLightLink; // calibration for camera <> world <> projector
 	Vision				mVision ;	// edge detection	->
 	Vision::Output		mVisionOutput; // contours, tokens ->
-	Input				mVisionInput;
+	VisionInput			mVisionInput;
 	
 	bool setupCaptureDevice(); // specified by mLightLink.mCameraIndex
 	void updateDebugFrameCaptureDevicesWithPxPerWorldUnit( float );
@@ -150,6 +127,7 @@ private:
 		// it tries a
 
 	// misc.
+	void maybeUpdateCaptureProfileWithFrame( SurfaceRef ); // if VisionInput is a file, see if its file size has changed, and update apture profile
 	void setProjectorWorldSpaceCoordsFromCaptureProfile();
 	void enumerateDisplaysAndCamerasToConsole() const;
 	PolyLine2 getWorldBoundsPoly() const;
