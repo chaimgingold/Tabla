@@ -24,7 +24,7 @@ TablaApp::~TablaApp()
 {
 	cout << "Shutting down..." << endl;
 
-	if (mCapture) mCapture->stop();
+	mVisionInput.stop();
 }
 
 PolyLine2 TablaApp::getWorldBoundsPoly() const
@@ -176,6 +176,7 @@ void TablaApp::loadAppConfigXml( XmlTree xml )
 	if (xml.hasChild("PaperBounce3/App"))
 	{
 		mParams.set( xml.getChild("PaperBounce3/App") );
+		mVisionInput.setDebugFrameSkip( mParams.mDebugFrameSkip );
 	}
 	
 	if (xml.hasChild("PaperBounce3/RFID"))
@@ -434,25 +435,59 @@ bool TablaApp::tryToSetupValidCaptureDevice()
 
 bool TablaApp::setupCaptureDevice()
 {
-	mDebugFrame.reset();
-	mDebugFrameFileWatch.clear();
-	
-	if ( mLightLink.mCaptureProfiles.empty() ) {
+	if ( mLightLink.mCaptureProfiles.empty() )
+	{
 		return false;
 	}
+	else
+	{
+		setProjectorWorldSpaceCoordsFromCaptureProfile();
 
-	const LightLink::CaptureProfile &profile = mLightLink.getCaptureProfile();
-	
-	setProjectorWorldSpaceCoordsFromCaptureProfile();
-	
-	if ( profile.isCamera() ) {
-		return setupCaptureDevice_Camera(profile);
-	} else {
-		return setupCaptureDevice_File(profile);
+		return mVisionInput.setup( mLightLink.getCaptureProfile() );
 	}
 }
 
-bool TablaApp::setupCaptureDevice_File( const LightLink::CaptureProfile& profile )
+bool Input::setup( const LightLink::CaptureProfile& profile )
+{
+	mDebugFrame.reset();
+	mDebugFrameFileWatch.clear();
+	
+	if ( profile.isCamera() ) {
+		return setupWithCamera(profile);
+	} else {
+		return setupWithFile(profile);
+	}
+}
+
+void Input::stop()
+{
+	if (mCapture) mCapture->stop();
+	
+	mDebugFrame.reset();
+	mDebugFrameFileWatch.clear();
+}
+
+bool Input::getFrame( Surface& frame )
+{
+	// TODO: Return SurfaceRef to ensure we aren't copying without need
+	
+	if (   (mCapture && mCapture->checkNewFrame())
+		|| (mDebugFrame && (mDebugFrameSkip<2 || getElapsedFrames()%mDebugFrameSkip==0)) )
+	{
+		// get image
+		if (mDebugFrame) {
+			mDebugFrameFileWatch.update();
+			frame = *mDebugFrame.get();
+		} else {
+			frame = *mCapture->getSurface(); // !!!!! ARE WE COPYING????
+		}
+		
+		return true;
+	}
+	return false;
+}
+
+bool Input::setupWithFile( const LightLink::CaptureProfile& profile )
 {
 	cout << "Trying to load file capture profile '" << profile.mName << "' for file '" << profile.mFilePath << "'" << endl;
 	
@@ -465,6 +500,7 @@ bool TablaApp::setupCaptureDevice_File( const LightLink::CaptureProfile& profile
 			// check for image size change
 			if ( 1 && mDebugFrame->getSize() != ivec2(profile.mCaptureSize) )
 			{
+				/*
 				// update it
 				mLightLink.getCaptureProfile() = LightLink::CaptureProfile(
 					fs::path(profile.mFilePath),
@@ -478,6 +514,7 @@ bool TablaApp::setupCaptureDevice_File( const LightLink::CaptureProfile& profile
 				// might be cleanest to change to a dirty/event mechanism.
 				
 				setProjectorWorldSpaceCoordsFromCaptureProfile();
+				*/
 			}
 			
 		} catch (...){
@@ -492,7 +529,7 @@ bool TablaApp::setupCaptureDevice_File( const LightLink::CaptureProfile& profile
 	// we also might want to always return true so that user can escape missing files (removing from list)
 }
 
-bool TablaApp::setupCaptureDevice_Camera ( const LightLink::CaptureProfile& profile )
+bool Input::setupWithCamera ( const LightLink::CaptureProfile& profile )
 {
 	cout << "Trying to load camera capture profile '" << profile.mName << "' for '" << profile.mDeviceName << "'" << endl;
 	
@@ -795,7 +832,6 @@ void TablaApp::update()
 	mAppFPS.mark();
 	
 	mFileWatch.update();
-	mDebugFrameFileWatch.update();
 	
 	updateVision();
 	
@@ -809,19 +845,12 @@ void TablaApp::update()
 
 void TablaApp::updateVision()
 {
-	if (   (mCapture && mCapture->checkNewFrame())
-		|| (mDebugFrame && (getParams().mDebugFrameSkip<2 || getElapsedFrames()%getParams().mDebugFrameSkip==0)) )
+	Surface frame;
+
+	if ( mVisionInput.getFrame(frame) )
 	{
 		mCaptureFPS.mark();
 
-		// get image
-		Surface frame;
-		if (mDebugFrame) {
-			frame = *mDebugFrame.get();
-		} else {
-			frame = *mCapture->getSurface();
-		}
-		
 		// vision it
 		mVisionOutput = mVision.processFrame(frame);
 		
@@ -1065,7 +1094,7 @@ void TablaApp::keyDown( KeyEvent event )
 				break;
 
 			case KeyEvent::KEY_s:
-				if (!mDebugFrame) saveCameraImageToDisk();
+				if (!mVisionInput.isFile()) saveCameraImageToDisk();
 				break;
 			
 			case KeyEvent::KEY_r:
@@ -1114,11 +1143,9 @@ void TablaApp::keyDown( KeyEvent event )
 
 			case KeyEvent::KEY_ESCAPE:
 				{
-					mDebugFrame.reset();
-					mDebugFrameFileWatch.clear();
-					
-					if ( !mLightLink.getCaptureProfile().mFilePath.empty() )
+					if ( mLightLink.getCaptureProfile().isFile() )
 					{
+						mVisionInput.stop();
 						mLightLink.eraseCaptureProfile(mLightLink.getCaptureProfile().mName);
 						setupNextValidCaptureProfile();
 					}

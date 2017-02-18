@@ -41,6 +41,30 @@ using namespace ci;
 using namespace ci::app;
 using namespace std;
 
+	class Input
+	{
+	public:
+		bool setup( const LightLink::CaptureProfile& );
+		void stop();
+		
+		bool getFrame( Surface& );
+		void setDebugFrameSkip( int n ) { mDebugFrameSkip=n; }
+		bool isFile() const { return mDebugFrame.get(); }
+		
+	private:
+		bool setupWithCamera( const LightLink::CaptureProfile& );
+		bool setupWithFile  ( const LightLink::CaptureProfile& );
+
+		// camera
+		CaptureRef mCapture;
+
+		// file (debug frame)
+		int		   mDebugFrameSkip=0;
+		SurfaceRef mDebugFrame;
+		FileWatch  mDebugFrameFileWatch;
+		
+	};
+
 class TablaApp : public App {
   public:
 	~TablaApp();
@@ -101,21 +125,17 @@ class TablaApp : public App {
 		
 private:
 	
-	
-	
 	// === Vision System ===
 
 	void updateVision();
 	
 	// main players
 	LightLink			mLightLink; // calibration for camera <> world <> projector
-	CaptureRef			mCapture;	// input device		->
 	Vision				mVision ;	// edge detection	->
 	Vision::Output		mVisionOutput; // contours, tokens ->
+	Input				mVisionInput;
 	
-	// debug frame
-	SurfaceRef mDebugFrame;
-	FileWatch  mDebugFrameFileWatch;
+	bool setupCaptureDevice(); // specified by mLightLink.mCameraIndex
 	void updateDebugFrameCaptureDevicesWithPxPerWorldUnit( float );
 	
 	// pipeline 
@@ -124,9 +144,6 @@ private:
 	
 	// capture device management
 	bool ensureLightLinkHasLocalDeviceProfiles(); // returns if mLightLink changed
-	bool setupCaptureDevice(); // specified by mLightLink.mCameraIndex
-	bool setupCaptureDevice_Camera( const LightLink::CaptureProfile& );
-	bool setupCaptureDevice_File  ( const LightLink::CaptureProfile& );
 	void setupNextValidCaptureProfile(); // iterate through them
 	bool tryToSetupValidCaptureDevice();
 		// called once by lightLinkDidChange if setupCaptureDevice fails
