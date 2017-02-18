@@ -31,6 +31,7 @@
 
 ### Minor
 - [ ] Capture menu only shows valid options
+- [ ] Escape key should exit debug frame and return to last camera source
 
 ## Refactor
 ### For Game Jam / New Contributors

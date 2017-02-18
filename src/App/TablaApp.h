@@ -110,7 +110,6 @@ private:
 	LightLink			mLightLink; // calibration for camera <> world <> projector
 	Vision				mVision ;	// edge detection	->
 	Vision::Output		mVisionOutput; // contours, tokens ->
-	VisionInput			mVisionInput;
 	
 	bool setupCaptureDevice(); // specified by mLightLink.mCameraIndex
 	void updateDebugFrameCaptureDevicesWithPxPerWorldUnit( float );
@@ -127,7 +126,7 @@ private:
 		// it tries a
 
 	// misc.
-	void maybeUpdateCaptureProfileWithFrame( SurfaceRef ); // if VisionInput is a file, see if its file size has changed, and update apture profile
+	void maybeUpdateCaptureProfileWithFrame(); // if VisionInput is a file, see if its file size has changed, and update apture profile
 	void setProjectorWorldSpaceCoordsFromCaptureProfile();
 	void enumerateDisplaysAndCamerasToConsole() const;
 	PolyLine2 getWorldBoundsPoly() const;

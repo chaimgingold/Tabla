@@ -51,7 +51,7 @@ void Vision::setParams( Params p )
 	mTokenMatcher.setParams(mParams.mTokenMatcherParams);
 }
 
-void Vision::setCaptureProfile( const LightLink::CaptureProfile& profile )
+bool Vision::setCaptureProfile( const LightLink::CaptureProfile& profile )
 {
 	// compute remap?
 	bool remapChanged =
@@ -62,43 +62,55 @@ void Vision::setCaptureProfile( const LightLink::CaptureProfile& profile )
 	mCaptureProfile=profile;
 	
 	// update remap
-	if ( remapChanged )
-	{
-		if ( mCaptureProfile.mCameraMatrix.empty() || mCaptureProfile.mDistCoeffs.empty() )
-		{
-			cout << "Vision:: no remap " << endl;
+	if ( remapChanged ) updateRemap();
 
-			mRemap[0] = cv::Mat();
-			mRemap[1] = cv::Mat();
-		}
-		else
-		{
-			cout << "Vision:: computing remap " << endl;
-			
-			cv::Size imageSize(mCaptureProfile.mCaptureSize.x,mCaptureProfile.mCaptureSize.y);
-			
-			cout << "cv::initUndistortRectifyMap" << endl;
-			cout << "\tcameraMatrix: " << mCaptureProfile.mCameraMatrix << endl;
-			cout << "\tmDistCoeffs: " << mCaptureProfile.mDistCoeffs << endl;
-			cout << "\timageSize: " << imageSize << endl;
-			
-			cv::initUndistortRectifyMap(
-				mCaptureProfile.mCameraMatrix,
-				mCaptureProfile.mDistCoeffs,
-				cv::Mat(), // mono, so not needed
-				mCaptureProfile.mCameraMatrix, // mono, so same as 1st param
-				imageSize,
-				CV_16SC2, // CV_32FC1 or CV_16SC2
-				mRemap[0],
-				mRemap[1]);
-		}
+	// setup input device
+	return mInput.setup(profile);
+}
+
+void Vision::updateRemap()
+{
+	if ( mCaptureProfile.mCameraMatrix.empty() || mCaptureProfile.mDistCoeffs.empty() )
+	{
+		cout << "Vision:: no remap " << endl;
+
+		mRemap[0] = cv::Mat();
+		mRemap[1] = cv::Mat();
+	}
+	else
+	{
+		cout << "Vision:: computing remap " << endl;
+		
+		cv::Size imageSize(mCaptureProfile.mCaptureSize.x,mCaptureProfile.mCaptureSize.y);
+		
+		cout << "cv::initUndistortRectifyMap" << endl;
+		cout << "\tcameraMatrix: " << mCaptureProfile.mCameraMatrix << endl;
+		cout << "\tmDistCoeffs: " << mCaptureProfile.mDistCoeffs << endl;
+		cout << "\timageSize: " << imageSize << endl;
+		
+		cv::initUndistortRectifyMap(
+			mCaptureProfile.mCameraMatrix,
+			mCaptureProfile.mDistCoeffs,
+			cv::Mat(), // mono, so not needed
+			mCaptureProfile.mCameraMatrix, // mono, so same as 1st param
+			imageSize,
+			CV_16SC2, // CV_32FC1 or CV_16SC2
+			mRemap[0],
+			mRemap[1]);
 	}
 }
 
-Vision::Output
-Vision::processFrame( SurfaceRef surface )
+void Vision::stopCapture()
 {
-	Vision::Output output;
+	mInput.stop();
+}
+
+bool
+Vision::getOutput( Vision::Output& output )
+{
+	SurfaceRef surface = mInput.getFrame();
+	if (!surface) return false;
+	
 	Pipeline& pipeline = output.mPipeline; // patch us in (refactor in progress)
 
 	// start pipeline
@@ -230,5 +242,5 @@ Vision::processFrame( SurfaceRef surface )
 	
 	// output
 	mFrameCount++;
-	return output;
+	return true;
 }

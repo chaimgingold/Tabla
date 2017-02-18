@@ -18,6 +18,7 @@
 #include "LightLink.h"
 
 #include "Vision.h"
+#include "VisionInput.h"
 #include "Contour.h"
 #include "Pipeline.h"
 
@@ -57,16 +58,25 @@ public:
 
 	// configure
 	void setParams( Params );
-	void setCaptureProfile( const LightLink::CaptureProfile& );
-
-	// push input through
-	Output processFrame( SurfaceRef );
+	void setDebugFrameSkip( int n ) { mInput.setDebugFrameSkip(n); }
+	
+	// setup input
+	bool setCaptureProfile( const LightLink::CaptureProfile& );
+	void stopCapture();
+	
+	// get output
+	bool getOutput( Output& ); // returns true if output available
 	
 private:
+
 	Params		mParams;
+
+	// input
+	VisionInput mInput;
 	LightLink::CaptureProfile mCaptureProfile;
 
 	// undistort params
+	void updateRemap();
 	cv::Mat mRemap[2]; // can be empty for none
 
 	// submodules

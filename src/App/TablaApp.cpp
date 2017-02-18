@@ -24,7 +24,7 @@ TablaApp::~TablaApp()
 {
 	cout << "Shutting down..." << endl;
 
-	mVisionInput.stop();
+	mVision.stopCapture();
 }
 
 PolyLine2 TablaApp::getWorldBoundsPoly() const
@@ -176,7 +176,7 @@ void TablaApp::loadAppConfigXml( XmlTree xml )
 	if (xml.hasChild("PaperBounce3/App"))
 	{
 		mParams.set( xml.getChild("PaperBounce3/App") );
-		mVisionInput.setDebugFrameSkip( mParams.mDebugFrameSkip );
+		mVision.setDebugFrameSkip( mParams.mDebugFrameSkip );
 	}
 	
 	if (xml.hasChild("PaperBounce3/RFID"))
@@ -410,7 +410,6 @@ void TablaApp::lightLinkDidChange( bool saveToFile, bool doSetupCaptureDevice )
 	// notify people
 	// might need to privatize mLightLink and make this a proper setter
 	// or rename it to be "notify" or "onChange" or "didChange" something
-	mVision.setCaptureProfile(mLightLink.getCaptureProfile());
 	if (mGameWorld) mGameWorld->setWorldBoundsPoly( getWorldBoundsPoly() );
 	
 	if (saveToFile)
@@ -443,35 +442,32 @@ bool TablaApp::setupCaptureDevice()
 	{
 		setProjectorWorldSpaceCoordsFromCaptureProfile();
 
-		return mVisionInput.setup( mLightLink.getCaptureProfile() );
+		return mVision.setCaptureProfile( mLightLink.getCaptureProfile() );
 	}
 }
 
-void TablaApp::maybeUpdateCaptureProfileWithFrame( SurfaceRef frame )
+void TablaApp::maybeUpdateCaptureProfileWithFrame()
 {
 	// check for debug file image size change
-	if ( frame && mVisionInput.isFile() )
+	auto profile = mLightLink.getCaptureProfile();
+	auto frame = getPipeline().getStage("input");
+
+	if ( frame && profile.isFile() )
 	{
-		auto profile = mLightLink.getCaptureProfile();
+		ivec2 frameSize = frame->mImageSize;
 		
-		if ( frame->getSize() != ivec2(profile.mCaptureSize) )
+		if ( frameSize != ivec2(profile.mCaptureSize) )
 		{
 			// update it
 			mLightLink.getCaptureProfile() = LightLink::CaptureProfile(
 				fs::path(profile.mFilePath),
-				vec2(frame->getSize()),
+				vec2(frameSize),
 				getParams().mDefaultPixelsPerWorldUnit
 			);
 			
 			setProjectorWorldSpaceCoordsFromCaptureProfile();
 			
 			lightLinkDidChange(true,false);
-			// BUT WE ARE NOW!
-			// note: we aren't successfully saving new size to LightLink.xml
-			// if we call lightLinkDidChange, we crash; it could be a number of factors.
-			// but clearly it's messy to do so... we could be recursively in mFileWatch::load,
-			// or enter a loop, or some craziness... 
-			// might be cleanest to change to a dirty/event mechanism.
 		}
 	}
 }
@@ -758,16 +754,11 @@ void TablaApp::update()
 
 void TablaApp::updateVision()
 {
-	SurfaceRef frame = mVisionInput.getFrame();
-
-	if ( frame )
+	if ( mVision.getOutput(mVisionOutput) )
 	{
 		// misc
-		maybeUpdateCaptureProfileWithFrame(frame);
+		maybeUpdateCaptureProfileWithFrame();
 		mCaptureFPS.mark();
-
-		// vision it
-		mVisionOutput = mVision.processFrame(frame);
 		
 		// finish off the pipeline with draw stage
 		addProjectorPipelineStages(mVisionOutput.mPipeline);
@@ -1009,7 +1000,7 @@ void TablaApp::keyDown( KeyEvent event )
 				break;
 
 			case KeyEvent::KEY_s:
-				if (!mVisionInput.isFile()) saveCameraImageToDisk();
+				if (!mLightLink.getCaptureProfile().isFile()) saveCameraImageToDisk();
 				break;
 			
 			case KeyEvent::KEY_r:
@@ -1048,7 +1039,6 @@ void TablaApp::keyDown( KeyEvent event )
 			case KeyEvent::KEY_DOWN:
 			{
 				string stage;
-
 				if (event.isMetaDown()) stage = getPipeline().getLastStageName() ;
 				else stage = getPipeline().getNextStageName( getPipelineStageSelection() );
 
@@ -1060,7 +1050,7 @@ void TablaApp::keyDown( KeyEvent event )
 				{
 					if ( mLightLink.getCaptureProfile().isFile() )
 					{
-						mVisionInput.stop();
+						mVision.stopCapture();
 						mLightLink.eraseCaptureProfile(mLightLink.getCaptureProfile().mName);
 						setupNextValidCaptureProfile();
 					}
