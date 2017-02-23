@@ -346,17 +346,23 @@ bool TablaApp::ensureLightLinkHasLocalDeviceProfiles()
 		{
 			if ( mLightLink.getCaptureProfilesForDevice(d->getName()).empty() )
 			{
-				vec2 size(640,480); // help! how do i find out the default sizes?
+				vector<vec2> sizes = { vec2(1920,1080), vec2(640,480) };
+				// TODO: escape to OS and get some proper sizes...
 				
-				LightLink::CaptureProfile profile(
-					/*string("Default ") + */d->getName(),
-					d->getName(),
-					size,
-					getParams().mDefaultPixelsPerWorldUnit
-					);
+				for( auto size : sizes )
+				{
+					LightLink::CaptureProfile profile(
+						d->getName() + " " + toString(size.x) + "x" + toString(size.y),
+						d->getName(),
+						size,
+						getParams().mDefaultPixelsPerWorldUnit
+						);
+					
+					mLightLink.mCaptureProfiles[profile.mName] = profile;
+				}
 				
-				mLightLink.mCaptureProfiles[profile.mName] = profile;
 				dirty=true;
+				
 			} // make profile for device?
 		} // for
 	}
