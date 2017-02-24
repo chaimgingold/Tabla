@@ -36,6 +36,7 @@ void TokenMatcher::Params::set( XmlTree xml )
 	getXml(xml,"InlierThreshold",mInlierThreshold);
 	getXml(xml,"NNMatchRatio",mNNMatchRatio);
 	getXml(xml,"NNMatchPercentage",mNNMatchPercentage);
+	getXml(xml,"MinMatchScore",mMinMatchScore);
 	getXml(xml,"TokenContourMinWidth",mTokenContourMinWidth);
 	getXml(xml,"TokenContourMaxWidth",mTokenContourMaxWidth);
 	getXml(xml,"TokenContourMinAspect",mTokenContourMinAspect);
@@ -246,16 +247,22 @@ TokenMatchVec TokenMatcher::matchTokens( vector<AnalyzedToken> candidates )
 
 			int numMatched = doKnnMatch(libraryToken.descriptors, candidateToken.descriptors);
 			
-			float finalMatchScore = numMatched;
+			float thisMatchScore = numMatched;
 
-			if (mParams.mVerbose) cout << "\t" << libraryToken.name << " : " << finalMatchScore << endl;
+			if (mParams.mVerbose) cout << "\t" << libraryToken.name << " : " << thisMatchScore << endl;
 
-			if (bestMatchScore < finalMatchScore) {
-				bestMatchScore = finalMatchScore;
+
+			if (bestMatchScore < thisMatchScore) {
+				bestMatchScore = thisMatchScore;
 				bestMatch = libraryToken;
 			}
 		}
-		matches.push_back( TokenMatch(bestMatch, candidateToken));
+
+		// Establish a minimum confidence level for something to be considered a match
+		if (bestMatchScore > mParams.mMinMatchScore) {
+			matches.push_back( TokenMatch(bestMatch, candidateToken, bestMatchScore) );
+		}
+
 	}
 	return matches;
 }

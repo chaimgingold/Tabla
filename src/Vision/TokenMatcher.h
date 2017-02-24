@@ -55,18 +55,22 @@ struct AnalyzedToken {
 class TokenMatch
 {
 public:
-	TokenMatch( AnalyzedToken library, AnalyzedToken candidate )
+	TokenMatch( AnalyzedToken library, AnalyzedToken candidate, float score )
 	: mLibrary(library)
-	, mCandidate(candidate){}
+	, mCandidate(candidate)
+	, mScore(score){}
 
 	string getName() const { return mLibrary.name; }
 	const PolyLine2& getPoly() const { return mCandidate.fromContour.polyLine; }
 	
 	const AnalyzedToken& getCandidate() const { return mCandidate; }
+
+	float getScore() const { return mScore; }
 	
 private:
 	AnalyzedToken mLibrary;
 	AnalyzedToken mCandidate;
+	float mScore;
 };
 
 class TokenMatchVec : public vector<TokenMatch>
@@ -110,6 +114,9 @@ public:
 		// Nearest neighbor matching ratio
 		float mNNMatchRatio=0.8;
 		float mNNMatchPercentage=0.8;
+
+		// Minimum score to be considered a matching token
+		float mMinMatchScore=10;
 
 		// token library
 		struct TokenDef
