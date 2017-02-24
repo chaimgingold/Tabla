@@ -16,13 +16,13 @@
 			<ContourMinWidth>			4	</ContourMinWidth>
 		</Contours>
 
-		<TokenMatcher enable="0">
+		<TokenMatcher enable="1">
 			<InlierThreshold>			1.5 </InlierThreshold>
 			<NNMatchRatio>			    0.8 </NNMatchRatio>
 			<NNMatchPercentage>			0.3 </NNMatchPercentage>
-			<MinMatchScore>				10  </MinMatchScore>
-			<TokenContourMinWidth>		10  </TokenContourMinWidth>
-			<TokenContourMaxWidth>		40  </TokenContourMaxWidth>
+			<MinMatchScore>				15  </MinMatchScore>
+			<TokenContourMinWidth>		4  </TokenContourMinWidth>
+			<TokenContourMaxWidth>		10  </TokenContourMaxWidth>
 			<TokenContourMinAspect>		0.7 </TokenContourMinAspect>
 
 			
@@ -64,6 +64,8 @@
 		<WorldUnitsPerMeasure>27.94</WorldUnitsPerMeasure>
 			<!-- how many cm become 1 second? -->
 			<!--	11" = 27.94cm	-->
+
+		<MaxTokenScoreDistance>5</MaxTokenScoreDistance>
 
 		<BlankEdgePixels>2</BlankEdgePixels>
 		<!--	0 for none	-->

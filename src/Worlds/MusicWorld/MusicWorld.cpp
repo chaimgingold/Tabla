@@ -440,11 +440,11 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 	{
 		for( const auto &t : mTokens )
 		{
-			if (mStamps.areTokensEnabled()) gl::color(1,1,1,.25);
+			if (mStamps.areTokensEnabled()) gl::color(1,1,1,.4);
 			else gl::color(1,1,0);
 			gl::drawSolid(t.getPoly());
 
-			gl::color(0,1,1);
+			gl::color(1,1,0);
 			gl::draw(t.getPoly());
 		}
 	}

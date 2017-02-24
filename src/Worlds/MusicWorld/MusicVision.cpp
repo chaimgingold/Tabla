@@ -22,7 +22,8 @@ void MusicVision::setParams( XmlTree xml )
 //	getXml(xml,"ScoreMaxInteriorAngleDeg",mScoreMaxInteriorAngleDeg);
 	getXml(xml,"ScoreTrackTemporalBlendFrac",mScoreTrackTemporalBlendFrac);
 	getXml(xml,"ScoreTrackTemporalBlendIfDiffFracLT",mScoreTrackTemporalBlendIfDiffFracLT);
-
+	
+	getXml(xml,"MaxTokenScoreDistance",mMaxTokenScoreDistance);
 	getXml(xml,"WorldUnitsPerMeasure",mWorldUnitsPerMeasure);
 	getXml(xml,"BlankEdgePixels",mBlankEdgePixels);
 
@@ -261,21 +262,56 @@ MusicVision::decideMeasureCountForScore ( const Score& score ) const
 	}
 }
 
+static float distanceBetweenPolys( const PolyLine2& a, const PolyLine2& b )
+{
+	vec2 bc = b.calcCentroid();
+	
+	vec2 p1 = closestPointOnPoly(bc, a);
+	vec2 p2 = closestPointOnPoly(p1, b);
+	
+	return distance(p1,p2);
+}
+
 InstrumentRef
-MusicVision::decideInstrumentForScore( const Score& score, const vector<MusicStamp>& stamps ) const
+MusicVision::decideInstrumentForScore( const Score& score, MusicStampVec& stamps, const TokenMatchVec& tokens ) const
 {
 	InstrumentRef best;
-	float bestScore=MAXFLOAT;
 	
-	for( const auto &s : stamps )
+	if (stamps.areTokensEnabled())
 	{
-		if ( s.isInstrumentAvailable() && score.getPolyLine().contains(s.mLoc) )
+		float bestScore = mMaxTokenScoreDistance;
+		
+		for( const auto &t : tokens )
 		{
-			float sscore = distance( score.getCentroid(), s.mLoc );
-			if (sscore<bestScore)
+			MusicStamp* s = stamps.getStampByInstrumentName(t.getName());
+			
+			if (s)
 			{
-				bestScore = sscore;
-				best = s.mInstrument;
+				float sscore = distanceBetweenPolys(score.getPolyLine(),t.getPoly());
+				
+				if (sscore<bestScore)
+				{
+					bestScore = sscore;
+					best = s->mInstrument;
+				}
+			}
+			else cout << "Couldn't find a stamp for token '" << t.getName() << "'" << endl;
+		}
+	}
+	else
+	{
+		float bestScore=MAXFLOAT;
+		
+		for( const auto &s : stamps )
+		{
+			if ( s.isInstrumentAvailable() && score.getPolyLine().contains(s.mLoc) )
+			{
+				float sscore = distance( score.getCentroid(), s.mLoc );
+				if (sscore<bestScore)
+				{
+					bestScore = sscore;
+					best = s.mInstrument;
+				}
 			}
 		}
 	}
@@ -352,7 +388,7 @@ MusicVision::updateVision(
 	const Vision::Output&	visionOut,
 	Pipeline&				pipeline,
 	const ScoreVec&			oldScores,
-	const vector<MusicStamp>& stamps ) const
+	MusicStampVec& stamps ) const
 {
 	ScoreVec v = getScores( visionOut.mContours, oldScores, stamps, visionOut.mTokens );
 	
@@ -364,7 +400,7 @@ MusicVision::updateVision(
 ScoreVec
 MusicVision::getScoresFromContours(
 	const ContourVector& contours,
-	const vector<MusicStamp>& stamps,
+	MusicStampVec& stamps,
 	const TokenMatchVec& tokens ) const
 {
 	ScoreVec scores;
@@ -385,7 +421,7 @@ MusicVision::getScoresFromContours(
 				// this final test is now redundant to RectFinder
 
 			// instrument
-			InstrumentRef instr = decideInstrumentForScore(score,stamps);
+			InstrumentRef instr = decideInstrumentForScore(score,stamps,tokens);
 			if (instr)
 			{
 				score.mInstrumentName = instr->mName ;
@@ -481,14 +517,14 @@ ScoreVec MusicVision::mergeOldAndNewScores(
 ScoreVec MusicVision::getScores(
 	const ContourVector& contours,
 	const ScoreVec& oldScores,
-	const vector<MusicStamp>& stamps,
+	MusicStampVec& stamps,
 	const TokenMatchVec& tokens ) const
 {
 	// get new ones
 	ScoreVec newScores = getScoresFromContours(contours,stamps,tokens);
 
 	// merge with old
-	newScores = mergeOldAndNewScores(oldScores,newScores,contours);
+	if (!stamps.areTokensEnabled()) newScores = mergeOldAndNewScores(oldScores,newScores,contours);
 	
 	// return
 	return newScores;

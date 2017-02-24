@@ -183,7 +183,14 @@ void MusicStamp::goHome()
 
 void MusicStampVec::draw()
 {
-	for( const auto &s : *this ) s.draw(mDebugDrawSearch);
+	for( const auto &s : *this )
+	{
+		bool drawIt=true;
+		
+		if ( areTokensEnabled() && !s.mHasScore ) drawIt=false;
+		
+		if (drawIt) s.draw(mDebugDrawSearch);
+	}
 }
 
 void MusicStampVec::setParams( XmlTree& xml )
@@ -317,6 +324,7 @@ MusicStampVec::getStampByInstrumentName( string name )
 
 void MusicStampVec::updateWithTokens( const TokenMatchVec& tokens )
 {
+	return;
 	bool verbose = false;
 	
 	for ( auto t : tokens )
@@ -333,7 +341,10 @@ void MusicStampVec::updateWithTokens( const TokenMatchVec& tokens )
 	}
 }
 
-void MusicStampVec::tick( const ScoreVec& scores, const ContourVector& contours, float globalPhase, float globalBeatDuration )
+void MusicStampVec::tick(
+	const ScoreVec& scores,
+	const ContourVector& contours,
+	float globalPhase, float globalBeatDuration )
 {
 	// Forget stamps' scores
 	for( auto &stamp : *this )
@@ -367,23 +378,26 @@ void MusicStampVec::tick( const ScoreVec& scores, const ContourVector& contours,
 		}
 	}
 
-	// update search loc
-	updateSearch(contours);
-	
-	// idle dance
-	updateIdleAnims(globalPhase, globalBeatDuration);
-	
-	// De-collide them
-	decollide();
-	decollideScores(scores);
-	
-	// Update state
-	updateBoundState();
-	
-	// Snap home?
-	if (mSnapHomeWhenLost) snapHomeIfLost();
-	
-	updateLostPolyDraw();
+	if ( !areTokensEnabled() )
+	{
+		// update search loc
+		updateSearch(contours);
+		
+		// idle dance
+		updateIdleAnims(globalPhase, globalBeatDuration);
+		
+		// De-collide them
+		decollide();
+		decollideScores(scores);
+		
+		// Update state
+		updateBoundState();
+		
+		// Snap home?
+		if (mSnapHomeWhenLost) snapHomeIfLost();
+		
+		updateLostPolyDraw();
+	}
 	
 	// Tick stamps
 	for( auto &stamp : *this ) stamp.tick();

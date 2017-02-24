@@ -168,15 +168,18 @@ public:
 	void setup( const map<string,InstrumentRef>&, PolyLine2 worldBounds, vec2 timeVec, gl::GlslProgRef rainbowShader );
 	
 	void updateWithTokens( const TokenMatchVec& );
-	void tick( const ScoreVec&, const ContourVector&, float globalPhase, float globalBeatDuration );
+	void tick(
+		const ScoreVec&,
+		const ContourVector&,
+		float globalPhase, float globalBeatDuration );
 	void draw();
 	
 	bool areTokensEnabled() const { return mEnableTokens; }
 	
-private:
 	MusicStamp* getStampByInstrument( InstrumentRef );
 	MusicStamp* getStampByInstrumentName( string );
-	
+
+private:	
 	void decollide();
 	void decollideScores( const ScoreVec& );
 	void updateBoundState();

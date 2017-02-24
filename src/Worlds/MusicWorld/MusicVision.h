@@ -33,11 +33,13 @@ public:
 	PolyLine2 mWorldBoundsPoly;
 
 	// do it
-	ScoreVec updateVision( const Vision::Output&, Pipeline&, const ScoreVec& oldScores, const vector<MusicStamp>& ) const;
+	ScoreVec updateVision( const Vision::Output&, Pipeline&, const ScoreVec& oldScores, MusicStampVec& ) const;
 	
 private:
 
 	MetaParamInfo getMetaParamInfo( MetaParam p ) const;
+
+//	bool mTokensEnabled=true; // TODO: hook me up to something (read)
 
 	// params
 	int	  mScoreNoteVisionThresh=-1; // 0..255, or -1 for OTSU
@@ -47,7 +49,9 @@ private:
 	float mScoreTrackMaxError=1.f;
 	float mScoreTrackTemporalBlendFrac=.5f; // 0 means off, so all new
 	float mScoreTrackTemporalBlendIfDiffFracLT=.1f; // only do blending if frames are similar enough; otherwise: fast no blend mode.
-
+	
+	float mMaxTokenScoreDistance=5.f;
+	
 	float mWorldUnitsPerMeasure = 5.f;
 	int  mBlankEdgePixels=0;
 
@@ -56,10 +60,10 @@ private:
 	ScoreVec getScores(
 		const ContourVector&,
 		const ScoreVec& oldScores,
-		const vector<MusicStamp>& stamps,
+		MusicStampVec& stamps,
 		const TokenMatchVec& ) const;
 	
-	ScoreVec getScoresFromContours( const ContourVector&, const vector<MusicStamp>& stamps, const TokenMatchVec& ) const;
+	ScoreVec getScoresFromContours( const ContourVector&, MusicStampVec& stamps, const TokenMatchVec& ) const;
 	
 	ScoreVec mergeOldAndNewScores(
 		const ScoreVec& oldScores,
@@ -74,7 +78,7 @@ private:
 	
 	//
 	float		  decideMeasureCountForScore( const Score& ) const;
-	InstrumentRef decideInstrumentForScore( const Score&, const vector<MusicStamp>& ) const;
+	InstrumentRef decideInstrumentForScore( const Score&, MusicStampVec&, const TokenMatchVec& tokens ) const;
 
 	float getScoreOctaveShift( const Score& s, const PolyLine2& wrtRegion ) const;
 
