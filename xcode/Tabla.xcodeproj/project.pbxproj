@@ -27,6 +27,7 @@
 		23756771BB404A04991A26CB /* b2PolygonAndCircleContact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6B648D73A5D453781A11E34 /* b2PolygonAndCircleContact.cpp */; };
 		24F2003E479C4BC49D1F7374 /* b2WheelJoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 627E59F1B82E4F36ABF0DE48 /* b2WheelJoint.cpp */; };
 		26024C951E25CADC0096FB4D /* docs in Resources */ = {isa = PBXBuildFile; fileRef = 26024C941E25CADC0096FB4D /* docs */; };
+		260AD7BD1E60E8CC0077AEEC /* channel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 260AD7BB1E60E8CC0077AEEC /* channel.cpp */; };
 		26143F001E2356A800EDEE1E /* PinballInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26143EFE1E2356A800EDEE1E /* PinballInput.cpp */; };
 		262A88751DB594B700FE2336 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 262A88741DB594B700FE2336 /* CoreMIDI.framework */; };
 		262FCDCC1E234CB100FC5D66 /* PinballVision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 262FCDCA1E234CB100FC5D66 /* PinballVision.cpp */; };
@@ -218,6 +219,8 @@
 		1967F5787DB34245B2B91CBA /* b2EdgeAndCircleContact.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = b2EdgeAndCircleContact.h; path = ../blocks/Box2D/src/Box2D/Dynamics/Contacts/b2EdgeAndCircleContact.h; sourceTree = "<group>"; };
 		1DCA2C3FD6C84A6DAB24027E /* b2DistanceJoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2DistanceJoint.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Joints/b2DistanceJoint.cpp; sourceTree = "<group>"; };
 		26024C941E25CADC0096FB4D /* docs */ = {isa = PBXFileReference; lastKnownFileType = folder; name = docs; path = ../docs; sourceTree = "<group>"; };
+		260AD7BB1E60E8CC0077AEEC /* channel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = channel.cpp; sourceTree = "<group>"; };
+		260AD7BC1E60E8CC0077AEEC /* channel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = channel.h; sourceTree = "<group>"; };
 		26143EFE1E2356A800EDEE1E /* PinballInput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PinballInput.cpp; sourceTree = "<group>"; };
 		26143EFF1E2356A800EDEE1E /* PinballInput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PinballInput.h; sourceTree = "<group>"; };
 		262A88741DB594B700FE2336 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
@@ -959,6 +962,8 @@
 				26CCA3051E089EB8005F7C24 /* rtmidi */,
 				266E2C6C1E495A3C00F92DAE /* MIDIInput.cpp */,
 				266E2C6D1E495A3C00F92DAE /* MIDIInput.h */,
+				260AD7BB1E60E8CC0077AEEC /* channel.cpp */,
+				260AD7BC1E60E8CC0077AEEC /* channel.h */,
 			);
 			name = Utilities;
 			path = ../src/Utilities;
@@ -2755,6 +2760,7 @@
 				E3E1015154A147BC9674C8ED /* b2WeldJoint.cpp in Sources */,
 				24F2003E479C4BC49D1F7374 /* b2WheelJoint.cpp in Sources */,
 				26CCA2D51E089DE7005F7C24 /* GameWorld.cpp in Sources */,
+				260AD7BD1E60E8CC0077AEEC /* channel.cpp in Sources */,
 				07C3702F227C4A08918DBF6E /* b2Rope.cpp in Sources */,
 				26CCA30B1E089EB8005F7C24 /* GamepadManager.cpp in Sources */,
 			);

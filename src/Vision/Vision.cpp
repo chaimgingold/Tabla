@@ -51,6 +51,11 @@ void Vision::setParams( Params p )
 	mTokenMatcher.setParams(mParams.mTokenMatcherParams);
 }
 
+void Vision::setDebugFrameSkip( int n )
+{
+	mInput.setDebugFrameSkip(n);
+}
+
 bool Vision::setCaptureProfile( const LightLink::CaptureProfile& profile )
 {
 	// compute remap?
@@ -110,6 +115,8 @@ Vision::getOutput( Vision::Output& output )
 {
 	SurfaceRef surface = mInput.getFrame();
 	if (!surface) return false;
+
+	output.mCaptureProfile = mCaptureProfile;
 	
 	Pipeline& pipeline = output.mPipeline; // patch us in (refactor in progress)
 

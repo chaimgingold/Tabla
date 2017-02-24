@@ -34,7 +34,7 @@ public:
 	virtual void setParams( XmlTree ){}
 	virtual void updateVision( const Vision::Output&, Pipeline& ){} // probably lower freq than update()
 	
-	void		setWorldBoundsPoly( PolyLine2 p ) { mWorldBoundsPoly=p; worldBoundsPolyDidChange(); }
+	void		setWorldBoundsPoly( PolyLine2 ); // only calls didChange if it is different
 	PolyLine2	getWorldBoundsPoly() const { return mWorldBoundsPoly; }
 	virtual void worldBoundsPolyDidChange(){}
 	

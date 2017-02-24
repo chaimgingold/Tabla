@@ -29,7 +29,14 @@ TablaApp::~TablaApp()
 
 PolyLine2 TablaApp::getWorldBoundsPoly() const
 {
-	PolyLine2 p = getPointsAsPoly( mLightLink.getCaptureProfile().mCaptureWorldSpaceCoords, 4 );
+	PolyLine2 p;
+	
+	if ( getPipeline().empty() ) p = getPointsAsPoly( mLightLink.getCaptureProfile().mCaptureWorldSpaceCoords, 4);
+	else p = getPointsAsPoly( getCaptureProfileForPipeline().mCaptureWorldSpaceCoords, 4 );
+	// a little sleight of hand here.
+	// usually world bounds comes from pipeline, but if we haven't processed any frames yet, then we take
+	// it directly from light link.
+	
 	p.setClosed();
 	return p;
 }
@@ -220,6 +227,9 @@ void TablaApp::setupWindows()
 {
 	mProjectorWin = TablaWindowRef( new TablaWindow(getWindow(),false,*this) );
 
+	// We can't use getCaptureProfileForPipeline() yet because we haven't processed any frames,
+	// so we will use mLightLink directly.
+	
 	// resize window
 	mProjectorWin->getWindow()->setSize(
 		mLightLink.getCaptureProfile().mCaptureSize.x,
@@ -413,11 +423,6 @@ void TablaApp::lightLinkDidChange( bool saveToFile, bool doSetupCaptureDevice )
 		tryToSetupValidCaptureDevice();
 	}
 
-	// notify people
-	// might need to privatize mLightLink and make this a proper setter
-	// or rename it to be "notify" or "onChange" or "didChange" something
-	if (mGameWorld) mGameWorld->setWorldBoundsPoly( getWorldBoundsPoly() );
-	
 	if (saveToFile)
 	{
 		XmlTree lightLinkXml = mLightLink.getParams();
@@ -455,7 +460,7 @@ bool TablaApp::setupCaptureDevice()
 void TablaApp::maybeUpdateCaptureProfileWithFrame()
 {
 	// check for debug file image size change
-	auto profile = mLightLink.getCaptureProfile();
+	auto profile = getCaptureProfileForPipeline();
 	auto frame = getPipeline().getStage("input");
 
 	if ( frame && profile.isFile() )
@@ -764,6 +769,7 @@ void TablaApp::updateVision()
 	{
 		// misc
 		maybeUpdateCaptureProfileWithFrame();
+		mGameWorld->setWorldBoundsPoly( getWorldBoundsPoly() ); // comes with each frame
 		mCaptureFPS.mark();
 		
 		// finish off the pipeline with draw stage
@@ -1006,7 +1012,7 @@ void TablaApp::keyDown( KeyEvent event )
 				break;
 
 			case KeyEvent::KEY_s:
-				if (!mLightLink.getCaptureProfile().isFile()) saveCameraImageToDisk();
+				if (!getCaptureProfileForPipeline().isFile()) saveCameraImageToDisk();
 				break;
 			
 			case KeyEvent::KEY_r:

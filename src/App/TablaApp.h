@@ -79,13 +79,14 @@ class TablaApp : public App {
 
 
 	// Vision pipeline
-	const Pipeline& getPipeline() { return mVisionOutput.mPipeline; }
+	const Pipeline& getPipeline() const { return mVisionOutput.mPipeline; }
 
 	void   selectPipelineStage( string s );
 	string getPipelineStageSelection() const;
 
 	const Vision::Output& getVisionOutput() const { return mVisionOutput; } // for debug visualization
-
+	const LightLink::CaptureProfile& getCaptureProfileForPipeline() const { return mVisionOutput.mCaptureProfile; }
+	
 
 	// game
 	GameWorldRef getGameWorld() const { return mGameWorld; }

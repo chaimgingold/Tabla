@@ -70,7 +70,7 @@ TablaWindow::TablaWindow( WindowRef window, bool isUIWindow, TablaApp& app )
 			mCameraPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
 					mApp,
-					[this](){ return getPointsAsPoly(mApp.getLightLink().getCaptureProfile().mCaptureCoords,4); },
+					[this](){ return getPointsAsPoly(mApp.getCaptureProfileForPipeline().mCaptureCoords,4); },
 					"undistorted"
 					)
 				);
@@ -114,7 +114,7 @@ TablaWindow::TablaWindow( WindowRef window, bool isUIWindow, TablaApp& app )
 			mWorldBoundsPolyEditView = make_shared<PolyEditView>(
 				PolyEditView(
 					mApp,
-					[&](){ return getPointsAsPoly(mApp.getLightLink().getCaptureProfile().mCaptureWorldSpaceCoords,4); },
+					[&](){ return getPointsAsPoly(mApp.getCaptureProfileForPipeline().mCaptureWorldSpaceCoords,4); },
 					"world-boundaries"
 					)
 			);

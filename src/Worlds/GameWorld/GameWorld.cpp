@@ -19,6 +19,31 @@ fs::path GameWorld::getAssetPath( fs::path p ) const
 	return TablaApp::get()->hotloadableAssetPath(p);
 }
 
+void GameWorld::setWorldBoundsPoly( PolyLine2 p )
+{
+	bool diff=false;
+
+	if ( p.size()==mWorldBoundsPoly.size() )
+	{
+		for( int i=0; i<p.size(); ++i )
+		{
+			if ( p.getPoints()[i] != mWorldBoundsPoly.getPoints()[i] )
+			{
+				diff=true;
+				break;
+			}
+		}
+	}
+	else diff=true;
+	
+	if (diff)
+	{
+		mWorldBoundsPoly=p;
+		
+		worldBoundsPolyDidChange();
+	}
+}
+
 vec2 GameWorld::getRandomPointInWorldBoundsPoly() const
 {
 	PolyLine2 wb = getWorldBoundsPoly();

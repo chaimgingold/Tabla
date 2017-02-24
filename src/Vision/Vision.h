@@ -51,6 +51,7 @@ public:
 	class Output
 	{
 	public:
+		LightLink::CaptureProfile mCaptureProfile; // profile used
 		Pipeline mPipeline;
 		ContourVector mContours;
 		TokenMatchVec mTokens;
@@ -58,7 +59,7 @@ public:
 
 	// configure
 	void setParams( Params );
-	void setDebugFrameSkip( int n ) { mInput.setDebugFrameSkip(n); }
+	void setDebugFrameSkip( int );
 	
 	// setup input
 	bool setCaptureProfile( const LightLink::CaptureProfile& );
@@ -68,7 +69,6 @@ public:
 	bool getOutput( Output& ); // returns true if output available
 	
 private:
-
 	Params		mParams;
 
 	// input
