@@ -36,6 +36,9 @@ void TokenMatcher::Params::set( XmlTree xml )
 	getXml(xml,"InlierThreshold",mInlierThreshold);
 	getXml(xml,"NNMatchRatio",mNNMatchRatio);
 	getXml(xml,"NNMatchPercentage",mNNMatchPercentage);
+	getXml(xml,"TokenContourMinWidth",mTokenContourMinWidth);
+	getXml(xml,"TokenContourMaxWidth",mTokenContourMaxWidth);
+	getXml(xml,"TokenContourMinAspect",mTokenContourMinAspect);
 	
 	mTokenDefs.clear();
 	if (mVerbose) cout << "Tokens:" << endl;
@@ -142,6 +145,22 @@ vector<AnalyzedToken> TokenMatcher::tokensFromContours( const Pipeline::StageRef
 	for ( auto c: contours )
 	{
 		if (c.mIsHole||c.mTreeDepth>0) {
+			continue;
+		}
+
+		// Do a pre-pass to filter out out-of-range tokens
+		vec2 rotRecSize = c.mRotatedBoundingRect.mSize;
+		float largestEdge = MAX(rotRecSize.x, rotRecSize.y);
+		float smallestEdge = MIN(rotRecSize.x, rotRecSize.y);
+
+		// Check that the aspect ratio is roughly square-ish
+		if (smallestEdge / largestEdge < mParams.mTokenContourMinAspect) {
+			continue;
+		}
+
+		// Check that the token is within the size bounds we've designated for tokens
+		if (largestEdge  > mParams.mTokenContourMaxWidth ||
+			smallestEdge < mParams.mTokenContourMinWidth) {
 			continue;
 		}
 

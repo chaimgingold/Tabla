@@ -95,6 +95,14 @@ public:
 		
 		bool mVerbose   = false;
 		bool mIsEnabled = true;
+
+		// Filtering out degenerate contours
+
+		// Checks that the smallest edge / largest edge
+		// is roughly square-ish
+		float mTokenContourMinAspect=0.7;
+		float mTokenContourMinWidth=5;
+		float mTokenContourMaxWidth=10;
 		
 		// Tuning
 		// Distance threshold to identify inliers

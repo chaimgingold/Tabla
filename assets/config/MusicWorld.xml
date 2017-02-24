@@ -20,6 +20,10 @@
 			<InlierThreshold>			1.5 </InlierThreshold>
 			<NNMatchRatio>			    0.8 </NNMatchRatio>
 			<NNMatchPercentage>			0.3 </NNMatchPercentage>
+			<TokenContourMinWidth>		10  </TokenContourMinWidth>
+			<TokenContourMaxWidth>		40  </TokenContourMaxWidth>
+			<TokenContourMinAspect>		0.7 </TokenContourMinAspect>
+
 			
 			<Tokens path="music-icons-black/">
 				<Token name="3Additive" path="additive.png"/>
