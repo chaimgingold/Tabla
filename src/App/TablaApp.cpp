@@ -772,14 +772,14 @@ void TablaApp::updateVision()
 		mGameWorld->setWorldBoundsPoly( getWorldBoundsPoly() ); // comes with each frame
 		mCaptureFPS.mark();
 		
-		// finish off the pipeline with draw stage
-		addProjectorPipelineStages(mVisionOutput.mPipeline);
-		
-		// pass contours to ballworld
+		// pass contours to game world
 		if (mGameWorld)
 		{
 			mGameWorld->updateVision( mVisionOutput, mVisionOutput.mPipeline );
 		}
+
+		// finish off the pipeline with draw stage
+		addProjectorPipelineStages(mVisionOutput.mPipeline);		
 		
 		// update pipeline visualization
 		if (mUIWindow) mUIWindow->updatePipelineViews();

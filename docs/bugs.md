@@ -22,7 +22,7 @@
 ## Minor Bugs
 - [x] Use Scissor Rect on Pop up menu. Refactor code in PipelineStageView::draw() to be reusable.
 	- [ ] Button is clipped, but not menu.
-- [ ] Rationalize timing for debug file input frame skip 
+- [ ] Rationalize timing for debug file input frame skip. Ideally Vision thread sleep is dynamic, based upon desired FPS--for file and camera--and average/last execution time.
 
 # Game Worlds
 

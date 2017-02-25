@@ -382,6 +382,11 @@ TokenMatcherThreaded::~TokenMatcherThreaded()
 	mThread.join();
 }
 
+void TokenMatcherThreaded::stop()
+{
+	mIn.close();
+}
+
 void TokenMatcherThreaded::setParams( TokenMatcher::Params p )
 {
 	unique_lock<std::mutex> lock(mInputLock);

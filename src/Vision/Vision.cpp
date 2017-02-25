@@ -48,43 +48,51 @@ Vision::Vision()
 {
 	mThread = thread([this]()
 	{
-		bool run=true;
-		
-		while (run)
-		{
-			// get surface
-			SurfaceRef surface;
-			Vision::Output output;
-			
-			// get input, process it
-			chrono::nanoseconds filesleep = 0s;
-			
-			{
-				unique_lock<std::mutex> lock(mInputLock);
-				surface = mInput.getFrame();
-				run = !mIsDestructing;
-				
-				// vision it
-				if (surface) {
-					output = processFrame(surface);
-				}
-				
-				if (mInput.isFile()) filesleep = mDebugFrameSleep;
-				// TODO: rationalize this by looking at how much time has elapsed...
-			}
-			
-			// output
-			if (surface)
-			{
-				mVisionOutputChannel.put(output,2);
-				
-				if (filesleep > 0s) this_thread::sleep_for(filesleep);
-			}
-			else this_thread::sleep_for(2.5ms); // @30fps 1frame = 33ms, @60fps 1frame = 16ms
-			// 5ms seems too high to reach 30fps, but 2.5 seems to work
-			// ideally we could block inside of mInput.getFrame()
-		};
+		visionThreadRunLoop();
 	});
+}
+
+void Vision::visionThreadRunLoop()
+{
+	bool run=true;
+	
+	while (run)
+	{
+		// get surface
+		SurfaceRef surface;
+		Vision::Output output;
+		
+		// get input, process it
+		chrono::nanoseconds filesleep = 0s;
+		
+		{
+			unique_lock<std::mutex> lock(mInputLock);
+			surface = mInput.getFrame();
+			run = !mIsDestructing;
+			
+			// vision it
+			if (surface) {
+				output = processFrame(surface);
+			}
+			
+			if (mInput.isFile()) filesleep = mDebugFrameSleep;
+			// TODO: rationalize this by looking at how much time has elapsed...
+		}
+		
+		// output
+		if (surface)
+		{
+			mVisionOutputChannel.put(output,2);
+			
+			if (filesleep > 0s) this_thread::sleep_for(filesleep);
+		}
+		else this_thread::sleep_for(2.5ms); // @30fps 1frame = 33ms, @60fps 1frame = 16ms
+		// 5ms seems too high to reach 30fps, but 2.5 seems to work
+		// ideally we could block inside of mInput.getFrame()
+		
+		// TODO: rationalize all this waiting by keeping track of desired FPS--for file and camera--
+		// and running execution time to predict how long to wait.
+	};
 }
 
 Vision::~Vision()
@@ -93,6 +101,18 @@ Vision::~Vision()
 	{
 		std::unique_lock<std::mutex> lock(mInputLock);
 		mIsDestructing=true;
+	}
+		
+	// stop token matcher first, in case mThread is waiting on it!
+	// (avoid a race condition)
+	mTokenMatcher.stop();
+	
+	// drain output in case mThread is blocked on putting data into it
+	// (ie caller thread has shut us down with a full output queue!)
+	// avoids another potential race condition
+	{
+		Output dontcare;
+		while ( mVisionOutputChannel.get(dontcare,false) ) {}
 	}
 	
 	// wait for them

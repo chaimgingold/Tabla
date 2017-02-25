@@ -49,7 +49,7 @@
 - [ ] Move settings to /Library. (Do before distributing it more widely, so we make migration later easier.)
 
 ### Minor
-- [ ] Move RectFinder into Vision pipeline
+- [ ] Move RectFinder into Vision pipeline--not sure this is a good idea yet
 - [x] Refactor TablaWindow to manage all the WindowRef stuff, so move direct WindowRef interaction from TablaApp into TablaWindow 
 - [ ] ~~Put lightlink.xml in settings.xml (i think it's a good idea...; maybe not?)~~
 - [x] Make polygon xml into a list of vertices inside of polygon block: e.g. <v>x1 y1</v> <v>x2 y2</v> etc... (will make file look less crazy).

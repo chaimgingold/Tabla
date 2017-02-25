@@ -76,6 +76,8 @@ public:
 	
 private:
 
+	void visionThreadRunLoop();
+
 	bool mIsDestructing=false;
 	
 	//

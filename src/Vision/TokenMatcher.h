@@ -181,6 +181,7 @@ public:
 	void put( Input );
 	bool get( Output& );
 	bool isBusy() { return mBusy>0; }
+	void stop(); // idempotent; also called by destructor. call during shutdown
 	
 private:
 	int mBusy=0;
