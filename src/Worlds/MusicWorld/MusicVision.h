@@ -68,7 +68,8 @@ private:
 	ScoreVec mergeOldAndNewScores(
 		const ScoreVec& oldScores,
 		const ScoreVec& newScores,
-		const ContourVector& contours ) const;
+		const ContourVector& contours,
+		bool isUsingTokens ) const;
 	
 	void updateScoresWithImageData( Pipeline& pipeline, ScoreVec& scores ) const;
 	

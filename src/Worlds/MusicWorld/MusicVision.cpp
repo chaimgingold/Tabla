@@ -452,7 +452,8 @@ MusicVision::getScoresFromContours(
 ScoreVec MusicVision::mergeOldAndNewScores(
 	const ScoreVec& oldScores,
 	const ScoreVec& newScores,
-	const ContourVector& contours ) const
+	const ContourVector& contours,
+	bool isUsingTokens ) const
 {
 	const bool kVerbose = false;
 	
@@ -470,10 +471,21 @@ ScoreVec MusicVision::mergeOldAndNewScores(
 			if (kVerbose) cout << "match" << endl;
 
 			// new <= old
-			if (oldScore.mInstrument)
+			if ( oldScore.mInstrument )
 			{
-				// overwrite new score with old, but not if old score had no instrument
-				*newScore = oldScore;
+				// overwrite new score with old, but not...
+				// ...if old score had no instrument
+
+				if (isUsingTokens)
+				{
+					// we just want to copy the outline
+					for( int i=0; i<4; ++i ) newScore->mQuad[i] = oldScore.mQuad[i];
+				}
+				else
+				{
+					// otherwise everything
+					*newScore = oldScore;
+				}
 			}
 		}
 		else // zombie! (c has no match)
@@ -524,7 +536,7 @@ ScoreVec MusicVision::getScores(
 	ScoreVec newScores = getScoresFromContours(contours,stamps,tokens);
 
 	// merge with old
-	if (!stamps.areTokensEnabled()) newScores = mergeOldAndNewScores(oldScores,newScores,contours);
+	newScores = mergeOldAndNewScores(oldScores,newScores,contours,stamps.areTokensEnabled());
 	
 	// return
 	return newScores;
