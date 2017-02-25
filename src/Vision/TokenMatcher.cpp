@@ -379,6 +379,7 @@ TokenMatcherThreaded::TokenMatcherThreaded()
 TokenMatcherThreaded::~TokenMatcherThreaded()
 {
 	mIn.close();
+	mThread.join();
 }
 
 void TokenMatcherThreaded::setParams( TokenMatcher::Params p )
