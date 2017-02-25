@@ -9,10 +9,12 @@
 #ifndef TokenMatcher_h
 #define TokenMatcher_h
 
-#include <stdio.h>
+#include <thread>
+#include <chrono>
 
 #include "cinder/Xml.h"
 
+#include "channel.h"
 #include "Pipeline.h"
 #include "Contour.h"
 
@@ -150,6 +152,46 @@ private:
 	vector<AnalyzedToken> mTokenLibrary;
 	vec2 mAverageLibraryTokenSize = vec2(0,0);
 	int doKnnMatch(Mat descriptorsA, Mat descriptorsB);
+	
+};
+
+class TokenMatcherThreaded {
+public:
+	TokenMatcherThreaded();
+	~TokenMatcherThreaded();
+
+	struct Input
+	{
+		Pipeline mPipeline;
+		ContourVec mContours;
+		float mTimeStamp; // you set it
+	};
+	
+	struct Output
+	{
+		Pipeline mPipeline;
+		TokenMatchVec mTokens;
+		float mTimeStamp; // your input time stamp
+	};
+	
+	void setParams( TokenMatcher::Params );
+
+	// assuming you are calling all of these three from a single other thread!
+	// (or we will need to put another mutex guard around these :P)
+	void put( Input );
+	bool get( Output& );
+	bool isBusy() { return mBusy>0; }
+	
+private:
+	int mBusy=0;
+	
+	channel<Input>  mIn;
+	channel<Output> mOut;
+	
+	mutex  mInputLock;
+	thread mThread;		
+	
+	TokenMatcher mMatcher;
 	
 };
 

@@ -328,3 +328,79 @@ void TokenMatcher::setParams( Params p )
 	}
 	if (mParams.mVerbose) cout << "Average token size in library: " << mAverageLibraryTokenSize << endl;
 }
+
+TokenMatcherThreaded::TokenMatcherThreaded()
+{
+	mThread = thread([this]()
+	{
+		bool run = true;
+		
+		while (run)
+		{
+			Input input;
+			
+			// get
+			if ( mIn.get(input) )
+			{
+				Output output;
+				output.mPipeline = input.mPipeline;
+				
+				// process
+				{
+					unique_lock<std::mutex> lock(mInputLock); // lock params
+
+					if ( mMatcher.isEnabled() && !mMatcher.getTokenLibrary().empty() )
+					{
+						auto clippedStage = input.mPipeline.getStage("clipped_gray");
+					
+						if (clippedStage)
+						{
+							vector<AnalyzedToken> candidates = mMatcher.tokensFromContours(
+								clippedStage,
+								input.mContours,
+								output.mPipeline );
+							
+							output.mTokens = mMatcher.matchTokens(candidates);
+						}
+					} // enabled
+				}
+				
+				// out
+				output.mTimeStamp = input.mTimeStamp;
+				mOut.put(output);
+			}
+			else {
+				run=false; // closed
+			}
+		}; // while
+	});
+}
+
+TokenMatcherThreaded::~TokenMatcherThreaded()
+{
+	mIn.close();
+}
+
+void TokenMatcherThreaded::setParams( TokenMatcher::Params p )
+{
+	unique_lock<std::mutex> lock(mInputLock);
+	mMatcher.setParams(p);
+}
+
+void TokenMatcherThreaded::put( Input i )
+{
+	mBusy++;
+	mIn.put(i);
+}
+
+bool TokenMatcherThreaded::get( Output& o )
+{
+	bool got = mOut.get(o,false);
+	
+	if (got) {
+		mBusy--;
+		assert(mBusy>=0);
+	}
+	
+	return got;
+}

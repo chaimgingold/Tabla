@@ -46,7 +46,6 @@ void Vision::Params::set( XmlTree xml )
 
 Vision::Vision()
 {
-	// main vision thread
 	mThread = thread([this]()
 	{
 		bool run=true;
@@ -66,11 +65,8 @@ Vision::Vision()
 				run = !mIsDestructing;
 				
 				// vision it
-				if (surface)
-				{
+				if (surface) {
 					output = processFrame(surface);
-					
-					mFrameCount++;
 				}
 				
 				if (mInput.isFile()) filesleep = mDebugFrameSleep;
@@ -89,9 +85,6 @@ Vision::Vision()
 			// ideally we could block inside of mInput.getFrame()
 		};
 	});
-	
-	// token thread
-	//mTokenThread = ...
 }
 
 Vision::~Vision()
@@ -310,23 +303,35 @@ Vision::Output Vision::processFrame( SurfaceRef surface )
 		pipeline.then( "clipped_gray", clipped_gray );
 	}
 	
-	// find contours	
+	// find contours
 	auto clippedStage = pipeline.back(); // gets "clipped_gray"
 	
 	output.mContours = mContourVision.findContours( clippedStage, pipeline, contourPixelToWorld );
-	
-	if (mTokenMatcher.isEnabled() && !mTokenMatcher.getTokenLibrary().empty())
+
+	// tokens
+	if (1)
 	{
-		if ( mTokenMatchSkip<1 || mFrameCount % (mTokenMatchSkip+1)==0 )
+		TokenMatcherThreaded::Output tokens; 
+		
+		if ( mTokenMatcher.get(tokens) )
 		{
-			vector<AnalyzedToken> candidates = mTokenMatcher.tokensFromContours( clippedStage, output.mContours, pipeline );
-			TokenMatchVec matches = mTokenMatcher.matchTokens(candidates);
-			cout << matches.size() << endl;
-			output.mTokens = matches;
+			output.mTokens = tokens.mTokens;
+			mOldTokenMatcherOutput = tokens.mTokens;
+			// TODO: add/capture pipeline stages added by tokenizer
 			
-			mOldTokenMatcherOutput = matches;
+//			float now = ci::app::getElapsedSeconds();
+//			cout << "TOKENS @ " << now << " took " << now - tokens.mTimeStamp << "s" << endl;
 		}
 		else output.mTokens = mOldTokenMatcherOutput;
+		
+		if ( !mTokenMatcher.isBusy() )
+		{
+			TokenMatcherThreaded::Input input;
+			input.mPipeline = pipeline; // not a deep copy; this could lead to trouble with multiple pointers into same data. but i don't think there is a lot of rewriting going on. :P
+			input.mContours = output.mContours;
+			input.mTimeStamp = ci::app::getElapsedSeconds();
+			mTokenMatcher.put(input);
+		}
 	}
 	
 	return output;

@@ -81,10 +81,7 @@ private:
 	//
 	Params mParams;
 
-	int mFrameCount=0;
-	int mTokenMatchSkip=30;
-
-	// theading
+	// main threading
 	mutex  mInputLock;
 	thread mThread;
 	channel<Output> mVisionOutputChannel;
@@ -102,7 +99,7 @@ private:
 
 	// submodules
 	ContourVision mContourVision;
-	TokenMatcher  mTokenMatcher;
+	TokenMatcherThreaded mTokenMatcher;
 	
 	//
 	TokenMatchVec mOldTokenMatcherOutput;
