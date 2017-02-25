@@ -101,9 +101,13 @@ Vision::~Vision()
 
 void Vision::setParams( Params p )
 {
-	std::unique_lock<std::mutex> lock(mInputLock);
-	mParams=p;
-	mContourVision.setParams(mParams.mContourVisionParams);
+	{
+		std::unique_lock<std::mutex> lock(mInputLock);
+		mParams=p;
+		mContourVision.setParams(mParams.mContourVisionParams);
+	}
+	
+	// has its own lock
 	mTokenMatcher.setParams(mParams.mTokenMatcherParams);
 }
 

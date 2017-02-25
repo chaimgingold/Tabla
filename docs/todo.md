@@ -12,11 +12,11 @@
 # Application
 
 ## New Features
-- [ ] Finish token system
+- [?] Finish token system
 	- XML Parsing
 		- [x] Make Vision/Token XML entries into attributes
 		- [x] put a path attribute in Tokens prepended to each Token path
-- [ ] MIDI controller input!
+- [x] MIDI controller input!
 - [ ] Each GameWorld can have their own settings (either in settings.xml, or in per-game files--latter, i think). e.g. for which way is up
 
 ## Usability
@@ -31,7 +31,7 @@
 
 ### Minor
 - [ ] Capture menu only shows valid options
-- [ ] Escape key should exit debug frame and return to last camera source
+- [ ] Escape key should exit debug frame and THEN return to last camera source
 
 ## Refactor
 ### For Game Jam / New Contributors
@@ -70,6 +70,7 @@
 - [ ] Tokens for instruments!
 	- [x] Tokens set score instruments
 	- [ ] Draw visual feedback on token (filled pulsing rainbow or something).
+	- [ ] Tokens show their radius of influence
 	- [ ] Multiple instruments per score!
 - [x] Improve Stamp <-> Score tracking
 	- [x] Remember last seen polygon, to help with interframe tracking. Draw it. To help player see it, and me improve the algorithm. Maybe poly<>poly intersection, or poly<>poly distance, or poly<>poly similar min bounding rect location, size, orientation (look at difference across all three axes--size being most important, location and orientation can change more). So pull up ocv rotated bounding box function so we can easily get to it.
