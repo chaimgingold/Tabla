@@ -58,11 +58,13 @@ Vision::Vision()
 			Vision::Output output;
 			
 			// get input, process it
+			chrono::nanoseconds filesleep = 0s;
+			
 			{
 				unique_lock<std::mutex> lock(mInputLock);
 				surface = mInput.getFrame();
 				run = !mIsDestructing;
-			
+				
 				// vision it
 				if (surface)
 				{
@@ -70,12 +72,17 @@ Vision::Vision()
 					
 					mFrameCount++;
 				}
+				
+				if (mInput.isFile()) filesleep = mDebugFrameSleep;
+				// TODO: rationalize this by looking at how much time has elapsed...
 			}
 			
 			// output
 			if (surface)
 			{
 				mVisionOutputChannel.put(output,2);
+				
+				if (filesleep > 0s) this_thread::sleep_for(filesleep);
 			}
 			else this_thread::sleep_for(2.5ms); // @30fps 1frame = 33ms, @60fps 1frame = 16ms
 			// 5ms seems too high to reach 30fps, but 2.5 seems to work
@@ -110,7 +117,14 @@ void Vision::setParams( Params p )
 void Vision::setDebugFrameSkip( int n )
 {
 	std::unique_lock<std::mutex> lock(mInputLock);
-	mInput.setDebugFrameSkip(n);
+	if (n<2) mDebugFrameSleep=0s;
+	else
+	{
+		std::chrono::milliseconds ms( (long long)( ((double)n/30.) * 1000. ) );
+		mDebugFrameSleep = ms;
+	}
+	
+	cout << mDebugFrameSleep.count() << endl;
 }
 
 bool Vision::setCaptureProfile( const LightLink::CaptureProfile& profile )

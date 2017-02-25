@@ -94,7 +94,8 @@ private:
 	// input
 	VisionInput mInput;
 	LightLink::CaptureProfile mCaptureProfile;
-
+	chrono::nanoseconds mDebugFrameSleep=0s;
+	
 	// undistort params
 	void updateRemap();
 	cv::Mat mRemap[2]; // can be empty for none

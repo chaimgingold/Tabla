@@ -39,8 +39,6 @@ private:
 
 	MetaParamInfo getMetaParamInfo( MetaParam p ) const;
 
-//	bool mTokensEnabled=true; // TODO: hook me up to something (read)
-
 	// params
 	int	  mScoreNoteVisionThresh=-1; // 0..255, or -1 for OTSU
 

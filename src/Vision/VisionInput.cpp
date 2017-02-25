@@ -14,9 +14,21 @@ bool VisionInput::setup( const LightLink::CaptureProfile& profile )
 	mDebugFrame.reset();
 	mDebugFrameFileWatch.clear();
 	
-	if ( profile.isCamera() ) {
+	if ( profile.isCamera() )
+	{
+		// clear file
+		mDebugFrame.reset();
+		mDebugFrameFileWatch.clear();
+
+		// setup
 		return setupWithCamera(profile);
-	} else {
+	}
+	else
+	{
+		// clear camera
+		if (mCapture) mCapture->stop();
+		
+		// setup
 		return setupWithFile(profile);
 	}
 }
@@ -31,18 +43,23 @@ void VisionInput::stop()
 
 SurfaceRef VisionInput::getFrame()
 {
-	if (   (mCapture && mCapture->checkNewFrame())
-		|| (mDebugFrame && (mDebugFrameSkip<2 || getElapsedFrames()%mDebugFrameSkip==0)) )
+	SurfaceRef frame;
+	
+	// camera?
+	if ( mCapture && mCapture->checkNewFrame() )
 	{
-		// get image
-		if (mDebugFrame) {
-			mDebugFrameFileWatch.update();
-			return mDebugFrame;
-		} else {
-			return mCapture->getSurface();
-		}
+		frame = mCapture->getSurface();
 	}
-	return SurfaceRef();
+	
+	// file?
+	if ( mDebugFrame )
+	{
+		mDebugFrameFileWatch.update();
+		frame = mDebugFrame;
+	}
+	
+	// return
+	return frame;
 }
 
 bool VisionInput::setupWithFile( const LightLink::CaptureProfile& profile )

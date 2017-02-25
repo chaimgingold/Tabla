@@ -21,7 +21,6 @@ public:
 	void stop();
 	
 	SurfaceRef getFrame();
-	void setDebugFrameSkip( int n ) { mDebugFrameSkip=n; }
 	bool isFile() const { return mDebugFrame.get(); }
 	
 private:
@@ -32,10 +31,8 @@ private:
 	CaptureRef mCapture;
 
 	// file (debug frame)
-	int		   mDebugFrameSkip=0;
 	SurfaceRef mDebugFrame;
 	FileWatch  mDebugFrameFileWatch;
-	
 };
 
 #endif /* VisionInput_hpp */

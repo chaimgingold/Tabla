@@ -22,6 +22,7 @@
 ## Minor Bugs
 - [x] Use Scissor Rect on Pop up menu. Refactor code in PipelineStageView::draw() to be reusable.
 	- [ ] Button is clipped, but not menu.
+- [ ] Rationalize timing for debug file input frame skip 
 
 # Game Worlds
 
