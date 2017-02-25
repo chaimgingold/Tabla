@@ -471,21 +471,18 @@ ScoreVec MusicVision::mergeOldAndNewScores(
 			if (kVerbose) cout << "match" << endl;
 
 			// new <= old
+			InstrumentRef newInstrument = newScore->mInstrument;
+			
 			if ( oldScore.mInstrument )
 			{
 				// overwrite new score with old, but not...
 				// ...if old score had no instrument
 
-				if (isUsingTokens)
-				{
-					// we just want to copy the outline
-					for( int i=0; i<4; ++i ) newScore->mQuad[i] = oldScore.mQuad[i];
-				}
-				else
-				{
-					// otherwise everything
-					*newScore = oldScore;
-				}
+				// otherwise
+				*newScore = oldScore;
+				
+				// but...
+				if (isUsingTokens) newScore->mInstrument = newInstrument;
 			}
 		}
 		else // zombie! (c has no match)

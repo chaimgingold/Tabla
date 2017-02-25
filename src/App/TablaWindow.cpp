@@ -359,6 +359,7 @@ void TablaWindow::updatePipelineViews()
 	
 	vec2 pos = vec2(1,1) * mApp.getParams().mConfigWindowPipelineGutter;
 	const float left = pos.x;
+	float top = pos.y;
 	
 	ViewRef lastView;
 	bool wasLastViewOrtho=false;
@@ -422,9 +423,10 @@ void TablaWindow::updatePipelineViews()
 			
 			lastView = view;
 			wasLastViewOrtho = s->mLayoutHintOrtho;
+			top = max( top, view->getFrame().y2 );
 			
 			// next pos
-			pos = vec2( left, view->getFrame().y2 + mApp.getParams().mConfigWindowPipelineGutter ) ;
+			pos = vec2( left, top + mApp.getParams().mConfigWindowPipelineGutter ) ;
 		}
 	}
 }
