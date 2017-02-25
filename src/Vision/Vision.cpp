@@ -10,23 +10,6 @@
 #include "xml.h"
 #include "ocv.h"
 
-void Vision::Params::set( XmlTree xml )
-{
-	getXml(xml,"CaptureAllPipelineStages",mCaptureAllPipelineStages);
-	
-//	cout << xml.getChild("Contours") << endl;
-//	cout << xml.getChild("TokenMatcher") << endl;
-	if ( xml.hasChild("Contours") )
-	{
-		mContourVisionParams.set( xml.getChild("Contours") );
-	}
-	
-	if ( xml.hasChild("TokenMatcher") )
-	{
-		mTokenMatcherParams.set( xml.getChild("TokenMatcher") );
-	}
-}
-
 template<class T>
 vector<T> asVector( const T &d, int len )
 {
@@ -44,8 +27,81 @@ Rectf asBoundingRect( vec2 pts[4] )
 	return Rectf(v);
 }
 
+void Vision::Params::set( XmlTree xml )
+{
+	getXml(xml,"CaptureAllPipelineStages",mCaptureAllPipelineStages);
+	
+//	cout << xml.getChild("Contours") << endl;
+//	cout << xml.getChild("TokenMatcher") << endl;
+	if ( xml.hasChild("Contours") )
+	{
+		mContourVisionParams.set( xml.getChild("Contours") );
+	}
+	
+	if ( xml.hasChild("TokenMatcher") )
+	{
+		mTokenMatcherParams.set( xml.getChild("TokenMatcher") );
+	}
+}
+
+Vision::Vision()
+{
+	// main vision thread
+	mThread = thread([this]()
+	{
+		bool run=true;
+		
+		while (run)
+		{
+			// get surface
+			SurfaceRef surface;
+			Vision::Output output;
+			
+			// get input, process it
+			{
+				unique_lock<std::mutex> lock(mInputLock);
+				surface = mInput.getFrame();
+				run = !mIsDestructing;
+			
+				// vision it
+				if (surface)
+				{
+					output = processFrame(surface);
+					
+					mFrameCount++;
+				}
+			}
+			
+			// output
+			if (surface)
+			{
+				mVisionOutputChannel.put(output,2);
+			}
+			else this_thread::sleep_for(2.5ms); // @30fps 1frame = 33ms, @60fps 1frame = 16ms
+			// 5ms seems too high to reach 30fps, but 2.5 seems to work
+			// ideally we could block inside of mInput.getFrame()
+		};
+	});
+	
+	// token thread
+	//mTokenThread = ...
+}
+
+Vision::~Vision()
+{
+	// tell everyone to wrap up
+	{
+		std::unique_lock<std::mutex> lock(mInputLock);
+		mIsDestructing=true;
+	}
+	
+	// wait for them
+	mThread.join();
+}
+
 void Vision::setParams( Params p )
 {
+	std::unique_lock<std::mutex> lock(mInputLock);
 	mParams=p;
 	mContourVision.setParams(mParams.mContourVisionParams);
 	mTokenMatcher.setParams(mParams.mTokenMatcherParams);
@@ -53,11 +109,14 @@ void Vision::setParams( Params p )
 
 void Vision::setDebugFrameSkip( int n )
 {
+	std::unique_lock<std::mutex> lock(mInputLock);
 	mInput.setDebugFrameSkip(n);
 }
 
 bool Vision::setCaptureProfile( const LightLink::CaptureProfile& profile )
 {
+	std::unique_lock<std::mutex> lock(mInputLock);
+	
 	// compute remap?
 	bool remapChanged =
 		! isMatEqual<float>(profile.mDistCoeffs,mCaptureProfile.mDistCoeffs)
@@ -107,15 +166,24 @@ void Vision::updateRemap()
 
 void Vision::stopCapture()
 {
+	std::unique_lock<std::mutex> lock(mInputLock);
 	mInput.stop();
 }
 
 bool
 Vision::getOutput( Vision::Output& output )
 {
-	SurfaceRef surface = mInput.getFrame();
-	if (!surface) return false;
+	if ( mVisionOutputChannel.get(output,false) )
+	{
+		return true;
+	}
+	else return false;
+}
 
+Vision::Output Vision::processFrame( SurfaceRef surface )
+{
+	Vision::Output output;
+	
 	output.mCaptureProfile = mCaptureProfile;
 	
 	Pipeline& pipeline = output.mPipeline; // patch us in (refactor in progress)
@@ -247,7 +315,5 @@ Vision::getOutput( Vision::Output& output )
 		else output.mTokens = mOldTokenMatcherOutput;
 	}
 	
-	// output
-	mFrameCount++;
-	return true;
+	return output;
 }

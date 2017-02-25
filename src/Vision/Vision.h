@@ -11,9 +11,12 @@
 
 #include <string>
 #include <vector>
+#include <thread>
 
 #include "cinder/Surface.h"
 #include "cinder/Xml.h"
+
+#include "channel.h"
 #include "CinderOpenCV.h"
 #include "LightLink.h"
 
@@ -35,6 +38,9 @@ class Vision
 {
 public:
 
+	Vision();
+	~Vision();
+	
 	// settings
 	class Params
 	{
@@ -69,8 +75,22 @@ public:
 	bool getOutput( Output& ); // returns true if output available
 	
 private:
-	Params		mParams;
 
+	bool mIsDestructing=false;
+	
+	//
+	Params mParams;
+
+	int mFrameCount=0;
+	int mTokenMatchSkip=30;
+
+	// theading
+	mutex  mInputLock;
+	thread mThread;
+	channel<Output> mVisionOutputChannel;
+	
+	Output processFrame( SurfaceRef );
+	
 	// input
 	VisionInput mInput;
 	LightLink::CaptureProfile mCaptureProfile;
@@ -84,9 +104,6 @@ private:
 	TokenMatcher  mTokenMatcher;
 	
 	//
-	int mFrameCount=0;
-	int mTokenMatchSkip=30;
-	
 	TokenMatchVec mOldTokenMatcherOutput;
 };
 

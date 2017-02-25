@@ -12,6 +12,7 @@
 
 #include <list>
 #include <thread>
+
 template<class item>
 class channel {
 private:
@@ -33,7 +34,7 @@ public:
   void put(const item &i, int maxitems=0) {
     std::unique_lock<std::mutex> lock(m);
 	if(maxitems>0)
-	  cv.wait(lock, [&](){ queue.size()<=maxitems; });
+	  cv.wait(lock, [&](){ return closed || queue.size()<maxitems; });
     if(closed)
       throw std::logic_error("put to closed channel");
     queue.push_back(i);
@@ -47,7 +48,9 @@ public:
       return false;
     out = queue.front();
     queue.pop_front();
+    cv.notify_one();
     return true;
   }
 };
+
 #endif /* channel_hpp */
