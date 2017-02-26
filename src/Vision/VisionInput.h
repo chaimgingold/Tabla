@@ -24,6 +24,8 @@ public:
 	bool isFile() const { return mDebugFrame.get(); }
 	
 private:
+	void stopCamera();
+	void stopFile();
 	bool setupWithCamera( const LightLink::CaptureProfile& );
 	bool setupWithFile  ( const LightLink::CaptureProfile& );
 

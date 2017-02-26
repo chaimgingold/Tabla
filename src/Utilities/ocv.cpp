@@ -114,12 +114,15 @@ namespace cinder {
 		return mat3to4( fromOcvMat3x3(xform) );
 	}
 	
-	gl::TextureRef matToTexture( cv::Mat mat )
+	gl::TextureRef matToTexture( cv::Mat mat, bool loadTopDown )
 	{
-		return gl::Texture::create( ImageSourceRef( new ImageSourceCvMat(mat)) );
+		return gl::Texture::create(
+			ImageSourceRef( new ImageSourceCvMat(mat)),
+			gl::Texture::Format().loadTopDown(loadTopDown)
+			);
 	}
 	
-	gl::TextureRef matToTexture( cv::UMat mat )
+	gl::TextureRef matToTexture( cv::UMat mat, bool loadTopDown )
 	{
 		/*if (0)
 		{
@@ -138,7 +141,7 @@ namespace cinder {
 	//		mImageGL = gl::Texture::create( fromOcv(mImageCV), gl::Texture::Format().loadTopDown() );
 			return gl::Texture::create(
 				ImageSourceRef( new ImageSourceCvMat( mat.getMat(cv::ACCESS_READ) ) ),
-				gl::Texture::Format().loadTopDown() );
+				gl::Texture::Format().loadTopDown(loadTopDown) );
 		}
 	}
 

@@ -36,8 +36,8 @@ public:
 	bool mDoesZombieTouchOtherZombies=false;
 
 	// image data
-	cv::Mat		mImage;				// thresholded image
-	cv::Mat		mQuantizedImagePreThreshold; // (for inter-frame smoothing)
+	cv::UMat	mImage;				// thresholded image
+	cv::UMat	mQuantizedImagePreThreshold; // (for inter-frame smoothing)
 	cv::Mat		mQuantizedImage;	// quantized image data for midi playback
 	float		mMetaParamSliderValue=-1.f; // 0..1
 	gl::TextureRef mTexture; // used for additive, so we don't do it per frame

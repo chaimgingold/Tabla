@@ -48,8 +48,8 @@ namespace cinder {
 		return true;
 	}
 	
-	gl::TextureRef matToTexture( cv::UMat mat );
-	gl::TextureRef matToTexture( cv::Mat mat );
+	gl::TextureRef matToTexture( cv::UMat mat, bool loadTopDown );
+	gl::TextureRef matToTexture( cv::Mat  mat, bool loadTopDown );
 
 	PolyLine2 approxPolyDP( const PolyLine2&, float eps );
 	

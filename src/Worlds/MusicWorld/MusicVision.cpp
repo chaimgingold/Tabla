@@ -540,11 +540,11 @@ ScoreVec MusicVision::getScores(
 }
 
 
-static float getImgDiffFrac( cv::Mat a, cv::Mat b )
+static float getImgDiffFrac( cv::UMat a, cv::UMat b )
 {
 	if ( !b.empty() && !a.empty() && a.size == b.size )
 	{
-		cv::Mat diffm;
+		cv::UMat diffm;
 		cv::subtract( a, b, diffm);
 		cv::Scalar diff = cv::sum(diffm);
 		float d = (diff[0]/255.f) / (a.size[0] * a.size[1]);
@@ -555,7 +555,13 @@ static float getImgDiffFrac( cv::Mat a, cv::Mat b )
 	return 1.f;
 }
 
-static void doTemporalMatBlend( Pipeline& pipeline, string scoreName, cv::Mat oldimg, cv::Mat newimg, float oldWeight, float diffthresh )
+static void doTemporalMatBlend(
+	Pipeline& pipeline,
+	string scoreName,
+	cv::UMat oldimg,
+	cv::UMat newimg,
+	float oldWeight,
+	float diffthresh )
 {
 	// newimg = oldimg * oldWeight + newimg * (1 - oldWeight)
 
@@ -584,15 +590,15 @@ void MusicVision::quantizeImage( Pipeline& pipeline,
 	Score& s,
 	string scoreName,
 	bool doTemporalBlend,
-	cv::Mat oldTemporalBlendImage,
+	cv::UMat oldTemporalBlendImage,
 	int quantizeNumCols, int quantizeNumRows ) const
 {
-	cv::Mat &inquant = s.mImage;
+	cv::UMat &inquant = s.mImage;
 
 	if (quantizeNumCols<=0) quantizeNumCols = inquant.cols;
 	if (quantizeNumRows<=0) quantizeNumRows = inquant.rows;
 
-	cv::Mat quantized;
+	cv::UMat quantized;
 	cv::resize( inquant, quantized, cv::Size(quantizeNumCols,quantizeNumRows), 0, 0, cv::INTER_AREA ); // best?
 		// cv::INTER_AREA is the best.
 		// cv::INTER_LANCZOS4 is good
@@ -616,7 +622,7 @@ void MusicVision::quantizeImage( Pipeline& pipeline,
 	}
 
 	// threshold
-	cv::Mat &inthresh = quantized;
+	cv::UMat &inthresh = quantized;
 	cv::Mat thresholded;
 
 	if ( mScoreNoteVisionThresh < 0 ) {
@@ -680,7 +686,7 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& score
 		string scoreName = string("score")+toString(si+1);
 		const auto instr = s.mInstrument;
 
-		cv::Mat oldTemporalBlendImage;
+		cv::UMat oldTemporalBlendImage;
 		const bool doTemporalBlend = instr && instr->isNoteType() && mScoreTrackTemporalBlendFrac>0.f;
 		if ( doTemporalBlend ) oldTemporalBlendImage = s.mQuantizedImagePreThreshold.clone(); // must clone to work!
 
@@ -721,7 +727,7 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& score
 		
 		// additive texture grab
 		if (instr && instr->mSynthType==Instrument::SynthType::Additive) {
-			s.mTexture = matToTexture(s.mImage);
+			s.mTexture = matToTexture(s.mImage,false);
 		}
 	}
 }

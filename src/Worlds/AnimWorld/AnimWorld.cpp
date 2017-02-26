@@ -34,7 +34,7 @@ vec2 Frame::calcQuadCenter() const
 gl::TextureRef Frame::getAsTexture()
 {
 	if ( !mTexture && !mImageCV.empty() ) {
-		mTexture = matToTexture(mImageCV);
+		mTexture = matToTexture(mImageCV,true);
 	}
 	return mTexture;
 }

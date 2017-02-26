@@ -16,7 +16,7 @@ gl::TextureRef Pipeline::Stage::getGLImage() const
 {
 	if ( !mImageGL && !mImageCV.empty() )
 	{
-		mImageGL = matToTexture(mImageCV);
+		mImageGL = matToTexture(mImageCV,true);
 	}
 	
 	return mImageGL;

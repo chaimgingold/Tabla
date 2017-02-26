@@ -109,7 +109,7 @@ private:
 		Score& score,
 		string scoreName,
 		bool doTemporalBlend,
-		cv::Mat oldTemporalBlendImage,
+		cv::UMat oldTemporalBlendImage,
 		int quantizeNumCols, int quantizeNumRows ) const;
 		// logs to pipeline
 		// resizes score.mImage => mQuantizedImage + mQuantizedImagePreThreshold,

@@ -35,6 +35,9 @@
 - [ ] Can easily put Config window in a high performance mode (no gl textures drawn) for demo machine.
 
 ### Minor
+- FPS indicators
+	- [ ] FPS more visual, especially capture, which varies a lot
+	- [ ] Smooth it before showing maybe.
 - [ ] Capture menu only shows valid options
 - [ ] Escape key should exit debug frame and THEN return to last camera source
 

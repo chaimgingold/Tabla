@@ -10,33 +10,35 @@
 
 
 bool VisionInput::setup( const LightLink::CaptureProfile& profile )
-{
-	mDebugFrame.reset();
-	mDebugFrameFileWatch.clear();
-	
+{	
 	if ( profile.isCamera() )
 	{
-		// clear file
-		mDebugFrame.reset();
-		mDebugFrameFileWatch.clear();
-
-		// setup
+		stopFile();
+		
 		return setupWithCamera(profile);
 	}
 	else
 	{
-		// clear camera
-		if (mCapture) mCapture->stop();
+		stopCamera();
 		
-		// setup
 		return setupWithFile(profile);
 	}
 }
 
 void VisionInput::stop()
 {
+	stopCamera();
+	stopFile();
+}
+
+void VisionInput::stopCamera()
+{
 	if (mCapture) mCapture->stop();
-	
+	mCapture.reset();
+}
+
+void VisionInput::stopFile()
+{
 	mDebugFrame.reset();
 	mDebugFrameFileWatch.clear();
 }
