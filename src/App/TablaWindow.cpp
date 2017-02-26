@@ -455,7 +455,7 @@ void TablaWindow::layoutMenus()
 
 	if (mCaptureMenuView)
 	{
-		mCaptureMenuView->layout( Rectf( lowerRight - size, lowerRight ) );
+		mCaptureMenuView->layout( Rectf( lowerRight - size*vec2(2.f,1.f), lowerRight ) );
 	}
 }
 

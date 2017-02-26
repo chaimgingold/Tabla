@@ -27,6 +27,7 @@
 		23756771BB404A04991A26CB /* b2PolygonAndCircleContact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6B648D73A5D453781A11E34 /* b2PolygonAndCircleContact.cpp */; };
 		24F2003E479C4BC49D1F7374 /* b2WheelJoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 627E59F1B82E4F36ABF0DE48 /* b2WheelJoint.cpp */; };
 		26024C951E25CADC0096FB4D /* docs in Resources */ = {isa = PBXBuildFile; fileRef = 26024C941E25CADC0096FB4D /* docs */; };
+		2603D16E1E625952002E4188 /* GetCaptureDeviceFormats.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2603D16D1E625952002E4188 /* GetCaptureDeviceFormats.mm */; };
 		260AD7BD1E60E8CC0077AEEC /* channel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 260AD7BB1E60E8CC0077AEEC /* channel.cpp */; };
 		26143F001E2356A800EDEE1E /* PinballInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26143EFE1E2356A800EDEE1E /* PinballInput.cpp */; };
 		262A88751DB594B700FE2336 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 262A88741DB594B700FE2336 /* CoreMIDI.framework */; };
@@ -219,6 +220,8 @@
 		1967F5787DB34245B2B91CBA /* b2EdgeAndCircleContact.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = b2EdgeAndCircleContact.h; path = ../blocks/Box2D/src/Box2D/Dynamics/Contacts/b2EdgeAndCircleContact.h; sourceTree = "<group>"; };
 		1DCA2C3FD6C84A6DAB24027E /* b2DistanceJoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2DistanceJoint.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Joints/b2DistanceJoint.cpp; sourceTree = "<group>"; };
 		26024C941E25CADC0096FB4D /* docs */ = {isa = PBXFileReference; lastKnownFileType = folder; name = docs; path = ../docs; sourceTree = "<group>"; };
+		2603D16D1E625952002E4188 /* GetCaptureDeviceFormats.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = GetCaptureDeviceFormats.mm; sourceTree = "<group>"; };
+		2603D1701E625B87002E4188 /* GetCaptureDeviceFormats.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GetCaptureDeviceFormats.h; sourceTree = "<group>"; };
 		260AD7BB1E60E8CC0077AEEC /* channel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = channel.cpp; sourceTree = "<group>"; };
 		260AD7BC1E60E8CC0077AEEC /* channel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = channel.h; sourceTree = "<group>"; };
 		26143EFE1E2356A800EDEE1E /* PinballInput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PinballInput.cpp; sourceTree = "<group>"; };
@@ -942,6 +945,8 @@
 				26CCA2F01E089E3F005F7C24 /* TokenMatcher.h */,
 				26E30EB01E0C9A3600AA9F97 /* RectFinder.cpp */,
 				26E30EB11E0C9A3600AA9F97 /* RectFinder.h */,
+				2603D16D1E625952002E4188 /* GetCaptureDeviceFormats.mm */,
+				2603D1701E625B87002E4188 /* GetCaptureDeviceFormats.h */,
 			);
 			name = Vision;
 			path = ../src/Vision;
@@ -2702,6 +2707,7 @@
 				148CF21F16044275A8C29BD4 /* b2StackAllocator.cpp in Sources */,
 				26F3234C1DF74D8900EC9559 /* Gamepad_private.c in Sources */,
 				26E30EA91E0B4F0600AA9F97 /* ocv.cpp in Sources */,
+				2603D16E1E625952002E4188 /* GetCaptureDeviceFormats.mm in Sources */,
 				26CCA2D31E089DE7005F7C24 /* BallWorld.cpp in Sources */,
 				26E30EB21E0C9A3600AA9F97 /* RectFinder.cpp in Sources */,
 				B82FE516E59446FB928ED0B8 /* b2Timer.cpp in Sources */,

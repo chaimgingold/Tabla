@@ -6,6 +6,8 @@
 #include "MainImageView.h"
 #include "ocv.h"
 
+#include "GetCaptureDeviceFormats.h"
+
 #include "cinder/audio/Context.h"
 #include "cinder/audio/dsp/Converter.h"
 
@@ -356,15 +358,19 @@ bool TablaApp::ensureLightLinkHasLocalDeviceProfiles()
 		{
 			if ( mLightLink.getCaptureProfilesForDevice(d->getName()).empty() )
 			{
-				vector<vec2> sizes = { vec2(1920,1080), vec2(640,480) };
-				// TODO: escape to OS and get some proper sizes...
+				vector<CaptureDeviceFormat> formats = getCaptureDeviceFormats(d->getNative());
 				
-				for( auto size : sizes )
+				// TODO: filter for best choices
+				
+				for( auto fmt : formats )
 				{
 					LightLink::CaptureProfile profile(
-						d->getName() + " " + toString(size.x) + "x" + toString(size.y),
+						d->getName() + " "
+						+ toString(fmt.mSize.x) + "x"
+						+ toString(fmt.mSize.y)
+						+ "@" + toString((int)fmt.mMaxFPS) + "fps",
 						d->getName(),
-						size,
+						fmt.mSize,
 						getParams().mDefaultPixelsPerWorldUnit
 						);
 					

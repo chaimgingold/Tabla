@@ -23,8 +23,13 @@
 ### Major
 - [ ] Configurable (or adaptive) up vector for modes... 
 - [ ] Automatic projector calibration. (And rename CalibateWorld to CameraCameraCalibrateWorld; add a ProjectorCameraCalibrateWorld that does this). Simply project a box in known projector space, find it in world space, then use that perspective transform to set the projector profile's mProjectorCoords.
-- [ ] Populate capture devices with appropriate resolutions (not just 640x480!)
+- [x] Populate capture devices with appropriate resolutions (not just 640x480!)
+	- Capture::Device::getNative() on MacOS returns => AVCaptureDevice*
+	- https://developer.apple.com/reference/avfoundation/avcapturedevice (see formats)
 	- http://stackoverflow.com/questions/34640551/can-avcapturesession-use-custom-resolution
+	- https://developer.apple.com/reference/coremedia/1489287-cmvideoformatdescriptiongetdimen?language=objc
+	- https://developer.apple.com/reference/avfoundation/avcapturedeviceformat
+- [ ] Filter prepopulated capture device formats => profiles
 - [x] World bounds poly editor shows camera image, dimensions in CM as text, snaps to CM, and constrained to rectangle.
 - [x] Pull down menu with capture options
 - [ ] Can easily put Config window in a high performance mode (no gl textures drawn) for demo machine.
