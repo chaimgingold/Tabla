@@ -61,7 +61,10 @@ private:
 		MusicStampVec& stamps,
 		const TokenMatchVec& ) const;
 	
-	ScoreVec getScoresFromContours( const ContourVector&, MusicStampVec& stamps, const TokenMatchVec& ) const;
+	ScoreVec getScoresFromContours(
+		const ContourVector&,
+		const MusicStampVec&,
+		const TokenMatchVec& ) const;
 	
 	ScoreVec mergeOldAndNewScores(
 		const ScoreVec& oldScores,
@@ -77,7 +80,10 @@ private:
 	
 	//
 	float		  decideMeasureCountForScore( const Score& ) const;
-	InstrumentRef decideInstrumentForScore( const Score&, MusicStampVec&, const TokenMatchVec& tokens ) const;
+	InstrumentRef decideInstrumentForScore(
+		const Score&,
+		const MusicStampVec&,
+		const TokenMatchVec& tokens ) const;
 
 	float getScoreOctaveShift( const Score& s, const PolyLine2& wrtRegion ) const;
 
@@ -97,12 +103,23 @@ private:
 		float maxErr,
 		float* matchError=0 ) const;
 	
-	float  scoreFractionInContours( const Score& old, const ContourVector &contours, int numSamples ) const;
-	bool   doesZombieScoreIntersectZombieScores( const Score& old, ScoreVec& scores ) const; // marks other zombies if so
-	bool   shouldPersistOldScore  ( const Score& old, ScoreVec& scores, const ContourVector &contours ) const;
+	float scoreFractionInContours(
+		const Score& old,
+		const ContourVector &contours,
+		int numSamples ) const;
+		
+	bool doesZombieScoreIntersectZombieScores(
+		const Score& old,
+		ScoreVec& scores ) const; // marks other zombies if so
+		
+	bool shouldPersistOldScore(
+		const Score& old,
+		ScoreVec& scores,
+		const ContourVector &contours ) const;
 		// match failed; do we want to keep it?
 		// any intersecting zombie scores are marked for removal (mDoesZombieTouchOtherZombies)
-	bool	shouldBeMetaParamScore( const Score& ) const;
+		
+	bool shouldBeMetaParamScore( const Score& ) const;
 
 	// image processing helper code
 	void quantizeImage( Pipeline& pipeline,

@@ -178,6 +178,7 @@ public:
 	
 	MusicStamp* getStampByInstrument( InstrumentRef );
 	MusicStamp* getStampByInstrumentName( string );
+	const MusicStamp* getStampByInstrumentName( string ) const;
 
 private:	
 	void decollide();

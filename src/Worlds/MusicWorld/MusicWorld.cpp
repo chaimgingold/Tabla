@@ -139,9 +139,12 @@ void MusicWorld::setParams( XmlTree xml )
 	// rebind scores to instruments
 	for( auto &s : mScores )
 	{
-		auto i = mInstruments.find( s.mInstrumentName );
-		if (i==mInstruments.end()) s.mInstrument=0; // nil it!
-		else s.mInstrument = i->second; // rebind
+		if (s.mInstrument)
+		{
+			auto i = mInstruments.find( s.mInstrument->mName );
+			if (i==mInstruments.end()) s.mInstrument=0; // nil it!
+			else s.mInstrument = i->second; // rebind
+		}
 	}
 	
 	// update vision

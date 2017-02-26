@@ -273,7 +273,10 @@ static float distanceBetweenPolys( const PolyLine2& a, const PolyLine2& b )
 }
 
 InstrumentRef
-MusicVision::decideInstrumentForScore( const Score& score, MusicStampVec& stamps, const TokenMatchVec& tokens ) const
+MusicVision::decideInstrumentForScore(
+	const Score& score,
+	const MusicStampVec& stamps,
+	const TokenMatchVec& tokens ) const
 {
 	InstrumentRef best;
 	
@@ -283,7 +286,7 @@ MusicVision::decideInstrumentForScore( const Score& score, MusicStampVec& stamps
 		
 		for( const auto &t : tokens )
 		{
-			MusicStamp* s = stamps.getStampByInstrumentName(t.getName());
+			const MusicStamp* s = stamps.getStampByInstrumentName(t.getName());
 			
 			if (s)
 			{
@@ -400,7 +403,7 @@ MusicVision::updateVision(
 ScoreVec
 MusicVision::getScoresFromContours(
 	const ContourVector& contours,
-	MusicStampVec& stamps,
+	const MusicStampVec& stamps,
 	const TokenMatchVec& tokens ) const
 {
 	ScoreVec scores;
@@ -417,16 +420,9 @@ MusicVision::getScoresFromContours(
 
 			// shape
 			score.setQuadFromPolyLine(rectPoly,mTimeVec);
-//			if ( score.getQuadMaxInteriorAngle() > toRadians(mScoreMaxInteriorAngleDeg) ) continue;
-				// this final test is now redundant to RectFinder
 
 			// instrument
-			InstrumentRef instr = decideInstrumentForScore(score,stamps,tokens);
-			if (instr)
-			{
-				score.mInstrumentName = instr->mName ;
-				score.mInstrument = instr;
-			}
+			score.mInstrument = decideInstrumentForScore(score,stamps,tokens);
 
 			// timing
 			// Choose octave based on up<>down
@@ -683,13 +679,24 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& score
 	for( int si=0; si<scores.size(); ++si )
 	{
 		Score& s = scores[si];
-		string scoreName = string("score")+toString(si+1);
-		const auto instr = s.mInstrument;
-
+		const string scoreName = string("score")+toString(si+1);
+		// TODO: ideally we don't do anything if score has no instrument.
+		// BUT I'm not doing that because stamps still show up as scores,
+		// and until that is licked, I want to remind us that stamps are still
+		// being processed as sores while looking at thumbnail pipeline.
+		
+		// get temporal blend info 
 		cv::UMat oldTemporalBlendImage;
-		const bool doTemporalBlend = instr && instr->isNoteType() && mScoreTrackTemporalBlendFrac>0.f;
-		if ( doTemporalBlend ) oldTemporalBlendImage = s.mQuantizedImagePreThreshold.clone(); // must clone to work!
-
+		
+		const bool doTemporalBlend =
+			s.mInstrument &&
+		    s.mInstrument->isNoteType()
+		 && mScoreTrackTemporalBlendFrac>0.f;
+		 
+		if ( doTemporalBlend ) {
+			oldTemporalBlendImage = s.mQuantizedImagePreThreshold.clone(); // must clone to work!
+		}
+		
 		// extract image
 		mat4 scoreImageToWorld;
 		getSubMatWithQuad( world->mImageCV, s.mImage, s.mQuad, world->mWorldToImage, scoreImageToWorld );
@@ -708,26 +715,39 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& score
 			pipeline.back()->mLayoutHintScale = .5f;
 			pipeline.back()->mLayoutHintOrtho = true;
 		}
-		
-		// quantize
-		if ( instr && instr->isNoteType() )
-		{
-			// notes
-			quantizeImage(pipeline,s,scoreName,doTemporalBlend,oldTemporalBlendImage, s.getQuantizedBeatCount(), s.mNoteCount );
-		}
-		else if ( instr && instr->mSynthType==Instrument::SynthType::Meta )
-		{
-			// meta-param
-			quantizeImage(pipeline,s,scoreName,doTemporalBlend,oldTemporalBlendImage, 1, -1 );
-				// we don't quantize to num states because it behaves weird.
-				// maybe 2x or 4x that might help, but the code below handles continuous values best.
 
-			s.mMetaParamSliderValue = getSliderValueFromQuantizedImageData(s);
-		}
-		
-		// additive texture grab
-		if (instr && instr->mSynthType==Instrument::SynthType::Additive) {
-			s.mTexture = matToTexture(s.mImage,false);
-		}
-	}
+		if ( s.mInstrument )
+		{
+			// post-processing
+			switch( s.mInstrument->mSynthType )
+			{
+				// quantize notes
+				case Instrument::SynthType::MIDI:
+				case Instrument::SynthType::RobitPokie:
+				
+					quantizeImage(pipeline,s,scoreName,
+						doTemporalBlend,oldTemporalBlendImage,
+						s.getQuantizedBeatCount(), s.mNoteCount );
+				
+					break;
+
+				// get meta-param
+				case Instrument::SynthType::Meta:
+				
+					quantizeImage(pipeline,s,scoreName,
+						doTemporalBlend,oldTemporalBlendImage,
+						1, -1 );
+					// we don't quantize to num states because it behaves weird.
+					// maybe 2x or 4x that might help, but the code below handles continuous values best.
+
+					s.mMetaParamSliderValue = getSliderValueFromQuantizedImageData(s);
+					break;
+			
+				// additive texture grab
+				case Instrument::SynthType::Additive:
+					s.mTexture = matToTexture(s.mImage,false);
+					break;
+			} // switch
+		} // if
+	} // for
 }

@@ -322,6 +322,16 @@ MusicStampVec::getStampByInstrumentName( string name )
 	return 0;
 }
 
+const MusicStamp*
+MusicStampVec::getStampByInstrumentName( string name ) const
+{
+	for( auto &i : *this )
+	{
+		if (i.mInstrument->mName==name) return &i;
+	}
+	return 0;
+}
+
 void MusicStampVec::updateWithTokens( const TokenMatchVec& tokens )
 {
 	return;

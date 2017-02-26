@@ -43,9 +43,6 @@ public:
 	gl::TextureRef mTexture; // used for additive, so we don't do it per frame
 	
 	// synth parameters
-	string		mInstrumentName; // which synth
-
-
 	float		mPosition=0; // progress from 0-mDuration
 	void        tick(float globalPhase, float beatDuration);
 
