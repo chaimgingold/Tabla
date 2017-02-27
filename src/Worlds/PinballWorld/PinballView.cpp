@@ -741,7 +741,6 @@ void PinballView::draw3dBalls( vec3 eyeLoc, int skipBall, gl::TextureCubeMapRef 
 		
 		vec3 lightLoc = vec3( mWorld.getWorldBoundsPoly().calcCentroid(), -mCubeMapLightHeight ) ;
 		
-		mBallShader->uniform( "uCubeMapTex", 0 );
 		mBallShader->uniform( "inLightLoc", lightLoc);
 		mBallShader->uniform( "inEyeLoc", eyeLoc);
 		mBallShader->uniform( "uLightColor", mCubeMapLightColor );
@@ -752,9 +751,8 @@ void PinballView::draw3dBalls( vec3 eyeLoc, int skipBall, gl::TextureCubeMapRef 
 			if (i==skipBall) continue;
 			
 			gl::TextureCubeMapRef env = getCubeMapForBall(i);
-			if (env==skipMap) continue;
-			if (env) env->bind();
-			else continue;
+			if (!env || env==skipMap) continue;
+			env->bind();
 			
 			const Ball& b = mWorld.getBalls()[i];
 			
