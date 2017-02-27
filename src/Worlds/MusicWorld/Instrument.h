@@ -15,6 +15,7 @@
 #include "PureDataNode.h"
 #include "RtMidi.h"
 #include "Cinder-Serial.h"
+#include "OpenSFZ.h"
 
 using namespace cipd;
 using namespace Cinder::Serial;

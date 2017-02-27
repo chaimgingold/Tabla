@@ -6,7 +6,7 @@
 
 class SFZEG {
 	public:
-		static const float bottomLevel = 0.001;
+		constexpr static const float bottomLevel = 0.001;
 
 		SFZEG();
 
