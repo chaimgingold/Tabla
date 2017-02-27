@@ -1,0 +1,440 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A73FB588172A27C600C80C7F /* SFZCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73FB587172A27C600C80C7F /* SFZCommon.cpp */; };
+		A7CB309F17261D5C00F34741 /* RIFF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7CB307117261D5C00F34741 /* RIFF.cpp */; };
+		A7CB30A017261D5C00F34741 /* RIFF.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB307217261D5C00F34741 /* RIFF.h */; };
+		A7CB30A117261D5C00F34741 /* generators.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB307417261D5C00F34741 /* generators.h */; };
+		A7CB30A217261D5C00F34741 /* ibag.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB307517261D5C00F34741 /* ibag.h */; };
+		A7CB30A317261D5C00F34741 /* igen.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB307617261D5C00F34741 /* igen.h */; };
+		A7CB30A417261D5C00F34741 /* imod.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB307717261D5C00F34741 /* imod.h */; };
+		A7CB30A517261D5C00F34741 /* inst.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB307817261D5C00F34741 /* inst.h */; };
+		A7CB30A617261D5C00F34741 /* iver.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB307917261D5C00F34741 /* iver.h */; };
+		A7CB30A717261D5C00F34741 /* pbag.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB307A17261D5C00F34741 /* pbag.h */; };
+		A7CB30A817261D5C00F34741 /* pgen.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB307B17261D5C00F34741 /* pgen.h */; };
+		A7CB30A917261D5C00F34741 /* phdr.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB307C17261D5C00F34741 /* phdr.h */; };
+		A7CB30AA17261D5C00F34741 /* pmod.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB307D17261D5C00F34741 /* pmod.h */; };
+		A7CB30AB17261D5C00F34741 /* shdr.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB307E17261D5C00F34741 /* shdr.h */; };
+		A7CB30AC17261D5C00F34741 /* SF2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7CB307F17261D5C00F34741 /* SF2.cpp */; };
+		A7CB30AD17261D5C00F34741 /* SF2.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB308017261D5C00F34741 /* SF2.h */; };
+		A7CB30AE17261D5C00F34741 /* SF2Generator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7CB308117261D5C00F34741 /* SF2Generator.cpp */; };
+		A7CB30AF17261D5C00F34741 /* SF2Generator.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB308217261D5C00F34741 /* SF2Generator.h */; };
+		A7CB30B017261D5C00F34741 /* SF2Reader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7CB308317261D5C00F34741 /* SF2Reader.cpp */; };
+		A7CB30B117261D5C00F34741 /* SF2Reader.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB308417261D5C00F34741 /* SF2Reader.h */; };
+		A7CB30B217261D5C00F34741 /* SF2Sound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7CB308517261D5C00F34741 /* SF2Sound.cpp */; };
+		A7CB30B317261D5C00F34741 /* SF2Sound.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB308617261D5C00F34741 /* SF2Sound.h */; };
+		A7CB30B617261D5C00F34741 /* SFZEG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7CB308917261D5C00F34741 /* SFZEG.cpp */; };
+		A7CB30B717261D5C00F34741 /* SFZEG.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB308A17261D5C00F34741 /* SFZEG.h */; };
+		A7CB30BC17261D5C00F34741 /* SFZReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7CB308F17261D5C00F34741 /* SFZReader.cpp */; };
+		A7CB30BD17261D5C00F34741 /* SFZReader.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB309017261D5C00F34741 /* SFZReader.h */; };
+		A7CB30BE17261D5C00F34741 /* SFZRegion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7CB309117261D5C00F34741 /* SFZRegion.cpp */; };
+		A7CB30BF17261D5C00F34741 /* SFZRegion.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB309217261D5C00F34741 /* SFZRegion.h */; };
+		A7CB30C017261D5C00F34741 /* SFZSample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7CB309317261D5C00F34741 /* SFZSample.cpp */; };
+		A7CB30C117261D5C00F34741 /* SFZSample.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB309417261D5C00F34741 /* SFZSample.h */; };
+		A7CB30C217261D5C00F34741 /* SFZSound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7CB309517261D5C00F34741 /* SFZSound.cpp */; };
+		A7CB30C317261D5C00F34741 /* SFZSound.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB309617261D5C00F34741 /* SFZSound.h */; };
+		A7CB30C417261D5C00F34741 /* SFZSynth.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7CB309717261D5C00F34741 /* SFZSynth.cpp */; };
+		A7CB30C517261D5C00F34741 /* SFZSynth.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB309817261D5C00F34741 /* SFZSynth.h */; };
+		A7CB30C617261D5C00F34741 /* SFZVoice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7CB309917261D5C00F34741 /* SFZVoice.cpp */; };
+		A7CB30C717261D5C00F34741 /* SFZVoice.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB309A17261D5C00F34741 /* SFZVoice.h */; };
+		A7CB30C817261D5C00F34741 /* StringSlice.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB309B17261D5C00F34741 /* StringSlice.h */; };
+		A7CB30C917261D5C00F34741 /* WinTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB309C17261D5C00F34741 /* WinTypes.h */; };
+		A7CB30CC1726300600F34741 /* SFZAudioBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7CB30CA1726300400F34741 /* SFZAudioBuffer.cpp */; };
+		A7CB30CD1726300600F34741 /* SFZAudioBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB30CB1726300500F34741 /* SFZAudioBuffer.h */; };
+		A7CB30D01726354C00F34741 /* Synthesizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7CB30CE1726354A00F34741 /* Synthesizer.cpp */; };
+		A7CB30D11726354C00F34741 /* Synthesizer.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB30CF1726354A00F34741 /* Synthesizer.h */; };
+		A7CB30D31726370300F34741 /* SFZCommon.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB30D21726370200F34741 /* SFZCommon.h */; };
+		A7CB312C17276C2E00F34741 /* SFZAudioReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7CB312A17276C2A00F34741 /* SFZAudioReader.cpp */; };
+		A7CB312D17276C2E00F34741 /* SFZAudioReader.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB312B17276C2B00F34741 /* SFZAudioReader.h */; };
+		A7CB313017276CB400F34741 /* stb_vorbis.c in Sources */ = {isa = PBXBuildFile; fileRef = A7CB312E17276CB000F34741 /* stb_vorbis.c */; };
+		A7CB313117276CB400F34741 /* stb_vorbis.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB312F17276CB100F34741 /* stb_vorbis.h */; };
+		A7CB313E1728AEC000F34741 /* InputStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7CB313C1728AEBC00F34741 /* InputStream.cpp */; };
+		A7CB313F1728AEC000F34741 /* InputStream.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB313D1728AEBE00F34741 /* InputStream.h */; };
+		A7CB31421728B24F00F34741 /* Path.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7CB31401728B24B00F34741 /* Path.cpp */; };
+		A7CB31431728B24F00F34741 /* Path.h in Headers */ = {isa = PBXBuildFile; fileRef = A7CB31411728B24C00F34741 /* Path.h */; };
+		A7F17203172A0A6D00F17088 /* OpenSFZ.h in Headers */ = {isa = PBXBuildFile; fileRef = A7F17202172A0A6D00F17088 /* OpenSFZ.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A73FB587172A27C600C80C7F /* SFZCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SFZCommon.cpp; sourceTree = "<group>"; };
+		A7CB306617261D2400F34741 /* libOpenSFZ.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libOpenSFZ.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		A7CB307117261D5C00F34741 /* RIFF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RIFF.cpp; sourceTree = "<group>"; };
+		A7CB307217261D5C00F34741 /* RIFF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RIFF.h; sourceTree = "<group>"; };
+		A7CB307417261D5C00F34741 /* generators.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = generators.h; sourceTree = "<group>"; };
+		A7CB307517261D5C00F34741 /* ibag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ibag.h; sourceTree = "<group>"; };
+		A7CB307617261D5C00F34741 /* igen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = igen.h; sourceTree = "<group>"; };
+		A7CB307717261D5C00F34741 /* imod.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imod.h; sourceTree = "<group>"; };
+		A7CB307817261D5C00F34741 /* inst.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inst.h; sourceTree = "<group>"; };
+		A7CB307917261D5C00F34741 /* iver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iver.h; sourceTree = "<group>"; };
+		A7CB307A17261D5C00F34741 /* pbag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pbag.h; sourceTree = "<group>"; };
+		A7CB307B17261D5C00F34741 /* pgen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pgen.h; sourceTree = "<group>"; };
+		A7CB307C17261D5C00F34741 /* phdr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = phdr.h; sourceTree = "<group>"; };
+		A7CB307D17261D5C00F34741 /* pmod.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pmod.h; sourceTree = "<group>"; };
+		A7CB307E17261D5C00F34741 /* shdr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shdr.h; sourceTree = "<group>"; };
+		A7CB307F17261D5C00F34741 /* SF2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SF2.cpp; sourceTree = "<group>"; };
+		A7CB308017261D5C00F34741 /* SF2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SF2.h; sourceTree = "<group>"; };
+		A7CB308117261D5C00F34741 /* SF2Generator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SF2Generator.cpp; sourceTree = "<group>"; };
+		A7CB308217261D5C00F34741 /* SF2Generator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SF2Generator.h; sourceTree = "<group>"; };
+		A7CB308317261D5C00F34741 /* SF2Reader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SF2Reader.cpp; sourceTree = "<group>"; };
+		A7CB308417261D5C00F34741 /* SF2Reader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SF2Reader.h; sourceTree = "<group>"; };
+		A7CB308517261D5C00F34741 /* SF2Sound.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SF2Sound.cpp; sourceTree = "<group>"; };
+		A7CB308617261D5C00F34741 /* SF2Sound.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SF2Sound.h; sourceTree = "<group>"; };
+		A7CB308917261D5C00F34741 /* SFZEG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SFZEG.cpp; sourceTree = "<group>"; };
+		A7CB308A17261D5C00F34741 /* SFZEG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFZEG.h; sourceTree = "<group>"; };
+		A7CB308F17261D5C00F34741 /* SFZReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SFZReader.cpp; sourceTree = "<group>"; };
+		A7CB309017261D5C00F34741 /* SFZReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFZReader.h; sourceTree = "<group>"; };
+		A7CB309117261D5C00F34741 /* SFZRegion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SFZRegion.cpp; sourceTree = "<group>"; };
+		A7CB309217261D5C00F34741 /* SFZRegion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFZRegion.h; sourceTree = "<group>"; };
+		A7CB309317261D5C00F34741 /* SFZSample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SFZSample.cpp; sourceTree = "<group>"; };
+		A7CB309417261D5C00F34741 /* SFZSample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFZSample.h; sourceTree = "<group>"; };
+		A7CB309517261D5C00F34741 /* SFZSound.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SFZSound.cpp; sourceTree = "<group>"; };
+		A7CB309617261D5C00F34741 /* SFZSound.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFZSound.h; sourceTree = "<group>"; };
+		A7CB309717261D5C00F34741 /* SFZSynth.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SFZSynth.cpp; sourceTree = "<group>"; };
+		A7CB309817261D5C00F34741 /* SFZSynth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFZSynth.h; sourceTree = "<group>"; };
+		A7CB309917261D5C00F34741 /* SFZVoice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SFZVoice.cpp; sourceTree = "<group>"; };
+		A7CB309A17261D5C00F34741 /* SFZVoice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFZVoice.h; sourceTree = "<group>"; };
+		A7CB309B17261D5C00F34741 /* StringSlice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StringSlice.h; sourceTree = "<group>"; };
+		A7CB309C17261D5C00F34741 /* WinTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WinTypes.h; sourceTree = "<group>"; };
+		A7CB30CA1726300400F34741 /* SFZAudioBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SFZAudioBuffer.cpp; sourceTree = "<group>"; };
+		A7CB30CB1726300500F34741 /* SFZAudioBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFZAudioBuffer.h; sourceTree = "<group>"; };
+		A7CB30CE1726354A00F34741 /* Synthesizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Synthesizer.cpp; sourceTree = "<group>"; };
+		A7CB30CF1726354A00F34741 /* Synthesizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Synthesizer.h; sourceTree = "<group>"; };
+		A7CB30D21726370200F34741 /* SFZCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFZCommon.h; sourceTree = "<group>"; };
+		A7CB312A17276C2A00F34741 /* SFZAudioReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SFZAudioReader.cpp; sourceTree = "<group>"; };
+		A7CB312B17276C2B00F34741 /* SFZAudioReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFZAudioReader.h; sourceTree = "<group>"; };
+		A7CB312E17276CB000F34741 /* stb_vorbis.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = stb_vorbis.c; sourceTree = "<group>"; };
+		A7CB312F17276CB100F34741 /* stb_vorbis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stb_vorbis.h; sourceTree = "<group>"; };
+		A7CB313C1728AEBC00F34741 /* InputStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InputStream.cpp; sourceTree = "<group>"; };
+		A7CB313D1728AEBE00F34741 /* InputStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InputStream.h; sourceTree = "<group>"; };
+		A7CB31401728B24B00F34741 /* Path.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Path.cpp; sourceTree = "<group>"; };
+		A7CB31411728B24C00F34741 /* Path.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Path.h; sourceTree = "<group>"; };
+		A7F17202172A0A6D00F17088 /* OpenSFZ.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OpenSFZ.h; path = Include/OpenSFZ.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A7CB306317261D2400F34741 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A7CB305D17261D2400F34741 = {
+			isa = PBXGroup;
+			children = (
+				A7F17202172A0A6D00F17088 /* OpenSFZ.h */,
+				A7CB306D17261D5C00F34741 /* Source */,
+				A7CB306717261D2400F34741 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A7CB306717261D2400F34741 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A7CB306617261D2400F34741 /* libOpenSFZ.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A7CB306D17261D5C00F34741 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				A7CB313C1728AEBC00F34741 /* InputStream.cpp */,
+				A7CB313D1728AEBE00F34741 /* InputStream.h */,
+				A7CB31401728B24B00F34741 /* Path.cpp */,
+				A7CB31411728B24C00F34741 /* Path.h */,
+				A7CB307117261D5C00F34741 /* RIFF.cpp */,
+				A7CB307217261D5C00F34741 /* RIFF.h */,
+				A7CB307317261D5C00F34741 /* sf2-chunks */,
+				A7CB307F17261D5C00F34741 /* SF2.cpp */,
+				A7CB308017261D5C00F34741 /* SF2.h */,
+				A7CB308117261D5C00F34741 /* SF2Generator.cpp */,
+				A7CB308217261D5C00F34741 /* SF2Generator.h */,
+				A7CB308317261D5C00F34741 /* SF2Reader.cpp */,
+				A7CB308417261D5C00F34741 /* SF2Reader.h */,
+				A7CB308517261D5C00F34741 /* SF2Sound.cpp */,
+				A7CB308617261D5C00F34741 /* SF2Sound.h */,
+				A7CB30CA1726300400F34741 /* SFZAudioBuffer.cpp */,
+				A7CB30CB1726300500F34741 /* SFZAudioBuffer.h */,
+				A7CB312A17276C2A00F34741 /* SFZAudioReader.cpp */,
+				A7CB312B17276C2B00F34741 /* SFZAudioReader.h */,
+				A7CB30D21726370200F34741 /* SFZCommon.h */,
+				A73FB587172A27C600C80C7F /* SFZCommon.cpp */,
+				A7CB308917261D5C00F34741 /* SFZEG.cpp */,
+				A7CB308A17261D5C00F34741 /* SFZEG.h */,
+				A7CB308F17261D5C00F34741 /* SFZReader.cpp */,
+				A7CB309017261D5C00F34741 /* SFZReader.h */,
+				A7CB309117261D5C00F34741 /* SFZRegion.cpp */,
+				A7CB309217261D5C00F34741 /* SFZRegion.h */,
+				A7CB309317261D5C00F34741 /* SFZSample.cpp */,
+				A7CB309417261D5C00F34741 /* SFZSample.h */,
+				A7CB309517261D5C00F34741 /* SFZSound.cpp */,
+				A7CB309617261D5C00F34741 /* SFZSound.h */,
+				A7CB309717261D5C00F34741 /* SFZSynth.cpp */,
+				A7CB309817261D5C00F34741 /* SFZSynth.h */,
+				A7CB309917261D5C00F34741 /* SFZVoice.cpp */,
+				A7CB309A17261D5C00F34741 /* SFZVoice.h */,
+				A7CB312E17276CB000F34741 /* stb_vorbis.c */,
+				A7CB312F17276CB100F34741 /* stb_vorbis.h */,
+				A7CB309B17261D5C00F34741 /* StringSlice.h */,
+				A7CB30CE1726354A00F34741 /* Synthesizer.cpp */,
+				A7CB30CF1726354A00F34741 /* Synthesizer.h */,
+				A7CB309C17261D5C00F34741 /* WinTypes.h */,
+			);
+			path = Source;
+			sourceTree = "<group>";
+		};
+		A7CB307317261D5C00F34741 /* sf2-chunks */ = {
+			isa = PBXGroup;
+			children = (
+				A7CB307417261D5C00F34741 /* generators.h */,
+				A7CB307517261D5C00F34741 /* ibag.h */,
+				A7CB307617261D5C00F34741 /* igen.h */,
+				A7CB307717261D5C00F34741 /* imod.h */,
+				A7CB307817261D5C00F34741 /* inst.h */,
+				A7CB307917261D5C00F34741 /* iver.h */,
+				A7CB307A17261D5C00F34741 /* pbag.h */,
+				A7CB307B17261D5C00F34741 /* pgen.h */,
+				A7CB307C17261D5C00F34741 /* phdr.h */,
+				A7CB307D17261D5C00F34741 /* pmod.h */,
+				A7CB307E17261D5C00F34741 /* shdr.h */,
+			);
+			path = "sf2-chunks";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		A7CB306417261D2400F34741 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A7CB30A017261D5C00F34741 /* RIFF.h in Headers */,
+				A7CB30A117261D5C00F34741 /* generators.h in Headers */,
+				A7CB30A217261D5C00F34741 /* ibag.h in Headers */,
+				A7CB30A317261D5C00F34741 /* igen.h in Headers */,
+				A7CB30A417261D5C00F34741 /* imod.h in Headers */,
+				A7CB30A517261D5C00F34741 /* inst.h in Headers */,
+				A7CB30A617261D5C00F34741 /* iver.h in Headers */,
+				A7CB30A717261D5C00F34741 /* pbag.h in Headers */,
+				A7CB30A817261D5C00F34741 /* pgen.h in Headers */,
+				A7CB30A917261D5C00F34741 /* phdr.h in Headers */,
+				A7CB30AA17261D5C00F34741 /* pmod.h in Headers */,
+				A7CB30AB17261D5C00F34741 /* shdr.h in Headers */,
+				A7CB30AD17261D5C00F34741 /* SF2.h in Headers */,
+				A7CB30AF17261D5C00F34741 /* SF2Generator.h in Headers */,
+				A7CB30B117261D5C00F34741 /* SF2Reader.h in Headers */,
+				A7CB30B317261D5C00F34741 /* SF2Sound.h in Headers */,
+				A7CB30B717261D5C00F34741 /* SFZEG.h in Headers */,
+				A7CB30BD17261D5C00F34741 /* SFZReader.h in Headers */,
+				A7CB30BF17261D5C00F34741 /* SFZRegion.h in Headers */,
+				A7CB30C117261D5C00F34741 /* SFZSample.h in Headers */,
+				A7CB30C317261D5C00F34741 /* SFZSound.h in Headers */,
+				A7CB30C517261D5C00F34741 /* SFZSynth.h in Headers */,
+				A7CB30C717261D5C00F34741 /* SFZVoice.h in Headers */,
+				A7CB30C817261D5C00F34741 /* StringSlice.h in Headers */,
+				A7CB30C917261D5C00F34741 /* WinTypes.h in Headers */,
+				A7CB30CD1726300600F34741 /* SFZAudioBuffer.h in Headers */,
+				A7CB30D11726354C00F34741 /* Synthesizer.h in Headers */,
+				A7CB30D31726370300F34741 /* SFZCommon.h in Headers */,
+				A7CB312D17276C2E00F34741 /* SFZAudioReader.h in Headers */,
+				A7CB313117276CB400F34741 /* stb_vorbis.h in Headers */,
+				A7CB313F1728AEC000F34741 /* InputStream.h in Headers */,
+				A7CB31431728B24F00F34741 /* Path.h in Headers */,
+				A7F17203172A0A6D00F17088 /* OpenSFZ.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		A7CB306517261D2400F34741 /* OpenSFZ */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A7CB306A17261D2400F34741 /* Build configuration list for PBXNativeTarget "OpenSFZ" */;
+			buildPhases = (
+				A7CB306217261D2400F34741 /* Sources */,
+				A7CB306317261D2400F34741 /* Frameworks */,
+				A7CB306417261D2400F34741 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = OpenSFZ;
+			productName = OpenSFZ;
+			productReference = A7CB306617261D2400F34741 /* libOpenSFZ.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A7CB305E17261D2400F34741 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0460;
+				ORGANIZATIONNAME = "David Wallin";
+			};
+			buildConfigurationList = A7CB306117261D2400F34741 /* Build configuration list for PBXProject "OpenSFZ" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = A7CB305D17261D2400F34741;
+			productRefGroup = A7CB306717261D2400F34741 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A7CB306517261D2400F34741 /* OpenSFZ */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A7CB306217261D2400F34741 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A7CB309F17261D5C00F34741 /* RIFF.cpp in Sources */,
+				A7CB30AC17261D5C00F34741 /* SF2.cpp in Sources */,
+				A7CB30AE17261D5C00F34741 /* SF2Generator.cpp in Sources */,
+				A7CB30B017261D5C00F34741 /* SF2Reader.cpp in Sources */,
+				A7CB30B217261D5C00F34741 /* SF2Sound.cpp in Sources */,
+				A7CB30B617261D5C00F34741 /* SFZEG.cpp in Sources */,
+				A7CB30BC17261D5C00F34741 /* SFZReader.cpp in Sources */,
+				A7CB30BE17261D5C00F34741 /* SFZRegion.cpp in Sources */,
+				A7CB30C017261D5C00F34741 /* SFZSample.cpp in Sources */,
+				A7CB30C217261D5C00F34741 /* SFZSound.cpp in Sources */,
+				A7CB30C417261D5C00F34741 /* SFZSynth.cpp in Sources */,
+				A7CB30C617261D5C00F34741 /* SFZVoice.cpp in Sources */,
+				A7CB30CC1726300600F34741 /* SFZAudioBuffer.cpp in Sources */,
+				A7CB30D01726354C00F34741 /* Synthesizer.cpp in Sources */,
+				A7CB312C17276C2E00F34741 /* SFZAudioReader.cpp in Sources */,
+				A7CB313017276CB400F34741 /* stb_vorbis.c in Sources */,
+				A7CB313E1728AEC000F34741 /* InputStream.cpp in Sources */,
+				A7CB31421728B24F00F34741 /* Path.cpp in Sources */,
+				A73FB588172A27C600C80C7F /* SFZCommon.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A7CB306817261D2400F34741 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				ONLY_ACTIVE_ARCH = NO;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		A7CB306917261D2400F34741 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		A7CB306B17261D2400F34741 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				EXECUTABLE_PREFIX = lib;
+				GCC_DYNAMIC_NO_PIC = YES;
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		A7CB306C17261D2400F34741 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				EXECUTABLE_PREFIX = lib;
+				GCC_DYNAMIC_NO_PIC = YES;
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A7CB306117261D2400F34741 /* Build configuration list for PBXProject "OpenSFZ" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A7CB306817261D2400F34741 /* Debug */,
+				A7CB306917261D2400F34741 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A7CB306A17261D2400F34741 /* Build configuration list for PBXNativeTarget "OpenSFZ" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A7CB306B17261D2400F34741 /* Debug */,
+				A7CB306C17261D2400F34741 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A7CB305E17261D2400F34741 /* Project object */;
+}

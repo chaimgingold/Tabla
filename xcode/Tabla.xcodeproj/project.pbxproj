@@ -109,6 +109,7 @@
 		B66BF6020B6B4738AF2E400D /* b2PolygonContact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9E75530E63FA4EC397C0D1E2 /* b2PolygonContact.cpp */; };
 		B82FE516E59446FB928ED0B8 /* b2Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 474731D0E50948D4B9522AA0 /* b2Timer.cpp */; };
 		BF8EA3BC1AE14D83A5112094 /* b2Contact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D9B3511148F4C0DB5FE5C5C /* b2Contact.cpp */; };
+		C26E07CC1E64B18E007C6D5B /* libOpenSFZ.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C26E07CB1E64B180007C6D5B /* libOpenSFZ.a */; };
 		C27757E51DF16AFB0030FDC9 /* libopencv_calib3d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C27757BB1DF16AFB0030FDC9 /* libopencv_calib3d.a */; };
 		C27757E71DF16AFB0030FDC9 /* libopencv_core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C27757BD1DF16AFB0030FDC9 /* libopencv_core.a */; };
 		C27757EC1DF16AFB0030FDC9 /* libopencv_features2d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C27757C21DF16AFB0030FDC9 /* libopencv_features2d.a */; };
@@ -177,6 +178,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		C26E07CA1E64B180007C6D5B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C26E07C51E64B180007C6D5B /* OpenSFZ.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = A7CB306617261D2400F34741;
+			remoteInfo = OpenSFZ;
+		};
 		C2EC77911DA7157F00DB39C8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C2EC764B1DA7157E00DB39C8 /* libpd.xcodeproj */;
@@ -392,6 +400,7 @@
 		C20E7BFEBC8645C79A3B1048 /* b2RopeJoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2RopeJoint.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Joints/b2RopeJoint.cpp; sourceTree = "<group>"; };
 		C21AE8171E1B343D00AFB272 /* blockingconcurrentqueue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = blockingconcurrentqueue.h; sourceTree = "<group>"; };
 		C21AE8181E1B343D00AFB272 /* concurrentqueue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = concurrentqueue.h; sourceTree = "<group>"; };
+		C26E07C51E64B180007C6D5B /* OpenSFZ.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OpenSFZ.xcodeproj; path = ../blocks/OpenSFZ/OpenSFZ.xcodeproj; sourceTree = "<group>"; };
 		C27757BB1DF16AFB0030FDC9 /* libopencv_calib3d.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopencv_calib3d.a; path = ../blocks/OpenCV3/lib/macosx/libopencv_calib3d.a; sourceTree = "<group>"; };
 		C27757BD1DF16AFB0030FDC9 /* libopencv_core.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopencv_core.a; path = ../blocks/OpenCV3/lib/macosx/libopencv_core.a; sourceTree = "<group>"; };
 		C27757C21DF16AFB0030FDC9 /* libopencv_features2d.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopencv_features2d.a; path = ../blocks/OpenCV3/lib/macosx/libopencv_features2d.a; sourceTree = "<group>"; };
@@ -651,6 +660,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C26E07CC1E64B18E007C6D5B /* libOpenSFZ.a in Frameworks */,
 				262A88751DB594B700FE2336 /* CoreMIDI.framework in Frameworks */,
 				C2EC77971DA715B000DB39C8 /* libpd-osx.a in Frameworks */,
 				006D720419952D00008149E2 /* AVFoundation.framework in Frameworks */,
@@ -717,6 +727,7 @@
 		01B97315FEAEA392516A2CEA /* Blocks */ = {
 			isa = PBXGroup;
 			children = (
+				C26E07C51E64B180007C6D5B /* OpenSFZ.xcodeproj */,
 				26F323471DF74D5700EC9559 /* Gamepad */,
 				C2C874771DDBB2D40067E07D /* Cinder-Serial */,
 				C2EC763E1DA7157E00DB39C8 /* PureData */,
@@ -1227,6 +1238,14 @@
 				BC0814520A2C43AEAB643FDD /* include */,
 			);
 			name = OpenCV3;
+			sourceTree = "<group>";
+		};
+		C26E07C61E64B180007C6D5B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C26E07CB1E64B180007C6D5B /* libOpenSFZ.a */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		C27759351DF16E600030FDC9 /* OpenCV3 */ = {
@@ -2619,6 +2638,10 @@
 					ProductGroup = C2EC764C1DA7157E00DB39C8 /* Products */;
 					ProjectRef = C2EC764B1DA7157E00DB39C8 /* libpd.xcodeproj */;
 				},
+				{
+					ProductGroup = C26E07C61E64B180007C6D5B /* Products */;
+					ProjectRef = C26E07C51E64B180007C6D5B /* OpenSFZ.xcodeproj */;
+				},
 			);
 			projectRoot = "";
 			targets = (
@@ -2628,6 +2651,13 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		C26E07CB1E64B180007C6D5B /* libOpenSFZ.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libOpenSFZ.a;
+			remoteRef = C26E07CA1E64B180007C6D5B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		C2EC77921DA7157F00DB39C8 /* libpd-ios.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
