@@ -60,6 +60,43 @@ bool Score::isNoteOn( float playheadFrac, int note ) const
 	return isOn;
 }
 
+ScoreNotes
+Score::parseNotes() const
+{	
+	const auto &img = mQuantizedImage;
+	assert( mNoteCount == img.rows );
+
+	ScoreNotes notes;
+	notes.resize(mNoteCount);
+	
+	const float invcols = 1.f / (float)img.cols;
+	
+	for ( int y=0; y<mNoteCount; ++y )
+	{
+		for( int x=0; x<img.cols; ++x )
+		{
+			if ( isScoreValueHigh(img.at<unsigned char>(mNoteCount-1-y,x)) )
+			{
+				ScoreNote n;
+				
+				n.mStartTimeAsCol = x;
+				n.mStartTimeAsScoreFrac = (float)n.mStartTimeAsCol * invcols;
+				n.mLengthAsCols = getNoteLengthAsImageCols(img,x,y);
+				n.mLengthAsScoreFrac = (float)n.mLengthAsCols * invcols;
+				
+				// we used to cap the length in drawNotes, but that doesn't
+				// seem necesssary.
+				
+				notes[y].push_back(n);
+
+				x = x + n.mLengthAsCols + 1;
+			}
+		}
+	}
+	
+	return notes;
+}
+
 int Score::getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const
 {
 	int x2;
@@ -92,79 +129,72 @@ int Score::drawNotes( GameWorld::DrawType drawType ) const
 	
 	int numOnNotes=0;
 	
-	// collect notes into a batch
-	// (probably wise to extract this geometry/data once when processing vision data,
-	// then use it for both playback and drawing).
-	const float invcols = 1.f / (float)(mQuantizedImage.cols);
 	const float yheight = 1.f / (float)mNoteCount;
 	const float playheadFrac = getPlayheadFrac();
 
 	TriMesh mesh( TriMesh::Format().positions(2).colors(4) );	
-
-	for ( int y=0; y<mNoteCount; ++y )
+	
+	ScoreNotes notes = parseNotes();
+	// collect notes into a batch
+	// (probably wise to extract this geometry/data once when processing vision data,
+	// then use it for both playback and drawing).
+	
+	for ( int note=0; note<mNoteCount; ++note )
 	{
-		const float y1frac = y * yheight + yheight*.2f;
-		const float y2frac = y * yheight + yheight*.8f;
-
-		for( int x=0; x<mQuantizedImage.cols; ++x )
+		const float y1frac = note * yheight + yheight*.2f;
+		const float y2frac = note * yheight + yheight*.8f;
+		
+		for ( auto anote : notes[note] )
 		{
-			if ( isScoreValueHigh(mQuantizedImage.at<unsigned char>(mNoteCount-1-y,x)) )
+			// how wide?
+			const float x1frac = anote.mStartTimeAsScoreFrac;
+			const float x2frac = anote.mStartTimeAsScoreFrac + anote.mLengthAsScoreFrac;
+
+			vec2 start1 = fracToQuad( vec2( x1frac, y1frac) ) ;
+			vec2 end1   = fracToQuad( vec2( x2frac, y1frac) ) ;
+
+			vec2 start2 = fracToQuad( vec2( x1frac, y2frac) ) ;
+			vec2 end2   = fracToQuad( vec2( x2frac, y2frac) ) ;
+
+			const bool isInFlight = playheadFrac > x1frac && playheadFrac < x2frac;
+			if (isInFlight) numOnNotes++;
+			
+
+			/*	0--1 .. 2
+				|  |
+				3--2 .. 1
+				.  .
+				s  e
+			*/
+			float strikeColor;
 			{
-				// how wide?
-				int length = getNoteLengthAsImageCols(mQuantizedImage,x,y);
-
-				const float x1frac = x * invcols;
-				const float x2frac = min( 1.f, (x+length) * invcols );
-
-				vec2 start1 = fracToQuad( vec2( x1frac, y1frac) ) ;
-				vec2 end1   = fracToQuad( vec2( x2frac, y1frac) ) ;
-
-				vec2 start2 = fracToQuad( vec2( x1frac, y2frac) ) ;
-				vec2 end2   = fracToQuad( vec2( x2frac, y2frac) ) ;
-
-				const bool isInFlight = playheadFrac > x1frac && playheadFrac < x2frac;
-				if (isInFlight) numOnNotes++;
-				
-
-				/*	0--1 .. 2
-				    |  |
-					3--2 .. 1
-					.  .
-					s  e
-				*/
-				float strikeColor;
-				{
-					float t = playheadFrac;
-					if (t<x1frac) t += 1.f; // make sure t is always >= x1frac (wrap it)
-					strikeColor = 1.f - constrain( (t - x2frac)/kNoteFadeOutTimeFrac, 0.f, 1.f );
-				}
-				
-				vec2 v[4] = {start2,end2,end1,start1};
-				ColorA color = lerp( mInstrument->mNoteOffColor, mInstrument->mNoteOnColor, strikeColor );
-				
-				// stretch it out
-				if (isInFlight) // this conditional is redundant to inflate==0.f
-				{
-					float inflate;
-					
-					inflate = 1.f - (playheadFrac - x1frac) / (x2frac - x1frac);
-					inflate *= inflate;
-					inflate *= kInflateOnHitFrac;
-
-					vec2 xd = xvec * inflate;
-					vec2 yd = -yvec * inflate; // don't get why this needs to be negative, but it does. :P
-					
-					v[0] += -xd +yd;
-					v[1] +=  xd +yd;
-					v[2] +=  xd -yd;
-					v[3] += -xd -yd;
-				}
-
-				appendQuad(mesh, color, v);
-				
-				// skip ahead
-				x = x + length+1;
+				float t = playheadFrac;
+				if (t<x1frac) t += 1.f; // make sure t is always >= x1frac (wrap it)
+				strikeColor = 1.f - constrain( (t - x2frac)/kNoteFadeOutTimeFrac, 0.f, 1.f );
 			}
+			
+			vec2 v[4] = {start2,end2,end1,start1};
+			ColorA color = lerp( mInstrument->mNoteOffColor, mInstrument->mNoteOnColor, strikeColor );
+			
+			// stretch it out
+			if (isInFlight) // this conditional is redundant to inflate==0.f
+			{
+				float inflate;
+				
+				inflate = 1.f - (playheadFrac - x1frac) / (x2frac - x1frac);
+				inflate *= inflate;
+				inflate *= kInflateOnHitFrac;
+
+				vec2 xd = xvec * inflate;
+				vec2 yd = -yvec * inflate; // don't get why this needs to be negative, but it does. :P
+				
+				v[0] += -xd +yd;
+				v[1] +=  xd +yd;
+				v[2] +=  xd -yd;
+				v[3] += -xd -yd;
+			}
+
+			appendQuad(mesh, color, v);
 		}
 	}
 
