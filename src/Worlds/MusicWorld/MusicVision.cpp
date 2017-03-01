@@ -722,6 +722,7 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& score
 			switch( s.mInstrument->mSynthType )
 			{
 				// quantize notes
+				case Instrument::SynthType::Sampler:
 				case Instrument::SynthType::MIDI:
 				case Instrument::SynthType::RobitPokie:
 				

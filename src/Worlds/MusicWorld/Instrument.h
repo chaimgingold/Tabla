@@ -15,7 +15,8 @@
 #include "PureDataNode.h"
 #include "RtMidi.h"
 #include "Cinder-Serial.h"
-#include "OpenSFZ.h"
+#include "OpenSFZNode.h"
+
 
 using namespace cipd;
 using namespace Cinder::Serial;
@@ -112,7 +113,8 @@ public:
 		Additive    = 1,
 		MIDI	    = 2,
 		RobitPokie  = 3,
-		Meta	    = 4  // controls global params
+		Meta	    = 4, // controls global params
+		Sampler     = 5
 	};
 
 	SynthType mSynthType;
@@ -121,7 +123,7 @@ public:
 
 	int mAdditiveSynthID;
 	PureDataNodeRef mPd;
-	
+	OpenSFZNodeRef mOpenSFZ;
 	// Arpeggiator
 	void tickArpeggiator();
 

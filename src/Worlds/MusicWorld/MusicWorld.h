@@ -74,6 +74,7 @@ private:
 	// synthesis
 	PureDataNodeRef	mPd;	// synth engine
 	PatchRef		mPatch;			// music patch
+	OpenSFZNodeRef  mOpenSFZ;
 
 	void setupSynthesis();
 	void updateAdditiveScoreSynthesis();

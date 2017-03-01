@@ -30,7 +30,7 @@
 extern float decibelsToGain(float db);
 extern float getMidiNoteInHertz(int noteNumber);
 
-typedef long int64;
+//
 
 
 

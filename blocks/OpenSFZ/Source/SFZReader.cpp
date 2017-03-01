@@ -4,6 +4,7 @@
 #include "StringSlice.h"
 
 #include <sstream>
+typedef long int64;
 
 SFZReader::SFZReader(SFZSound* soundIn)
 	: sound(soundIn), line(1)

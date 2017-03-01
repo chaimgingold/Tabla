@@ -37,6 +37,7 @@
 #include "TablaWindow.h"
 
 #include "PureDataNode.h"
+#include "OpenSFZNode.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -94,6 +95,7 @@ class TablaApp : public App {
 	
 	// shared resources
 	cipd::PureDataNodeRef getPd() const { return mPd; }
+	OpenSFZNodeRef getOpenSFZ() const { return mOpenSFZ; }
 	gl::TextureFontRef getFont() const { return mTextureFont; }
 	const TablaAppParams& getParams() const { return mParams; }
 
@@ -220,7 +222,7 @@ private:
 	// === Audio Synthesis ===
 	cipd::PureDataNodeRef mPd;
 	cipd::PatchRef mAVClackerPatch;
-	
+	OpenSFZNodeRef mOpenSFZ;
 	void setupPureData();
 };
 

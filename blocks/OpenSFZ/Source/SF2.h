@@ -6,6 +6,8 @@
 #include "SFZCommon.h"
 #include "InputStream.h"
 
+typedef long int64;
+
 #define SF2Field(type, name) 	\
 	type	name;
 

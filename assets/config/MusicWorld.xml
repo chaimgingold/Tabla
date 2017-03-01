@@ -224,6 +224,23 @@
 			<MapNotesToChannels>0</MapNotesToChannels>
 		</Instrument>
 
+<!--		<Instrument>-->
+<!--			<PlayheadColor>FF8844</PlayheadColor>-->
+<!--			<ScoreColor>005566</ScoreColor>-->
+<!--			<ScoreColorDownLines>884400</ScoreColorDownLines>-->
+<!--			<NoteOffColor>BBBBFF</NoteOffColor>-->
+<!--			<NoteOnColor>FF8844</NoteOnColor>-->
+<!---->
+<!--			<Name>6Volca Bass</Name>-->
+<!--			<IconFileName>keyboard2.png</IconFileName>-->
+<!--			<SynthType>MIDI</SynthType>-->
+<!---->
+<!--			<Port>3</Port>-->
+<!--			<Channel>0</Channel>-->
+<!--			<MapNotesToChannels>0</MapNotesToChannels>-->
+<!---->
+<!--		</Instrument>-->
+
 		<Instrument>
 			<PlayheadColor>FF8844</PlayheadColor>
 			<ScoreColor>005566</ScoreColor>
@@ -233,11 +250,12 @@
 
 			<Name>6Volca Bass</Name>
 			<IconFileName>keyboard2.png</IconFileName>
-			<SynthType>MIDI</SynthType>
+			<SynthType>Sampler</SynthType>
 
-			<Port>3</Port>
+			<Port>0</Port>
 			<Channel>0</Channel>
 			<MapNotesToChannels>0</MapNotesToChannels>
+
 		</Instrument>
 
 		<Instrument>

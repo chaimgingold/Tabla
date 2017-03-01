@@ -51,6 +51,7 @@ void Instrument::setParams( XmlTree xml )
 		synths["MIDI"] = SynthType::MIDI;
 		synths["RobitPokie"] = SynthType::RobitPokie;
 		synths["Meta"] = SynthType::Meta;
+		synths["Sampler"] = SynthType::Sampler;
 		auto i = synths.find(t);
 		mSynthType = (i!=synths.end()) ? i->second : SynthType::MIDI ; // default to MIDI
 
@@ -102,7 +103,9 @@ void Instrument::setup()
 
 bool Instrument::isNoteType() const
 {
-	return mSynthType==Instrument::SynthType::MIDI || mSynthType==Instrument::SynthType::RobitPokie;
+	return mSynthType==Instrument::SynthType::MIDI
+		|| mSynthType==Instrument::SynthType::RobitPokie
+		|| mSynthType==Instrument::SynthType::Sampler;
 }
 
 bool Instrument::isAvailable() const
@@ -258,7 +261,9 @@ void Instrument::doNoteOn( int note, float duration )
 			case SynthType::MIDI:
 				sendNoteOn( mMidiOut, channel, note, velocity );
 				break;
-
+			case SynthType::Sampler:
+				mOpenSFZ->mSynth->noteOn(1, note, (float)velocity/127.0);
+				break;
 			default:
 				break;
 		}
@@ -314,7 +319,8 @@ void Instrument::doNoteOff( int note )
 		case SynthType::MIDI:
 			sendNoteOff( mMidiOut, channelForNote(note), note);
 			break;
-
+		case SynthType::Sampler:
+			mOpenSFZ->mSynth->noteOff(1, note, true);
 		default:
 			break;
 	}

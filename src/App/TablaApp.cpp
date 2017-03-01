@@ -17,6 +17,8 @@
 
 #include <stdlib.h> // system()
 
+
+
 const int  kRequestFrameRate = 60 ; // was 120, don't think it matters/we got there
 const vec2 kDefaultWindowSize( 640, 480 );
 
@@ -306,6 +308,12 @@ void TablaApp::setupPureData()
 
 	// Connect synth to master output
 	mPd >> audio::master()->getOutput();
+
+	// Create a SoundFont sample player
+	mOpenSFZ = ctx->makeNode(new OpenSFZNode( audio::Node::Format().autoEnable() ));
+
+	// Connect to output
+	mOpenSFZ >> audio::master()->getOutput();
 
 	// Enable Cinder audio
 	ctx->enable();

@@ -4,6 +4,7 @@
 #include "WinTypes.h"
 #include "InputStream.h"
 
+typedef long int64;
 
 struct RIFFChunk {
 	enum Type {

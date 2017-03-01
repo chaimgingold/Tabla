@@ -553,7 +553,7 @@ void Score::draw( GameWorld::DrawType drawType ) const
 				drawMetaParam(drawType);
 			}
 			break;
-			
+			case Instrument::SynthType::Sampler:
 			case Instrument::SynthType::MIDI:
 			case Instrument::SynthType::RobitPokie:
 			{
@@ -627,6 +627,7 @@ void Score::tick(float globalPhase, float beatDuration)
 		break;
 
 		// Notes
+		case Instrument::SynthType::Sampler:
 		case Instrument::SynthType::MIDI:
 		case Instrument::SynthType::RobitPokie:
 		{

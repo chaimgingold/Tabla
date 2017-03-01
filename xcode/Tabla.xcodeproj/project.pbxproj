@@ -109,6 +109,7 @@
 		B66BF6020B6B4738AF2E400D /* b2PolygonContact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9E75530E63FA4EC397C0D1E2 /* b2PolygonContact.cpp */; };
 		B82FE516E59446FB928ED0B8 /* b2Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 474731D0E50948D4B9522AA0 /* b2Timer.cpp */; };
 		BF8EA3BC1AE14D83A5112094 /* b2Contact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D9B3511148F4C0DB5FE5C5C /* b2Contact.cpp */; };
+		C21A1E2A1E66095000399277 /* OpenSFZNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C21A1E281E66095000399277 /* OpenSFZNode.cpp */; };
 		C26E07CC1E64B18E007C6D5B /* libOpenSFZ.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C26E07CB1E64B180007C6D5B /* libOpenSFZ.a */; };
 		C27757E51DF16AFB0030FDC9 /* libopencv_calib3d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C27757BB1DF16AFB0030FDC9 /* libopencv_calib3d.a */; };
 		C27757E71DF16AFB0030FDC9 /* libopencv_core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C27757BD1DF16AFB0030FDC9 /* libopencv_core.a */; };
@@ -398,6 +399,8 @@
 		C0B1C0F0E0A44565970E6E65 /* b2Body.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2Body.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/b2Body.cpp; sourceTree = "<group>"; };
 		C159A0020C244479B7849346 /* b2EdgeAndPolygonContact.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2EdgeAndPolygonContact.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Contacts/b2EdgeAndPolygonContact.cpp; sourceTree = "<group>"; };
 		C20E7BFEBC8645C79A3B1048 /* b2RopeJoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = b2RopeJoint.cpp; path = ../blocks/Box2D/src/Box2D/Dynamics/Joints/b2RopeJoint.cpp; sourceTree = "<group>"; };
+		C21A1E281E66095000399277 /* OpenSFZNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpenSFZNode.cpp; path = ../blocks/OpenSFZNode.cpp; sourceTree = "<group>"; };
+		C21A1E291E66095000399277 /* OpenSFZNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OpenSFZNode.h; path = ../blocks/OpenSFZNode.h; sourceTree = "<group>"; };
 		C21AE8171E1B343D00AFB272 /* blockingconcurrentqueue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = blockingconcurrentqueue.h; sourceTree = "<group>"; };
 		C21AE8181E1B343D00AFB272 /* concurrentqueue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = concurrentqueue.h; sourceTree = "<group>"; };
 		C26E07C51E64B180007C6D5B /* OpenSFZ.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OpenSFZ.xcodeproj; path = ../blocks/OpenSFZ/OpenSFZ.xcodeproj; sourceTree = "<group>"; };
@@ -727,6 +730,8 @@
 		01B97315FEAEA392516A2CEA /* Blocks */ = {
 			isa = PBXGroup;
 			children = (
+				C21A1E281E66095000399277 /* OpenSFZNode.cpp */,
+				C21A1E291E66095000399277 /* OpenSFZNode.h */,
 				C26E07C51E64B180007C6D5B /* OpenSFZ.xcodeproj */,
 				26F323471DF74D5700EC9559 /* Gamepad */,
 				C2C874771DDBB2D40067E07D /* Cinder-Serial */,
@@ -2715,6 +2720,7 @@
 				C2C874931DDBB2D40067E07D /* win.cc in Sources */,
 				26CCA2DB1E089DE7005F7C24 /* PinballParts.cpp in Sources */,
 				C2C874901DDBB2D40067E07D /* list_ports_osx.cc in Sources */,
+				C21A1E2A1E66095000399277 /* OpenSFZNode.cpp in Sources */,
 				58F3F572E622458BA5EA9B45 /* b2Distance.cpp in Sources */,
 				26A451641E54420600BCAC25 /* TablaAppParams.cpp in Sources */,
 				FE95B791332E4B49916DF787 /* b2DynamicTree.cpp in Sources */,
