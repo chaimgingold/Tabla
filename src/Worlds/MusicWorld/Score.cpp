@@ -39,84 +39,46 @@ void drawLines( vector<vec2> points )
 	ctx->popVao();
 }
 
-bool Score::isScoreValueHigh( uchar value ) const
+const ScoreNote*
+ScoreNotes::isNoteOn( float playheadFrac, int note ) const
 {
-	const int kValueThresh = 100;
-
-	return value < kValueThresh ;
-	// if dark, then high
-	// else low
-}
-
-bool Score::isNoteOn( float playheadFrac, int note ) const
-{
-	int x = constrain( (int)(playheadFrac * (float)(mQuantizedImage.cols)), 0, mQuantizedImage.cols-1 );
-	int y = mNoteCount-1-note;
-	if (y >= mQuantizedImage.rows || y < 0 || x < 0) {
-		return false;
-	}
-	bool isOn = isScoreValueHigh(mQuantizedImage.at<unsigned char>(y,x));
+	if ( note < 0 || note >= size() ) return 0;
 	
-	return isOn;
-}
-
-ScoreNotes
-Score::parseNotes() const
-{	
-	const auto &img = mQuantizedImage;
-	assert( mNoteCount == img.rows );
-
-	ScoreNotes notes;
-	notes.resize(mNoteCount);
-	
-	const float invcols = 1.f / (float)img.cols;
-	
-	for ( int y=0; y<mNoteCount; ++y )
+	for( const auto &n : (*this)[note] )
 	{
-		for( int x=0; x<img.cols; ++x )
+		if ( playheadFrac >= n.mStartTimeAsScoreFrac )
 		{
-			if ( isScoreValueHigh(img.at<unsigned char>(mNoteCount-1-y,x)) )
-			{
-				ScoreNote n;
-				
-				n.mStartTimeAsCol = x;
-				n.mStartTimeAsScoreFrac = (float)n.mStartTimeAsCol * invcols;
-				n.mLengthAsCols = getNoteLengthAsImageCols(img,x,y);
-				n.mLengthAsScoreFrac = (float)n.mLengthAsCols * invcols;
-				
-				// we used to cap the length in drawNotes, but that doesn't
-				// seem necesssary.
-				
-				notes[y].push_back(n);
-
-				x = x + n.mLengthAsCols + 1;
+			auto end = n.mStartTimeAsScoreFrac + n.mLengthAsScoreFrac;
+			
+			if ( playheadFrac < end ) {
+				return &n;
 			}
 		}
+		else return 0;
 	}
 	
-	return notes;
+	return 0;
 }
 
-int Score::getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const
+const ScoreNote*
+ScoreNotes::isNoteOn( int playheadCol, int note ) const
 {
-	int x2;
-
-	for( x2=x;
-		 x2<image.cols
-			&& isScoreValueHigh(image.at<unsigned char>(image.rows-1-y,x2)) ;
-		 ++x2 )
-	{}
-
-	int len = x2-x;
-
-	return len;
-}
-
-float Score::getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const
-{
-	// can return 0, which means we filtered out super short image noise-notes
-
-	return (float)getNoteLengthAsImageCols(image,x,y) / (float)image.cols;
+	if ( note < 0 || note >= size() ) return 0;
+	
+	for( const auto &n : (*this)[note] )
+	{
+		if ( playheadCol >= n.mStartTimeAsCol )
+		{
+			auto end = n.mStartTimeAsCol + n.mLengthAsCols;
+			
+			if ( playheadCol < end ) {
+				return &n;
+			}
+		}
+		else return 0;
+	}
+	
+	return 0;
 }
 
 int Score::drawNotes( GameWorld::DrawType drawType ) const
@@ -134,17 +96,12 @@ int Score::drawNotes( GameWorld::DrawType drawType ) const
 
 	TriMesh mesh( TriMesh::Format().positions(2).colors(4) );	
 	
-	ScoreNotes notes = parseNotes();
-	// collect notes into a batch
-	// (probably wise to extract this geometry/data once when processing vision data,
-	// then use it for both playback and drawing).
-	
 	for ( int note=0; note<mNoteCount; ++note )
 	{
 		const float y1frac = note * yheight + yheight*.2f;
 		const float y2frac = note * yheight + yheight*.8f;
 		
-		for ( auto anote : notes[note] )
+		for ( auto anote : mNotes[note] )
 		{
 			// how wide?
 			const float x1frac = anote.mStartTimeAsScoreFrac;
@@ -348,7 +305,7 @@ tIconAnimState Score::getIconPoseFromScore_Percussive( float playheadFrac ) cons
 	
 	for( int note=0; note<mNoteCount; note++ )
 	{
-		if ( isNoteOn(playheadFrac,note) )
+		if ( mNotes.isNoteOn(playheadFrac,note) )
 		{
 			numOnNotes++;
 			pose += poses[ (note*3)%13 ]; // separate similar adjacent anim frames (in note space)
@@ -390,7 +347,7 @@ tIconAnimState Score::getIconPoseFromScore_Melodic( float playheadFrac ) const
 	
 	for( int note=0; note<mNoteCount; note++ )
 	{
-		if ( isNoteOn(playheadFrac,note) )
+		if ( mNotes.isNoteOn(playheadFrac,note) )
 		{
 			noteIndexSum += note;
 			numOnNotes++;
@@ -661,36 +618,40 @@ void Score::tick(float globalPhase, float beatDuration)
 		case Instrument::SynthType::RobitPokie:
 		{
 			// send midi notes
-			if (!mQuantizedImage.empty())
+			if (!mNotes.empty())
 			{
-				int x = getPlayheadFrac() * (float)(mQuantizedImage.cols);
+				int x = getPlayheadFrac() * (float)mNotes.mNumCols;
 
-				for ( int y=0; y<mNoteCount; ++y )
+				for ( int y=0; y<mNotes.size(); ++y )
 				{
-					unsigned char value = mQuantizedImage.at<unsigned char>(mNoteCount-1-y,x);
-
 					int note = noteForY(y);
-
-					if ( isScoreValueHigh(value) )
+					
+					const ScoreNote* isOn = mNotes.isNoteOn(x,y);
+					
+					if (isOn)
 					{
 						float duration =
 						beatDuration *
 						(float)getQuantizedBeatCount() *
-						getNoteLengthAsScoreFrac(mQuantizedImage,x,y);
+						isOn->mLengthAsScoreFrac;
+						// Note: that if we trigger late, we will go on for too long...
 
 						if (duration>0)
 						{
 							mInstrument->doNoteOn( note, duration );
 						}
 					}
-					// See if the note was previously triggered but no longer exists, and turn it off if so
-					else if (mInstrument->isNoteInFlight( note ))
+					else
 					{
-						// TODO: this should work as long a there isn't >1 score per instrument. In that case,
-						// this will start to behave weirdly. Proper solution is to scan all scores and
-						// aggregate all the on notes, and then join the list of desired on notes to actual on notes
-						// in a single pass, taking action to on/off them as needed.
-						mInstrument->doNoteOff( note );
+						// See if the note was previously triggered but no longer exists, and turn it off if so
+						if (mInstrument->isNoteInFlight( note ))
+						{
+							// TODO: this should work as long a there isn't >1 score per instrument. In that case,
+							// this will start to behave weirdly. Proper solution is to scan all scores and
+							// aggregate all the on notes, and then join the list of desired on notes to actual on notes
+							// in a single pass, taking action to on/off them as needed.
+							mInstrument->doNoteOff( note );
+						}
 					}
 				}
 			}

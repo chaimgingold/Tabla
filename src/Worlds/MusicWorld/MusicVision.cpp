@@ -729,6 +729,8 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& score
 						doTemporalBlend,oldTemporalBlendImage,
 						s.getQuantizedBeatCount(), s.mNoteCount );
 				
+					s.mNotes = getNotesFromQuantizedImage(s.mQuantizedImage);
+					
 					break;
 
 				// get meta-param
@@ -750,4 +752,70 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& score
 			} // switch
 		} // if
 	} // for
+}
+
+bool MusicVision::isScoreValueHigh( uchar value ) const
+{
+	const int kValueThresh = 100;
+
+	return value < kValueThresh ;
+	// if dark, then high
+	// else low
+}
+
+ScoreNotes
+MusicVision::getNotesFromQuantizedImage( cv::Mat img ) const
+{	
+	ScoreNotes notes;
+	notes.resize(mNoteCount);
+	notes.mNumCols = img.cols;
+	
+	const float invcols = 1.f / (float)img.cols;
+	
+	for ( int y=0; y<mNoteCount; ++y )
+	{
+		for( int x=0; x<img.cols; ++x )
+		{
+			if ( isScoreValueHigh(img.at<unsigned char>(mNoteCount-1-y,x)) )
+			{
+				ScoreNote n;
+				
+				n.mStartTimeAsCol = x;
+				n.mStartTimeAsScoreFrac = (float)n.mStartTimeAsCol * invcols;
+				n.mLengthAsCols = getNoteLengthAsImageCols(img,x,y);
+				n.mLengthAsScoreFrac = (float)n.mLengthAsCols * invcols;
+				
+				// we used to cap the length in drawNotes, but that doesn't
+				// seem necesssary.
+				
+				notes[y].push_back(n);
+
+				x = x + n.mLengthAsCols + 1;
+			}
+		}
+	}
+	
+	return notes;
+}
+
+int MusicVision::getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const
+{
+	int x2;
+
+	for( x2=x;
+		 x2<image.cols
+			&& isScoreValueHigh(image.at<unsigned char>(image.rows-1-y,x2)) ;
+		 ++x2 )
+	{}
+
+	int len = x2-x;
+
+	return len;
+}
+
+float MusicVision::getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const
+{
+	// can return 0, which means we filtered out super short image noise-notes
+
+	return (float)getNoteLengthAsImageCols(image,x,y) / (float)image.cols;
 }

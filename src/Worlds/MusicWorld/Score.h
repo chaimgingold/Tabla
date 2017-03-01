@@ -12,23 +12,29 @@
 #include "Instrument.h"
 #include "MusicStamp.h"
 
-// note
+// notes
 struct ScoreNote
-{
-	int   mStartTimeAsCol;
+{	
+	int   mStartTimeAsCol; // 0, 1, 2..
+	int   mLengthAsCols; // 1, 2, ...
+
+	// 0..1
 	float mStartTimeAsScoreFrac;
-	int   mLengthAsCols; // 1, 2, 3, ...
-	float mLengthAsScoreFrac; // 0..1
+	float mLengthAsScoreFrac;
 };
 
 class ScoreNotes : public vector<vector<ScoreNote>>
 {
 public:
-//	bool isNoteOn( float playheadFrac, int note ) const; // TODO	
-};
 	// for storing parsed notes.
 	// - first index is note
 	// - then, a list of notes, in order of start time
+
+	int   mNumCols=0;
+
+	const ScoreNote* isNoteOn( float playheadFrac, int note ) const;
+	const ScoreNote* isNoteOn( int    playheadCol, int note ) const;		
+};
 
 // scores
 class Score
@@ -59,6 +65,7 @@ public:
 	cv::Mat		mQuantizedImage;	// quantized image data for midi playback
 	float		mMetaParamSliderValue=-1.f; // 0..1
 	gl::TextureRef mTexture; // used for additive, so we don't do it per frame
+	ScoreNotes	mNotes;
 	
 	// synth parameters
 	float		mPosition=0; // progress from 0-mDuration
@@ -99,13 +106,6 @@ public:
 	Scale mScale;
 	int noteForY( int y ) const;
 
-	// score vision
-	// TODO: move this into MusicVision/and or ScoreNotes
-	bool  isScoreValueHigh( uchar ) const;
-	float getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const;
-	int   getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const;
-	ScoreNotes parseNotes() const;
-
 	// additive synth
 	void updateAdditiveSynthesis();
 
@@ -118,14 +118,10 @@ private:
 	tIconAnimState getIconPoseFromScore_Additive( float playheadFrac ) const;
 	tIconAnimState getIconPoseFromScore_Meta( float playheadFrac ) const;
 
-	bool isNoteOn( float playheadFrac, int note ) const; // TODO: move into ScoreNotes
-	
 	int  drawNotes		( GameWorld::DrawType drawType ) const; // returns # on notes
 	void drawScoreLines	( GameWorld::DrawType drawType ) const;
 	void drawPlayhead	( GameWorld::DrawType drawType ) const;
 	void drawMetaParam	( GameWorld::DrawType drawType ) const;
-	
-	//void drawInstrumentIcon( tIconAnimState pose ) const;
 };
 
 class ScoreVec : public vector<Score>
