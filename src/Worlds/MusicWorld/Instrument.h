@@ -161,6 +161,7 @@ public:
 	uint8_t serialCharForNote(int note);
 
 private:
+	void updateNoteSynthesis( const Scores& );
 	void updateAdditiveSynthesis( const Scores& ) const;
 	void updateAdditiveSynthesisWithVision( const Scores& ) const;	
 	

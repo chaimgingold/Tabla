@@ -71,6 +71,7 @@ public:
 	
 	// synth parameters
 	float		mPosition=0; // progress from 0-mDuration
+	float		mBeatDuration=0;
 	void        tick(float globalPhase, float beatDuration);
 
 	int			mOctave=-1; // controlled by mOctaveFrac
@@ -106,7 +107,7 @@ public:
 	float		getMetaParamSliderValue( InstrumentRef ) const;
 	
 	Scale mScale;
-	int noteForY( InstrumentRef, int y ) const;
+	int noteForY( const Instrument*, int y ) const;
 
 	// icon animation
 	tIconAnimState getIconPoseFromScore( InstrumentRef, float playheadFrac ) const;

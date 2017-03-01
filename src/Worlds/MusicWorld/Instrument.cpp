@@ -381,6 +381,12 @@ void Instrument::updateSynthesis( const vector<Score const*>& scores )
 		case Instrument::SynthType::Additive:
 			updateAdditiveSynthesis(scores);
 			break;
+
+		// Notes
+		case Instrument::SynthType::MIDI:
+		case Instrument::SynthType::RobitPokie:
+			updateNoteSynthesis(scores);
+			break;
 		
 		default:
 		break;
@@ -402,6 +408,59 @@ void Instrument::updateSynthesisWithVision( const Scores& scores )
 		default:
 		break;
 	}
+}
+
+void Instrument::updateNoteSynthesis( const Scores& scores )
+{
+	set<NoteNum> onSet; // notes that are presently on in our scores 
+	
+	for( auto score : scores )
+	{
+		// send midi notes
+		if (!score->mNotes.empty())
+		{
+			int x = score->getPlayheadFrac() * (float)score->mNotes.mNumCols;
+
+			for ( int y=0; y<score->mNotes.size(); ++y )
+			{
+				int note = score->noteForY(this,y);
+				
+				const ScoreNote* isOn = score->mNotes.isNoteOn(x,y);
+				
+				if (isOn)
+				{
+					float duration =
+						score->mBeatDuration *
+						(float)score->getQuantizedBeatCount() *
+						isOn->mLengthAsScoreFrac;
+						// Note: that if we trigger late, we will go on for too long...
+
+					if (duration>0)
+					{
+						doNoteOn( note, duration );
+					}
+
+					onSet.insert(note);
+				}
+			}
+		}
+	}
+	
+	// turn off in-flight notes that aren't on right now
+	vector<NoteNum> turnOff;
+	
+	for( auto n : mOnNotes )
+	{
+		if ( onSet.find(n.first)==onSet.end() )
+		{
+			turnOff.push_back(n.first); // queue them up so we don't mess up iterator
+		}
+	}
+
+	for( auto n : turnOff ) doNoteOff(n); 
+	
+	// arpeggiate
+	tickArpeggiator();
 }
 
 void Instrument::updateAdditiveSynthesis( const Scores& scores ) const

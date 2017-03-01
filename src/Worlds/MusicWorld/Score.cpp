@@ -605,8 +605,10 @@ PolyLine2 Score::getPolyLine() const
 
 void Score::tick(float globalPhase, float beatDuration)
 {
+	mBeatDuration = beatDuration;
 	mPosition = fmod(globalPhase, (float)getBeatCount() );
 
+	/*
 	for( auto instrument : mInstruments )
 	{
 		switch( instrument->mSynthType )
@@ -661,7 +663,7 @@ void Score::tick(float globalPhase, float beatDuration)
 			default:
 			break;
 		}
-	}
+	}*/
 }
 
 float Score::getPlayheadFrac() const
@@ -708,7 +710,7 @@ float Score::getMetaParamSliderValue( InstrumentRef i ) const
 	else return valueit->second;
 }
 
-int Score::noteForY( InstrumentRef instrument, int y ) const
+int Score::noteForY( const Instrument* instrument, int y ) const
 {	
 	bool isPokie = instrument->mSynthType == Instrument::SynthType::RobitPokie;
 	if (instrument && instrument->mMapNotesToChannels && !isPokie) {
@@ -724,28 +726,6 @@ int Score::noteForY( InstrumentRef instrument, int y ) const
 
 	return note + extraOctaveShift + mRootNote + mOctave*12;
 }
-/*
-float Score::getQuadMaxInteriorAngle() const
-{
-	float mang=0.f;
-
-	for( int i=0; i<4; ++i )
-	{
-		vec2 a = mQuad[i];
-		vec2 x = mQuad[(i+1)%4];
-		vec2 b = mQuad[(i+2)%4];
-
-		a -= x;
-		b -= x;
-
-		float ang = acos( dot(a,b) / (length(a)*length(b)) );
-
-		if (ang>mang) mang=ang;
-
-	}
-
-	return mang;
-}*/
 
 const Score* ScoreVec::pick( vec2 p ) const
 {
