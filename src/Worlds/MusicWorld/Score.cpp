@@ -611,15 +611,6 @@ void Score::tick(float globalPhase, float beatDuration)
 	{
 		switch( instrument->mSynthType )
 		{
-			// Additive
-			case Instrument::SynthType::Additive:
-			{
-				// Update time
-				instrument->mPd->sendFloat(toString(instrument->mAdditiveSynthID)+string("phase"),
-													  getPlayheadFrac() );
-			}
-			break;
-
 			// Notes
 			case Instrument::SynthType::MIDI:
 			case Instrument::SynthType::RobitPokie:
@@ -670,67 +661,6 @@ void Score::tick(float globalPhase, float beatDuration)
 			default:
 			break;
 		}
-	}
-}
-
-void Score::updateAdditiveSynthesis()
-{
-	InstrumentRef instr = mInstruments.hasSynthType(Instrument::SynthType::Additive);
-
-	// send image for additive synthesis
-	if ( instr && !mImage.empty() )
-	{
-		PureDataNodeRef pd = instr->mPd;
-		int additiveSynthID = instr->mAdditiveSynthID;
-
-		int rows = mImage.rows;
-		int cols = mImage.cols;
-
-		// Update pan
-		pd->sendFloat(toString(additiveSynthID)+string("pan"),
-							     mPan);
-
-		// Update per-score pitch
-		pd->sendFloat(toString(additiveSynthID)+string("note-root"),
-								 20 );
-
-		// Update range of notes covered by additive synthesis
-		pd->sendFloat(toString(additiveSynthID)+string("note-range"),
-								 100 );
-
-		// Update resolution
-		pd->sendFloat(toString(additiveSynthID)+string("resolution-x"),
-								 cols);
-
-		pd->sendFloat(toString(additiveSynthID)+string("resolution-y"),
-								 rows);
-
-		// Create a float version of the image
-		cv::Mat imageFloatMat;
-
-		// Copy the uchar version scaled 0-1
-		mImage.convertTo(imageFloatMat, CV_32FC1, 1/255.0);
-
-		// Convert to a vector to pass to Pd
-
-		// Grab the current column at the playhead. We send updates even if the
-		// phase doesn't change enough to change the colIndex,
-		// as the pixels might have changed instead.
-		float phase = getPlayheadFrac();
-		int colIndex = imageFloatMat.cols * phase;
-
-		cv::Mat columnMat = imageFloatMat.col(colIndex);
-
-		// We use a list message rather than writeArray as it causes less contention with Pd's execution thread
-		auto ampsByFreq = pd::List();
-		for (int i = 0; i < columnMat.rows; i++) {
-			ampsByFreq.addFloat(columnMat.at<float>(i, 0));
-		}
-
-		pd->sendList(toString(additiveSynthID)+string("vals"), ampsByFreq);
-
-		// Turn the synth on
-		pd->sendFloat(toString(additiveSynthID)+string("volume"), 1);
 	}
 }
 

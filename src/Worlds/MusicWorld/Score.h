@@ -103,17 +103,13 @@ public:
 	// x is axis along which playhead moves; y is perp to it (parallel to playhead)
 	vec2		fracToQuad( vec2 frac ) const; // frac.x = time[0,1], frac.y = note_space[0,1]
 	vec2		getCentroid() const { return fracToQuad(vec2(.5,.5)); }
-//	float		getQuadMaxInteriorAngle() const; // looking for concave-ish shapes...
 	float		getMetaParamSliderValue( InstrumentRef ) const;
 	
 	Scale mScale;
 	int noteForY( InstrumentRef, int y ) const;
 
-	// additive synth
-	void updateAdditiveSynthesis();
-
 	// icon animation
-	tIconAnimState getIconPoseFromScore( InstrumentRef instrument, float playheadFrac ) const;
+	tIconAnimState getIconPoseFromScore( InstrumentRef, float playheadFrac ) const;
 
 private:
 	tIconAnimState getIconPoseFromScore_Melodic   ( InstrumentRef, float playheadFrac ) const;

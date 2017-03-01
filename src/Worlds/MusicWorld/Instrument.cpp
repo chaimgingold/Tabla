@@ -14,7 +14,7 @@
 #include "Pipeline.h"
 #include "ocv.h"
 #include "RtMidi.h"
-
+#include "Score.h"
 
 using namespace std::chrono;
 using namespace ci::gl;
@@ -370,6 +370,123 @@ void Instrument::killAllNotes()
 				sendNoteOff( mMidiOut, channel, note );
 			}
 		}
+	}
+}
+
+void Instrument::updateSynthesis( const vector<Score const*>& scores )
+{
+	switch (mSynthType)
+	{
+		// Additive
+		case Instrument::SynthType::Additive:
+			updateAdditiveSynthesis(scores);
+			break;
+		
+		default:
+		break;
+	}
+	
+	// retire notes (do this outside of scores to handle instruments that no longer have scores)	
+	updateNoteOffs();
+}
+
+void Instrument::updateSynthesisWithVision( const Scores& scores )
+{
+	switch (mSynthType)
+	{
+		// Additive
+		case Instrument::SynthType::Additive:
+			updateAdditiveSynthesisWithVision(scores);
+			break;
+			
+		default:
+		break;
+	}
+}
+
+void Instrument::updateAdditiveSynthesis( const Scores& scores ) const
+{
+	// Update time (for first score)
+	if ( !scores.empty() )
+	{
+		mPd->sendFloat(toString(mAdditiveSynthID)+string("phase"),
+					   scores[0]->getPlayheadFrac() );
+	}			
+}
+		
+void Instrument::updateAdditiveSynthesisWithVision( const Scores& scores ) const
+{
+	// Mute all additive synths, in case their score has disappeared (FIXME: do this in ~Score() ?)
+	{
+		const int kMaxSynths = 8; // This corresponds to [clone 8 music-voice] in music.pd
+
+		for( int additiveSynthID=0; additiveSynthID<kMaxSynths; ++additiveSynthID )
+		{
+			mPd->sendFloat(toString(additiveSynthID)+string("volume"), 0);
+		}
+	}
+
+	// grab 1st score-- and ignore the others
+	if (scores.empty()) return;
+	const Score& score = *(scores[0]);
+	
+	// send image for additive synthesis
+	if ( !score.mImage.empty() )
+	{
+		PureDataNodeRef pd = mPd;
+		int additiveSynthID = mAdditiveSynthID;
+		
+		int rows = score.mImage.rows;
+		int cols = score.mImage.cols;
+
+		string prefix = toString(additiveSynthID);
+		
+		// Update pan
+		pd->sendFloat(prefix+"pan",
+					  score.mPan);
+
+		// Update per-score pitch
+		pd->sendFloat(prefix+"note-root",
+					  20 );
+
+		// Update range of notes covered by additive synthesis
+		pd->sendFloat(prefix+"note-range",
+					  100 );
+
+		// Update resolution
+		pd->sendFloat(prefix+"resolution-x",
+					  cols);
+
+		pd->sendFloat(prefix+"resolution-y",
+					  rows);
+
+		// Create a float version of the image
+		cv::Mat imageFloatMat;
+
+		// Copy the uchar version scaled 0-1
+		score.mImage.convertTo(imageFloatMat, CV_32FC1, 1/255.0);
+		// TODO: optimize-- do convertTo after slicing out column  
+
+		// Convert to a vector to pass to Pd
+
+		// Grab the current column at the playhead. We send updates even if the
+		// phase doesn't change enough to change the colIndex,
+		// as the pixels might have changed instead.
+		float phase = score.getPlayheadFrac();
+		int colIndex = imageFloatMat.cols * phase;
+
+		cv::Mat columnMat = imageFloatMat.col(colIndex);
+		
+		// We use a list message rather than writeArray as it causes less contention with Pd's execution thread
+		auto ampsByFreq = pd::List();
+		for (int i = 0; i < columnMat.rows; i++) {
+			ampsByFreq.addFloat(columnMat.at<float>(i, 0));
+		}
+
+		pd->sendList(prefix+"vals", ampsByFreq);
+
+		// Turn the synth on
+		pd->sendFloat(prefix+"volume", 1);
 	}
 }
 

@@ -76,10 +76,16 @@ private:
 	PatchRef		mPatch;			// music patch
 
 	void setupSynthesis();
-	void updateAdditiveScoreSynthesis();
 
 	void killAllNotes(); // sends a note off for all MIDI notes (0-127)
 
+	void updateSynthesis(); // every tick
+	void updateSynthesisWithVision(); // when vision changed
+	void updateMetaParamsWithVision();
+	
+	typedef map<InstrumentRef,vector<Score const*>> InstrumentsToScores;
+	InstrumentsToScores getInstrumentsToScores() const;
+	
 	// DT calculation
 	float mLastFrameTime;
 	float getDT();
