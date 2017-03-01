@@ -165,5 +165,12 @@ private:
 
 typedef std::shared_ptr<Instrument> InstrumentRef;
 
+class InstrumentRefs : public vector<InstrumentRef>
+{
+public:
+	InstrumentRef hasSynthType ( Instrument::SynthType ) const; // returns 1st if present
+	bool		  hasInstrument( InstrumentRef ) const;
+	InstrumentRef hasNoteType  () const; // returns 1st if present
+};
 
 #endif /* Instrument_hpp */

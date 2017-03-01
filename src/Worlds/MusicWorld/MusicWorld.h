@@ -64,7 +64,7 @@ private:
 	void updateMetaParamsWithDefaultsMaybe();
 	void updateMetaParameter(MetaParam metaParam, float value);
 	void updateScoresWithMetaParams();
-	Score* getScoreForMetaParam( MetaParam );
+	Score* getScoreForMetaParam( MetaParam ); // returns 1st
 
 	// vision
 	MusicVision mVision;

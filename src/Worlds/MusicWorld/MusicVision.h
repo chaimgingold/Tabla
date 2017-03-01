@@ -80,7 +80,7 @@ private:
 	
 	//
 	float		  decideMeasureCountForScore( const Score& ) const;
-	InstrumentRef decideInstrumentForScore(
+	InstrumentRefs decideInstrumentsForScore(
 		const Score&,
 		const MusicStampVec&,
 		const TokenMatchVec& tokens ) const;
@@ -133,7 +133,7 @@ private:
 		// and does temporal smoothing (optionally)
 		// if you pass -1 for cols or rows then it isn't resized in that dimension
 	
-	static float getSliderValueFromQuantizedImageData( const Score& );
+	static float getSliderValueFromQuantizedImageData( const Score&, InstrumentRef );
 	
 	//
 	bool isNoteOn( float playheadFrac, int note ) const; // TODO: move into ScoreNotes

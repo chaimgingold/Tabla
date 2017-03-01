@@ -372,3 +372,27 @@ void Instrument::killAllNotes()
 		}
 	}
 }
+
+InstrumentRef InstrumentRefs::hasSynthType( Instrument::SynthType t ) const
+{
+	for ( auto i : *this ) {
+		if (i->mSynthType==t) return i;
+	}
+	return 0;
+}
+
+bool InstrumentRefs::hasInstrument( InstrumentRef i ) const
+{
+	for ( auto j : *this ) {
+		if (j==i) return true;
+	}
+	return false;	
+}
+
+InstrumentRef InstrumentRefs::hasNoteType() const
+{
+	for ( auto i : *this ) {
+		if (i->isNoteType()) return i;
+	}
+	return 0;
+}
