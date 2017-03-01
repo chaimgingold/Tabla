@@ -369,22 +369,25 @@ void MusicStampVec::tick(
 	// Note scores => stamps
 	for( const auto &score : scores )
 	{
-		MusicStamp* stamp = getStampByInstrument( score.mInstrument );
+		for( auto instrument : score.mInstruments )
+		{	
+			MusicStamp* stamp = getStampByInstrument( instrument );
 
-		if (stamp)
-		{
-			// mark it
-			stamp->mHasScore = true;
-			stamp->setLastBoundToScorePoly( score.getPolyLine() );
-			
-			// update search: new score to attach to?
-			if ( !stamp->mLastHasScore /* new! */ && findContour(contours,score.getCentroid()) /* not a zombie */ )
+			if (stamp)
 			{
-				stamp->mSearchForPaperLoc = score.getCentroid();
-			}
+				// mark it
+				stamp->mHasScore = true;
+				stamp->setLastBoundToScorePoly( score.getPolyLine() );
+				
+				// update search: new score to attach to?
+				if ( !stamp->mLastHasScore /* new! */ && findContour(contours,score.getCentroid()) /* not a zombie */ )
+				{
+					stamp->mSearchForPaperLoc = score.getCentroid();
+				}
 
-			// anim
-			updateAnimWithScore(*stamp,score);
+				// anim
+				updateAnimWithScore(*stamp,score);
+			}
 		}
 	}
 
@@ -461,7 +464,7 @@ void MusicStampVec::updateAnimWithScore( MusicStamp& stamp, const Score& score )
 {
 	stamp.mXAxis = score.getPlayheadVec();
 	stamp.mLoc = lerp( stamp.mLoc, score.getCentroid(), .5f );
-	stamp.mIconPoseTarget = score.getIconPoseFromScore(score.getPlayheadFrac());
+	stamp.mIconPoseTarget = score.getIconPoseFromScore(stamp.mInstrument,score.getPlayheadFrac());
 	stamp.mIconPoseTarget += tIconAnimState::getSwayForScore(
 		fmod( score.getPlayheadFrac() * score.mMeasureCount, 1.f )
 		); // blend in sway
@@ -652,7 +655,7 @@ void MusicStampVec::decollideScores( const ScoreVec& scores )
 			// did we collide with an active (has an instrument) score?
 			const Score* s = scores.pick(stamp.mLoc);
 			
-			if ( s && s->mInstrument )
+			if ( s && !s->mInstruments.empty() )
 			{
 	//			stamp.mLoc = lerp( stamp.mLoc, stamp.mHomeLoc, .5f );
 				// problem: this doesn't complete properly, it works, but stamp just goes to the edge...

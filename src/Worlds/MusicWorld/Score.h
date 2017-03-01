@@ -12,11 +12,35 @@
 #include "Instrument.h"
 #include "MusicStamp.h"
 
+// notes
+struct ScoreNote
+{	
+	int   mStartTimeAsCol; // 0, 1, 2..
+	int   mLengthAsCols; // 1, 2, ...
+
+	// 0..1
+	float mStartTimeAsScoreFrac;
+	float mLengthAsScoreFrac;
+};
+
+class ScoreNotes : public vector<vector<ScoreNote>>
+{
+public:
+	// for storing parsed notes.
+	// - first index is note
+	// - then, a list of notes, in order of start time
+
+	int   mNumCols=0;
+
+	const ScoreNote* isNoteOn( float playheadFrac, int note ) const;
+	const ScoreNote* isNoteOn( int    playheadCol, int note ) const;		
+};
+
 // scores
 class Score
 {
 public:
-	InstrumentRef mInstrument;
+	InstrumentRefs mInstruments;
 	gl::GlslProgRef mAdditiveShader;
 
 	void draw( GameWorld::DrawType ) const;
@@ -39,11 +63,15 @@ public:
 	cv::UMat	mImage;				// thresholded image
 	cv::UMat	mQuantizedImagePreThreshold; // (for inter-frame smoothing)
 	cv::Mat		mQuantizedImage;	// quantized image data for midi playback
-	float		mMetaParamSliderValue=-1.f; // 0..1
 	gl::TextureRef mTexture; // used for additive, so we don't do it per frame
+
+	// extracted data
+	map<MetaParam,float> mMetaParamSliderValue; // 0..1
+	ScoreNotes	mNotes;
 	
 	// synth parameters
 	float		mPosition=0; // progress from 0-mDuration
+	float		mBeatDuration=0;
 	void        tick(float globalPhase, float beatDuration);
 
 	int			mOctave=-1; // controlled by mOctaveFrac
@@ -76,36 +104,25 @@ public:
 	// x is axis along which playhead moves; y is perp to it (parallel to playhead)
 	vec2		fracToQuad( vec2 frac ) const; // frac.x = time[0,1], frac.y = note_space[0,1]
 	vec2		getCentroid() const { return fracToQuad(vec2(.5,.5)); }
-//	float		getQuadMaxInteriorAngle() const; // looking for concave-ish shapes...
-
+	float		getMetaParamSliderValue( InstrumentRef ) const;
+	
 	Scale mScale;
-	int noteForY( int y ) const;
-
-	// score vision
-	bool  isScoreValueHigh( uchar ) const;
-	float getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const;
-	int   getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const;
-
-	// additive synth
-	void updateAdditiveSynthesis();
+	int noteForY( const Instrument*, int y ) const;
 
 	// icon animation
-	tIconAnimState getIconPoseFromScore( float playheadFrac ) const;
+	tIconAnimState getIconPoseFromScore( InstrumentRef, float playheadFrac ) const;
 
 private:
-	tIconAnimState getIconPoseFromScore_Melodic( float playheadFrac ) const;
-	tIconAnimState getIconPoseFromScore_Percussive( float playheadFrac ) const;
-	tIconAnimState getIconPoseFromScore_Additive( float playheadFrac ) const;
-	tIconAnimState getIconPoseFromScore_Meta( float playheadFrac ) const;
+	tIconAnimState getIconPoseFromScore_Melodic   ( InstrumentRef, float playheadFrac ) const;
+	tIconAnimState getIconPoseFromScore_Percussive( InstrumentRef, float playheadFrac ) const;
+	tIconAnimState getIconPoseFromScore_Additive  ( InstrumentRef, float playheadFrac ) const;
+	tIconAnimState getIconPoseFromScore_Meta      ( InstrumentRef, float playheadFrac ) const;
 
-	bool isNoteOn( float playheadFrac, int note ) const;
-	
-	int  drawNotes		( GameWorld::DrawType drawType ) const; // returns # on notes
-	void drawScoreLines	( GameWorld::DrawType drawType ) const;
-	void drawPlayhead	( GameWorld::DrawType drawType ) const;
-	void drawMetaParam	( GameWorld::DrawType drawType ) const;
-	
-	//void drawInstrumentIcon( tIconAnimState pose ) const;
+	int  drawNotes		( InstrumentRef, GameWorld::DrawType ) const; // returns # on notes
+	void drawScoreLines	( InstrumentRef, GameWorld::DrawType ) const;
+	void drawPlayhead	( InstrumentRef, GameWorld::DrawType ) const;
+	void drawMetaParam	( InstrumentRef, GameWorld::DrawType ) const;
+	void drawAdditive 	( InstrumentRef, GameWorld::DrawType ) const;
 };
 
 class ScoreVec : public vector<Score>
@@ -113,7 +130,7 @@ class ScoreVec : public vector<Score>
 public:
 	const Score* pick( vec2 ) const;
 	Score* pick( vec2 );
-	Score* getScoreForInstrument( InstrumentRef );
+	Score* getScoreForInstrument( InstrumentRef ); // returns 1st with instrument
 };
 
 #endif /* Score_h */

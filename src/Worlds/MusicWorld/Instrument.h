@@ -21,6 +21,8 @@
 using namespace cipd;
 using namespace Cinder::Serial;
 
+class Score;
+
 typedef int NoteNum;
 
 typedef vector<NoteNum> Scale;
@@ -143,6 +145,9 @@ public:
 	void doNoteOn( int note, float duration ); // start time is now
 	void doNoteOff( int note );
 
+	typedef vector<Score const*> Scores;
+	void updateSynthesis( const Scores& );
+	void updateSynthesisWithVision( const Scores& );
 	void killAllNotes();
 
 	map<NoteNum, tOnNoteInfo> mOnNotes;
@@ -159,6 +164,10 @@ public:
 	uint8_t serialCharForNote(int note);
 
 private:
+	void updateNoteSynthesis( const Scores& );
+	void updateAdditiveSynthesis( const Scores& ) const;
+	void updateAdditiveSynthesisWithVision( const Scores& ) const;	
+	
 	// midi convenience methods
 	void sendMidi( RtMidiOutRef, uchar, uchar, uchar );
 	void sendNoteOn ( RtMidiOutRef midiOut, uchar channel, uchar note, uchar velocity );
@@ -168,5 +177,12 @@ private:
 
 typedef std::shared_ptr<Instrument> InstrumentRef;
 
+class InstrumentRefs : public vector<InstrumentRef>
+{
+public:
+	InstrumentRef hasSynthType ( Instrument::SynthType ) const; // returns 1st if present
+	bool		  hasInstrument( InstrumentRef ) const;
+	InstrumentRef hasNoteType  () const; // returns 1st if present
+};
 
 #endif /* Instrument_hpp */

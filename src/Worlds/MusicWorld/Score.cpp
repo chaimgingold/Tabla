@@ -39,50 +39,49 @@ void drawLines( vector<vec2> points )
 	ctx->popVao();
 }
 
-bool Score::isScoreValueHigh( uchar value ) const
+const ScoreNote*
+ScoreNotes::isNoteOn( float playheadFrac, int note ) const
 {
-	const int kValueThresh = 100;
-
-	return value < kValueThresh ;
-	// if dark, then high
-	// else low
-}
-
-bool Score::isNoteOn( float playheadFrac, int note ) const
-{
-	int x = constrain( (int)(playheadFrac * (float)(mQuantizedImage.cols)), 0, mQuantizedImage.cols-1 );
-	int y = mNoteCount-1-note;
-	if (y >= mQuantizedImage.rows || y < 0 || x < 0) {
-		return false;
-	}
-	bool isOn = isScoreValueHigh(mQuantizedImage.at<unsigned char>(y,x));
+	if ( note < 0 || note >= size() ) return 0;
 	
-	return isOn;
+	for( const auto &n : (*this)[note] )
+	{
+		if ( playheadFrac >= n.mStartTimeAsScoreFrac )
+		{
+			auto end = n.mStartTimeAsScoreFrac + n.mLengthAsScoreFrac;
+			
+			if ( playheadFrac < end ) {
+				return &n;
+			}
+		}
+		else return 0;
+	}
+	
+	return 0;
 }
 
-int Score::getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const
+const ScoreNote*
+ScoreNotes::isNoteOn( int playheadCol, int note ) const
 {
-	int x2;
-
-	for( x2=x;
-		 x2<image.cols
-			&& isScoreValueHigh(image.at<unsigned char>(image.rows-1-y,x2)) ;
-		 ++x2 )
-	{}
-
-	int len = x2-x;
-
-	return len;
+	if ( note < 0 || note >= size() ) return 0;
+	
+	for( const auto &n : (*this)[note] )
+	{
+		if ( playheadCol >= n.mStartTimeAsCol )
+		{
+			auto end = n.mStartTimeAsCol + n.mLengthAsCols;
+			
+			if ( playheadCol < end ) {
+				return &n;
+			}
+		}
+		else return 0;
+	}
+	
+	return 0;
 }
 
-float Score::getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const
-{
-	// can return 0, which means we filtered out super short image noise-notes
-
-	return (float)getNoteLengthAsImageCols(image,x,y) / (float)image.cols;
-}
-
-int Score::drawNotes( GameWorld::DrawType drawType ) const
+int Score::drawNotes( InstrumentRef instrument, GameWorld::DrawType drawType ) const
 {
 	const float kNoteFadeOutTimeFrac = .2f;
 	const float kInflateOnHitFrac = .25f; // cm (world units)
@@ -92,79 +91,67 @@ int Score::drawNotes( GameWorld::DrawType drawType ) const
 	
 	int numOnNotes=0;
 	
-	// collect notes into a batch
-	// (probably wise to extract this geometry/data once when processing vision data,
-	// then use it for both playback and drawing).
-	const float invcols = 1.f / (float)(mQuantizedImage.cols);
 	const float yheight = 1.f / (float)mNoteCount;
 	const float playheadFrac = getPlayheadFrac();
 
 	TriMesh mesh( TriMesh::Format().positions(2).colors(4) );	
-
-	for ( int y=0; y<mNoteCount; ++y )
+	
+	for ( int note=0; note<mNoteCount; ++note )
 	{
-		const float y1frac = y * yheight + yheight*.2f;
-		const float y2frac = y * yheight + yheight*.8f;
-
-		for( int x=0; x<mQuantizedImage.cols; ++x )
+		const float y1frac = note * yheight + yheight*.2f;
+		const float y2frac = note * yheight + yheight*.8f;
+		
+		for ( auto anote : mNotes[note] )
 		{
-			if ( isScoreValueHigh(mQuantizedImage.at<unsigned char>(mNoteCount-1-y,x)) )
+			// how wide?
+			const float x1frac = anote.mStartTimeAsScoreFrac;
+			const float x2frac = anote.mStartTimeAsScoreFrac + anote.mLengthAsScoreFrac;
+
+			vec2 start1 = fracToQuad( vec2( x1frac, y1frac) ) ;
+			vec2 end1   = fracToQuad( vec2( x2frac, y1frac) ) ;
+
+			vec2 start2 = fracToQuad( vec2( x1frac, y2frac) ) ;
+			vec2 end2   = fracToQuad( vec2( x2frac, y2frac) ) ;
+
+			const bool isInFlight = playheadFrac > x1frac && playheadFrac < x2frac;
+			if (isInFlight) numOnNotes++;
+			
+
+			/*	0--1 .. 2
+				|  |
+				3--2 .. 1
+				.  .
+				s  e
+			*/
+			float strikeColor;
 			{
-				// how wide?
-				int length = getNoteLengthAsImageCols(mQuantizedImage,x,y);
-
-				const float x1frac = x * invcols;
-				const float x2frac = min( 1.f, (x+length) * invcols );
-
-				vec2 start1 = fracToQuad( vec2( x1frac, y1frac) ) ;
-				vec2 end1   = fracToQuad( vec2( x2frac, y1frac) ) ;
-
-				vec2 start2 = fracToQuad( vec2( x1frac, y2frac) ) ;
-				vec2 end2   = fracToQuad( vec2( x2frac, y2frac) ) ;
-
-				const bool isInFlight = playheadFrac > x1frac && playheadFrac < x2frac;
-				if (isInFlight) numOnNotes++;
-				
-
-				/*	0--1 .. 2
-				    |  |
-					3--2 .. 1
-					.  .
-					s  e
-				*/
-				float strikeColor;
-				{
-					float t = playheadFrac;
-					if (t<x1frac) t += 1.f; // make sure t is always >= x1frac (wrap it)
-					strikeColor = 1.f - constrain( (t - x2frac)/kNoteFadeOutTimeFrac, 0.f, 1.f );
-				}
-				
-				vec2 v[4] = {start2,end2,end1,start1};
-				ColorA color = lerp( mInstrument->mNoteOffColor, mInstrument->mNoteOnColor, strikeColor );
-				
-				// stretch it out
-				if (isInFlight) // this conditional is redundant to inflate==0.f
-				{
-					float inflate;
-					
-					inflate = 1.f - (playheadFrac - x1frac) / (x2frac - x1frac);
-					inflate *= inflate;
-					inflate *= kInflateOnHitFrac;
-
-					vec2 xd = xvec * inflate;
-					vec2 yd = -yvec * inflate; // don't get why this needs to be negative, but it does. :P
-					
-					v[0] += -xd +yd;
-					v[1] +=  xd +yd;
-					v[2] +=  xd -yd;
-					v[3] += -xd -yd;
-				}
-
-				appendQuad(mesh, color, v);
-				
-				// skip ahead
-				x = x + length+1;
+				float t = playheadFrac;
+				if (t<x1frac) t += 1.f; // make sure t is always >= x1frac (wrap it)
+				strikeColor = 1.f - constrain( (t - x2frac)/kNoteFadeOutTimeFrac, 0.f, 1.f );
 			}
+			
+			vec2 v[4] = {start2,end2,end1,start1};
+			ColorA color = lerp( instrument->mNoteOffColor, instrument->mNoteOnColor, strikeColor );
+			
+			// stretch it out
+			if (isInFlight) // this conditional is redundant to inflate==0.f
+			{
+				float inflate;
+				
+				inflate = 1.f - (playheadFrac - x1frac) / (x2frac - x1frac);
+				inflate *= inflate;
+				inflate *= kInflateOnHitFrac;
+
+				vec2 xd = xvec * inflate;
+				vec2 yd = -yvec * inflate; // don't get why this needs to be negative, but it does. :P
+				
+				v[0] += -xd +yd;
+				v[1] +=  xd +yd;
+				v[2] +=  xd -yd;
+				v[3] += -xd -yd;
+			}
+
+			appendQuad(mesh, color, v);
 		}
 	}
 
@@ -174,11 +161,11 @@ int Score::drawNotes( GameWorld::DrawType drawType ) const
 	return numOnNotes;
 }
 
-void Score::drawScoreLines( GameWorld::DrawType drawType ) const
+void Score::drawScoreLines( InstrumentRef instrument, GameWorld::DrawType drawType ) const
 {
 	vector<vec2> pts;
 
-	gl::color(mInstrument->mScoreColor);
+	gl::color(instrument->mScoreColor);
 	gl::draw( getPolyLine() );
 
 	// Scale lines
@@ -215,15 +202,16 @@ void Score::drawScoreLines( GameWorld::DrawType drawType ) const
 		pts.push_back( lerp(mQuad[1], mQuad[0],f) );
 		pts.push_back( lerp(mQuad[2], mQuad[3],f) );
 	}
-	gl::color( mInstrument->mScoreColorDownLines  );
+	gl::color( instrument->mScoreColorDownLines  );
 	drawLines(pts);
 
 }
 
-void Score::drawPlayhead( GameWorld::DrawType drawType ) const
+void Score::drawPlayhead( InstrumentRef instrument, GameWorld::DrawType drawType ) const
 {
-	gl::color( mInstrument->mPlayheadColor );
-
+	if (instrument) gl::color( instrument->mPlayheadColor );
+	else gl::color(0,1,1); // TODO: make into xml value
+	
 	vec2 playhead[2];
 	getPlayheadLine(playhead);
 	gl::drawLine( playhead[0], playhead[1] );
@@ -234,25 +222,24 @@ void Score::drawPlayhead( GameWorld::DrawType drawType ) const
 	gl::drawSolidCircle( lerp(playhead[0],playhead[1],octaveFrac), .5f, 6 );
 }
 
-void Score::drawMetaParam( GameWorld::DrawType drawType ) const
+void Score::drawMetaParam( InstrumentRef instrument, GameWorld::DrawType drawType ) const
 {
-	Rectf r( mQuad[0], mQuad[2] );
-	r.canonicalize();
-
-	gl::color(mInstrument->mScoreColor);
+	const float sliderValue = getMetaParamSliderValue(instrument);
+	
+	gl::color(instrument->mScoreColor);
 	gl::draw( getPolyLine() );
 
 	// level
 	float y1, y2;
-	if ( mInstrument->mMetaParamInfo.isDiscrete() )
+	if ( instrument->mMetaParamInfo.isDiscrete() )
 	{
 		if ( drawType != GameWorld::DrawType::UIPipelineThumb ) // optimization
 		{
 			vector<vec2> lines;
 
-			for( int i=0; i<mInstrument->mMetaParamInfo.mNumDiscreteStates; ++i )
+			for( int i=0; i<instrument->mMetaParamInfo.mNumDiscreteStates; ++i )
 			{
-				float y = (float)i/(float)(mInstrument->mMetaParamInfo.mNumDiscreteStates);
+				float y = (float)i/(float)(instrument->mMetaParamInfo.mNumDiscreteStates);
 				lines.push_back( fracToQuad(vec2(0.f,y)) );
 				lines.push_back( fracToQuad(vec2(1.f,y)) );
 			}
@@ -260,11 +247,11 @@ void Score::drawMetaParam( GameWorld::DrawType drawType ) const
 			drawLines(lines);
 		}
 
-//		y1=mInstrument->mMetaParamInfo.discretize(mMetaParamSliderValue);
-//		y2=y1 + 1.f / (float)mInstrument->mMetaParamInfo.mNumDiscreteStates;
+//		y1=instrument->mMetaParamInfo.discretize(mMetaParamSliderValue);
+//		y2=y1 + 1.f / (float)instrument->mMetaParamInfo.mNumDiscreteStates;
 
-		y1=mInstrument->mMetaParamInfo.discretize(mMetaParamSliderValue);
-		y2=y1 + 1.f / (float)mInstrument->mMetaParamInfo.mNumDiscreteStates;
+		y1=instrument->mMetaParamInfo.discretize(sliderValue);
+		y2=y1 + 1.f / (float)instrument->mMetaParamInfo.mNumDiscreteStates;
 	}
 	else
 	{
@@ -277,10 +264,10 @@ void Score::drawMetaParam( GameWorld::DrawType drawType ) const
 
 		// a meter filled up to the level
 		y1 = 0.f;
-		y2 = max( k, mMetaParamSliderValue );
+		y2 = max( k, sliderValue );
 	}
 
-	if ( mMetaParamSliderValue != -1.f )
+	if ( sliderValue != -1.f )
 	{
 		PolyLine2 p;
 		p.push_back( fracToQuad(vec2(0.f,y1)) );
@@ -292,7 +279,48 @@ void Score::drawMetaParam( GameWorld::DrawType drawType ) const
 	}
 }
 
-tIconAnimState Score::getIconPoseFromScore_Percussive( float playheadFrac ) const
+void Score::drawAdditive( InstrumentRef instrument, GameWorld::DrawType drawType ) const
+{
+	if ( mAdditiveShader && mTexture )
+	{
+		gl::ScopedGlslProg glslScp( mAdditiveShader );
+		gl::ScopedTextureBind texScp( mTexture );
+
+		mAdditiveShader->uniform( "uTex0", 0 );
+		mAdditiveShader->uniform( "uTime", (float)ci::app::getElapsedSeconds() );
+		mAdditiveShader->uniform( "uPhase", getPlayheadFrac());
+		mAdditiveShader->uniform( "uAspectRatio", getWindowAspectRatio() );
+
+		vec2 v[6];
+		vec2 uv[6];
+
+		v[0] = mQuad[0];
+		v[1] = mQuad[1];
+		v[2] = mQuad[3];
+		v[3] = mQuad[3];
+		v[4] = mQuad[1];
+		v[5] = mQuad[2];
+
+		float y0=1.f, y1=0.f; // y is inverted to get to texture space; do it here, not in shader.
+		uv[0] = vec2(0,y0);
+		uv[1] = vec2(1,y0);
+		uv[2] = vec2(0,y1);
+		uv[3] = vec2(0,y1);
+		uv[4] = vec2(1,y0);
+		uv[5] = vec2(1,y1);
+
+		gl::drawSolidTriangle(v,uv);
+		gl::drawSolidTriangle(v+3,uv+3);
+		// TODO: be less dumb and draw as tri strip or quad
+	}
+	else
+	{
+		gl::color(instrument->mScoreColor);
+		gl::draw( getPolyLine() );
+	}	
+}
+
+tIconAnimState Score::getIconPoseFromScore_Percussive( InstrumentRef instrument, float playheadFrac ) const
 {
 	const vec4 poses[13] =
 	{
@@ -318,7 +346,7 @@ tIconAnimState Score::getIconPoseFromScore_Percussive( float playheadFrac ) cons
 	
 	for( int note=0; note<mNoteCount; note++ )
 	{
-		if ( isNoteOn(playheadFrac,note) )
+		if ( mNotes.isNoteOn(playheadFrac,note) )
 		{
 			numOnNotes++;
 			pose += poses[ (note*3)%13 ]; // separate similar adjacent anim frames (in note space)
@@ -336,8 +364,8 @@ tIconAnimState Score::getIconPoseFromScore_Percussive( float playheadFrac ) cons
 	// pose
 	tIconAnimState state = pose;
 	
-	if (mInstrument) {
-		state.mColor = (numOnNotes>0) ? mInstrument->mNoteOnColor : mInstrument->mNoteOffColor;
+	if (instrument) {
+		state.mColor = (numOnNotes>0) ? instrument->mNoteOnColor : instrument->mNoteOffColor;
 	} else {
 		state.mColor = ColorA(1,1,1,1);
 	}
@@ -346,12 +374,12 @@ tIconAnimState Score::getIconPoseFromScore_Percussive( float playheadFrac ) cons
 	
 	state.mGradientSpeed = lerp( kMinGradientSpeed, kMaxGradientSpeed, fracOnNote );
 	state.mGradientFreq  = lerp( kMinGradientFreq, kMaxGradientFreq, fracOnNote );
-	if (mInstrument) state.mGradientCenter = mInstrument->mIconGradientCenter;
+	if (instrument) state.mGradientCenter = instrument->mIconGradientCenter;
 	
 	return state;
 }
 
-tIconAnimState Score::getIconPoseFromScore_Melodic( float playheadFrac ) const
+tIconAnimState Score::getIconPoseFromScore_Melodic( InstrumentRef instrument, float playheadFrac ) const
 {
 	// gather
 	int numOnNotes=0;
@@ -360,7 +388,7 @@ tIconAnimState Score::getIconPoseFromScore_Melodic( float playheadFrac ) const
 	
 	for( int note=0; note<mNoteCount; note++ )
 	{
-		if ( isNoteOn(playheadFrac,note) )
+		if ( mNotes.isNoteOn(playheadFrac,note) )
 		{
 			noteIndexSum += note;
 			numOnNotes++;
@@ -377,8 +405,8 @@ tIconAnimState Score::getIconPoseFromScore_Melodic( float playheadFrac ) const
 	// pose
 	tIconAnimState state;
 	
-	if (mInstrument) {
-		state.mColor = (numOnNotes>0) ? mInstrument->mNoteOnColor : mInstrument->mNoteOffColor;
+	if (instrument) {
+		state.mColor = (numOnNotes>0) ? instrument->mNoteOnColor : instrument->mNoteOffColor;
 	} else {
 		state.mColor = ColorA(1,1,1,1);
 	}
@@ -392,12 +420,12 @@ tIconAnimState Score::getIconPoseFromScore_Melodic( float playheadFrac ) const
 	float onNoteFrac = (float)numOnNotes/(float)mNoteCount;
 	state.mGradientSpeed = lerp( kMinGradientSpeed, kMaxGradientSpeed, powf( onNoteFrac, 3 ) );
 	state.mGradientFreq = lerp( kMinGradientFreq, kMaxGradientFreq, onNoteFrac );
-	if (mInstrument) state.mGradientCenter = mInstrument->mIconGradientCenter;
+	if (instrument) state.mGradientCenter = instrument->mIconGradientCenter;
 	
 	return state;
 }
 
-tIconAnimState Score::getIconPoseFromScore_Additive( float playheadFrac ) const
+tIconAnimState Score::getIconPoseFromScore_Additive( InstrumentRef instrument, float playheadFrac ) const
 {
 	if (!mImage.empty())
 	{
@@ -431,57 +459,56 @@ tIconAnimState Score::getIconPoseFromScore_Additive( float playheadFrac ) const
 		float scaleDegree = fracOn / .5f ; // what % of keys on count as 100% scale?
 		
 		tIconAnimState pose;
-		pose.mColor = sum>0.f ? mInstrument->mNoteOnColor : mInstrument->mNoteOffColor;
+		pose.mColor = sum>0.f ? instrument->mNoteOnColor : instrument->mNoteOffColor;
 		pose.mScale = vec2(1,1) * lerp( 1.f, 1.4f, scaleDegree*scaleDegree );
 		pose.mTranslate.y = lerp( .5f, -.5f, weightedy ) ; // low values means up
 		pose.mGradientSpeed = lerp( kMinGradientSpeed, kMaxGradientSpeed, powf(fracOn,.5) );
 		pose.mGradientFreq = lerp( kMinGradientFreq, kMaxGradientFreq, powf(fracOn,.5) );
-		if (mInstrument) pose.mGradientCenter = mInstrument->mIconGradientCenter;
+		if (instrument) pose.mGradientCenter = instrument->mIconGradientCenter;
 		return pose;
 	}
 	else return tIconAnimState();
 }
 
-tIconAnimState Score::getIconPoseFromScore_Meta( float playheadFrac ) const
+tIconAnimState Score::getIconPoseFromScore_Meta( InstrumentRef instrument, float playheadFrac ) const
 {
+	const float sliderValue = getMetaParamSliderValue(instrument);
+	
 	tIconAnimState pose;
-	pose.mGradientSpeed = lerp( kMinGradientSpeed, kMaxGradientSpeed, powf(constrain(mMetaParamSliderValue,0.f,1.f),3.f) );
-	pose.mGradientFreq = lerp( kMinGradientFreq, kMaxGradientFreq, mMetaParamSliderValue );
-	if (mInstrument) pose.mGradientCenter = mInstrument->mIconGradientCenter;
+	pose.mGradientSpeed = lerp(
+		kMinGradientSpeed,
+		kMaxGradientSpeed,
+		powf( constrain(sliderValue,0.f,1.f), 3.f) );
+		
+	pose.mGradientFreq = lerp( kMinGradientFreq, kMaxGradientFreq, sliderValue );
+	if (instrument) pose.mGradientCenter = instrument->mIconGradientCenter;
 	return pose;
 }
 
-tIconAnimState Score::getIconPoseFromScore( float playheadFrac ) const
+tIconAnimState Score::getIconPoseFromScore( InstrumentRef instrument, float playheadFrac ) const
 {
 	// no instrument?
-	if ( !mInstrument ) return tIconAnimState();
+	if ( !instrument ) return tIconAnimState();
 
 	// synth type
-	switch( mInstrument->mSynthType )
+	switch( instrument->mSynthType )
 	{
 		case Instrument::SynthType::MIDI:
-		{
-			return getIconPoseFromScore_Melodic(playheadFrac);
-		}
-		break;
+		case Instrument::SynthType::Sampler:
+			return getIconPoseFromScore_Melodic(instrument,playheadFrac);
+			break;
 		
 		case Instrument::SynthType::RobitPokie:
-		{
-			return getIconPoseFromScore_Percussive(playheadFrac);
-		}
-		break;
+			return getIconPoseFromScore_Percussive(instrument,playheadFrac);
+			break;
 		
 		case Instrument::SynthType::Additive:
-		{
-			return getIconPoseFromScore_Additive(playheadFrac);
-		}
-		break;
+			return getIconPoseFromScore_Additive(instrument,playheadFrac);
+			break;
 		
 		case Instrument::SynthType::Meta:
-		{
-			return getIconPoseFromScore_Meta(playheadFrac);
-		}
-		break;
+			return getIconPoseFromScore_Meta(instrument,playheadFrac);
+			break;
 		
 		default: break;
 	} // switch
@@ -501,56 +528,21 @@ void Score::draw( GameWorld::DrawType drawType ) const
 		gl::drawSolid(getPolyLine());
 	}
 
-	if (mInstrument)
+	// FIXME: Looping isn't quite right, but it's a start to this refactoring.
+	for( auto instrument : mInstruments )
 	{
-		switch( mInstrument->mSynthType )
+		switch( instrument->mSynthType )
 		{
 			case Instrument::SynthType::Additive:
 			{
-				if ( mAdditiveShader && mTexture )
-				{
-					gl::ScopedGlslProg glslScp( mAdditiveShader );
-					gl::ScopedTextureBind texScp( mTexture );
-
-					mAdditiveShader->uniform( "uTex0", 0 );
-					mAdditiveShader->uniform( "uTime", (float)ci::app::getElapsedSeconds() );
-					mAdditiveShader->uniform( "uPhase", getPlayheadFrac());
-					mAdditiveShader->uniform( "uAspectRatio", getWindowAspectRatio() );
-
-					vec2 v[6];
-					vec2 uv[6];
-
-					v[0] = mQuad[0];
-					v[1] = mQuad[1];
-					v[2] = mQuad[3];
-					v[3] = mQuad[3];
-					v[4] = mQuad[1];
-					v[5] = mQuad[2];
-
-					float y0=1.f, y1=0.f; // y is inverted to get to texture space; do it here, not in shader.
-					uv[0] = vec2(0,y0);
-					uv[1] = vec2(1,y0);
-					uv[2] = vec2(0,y1);
-					uv[3] = vec2(0,y1);
-					uv[4] = vec2(1,y0);
-					uv[5] = vec2(1,y1);
-
-					gl::drawSolidTriangle(v,uv);
-					gl::drawSolidTriangle(v+3,uv+3);
-					// TODO: be less dumb and draw as tri strip or quad
-				}
-				else
-				{
-					gl::color(mInstrument->mScoreColor);
-					gl::draw( getPolyLine() );
-				}
+				drawAdditive(instrument,drawType);
 			}
 			break;
 			
 			case Instrument::SynthType::Meta:
 			{
 				// meta
-				drawMetaParam(drawType);
+				drawMetaParam(instrument,drawType);
 			}
 			break;
 			case Instrument::SynthType::Sampler:
@@ -560,22 +552,25 @@ void Score::draw( GameWorld::DrawType drawType ) const
 				// "Note-type" synth (midi or robit)
 				if ( drawType != GameWorld::DrawType::UIPipelineThumb ) // optimization
 				{
-					drawScoreLines(drawType);
-					drawNotes(drawType);
+					drawScoreLines(instrument,drawType);
+					drawNotes(instrument,drawType);
 				}
 				else
 				{
-					gl::color(mInstrument->mScoreColor);
+					gl::color(instrument->mScoreColor);
 					gl::draw( getPolyLine() );
 				}
 
 				// playhead
-				drawPlayhead(drawType);
+				drawPlayhead(instrument,drawType);
 			}
 			break;
 		} // switch
 	} // if
-
+	
+	// i would like to do this, but spurious token scores make it broken :P
+//	if ( mInstruments.empty() ) drawPlayhead(0,drawType);
+	
 	// quad debug
 	if (0)
 	{
@@ -611,129 +606,66 @@ PolyLine2 Score::getPolyLine() const
 
 void Score::tick(float globalPhase, float beatDuration)
 {
+	mBeatDuration = beatDuration;
 	mPosition = fmod(globalPhase, (float)getBeatCount() );
 
-	if (!mInstrument) return;
-
-	switch( mInstrument->mSynthType )
+	/*
+	for( auto instrument : mInstruments )
 	{
-		// Additive
-		case Instrument::SynthType::Additive:
+		switch( instrument->mSynthType )
 		{
-			// Update time
-			mInstrument->mPd->sendFloat(toString(mInstrument->mAdditiveSynthID)+string("phase"),
-												  getPlayheadFrac() );
-		}
-		break;
-
-		// Notes
-		case Instrument::SynthType::Sampler:
-		case Instrument::SynthType::MIDI:
-		case Instrument::SynthType::RobitPokie:
-		{
-			// send midi notes
-			if (!mQuantizedImage.empty())
+			// Notes
+			case Instrument::SynthType::Sampler:
+			case Instrument::SynthType::MIDI:
+			case Instrument::SynthType::RobitPokie:
 			{
-				int x = getPlayheadFrac() * (float)(mQuantizedImage.cols);
-
-				for ( int y=0; y<mNoteCount; ++y )
+				// send midi notes
+				if (!mNotes.empty())
 				{
-					unsigned char value = mQuantizedImage.at<unsigned char>(mNoteCount-1-y,x);
+					int x = getPlayheadFrac() * (float)mNotes.mNumCols;
 
-					int note = noteForY(y);
-
-					if ( isScoreValueHigh(value) )
+					for ( int y=0; y<mNotes.size(); ++y )
 					{
-						float duration =
-						beatDuration *
-						(float)getQuantizedBeatCount() *
-						getNoteLengthAsScoreFrac(mQuantizedImage,x,y);
-
-						if (duration>0)
+						int note = noteForY(instrument,y);
+						
+						const ScoreNote* isOn = mNotes.isNoteOn(x,y);
+						
+						if (isOn)
 						{
-							mInstrument->doNoteOn( note, duration );
+							float duration =
+							beatDuration *
+							(float)getQuantizedBeatCount() *
+							isOn->mLengthAsScoreFrac;
+							// Note: that if we trigger late, we will go on for too long...
+
+							if (duration>0)
+							{
+								instrument->doNoteOn( note, duration );
+							}
+						}
+						else
+						{
+							// See if the note was previously triggered but no longer exists, and turn it off if so
+							if (instrument->isNoteInFlight( note ))
+							{
+								// TODO: this should work as long a there isn't >1 score per instrument. In that case,
+								// this will start to behave weirdly. Proper solution is to scan all scores and
+								// aggregate all the on notes, and then join the list of desired on notes to actual on notes
+								// in a single pass, taking action to on/off them as needed.
+								instrument->doNoteOff( note );
+							}
 						}
 					}
-					// See if the note was previously triggered but no longer exists, and turn it off if so
-					else if (mInstrument->isNoteInFlight( note ))
-					{
-						// TODO: this should work as long a there isn't >1 score per instrument. In that case,
-						// this will start to behave weirdly. Proper solution is to scan all scores and
-						// aggregate all the on notes, and then join the list of desired on notes to actual on notes
-						// in a single pass, taking action to on/off them as needed.
-						mInstrument->doNoteOff( note );
-					}
 				}
+
+				instrument->tickArpeggiator();
 			}
+			break;
 
-			mInstrument->tickArpeggiator();
+			default:
+			break;
 		}
-		break;
-
-		default:
-		break;
-	}
-}
-
-void Score::updateAdditiveSynthesis() {
-	InstrumentRef instr = mInstrument;
-	if (!instr) return;
-
-	// send image for additive synthesis
-	if ( instr->mSynthType==Instrument::SynthType::Additive && !mImage.empty() )
-	{
-		PureDataNodeRef pd = instr->mPd;
-		int additiveSynthID = mInstrument->mAdditiveSynthID;
-
-		int rows = mImage.rows;
-		int cols = mImage.cols;
-
-		// Update pan
-		pd->sendFloat(toString(additiveSynthID)+string("pan"),
-							     mPan);
-
-		// Update per-score pitch
-		pd->sendFloat(toString(additiveSynthID)+string("note-root"),
-								 20 );
-
-		// Update range of notes covered by additive synthesis
-		pd->sendFloat(toString(additiveSynthID)+string("note-range"),
-								 100 );
-
-		// Update resolution
-		pd->sendFloat(toString(additiveSynthID)+string("resolution-x"),
-								 cols);
-
-		pd->sendFloat(toString(additiveSynthID)+string("resolution-y"),
-								 rows);
-
-		// Create a float version of the image
-		cv::Mat imageFloatMat;
-
-		// Copy the uchar version scaled 0-1
-		mImage.convertTo(imageFloatMat, CV_32FC1, 1/255.0);
-
-		// Convert to a vector to pass to Pd
-
-		// Grab the current column at the playhead. We send updates even if the
-		// phase doesn't change enough to change the colIndex,
-		// as the pixels might have changed instead.
-		float phase = getPlayheadFrac();
-		int colIndex = imageFloatMat.cols * phase;
-
-		cv::Mat columnMat = imageFloatMat.col(colIndex);
-
-		// We use a list message rather than writeArray as it causes less contention with Pd's execution thread
-		auto ampsByFreq = pd::List();
-		for (int i = 0; i < columnMat.rows; i++) {
-			ampsByFreq.addFloat(columnMat.at<float>(i, 0));
-		}
-
-		pd->sendList(toString(additiveSynthID)+string("vals"), ampsByFreq);
-
-		// Turn the synth on
-		pd->sendFloat(toString(additiveSynthID)+string("volume"), 1);
-	}
+	}*/
 }
 
 float Score::getPlayheadFrac() const
@@ -772,11 +704,18 @@ vec2 Score::fracToQuad( vec2 frac ) const
 	return lerp(bot,top,frac.y);
 }
 
-int Score::noteForY( int y ) const {
+float Score::getMetaParamSliderValue( InstrumentRef i ) const
+{
+	auto valueit = mMetaParamSliderValue.find(i->mMetaParam);
 
-	
-	bool isPokie = mInstrument->mSynthType == Instrument::SynthType::RobitPokie;
-	if (mInstrument && mInstrument->mMapNotesToChannels && !isPokie) {
+	if (valueit==mMetaParamSliderValue.end()) return i->mMetaParamInfo.mDefaultValue;
+	else return valueit->second;
+}
+
+int Score::noteForY( const Instrument* instrument, int y ) const
+{	
+	bool isPokie = instrument->mSynthType == Instrument::SynthType::RobitPokie;
+	if (instrument && instrument->mMapNotesToChannels && !isPokie) {
 		// Reinterpret octave shift as note shift when using NotesToChannelsMode (and don't go negative)
 		int noteShift = mOctave + mNumOctaves/2;
 		return y + noteShift;
@@ -789,28 +728,6 @@ int Score::noteForY( int y ) const {
 
 	return note + extraOctaveShift + mRootNote + mOctave*12;
 }
-/*
-float Score::getQuadMaxInteriorAngle() const
-{
-	float mang=0.f;
-
-	for( int i=0; i<4; ++i )
-	{
-		vec2 a = mQuad[i];
-		vec2 x = mQuad[(i+1)%4];
-		vec2 b = mQuad[(i+2)%4];
-
-		a -= x;
-		b -= x;
-
-		float ang = acos( dot(a,b) / (length(a)*length(b)) );
-
-		if (ang>mang) mang=ang;
-
-	}
-
-	return mang;
-}*/
 
 const Score* ScoreVec::pick( vec2 p ) const
 {
@@ -834,7 +751,7 @@ Score* ScoreVec::getScoreForInstrument( InstrumentRef instr )
 {
 	for( auto &s : *this )
 	{
-		if ( s.mInstrument==instr ) return &s;
+		if ( s.mInstruments.hasInstrument(instr) ) return &s;
 	}
 	return 0;
 }

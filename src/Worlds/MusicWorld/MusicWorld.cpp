@@ -140,12 +140,16 @@ void MusicWorld::setParams( XmlTree xml )
 	// rebind scores to instruments
 	for( auto &s : mScores )
 	{
-		if (s.mInstrument)
+		InstrumentRefs rebound; 
+		
+		for ( auto instrument : s.mInstruments )
 		{
-			auto i = mInstruments.find( s.mInstrument->mName );
-			if (i==mInstruments.end()) s.mInstrument=0; // nil it!
-			else s.mInstrument = i->second; // rebind
+			auto i = mInstruments.find( instrument->mName );
+			if (i==mInstruments.end()) /*instrument=0*/; // don't copy it over; forget it
+			else rebound.push_back(i->second); // rebind
 		}
+		
+		s.mInstruments = rebound;
 	}
 	
 	// update vision
@@ -217,11 +221,12 @@ Score* MusicWorld::getScoreForMetaParam( MetaParam p )
 {
 	for( int i=0; i<mScores.size(); ++i )
 	{
-		InstrumentRef instr = mScores[i].mInstrument;
-
-		if ( instr && instr->mSynthType==Instrument::SynthType::Meta && instr->mMetaParam==p )
+		for ( auto instr : mScores[i].mInstruments )
 		{
-			return &mScores[i];
+			if ( instr->mSynthType==Instrument::SynthType::Meta && instr->mMetaParam==p )
+			{
+				return &mScores[i];
+			}
 		}
 	}
 	return 0;
@@ -269,8 +274,8 @@ void MusicWorld::update()
 	// Advance each score
 	for( auto &score : mScores ) score.tick(mPhase, getBeatDuration());
 
-	// retire notes (do this outside of scores to handle instruments that no longer have scores)
-	for( auto pair : mInstruments) pair.second->updateNoteOffs();
+	// Update Instruments (with their scores)
+	updateSynthesis();
 
 	//
 	mStamps.tick(mScores,mContours,mPhase,getBeatDuration());
@@ -288,31 +293,18 @@ void MusicWorld::updateVision( const Vision::Output& visionOut, Pipeline &p )
 	
 	updateMetaParamsWithDefaultsMaybe();
 	updateScoresWithMetaParams();
-	updateAdditiveScoreSynthesis(); // update additive synths based on new image data
+	updateSynthesisWithVision();
+	updateMetaParamsWithVision();
 	
-	// fill out some data...
+	// push data to scores
 	for( Score &s : mScores )
 	{
-		if (s.mInstrument)
+		if ( s.mInstruments.hasSynthType(Instrument::SynthType::Additive) )
 		{
-			switch(s.mInstrument->mSynthType)
-			{
-				case Instrument::SynthType::Additive:
-				{
-					s.mAdditiveShader = mAdditiveShader;
-					break;
-				}
-				
-				case Instrument::SynthType::Meta:
-				{
-					updateMetaParameter( s.mInstrument->mMetaParam, s.mMetaParamSliderValue );
-					break;
-				}
-				
-				default:break;
-			} // switch
-		} // if
-	} // loop
+			s.mAdditiveShader = mAdditiveShader;
+			break;
+		}
+	}
 }
 
 float MusicWorld::getBeatDuration() const {
@@ -421,21 +413,68 @@ void MusicWorld::updateMetaParameter(MetaParam metaParam, float value)
 	}
 }
 
-void MusicWorld::updateAdditiveScoreSynthesis()
+void
+MusicWorld::updateSynthesis()
 {
-	const int kMaxSynths = 8; // This corresponds to [clone 8 music-voice] in music.pd
+	InstrumentsToScores i2s = getInstrumentsToScores();
 
-	// Mute all additive synths, in case their score has disappeared (FIXME: do this in ~Score() ?)
-	for( int additiveSynthID=0; additiveSynthID<kMaxSynths; ++additiveSynthID )
+	for( auto instrument : i2s )
 	{
-		mPd->sendFloat(toString(additiveSynthID)+string("volume"), 0);
-	}
+		instrument.first->updateSynthesis(instrument.second);
+	}	
+}
 
-	// send scores to Pd
-	for( auto &score : mScores )
+void
+MusicWorld::updateSynthesisWithVision()
+{
+	InstrumentsToScores i2s = getInstrumentsToScores();
+	
+	for( auto instrument : i2s )
 	{
-		score.updateAdditiveSynthesis();
+		instrument.first->updateSynthesisWithVision(instrument.second);
 	}
+}
+
+void MusicWorld::updateMetaParamsWithVision()
+{
+	for( const Score &s : mScores )
+	{
+		// This is a little weird... But if somehow multiple metaparams have gotten
+		// on there, then let's just do them all. And draw will draw them all.
+		// That way if we mess up somewhere and bind>1 to a score at least it will
+		// carry on robustly.
+		// If we switch to using getInstrumentsToScores() then we can detect >1 per param easily.
+		for( auto i : s.mInstruments )
+		{
+			if ( i->mSynthType==Instrument::SynthType::Meta )
+			{
+				updateMetaParameter( i->mMetaParam, s.getMetaParamSliderValue(i) );
+			}
+		}
+	}
+}
+
+MusicWorld::InstrumentsToScores
+MusicWorld::getInstrumentsToScores() const
+{
+	InstrumentsToScores i2s;
+	
+	// make sure we have an entry for each instrument
+	for( auto i : mInstruments )
+	{
+		i2s[i.second] = vector<Score const*>();
+	}
+	
+	// index scores by instrument
+	for( const auto &s : mScores )
+	{
+		for( const auto i : s.mInstruments )
+		{
+			i2s[i].push_back(&s);
+		}
+	}
+	
+	return i2s;
 }
 
 void MusicWorld::draw( GameWorld::DrawType drawType )

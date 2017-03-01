@@ -244,7 +244,7 @@ MusicVision::getNearestTempo( float t ) const
 float
 MusicVision::decideMeasureCountForScore ( const Score& score ) const
 {
-	if ( score.mInstrument && score.mInstrument->mSynthType == Instrument::SynthType::Meta )
+	if ( score.mInstruments.hasSynthType( Instrument::SynthType::Meta ) )
 	{
 		return 1; // 1 measure
 	}
@@ -272,17 +272,15 @@ static float distanceBetweenPolys( const PolyLine2& a, const PolyLine2& b )
 	return distance(p1,p2);
 }
 
-InstrumentRef
-MusicVision::decideInstrumentForScore(
+InstrumentRefs
+MusicVision::decideInstrumentsForScore(
 	const Score& score,
 	const MusicStampVec& stamps,
 	const TokenMatchVec& tokens ) const
-{
-	InstrumentRef best;
-	
+{	
 	if (stamps.areTokensEnabled())
 	{
-		float bestScore = mMaxTokenScoreDistance;
+		InstrumentRefs result;
 		
 		for( const auto &t : tokens )
 		{
@@ -292,17 +290,19 @@ MusicVision::decideInstrumentForScore(
 			{
 				float sscore = distanceBetweenPolys(score.getPolyLine(),t.getPoly());
 				
-				if (sscore<bestScore)
+				if ( sscore < mMaxTokenScoreDistance )
 				{
-					bestScore = sscore;
-					best = s->mInstrument;
+					result.push_back(s->mInstrument);
 				}
 			}
 			else cout << "Couldn't find a stamp for token '" << t.getName() << "'" << endl;
 		}
+		
+		return result;
 	}
 	else
 	{
+		InstrumentRef best;
 		float bestScore=MAXFLOAT;
 		
 		for( const auto &s : stamps )
@@ -317,9 +317,11 @@ MusicVision::decideInstrumentForScore(
 				}
 			}
 		}
-	}
-	
-	return best;
+
+		InstrumentRefs result;
+		if (best) result.push_back(best);
+		return result;
+	}	
 }
 
 pair<float,float> getShapeRange( const vec2* pts, int npts, vec2 lookVec )
@@ -422,7 +424,7 @@ MusicVision::getScoresFromContours(
 			score.setQuadFromPolyLine(rectPoly,mTimeVec);
 
 			// instrument
-			score.mInstrument = decideInstrumentForScore(score,stamps,tokens);
+			score.mInstruments = decideInstrumentsForScore(score,stamps,tokens);
 
 			// timing
 			// Choose octave based on up<>down
@@ -467,9 +469,9 @@ ScoreVec MusicVision::mergeOldAndNewScores(
 			if (kVerbose) cout << "match" << endl;
 
 			// new <= old
-			InstrumentRef newInstrument = newScore->mInstrument;
+			InstrumentRefs newInstruments = newScore->mInstruments;
 			
-			if ( oldScore.mInstrument )
+			if ( !oldScore.mInstruments.empty() )
 			{
 				// overwrite new score with old, but not...
 				// ...if old score had no instrument
@@ -478,7 +480,7 @@ ScoreVec MusicVision::mergeOldAndNewScores(
 				*newScore = oldScore;
 				
 				// but...
-				if (isUsingTokens) newScore->mInstrument = newInstrument;
+				if (isUsingTokens) newScore->mInstruments = newInstruments;
 			}
 		}
 		else // zombie! (c has no match)
@@ -637,7 +639,7 @@ void MusicVision::quantizeImage( Pipeline& pipeline,
 	s.mQuantizedImage = thresholded;
 }
 
-float MusicVision::getSliderValueFromQuantizedImageData( const Score& s )
+float MusicVision::getSliderValueFromQuantizedImageData( const Score& s, InstrumentRef instrument )
 {
 	// alternative idea would be to take max, not avg
 	
@@ -660,7 +662,7 @@ float MusicVision::getSliderValueFromQuantizedImageData( const Score& s )
 	if ( sumw==0.f )
 	{
 //		value = oldSliderValue; // uh-oh! fall back to last frame value
-		value = s.mInstrument->mMetaParamInfo.mDefaultValue;
+		value = instrument->mMetaParamInfo.mDefaultValue;
 	}
 	
 	return value;
@@ -689,8 +691,7 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& score
 		cv::UMat oldTemporalBlendImage;
 		
 		const bool doTemporalBlend =
-			s.mInstrument &&
-		    s.mInstrument->isNoteType()
+		    s.mInstruments.hasNoteType()
 		 && mScoreTrackTemporalBlendFrac>0.f;
 		 
 		if ( doTemporalBlend ) {
@@ -716,39 +717,107 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& score
 			pipeline.back()->mLayoutHintOrtho = true;
 		}
 
-		if ( s.mInstrument )
+		// post-processing
+		if ( s.mInstruments.hasNoteType() )
 		{
-			// post-processing
-			switch( s.mInstrument->mSynthType )
+			// quantize notes
+			quantizeImage(pipeline,s,scoreName,
+				doTemporalBlend,oldTemporalBlendImage,
+				s.getQuantizedBeatCount(), s.mNoteCount );
+		
+			s.mNotes = getNotesFromQuantizedImage(s.mQuantizedImage);
+		}
+
+		// meta params
+		s.mMetaParamSliderValue.clear();
+		if ( s.mInstruments.hasSynthType(Instrument::SynthType::Meta) )
+		{
+			quantizeImage(pipeline,s,scoreName,
+				doTemporalBlend,oldTemporalBlendImage,
+				1, -1 );
+			// we don't quantize to num states because it behaves weird.
+			// maybe 2x or 4x that might help, but the code below handles continuous values best.
+
+			for( auto i : s.mInstruments )
 			{
-				// quantize notes
-				case Instrument::SynthType::Sampler:
-				case Instrument::SynthType::MIDI:
-				case Instrument::SynthType::RobitPokie:
-				
-					quantizeImage(pipeline,s,scoreName,
-						doTemporalBlend,oldTemporalBlendImage,
-						s.getQuantizedBeatCount(), s.mNoteCount );
-				
-					break;
-
-				// get meta-param
-				case Instrument::SynthType::Meta:
-				
-					quantizeImage(pipeline,s,scoreName,
-						doTemporalBlend,oldTemporalBlendImage,
-						1, -1 );
-					// we don't quantize to num states because it behaves weird.
-					// maybe 2x or 4x that might help, but the code below handles continuous values best.
-
-					s.mMetaParamSliderValue = getSliderValueFromQuantizedImageData(s);
-					break;
+				if ( i->mSynthType==Instrument::SynthType::Meta )
+				{
+					s.mMetaParamSliderValue[i->mMetaParam] =
+						getSliderValueFromQuantizedImageData(s,i);
+				}
+			}
+		}
 			
-				// additive texture grab
-				case Instrument::SynthType::Additive:
-					s.mTexture = matToTexture(s.mImage,false);
-					break;
-			} // switch
-		} // if
+		// additive texture grab
+		if ( s.mInstruments.hasSynthType(Instrument::SynthType::Additive) )
+		{
+			s.mTexture = matToTexture(s.mImage,false);
+		}
 	} // for
+}
+
+bool MusicVision::isScoreValueHigh( uchar value ) const
+{
+	const int kValueThresh = 100;
+
+	return value < kValueThresh ;
+	// if dark, then high
+	// else low
+}
+
+ScoreNotes
+MusicVision::getNotesFromQuantizedImage( cv::Mat img ) const
+{	
+	ScoreNotes notes;
+	notes.resize(mNoteCount);
+	notes.mNumCols = img.cols;
+	
+	const float invcols = 1.f / (float)img.cols;
+	
+	for ( int y=0; y<mNoteCount; ++y )
+	{
+		for( int x=0; x<img.cols; ++x )
+		{
+			if ( isScoreValueHigh(img.at<unsigned char>(mNoteCount-1-y,x)) )
+			{
+				ScoreNote n;
+				
+				n.mStartTimeAsCol = x;
+				n.mStartTimeAsScoreFrac = (float)n.mStartTimeAsCol * invcols;
+				n.mLengthAsCols = getNoteLengthAsImageCols(img,x,y);
+				n.mLengthAsScoreFrac = (float)n.mLengthAsCols * invcols;
+				
+				// we used to cap the length in drawNotes, but that doesn't
+				// seem necesssary.
+				
+				notes[y].push_back(n);
+
+				x = x + n.mLengthAsCols + 1;
+			}
+		}
+	}
+	
+	return notes;
+}
+
+int MusicVision::getNoteLengthAsImageCols( cv::Mat image, int x, int y ) const
+{
+	int x2;
+
+	for( x2=x;
+		 x2<image.cols
+			&& isScoreValueHigh(image.at<unsigned char>(image.rows-1-y,x2)) ;
+		 ++x2 )
+	{}
+
+	int len = x2-x;
+
+	return len;
+}
+
+float MusicVision::getNoteLengthAsScoreFrac( cv::Mat image, int x, int y ) const
+{
+	// can return 0, which means we filtered out super short image noise-notes
+
+	return (float)getNoteLengthAsImageCols(image,x,y) / (float)image.cols;
 }
