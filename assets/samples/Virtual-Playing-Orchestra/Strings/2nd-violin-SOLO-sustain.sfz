@@ -1,0 +1,155 @@
+//==============================================================
+// Solo 2nd Violin - Sustain
+//
+//   violin_vib.sfz from No Budget Orchestra - https://nobudgetorchestra.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+//==============================================================
+// Solo Violin - Sustain
+//
+//   violin_vib.sfz from No Budget Orchestra - https://nobudgetorchestra.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+<group>
+offset=300 // make 2nd violin a little different from 1st violin (PB)
+eq1_freq=295.7
+eq1_bw=2
+eq1_gain=4.6
+
+eq1_freq=4871.7
+eq1_bw=2
+eq1_gain=-4
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+// swap the samples around to further differentiate from 1st-SOLO violin
+
+ampeg_attack=0.3
+ampeg_release=0.6
+ampeg_decay=0.6
+tune=-2
+width=0 // force mono (PB)
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+// removed <control> - won't work when merging files
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\3_G.wav key=55 lokey=56 hikey=56
+tune=3
+volume=-1
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\3_Ab.wav key=56 lokey=55 hikey=55 
+tune=4
+volume=0.5
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\3_A.wav key=57 lokey=58 hikey=58
+tune=8
+volume=-1
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\3_Bb.wav key=58 lokey=57 hikey=57
+tune=8
+volume=1
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\3_B.wav key=59 lokey=60 hikey=60
+volume=-0.5
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\4_C.wav key=60 lokey=59 hikey=59
+tune=6
+volume=1.5
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\4_Db.wav key=61 lokey=62 hikey=62
+tune=6
+volume=2
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\4_D.wav key=62 lokey=61 hikey=61
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\4_Eb.wav key=63 lokey=64 hikey=64
+volume=0.5
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\4_E.wav key=64 lokey=63 hikey=63
+tune=6
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\4_F.wav key=65 lokey=66 hikey=66
+tune=6
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\4_Gb.wav key=66 lokey=65 hikey=65
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\4_G.wav key=67 lokey=68 hikey=68
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\4_Ab.wav key=68 lokey=67 hikey=67
+tune=8
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\4_A.wav key=69 lokey=70 hikey=70
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\4_Bb.wav key=70 lokey=69 hikey=69
+volume=2
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\4_B.wav key=71 lokey=72 hikey=72
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\5_C.wav key=72 lokey=71 hikey=71
+tune=6
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\5_Db.wav key=73 lokey=74 hikey=74
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\5_D.wav key=74 lokey=73 hikey=73
+tune=6
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\5_Eb.wav key=75 lokey=76 hikey=76
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\5_E.wav key=76 lokey=75 hikey=75
+tune=6
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\5_F.wav key=77 lokey=78 hikey=78
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\5_Gb.wav key=78 lokey=77 hikey=77
+volume=4
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\5_G.wav key=79 lokey=80 hikey=81
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\5_Ab.wav key=80 lokey=79 hikey=79
+tune=-12
+
+// removed 5_A had a click sound (PB)
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\5_Bb.wav key=82 lokey=83 hikey=83
+tune=-12
+volume=3
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\5_B.wav key=83 lokey=82 hikey=82
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\6_C.wav key=84 lokey=85 hikey=85
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\6_Db.wav key=85 lokey=84 hikey=84
+volume=1
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\6_D.wav key=86 lokey=90 hikey=90
+// removed 6_Eb - noisy (PB)
+
+// removed 6_E - noisy (PB)
+
+// removed 6_F - noisy (PB)
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\6_Gb.wav key=90 hikey=89 lokey=86
+tune=-32
+volume=2
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\6_G.wav key=91 lokey=94 hikey=105
+tune=-12
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\6_Ab.wav key=92 lokey=91 hikey=91
+tune=-27
+
+// removed 6_A vibrato out of tune (PB)
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\Vibrato\6_Bb.wav key=94 lokey=92 hikey=93
+tune=8
+volume=2
+
+// removed 6_B too squeeky (PB)
+
+
+
+// removed release samples - not worth it (PB)
+

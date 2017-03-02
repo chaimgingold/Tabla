@@ -1,0 +1,53 @@
+//==============================================================
+//  Clarinet Section - Sustain
+//
+//   clarinets_legsus.sfz from No Budget Orchestra - https://nobudgetorchestra.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+<group>
+ampeg_attack=0.4 // slightly longer attack (PB)
+ampeg_release=0.6 // slightly longer release (PB)
+volume=-1
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+ ampeg_release=.4
+
+<region> sample=..\libs\NoBudgetOrch\ClarinetSect\Sustain\3_D.wav pitch_keycenter=d3 lokey=d3 hikey=d#3
+<region> sample=..\libs\NoBudgetOrch\ClarinetSect\Sustain\3_Gb.wav pitch_keycenter=f#3 lokey=e3 hikey=g3
+<region> sample=..\libs\NoBudgetOrch\ClarinetSect\Sustain\3_Bb.wav pitch_keycenter=a#3 lokey=g#3 hikey=b3
+pan=15
+tune=-5
+
+<region> sample=..\libs\NoBudgetOrch\ClarinetSect\Sustain\4_D.wav pitch_keycenter=d4 lokey=c4 hikey=d#4
+pan=-5
+tune=-3
+
+<region> sample=..\libs\NoBudgetOrch\ClarinetSect\Sustain\4_Gb.wav pitch_keycenter=f#4 lokey=e4 hikey=g4
+tune=-5
+
+<region> sample=..\libs\NoBudgetOrch\ClarinetSect\Sustain\4_Bb.wav pitch_keycenter=a#4 lokey=g#4 hikey=b4
+pan=10
+
+<region> sample=..\libs\NoBudgetOrch\ClarinetSect\Sustain\5_D.wav pitch_keycenter=d5 lokey=c5 hikey=d#5
+tune=-5
+
+<region> sample=..\libs\NoBudgetOrch\ClarinetSect\Sustain\5_Gb.wav pitch_keycenter=f#5 lokey=e5 hikey=g5
+pan=10
+tune=-5
+
+<region> sample=..\libs\NoBudgetOrch\ClarinetSect\Sustain\5_Bb.wav pitch_keycenter=a#5 lokey=g#5 hikey=b5
+<region> sample=..\libs\NoBudgetOrch\ClarinetSect\Sustain\6_D.wav pitch_keycenter=d6 lokey=c6 hikey=d#6
+pan=10
+tune=-5
+
+<region> sample=..\libs\NoBudgetOrch\ClarinetSect\Sustain\6_Gb.wav pitch_keycenter=f#6 lokey=e6 hikey=c7
+pan=-5
+
+
+

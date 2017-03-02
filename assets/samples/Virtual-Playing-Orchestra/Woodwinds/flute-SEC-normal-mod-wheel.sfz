@@ -1,0 +1,251 @@
+//==============================================================
+// Flute Section - Normal Mod Wheel
+//
+//   This is a combination of
+//
+//     flute-SEC-sustain.sfz
+//     flute-SEC-staccato.sfz
+//
+//   ... where the mod wheel lengthens the attack
+//
+//   by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+//==============================================================
+//  Flute Section - Sustain
+//
+//   flute_sect.sfz from No Budget Orchestra - https://nobudgetorchestra.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+<group>
+ampeg_attackcc1=0.5 // mod wheel slows attack
+ampeg_attack=0 // faster sustain attack for marcato (PB)
+
+	ampeg_release=0.9 // slightly longer release for sustain (PB)
+//	loop_mode=loop_continuous
+<region>
+	sample=..\libs\NoBudgetOrch\FluteSect\4_Db.wav
+pan=5
+
+	pitch_keycenter=c#3 lokey=c3 hikey=d3
+<region>
+	sample=..\libs\NoBudgetOrch\FluteSect\4_F.wav
+tune=-5
+pan=10
+
+	pitch_keycenter=f3 lokey=d#3 hikey=f#3
+<region>
+	sample=..\libs\NoBudgetOrch\FluteSect\4_Ab.wav
+	pitch_keycenter=g#3 lokey=g3 hikey=a3
+<region>
+	sample=..\libs\NoBudgetOrch\FluteSect\4_B.wav
+	pitch_keycenter=b3 lokey=a#3 hikey=c4
+<region>
+	sample=..\libs\NoBudgetOrch\FluteSect\5_D.wav
+	pitch_keycenter=d4 lokey=c#4 hikey=d#4
+<region>
+	sample=..\libs\NoBudgetOrch\FluteSect\5_F.wav
+	pitch_keycenter=f4 lokey=e4 hikey=f#4
+<region>
+	sample=..\libs\NoBudgetOrch\FluteSect\5_Ab.wav
+	pitch_keycenter=g#4 lokey=g4 hikey=b4
+
+// removed 6_C.wav
+
+<region>
+	sample=..\libs\NoBudgetOrch\FluteSect\6_Eb-PB.wav
+	pitch_keycenter=d#5 lokey=c5 hikey=f5
+<region>
+	sample=..\libs\NoBudgetOrch\FluteSect\6_Ab.wav
+tune=-10
+
+	pitch_keycenter=g#5 lokey=f#5 hikey=d6
+
+
+//==============================================================
+// Solo Flute - Staccato
+//
+//   FluteStac.sfz from Versilian Studios - http://vis.versilstudios.net/vsco-2.html
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// Remapped to only use best samples (PB)
+
+<group>
+ampeg_attackcc1=0.5 // mod wheel slows attack
+gain_cc1=-15        // mod wheel reduces volume
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+ampeg_attack=0.001
+ampeg_release=3
+ampeg_dynamic=1
+volume=-7.5
+
+<region>
+sample=..\libs\VSCO2-CE\Woodwinds\Flute\stac-PB\LDFlute_stac_C3-PB.wav
+tune=-5
+
+lokey=c3
+hikey=d#3
+pitch_keycenter=c3
+
+<region>
+sample=..\libs\VSCO2-CE\Woodwinds\Flute\stac-PB\LDFlute_stac_E3-PB.wav
+lokey=e3
+hikey=g#3
+pitch_keycenter=e3
+
+<region>
+sample=..\libs\VSCO2-CE\Woodwinds\Flute\stac-PB\LDFlute_stac_A3_v2_rr1-PB.wav
+lokey=g3
+hikey=a#3
+pitch_keycenter=a3
+tune=5
+
+<region>
+sample=..\libs\VSCO2-CE\Woodwinds\Flute\stac-PB\LDFlute_stac_C4_v4_rr1-PB.wav
+lokey=b3
+hikey=d4
+pitch_keycenter=c4
+
+<region>
+sample=..\libs\VSCO2-CE\Woodwinds\Flute\stac-PB\LDFlute_stac_E4_v2_rr1-PB.wav
+volume=-8.5
+
+lokey=d#4
+hikey=f#4
+pitch_keycenter=e4
+
+<region>
+sample=..\libs\VSCO2-CE\Woodwinds\Flute\stac-PB\LDFlute_stac_A4_v3_rr2-PB.wav
+lokey=g4
+hikey=a#4
+pitch_keycenter=a4
+
+<region>
+sample=..\libs\VSCO2-CE\Woodwinds\Flute\stac-PB\LDFlute_stac_C5_v1_rr1-PB.wav
+volume=-4.5
+
+lokey=b4
+hikey=d5
+pitch_keycenter=c5
+
+<region>
+sample=..\libs\VSCO2-CE\Woodwinds\Flute\stac-PB\LDFlute_stac_E5_v1_rr2-PB.wav
+lokey=d#5
+hikey=f#5
+pitch_keycenter=e5
+
+<region>
+sample=..\libs\VSCO2-CE\Woodwinds\Flute\stac-PB\LDFlute_stac_A5_v1_rr1-PB.wav
+volume=-6.5
+
+lokey=g5
+hikey=a#5
+pitch_keycenter=a5
+
+<region>
+sample=..\libs\VSCO2-CE\Woodwinds\Flute\stac-PB\LDFlute_stac_C6_v2_rr2-PB.wav
+volume=-6.5
+
+lokey=b5
+hikey=d6
+pitch_keycenter=c6
+
+
+
+//==============================================================
+//  Flute Section - Staccato
+//
+//   flute_sect.sfz from No Budget Orchestra - https://nobudgetorchestra.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+<group>
+ampeg_attackcc1=0.5 // mod wheel slows attack
+gain_cc1=-15        // mod wheel reduces volume
+// manufacture staccato from sustain (PB)
+offset=1124
+
+ampeg_attack=0.06
+ampeg_sustain=0.0
+ampeg_hold=0.06
+ampeg_decay=0.6
+ampeg_release=0.6
+
+
+
+
+	
+//	loop_mode=loop_continuous
+<region>
+	sample=..\libs\NoBudgetOrch\FluteSect\4_Db.wav
+
+volume=8
+pan=30
+
+	pitch_keycenter=c#3 lokey=c3 hikey=d3
+<region>
+	sample=..\libs\NoBudgetOrch\FluteSect\4_F.wav
+
+volume=1
+tune=-5
+pan=65
+
+	pitch_keycenter=f3 lokey=d#3 hikey=f#3
+<region>
+	sample=..\libs\NoBudgetOrch\FluteSect\4_Ab.wav
+pan=10
+volume=3
+
+	pitch_keycenter=g#3 lokey=g3 hikey=a3
+<region>
+	sample=..\libs\NoBudgetOrch\FluteSect\4_B.wav
+pan=15
+volume=3
+
+	pitch_keycenter=b3 lokey=a#3 hikey=c4
+<region>
+	sample=..\libs\NoBudgetOrch\FluteSect\5_D.wav
+pan=35
+volume=3
+
+	pitch_keycenter=d4 lokey=c#4 hikey=d#4
+<region>
+	sample=..\libs\NoBudgetOrch\FluteSect\5_F.wav
+pan=25
+volume=3
+
+	pitch_keycenter=f4 lokey=e4 hikey=f#4
+<region>
+	sample=..\libs\NoBudgetOrch\FluteSect\5_Ab.wav
+pan=10
+volume=5
+
+	pitch_keycenter=g#4 lokey=g4 hikey=b4
+
+// removed 6_C.wav
+
+<region>
+	sample=..\libs\NoBudgetOrch\FluteSect\6_Eb-PB.wav
+	pitch_keycenter=d#5 lokey=c5 hikey=f5
+<region>
+	sample=..\libs\NoBudgetOrch\FluteSect\6_Ab.wav
+tune=-10
+
+	pitch_keycenter=g#5 lokey=f#5 hikey=d6
+
+
+

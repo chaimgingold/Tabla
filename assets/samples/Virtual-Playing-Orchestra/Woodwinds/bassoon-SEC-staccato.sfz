@@ -1,0 +1,76 @@
+//==============================================================
+// Bassoon Section - Staccato
+//
+//   bassoons_legsus.sfz - from No Budget Orchestra - https://nobudgetorchestra.net
+//
+//   Modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+
+<group>
+ampeg_attack=0.03 // create staccato from sustain (PB)
+ampeg_sustain=0
+ampeg_hold=0.15
+ampeg_decay=0.6
+offset=1016
+
+
+volume=0 // adjust volume to match SSO (PB)
+
+
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+ ampeg_release=.6 
+<control> default_path=..\libs\NoBudgetOrch\BassoonSect\Sustain\
+<region> sample=1_Bb.wav pitch_keycenter=a#1 lokey=a#1 hikey=c2
+volume=1
+
+<region> sample=2_D.wav pitch_keycenter=d2 lokey=c#2 hikey=d#2
+
+tune=-5
+volume=0.5
+
+<region> sample=2_F.wav pitch_keycenter=f2 lokey=e2 hikey=f#2
+pan=3
+
+<region> sample=2_Ab.wav pitch_keycenter=g#2 lokey=g2 hikey=a2
+volume=1
+
+<region> sample=3_C.wav pitch_keycenter=c3 lokey=a#2 hikey=d3
+pan=15
+
+<region> sample=3_Gb.wav pitch_keycenter=f#3 lokey=d#3 hikey=g#3
+volume=0.4
+
+<region> sample=3_A.wav pitch_keycenter=a3 lokey=g3 hikey=a#3
+tune=-10
+volume=-1
+
+<region> sample=4_C.wav pitch_keycenter=c4 lokey=b3 hikey=c#4
+pan=15
+volume=0
+
+<region> sample=4_Eb.wav pitch_keycenter=d#4 lokey=d4 hikey=f4
+
+tune=3
+pan=10
+volume=-1
+
+<region> sample=4_A.wav pitch_keycenter=a4 lokey=f#4 hikey=a#4
+
+pan=10
+tune=-5
+volume=-1
+
+<region> sample=5_Db.wav pitch_keycenter=c#5 lokey=b4 hikey=d#5
+tune=-10
+pan=-10
+
+
+
+

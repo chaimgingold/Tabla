@@ -1,0 +1,329 @@
+//==============================================================
+// Cello Section - Pizzicato
+//
+//   CelloEnsPizz.sfz from Versilian Studios - http://vis.versilstudios.net/vsco-2.html
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// removed control and global, doesn't work when merged with other files (PB)
+
+<group>
+ampeg_attack=0.03
+ampeg_release=1.0
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+ //Begin Group 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//-------------- low velocity --------------
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_A2_v1_RR2.wav
+pan=-15
+
+lokey=55
+hikey=60
+pitch_keycenter=57
+xfout_lovel=0
+hivel=62
+volume=25
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_B1_v1_RR1.wav
+pan=-30
+
+lokey=45
+hikey=48
+pitch_keycenter=47
+xfout_lovel=0
+hivel=62
+volume=27
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_B3_v1_RR2.wav
+pan=-33
+
+lokey=69
+hikey=72
+pitch_keycenter=71
+xfout_lovel=0
+hivel=62
+volume=26
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_C1_v1_RR1.wav
+pan=-15
+
+lokey=36
+hikey=38
+pitch_keycenter=36
+xfout_lovel=0
+hivel=62
+volume=24
+
+
+// removed pizzT_C3 - bad click sound (PB)
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_D2_v1_RR2.wav
+pan=-30
+
+lokey=49
+hikey=51
+pitch_keycenter=50
+xfout_lovel=0
+hivel=62
+volume=27
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_D4_v1_RR1.wav
+pan=-25
+
+lokey=73
+hikey=76
+pitch_keycenter=74
+xfout_lovel=0
+hivel=62
+volume=27
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_E1_v1_RR2.wav
+pan=-20
+
+lokey=39
+hikey=41
+pitch_keycenter=40
+xfout_lovel=0
+hivel=62
+volume=29
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_E3_v1_RR1.wav
+pan=-24
+
+lokey=61
+hikey=65
+pitch_keycenter=64
+xfout_lovel=0
+hivel=62
+volume=23
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_F2_v1_RR1.wav
+pan=-35
+
+lokey=52
+hikey=54
+pitch_keycenter=53
+xfout_lovel=0
+hivel=62
+volume=25
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_F4_v1_RR1.wav
+pan=-20
+
+lokey=76
+hikey=81
+pitch_keycenter=77
+xfout_lovel=0
+hivel=62
+volume=30
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_G1_v1_RR1.wav
+pan=-20
+
+lokey=42
+hikey=44
+pitch_keycenter=43
+xfout_lovel=0
+hivel=62
+volume=25
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_G3_v1_RR1.wav
+pan=-15
+
+lokey=66
+hikey=68
+pitch_keycenter=67
+xfout_lovel=0
+hivel=62
+volume=25
+
+//-------------- high velocity --------------
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_A2_v2_RR1.wav
+pan=-20
+
+lokey=55
+hikey=60
+pitch_keycenter=57
+xfin_lovel=54
+hivel=127
+volume=13
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_B1_v2_RR1.wav
+pan=-30
+
+lokey=45
+hikey=48
+pitch_keycenter=47
+xfin_lovel=54
+hivel=127
+volume=16
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_B3_v2_RR2.wav
+pan=-30
+
+lokey=69
+hikey=72
+pitch_keycenter=71
+xfin_lovel=54
+hivel=127
+volume=15
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_C1_v2_RR1.wav
+pan=-18
+
+lokey=36
+hikey=38
+pitch_keycenter=36
+xfin_lovel=54
+hivel=127
+volume=13
+
+
+// removed pizzT_C3 - bad click sound (PB)
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_D2_v2_RR1.wav
+pan=-35
+
+lokey=49
+hikey=51
+pitch_keycenter=50
+xfin_lovel=54
+hivel=127
+volume=11
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_D4_v2_RR1.wav
+pan=-12
+
+lokey=73
+hikey=76
+pitch_keycenter=74
+xfin_lovel=54
+hivel=127
+volume=13
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_E1_v2_RR2.wav
+pan=-25
+
+lokey=39
+hikey=41
+pitch_keycenter=40
+xfin_lovel=54
+hivel=127
+volume=18
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_E3_v2_RR1.wav
+pan=-25
+
+lokey=61
+hikey=65
+pitch_keycenter=64
+xfin_lovel=54
+hivel=127
+volume=12
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_F2_v2_RR1.wav
+pan=-25
+
+lokey=52
+hikey=54
+pitch_keycenter=53
+xfin_lovel=54
+hivel=127
+volume=14
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_F4_v2_RR2.wav
+pan=-20
+
+lokey=76
+hikey=81
+pitch_keycenter=77
+xfin_lovel=54
+hivel=127
+volume=10
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_G1_v2_RR2.wav
+pan=-25
+
+lokey=42
+hikey=44
+pitch_keycenter=43
+xfin_lovel=54
+hivel=127
+volume=18
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Cello Section\pizzT\pizzT_G3_v2_RR2.wav
+pan=-20
+
+lokey=66
+hikey=68
+pitch_keycenter=67
+xfin_lovel=54
+hivel=127
+volume=10
+

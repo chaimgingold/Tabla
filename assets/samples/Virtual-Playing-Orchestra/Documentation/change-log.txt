@@ -1,0 +1,76 @@
+Version 0.1 - Oct 13 2016
+-------------------------
+- [Beta Release for Testing]
+
+Version 0.2 patch - Oct 17 2016
+--------------------------------
+ - modified keyswitch and glockenspiel patches to avoid use of <global> opcode
+   for compatibility with LinuxSampler
+
+Version 0.3 patch - Oct 17 2016
+-------------------------------
+  - renamed 2nd-violins-piz-rr2-g3-pb.wav to
+            2nd-violins-piz-rr2-g3-PB.wav
+  - deleted Strings-1st-violin-SEC-staccato-fix.sfz
+  - deleted Strings-1st-violin-SOLO-sustain2.sfz
+  - deleted Strings-1st-violin-SOLO-sustain-SSO.sfz
+  - Percussion-glockenepiel.sfz had the path wrong after <global> opcode was
+    removed and glockenspiel needed to be transposed -24 instead of -12 to get the
+    correct key mapping
+
+Version 0.4 patch - Oct 25 2016
+-------------------------------
+  - Choir-mixed.sfz referenced the "chorus" instead of "Chorus" directory causing
+    problems for LinuxSampler
+  - Bassoon-SOLO .sfz files referenced the "bassoon" instead of "Bassoon" directory
+    causing problems for LinuxSampler
+  - Oboe-SOLO .sfz files referenced the "oboe" instead of "Oboe" directory
+    causing problems for LinuxSampler
+  - Piccolo-SOLO .sfz files referenced the "piccolo" instead of "Piccolo" directory
+    causing problems for LinuxSampler
+  - removed vibrato from solo horn
+  - ensured all pizz samples have 0.03 ampeg_attack to avoid clicks due to random
+    offset
+  - removed round robin from Strings-cello-SEC-pizzicato
+  - converted viola solo pizz to mono (instead of using width=0 opcode)
+  - converted xylophone to mono, adjusted volume of each note
+  - replaced timpani rolls
+  - adjusted trombone-SEC-staccato to fix problem of double hits
+      sounding for some notes
+
+  - added tremolo articulation for all section strings
+  - added English Horn Solo
+
+  - stretched range of 1st and 2nd violins from c7 to a7
+  - stretched range of violas from e6 to a6
+  - stretched range of cellos from e5 to a5
+  - set range of trumpet to F#3-C6
+  - set range of french horn to B1-F5
+  - set range of glockenspiel to F5-C8
+  - set range of xylophone to C4-C8
+  - set range of tubular bells to C4-G5
+
+Version 1.0 -
+------------------------------------
+- [ First Public Release ]
+  - deleted unused Strings-1st-violin-SEC-staccato-fix.sfz
+  - deleted unused Strings-1st-violin-SOLO-sustain2.sfz
+  - deleted unused Strings-1st-violin-SOLO-sustain-SSO.sfz
+  - renamed "Horn" .sfz files to "French-Horn"
+  - renamed all .sfz files to remove redundant instrument classes from name
+     ex "Strings-1st-violin-SEC-sustain.sfz" becomes "1st-violin-SEC-sustain.sfz"
+    renamed all "Sustain-mod-wheel" files to "Normal-mod-wheel"
+  - made glockenspiel samples mono
+  - moved keyswitch for timpani from C1 to C5
+  - made small adjustment for better ending of timpani roll
+  - renamed "Choir" subdirectory to "Vocals"
+  - adjusted tuning of piccolo
+  - adjusted tuning of flute-SEC-sustain
+  - completely replaced solo trombone
+  - added c3 keyswitch option for Piccolo and Oboe
+  - removed delay as a randomization factor from all instruments
+  - adjusted marcato timing for smaller delay between accent and sustain
+  - renamed all "marcato" patches to "accent"
+  - replaced tremolo for bass, cello, viola
+  - removed 1st violin sec pizzicato round robin
+  - removed 2nd violin sec pizzicato round robin

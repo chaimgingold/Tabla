@@ -1,0 +1,142 @@
+//==============================================================
+// 1st Violin Section - Pizzicato
+//
+//   Strings - 1st Violins Pizzicato.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   samples and .sfz modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//     1st Violins Pizzicato
+// ------------------------------
+
+<group>
+ampeg_attack=0.03
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+loop_mode=one_shot
+ampeg_sustain=0
+ampeg_decay=1
+ampeg_vel2decay=10
+
+<region>
+sample=..\libs\SSO\Samples\1st Violins\1st-violins-piz-rr1-g3-PB.wav
+volume=2 pan=20
+
+lokey=g3
+hikey=g#3
+pitch_keycenter=g3
+
+<region>
+sample=..\libs\SSO\Samples\1st Violins\1st-violins-piz-rr1-a#3-PB.wav
+volume=2 pan=25
+
+lokey=a3
+hikey=b3
+pitch_keycenter=a#3
+
+<region>
+sample=..\libs\SSO\Samples\1st Violins\1st-violins-piz-rr1-c#4-PB.wav
+volume=3 pan=15
+
+lokey=c4
+hikey=d4
+pitch_keycenter=c#4
+
+<region>
+sample=..\libs\SSO\Samples\1st Violins\1st-violins-piz-rr1-e4-PB.wav
+volume=2 pan=30
+
+lokey=d#4
+hikey=f4
+pitch_keycenter=e4
+
+<region>
+sample=..\libs\SSO\Samples\1st Violins\1st-violins-piz-rr1-g4-PB.wav
+volume=2 pan=25
+
+lokey=f#4
+hikey=g#4
+pitch_keycenter=g4
+
+<region>
+sample=..\libs\SSO\Samples\1st Violins\1st-violins-piz-rr1-a#4-PB.wav
+volume=3 pan=20
+
+lokey=a4
+hikey=b4
+pitch_keycenter=a#4
+
+<region>
+sample=..\libs\SSO\Samples\1st Violins\1st-violins-piz-rr1-c#5-PB.wav
+volume=2 pan=20
+
+lokey=c5
+hikey=d5
+pitch_keycenter=c#5
+
+<region>
+sample=..\libs\SSO\Samples\1st Violins\1st-violins-piz-rr1-e5-PB.wav
+volume=1 pan=30
+
+lokey=d#5
+hikey=f5
+pitch_keycenter=e5
+
+<region>
+sample=..\libs\SSO\Samples\1st Violins\1st-violins-piz-rr1-g5-PB.wav
+volume=4 pan=10
+
+lokey=f#5
+hikey=g#5
+pitch_keycenter=g5
+
+<region>
+sample=..\libs\SSO\Samples\1st Violins\1st-violins-piz-rr1-a#5-PB.wav
+volume=8 pan=-10
+
+lokey=a5
+hikey=b5
+pitch_keycenter=a#5
+
+<region>
+sample=..\libs\SSO\Samples\1st Violins\1st-violins-piz-rr1-c#6-PB.wav
+volume=6 pan=0
+
+lokey=c6
+hikey=d6
+pitch_keycenter=c#6
+
+<region>
+sample=..\libs\SSO\Samples\1st Violins\1st-violins-piz-rr1-e6-PB.wav
+volume=4 pan=0
+
+lokey=d#6
+hikey=f6
+pitch_keycenter=e6
+
+<region>
+sample=..\libs\SSO\Samples\1st Violins\1st-violins-piz-rr1-g6-PB.wav
+volume=3 pan=0
+
+lokey=f#6
+hikey=g#6
+pitch_keycenter=g6
+
+<region>
+sample=..\libs\SSO\Samples\1st Violins\1st-violins-piz-rr1-a#6-PB.wav
+volume=1 pan=0
+
+lokey=a6
+hikey=a7
+pitch_keycenter=a#6
+
+// removed round robin (PB)
+

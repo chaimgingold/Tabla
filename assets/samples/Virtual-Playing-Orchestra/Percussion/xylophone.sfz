@@ -1,0 +1,89 @@
+//==============================================================
+//  Percussion - Xylophone
+//
+//   xylophone.sfz from No Budget Orchestra - https://nobudgetorchestra.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+<control>
+note_offset=-12
+ default_path=..\libs\NoBudgetOrch\Percussion\Xylophone\
+<group> loop_mode=one_shot seq_length=2
+<region> sample=4_Gb-PB.wav pitch_keycenter=f#4 lokey=c4 hikey=f#4
+volume=1
+
+<region> sample=4_Gb_2-PB.wav pitch_keycenter=f#4 lokey=c4 hikey=f#4 seq_position=2
+volume=3
+
+<region> sample=4_Ab-PB.wav pitch_keycenter=g#4 lokey=g4 hikey=g#4
+<region> sample=4_Ab_2-PB.wav pitch_keycenter=g#4 lokey=g4 hikey=g#4 seq_position=2
+volume=3
+
+<region> sample=4_Bb-PB.wav pitch_keycenter=a#4 lokey=a4 hikey=a#4
+volume=4
+
+<region> sample=4_Bb_2-PB.wav pitch_keycenter=a#4 lokey=a4 hikey=a#4 seq_position=2
+volume=3
+
+<region> sample=5_C-PB.wav pitch_keycenter=c5 lokey=b4 hikey=c5
+<region> sample=5_C_2-PB.wav pitch_keycenter=c5 lokey=b4 hikey=c5 seq_position=2
+volume=2
+
+<region> sample=5_D-PB.wav pitch_keycenter=d5 lokey=c#5 hikey=d5
+<region> sample=5_D_2-PB.wav pitch_keycenter=d5 lokey=c#5 hikey=d5 seq_position=2
+volume=1
+
+<region> sample=5_E-PB.wav pitch_keycenter=e5 lokey=d#5 hikey=e5
+<region> sample=5_E_2-PB.wav pitch_keycenter=e5 lokey=d#5 hikey=e5 seq_position=2
+<region> sample=5_Gb-PB.wav pitch_keycenter=f#5 lokey=f5 hikey=f#5
+volume=2
+
+<region> sample=5_Gb_2-PB.wav pitch_keycenter=f#5 lokey=f5 hikey=f#5 seq_position=2
+volume=2
+
+<region> sample=5_Ab-PB.wav pitch_keycenter=g#5 lokey=g5 hikey=g#5
+volume=2
+
+<region> sample=5_Ab_2-PB.wav pitch_keycenter=g#5 lokey=g5 hikey=g#5 seq_position=2
+volume=2
+
+<region> sample=5_Bb-PB.wav pitch_keycenter=a#5 lokey=a5 hikey=a#5
+volume=2
+
+<region> sample=5_Bb_2-PB.wav pitch_keycenter=a#5 lokey=a5 hikey=a#5 seq_position=2
+volume=2
+
+<region> sample=6_C-PB.wav pitch_keycenter=c6 lokey=b5 hikey=c6
+volume=1
+
+<region> sample=6_C_2-PB.wav pitch_keycenter=c6 lokey=b5 hikey=c6 seq_position=2
+volume=2
+
+<region> sample=6_D-PB.wav pitch_keycenter=d6 lokey=c#6 hikey=d6
+volume=1
+
+<region> sample=6_D_2-PB.wav pitch_keycenter=d6 lokey=c#6 hikey=d6 seq_position=2
+<region> sample=6_E-PB.wav pitch_keycenter=e6 lokey=d#6 hikey=e6
+<region> sample=6_E_2-PB.wav pitch_keycenter=e6 lokey=d#6 hikey=e6 seq_position=2
+volume=1
+
+<region> sample=6_Gb-PB.wav pitch_keycenter=f#6 lokey=f6 hikey=f#6
+volume=3
+
+<region> sample=6_Gb_2-PB.wav pitch_keycenter=f#6 lokey=f6 hikey=f#6 seq_position=2
+volume=2
+
+<region> sample=6_Ab-PB.wav pitch_keycenter=g#6 lokey=g6 hikey=g#6
+volume=1
+
+<region> sample=6_Ab_2-PB.wav pitch_keycenter=g#6 lokey=g6 hikey=g#6 seq_position=2
+volume=2
+
+<region> sample=6_Bb-PB.wav pitch_keycenter=a#6 lokey=a6 hikey=c8
+volume=1
+
+<region> sample=6_Bb_2-PB.wav pitch_keycenter=a#6 lokey=a6 hikey=c8 seq_position=2
+volume=2
+

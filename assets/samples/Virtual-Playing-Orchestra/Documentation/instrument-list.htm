@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<head>
+<meta charset="UTF-8" />
+
+</head>
+<body>
+
+<link rel="stylesheet" type="text/css" rel="stylesheet" href="instrument-list.css" />
+
+<div id="instruments-list">
+<!-- beginWordpress -->
+<h1>Notes:</h1>
+<ul>
+	<li>All instruments are set to only play within their proper range</li>
+	<li>All instruments are mapped to appear in the proper place on a musical score so in some cases, to reach all the notes on a MIDI controller, it might be necessary to set the midi controller to transpose the notes or set your Digital Audio Workstation (DAW) to transpose the MIDI</li>
+	<li>All instruments include a general purpose articulation called “Normal-mod-wheel”. This is effectively a sustain patch with a fast attack, but the mod wheel reduces the rate of the attack, for the times when you don't want the slower crescendo of the sustain patch, but you still want a sustained note.</li>
+	<li>Each articulation, Sustain, Normal Mod Wheel, Staccato, Accent can be loaded individually, but is also part of a key switch patch</li>
+	<li>Generally, (harp is the exception) key switches are assigned to the following notes, with "n" representing where the key switches start<br />
+ <br />
+ Cn = Sustain <br />
+ C#n = Tremolo (only for string section) <br />
+ Dn = Normal / General Purpose (mod wheel changes length of note attack) <br />
+ D#n = Accent (an accented sustain) <br />
+ En = Staccato <br />
+ Fn = Pizzicato (only for strings, of course)<br />
+ <br />
+ For Harp, C0 = Sustain, D0 = dampened or B7 = Sustain, C8 = dampened
+ <br />
+ For Timpani, C5 = Hit, D5 = roll
+</li>
+</ul>
+
+  <h1>Instruments</h1>
+
+  <h2>Woodwinds</h2>
+  <table class="wood-strings-brass">
+    <tr>
+      <th colspan=2>Instruments</th> <th>Range</th> <th>Articulations</th> <th>Notes</th>
+    </tr>
+    <tr>
+      <td>Piccolo</td> <td>Solo</td> <td>D5 - C8</td></td><td>Sustain, Normal-mod-wheel, Accent, Staccato </td> <td>Key switches start at C2 or C3</td>
+    </tr>
+    <tr>
+      <td>Flute</td> <td>Solo, Section</td> <td>C4 - D7</td> <td>Sustain, Normal-mod-wheel, Accent, Staccato </td> <td>Key switches start at C2</td>
+    </tr>
+    <tr>
+      <td>Oboe</td> <td>Solo, Section</td> <td>Bb3 - A6</td> <td>Sustain, Normal-mod-wheel, Accent, Staccato </td> <td>Key switches start at C2 or C3</td>
+    </tr>
+    <tr>
+      <td>English Horn</td> <td>Solo</td> <td>E3 - Bb5</td> <td>Sustain, Normal-mod-wheel, Accent, Staccato </td> <td>Key switches start at C2</td>
+    </tr>
+    <tr>
+      <td>Clarinet</td> <td>Solo, Section</td> <td>D3 - Bb6</td> <td>Sustain, Normal-mod-wheel, Accent, Staccato </td> <td>Key switches start at C2</td>
+    </tr>
+    <tr>
+      <td>Bassoon</td> <td>Solo, Section</td> <td>Bb1 - Eb5</td> <td>Sustain, Normal-mod-wheel, Accent, Staccato</td> <td>To reach all notes, may need to transpose keyboard down an octave<br>- before transpose, key switches start at C5,<br>- after tranpose Key switches start at C6</td>
+    </tr>
+  </table>
+
+  <h2>Strings</h2>
+  <table class="wood-strings-brass">
+    <tr>
+      <th colspan=2>Instruments</th> <th>Range</th> <th>Articulations</th> <th>Notes</th>
+    </tr>
+    <tr>
+      <td>1st Violins</td> <td>Solo, Section</td> <td>G3 - A7</td> <td>Sustain, Tremolo*, Normal-mod-wheel, Accent, Staccato, Pizzicato</td> <td>Key switches start at C2</td>
+    </tr>
+    <tr>
+      <td>2nd Violins</td> <td>Solo, Section</td> <td>G3 - A7</td> <td>Sustain, Tremolo*, Normal-mod-wheel, Accent, Staccato, Pizzicato</td> <td>Key switches start at C2</td>
+    </tr>
+    <tr>
+      <td>Viola</td> <td>Solo, Section</td> <td>C3 - A6</td> <td>Sustain, Tremolo*, Normal-mod-wheel, Accent, Staccato, Pizzicato</td> <td>Key switches start at C2</td>
+    </tr>
+    <tr>
+      <td>Cello</td> <td>Solo, Section</td> <td>C2 - A5</td> <td>Sustain, Tremolo*, Normal-mod-wheel, Accent, Staccato, Pizzicato</td> <td>Key switches start at C6</td>
+    </tr>
+    <tr>
+      <td>String Bass</td> <td>Solo, Section</td> <td>C1 - G4</td> <td>Sustain, Tremolo*, Normal-mod-wheel, Accent, Staccato, Pizzicato</td> <td>To reach all notes, may need to transpose keyboard down an octave<br>- before transpose, key switches start at C5,<br>- after tranpose, key switches start at C6</td>
+    </tr>
+    <tr>
+      <td>Harp</td> <td>Solo</td> <td>B0 - G#7</td> <td>Sustain, Dampened</td> <td>Key switches start at C0 or B7. May need to tranpose up or down to reach Key switches</td>
+    </tr>
+    <tr>
+      <td colspan=5><p>* Tremolo for sections only, not available for solo instruments<p></td>
+    </tr>
+  </table>
+
+  <h2>Brass</h2>
+  <table class="wood-strings-brass">
+    <tr>
+      <th colspan=2>Instruments</th> <th>Range</th> <th>Articulations</th> <th>Notes</th>
+    </tr>
+    <tr>
+      <td>Trumpet</td> <td>Solo, Section</td> <td>F#3 - C6</td> <td>Sustain, Normal-mod-wheel, Accent, Staccato</td> <td>Key switches start at C2</td>
+    </tr>
+    <tr>
+      <td>French Horn</td> <td>Solo, Section</td> <td>B1 - F5</td> <td>Sustain, Normal-mod-wheel, Accent, Staccato</td> <td>Key switches start at C6</td>
+    </tr>
+    <tr>
+      <td>Trombone</td> <td>Solo, Section</td> <td>E2 - F5</td> <td>Sustain, Normal-mod-wheel, Accent, Staccato</td> <td>Key switches start at C6</td>
+    </tr>
+    <tr>
+      <td>Tuba</td> <td>Solo</td> <td>D1 - D4</td> <td>Sustain, Normal-mod-wheel, Accent, Staccato</td> <td>To reach all notes, may need to transpose keyboard down an octave<br>- before transpose, key switches start at C5,<br>- after tranpose Key switches start at C6</td>
+    </tr>
+  </table>
+
+  <h2>Vocals</h2>
+  <table class="wood-strings-brass">
+    <tr>
+      <th colspan=2>Instruments</th> <th>Range</th> <th>Articulations</th> <th>Notes</th>
+    </tr>
+    <tr>
+      <td>Choir Male</td> <td></td> <td>G2 - F#4</td> <td></td> <td></td>
+    </tr>
+    <tr>
+      <td>Choir Female</td> <td></td> <td>G4 - C6</td> <td></td> <td></td>
+    </tr>
+    <tr>
+      <td>Choir Mixed</td> <td></td> <td>G2 - C6</td> <td></td> <td>Simply, male + female choir together</td>
+    </tr>
+  </table>
+
+  <h2>Percussion</h2>
+
+  <table>
+    <tr>
+      <th>Instruments</th> <th>Range</th> <th>Articulations</th> <th>Notes</th>
+    </tr>
+    <tr>
+      <td>Glockenspiel</td> <td>F5 - C8</td> <td></td> <td></td>
+    </tr>
+    <tr>
+      <td>Timpani</td> <td>C2 - C4</td> <td>Round Robin Hit, Roll</td> <td>Key switches start at C5</td>
+    </tr>
+    <tr>
+      <td>Tubular Bells</td> <td>C4 - G5</td> <td></td> <td>A3 silences the last note</td>
+    </tr>
+    <tr>
+      <td>Snare Drum</td> <td><center>-</center></td>  <td>Left Hand, Right Hand, Round Robin Hit, Roll</td> <td></td>
+    </tr>
+    <tr>
+      <td>Xylophone</td> <td>C4 - C8</td> <td></td> <td></td>
+    </tr>
+  </table>
+
+  <h1>Key Mapping for Percussion</h1>
+
+  <h2>Bass drum, Snare, Cymbals</h2>
+  <table>
+    <tr>
+      <th>Note #</th> <th>Note Name</th> <th>Instrument</th>
+    </tr>
+    <tr>
+      <td>36</td><td>C2</td><td>Bass Drum 1</td>
+    </tr>
+    <tr>
+      <td>38</td><td>D2</td><td>Bass Drum 2</td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td><td></td><td></td>
+    </tr>
+    <tr>
+      <td>48</td><td>C3</td><td>Snare Drum 1 Hit - Left Hand</td>
+    </tr>
+    <tr>
+      <td>49</td><td>C#3</td><td>Snare Drum 1 Hit - Round Robin</td>
+    </tr>
+    <tr>
+      <td>50</td><td>D3</td><td>Snare Drum 1 Hit - Right Hand</td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td><td></td><td></td>
+    </tr>
+    <tr>
+      <td>52</td><td>E3</td><td>Snare Drum 1 Roll</td>
+    </tr>
+    <tr>
+      <td>53</td><td>F3</td><td>Snare Drum 2 Hit - Left Hand</td>
+    </tr>
+    <tr>
+      <td>54</td><td>F#3</td><td>Snare Drum 2 Hit - Round Robin</td>
+    </tr>
+    <tr>
+      <td>55</td><td>G3</td><td>Snare Drum 2 Hit - Right Hand</td>
+    </tr>
+    <tr>
+      <td>56</td><td>G#3</td><td>Snare Drum 2 Tap (stick, on rim of drum)</td>
+    </tr>
+    <tr>
+      <td>57</td><td>A3</td><td>Snare Drum 2 Roll</td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td><td></td><td></td>
+    </tr>
+    <tr>
+      <td>60</td><td>C4</td><td>Cymbals 1 Roll A</td>
+    </tr>
+    <tr>
+      <td>61</td><td>C#4</td><td>Cymbals 1 Crash</td>
+    </tr>
+    <tr>
+      <td>62</td><td>D4</td><td>Cymbals 1 Roll B</td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td><td></td><td></td>
+    </tr>
+    <tr>
+      <td>65</td><td>F4</td><td>Cymbals 2 Short Roll</td>
+    </tr>
+    <tr>
+      <td>66</td><td>F#4</td><td>Cymbals 2 Crash</td>
+    </tr>
+    <tr>
+      <td>67</td><td>G4</td><td>Cymbals 2 Medium Roll</td>
+    </tr>
+    <tr>
+      <td>69</td><td>A4</td><td>Cymbals 2 Long Roll</td>
+    </tr>
+  </table>
+
+  <h2>Miscellaneous Percussion</h2>
+  <table>
+    <tr>
+      <th>Note #</th> <th>Note Name</th> <th>Instrument</th>
+    </tr>
+    <tr>
+      <td>46</td><td>Bb2</td><td>Gong Hit</td>
+    </tr>
+    <tr>
+      <td>47</td><td>B2 </td><td>TamTam A</td>
+    </tr>
+    <tr>
+      <td>48</td><td>C3 </td><td>TamTam B</td>
+    </tr>
+    <tr>
+      <td>49</td><td>C#3</td><td>TamTam C</td>
+    </tr>
+    <tr>
+      <td>50</td><td>D3 </td><td></td>
+    </tr>
+    <tr>
+      <td>51</td><td>Eb3</td><td>Finger Cymbals - Hi</td>
+    </tr>
+    <tr>
+      <td>52</td><td>E3 </td><td>Finger Cymbals - Lo</td>
+    </tr>
+    <tr>
+      <td>53</td><td>F3 </td><td>Tambourine Shake</td>
+    </tr>
+    <tr>
+      <td>54</td><td>F#3</td><td>Tambourine Hit</td>
+    </tr>
+    <tr>
+      <td>55</td><td>G3 </td><td>Tambourine Roll</td>
+    </tr>
+    <tr>
+      <td>56</td><td>Ab3</td><td>Cowbell</td>
+    </tr>
+    <tr>
+      <td>57</td><td>A3 </td><td></td>
+    </tr>
+    <tr>
+      <td>58</td><td>Bb3</td><td>Vibra slap</td>
+    </tr>
+    <tr>
+      <td>59</td><td>B3 </td><td></td>
+    </tr>
+    <tr>
+      <td>60</td><td>C4 </td><td>Quinto Hit (or high conga)</td>
+    </tr>
+    <tr>
+      <td>61</td><td>C#4</td><td>Quinto Tap</td>
+    </tr>
+    <tr>
+      <td>62</td><td>D4 </td><td>Conga Hit (or mid conga)</td>
+    </tr>
+    <tr>
+      <td>63</td><td>Eb4</td><td>Conga Tap</td>
+    </tr>
+    <tr>
+      <td>64</td><td>E4 </td><td>Tumba Hit (or low conga)</td>
+    </tr>
+    <tr>
+      <td>65</td><td>F4 </td><td>Tumba Tap1</td>
+    </tr>
+    <tr>
+      <td>66</td><td>F#4</td><td></td>
+    </tr>
+    <tr>
+      <td>67</td><td>G4 </td><td></td>
+    </tr>
+    <tr>
+      <td>68</td><td>Ab4</td><td></td>
+    </tr>
+    <tr>
+      <td>69</td><td>A4 </td><td>Cabasa</td>
+    </tr>
+    <tr>
+      <td>70</td><td>Bb4</td><td>Shaker</td>
+    </tr>
+    <tr>
+      <td>71</td><td>B4 </td><td>Ratchet Crank</td>
+    </tr>
+    <tr>
+      <td>72</td><td>C5 </td><td>Ratchet Fast</td>
+    </tr>
+    <tr>
+      <td>73</td><td>C#5</td><td>Ratchet Slow</td>
+    </tr>
+    <tr>
+      <td>74</td><td>D5 </td><td>Castanets</td>
+    </tr>
+    <tr>
+      <td>75</td><td>Eb5</td><td>Claves</td>
+    </tr>
+    <tr>
+      <td>76</td><td>E5 </td><td>Wood-block-hi</td>
+    </tr>
+    <tr>
+      <td>77</td><td>F5 </td><td>Wood-block-lo</td>
+    </tr>
+    <tr>
+      <td>78</td><td>F#5</td><td></td>
+    </tr>
+    <tr>
+      <td>79</td><td>G5 </td><td>Triangle roll</td>
+    </tr>
+    <tr>
+      <td>80</td><td>Ab5</td><td>Muted Triangle</td>
+    </tr>
+    <tr>
+      <td>81</td><td>A5 </td><td>Open triangle</td>
+    </tr>
+    <tr>
+      <td>82</td><td>Bb5</td><td>Sleighbells</td>
+    </tr>
+    <tr>
+      <td>83</td><td>C6 </td><td>Bell Tree 1 Stroke 1</td>
+    </tr>
+    <tr>
+      <td>84</td><td>C#6</td><td>Bell Tree 1 Stroke 2</td>
+    </tr>
+    <tr>
+      <td>86</td><td>D6 </td><td>Bell Tree 1 Stroke 3</td>
+    </tr>
+    <tr>
+      <td>87</td><td>Eb6</td><td>Bell Tree 1 Stroke 4</td>
+    </tr>
+    <tr>
+      <td>88</td><td>E6 </td><td>Bell Tree 2</td>
+    </tr>
+    <tr>
+      <td>89</td><td>F6 </td><td>Bar Chimes A</td>
+    </tr>
+    <tr>
+      <td>90</td><td>F#6</td><td>Bar Chimes B</td>
+    </tr>
+    <tr>
+      <td>91</td><td>G6 </td><td>Bar Chimes C</td>
+    </tr>
+  </table>
+<!-- endWordpress -->
+</div>
+</body>
+</html>

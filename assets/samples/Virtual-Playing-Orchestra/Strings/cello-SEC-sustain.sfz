@@ -1,0 +1,48 @@
+//==============================================================
+// Cello Section - Sustain
+//
+//   cellos.sfz from No Budget Orchestra - https://nobudgetorchestra.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+<group> ampeg_release=1.1 
+ampeg_attack=0.6
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+// removed control, doesn't work when merged with other files (PB)
+<region> lokey=c2 hikey=d2 pitch_keycenter=c#2 sample=..\libs\NoBudgetOrch\CelloSect\Sustain\2_Db.wav
+<region> lokey=d#2 hikey=f2 pitch_keycenter=e2 sample=..\libs\NoBudgetOrch\CelloSect\Sustain\2_E.wav
+pan=-5
+
+<region> lokey=f#2 hikey=g#2 pitch_keycenter=g2 sample=..\libs\NoBudgetOrch\CelloSect\Sustain\2_G.wav
+volume=-0.5
+
+<region> lokey=a2 hikey=b2 pitch_keycenter=a#2 sample=..\libs\NoBudgetOrch\CelloSect\Sustain\2_Bb.wav
+volume=1 pan=5
+
+<region> lokey=c3 hikey=d3 pitch_keycenter=c#3 sample=..\libs\NoBudgetOrch\CelloSect\Sustain\3_Db.wav
+pan=5
+
+<region> lokey=d#3 hikey=f#3 pitch_keycenter=e3 sample=..\libs\NoBudgetOrch\CelloSect\Sustain\3_E.wav
+volume=-0.5 pan=5
+
+<region> lokey=g3 hikey=b3 pitch_keycenter=a#3 sample=..\libs\NoBudgetOrch\CelloSect\Sustain\3_Bb.wav volume=0 tune=3
+<region> lokey=c4 hikey=d4 pitch_keycenter=c#4 sample=..\libs\NoBudgetOrch\CelloSect\Sustain\4_Db.wav volume=0
+<region> lokey=d#4 hikey=f4 pitch_keycenter=e4 sample=..\libs\NoBudgetOrch\CelloSect\Sustain\4_E.wav
+<region> lokey=f#4 hikey=g#4 pitch_keycenter=g4 sample=..\libs\NoBudgetOrch\CelloSect\Sustain\4_G.wav
+<region> lokey=a4 hikey=c5 pitch_keycenter=a#4 sample=..\libs\NoBudgetOrch\CelloSect\Sustain\4_Bb.wav
+pan=5 tune=6
+
+<region> lokey=c#5 hikey=a5 pitch_keycenter=e5 sample=..\libs\NoBudgetOrch\CelloSect\Sustain\5_E.wav
+pan=-5
+
+// removed 5_Bb.wav - too high
+
+

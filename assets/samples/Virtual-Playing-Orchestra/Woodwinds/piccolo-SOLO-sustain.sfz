@@ -1,0 +1,110 @@
+//==============================================================
+// Solo Piccolo - Sustain
+//
+//   Woodwinds - Piccolo Solo.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//           Piccolo
+// ------------------------------
+
+<group>
+ampeg_attack=0.25 // slightly longer attack (PB)
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+ampeg_release=0.550
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-c4-PB.wav
+tune=-10
+
+lokey=d4 // reduce the range (PB)
+hikey=d4 // reduce the range (PB)
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-d#4-PB.wav
+tune=-7
+
+lokey=d#4 // reduce the range (PB)
+hikey=e4
+pitch_keycenter=d#4
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-f#4-PB.wav
+lokey=f4
+hikey=g4
+pitch_keycenter=f#4
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-a4-PB.wav
+tune=-10
+
+lokey=g#4
+hikey=a#4
+pitch_keycenter=a4
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-c5-PB.wav
+tune=-7
+
+lokey=b4
+hikey=c#5
+pitch_keycenter=c5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-d#5-PB.wav
+tune=-3
+
+lokey=d5
+hikey=e5
+pitch_keycenter=d#5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-f#5-PB.wav
+tune=-10
+
+lokey=f5
+hikey=g5
+pitch_keycenter=f#5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-a5-PB.wav
+tune=-7
+
+lokey=g#5
+hikey=a#5
+pitch_keycenter=a5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-c6-PB.wav
+tune=-10
+
+lokey=b5
+hikey=c#6
+pitch_keycenter=c6
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-d#6-PB.wav
+tune=-5
+
+lokey=d6
+hikey=e6
+pitch_keycenter=d#6
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-f#6-PB.wav
+tune=-7
+
+lokey=f6
+hikey=c7 // extend the range (PB)
+pitch_keycenter=f#6
+

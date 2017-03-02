@@ -1,0 +1,198 @@
+//==============================================================
+// Bass Solo - Staccato
+//
+// mapped by Paul Battersby - http://virtualplaying.com
+//
+// The samples from VSCO2 - http://vis.versilstudios.net/vsco-2.html
+// are licensed under:
+//
+// CC0 1.0 Universal (CC0 1.0) Public Domain Dedication License
+// https://creativecommons.org/publicdomain/zero/1.0/
+//
+// This file by Paul Battersby - http://virtualplaying.com
+// is licensed using the same license above
+//
+//==============================================================
+
+// ----------------- RR 1 -------------------
+<group>
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+group_label=group1-RR1
+seq_position=1
+seq_length=2
+
+
+// get rid of any leading or trailing clicks
+ampeg_attack=0.03
+ampeg_decay=0.06
+
+ampeg_release=1.5
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_E0-rr1-PB.wav
+pitch_keycenter=e1
+lokey=c1
+hikey=f1
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_F#0-rr1-PB.wav
+pitch_keycenter=f#1
+lokey=f#1
+hikey=f#1
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_G0-rr1-PB.wav
+pitch_keycenter=g1
+lokey=g1
+hikey=a1
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_A#0-rr1-PB.wav
+pitch_keycenter=a#1
+lokey=a#1
+hikey=b1
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_C1-rr1-PB.wav
+pitch_keycenter=c2
+lokey=c2
+hikey=c#2
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_D1-rr1-PB.wav
+pitch_keycenter=d2
+lokey=d2
+hikey=d#2
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_E1-rr1-PB.wav
+pitch_keycenter=e2
+lokey=e2
+hikey=g2
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_A1-rr1-PB.wav
+pitch_keycenter=a2
+lokey=g#2
+hikey=a#2
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_C#2-rr1-PB.wav
+pitch_keycenter=c#3
+lokey=b2
+hikey=f3
+
+//<region>
+//sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_E2-rr1-PB.wav
+//pitch_keycenter=e3
+//lokey=e3
+//hikey=g3
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_G#2-rr1-PB.wav
+pitch_keycenter=g#3
+lokey=f#3
+hikey=a#3
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_B2-rr1-PB.wav
+pitch_keycenter=b3
+lokey=b3
+hikey=g4
+
+
+// ----------------- RR 2 -------------------
+<group>
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+group_label=group2-RR2
+seq_position=2
+seq_length=2
+
+// get rid of any leading or trailing clicks
+ampeg_attack=0.03
+ampeg_decay=0.06
+
+ampeg_release=1.5
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_E0-rr2-PB.wav
+pitch_keycenter=e1
+lokey=c1
+hikey=f1
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_F#0-rr2-PB.wav
+pitch_keycenter=f#1
+lokey=f#1
+hikey=f#1
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_G0-rr2-PB.wav
+pitch_keycenter=g1
+lokey=g1
+hikey=a1
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_A#0-rr2-PB.wav
+pitch_keycenter=a#1
+lokey=a#1
+hikey=b1
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_C1-rr2-PB.wav
+pitch_keycenter=c2
+lokey=c2
+hikey=c#2
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_D1-rr2-PB.wav
+pitch_keycenter=d2
+lokey=d2
+hikey=d#2
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_E1-rr2-PB.wav
+pitch_keycenter=e2
+lokey=e2
+hikey=g2
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_A1-rr2-PB.wav
+pitch_keycenter=a2
+lokey=g#2
+hikey=a#2
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_C#2-rr2-PB.wav
+pitch_keycenter=c#3
+lokey=b2
+hikey=f3
+
+//<region>
+//sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_E2-rr2-PB.wav
+//pitch_keycenter=e3
+//lokey=e3
+//hikey=g3
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_G#2-rr2-PB.wav
+pitch_keycenter=g#3
+lokey=f#3
+hikey=a#3
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_B2-rr2-PB.wav
+pitch_keycenter=b3
+lokey=b3
+hikey=g4
+

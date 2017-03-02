@@ -11,6 +11,7 @@
 #include "cinder/Log.h"
 #include "cinder/audio/Context.h"
 #include "cinder/audio/dsp/Converter.h"
+#include "TablaApp.h"
 
 using namespace ci;
 
@@ -25,7 +26,9 @@ void OpenSFZNode::initialize() {
 	mSynth = new SFZSynth();
 	mSynth->setCurrentPlaybackSampleRate(getSampleRate());
 
-	SFZSound *testSound = new SFZSound(std::string("/Users/lukexi/Downloads/Virtual-Playing-Orchestra/Brass/french-horn-SEC-sustain.sfz"));
+
+	fs::path path = TablaApp::get()->hotloadableAssetPath( fs::path("samples/Virtual-Playing-Orchestra/Strings/harp-sustain.sfz"));
+	SFZSound *testSound = new SFZSound(path.string());
 
 	mSynth->addSound(testSound);
 

@@ -1,0 +1,172 @@
+//==============================================================
+// Percussion - Timpani Roll
+//
+// This was built from NoBudget Orchestra after I created round robin
+// samples from the original, then tapped out a timpani roll and recorded it
+//
+// Timpani samples:
+//  No Budget Orchestra - https://nobudgetorchestra.net
+//
+//  modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+<group>
+ampeg_release=0.6
+volume=7
+
+<region>
+sample=..\libs\Other\Samples/Timpani/timpani-roll-C2-PB.wav
+lokey=c2 hikey=c#2 pitch_keycenter=c2
+
+<region>
+sample=..\libs\Other\Samples/Timpani/timpani-roll-D2-PB.wav
+lokey=d2 hikey=d#2 pitch_keycenter=d2
+
+<region>
+sample=..\libs\Other\Samples/Timpani/timpani-roll-E2-PB.wav
+lokey=e2 hikey=f2 pitch_keycenter=e2
+
+<region>
+sample=..\libs\Other\Samples/Timpani/timpani-roll-G2-PB.wav
+lokey=f#2 hikey=g#2 pitch_keycenter=g2
+
+<region>
+sample=..\libs\Other\Samples/Timpani/timpani-roll-A2-PB.wav
+lokey=a2 hikey=a#2 pitch_keycenter=a2
+
+<region>
+sample=..\libs\Other\Samples/Timpani/timpani-roll-C3-PB.wav
+lokey=b2 hikey=c#3 pitch_keycenter=c3
+
+<region>
+sample=..\libs\Other\Samples/Timpani/timpani-roll-D3-PB.wav
+lokey=d3 hikey=d#3 pitch_keycenter=d3
+
+<region>
+sample=..\libs\Other\Samples/Timpani/timpani-roll-E3-PB.wav
+lokey=e3 hikey=f3 pitch_keycenter=e3
+
+<region>
+sample=..\libs\Other\Samples/Timpani/timpani-roll-G3-PB.wav
+lokey=f#3 hikey=g#3 pitch_keycenter=g3
+
+<region>
+sample=..\libs\Other\Samples/Timpani/timpani-roll-A3-PB.wav
+lokey=a3 hikey=a#3 pitch_keycenter=a3
+
+<region>
+sample=..\libs\Other\Samples/Timpani/timpani-roll-C4-PB.wav
+lokey=b3 hikey=c4 pitch_keycenter=c4
+
+
+//==============================================================
+//  Percussion - Timpani Hit
+//
+//   timpani.sfz from No Budget Orchestra - https://nobudgetorchestra.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+ // ----------------- Right Hand -----------------
+<group>
+trigger=release
+volume=-5
+// randomize like a real player
+ampeg_attack=0.03
+
+pitch_random=5
+amp_random=1
+
+group_label=right_hand
+group=1
+
+
+
+ampeg_sustain=0 ampeg_hold=0 ampeg_decay=20 ampeg_release=3
+
+<region>
+sample=..\libs\NoBudgetOrch\Timpani\C2-PB.wav
+volume=-1
+
+lokey=c2 hikey=c2 pitch_keycenter=c2
+
+<region>
+sample=..\libs\NoBudgetOrch\Timpani\D2-PB.wav
+volume=-1
+
+lokey=c#2 hikey=d2 pitch_keycenter=d2
+
+<region>
+sample=..\libs\NoBudgetOrch\Timpani\E2-PB.wav
+volume=1
+
+lokey=d#2 hikey=e2 pitch_keycenter=e2
+
+<region>
+sample=..\libs\NoBudgetOrch\Timpani\F2-PB.wav
+volume=1
+
+lokey=f2 hikey=f#2 pitch_keycenter=f2
+
+<region>
+sample=..\libs\NoBudgetOrch\Timpani\Ab2-PB.wav
+volume=-1
+
+lokey=g2 hikey=g#2 pitch_keycenter=g#2
+
+<region>
+sample=..\libs\NoBudgetOrch\Timpani\A2-PB.wav
+volume=-1
+
+lokey=a2 hikey=a2 pitch_keycenter=a2
+
+<region>
+sample=..\libs\NoBudgetOrch\Timpani\Bb2-PB.wav
+volume=-4
+
+lokey=a#2 hikey=a#2 pitch_keycenter=a#2
+
+<region>
+sample=..\libs\NoBudgetOrch\Timpani\C3-PB.wav
+volume=-4
+
+lokey=b2 hikey=c3 pitch_keycenter=c3
+
+<region>
+sample=..\libs\NoBudgetOrch\Timpani\D3-PB.wav
+volume=-3
+
+lokey=c#3 hikey=d#3 pitch_keycenter=d3
+
+<region>
+sample=..\libs\NoBudgetOrch\Timpani\Gb3-PB.wav
+volume=-1
+
+lokey=e3 hikey=f#3 pitch_keycenter=f#3
+
+<region>
+sample=..\libs\NoBudgetOrch\Timpani\G3-PB.wav
+volume=-1
+
+lokey=g3 hikey=g3 pitch_keycenter=g3
+
+<region>
+sample=..\libs\NoBudgetOrch\Timpani\Ab3-PB.wav
+volume=-1
+
+lokey=g#3 hikey=g#3 pitch_keycenter=g#3
+
+<region>
+sample=..\libs\NoBudgetOrch\Timpani\A3-PB.wav
+volume=-2
+
+lokey=a3 hikey=a3 pitch_keycenter=a3
+
+<region>
+sample=..\libs\NoBudgetOrch\Timpani\Bb3-PB.wav
+volume=-1
+
+lokey=a#3 hikey=c4 pitch_keycenter=a#3
+
+

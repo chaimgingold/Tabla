@@ -1,0 +1,434 @@
+//==============================================================
+// Solo Viola - Normal Mod Wheel
+//
+//   This is a combination of
+//
+//     viola-SOLO-sustain.sfz
+//     viola-SOLO-staccato.sfz
+//
+//   ... where the mod wheel lengthens the attack
+//
+//   by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+//==============================================================
+// Solo Viola - Staccato
+//
+//   Strings-viola-SOLO-staccato.sfz by Paul Battersby
+//
+//   Samples from Philharmonia Orchestra - http://www.philharmonia.co.uk/explore/make_music
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+//==============================================================
+// Viola Solo - Staccato
+//
+// mapped by Paul Battersby - http://virtualplaying.com
+//
+// The samples from Phaded Productions - http://beats.codenamehippie.com/
+// are licensed under:
+//
+// Creative Commons Attribution-ShareAlike 3.0 Unported License.// http://creativecommons.org/licenses/by-sa/3.0/deed.en_GB
+//
+// The sfz mapping file by Paul Battersby - http://virtualplaying.com
+// is licensed under the same license above
+//
+//==============================================================
+
+// ----------------- RR 1 -------------------
+<group>
+volume=-11.5
+ampeg_attackcc1=0.5 // mod wheel slows attack
+gain_cc1=-15        // mod wheel reduces volume
+
+volume=-8.5
+// randomize like a real player(PB)
+
+pitch_random=5
+amp_random=1
+
+
+group_label=group1-RR1
+seq_position=1
+seq_length=2
+
+// get rid of any leading or trailing clicks
+ampeg_attack=0.03
+ampeg_decay=0.06
+
+ampeg_release=0.6
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_C3-staccato-rr1-PB.wav
+volume=-9.5
+
+tune=5
+pitch_keycenter=c3
+lokey=c3
+hikey=d#3
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_E3-staccato-rr1-PB.wav
+pitch_keycenter=e3
+tune=5
+lokey=e3
+hikey=f#3
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_G3-staccato-rr1-PB.wav
+tune=-5
+pitch_keycenter=g3
+lokey=g3
+hikey=a3
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_A#3-staccato-rr1-PB.wav
+pitch_keycenter=a#3
+lokey=a#3
+hikey=b3
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_C4-staccato-rr1-PB.wav
+volume=-9.5
+
+tune=-5
+pitch_keycenter=c4
+lokey=c4
+hikey=d#4
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_E4-staccato-rr1-PB.wav
+volume=-9.5
+
+pitch_keycenter=e4
+tune=-5
+lokey=e4
+hikey=f#4
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_G4-staccato-rr1-PB.wav
+tune=-5
+pitch_keycenter=g4
+lokey=g4
+hikey=a4
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_A#4-staccato-rr1-PB.wav
+tune=-15
+pitch_keycenter=a#4
+lokey=a#4
+hikey=b4
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_C#5-staccato-rr1-PB.wav
+volume=-9.5
+
+pitch_keycenter=c#5
+lokey=c5
+hikey=d#5
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_E5-staccato-rr1-PB.wav
+volume=-8.5
+
+tune=-20
+pitch_keycenter=e5
+lokey=e5
+hikey=f#5
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_G#5-staccato-rr1-PB.wav
+volume=-8.5
+
+pitch_keycenter=g#5
+lokey=g5
+hikey=g#5
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_A5-staccato-rr1-PB.wav
+volume=-8.5
+
+pitch_keycenter=a5
+lokey=a5
+hikey=b5
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_E6-staccato-rr1-PB.wav
+tune=-20
+pitch_keycenter=e6
+lokey=c6
+hikey=a6
+
+// ----------------- RR 2 -------------------
+<group>
+volume=-11.5
+ampeg_attackcc1=0.5 // mod wheel slows attack
+gain_cc1=-15        // mod wheel reduces volume
+
+volume=-8.5
+// randomize like a real player(PB)
+
+pitch_random=5
+amp_random=1
+
+
+group_label=group2-RR2
+
+seq_position=2
+seq_length=2
+
+// get rid of any clicks
+ampeg_attack=0.03
+ampeg_decay=0.06
+
+ampeg_release=0.6
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_C#3-staccato-rr2-PB.wav
+tune=10
+pitch_keycenter=c#3
+lokey=c3
+hikey=d#3
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_F#3-staccato-rr2-PB.wav
+volume=-8.5
+
+pitch_keycenter=f#3
+lokey=e3
+hikey=f#3
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_G3-staccato-rr2-PB.wav
+pitch_keycenter=g3
+lokey=g3
+hikey=a3
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_A#3-staccato-rr2-PB.wav
+tune=-15
+pitch_keycenter=a#3
+lokey=a#3
+hikey=b3
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_D#4-staccato-rr2-PB.wav
+volume=-9.5
+
+pitch_keycenter=d#4
+lokey=c4
+hikey=d#4
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_F4-staccato-rr2-PB.wav
+volume=-8.5
+
+pitch_keycenter=f4
+tune=5
+lokey=e4
+hikey=f#4
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_G#4-staccato-rr2-PB.wav
+volume=-7.5
+
+tune=-5
+pitch_keycenter=g#4
+lokey=g4
+hikey=a4
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_A#4-staccato-rr2-PB.wav
+volume=-7.5
+
+pitch_keycenter=a#4
+lokey=a#4
+hikey=b4
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_C5-staccato-rr2-PB.wav
+volume=-8.5
+
+tune=-20
+pitch_keycenter=c5
+lokey=c5
+hikey=d#5
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_E5-staccato-rr2-PB.wav
+volume=-8.5
+
+pitch_keycenter=e5
+lokey=e5
+hikey=f#5
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_G#5-staccato-rr2-PB.wav
+volume=-7.5
+
+tune=-40
+pitch_keycenter=g#5
+lokey=g5
+hikey=g#5
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_A5-staccato-rr2-PB.wav
+volume=-8.5
+
+pitch_keycenter=a5
+tune=-20
+lokey=a5
+hikey=b5
+
+<region>
+sample=../libs/Philharmonia/Samples/Viola/viola_E6-staccato-rr2-PB.wav
+volume=-8.5
+
+tune=-15
+pitch_keycenter=e6
+lokey=c6
+hikey=a6
+
+
+//==============================================================
+// Solo Viola - Sustain
+//
+//   violin_vib.sfz from No Budget Orchestra - https://nobudgetorchestra.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+<group>
+ampeg_attackcc1=0.5 // mod wheel slows attack
+
+ampeg_attack=0.6
+
+// adjust tone (PB)
+eq1_freq=807.4
+eq1_bw=1.54
+eq1_gain=-9.2
+
+eq2_freq=5303.4
+eq2_bw=0.86
+eq2_gain=-8.8
+
+width=0 // force mono (PB)
+volume=4
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+ group=1 ampeg_release=0.7 xfin_lovel=54
+xfin_hivel=104
+// removed <control> - won't work when merging files
+<region> lokey=c3 hikey=c#3 pitch_keycenter=c3 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\3_C_f.wav
+<region> lokey=d3 hikey=e3 pitch_keycenter=d#3 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\3_Eb_f.wav
+volume=5
+
+<region> lokey=f3 hikey=g3 pitch_keycenter=f#3 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\3_Gb_f.wav
+volume=3
+
+<region> lokey=g#3 hikey=a#3 pitch_keycenter=a3 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\3_A_f.wav
+volume=7
+
+<region> lokey=b3 hikey=c#4 pitch_keycenter=c4 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\4_C_f.wav
+<region> lokey=d4 hikey=e4 pitch_keycenter=d#4 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\4_Eb_f.wav
+volume=6
+
+<region> lokey=f4 hikey=g4 pitch_keycenter=f#4 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\4_Gb_f.wav
+<region> lokey=g#4 hikey=a#4 pitch_keycenter=a4 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\4_A_f.wav
+volume=5
+
+<region> lokey=b4 hikey=c#5 pitch_keycenter=c5 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\5_C_f.wav
+volume=9
+
+<region> lokey=d5 hikey=e5 pitch_keycenter=d#5 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\5_Eb_f.wav
+volume=9
+
+<region> lokey=f5 hikey=g5 pitch_keycenter=f#5 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\5_Gb_f.wav
+volume=3
+
+<region> lokey=g#5 hikey=a#5 pitch_keycenter=a5 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\5_A_f.wav
+volume=5
+
+<region> lokey=b5 hikey=c#6 pitch_keycenter=c6 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\6_C_f.wav
+volume=6
+
+<region> lokey=d6 hikey=a6 pitch_keycenter=d#6 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\6_Eb_f.wav
+volume=4
+
+
+<group>
+ampeg_attackcc1=0.5 // mod wheel slows attack
+
+ampeg_attack=0.6
+
+// adjust tone (PB)
+eq1_freq=807.4
+eq1_bw=1.54
+eq1_gain=-9.2
+
+eq2_freq=5303.4
+eq2_bw=0.86
+eq2_gain=-8.8
+
+width=0 // force mono (PB)
+volume=4
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+ group=1 ampeg_release=0.7 lovel=0 xfout_lovel=54
+xfout_hivel=104
+// removed <control> - won't work when merging files
+<region> lokey=c3 hikey=c#3 pitch_keycenter=c3 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\3_C_mf.wav
+<region> lokey=d3 hikey=e3 pitch_keycenter=d#3 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\3_Eb_mf.wav
+volume=5
+
+<region> lokey=f3 hikey=g3 pitch_keycenter=f#3 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\3_Gb_mf.wav
+volume=3
+
+<region> lokey=g#3 hikey=a#3 pitch_keycenter=a3 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\3_A_mf.wav
+volume=7
+
+<region> lokey=b3 hikey=c#4 pitch_keycenter=c4 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\4_C_mf.wav
+<region> lokey=d4 hikey=e4 pitch_keycenter=d#4 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\4_Eb_mf.wav
+volume=6
+
+<region> lokey=f4 hikey=g4 pitch_keycenter=f#4 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\4_Gb_mf.wav
+<region> lokey=g#4 hikey=a#4 pitch_keycenter=a4 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\4_A_mf.wav
+volume=5
+
+<region> lokey=b4 hikey=c#5 pitch_keycenter=c5 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\5_C_mf.wav
+volume=9
+
+<region> lokey=d5 hikey=e5 pitch_keycenter=d#5 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\5_Eb_mf.wav
+volume=9
+
+<region> lokey=f5 hikey=g5 pitch_keycenter=f#5 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\5_Gb_mf.wav
+volume=3
+
+<region> lokey=g#5 hikey=a#5 pitch_keycenter=a5 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\5_A_mf.wav
+volume=5
+
+<region> lokey=b5 hikey=c#6 pitch_keycenter=c6 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\6_C_mf.wav
+volume=6
+
+<region> lokey=d6 hikey=a6 pitch_keycenter=d#6 sample=..\libs\NoBudgetOrch\SoloViola\Vibrato\6_Eb_mf.wav
+volume=4
+
+
+// removed lowest velocity layer (PB)
+
+
+// Removed release samples (PB)
+
+

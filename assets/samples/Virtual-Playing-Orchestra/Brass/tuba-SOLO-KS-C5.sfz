@@ -1,0 +1,762 @@
+//==============================================================
+// Brass - Solo Tuba - Key Switches
+//
+//   This is a combination of
+//
+//     tuba-SOLO-sustain.sfz
+//     tuba-SOLO-normal-mod-wheel.sfz
+//     tuba-SOLO-accent.sfz
+//     tuba-SOLO-staccato.sfz
+//
+//   ... to create a Key Switchable patch
+//
+//     key switch c5  = Sustain
+//     key switch d5  = Normal Mod Wheel
+//     key switch d#5 = Accent
+//     key switch e5  = Staccato
+//
+//   by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+//==============================================================
+// Tuba Solo - Sustain
+//
+//   Brass - Tuba Sustain.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   samples and .sfz modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//         Tuba Sustain
+// ------------------------------
+
+<group>
+sw_default=c5  // sustain by default
+sw_lokey=c5
+sw_hikey=e5
+sw_last=c5
+sw_label=C5 Sustain
+
+ampeg_attack=0.6
+ampeg_release=0.645
+fil_veltrack=11000
+fil_type=lpf_2p
+cutoff=120
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-e1-PB.wav
+volume=5
+
+lokey=d1
+hikey=f1
+pitch_keycenter=e1
+tune=-3
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-g1-PB.wav
+volume=6
+
+lokey=f#1
+hikey=g#1
+pitch_keycenter=g1
+tune=5
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-a#1-PB.wav
+volume=4
+
+lokey=a1
+hikey=b1
+pitch_keycenter=a#1
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-c#2-PB.wav
+volume=7
+
+lokey=c2
+hikey=d2
+pitch_keycenter=c#2
+tune=-14
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-e2-PB.wav
+volume=5
+
+lokey=d#2
+hikey=f2
+pitch_keycenter=e2
+tune=-17
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-g2-PB.wav
+volume=7
+
+lokey=f#2
+hikey=g#2
+pitch_keycenter=g2
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-a#2-PB.wav
+volume=5
+
+lokey=a2
+hikey=b2
+pitch_keycenter=a#2
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-c#3-PB.wav
+volume=5
+
+lokey=c3
+hikey=d3
+pitch_keycenter=c#3
+tune=10
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-e3-PB.wav
+volume=6
+
+lokey=d#3
+hikey=d4
+pitch_keycenter=e3
+
+// removed g3-c#4, sounded bad (PB)
+
+
+
+
+//==============================================================
+// Tuba Solo - Normal Mod Wheel
+//
+//   ... where the mod wheel lengthens the attack
+//
+//   Brass - Tuba Sustain.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   samples and .sfz modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//         Tuba Sustain
+// ------------------------------
+
+<group>
+sw_default=c5  // sustain by default
+sw_lokey=c5
+sw_hikey=e5
+sw_last=d5
+sw_label=D5 Normal Mod Wheel
+
+ampeg_attackcc1=0.5 // mod wheel slows attack
+ampeg_attack=0.030.6
+ampeg_release=0.645
+fil_veltrack=11000
+fil_type=lpf_2p
+cutoff=120
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-e1-PB.wav
+volume=5
+
+lokey=d1
+hikey=f1
+pitch_keycenter=e1
+tune=-3
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-g1-PB.wav
+volume=6
+
+lokey=f#1
+hikey=g#1
+pitch_keycenter=g1
+tune=5
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-a#1-PB.wav
+volume=4
+
+lokey=a1
+hikey=b1
+pitch_keycenter=a#1
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-c#2-PB.wav
+volume=7
+
+lokey=c2
+hikey=d2
+pitch_keycenter=c#2
+tune=-14
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-e2-PB.wav
+volume=5
+
+lokey=d#2
+hikey=f2
+pitch_keycenter=e2
+tune=-17
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-g2-PB.wav
+volume=7
+
+lokey=f#2
+hikey=g#2
+pitch_keycenter=g2
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-a#2-PB.wav
+volume=5
+
+lokey=a2
+hikey=b2
+pitch_keycenter=a#2
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-c#3-PB.wav
+volume=5
+
+lokey=c3
+hikey=d3
+pitch_keycenter=c#3
+tune=10
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-e3-PB.wav
+volume=6
+
+lokey=d#3
+hikey=d4
+pitch_keycenter=e3
+
+// removed g3-c#4, sounded bad (PB)
+
+
+
+//==============================================================
+// Tuba Solo - Staccato
+//
+//   Brass - Tuba Staccato.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   samples and .sfz modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//         Tuba Staccato
+// ------------------------------
+
+<group>
+sw_default=c5  // sustain by default
+sw_lokey=c5
+sw_hikey=e5
+sw_last=d5
+sw_label=D5 Normal Mod Wheel
+
+volume=-6
+ampeg_attackcc1=0.5 // mod wheel slows attack
+gain_cc1=-15        // mod wheel reduces volume
+ampeg_attack=0.03
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+loop_mode=one_shot
+
+
+fil_veltrack=11000
+fil_type=lpf_2p
+cutoff=120
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr1-e1-PB.wav
+lokey=d1
+hikey=f1
+pitch_keycenter=e1
+tune=-50
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr1-g1-PB.wav
+lokey=f#1
+hikey=g#1
+pitch_keycenter=g1
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr1-a#1-PB.wav
+lokey=a1
+hikey=b1
+pitch_keycenter=a#1
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr1-c#2-PB.wav
+lokey=c2
+hikey=d2
+pitch_keycenter=c#2
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr2-e2-PB.wav
+tune=-90
+
+lokey=d#2
+hikey=f2
+pitch_keycenter=e2
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr1-g2-PB.wav
+tune=10
+
+lokey=f#2
+hikey=g#2
+pitch_keycenter=g2
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr2-a#2-PB.wav
+tune=-100
+
+lokey=a2
+hikey=b2
+pitch_keycenter=a#2
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr1-c#3-PB.wav
+lokey=c3
+hikey=d3
+pitch_keycenter=c#3
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr1-e3-PB.wav
+tune=15
+
+lokey=d#3
+hikey=f3
+pitch_keycenter=e3
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr2-g3-PB.wav
+tune=-100
+
+lokey=f#3
+hikey=g#3
+pitch_keycenter=g3
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr2-a#3-PB.wav
+tune=-100
+
+lokey=a3
+hikey=b3
+pitch_keycenter=a#3
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr2-c#4-PB.wav
+tune=-100
+
+lokey=c4
+hikey=d4
+pitch_keycenter=c#4
+
+
+
+// removed RR samples (PB)
+
+
+
+
+
+//==============================================================
+// Tuba Solo - Accent
+//
+//   This is a combination of
+//
+//     tuba-SOLO-sustain.sfz
+//     tuba-SOLO-staccato.sfz
+//
+//   by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+//==============================================================
+// Tuba Solo - Staccato
+//
+//   Brass - Tuba Staccato.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   samples and .sfz modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//         Tuba Staccato
+// ------------------------------
+
+<group>
+sw_default=c5  // sustain by default
+sw_lokey=c5
+sw_hikey=e5
+sw_last=d#5
+sw_label=D#5 Accent
+
+ampeg_attack=0.03
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+loop_mode=one_shot
+
+
+fil_veltrack=11000
+fil_type=lpf_2p
+cutoff=120
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr1-e1-PB.wav
+lokey=d1
+hikey=f1
+pitch_keycenter=e1
+tune=-50
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr1-g1-PB.wav
+lokey=f#1
+hikey=g#1
+pitch_keycenter=g1
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr1-a#1-PB.wav
+lokey=a1
+hikey=b1
+pitch_keycenter=a#1
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr1-c#2-PB.wav
+lokey=c2
+hikey=d2
+pitch_keycenter=c#2
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr2-e2-PB.wav
+tune=-90
+
+lokey=d#2
+hikey=f2
+pitch_keycenter=e2
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr1-g2-PB.wav
+tune=10
+
+lokey=f#2
+hikey=g#2
+pitch_keycenter=g2
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr2-a#2-PB.wav
+tune=-100
+
+lokey=a2
+hikey=b2
+pitch_keycenter=a#2
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr1-c#3-PB.wav
+lokey=c3
+hikey=d3
+pitch_keycenter=c#3
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr1-e3-PB.wav
+tune=15
+
+lokey=d#3
+hikey=f3
+pitch_keycenter=e3
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr2-g3-PB.wav
+tune=-100
+
+lokey=f#3
+hikey=g#3
+pitch_keycenter=g3
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr2-a#3-PB.wav
+tune=-100
+
+lokey=a3
+hikey=b3
+pitch_keycenter=a#3
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr2-c#4-PB.wav
+tune=-100
+
+lokey=c4
+hikey=d4
+pitch_keycenter=c#4
+
+
+
+// removed RR samples (PB)
+
+
+
+//==============================================================
+// Tuba Solo - Sustain
+//
+//   Brass - Tuba Sustain.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   samples and .sfz modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//         Tuba Sustain
+// ------------------------------
+
+<group>
+sw_default=c5  // sustain by default
+sw_lokey=c5
+sw_hikey=e5
+sw_last=d#5
+sw_label=D#5 Accent
+
+delay=0.2 // allow time for accent before sustain takes over
+ampeg_attack=0.6
+ampeg_release=0.645
+fil_veltrack=11000
+fil_type=lpf_2p
+cutoff=120
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-e1-PB.wav
+volume=5
+
+lokey=d1
+hikey=f1
+pitch_keycenter=e1
+tune=-3
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-g1-PB.wav
+volume=6
+
+lokey=f#1
+hikey=g#1
+pitch_keycenter=g1
+tune=5
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-a#1-PB.wav
+
+delay=0.2
+volume=4
+
+lokey=a1
+hikey=b1
+pitch_keycenter=a#1
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-c#2-PB.wav
+volume=7
+
+lokey=c2
+hikey=d2
+pitch_keycenter=c#2
+tune=-14
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-e2-PB.wav
+volume=5
+
+lokey=d#2
+hikey=f2
+pitch_keycenter=e2
+tune=-17
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-g2-PB.wav
+volume=7
+
+lokey=f#2
+hikey=g#2
+pitch_keycenter=g2
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-a#2-PB.wav
+volume=5
+
+lokey=a2
+hikey=b2
+pitch_keycenter=a#2
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-c#3-PB.wav
+
+delay=0.15
+volume=5
+
+lokey=c3
+hikey=d3
+pitch_keycenter=c#3
+tune=10
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-sus-e3-PB.wav
+
+delay=0.15
+volume=6
+
+lokey=d#3
+hikey=d4
+pitch_keycenter=e3
+
+// removed g3-c#4, sounded bad (PB)
+
+
+
+
+
+//==============================================================
+// Tuba Solo - Staccato
+//
+//   Brass - Tuba Staccato.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   samples and .sfz modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//         Tuba Staccato
+// ------------------------------
+
+<group>
+sw_default=c5  // sustain by default
+sw_lokey=c5
+sw_hikey=e5
+sw_last=e5
+sw_label=E5 Staccato
+
+ampeg_attack=0.03
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+loop_mode=one_shot
+
+
+fil_veltrack=11000
+fil_type=lpf_2p
+cutoff=120
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr1-e1-PB.wav
+lokey=d1
+hikey=f1
+pitch_keycenter=e1
+tune=-50
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr1-g1-PB.wav
+lokey=f#1
+hikey=g#1
+pitch_keycenter=g1
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr1-a#1-PB.wav
+lokey=a1
+hikey=b1
+pitch_keycenter=a#1
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr1-c#2-PB.wav
+lokey=c2
+hikey=d2
+pitch_keycenter=c#2
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr2-e2-PB.wav
+tune=-90
+
+lokey=d#2
+hikey=f2
+pitch_keycenter=e2
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr1-g2-PB.wav
+tune=10
+
+lokey=f#2
+hikey=g#2
+pitch_keycenter=g2
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr2-a#2-PB.wav
+tune=-100
+
+lokey=a2
+hikey=b2
+pitch_keycenter=a#2
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr1-c#3-PB.wav
+lokey=c3
+hikey=d3
+pitch_keycenter=c#3
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr1-e3-PB.wav
+tune=15
+
+lokey=d#3
+hikey=f3
+pitch_keycenter=e3
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr2-g3-PB.wav
+tune=-100
+
+lokey=f#3
+hikey=g#3
+pitch_keycenter=g3
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr2-a#3-PB.wav
+tune=-100
+
+lokey=a3
+hikey=b3
+pitch_keycenter=a#3
+
+<region>
+sample=..\libs\SSO\Samples\Tuba\tuba-stc-rr2-c#4-PB.wav
+tune=-100
+
+lokey=c4
+hikey=d4
+pitch_keycenter=c#4
+
+
+
+// removed RR samples (PB)
+
+
+

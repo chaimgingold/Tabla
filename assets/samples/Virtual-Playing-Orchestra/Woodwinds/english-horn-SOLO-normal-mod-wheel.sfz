@@ -1,0 +1,250 @@
+//==============================================================
+// Solo English Horn - Normal Mod Wheel
+//
+//   This is a combination of
+//
+//     english-horn-SOLO-sustain.sfz
+//     english-horn-SOLO-staccato.sfz
+//
+//   ... where the mod wheel lengthens the attack
+//
+//   by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+//==============================================================
+// English Horn Solo - Staccato
+//
+// modified and mapped by Paul Battersby - http://virtualplaying.com
+//
+// Philharmonia Orchestra - http://www.philharmonia.co.uk/explore/make_music
+//
+// Creative Commons Attribution-ShareAlike 3.0 Unported License
+// https://creativecommons.org/licenses/by-sa/3.0/deed.en_GB
+//
+// The sfz mapping file by Paul Battersby - http://virtualplaying.com
+// is licensed under the same license above
+//
+//==============================================================
+
+<group>
+volume=-6.0
+ampeg_attackcc1=0.5 // mod wheel slows attack
+gain_cc1=-15        // mod wheel reduces volume
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+// get rid of any leading or trailing clicks
+ampeg_attack=0.03
+ampeg_decay=0.06
+
+ampeg_release=0.6
+
+<region>
+sample=..\libs\Philharmonia\Samples/English-Horn/E3-stac-PB.wav
+pitch_keycenter=e3
+lokey=e3
+hikey=f#3
+
+<region>
+sample=..\libs\Philharmonia\Samples/English-Horn/G#3-stac-PB.wav
+pitch_keycenter=g#3
+lokey=g3
+hikey=a3
+volume=-5
+
+<region>
+sample=..\libs\Philharmonia\Samples/English-Horn/A#3-stac-PB.wav
+pitch_keycenter=a#3
+lokey=a#3
+hikey=d4
+volume=-5
+
+<region>
+sample=..\libs\Philharmonia\Samples/English-Horn/F4-stac-PB.wav
+pitch_keycenter=f4
+lokey=d#4
+hikey=f4
+volume=-4
+
+<region>
+sample=..\libs\Philharmonia\Samples/English-Horn/F#4-stac-PB.wav
+pitch_keycenter=f#4
+lokey=f#4
+hikey=f#4
+volume=-3
+
+<region>
+sample=..\libs\Philharmonia\Samples/English-Horn/G4-stac-PB.wav
+pitch_keycenter=g4
+lokey=g4
+hikey=a4
+volume=-5
+
+<region>
+sample=..\libs\Philharmonia\Samples/English-Horn/A#4-stac-PB.wav
+pitch_keycenter=a#4
+lokey=a#4
+hikey=c5
+volume=-5.5
+
+<region>
+sample=..\libs\Philharmonia\Samples/English-Horn/D5-stac-PB.wav
+pitch_keycenter=d5
+lokey=c#5
+hikey=d5
+volume=-4.5
+
+<region>
+sample=..\libs\Philharmonia\Samples/English-Horn/D#5-stac-PB.wav
+pitch_keycenter=d#5
+lokey=d#5
+hikey=e5
+volume=-5
+
+<region>
+sample=..\libs\Philharmonia\Samples/English-Horn/F5-stac-PB.wav
+pitch_keycenter=f5
+lokey=f5
+hikey=f5
+volume=-5
+
+<region>
+sample=..\libs\Philharmonia\Samples/English-Horn/F#5-stac-PB.wav
+pitch_keycenter=f#5
+lokey=f#5
+hikey=f#5
+volume=-5
+
+<region>
+sample=..\libs\Philharmonia\Samples/English-Horn/G5-stac-PB.wav
+pitch_keycenter=g5
+lokey=g5
+hikey=g#5
+volume=-5
+
+<region>
+sample=..\libs\Philharmonia\Samples/English-Horn/A5-stac-PB.wav
+pitch_keycenter=a5
+lokey=a5
+hikey=a5
+
+<region>
+sample=..\libs\Philharmonia\Samples/English-Horn/B5-stac-PB.wav
+pitch_keycenter=b5
+lokey=a#5
+hikey=a#5
+volume=-4
+
+
+//==============================================================
+//  Solo English Horn - Sustain
+//
+//   Woodwinds - Cor Anglais Solo.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//          Cor Anglais
+// ------------------------------
+
+<group>
+ampeg_attackcc1=0.5 // mod wheel slows attack
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+ampeg_release=0.442
+
+<region>
+sample=..\libs\SSO\Samples\Cor Anglais\cor_anglais-f3-PB.wav
+ampeg_attack=0.03
+volume=7
+
+lokey=e3 // extend range (PB)
+hikey=f#3
+pitch_keycenter=f3
+
+<region>
+sample=..\libs\SSO\Samples\Cor Anglais\cor_anglais-g#3-PB.wav
+tune=-5
+ampeg_attack=0.03
+volume=5
+
+lokey=g3
+hikey=a3
+pitch_keycenter=g#3
+
+<region>
+sample=..\libs\SSO\Samples\Cor Anglais\cor_anglais-b3-PB.wav
+ampeg_attack=0.03
+volume=5
+
+lokey=a#3
+hikey=c4
+pitch_keycenter=b3
+tune=0
+
+<region>
+sample=..\libs\SSO\Samples\Cor Anglais\cor_anglais-d4-PB.wav
+volume=5
+
+lokey=c#4
+hikey=d#4
+pitch_keycenter=d4
+tune=-9
+
+<region>
+sample=..\libs\SSO\Samples\Cor Anglais\cor_anglais-f4-PB.wav
+volume=6.5
+
+lokey=e4
+hikey=f#4
+pitch_keycenter=f4
+tune=-12
+
+<region>
+sample=..\libs\SSO\Samples\Cor Anglais\cor_anglais-g#4-PB.wav
+volume=5
+
+lokey=g4
+hikey=a4
+pitch_keycenter=g#4
+
+<region>
+sample=..\libs\SSO\Samples\Cor Anglais\cor_anglais-b4-PB.wav
+volume=5
+
+lokey=a#4
+hikey=c5
+pitch_keycenter=b4
+
+<region>
+sample=..\libs\SSO\Samples\Cor Anglais\cor_anglais-d5-PB.wav
+volume=5
+
+lokey=c#5
+hikey=d#5
+pitch_keycenter=d5
+
+<region>
+sample=..\libs\SSO\Samples\Cor Anglais\cor_anglais-f5-PB.wav
+volume=5
+
+lokey=e5
+hikey=a#5 // extend range (PB)
+pitch_keycenter=f5
+tune=-8
+
+

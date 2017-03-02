@@ -1,0 +1,78 @@
+//==============================================================
+// Solo Cello - Pizzicato
+//
+//   cello_pizzi.sfz from No Budget Orchestra - https://nobudgetorchestra.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+<control> default_path=..\libs\NoBudgetOrch\SoloCello\Pizzicato\
+<group>
+volume=1
+ampeg_release=1.2
+
+eq1_freq=353.7
+eq1_bw=0.59
+eq1_gain=-6
+
+ampeg_attack=0.03
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+<region> lokey=c2 hikey=d2 pitch_keycenter=c2 sample=2_C-PB.wav
+tune=30
+
+// removed 2_D-PB.wav (PB)
+<region> lokey=d#2 hikey=e2 pitch_keycenter=e2 sample=2_E-PB.wav
+<region> lokey=f2 hikey=f2 pitch_keycenter=f2 sample=2_F-PB.wav
+tune=60
+
+<region> lokey=f#2 hikey=g2 pitch_keycenter=g2 sample=2_G-PB.wav
+<region> lokey=g#2 hikey=a2 pitch_keycenter=a2 sample=2_A-PB.wav
+<region> lokey=a#2 hikey=b2 pitch_keycenter=b2 sample=2_B-PB.wav
+<region> lokey=c3 hikey=c3 pitch_keycenter=c3 sample=3_C-PB.wav
+<region> lokey=c#3 hikey=d#3 pitch_keycenter=d3 sample=3_D-PB.wav
+volume=2
+
+<region> lokey=e3 hikey=e3 pitch_keycenter=e3 sample=3_E-PB.wav
+<region> lokey=f3 hikey=f3 pitch_keycenter=f3 sample=3_F-PB.wav
+tune=10
+
+<region> lokey=f#3 hikey=g3 pitch_keycenter=g3 sample=3_G-PB.wav
+<region> lokey=g#3 hikey=a3 pitch_keycenter=a3 sample=3_A-PB.wav
+<region> lokey=a#3 hikey=b3 pitch_keycenter=b3 sample=3_B-PB.wav
+tune=20
+
+<region> lokey=c4 hikey=c4 pitch_keycenter=c4 sample=4_C-PB.wav
+tune=10
+
+<region> lokey=c#4 hikey=d4 pitch_keycenter=d4 sample=4_D-PB.wav
+tune=20
+volume=3
+
+<region> lokey=d#4 hikey=e4 pitch_keycenter=e4 sample=4_E-PB.wav
+tune=20
+volume=5
+
+<region> lokey=f4 hikey=f4 pitch_keycenter=f4 sample=4_F-PB.wav
+volume=5
+
+<region> lokey=f#4 hikey=g4 pitch_keycenter=g4 sample=4_G-PB.wav
+tune=10
+volume=4
+
+<region> lokey=g#4 hikey=a4 pitch_keycenter=a4 sample=4_A-PB.wav
+tune=40
+volume=3
+
+<region> lokey=a#4 hikey=b4 pitch_keycenter=b4 sample=4_B-PB.wav
+tune=30
+
+<region> lokey=c5 hikey=a5 pitch_keycenter=c5 sample=5_C-PB.wav
+tune=10
+
+

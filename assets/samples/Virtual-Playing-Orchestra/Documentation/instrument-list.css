@@ -1,0 +1,50 @@
+html {
+  font-size : 62.5%;
+}
+
+#instruments-list {
+  font-family: "Open Sans",Arial,Helvetica,sans-serif;
+  font-size : 14px;
+  font-size : 1.4rem;
+}
+
+#instruments-list table {
+  font-family: "Open Sans",Arial,Helvetica,sans-serif;
+  width : auto;
+  min-width : 0;
+  display : table;
+  border-collapse : collapse;
+  font-size : 14px;
+  font-size : 1.4rem;
+}
+
+#instruments-list table, #instruments-list th, #instruments-list td, #instruments-list tr {
+  border: 1px solid #777;
+  background-color : #fdf5e6; /* OldLace */
+}
+
+#instruments-list td, #instruments-list th {
+  padding-left : 5px;
+  padding-right : 5px;
+  padding-top : 0px;
+  padding-bottom : 0px;
+  vertical-align : top
+}
+
+#instruments-list th {
+  background-color : #f1e8d9;
+}
+
+#instruments-list table.wood-strings-brass td:nth-child(1) {
+  border-right : none;
+  white-space : nowrap; /* don't allow instrument names to wrap */
+}
+
+#instruments-list table.wood-strings-brass td:nth-child(2) {
+  border-left : none;
+  white-space : nowrap; /* don't allow solo, section descriptons to wrap */
+}
+
+#instruments-list table.wood-strings-brass td:nth-child(3) {
+  white-space : nowrap; /* don't allow instrument names to wrap */
+}

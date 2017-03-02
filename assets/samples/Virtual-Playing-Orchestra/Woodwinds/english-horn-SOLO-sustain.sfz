@@ -1,0 +1,104 @@
+//==============================================================
+//  Solo English Horn - Sustain
+//
+//   Woodwinds - Cor Anglais Solo.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//          Cor Anglais
+// ------------------------------
+
+<group>
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+ampeg_release=0.442
+
+<region>
+sample=..\libs\SSO\Samples\Cor Anglais\cor_anglais-f3-PB.wav
+ampeg_attack=0.3
+volume=7
+
+lokey=e3 // extend range (PB)
+hikey=f#3
+pitch_keycenter=f3
+
+<region>
+sample=..\libs\SSO\Samples\Cor Anglais\cor_anglais-g#3-PB.wav
+tune=-5
+ampeg_attack=0.3
+volume=5
+
+lokey=g3
+hikey=a3
+pitch_keycenter=g#3
+
+<region>
+sample=..\libs\SSO\Samples\Cor Anglais\cor_anglais-b3-PB.wav
+ampeg_attack=0.3
+volume=5
+
+lokey=a#3
+hikey=c4
+pitch_keycenter=b3
+tune=0
+
+<region>
+sample=..\libs\SSO\Samples\Cor Anglais\cor_anglais-d4-PB.wav
+volume=5
+
+lokey=c#4
+hikey=d#4
+pitch_keycenter=d4
+tune=-9
+
+<region>
+sample=..\libs\SSO\Samples\Cor Anglais\cor_anglais-f4-PB.wav
+volume=6.5
+
+lokey=e4
+hikey=f#4
+pitch_keycenter=f4
+tune=-12
+
+<region>
+sample=..\libs\SSO\Samples\Cor Anglais\cor_anglais-g#4-PB.wav
+volume=5
+
+lokey=g4
+hikey=a4
+pitch_keycenter=g#4
+
+<region>
+sample=..\libs\SSO\Samples\Cor Anglais\cor_anglais-b4-PB.wav
+volume=5
+
+lokey=a#4
+hikey=c5
+pitch_keycenter=b4
+
+<region>
+sample=..\libs\SSO\Samples\Cor Anglais\cor_anglais-d5-PB.wav
+volume=5
+
+lokey=c#5
+hikey=d#5
+pitch_keycenter=d5
+
+<region>
+sample=..\libs\SSO\Samples\Cor Anglais\cor_anglais-f5-PB.wav
+volume=5
+
+lokey=e5
+hikey=a#5 // extend range (PB)
+pitch_keycenter=f5
+tune=-8
+

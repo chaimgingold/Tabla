@@ -1,0 +1,86 @@
+//==============================================================
+//  Clarinet Section - Staccato
+//
+//   clarinets_legsus.sfz from No Budget Orchestra - https://nobudgetorchestra.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+<group>
+// create a staccato from sustain
+ampeg_attack=0.03
+ampeg_sustain=0
+ampeg_hold=0.08
+ampeg_decay=0.6
+ampeg_release=0.6
+
+
+ampeg_release=0.6 // slightly longer release (PB)
+volume=-1
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+ ampeg_release=.4
+
+<region> sample=..\libs\NoBudgetOrch\ClarinetSect\Sustain\3_D.wav pitch_keycenter=d3 lokey=d3 hikey=d#3
+pan=-15
+volume=2
+
+<region> sample=..\libs\NoBudgetOrch\ClarinetSect\Sustain\3_Gb.wav pitch_keycenter=f#3 lokey=e3 hikey=g3
+pan=-5
+volume=3
+
+<region> sample=..\libs\NoBudgetOrch\ClarinetSect\Sustain\3_Bb.wav pitch_keycenter=a#3 lokey=g#3 hikey=b3
+
+volume=5
+pan=-5
+pan=15
+tune=-5
+
+<region> sample=..\libs\NoBudgetOrch\ClarinetSect\Sustain\4_D.wav pitch_keycenter=d4 lokey=c4 hikey=d#4
+
+volume=1
+pan=20
+tune=-3
+
+<region> sample=..\libs\NoBudgetOrch\ClarinetSect\Sustain\4_Gb.wav pitch_keycenter=f#4 lokey=e4 hikey=g4
+
+volume=1
+pan=15
+tune=-5
+
+<region> sample=..\libs\NoBudgetOrch\ClarinetSect\Sustain\4_Bb.wav pitch_keycenter=a#4 lokey=g#4 hikey=b4
+
+volume=1.5
+pan=15
+
+<region> sample=..\libs\NoBudgetOrch\ClarinetSect\Sustain\5_D.wav pitch_keycenter=d5 lokey=c5 hikey=d#5
+
+volume=-2
+pan=35
+tune=-5
+
+<region> sample=..\libs\NoBudgetOrch\ClarinetSect\Sustain\5_Gb.wav pitch_keycenter=f#5 lokey=e5 hikey=g5
+
+volume=2
+pan=55
+tune=-5
+
+<region> sample=..\libs\NoBudgetOrch\ClarinetSect\Sustain\5_Bb.wav pitch_keycenter=a#5 lokey=g#5 hikey=c#6
+<region> sample=..\libs\NoBudgetOrch\ClarinetSect\Sustain\6_D.wav pitch_keycenter=d6 lokey=d6 hikey=d#6
+
+volume=-2
+pan=40
+tune=-5
+
+<region> sample=..\libs\NoBudgetOrch\ClarinetSect\Sustain\6_Gb.wav pitch_keycenter=f#6 lokey=e6 hikey=c7
+
+volume=0
+pan=-15
+
+
+
+

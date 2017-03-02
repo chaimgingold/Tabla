@@ -1,0 +1,1675 @@
+//==============================================================
+// 2nd Violin Strings - Key Switches
+//
+//   This is a combination of
+//
+//     2nd-violin-SEC-sustain.sfz
+//     2nd-violin-SEC-tremolo.sfz
+//     2nd-violin-SEC-normal-mod-wheel.sfz
+//     2nd-violin-SEC-accent.sfz
+//     2nd-violin-SEC-staccato.sfz
+//     2nd-violin-SEC-pizzicato.sfz
+//
+//   ... to create a Key Switchable patch
+//
+//     key switch c2  = Sustain
+//     key switch c#2 = Tremolo
+//     key switch d2  = Normal Mod Wheel
+//     key switch d#2 = Accent
+//     key switch e2  = Staccato
+//     key switch f2  = Pizzicato
+//
+//   by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+//==============================================================
+// 2nd Violin Section - Sustain
+//
+//   Strings - 2nd Violins Sustain.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//      2nd Violins Sustain
+// ------------------------------
+
+<group>
+sw_default=c2  // sustain by default
+sw_lokey=c2
+sw_hikey=f2
+sw_last=c2
+sw_label=C2 Sustain
+
+// make 2nd violin a little different from 1st violin (PB)
+eq1_freq=227.8
+eq1_bw=2
+eq1_gain=-8.4
+
+eq1_freq=8241.7
+eq1_bw=2
+eq1_gain=-8.3
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+
+ampeg_attack=0.175
+ampeg_vel2attack=-0.175
+ampeg_release=1
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-g3.wav
+pan=5
+volume=1
+
+lokey=g3
+hikey=g#3
+pitch_keycenter=g3
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-a#3.wav
+volume=1
+
+lokey=a3
+hikey=b3
+pitch_keycenter=a#3
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-c#4.wav
+volume=1
+
+lokey=c4
+hikey=d4
+pitch_keycenter=c#4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-e4.wav
+volume=4
+
+lokey=d#4
+hikey=f4
+pitch_keycenter=e4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-g4.wav
+lokey=f#4
+hikey=g#4
+pitch_keycenter=g4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-a#4.wav
+lokey=a4
+hikey=b4
+pitch_keycenter=a#4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-c#5.wav
+volume=1
+
+lokey=c5
+hikey=d5
+pitch_keycenter=c#5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-e5.wav
+volume=1
+
+lokey=d#5
+hikey=f5
+pitch_keycenter=e5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-g5.wav
+volume=3
+
+lokey=f#5
+hikey=g#5
+pitch_keycenter=g5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-a#5.wav
+volume=3
+
+lokey=a5
+hikey=b5
+pitch_keycenter=a#5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-c#6.wav
+volume=2
+
+lokey=c6
+hikey=d6
+pitch_keycenter=c#6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-e6.wav
+volume=2
+
+lokey=d#6
+hikey=f6
+pitch_keycenter=e6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-g6.wav
+lokey=f#6
+hikey=g#6
+pitch_keycenter=g6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-a#6.wav
+lokey=a6
+hikey=a7
+pitch_keycenter=a#6
+
+//==============================================================
+// 2nd Vioin Section - Tremolo
+//
+// This was built by combining multiple performances of rapid staccato
+// using
+//   Strings-2nd-violins-SEC-staccato.sfz
+//   Strings-2nd-violins-SOLO-staccato.sfz
+//
+//  by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+<group>
+sw_default=c2  // sustain by default
+sw_lokey=c2
+sw_hikey=f2
+sw_last=c#2
+sw_label=C#2 Tremolo
+
+ampeg_release=0.9
+ampeg_attack=0.03
+volume=6
+
+<region>
+sample=..\libs\Other\Samples\2nd-Violin-Section\G3-tremolo-PB.wav
+pitch_keycenter=g3
+lokey=g3
+hikey=g#3
+volume=7
+
+<region>
+sample=..\libs\Other\Samples\2nd-Violin-Section\A3-tremolo-PB.wav
+pitch_keycenter=a3
+lokey=a3
+hikey=a#3
+
+<region>
+sample=..\libs\Other\Samples\2nd-Violin-Section\C4-tremolo-PB.wav
+pitch_keycenter=c4
+lokey=b3
+hikey=c#4
+volume=8
+
+<region>
+sample=..\libs\Other\Samples\2nd-Violin-Section\D4-tremolo-PB.wav
+pitch_keycenter=d4
+lokey=d4
+hikey=d#4
+volume=8
+
+<region>
+sample=..\libs\Other\Samples\2nd-Violin-Section\E4-tremolo-PB.wav
+pitch_keycenter=e4
+lokey=e4
+hikey=f#4
+volume=8
+
+<region>
+sample=..\libs\Other\Samples\2nd-Violin-Section\A4-tremolo-PB.wav
+pitch_keycenter=a4
+lokey=g4
+hikey=a#4
+
+<region>
+sample=..\libs\Other\Samples\2nd-Violin-Section\C5-tremolo-PB.wav
+pitch_keycenter=c5
+lokey=b4
+hikey=c#5
+volume=9
+
+<region>
+sample=..\libs\Other\Samples\2nd-Violin-Section\D5-tremolo-PB.wav
+pitch_keycenter=d5
+lokey=d5
+hikey=d#5
+volume=7
+
+<region>
+sample=..\libs\Other\Samples\2nd-Violin-Section\E5-tremolo-PB.wav
+pitch_keycenter=e5
+lokey=e5
+hikey=f5
+volume=7
+
+<region>
+sample=..\libs\Other\Samples\2nd-Violin-Section\G5-tremolo-PB.wav
+pitch_keycenter=g5
+lokey=f#5
+hikey=g#5
+volume=8
+
+<region>
+sample=..\libs\Other\Samples\2nd-Violin-Section\A5-tremolo-PB.wav
+pitch_keycenter=a5
+lokey=a5
+hikey=a#5
+
+<region>
+sample=..\libs\Other\Samples\2nd-Violin-Section\C6-tremolo-PB.wav
+pitch_keycenter=c6
+lokey=b5
+hikey=c#6
+volume=7
+
+<region>
+sample=..\libs\Other\Samples\2nd-Violin-Section\D6-tremolo-PB.wav
+pitch_keycenter=d6
+lokey=d6
+hikey=d#6
+volume=7
+
+<region>
+sample=..\libs\Other\Samples\2nd-Violin-Section\E6-tremolo-PB.wav
+pitch_keycenter=e6
+lokey=e6
+hikey=f6
+volume=8
+
+<region>
+sample=..\libs\Other\Samples\2nd-Violin-Section\G6-tremolo-PB.wav
+pitch_keycenter=g6
+lokey=f#6
+hikey=g#6
+volume=9
+
+<region>
+sample=..\libs\Other\Samples\2nd-Violin-Section\A6-tremolo-PB.wav
+pitch_keycenter=a6
+lokey=a6
+hikey=a#6
+volume=7
+
+<region>
+sample=..\libs\Other\Samples\2nd-Violin-Section\C7-tremolo-PB.wav
+pitch_keycenter=c7
+lokey=b6
+hikey=c#7
+volume=8
+
+<region>
+sample=..\libs\Other\Samples\2nd-Violin-Section\D7-tremolo-PB.wav
+pitch_keycenter=d7
+lokey=d7
+hikey=d#7
+volume=9
+
+<region>
+sample=..\libs\Other\Samples\2nd-Violin-Section\E7-tremolo-PB.wav
+pitch_keycenter=e7
+lokey=e7
+hikey=f7
+volume=9
+
+<region>
+sample=..\libs\Other\Samples\2nd-Violin-Section\G7-tremolo-PB.wav
+pitch_keycenter=g7
+lokey=f#7
+hikey=g#7
+volume=9
+
+<region>
+sample=..\libs\Other\Samples\2nd-Violin-Section\A7-tremolo-PB.wav
+pitch_keycenter=a7
+lokey=a7
+hikey=a7
+volume=9
+
+
+
+
+//==============================================================
+// 2nd Violin Section - Normal Mod Wheel
+//
+//   This is a combination of
+//
+//     2nd-violin-SEC-sustain.sfz
+//     2nd-violin-SEC-staccato.sfz
+//
+//   ... where the mod wheel lengthens the attack
+//
+//   by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+//==============================================================
+// 2nd Violin Section - Staccato
+//
+//   Strings - 2nd Violins Staccato.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   samples and .sfz modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//     2nd Violins Staccato
+// ------------------------------
+
+<group>
+sw_default=c2  // sustain by default
+sw_lokey=c2
+sw_hikey=f2
+sw_last=d2
+sw_label=D2 Normal Mod Wheel
+
+volume=-12.5
+ampeg_attackcc1=0.5 // mod wheel slows attack
+gain_cc1=-15        // mod wheel reduces volume
+
+volume=-10
+// make 2nd violin a little different from 1st violin (PB)
+eq1_freq=227.8
+eq1_bw=2
+eq1_gain=-8.4
+
+eq1_freq=8241.7
+eq1_bw=2
+eq1_gain=-8.3
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+loop_mode=one_shot
+seq_position=1
+seq_length=2
+ampeg_sustain=0
+ampeg_decay=1
+ampeg_vel2decay=10
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-g3-PB.wav
+lokey=g3
+hikey=g#3
+pitch_keycenter=g3
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-a#3-PB.wav
+lokey=a3
+hikey=b3
+pitch_keycenter=a#3
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-c#4-PB.wav
+volume=-9
+
+lokey=c4
+hikey=d4
+pitch_keycenter=c#4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-e4-PB.wav
+volume=-9
+
+lokey=d#4
+hikey=f4
+pitch_keycenter=e4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-g4-PB.wav
+lokey=f#4
+hikey=g#4
+pitch_keycenter=g4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-a#4-PB.wav
+volume=-7.5
+
+lokey=a4
+hikey=b4
+pitch_keycenter=a#4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-c#5-PB.wav
+lokey=c5
+hikey=d5
+pitch_keycenter=c#5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-e5-PB.wav
+volume=-9
+
+lokey=d#5
+hikey=f5
+pitch_keycenter=e5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-g5-PB.wav
+lokey=f#5
+hikey=g#5
+pitch_keycenter=g5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-a#5-PB.wav
+volume=-6.5
+
+lokey=a5
+hikey=b5
+pitch_keycenter=a#5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-c#6-PB.wav
+volume=-8.5
+
+lokey=c6
+hikey=d6
+pitch_keycenter=c#6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-e6-PB.wav
+lokey=d#6
+hikey=f6
+pitch_keycenter=e6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-g6-PB.wav
+lokey=f#6
+hikey=g#6
+pitch_keycenter=g6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-a#6-PB.wav
+lokey=a6
+hikey=a7
+pitch_keycenter=a#6
+
+
+
+<group>
+sw_default=c2  // sustain by default
+sw_lokey=c2
+sw_hikey=f2
+sw_last=d2
+sw_label=D2 Normal Mod Wheel
+
+volume=-12.5
+ampeg_attackcc1=0.5 // mod wheel slows attack
+gain_cc1=-15        // mod wheel reduces volume
+
+volume=-10
+// make 2nd violin a little different from 1st violin (PB)
+eq1_freq=227.8
+eq1_bw=2
+eq1_gain=-8.4
+
+eq1_freq=8241.7
+eq1_bw=2
+eq1_gain=-8.3
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+loop_mode=one_shot
+seq_position=2
+seq_length=2
+transpose=-1
+ampeg_attack=0.050
+ampeg_sustain=0
+ampeg_decay=1
+ampeg_vel2decay=10
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-g3-PB.wav
+lokey=g3
+hikey=g#3
+pitch_keycenter=g3
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-a#3-PB.wav
+lokey=a3
+hikey=b3
+pitch_keycenter=a#3
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-c#4-PB.wav
+lokey=c4
+hikey=d4
+pitch_keycenter=c#4
+tune=-5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-e4-PB.wav
+lokey=d#4
+hikey=f4
+pitch_keycenter=e4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-g4-PB.wav
+volume=-9
+
+lokey=f#4
+hikey=g#4
+pitch_keycenter=g4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-a#4-PB.wav
+volume=-7
+
+lokey=a4
+hikey=b4
+pitch_keycenter=a#4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-c#5-PB.wav
+volume=-8
+
+lokey=c5
+hikey=d5
+pitch_keycenter=c#5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-e5-PB.wav
+volume=-9.5
+
+lokey=d#5
+hikey=f5
+pitch_keycenter=e5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-g5-PB.wav
+lokey=f#5
+hikey=g#5
+pitch_keycenter=g5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-a#5-PB.wav
+volume=-7
+
+lokey=a5
+hikey=b5
+pitch_keycenter=a#5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-c#6-PB.wav
+volume=-9
+
+lokey=c6
+hikey=d6
+pitch_keycenter=c#6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-e6-PB.wav
+volume=-11
+
+lokey=d#6
+hikey=f6
+pitch_keycenter=e6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-g6-PB.wav
+lokey=f#6
+hikey=g#6
+pitch_keycenter=g6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-a#6-PB.wav
+lokey=a6
+hikey=a7
+pitch_keycenter=a#6
+
+
+
+//==============================================================
+// 2nd Violin Section - Sustain
+//
+//   Strings - 2nd Violins Sustain.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//      2nd Violins Sustain
+// ------------------------------
+
+<group>
+sw_default=c2  // sustain by default
+sw_lokey=c2
+sw_hikey=f2
+sw_last=d2
+sw_label=D2 Normal Mod Wheel
+
+ampeg_attackcc1=0.5 // mod wheel slows attack
+
+// make 2nd violin a little different from 1st violin (PB)
+eq1_freq=227.8
+eq1_bw=2
+eq1_gain=-8.4
+
+eq1_freq=8241.7
+eq1_bw=2
+eq1_gain=-8.3
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+
+ampeg_attack=0.175
+ampeg_vel2attack=-0.175
+ampeg_release=1
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-g3.wav
+pan=5
+volume=1
+
+lokey=g3
+hikey=g#3
+pitch_keycenter=g3
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-a#3.wav
+volume=1
+
+lokey=a3
+hikey=b3
+pitch_keycenter=a#3
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-c#4.wav
+volume=1
+
+lokey=c4
+hikey=d4
+pitch_keycenter=c#4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-e4.wav
+volume=4
+
+lokey=d#4
+hikey=f4
+pitch_keycenter=e4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-g4.wav
+lokey=f#4
+hikey=g#4
+pitch_keycenter=g4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-a#4.wav
+lokey=a4
+hikey=b4
+pitch_keycenter=a#4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-c#5.wav
+volume=1
+
+lokey=c5
+hikey=d5
+pitch_keycenter=c#5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-e5.wav
+volume=1
+
+lokey=d#5
+hikey=f5
+pitch_keycenter=e5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-g5.wav
+volume=3
+
+lokey=f#5
+hikey=g#5
+pitch_keycenter=g5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-a#5.wav
+volume=3
+
+lokey=a5
+hikey=b5
+pitch_keycenter=a#5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-c#6.wav
+volume=2
+
+lokey=c6
+hikey=d6
+pitch_keycenter=c#6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-e6.wav
+volume=2
+
+lokey=d#6
+hikey=f6
+pitch_keycenter=e6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-g6.wav
+lokey=f#6
+hikey=g#6
+pitch_keycenter=g6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-a#6.wav
+lokey=a6
+hikey=a7
+pitch_keycenter=a#6
+
+
+
+//==============================================================
+// 2nd Violin Section - Accent
+//
+//   This is a combination of
+//
+//     2nd-violin-SEC-sustain.sfz
+//     2nd-violin-SEC-staccato.sfz
+//
+//   by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+//==============================================================
+// 2nd Violin Section - Staccato
+//
+//   Strings - 2nd Violins Staccato.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   samples and .sfz modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//     2nd Violins Staccato
+// ------------------------------
+
+<group>
+sw_default=c2  // sustain by default
+sw_lokey=c2
+sw_hikey=f2
+sw_last=d#2
+sw_label=D#2 Accent
+
+volume=2.5
+// make 2nd violin a little different from 1st violin (PB)
+eq1_freq=227.8
+eq1_bw=2
+eq1_gain=-8.4
+
+eq1_freq=8241.7
+eq1_bw=2
+eq1_gain=-8.3
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+loop_mode=one_shot
+seq_position=1
+seq_length=2
+ampeg_sustain=0
+ampeg_decay=1
+ampeg_vel2decay=10
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-g3-PB.wav
+lokey=g3
+hikey=g#3
+pitch_keycenter=g3
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-a#3-PB.wav
+lokey=a3
+hikey=b3
+pitch_keycenter=a#3
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-c#4-PB.wav
+volume=3.5
+
+lokey=c4
+hikey=d4
+pitch_keycenter=c#4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-e4-PB.wav
+volume=3.5
+
+lokey=d#4
+hikey=f4
+pitch_keycenter=e4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-g4-PB.wav
+lokey=f#4
+hikey=g#4
+pitch_keycenter=g4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-a#4-PB.wav
+volume=5.0
+
+lokey=a4
+hikey=b4
+pitch_keycenter=a#4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-c#5-PB.wav
+lokey=c5
+hikey=d5
+pitch_keycenter=c#5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-e5-PB.wav
+volume=3.5
+
+lokey=d#5
+hikey=f5
+pitch_keycenter=e5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-g5-PB.wav
+lokey=f#5
+hikey=g#5
+pitch_keycenter=g5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-a#5-PB.wav
+volume=6.0
+
+lokey=a5
+hikey=b5
+pitch_keycenter=a#5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-c#6-PB.wav
+volume=4.0
+
+lokey=c6
+hikey=d6
+pitch_keycenter=c#6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-e6-PB.wav
+lokey=d#6
+hikey=f6
+pitch_keycenter=e6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-g6-PB.wav
+lokey=f#6
+hikey=g#6
+pitch_keycenter=g6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-a#6-PB.wav
+lokey=a6
+hikey=a7
+pitch_keycenter=a#6
+
+
+
+<group>
+sw_default=c2  // sustain by default
+sw_lokey=c2
+sw_hikey=f2
+sw_last=d#2
+sw_label=D#2 Accent
+
+volume=2.5
+// make 2nd violin a little different from 1st violin (PB)
+eq1_freq=227.8
+eq1_bw=2
+eq1_gain=-8.4
+
+eq1_freq=8241.7
+eq1_bw=2
+eq1_gain=-8.3
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+loop_mode=one_shot
+seq_position=2
+seq_length=2
+transpose=-1
+ampeg_attack=0.050
+ampeg_sustain=0
+ampeg_decay=1
+ampeg_vel2decay=10
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-g3-PB.wav
+lokey=g3
+hikey=g#3
+pitch_keycenter=g3
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-a#3-PB.wav
+lokey=a3
+hikey=b3
+pitch_keycenter=a#3
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-c#4-PB.wav
+lokey=c4
+hikey=d4
+pitch_keycenter=c#4
+tune=-5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-e4-PB.wav
+lokey=d#4
+hikey=f4
+pitch_keycenter=e4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-g4-PB.wav
+volume=3.5
+
+lokey=f#4
+hikey=g#4
+pitch_keycenter=g4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-a#4-PB.wav
+volume=5.5
+
+lokey=a4
+hikey=b4
+pitch_keycenter=a#4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-c#5-PB.wav
+volume=4.5
+
+lokey=c5
+hikey=d5
+pitch_keycenter=c#5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-e5-PB.wav
+volume=3.0
+
+lokey=d#5
+hikey=f5
+pitch_keycenter=e5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-g5-PB.wav
+lokey=f#5
+hikey=g#5
+pitch_keycenter=g5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-a#5-PB.wav
+volume=5.5
+
+lokey=a5
+hikey=b5
+pitch_keycenter=a#5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-c#6-PB.wav
+volume=3.5
+
+lokey=c6
+hikey=d6
+pitch_keycenter=c#6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-e6-PB.wav
+volume=1.5
+
+lokey=d#6
+hikey=f6
+pitch_keycenter=e6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-g6-PB.wav
+lokey=f#6
+hikey=g#6
+pitch_keycenter=g6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-a#6-PB.wav
+lokey=a6
+hikey=a7
+pitch_keycenter=a#6
+
+
+
+//==============================================================
+// 2nd Violin Section - Sustain
+//
+//   Strings - 2nd Violins Sustain.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//      2nd Violins Sustain
+// ------------------------------
+
+<group>
+sw_default=c2  // sustain by default
+sw_lokey=c2
+sw_hikey=f2
+sw_last=d#2
+sw_label=D#2 Accent
+
+delay=0.20 // allow time for accent before sustain takes over
+// make 2nd violin a little different from 1st violin (PB)
+eq1_freq=227.8
+eq1_bw=2
+eq1_gain=-8.4
+
+eq1_freq=8241.7
+eq1_bw=2
+eq1_gain=-8.3
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+
+ampeg_attack=0.175
+ampeg_vel2attack=-0.175
+ampeg_release=1
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-g3.wav
+pan=5
+volume=1
+
+lokey=g3
+hikey=g#3
+pitch_keycenter=g3
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-a#3.wav
+volume=1
+
+lokey=a3
+hikey=b3
+pitch_keycenter=a#3
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-c#4.wav
+volume=1
+
+lokey=c4
+hikey=d4
+pitch_keycenter=c#4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-e4.wav
+volume=4
+
+lokey=d#4
+hikey=f4
+pitch_keycenter=e4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-g4.wav
+lokey=f#4
+hikey=g#4
+pitch_keycenter=g4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-a#4.wav
+lokey=a4
+hikey=b4
+pitch_keycenter=a#4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-c#5.wav
+volume=1
+
+lokey=c5
+hikey=d5
+pitch_keycenter=c#5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-e5.wav
+volume=1
+
+lokey=d#5
+hikey=f5
+pitch_keycenter=e5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-g5.wav
+volume=3
+
+lokey=f#5
+hikey=g#5
+pitch_keycenter=g5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-a#5.wav
+volume=3
+
+lokey=a5
+hikey=b5
+pitch_keycenter=a#5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-c#6.wav
+volume=2
+
+lokey=c6
+hikey=d6
+pitch_keycenter=c#6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-e6.wav
+volume=2
+
+lokey=d#6
+hikey=f6
+pitch_keycenter=e6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-g6.wav
+lokey=f#6
+hikey=g#6
+pitch_keycenter=g6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-sus-a#6.wav
+delay=0.15
+
+lokey=a6
+hikey=a7
+pitch_keycenter=a#6
+
+
+
+//==============================================================
+// 2nd Violin Section - Staccato
+//
+//   Strings - 2nd Violins Staccato.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   samples and .sfz modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//     2nd Violins Staccato
+// ------------------------------
+
+<group>
+sw_default=c2  // sustain by default
+sw_lokey=c2
+sw_hikey=f2
+sw_last=e2
+sw_label=E2 Staccato
+
+volume=2.5
+// make 2nd violin a little different from 1st violin (PB)
+eq1_freq=227.8
+eq1_bw=2
+eq1_gain=-8.4
+
+eq1_freq=8241.7
+eq1_bw=2
+eq1_gain=-8.3
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+loop_mode=one_shot
+seq_position=1
+seq_length=2
+ampeg_sustain=0
+ampeg_decay=1
+ampeg_vel2decay=10
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-g3-PB.wav
+lokey=g3
+hikey=g#3
+pitch_keycenter=g3
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-a#3-PB.wav
+lokey=a3
+hikey=b3
+pitch_keycenter=a#3
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-c#4-PB.wav
+volume=3.5
+
+lokey=c4
+hikey=d4
+pitch_keycenter=c#4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-e4-PB.wav
+volume=3.5
+
+lokey=d#4
+hikey=f4
+pitch_keycenter=e4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-g4-PB.wav
+lokey=f#4
+hikey=g#4
+pitch_keycenter=g4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-a#4-PB.wav
+volume=5.0
+
+lokey=a4
+hikey=b4
+pitch_keycenter=a#4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-c#5-PB.wav
+lokey=c5
+hikey=d5
+pitch_keycenter=c#5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-e5-PB.wav
+volume=3.5
+
+lokey=d#5
+hikey=f5
+pitch_keycenter=e5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-g5-PB.wav
+lokey=f#5
+hikey=g#5
+pitch_keycenter=g5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-a#5-PB.wav
+volume=6.0
+
+lokey=a5
+hikey=b5
+pitch_keycenter=a#5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-c#6-PB.wav
+volume=4.0
+
+lokey=c6
+hikey=d6
+pitch_keycenter=c#6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-e6-PB.wav
+lokey=d#6
+hikey=f6
+pitch_keycenter=e6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-g6-PB.wav
+lokey=f#6
+hikey=g#6
+pitch_keycenter=g6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr1-a#6-PB.wav
+lokey=a6
+hikey=a7
+pitch_keycenter=a#6
+
+
+
+<group>
+sw_default=c2  // sustain by default
+sw_lokey=c2
+sw_hikey=f2
+sw_last=e2
+sw_label=E2 Staccato
+
+volume=2.5
+// make 2nd violin a little different from 1st violin (PB)
+eq1_freq=227.8
+eq1_bw=2
+eq1_gain=-8.4
+
+eq1_freq=8241.7
+eq1_bw=2
+eq1_gain=-8.3
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+loop_mode=one_shot
+seq_position=2
+seq_length=2
+transpose=-1
+ampeg_attack=0.050
+ampeg_sustain=0
+ampeg_decay=1
+ampeg_vel2decay=10
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-g3-PB.wav
+lokey=g3
+hikey=g#3
+pitch_keycenter=g3
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-a#3-PB.wav
+lokey=a3
+hikey=b3
+pitch_keycenter=a#3
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-c#4-PB.wav
+lokey=c4
+hikey=d4
+pitch_keycenter=c#4
+tune=-5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-e4-PB.wav
+lokey=d#4
+hikey=f4
+pitch_keycenter=e4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-g4-PB.wav
+volume=3.5
+
+lokey=f#4
+hikey=g#4
+pitch_keycenter=g4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-a#4-PB.wav
+volume=5.5
+
+lokey=a4
+hikey=b4
+pitch_keycenter=a#4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-c#5-PB.wav
+volume=4.5
+
+lokey=c5
+hikey=d5
+pitch_keycenter=c#5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-e5-PB.wav
+volume=3.0
+
+lokey=d#5
+hikey=f5
+pitch_keycenter=e5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-g5-PB.wav
+lokey=f#5
+hikey=g#5
+pitch_keycenter=g5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-a#5-PB.wav
+volume=5.5
+
+lokey=a5
+hikey=b5
+pitch_keycenter=a#5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-c#6-PB.wav
+volume=3.5
+
+lokey=c6
+hikey=d6
+pitch_keycenter=c#6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-e6-PB.wav
+volume=1.5
+
+lokey=d#6
+hikey=f6
+pitch_keycenter=e6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-g6-PB.wav
+lokey=f#6
+hikey=g#6
+pitch_keycenter=g6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-stc-rr2-a#6-PB.wav
+lokey=a6
+hikey=a7
+pitch_keycenter=a#6
+
+
+
+
+//==============================================================
+// 2nd Violin Section - Pizzicato
+//
+//   Strings - 2nd Violins Pizzicato.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   samples and .sfz modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//     2nd Violins Pizzicato
+// ------------------------------
+
+<group>
+sw_default=c2  // sustain by default
+sw_lokey=c2
+sw_hikey=f2
+sw_last=f2
+sw_label=F2 Pizzicato
+
+ampeg_attack=0.03
+volume=2
+// make 2nd violin a little different from 1st violin (PB)
+eq1_freq=227.8
+eq1_bw=2
+eq1_gain=-8.4
+
+eq1_freq=8241.7
+eq1_bw=2
+eq1_gain=-8.3
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+loop_mode=one_shot
+ampeg_sustain=0
+ampeg_decay=1
+ampeg_vel2decay=10
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-piz-rr1-g3-PB.wav
+pan=20
+
+lokey=g3
+hikey=g#3
+pitch_keycenter=g3
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-piz-rr1-a#3-PB.wav
+pan=15
+volume=4
+
+lokey=a3
+hikey=b3
+pitch_keycenter=a#3
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-piz-rr1-c#4-PB.wav
+pan=15
+
+lokey=c4
+hikey=d4
+pitch_keycenter=c#4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-piz-rr1-e4-PB.wav
+pan=20
+
+lokey=d#4
+hikey=f4
+pitch_keycenter=e4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-piz-rr1-g4-PB.wav
+pan=20
+
+lokey=f#4
+hikey=g#4
+pitch_keycenter=g4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-piz-rr1-a#4-PB.wav
+pan=20
+volume=4
+
+lokey=a4
+hikey=b4
+pitch_keycenter=a#4
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-piz-rr1-c#5-PB.wav
+pan=10
+volume=3.0
+
+lokey=c5
+hikey=d5
+pitch_keycenter=c#5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-piz-rr1-e5-PB.wav
+pan=25
+volume=4.5
+
+lokey=d#5
+hikey=f5
+pitch_keycenter=e5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-piz-rr1-g5-PB.wav
+pan=10
+volume=5
+
+lokey=f#5
+hikey=g#5
+pitch_keycenter=g5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-piz-rr1-a#5-PB.wav
+volume=8
+
+lokey=a5
+hikey=b5
+pitch_keycenter=a#5
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-piz-rr1-c#6-PB.wav
+volume=5
+
+lokey=c6
+hikey=d6
+pitch_keycenter=c#6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-piz-rr1-e6-PB.wav
+volume=4
+
+lokey=d#6
+hikey=f6
+pitch_keycenter=e6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-piz-rr1-g6-PB.wav
+volume=4
+
+lokey=f#6
+hikey=g#6
+pitch_keycenter=g6
+
+<region>
+sample=..\libs\SSO\Samples\2nd Violins\2nd-violins-piz-rr1-a#6-PB.wav
+volume=4
+
+lokey=a6
+hikey=a7
+pitch_keycenter=a#6
+
+
+// removed Round Robin (PB)
+
+
+
+

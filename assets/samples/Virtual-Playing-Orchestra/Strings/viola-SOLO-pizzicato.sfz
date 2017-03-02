@@ -1,0 +1,63 @@
+//==============================================================
+// Solo Viola - Pizzicato
+//
+//   viola_pizzi.sfz from No Budget Orchestra - https://nobudgetorchestra.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+<control> default_path=..\libs\NoBudgetOrch\SoloViola\Pizzicato\
+<group>
+width=0
+ampeg_attack=0.03
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+ ampeg_release=0.9
+<region> lokey=c3 hikey=c#3 pitch_keycenter=c3 sample=3_C_1-PB.wav
+volume=4 tune=5
+
+<region> lokey=d3 hikey=f#3 pitch_keycenter=d#3 sample=3_Eb_1-PB.wav
+volume=6
+
+// removed 3_Gb-PB.wav - (PB)
+<region> lokey=g3 hikey=a#3 pitch_keycenter=a3 sample=3_A_1-PB.wav
+volume=3
+
+<region> lokey=b3 hikey=c#4 pitch_keycenter=c4 sample=4_C_2-PB.wav
+volume=2
+
+<region> lokey=d4 hikey=f#4 pitch_keycenter=d#4 sample=4_Eb_1-PB.wav
+volume=4
+
+// removed 4_Gb-PB.wav - (PB)
+<region> lokey=g4 hikey=a#4 pitch_keycenter=a4 sample=4_A_1-PB.wav
+volume=5
+
+<region> lokey=b4 hikey=c#5 pitch_keycenter=c5 sample=5_C_1-PB.wav
+volume=5
+
+<region> lokey=d5 hikey=e5 pitch_keycenter=d#5 sample=5_Eb_2-PB.wav
+volume=3
+
+<region> lokey=f5 hikey=g5 pitch_keycenter=f#5 sample=5_Gb_2-PB.wav
+volume=9 tune=20
+
+<region> lokey=g#5 hikey=a6 pitch_keycenter=a5 sample=5_A_1-PB.wav
+volume=9 tune=10
+
+
+
+
+
+
+
+
+
+
+
+
+

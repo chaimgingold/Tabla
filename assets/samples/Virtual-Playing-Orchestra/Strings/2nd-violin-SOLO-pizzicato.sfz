@@ -1,0 +1,142 @@
+//==============================================================
+// Solo 2nd Violin - Pizzicato
+//
+//   violin_pizzi_vib.sfz from No Budget Orchestra - https://nobudgetorchestra.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//  remapped samples from 1st violin
+//
+//==============================================================
+
+<group>
+// make 2nd violin a little different from 1st violin (PB)
+eq1_freq=295.7
+eq1_bw=2
+eq1_gain=4.6
+
+eq1_freq=4871.7
+eq1_bw=2
+eq1_gain=-4
+ampeg_attack=0.03
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+ ampeg_release=0.6
+// removed <control> - won't work when merging files
+// removed 3_G-PB.wav - (PB)
+// removed 3_Ab-PB.wav - (PB)
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\3_A-PB.wav key=57 lokey=58 hikey=58
+volume=3
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\3_Bb-PB.wav key=58 lokey=55 hikey=57
+volume=6
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\3_B-PB.wav key=59 lokey=60 hikey=60
+volume=3
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\4_C-PB.wav key=60 lokey=59 hikey=59
+volume=1
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\4_Db-PB.wav key=61 lokey=62 hikey=62
+volume=2
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\4_D-PB.wav key=62 lokey=61 hikey=61
+volume=4
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\4_Eb-PB.wav key=63 lokey=64 hikey=64
+volume=7
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\4_E-PB.wav key=64 lokey=63 hikey=63
+volume=5
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\4_F-PB.wav key=65 lokey=66 hikey=66
+volume=3
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\4_Gb-PB.wav key=66 lokey=65 hikey=65
+volume=5
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\4_G-PB.wav key=67 lokey=68 hikey=69
+volume=6
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\4_Ab-PB.wav key=68 lokey=67 hikey=67
+volume=4
+
+// removed 4_A-PB.wav - (PB)
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\4_Bb-PB.wav key=70 lokey=71 hikey=72
+volume=10
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\4_B-PB.wav key=71 lokey=70 hikey=70
+volume=6
+
+// removed 5_C-PB.wav - (PB)
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\5_Db-PB.wav key=73 lokey=74 hikey=74
+volume=7
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\5_D-PB.wav key=74 lokey=73 hikey=73
+volume=7
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\5_Eb-PB.wav key=75 lokey=77 hikey=77
+volume=6
+
+// removed 5_E-PB.wav - (PB)
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\5_F-PB.wav key=77 lokey=75 hikey=76
+volume=5
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\5_Gb-PB.wav key=78 lokey=79 hikey=79
+volume=4
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\5_G-PB.wav key=79 lokey=78 hikey=78
+volume=10
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\5_Ab-PB.wav key=80 lokey=81 hikey=81
+volume=7
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\5_A-PB.wav key=81 lokey=80 hikey=80
+volume=10
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\5_Bb-PB.wav key=82 lokey=83 hikey=83
+volume=10
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\5_B-PB.wav key=83 lokey=82 hikey=82
+volume=7
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\6_C-PB.wav key=84 lokey=85 hikey=85
+volume=10
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\6_Db-PB.wav key=85 lokey=84 hikey=84
+volume=12
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\6_D-PB.wav key=86 lokey=87 hikey=87
+volume=10
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\6_Eb-PB.wav key=87 lokey=86 hikey=86
+volume=11.5
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\6_E-PB.wav key=88 lokey=89 hikey=89
+volume=10
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\6_F-PB.wav key=89 lokey=88 hikey=88
+volume=14
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\6_Gb-PB.wav key=90 lokey=91 hikey=91
+volume=13
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\6_G-PB.wav key=91 lokey=90 hikey=90
+volume=14
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\6_Ab-PB.wav key=92 lokey=93 hikey=93
+volume=19
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\6_A-PB.wav key=93 lokey=92 hikey=92
+volume=13
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\6_Bb-PB.wav key=94 lokey=95 hikey=105
+volume=10
+
+<region> sample=..\libs\NoBudgetOrch\SoloViolin\PizzicatoVib\6_B-PB.wav lokey=95 lokey=94 hikey=94 pitch_keycenter=95
+volume=11 tune=-30
+
+

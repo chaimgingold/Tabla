@@ -1,0 +1,493 @@
+//==============================================================
+// Solo Bass - Normal Mod Wheel
+//
+//   This is combination of:
+//
+//     bass-SOLO-sustain.sfz
+//     bass-SOLO-staccato.sfz
+//
+//   ... where the mod wheel lengthens the attack
+//
+//   by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+//==============================================================
+// Solo Bass - Sustain
+//
+//   ContrabassSusVB.sfz from Versilian Studios - http://vis.versilstudios.net/vsco-2.html
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// removed control, global - doesn't work when merged with other files
+
+<group>
+ampeg_attackcc1=0.6 // mod wheel slows attack
+ //Begin Group 1
+ampeg_attack=0.1
+ampeg_release=0.8
+ampeg_dynamic=1
+width=0
+
+
+
+
+group_label=gr_1
+
+
+
+// removed A#0 (PB)
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_A1_v1_rr1.wav
+lokey=45
+hikey=46
+pitch_keycenter=45
+lovel=0
+hivel=62
+volume=26
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_B2_v1_rr1.wav
+lokey=58
+hikey=67
+pitch_keycenter=59
+lovel=0
+hivel=62
+volume=28
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_C#2_v1_rr1.wav
+lokey=47
+hikey=50
+pitch_keycenter=49
+lovel=0
+hivel=62
+volume=39
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_C1_v1_rr1.wav
+lokey=35
+hikey=36
+pitch_keycenter=36
+lovel=0
+hivel=62
+volume=32.5
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_D1_v1_rr1.wav
+lokey=37
+hikey=38
+pitch_keycenter=38
+lovel=0
+hivel=62
+volume=36
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_E1_v1_rr1.wav
+lokey=39
+hikey=40
+pitch_keycenter=40
+lovel=0
+hivel=62
+volume=37
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_E2_v1_rr1.wav
+lokey=51
+hikey=53
+pitch_keycenter=52
+lovel=0
+hivel=62
+volume=37
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_F#0_v1_rr1.wav
+lokey=24
+hikey=30
+pitch_keycenter=30
+lovel=0
+hivel=62
+volume=34.5
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_F#1_v1_rr1.wav
+lokey=41
+hikey=42
+pitch_keycenter=42
+lovel=0
+hivel=62
+volume=38
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_G#1_v1_rr1.wav
+lokey=43
+hikey=44
+pitch_keycenter=44
+lovel=0
+hivel=62
+volume=26
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_G#2_v1_rr1.wav
+lokey=54
+hikey=57
+pitch_keycenter=56
+lovel=0
+hivel=62
+volume=32
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_G0_v1_rr1.wav
+lokey=31
+hikey=34
+pitch_keycenter=31
+lovel=0
+hivel=62
+volume=39.5
+
+
+// removed A#0 (PB)
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_A1_v3_rr1.wav
+lokey=45
+hikey=46
+pitch_keycenter=45
+lovel=63
+hivel=127
+volume=14
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_B2_v3_rr1.wav
+lokey=58
+hikey=67
+pitch_keycenter=59
+lovel=63
+hivel=127
+volume=16
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_C#2_v3_rr1.wav
+lokey=47
+hikey=50
+pitch_keycenter=49
+lovel=63
+hivel=127
+volume=27
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_C1_v3_rr1.wav
+lokey=35
+hikey=36
+pitch_keycenter=36
+lovel=63
+hivel=127
+volume=20.5
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_D1_v3_rr1.wav
+lokey=37
+hikey=38
+pitch_keycenter=38
+lovel=63
+hivel=127
+volume=24
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_E1_v3_rr1.wav
+lokey=39
+hikey=40
+pitch_keycenter=40
+lovel=63
+hivel=127
+volume=25
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_E2_v3_rr1.wav
+lokey=51
+hikey=53
+pitch_keycenter=52
+lovel=63
+hivel=127
+volume=25
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_F#0_v3_rr1.wav
+lokey=24
+hikey=30
+pitch_keycenter=30
+lovel=63
+hivel=127
+volume=22.5
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_F#1_v3_rr1.wav
+lokey=41
+hikey=42
+pitch_keycenter=42
+lovel=63
+hivel=127
+volume=26
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_G#1_v3_rr1.wav
+lokey=43
+hikey=44
+pitch_keycenter=44
+lovel=63
+hivel=127
+volume=14
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_G#2_v3_rr1.wav
+lokey=54
+hikey=57
+pitch_keycenter=56
+lovel=63
+hivel=127
+volume=20
+
+
+<region>
+sample=..\libs\VSCO2-CE\Strings\Solo Contrabass\SusVib\BKCtbss_SusVib_G0_v3_rr1.wav
+lokey=31
+hikey=34
+pitch_keycenter=31
+lovel=63
+hivel=127
+volume=27.5
+
+
+
+
+//==============================================================
+// Bass Solo - Staccato
+//
+// mapped by Paul Battersby - http://virtualplaying.com
+//
+// The samples from VSCO2 - http://vis.versilstudios.net/vsco-2.html
+// are licensed under:
+//
+// CC0 1.0 Universal (CC0 1.0) Public Domain Dedication License
+// https://creativecommons.org/publicdomain/zero/1.0/
+//
+// This file by Paul Battersby - http://virtualplaying.com
+// is licensed using the same license above
+//
+//==============================================================
+
+// ----------------- RR 1 -------------------
+<group>
+volume=-5.5
+ampeg_attackcc1=0.5 // mod wheel slows attack
+gain_cc1=-15        // mod wheel reduces volume
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+group_label=group1-RR1
+seq_position=1
+seq_length=2
+
+
+// get rid of any leading or trailing clicks
+ampeg_attack=0.03
+ampeg_decay=0.06
+
+ampeg_release=1.5
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_E0-rr1-PB.wav
+pitch_keycenter=e1
+lokey=c1
+hikey=f1
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_F#0-rr1-PB.wav
+pitch_keycenter=f#1
+lokey=f#1
+hikey=f#1
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_G0-rr1-PB.wav
+pitch_keycenter=g1
+lokey=g1
+hikey=a1
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_A#0-rr1-PB.wav
+pitch_keycenter=a#1
+lokey=a#1
+hikey=b1
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_C1-rr1-PB.wav
+pitch_keycenter=c2
+lokey=c2
+hikey=c#2
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_D1-rr1-PB.wav
+pitch_keycenter=d2
+lokey=d2
+hikey=d#2
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_E1-rr1-PB.wav
+pitch_keycenter=e2
+lokey=e2
+hikey=g2
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_A1-rr1-PB.wav
+pitch_keycenter=a2
+lokey=g#2
+hikey=a#2
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_C#2-rr1-PB.wav
+pitch_keycenter=c#3
+lokey=b2
+hikey=f3
+
+//<region>
+//sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_E2-rr1-PB.wav
+//pitch_keycenter=e3
+//lokey=e3
+//hikey=g3
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_G#2-rr1-PB.wav
+pitch_keycenter=g#3
+lokey=f#3
+hikey=a#3
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_B2-rr1-PB.wav
+pitch_keycenter=b3
+lokey=b3
+hikey=g4
+
+
+// ----------------- RR 2 -------------------
+<group>
+volume=-5.5
+ampeg_attackcc1=0.5 // mod wheel slows attack
+gain_cc1=-15        // mod wheel reduces volume
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+group_label=group2-RR2
+seq_position=2
+seq_length=2
+
+// get rid of any leading or trailing clicks
+ampeg_attack=0.03
+ampeg_decay=0.06
+
+ampeg_release=1.5
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_E0-rr2-PB.wav
+pitch_keycenter=e1
+lokey=c1
+hikey=f1
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_F#0-rr2-PB.wav
+pitch_keycenter=f#1
+lokey=f#1
+hikey=f#1
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_G0-rr2-PB.wav
+pitch_keycenter=g1
+lokey=g1
+hikey=a1
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_A#0-rr2-PB.wav
+pitch_keycenter=a#1
+lokey=a#1
+hikey=b1
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_C1-rr2-PB.wav
+pitch_keycenter=c2
+lokey=c2
+hikey=c#2
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_D1-rr2-PB.wav
+pitch_keycenter=d2
+lokey=d2
+hikey=d#2
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_E1-rr2-PB.wav
+pitch_keycenter=e2
+lokey=e2
+hikey=g2
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_A1-rr2-PB.wav
+pitch_keycenter=a2
+lokey=g#2
+hikey=a#2
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_C#2-rr2-PB.wav
+pitch_keycenter=c#3
+lokey=b2
+hikey=f3
+
+//<region>
+//sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_E2-rr2-PB.wav
+//pitch_keycenter=e3
+//lokey=e3
+//hikey=g3
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_G#2-rr2-PB.wav
+pitch_keycenter=g#3
+lokey=f#3
+hikey=a#3
+
+<region>
+sample=..\libs\VSCO2-CE\Strings/Solo Contrabass/Spic-PB/BKCtbss_Spic_B2-rr2-PB.wav
+pitch_keycenter=b3
+lokey=b3
+hikey=g4
+
+

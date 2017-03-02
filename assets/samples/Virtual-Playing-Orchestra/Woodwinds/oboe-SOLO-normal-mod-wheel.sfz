@@ -1,0 +1,129 @@
+//==============================================================
+//  Solo Oboe - Normal Mod Wheel
+//
+//   ... where the mod wheel lengthens the attack
+//
+//   Woodwinds - Oboe Solo.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//           Oboe
+// ------------------------------
+
+<group>
+// manufacture shorter attack from sustain (PB)
+offset=1171
+
+ampeg_attack=0.03
+ampeg_release=0.9
+
+ampeg_attackcc1=0.5 // mod wheel slows attack
+
+
+volume=-10.5 // compensate for eq boost (PB)
+
+eq1_freq=685.6 // boost low end (PB)
+eq1_gain=10.5
+eq1_bw=2
+
+eq2_freq=1188.8 // boost low end (PB)
+eq2_gain=7.6
+eq2_bw=2
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+fil_type=lpf_2p
+cutoff=5000
+
+<region>
+sample=..\libs\SSO\Samples\Oboe\oboe-a#3-PB.wav
+volume=-10
+
+lokey=a#3
+hikey=b3
+pitch_keycenter=a#3
+tune=-8
+
+<region>
+sample=..\libs\SSO\Samples\Oboe\oboe-c#4-PB.wav
+volume=-8
+
+lokey=c4
+hikey=d4
+pitch_keycenter=c#4
+tune=-9
+
+<region>
+sample=..\libs\SSO\Samples\Oboe\oboe-e4-PB.wav
+volume=-9.5
+
+lokey=d#4
+hikey=f4
+pitch_keycenter=e4
+tune=-14
+
+<region>
+sample=..\libs\SSO\Samples\Oboe\oboe-g4-PB.wav
+volume=-6
+
+lokey=f#4
+hikey=g#4
+pitch_keycenter=g4
+tune=-10
+
+<region>
+sample=..\libs\SSO\Samples\Oboe\oboe-a#4-PB.wav
+volume=-7.5
+
+lokey=a4
+hikey=b4
+pitch_keycenter=a#4
+tune=-5
+
+<region>
+sample=..\libs\SSO\Samples\Oboe\oboe-c#5-PB.wav
+volume=-4.0
+
+lokey=c5
+hikey=f5 // extend to replace bad sample e5 (PB)
+pitch_keycenter=c#5
+
+// removed oboe-e5-PB.wav (PB)
+
+<region>
+sample=..\libs\SSO\Samples\Oboe\oboe-g5-PB.wav
+volume=-3.5
+
+lokey=f#5
+hikey=g#5
+pitch_keycenter=g5
+tune=-20
+
+<region>
+sample=..\libs\SSO\Samples\Oboe\oboe-a#5-PB.wav
+volume=-8
+
+lokey=a5
+hikey=b5
+pitch_keycenter=a#5
+tune=-22
+
+<region>
+sample=..\libs\SSO\Samples\Oboe\oboe-c6-PB.wav
+volume=-4.5
+
+lokey=c6
+hikey=a6 // extend the range (PB)
+pitch_keycenter=c6
+tune=-25
+
+

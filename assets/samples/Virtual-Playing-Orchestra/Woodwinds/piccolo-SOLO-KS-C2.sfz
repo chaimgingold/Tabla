@@ -1,0 +1,862 @@
+//==============================================================
+// Solo Piccolo - Key Switches
+//
+//   This is a combination of
+//
+//     piccolo-SOLO-sustain.sfz
+//     piccolo-SOLO-normal-mod-wheel.sfz
+//     piccolo-SOLO-accent.sfz
+//     piccolo-SOLO-staccato.sfz
+//
+//   ... to create a Key Switchable patch
+//
+//     key switch c2  = Sustain
+//     key switch d2  = Normal Mod Wheel
+//     key switch d#2 = Accent
+//     key switch e2  = Staccato
+//
+//   by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+//==============================================================
+// Solo Piccolo - Sustain
+//
+//   Woodwinds - Piccolo Solo.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//           Piccolo
+// ------------------------------
+
+<group>
+sw_default=c2  // sustain by default
+sw_lokey=c2
+sw_hikey=e2
+sw_last=c2
+sw_label=C2 Sustain
+
+ampeg_attack=0.25 // slightly longer attack (PB)
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+ampeg_release=0.550
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-c4-PB.wav
+tune=-10
+
+lokey=d4 // reduce the range (PB)
+hikey=d4 // reduce the range (PB)
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-d#4-PB.wav
+tune=-7
+
+lokey=d#4 // reduce the range (PB)
+hikey=e4
+pitch_keycenter=d#4
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-f#4-PB.wav
+lokey=f4
+hikey=g4
+pitch_keycenter=f#4
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-a4-PB.wav
+tune=-10
+
+lokey=g#4
+hikey=a#4
+pitch_keycenter=a4
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-c5-PB.wav
+tune=-7
+
+lokey=b4
+hikey=c#5
+pitch_keycenter=c5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-d#5-PB.wav
+tune=-3
+
+lokey=d5
+hikey=e5
+pitch_keycenter=d#5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-f#5-PB.wav
+tune=-10
+
+lokey=f5
+hikey=g5
+pitch_keycenter=f#5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-a5-PB.wav
+tune=-7
+
+lokey=g#5
+hikey=a#5
+pitch_keycenter=a5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-c6-PB.wav
+tune=-10
+
+lokey=b5
+hikey=c#6
+pitch_keycenter=c6
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-d#6-PB.wav
+tune=-5
+
+lokey=d6
+hikey=e6
+pitch_keycenter=d#6
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-f#6-PB.wav
+tune=-7
+
+lokey=f6
+hikey=c7 // extend the range (PB)
+pitch_keycenter=f#6
+
+
+
+//==============================================================
+// Solo Piccolo - Normal Mod Wheel
+//
+//   This is a combination of
+//
+//     piccolo-SOLO-sustain.sfz
+//     piccolo-SOLO-staccato.sfz
+//
+//   ... where the mod wheel lengthens the attack
+//
+//   by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+//==============================================================
+// Solo Piccolo - Sustain
+//
+//   Woodwinds - Piccolo Solo.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//           Piccolo
+// ------------------------------
+
+<group>
+sw_default=c2  // sustain by default
+sw_lokey=c2
+sw_hikey=e2
+sw_last=d2
+sw_label=D2 Normal Mod Wheel
+
+ampeg_attackcc1=0.5 // mod wheel slows attack
+ampeg_attack=0.25 // slightly longer attack (PB)
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+ampeg_release=0.550
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-c4-PB.wav
+tune=-10
+
+lokey=d4 // reduce the range (PB)
+hikey=d4 // reduce the range (PB)
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-d#4-PB.wav
+tune=-7
+
+lokey=d#4 // reduce the range (PB)
+hikey=e4
+pitch_keycenter=d#4
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-f#4-PB.wav
+lokey=f4
+hikey=g4
+pitch_keycenter=f#4
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-a4-PB.wav
+tune=-10
+
+lokey=g#4
+hikey=a#4
+pitch_keycenter=a4
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-c5-PB.wav
+tune=-7
+
+lokey=b4
+hikey=c#5
+pitch_keycenter=c5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-d#5-PB.wav
+tune=-3
+
+lokey=d5
+hikey=e5
+pitch_keycenter=d#5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-f#5-PB.wav
+tune=-10
+
+lokey=f5
+hikey=g5
+pitch_keycenter=f#5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-a5-PB.wav
+tune=-7
+
+lokey=g#5
+hikey=a#5
+pitch_keycenter=a5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-c6-PB.wav
+tune=-10
+
+lokey=b5
+hikey=c#6
+pitch_keycenter=c6
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-d#6-PB.wav
+tune=-5
+
+lokey=d6
+hikey=e6
+pitch_keycenter=d#6
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-f#6-PB.wav
+tune=-7
+
+lokey=f6
+hikey=c7 // extend the range (PB)
+pitch_keycenter=f#6
+
+
+//==============================================================
+// Solo Piccolo - Staccato
+//
+//   Woodwinds - Piccolo Solo.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//           Piccolo
+// ------------------------------
+
+<group>
+sw_default=c2  // sustain by default
+sw_lokey=c2
+sw_hikey=e2
+sw_last=d2
+sw_label=D2 Normal Mod Wheel
+
+ampeg_attackcc1=0.5 // mod wheel slows attack
+gain_cc1=-15        // mod wheel reduces volume
+// manufacture staccato from sustain (PB)
+offset=2492
+
+ampeg_attack=0.04
+ampeg_sustain=0.0
+ampeg_hold=0.06
+ampeg_decay=0.7
+ampeg_release=0.7
+volume=0.8
+
+
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-c4-PB.wav
+
+volume=6
+tune=-10
+
+lokey=d4 // reduce the range (PB)
+hikey=d4 // reduce the range (PB)
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-d#4-PB.wav
+
+volume=2
+tune=-7
+
+lokey=d#4 // reduce the range (PB)
+hikey=e4
+pitch_keycenter=d#4
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-f#4-PB.wav
+volume=6.5
+
+lokey=f4
+hikey=g4
+pitch_keycenter=f#4
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-a4-PB.wav
+
+volume=3
+tune=-10
+
+lokey=g#4
+hikey=a#4
+pitch_keycenter=a4
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-c5-PB.wav
+
+volume=3
+tune=-7
+
+lokey=b4
+hikey=c#5
+pitch_keycenter=c5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-d#5-PB.wav
+
+volume=7
+tune=-3
+
+lokey=d5
+hikey=e5
+pitch_keycenter=d#5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-f#5-PB.wav
+
+volume=6
+tune=-10
+
+lokey=f5
+hikey=g5
+pitch_keycenter=f#5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-a5-PB.wav
+
+volume=1
+tune=-7
+
+lokey=g#5
+hikey=a#5
+pitch_keycenter=a5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-c6-PB.wav
+
+volume=2
+tune=-10
+
+lokey=b5
+hikey=c#6
+pitch_keycenter=c6
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-d#6-PB.wav
+
+volume=2
+tune=-5
+
+lokey=d6
+hikey=e6
+pitch_keycenter=d#6
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-f#6-PB.wav
+
+volume=-1
+tune=-7
+
+lokey=f6
+hikey=c7 // extend the range (PB)
+pitch_keycenter=f#6
+
+
+
+
+
+//==============================================================
+// Solo Piccolo - Accent
+//
+//   This is a combination of
+//
+//     piccolo-SOLO-sustain.sfz
+//     piccolo-SOLO-staccato.sfz
+//
+//   ... to create a Marcato patch
+//
+//   by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+//==============================================================
+// Solo Piccolo - Staccato
+//
+//   Woodwinds - Piccolo Solo.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//           Piccolo
+// ------------------------------
+
+<group>
+sw_default=c2  // sustain by default
+sw_lokey=c2
+sw_hikey=e2
+sw_last=d#2
+sw_label=D#2 Accent
+
+// manufacture staccato from sustain (PB)
+offset=2492
+
+ampeg_attack=0.04
+ampeg_sustain=0.0
+ampeg_hold=0.06
+ampeg_decay=0.7
+ampeg_release=0.7
+volume=0.8
+
+
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-c4-PB.wav
+
+volume=6
+tune=-10
+
+lokey=d4 // reduce the range (PB)
+hikey=d4 // reduce the range (PB)
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-d#4-PB.wav
+
+volume=2
+tune=-7
+
+lokey=d#4 // reduce the range (PB)
+hikey=e4
+pitch_keycenter=d#4
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-f#4-PB.wav
+volume=6.5
+
+lokey=f4
+hikey=g4
+pitch_keycenter=f#4
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-a4-PB.wav
+
+volume=3
+tune=-10
+
+lokey=g#4
+hikey=a#4
+pitch_keycenter=a4
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-c5-PB.wav
+
+volume=3
+tune=-7
+
+lokey=b4
+hikey=c#5
+pitch_keycenter=c5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-d#5-PB.wav
+
+volume=7
+tune=-3
+
+lokey=d5
+hikey=e5
+pitch_keycenter=d#5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-f#5-PB.wav
+
+volume=6
+tune=-10
+
+lokey=f5
+hikey=g5
+pitch_keycenter=f#5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-a5-PB.wav
+
+volume=1
+tune=-7
+
+lokey=g#5
+hikey=a#5
+pitch_keycenter=a5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-c6-PB.wav
+
+volume=2
+tune=-10
+
+lokey=b5
+hikey=c#6
+pitch_keycenter=c6
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-d#6-PB.wav
+
+volume=2
+tune=-5
+
+lokey=d6
+hikey=e6
+pitch_keycenter=d#6
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-f#6-PB.wav
+
+volume=-1
+tune=-7
+
+lokey=f6
+hikey=c7 // extend the range (PB)
+pitch_keycenter=f#6
+
+
+
+//==============================================================
+// Solo Piccolo - Sustain
+//
+//   Woodwinds - Piccolo Solo.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//           Piccolo
+// ------------------------------
+
+<group>
+sw_default=c2  // sustain by default
+sw_lokey=c2
+sw_hikey=e2
+sw_last=d#2
+sw_label=D#2 Accent
+
+delay=0.20 // allow time for accent before sustain takes over
+ampeg_attack=0.25 // slightly longer attack (PB)
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+ampeg_release=0.550
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-c4-PB.wav
+tune=-10
+
+lokey=d4 // reduce the range (PB)
+hikey=d4 // reduce the range (PB)
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-d#4-PB.wav
+tune=-7
+
+lokey=d#4 // reduce the range (PB)
+hikey=e4
+pitch_keycenter=d#4
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-f#4-PB.wav
+lokey=f4
+hikey=g4
+pitch_keycenter=f#4
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-a4-PB.wav
+tune=-10
+
+lokey=g#4
+hikey=a#4
+pitch_keycenter=a4
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-c5-PB.wav
+tune=-7
+
+lokey=b4
+hikey=c#5
+pitch_keycenter=c5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-d#5-PB.wav
+tune=-3
+
+lokey=d5
+hikey=e5
+pitch_keycenter=d#5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-f#5-PB.wav
+tune=-10
+
+lokey=f5
+hikey=g5
+pitch_keycenter=f#5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-a5-PB.wav
+tune=-7
+
+lokey=g#5
+hikey=a#5
+pitch_keycenter=a5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-c6-PB.wav
+tune=-10
+
+lokey=b5
+hikey=c#6
+pitch_keycenter=c6
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-d#6-PB.wav
+tune=-5
+
+lokey=d6
+hikey=e6
+pitch_keycenter=d#6
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-f#6-PB.wav
+tune=-7
+
+lokey=f6
+hikey=c7 // extend the range (PB)
+pitch_keycenter=f#6
+
+
+
+
+//==============================================================
+// Solo Piccolo - Staccato
+//
+//   Woodwinds - Piccolo Solo.sfz from Sonatina Symphonic Orchestra - http://sso.mattiaswestlund.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+// ------------------------------
+//  Sonatina Symphonic Orchestra
+// ------------------------------
+//           Piccolo
+// ------------------------------
+
+<group>
+sw_default=c2  // sustain by default
+sw_lokey=c2
+sw_hikey=e2
+sw_last=e2
+sw_label=E2 Staccato
+
+// manufacture staccato from sustain (PB)
+offset=2492
+
+ampeg_attack=0.04
+ampeg_sustain=0.0
+ampeg_hold=0.06
+ampeg_decay=0.7
+ampeg_release=0.7
+volume=0.8
+
+
+
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-c4-PB.wav
+
+volume=6
+tune=-10
+
+lokey=d4 // reduce the range (PB)
+hikey=d4 // reduce the range (PB)
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-d#4-PB.wav
+
+volume=2
+tune=-7
+
+lokey=d#4 // reduce the range (PB)
+hikey=e4
+pitch_keycenter=d#4
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-f#4-PB.wav
+volume=6.5
+
+lokey=f4
+hikey=g4
+pitch_keycenter=f#4
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-a4-PB.wav
+
+volume=3
+tune=-10
+
+lokey=g#4
+hikey=a#4
+pitch_keycenter=a4
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-c5-PB.wav
+
+volume=3
+tune=-7
+
+lokey=b4
+hikey=c#5
+pitch_keycenter=c5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-d#5-PB.wav
+
+volume=7
+tune=-3
+
+lokey=d5
+hikey=e5
+pitch_keycenter=d#5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-f#5-PB.wav
+
+volume=6
+tune=-10
+
+lokey=f5
+hikey=g5
+pitch_keycenter=f#5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-a5-PB.wav
+
+volume=1
+tune=-7
+
+lokey=g#5
+hikey=a#5
+pitch_keycenter=a5
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-c6-PB.wav
+
+volume=2
+tune=-10
+
+lokey=b5
+hikey=c#6
+pitch_keycenter=c6
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-d#6-PB.wav
+
+volume=2
+tune=-5
+
+lokey=d6
+hikey=e6
+pitch_keycenter=d#6
+
+<region>
+sample=..\libs\SSO\Samples\Piccolo\piccolo-f#6-PB.wav
+
+volume=-1
+tune=-7
+
+lokey=f6
+hikey=c7 // extend the range (PB)
+pitch_keycenter=f#6
+
+
+

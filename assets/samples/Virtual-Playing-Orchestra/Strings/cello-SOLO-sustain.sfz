@@ -1,0 +1,88 @@
+//==============================================================
+// Solo Cello - Sustain
+//
+//   cello_vib.sfz from No Budget Orchestra - https://nobudgetorchestra.net
+//
+//   modified by Paul Battersby - http://virtualplaying.com
+//
+//==============================================================
+
+<group> group=1 ampeg_attack=0.3 ampeg_release=0.5
+width=0
+// randomize like a real player(PB)
+offset_random=200
+pitch_random=5
+amp_random=1
+
+
+
+<region> lokey=c2 hikey=d#2 pitch_keycenter=d2 sample=..\libs\NoBudgetOrch\SoloCello\Vibrato\2_D.wav
+volume=1 tune=-25
+
+<region> lokey=e2 hikey=f#2 pitch_keycenter=f#2 sample=..\libs\NoBudgetOrch\SoloCello\Vibrato\2_Gb.wav
+volume=1.5
+
+<region> lokey=g2 hikey=a#2 pitch_keycenter=a2 sample=..\libs\NoBudgetOrch\SoloCello\Vibrato\2_A.wav
+volume=1.5
+
+<region> lokey=b2 hikey=d#3 pitch_keycenter=c#3 sample=..\libs\NoBudgetOrch\SoloCello\Vibrato\3_Db.wav
+volume=0.5
+
+<region> lokey=e3 hikey=f#3 pitch_keycenter=f3 sample=..\libs\NoBudgetOrch\SoloCello\Vibrato\3_F.wav
+volume=1
+
+<region> lokey=g3 hikey=a#3 pitch_keycenter=a3 sample=..\libs\NoBudgetOrch\SoloCello\Vibrato\3_A-PB.wav
+volume=2
+
+<region> lokey=b3 hikey=c#4 pitch_keycenter=c4 sample=..\libs\NoBudgetOrch\SoloCello\Vibrato\4_C.wav
+volume=2.5
+
+<region> lokey=d4 hikey=e4 pitch_keycenter=d#4 sample=..\libs\NoBudgetOrch\SoloCello\Vibrato\4_Eb.wav
+volume=0
+
+<region> lokey=f4 hikey=g#4 pitch_keycenter=g4 sample=..\libs\NoBudgetOrch\SoloCello\Vibrato\4_G.wav
+volume=2
+
+<region> lokey=a4 hikey=a5 pitch_keycenter=a#4 sample=..\libs\NoBudgetOrch\SoloCello\Vibrato\4_Bb.wav
+volume=1
+
+
+
+
+<group> group=3 off_by=1 off_mode=normal trigger=release loop_mode=one_shot ampeg_attack=0.2
+width=0
+
+
+// removed samples to match V1.sfz (PB)
+// use release samples with less reverb
+<region> lokey=c2 hikey=d#2 pitch_keycenter=d2 sample=..\libs\NoBudgetOrch\SoloCello\Release-PB\2_D_r-PB.wav
+volume=1 tune=-35
+
+<region> lokey=e2 hikey=f#2 pitch_keycenter=f#2 sample=..\libs\NoBudgetOrch\SoloCello\Release-PB\2_Gb_r-PB.wav
+volume=0.5 tune=-20
+
+<region> lokey=g2 hikey=a#2 pitch_keycenter=a#2 sample=..\libs\NoBudgetOrch\SoloCello\Release-PB\2_Bb_r-PB.wav
+volume=1.5
+
+<region> lokey=b2 hikey=d#3 pitch_keycenter=b2 sample=..\libs\NoBudgetOrch\SoloCello\Release-PB\2_B_r-PB.wav
+volume=1.5
+
+<region> lokey=e3 hikey=f#3 pitch_keycenter=e3 sample=..\libs\NoBudgetOrch\SoloCello\Release-PB\3_E_r-PB.wav
+volume=1
+
+<region> lokey=g3 hikey=a#3 pitch_keycenter=g#3 sample=..\libs\NoBudgetOrch\SoloCello\Release-PB\3_Ab_r-PB.wav
+volume=2
+
+<region> lokey=b3 hikey=c#4 pitch_keycenter=b3 sample=..\libs\NoBudgetOrch\SoloCello\Release-PB\3_B_r-PB.wav
+volume=2
+
+<region> lokey=d4 hikey=e4 pitch_keycenter=d4 sample=..\libs\NoBudgetOrch\SoloCello\Release-PB\4_D_r-PB.wav
+volume=1
+
+<region> lokey=f4 hikey=g#4 pitch_keycenter=f4 sample=..\libs\NoBudgetOrch\SoloCello\Release-PB\4_F_r-PB.wav
+volume=0
+
+<region> lokey=a4 hikey=e5 pitch_keycenter=g4 sample=..\libs\NoBudgetOrch\SoloCello\Release-PB\4_G_r-PB.wav
+volume=2
+
+
