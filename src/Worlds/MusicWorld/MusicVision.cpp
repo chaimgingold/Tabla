@@ -500,19 +500,7 @@ ScoreVec MusicVision::mergeOldAndNewScores(
 	}
 
 	// 2nd pass eliminate intersecting zombie (anything flagged)
-	auto filterVector = []( ScoreVec& vec, function<bool(const Score&)> iffunc ) -> ScoreVec
-	{
-		ScoreVec out;
-		
-		for( auto &s : vec )
-		{
-			if ( iffunc(s) ) out.push_back(s);
-		}
-		
-		return out;
-	};
-	
-	output = filterVector( output, []( const Score& score ) -> bool
+	output = output.getFiltered( []( const Score& score ) -> bool
 	{
 		return !score.mDoesZombieTouchOtherZombies;
 	});
@@ -532,6 +520,13 @@ ScoreVec MusicVision::getScores(
 
 	// merge with old
 	newScores = mergeOldAndNewScores(oldScores,newScores,contours,stamps.areTokensEnabled());
+	
+	// eliminate ones that intersect tokens
+	// (i think that we pick up tokens as scores before the token matcher has a chance to finish running,
+	// and by the time it does, they become zombies.)
+	newScores = newScores.getFiltered( [tokens]( const Score& s ){
+		return !tokens.doesOverlapToken(s.getPolyLine());
+	});
 	
 	// return
 	return newScores;

@@ -131,6 +131,7 @@ public:
 	const Score* pick( vec2 ) const;
 	Score* pick( vec2 );
 	Score* getScoreForInstrument( InstrumentRef ); // returns 1st with instrument
+	ScoreVec getFiltered( std::function<bool(const Score&)> ) const;
 };
 
 #endif /* Score_h */

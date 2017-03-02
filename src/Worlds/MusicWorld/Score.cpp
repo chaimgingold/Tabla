@@ -755,3 +755,15 @@ Score* ScoreVec::getScoreForInstrument( InstrumentRef instr )
 	}
 	return 0;
 }
+
+ScoreVec ScoreVec::getFiltered( std::function<bool(const Score&)> test ) const
+{
+	ScoreVec out;
+	
+	for( auto &s : *this )
+	{
+		if ( test(s) ) out.push_back(s);
+	}
+	
+	return out;
+}
