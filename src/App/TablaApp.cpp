@@ -706,11 +706,9 @@ void TablaApp::fileDrop( FileDropEvent event )
 		}
 		else
 		{
-			SurfaceRef surf;
-			
 			try
 			{
-				surf = make_shared<Surface>( loadImage(file) );
+				auto surf = make_shared<Surface>( loadImage(file) );
 				// let's verify it's cool, and get the size, but for consistency
 				// we'll let lightLinkDidChange load the image.
 			
@@ -721,8 +719,7 @@ void TablaApp::fileDrop( FileDropEvent event )
 					mLightLink.setCaptureProfile(cp.mName);
 					didChange = true;
 				}
-			} catch (...)
-			{
+			} catch (...) {
 				cout << "Failed to load test image '" << file.string() << "'" << endl; 
 			}
 		}

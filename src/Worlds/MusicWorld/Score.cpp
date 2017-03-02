@@ -712,23 +712,6 @@ float Score::getMetaParamSliderValue( InstrumentRef i ) const
 	else return valueit->second;
 }
 
-int Score::noteForY( const Instrument* instrument, int y ) const
-{	
-	bool isPokie = instrument->mSynthType == Instrument::SynthType::RobitPokie;
-	if (instrument && instrument->mMapNotesToChannels && !isPokie) {
-		// Reinterpret octave shift as note shift when using NotesToChannelsMode (and don't go negative)
-		int noteShift = mOctave + mNumOctaves/2;
-		return y + noteShift;
-	}
-
-	int numNotes = mScale.size();
-	int extraOctaveShift = y / numNotes * 12;
-	int degree = y % numNotes;
-	int note = mScale[degree];
-
-	return note + extraOctaveShift + mRootNote + mOctave*12;
-}
-
 const Score* ScoreVec::pick( vec2 p ) const
 {
 	for( auto &s : *this )

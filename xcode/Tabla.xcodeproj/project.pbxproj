@@ -730,9 +730,7 @@
 		01B97315FEAEA392516A2CEA /* Blocks */ = {
 			isa = PBXGroup;
 			children = (
-				C21A1E281E66095000399277 /* OpenSFZNode.cpp */,
-				C21A1E291E66095000399277 /* OpenSFZNode.h */,
-				C26E07C51E64B180007C6D5B /* OpenSFZ.xcodeproj */,
+				26E525231E68A1C90057E87F /* OpenSFZ */,
 				26F323471DF74D5700EC9559 /* Gamepad */,
 				C2C874771DDBB2D40067E07D /* Cinder-Serial */,
 				C2EC763E1DA7157E00DB39C8 /* PureData */,
@@ -1063,6 +1061,16 @@
 				26E30EAD1E0C567100AA9F97 /* QuadTestWorld.h */,
 			);
 			path = QuadTestWorld;
+			sourceTree = "<group>";
+		};
+		26E525231E68A1C90057E87F /* OpenSFZ */ = {
+			isa = PBXGroup;
+			children = (
+				C21A1E281E66095000399277 /* OpenSFZNode.cpp */,
+				C21A1E291E66095000399277 /* OpenSFZNode.h */,
+				C26E07C51E64B180007C6D5B /* OpenSFZ.xcodeproj */,
+			);
+			name = OpenSFZ;
 			sourceTree = "<group>";
 		};
 		26F0E2E51E28AF390083FB22 /* Calibration */ = {

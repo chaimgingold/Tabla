@@ -107,7 +107,6 @@ public:
 	float		getMetaParamSliderValue( InstrumentRef ) const;
 	
 	Scale mScale;
-	int noteForY( const Instrument*, int y ) const;
 
 	// icon animation
 	tIconAnimState getIconPoseFromScore( InstrumentRef, float playheadFrac ) const;
