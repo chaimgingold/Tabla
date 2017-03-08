@@ -150,6 +150,8 @@ void ProjectorCalibrateWorld::draw( DrawType drawType )
 			bool ok = mGenerator->getProjPixel( mCaptures, cameraPix.x, cameraPix.y, projPix );
 
 			//
+			vec2 cameraPixInWorldSpace = transformPoint( mInputStage->mImageToWorld, cameraPix );
+
 			{
 				// undo the world transform, so we draw in camera space
 				gl::ScopedViewMatrix matscope;
@@ -166,13 +168,22 @@ void ProjectorCalibrateWorld::draw( DrawType drawType )
 			if (ok)
 			{
 				// undo the world transform, so we draw in projector image space
-				gl::ScopedViewMatrix matscope;
-				gl::multViewMatrix(mProjectorStage->mImageToWorld);
-				gl::color(0,1,1);
-				gl::drawSolidCircle( fromOcv(projPix), 1.f, 3); // 1px radius 
+				{
+					gl::ScopedViewMatrix matscope;
+					gl::multViewMatrix(mProjectorStage->mImageToWorld);
+					gl::color(0,1,1);
+					gl::drawSolidCircle( fromOcv(projPix), 1.f, 3); // 1px radius 
+				}
+
+				// draw a line between the two
+				// (doesn't seem to land where we expect UNLESS projector and camera pixel quads are
+				// fully to the extend of the camera/projector bounds)
+				vec2 projPixInWorldSpace = transformPoint( mProjectorStage->mImageToWorld, fromOcv(projPix) );
+				gl::color(1,1,1,.5);
+				gl::drawLine( cameraPixInWorldSpace, projPixInWorldSpace );
 
 				// or manual transform
-//				vec2 projPixInWorldSpace = transformPoint( mInputStage->mImageToWorld, fromOcv(projPix) );
+//				vec2 projPixInWorldSpace = transformPoint( mProjectorStage->mImageToWorld, fromOcv(projPix) );
 //				gl::color(0,1,1);
 //				gl::drawSolidCircle(projPixInWorldSpace, .5f, 3); // .5cm radius
 			}
