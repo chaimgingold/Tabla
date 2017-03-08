@@ -147,7 +147,7 @@ void ProjectorCalibrateWorld::draw( DrawType drawType )
 			
 			cv::Point projPix;
 			
-			bool ok = mGenerator->getProjPixel( mPatterns, cameraPix.x, cameraPix.y, projPix );
+			bool ok = mGenerator->getProjPixel( mCaptures, cameraPix.x, cameraPix.y, projPix );
 
 			//
 			{
