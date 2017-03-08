@@ -59,44 +59,33 @@ void Vision::visionThreadRunLoop()
 	while (run)
 	{
 		// get surface
-		SurfaceRef surface;
+		SurfaceRef     input;
 		Vision::Output output;
 		
 		// get input, process it
-		chrono::nanoseconds filesleep = 0s;
-		
 		{
 			unique_lock<std::mutex> lock(mInputLock);
-			surface = mInput.getFrame();
+			input = mInput.getFrame();
 			run = !mIsDestructing;
 			
 			// vision it
-			if (surface) {
-				output = processFrame(surface);
+			if (input) {
+				output = processFrame(input);
 			}
-			
-			if (mInput.isFile()) filesleep = mDebugFrameSleep;
-			// TODO: rationalize this by looking at how much time has elapsed...
 		}
 		
 		// output
-		if (surface)
-		{
+		if (input) {
 			mVisionOutputChannel.put(output,2);
-			
-			if (filesleep > 0s) this_thread::sleep_for(filesleep);
 		}
-		else this_thread::sleep_for(2.5ms); // @30fps 1frame = 33ms, @60fps 1frame = 16ms
-		// 5ms seems too high to reach 30fps, but 2.5 seems to work
-		// ideally we could block inside of mInput.getFrame()
-		
-		// TODO: rationalize all this waiting by keeping track of desired FPS--for file and camera--
-		// and running execution time to predict how long to wait.
+		else mInput.waitForFrame(mDebugFrameSleep);
 	};
 }
 
 Vision::~Vision()
 {
+	mInput.stop();
+	
 	// tell everyone to wrap up
 	{
 		std::unique_lock<std::mutex> lock(mInputLock);

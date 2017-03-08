@@ -43,6 +43,21 @@ void VisionInput::stopFile()
 	mDebugFrameFileWatch.clear();
 }
 
+void VisionInput::waitForFrame( chrono::nanoseconds debugFrameSleep )
+{
+	if ( isCamera() )
+	{
+//		mCapture->waitForNewFrame();
+		this_thread::sleep_for(2.5ms); // @30fps 1frame = 33ms, @60fps 1frame = 16ms
+			// 5ms seems too high to reach 30fps, but 2.5 seems to work
+			// ideally we could block inside of mInput.getFrame()
+			
+			// TODO: rationalize all this waiting by keeping track of desired FPS--for file and camera--
+			// and running execution time to predict how long to wait. debugFrameSleep		
+	}
+	else this_thread::sleep_for(debugFrameSleep);
+}
+
 SurfaceRef VisionInput::getFrame()
 {
 	SurfaceRef frame;
