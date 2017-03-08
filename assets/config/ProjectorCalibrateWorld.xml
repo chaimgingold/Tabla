@@ -2,11 +2,6 @@
 
 	<Verbose>1</Verbose>
 
-	<RectSize>100</RectSize>
-	<HoleSize>20</HoleSize>
-	<HoleOffset>10</HoleOffset>
-	<WaitFrameCount>20</WaitFrameCount>
-	
 	<!-- cm -->
 	<Vision>
 		<Contours>

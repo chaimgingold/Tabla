@@ -245,14 +245,6 @@ Vision::Output Vision::processFrame( SurfaceRef surface )
 		mCaptureProfile.mCaptureCoords,
 		mCaptureProfile.mCaptureWorldSpaceCoords ) );
 
-//	cv::cvtColor(input_color, input, CV_BGR2GRAY);
-	// net performance of doing color -> grey conversion on CPU vs GPU is negligible.
-	// the main impact is downloading the data, which we may be able to do faster if we rewrite toOcv.
-	// but at least we now have color frame in the pipeline at the same total performance cost, so that's a net gain.
-	// might want to make it a setting, whether to do it on CPU or GPU.
-
-//	pipeline.then( "input", input );
-	
 	// undistort
 	cv::UMat undistorted;
 	
