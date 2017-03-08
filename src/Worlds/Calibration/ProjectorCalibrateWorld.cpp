@@ -26,6 +26,7 @@ ProjectorCalibrateWorld::ProjectorCalibrateWorld()
 void ProjectorCalibrateWorld::setParams( XmlTree xml )
 {
 	getXml(xml, "Verbose", mVerbose );
+	getXml(xml, "ShowPatternLength", mShowPatternLength );
 }
 
 void ProjectorCalibrateWorld::update()
@@ -57,6 +58,7 @@ void ProjectorCalibrateWorld::maybeMakePatterns( ivec2 size )
 		mGenerator = GrayCodePattern::create(mProjectorSize.x,mProjectorSize.y);
 		
 		mCaptures.clear();
+		mCaptureTextures.clear();
 		mShowPatternWhen = app::getElapsedSeconds();
 		mShowPattern = 0;
 		
@@ -69,6 +71,15 @@ void ProjectorCalibrateWorld::maybeMakePatterns( ivec2 size )
 		}
 		
 		if (mVerbose) cout << "Starting with pattern " << mShowPattern+1 << " / " << mPatterns.size() << endl;
+
+		// patterns => textures (as optimization)
+		mPatternTextures.resize( mPatterns.size() );
+		for ( int i=0; i<mPatterns.size(); ++i )
+		{
+			const bool topDown=true; // ??? (!) I think that Mat from OCV should be true; false only when dealing with UMat (?)
+
+			mPatternTextures[i] = matToTexture(mPatterns[i],topDown);
+		}
 	}
 }
 
@@ -101,6 +112,7 @@ void ProjectorCalibrateWorld::capture( Pipeline::StageRef input )
 		cv::Mat gray;
 		cv::cvtColor(input->mImageCV, gray, CV_BGR2GRAY);
 		mCaptures.push_back(gray);
+		mCaptureTextures.push_back( matToTexture(gray,true) );
 	}
 }
 
@@ -110,18 +122,18 @@ void ProjectorCalibrateWorld::updateVision( const Vision::Output& visionOut, Pip
 	
 	// log stuff for debug...
 	pipeline.beginOrthoGroup();
-	for ( int i=0; i<mPatterns.size(); ++i )
+	for ( int i=0; i<mPatternTextures.size(); ++i )
 	{
-		pipeline.then( string("pattern[")+i+"]", mPatterns[i] );
+		pipeline.then( string("pattern[")+toString(i)+"]", mPatternTextures[i] );
 		if (mProjectorStage) pipeline.back()->setImageToWorldTransform( mProjectorStage->mImageToWorld );
 		pipeline.back()->mStyle.mScale = .5f;
 	}
 	pipeline.endOrthoGroup();
 
 	pipeline.beginOrthoGroup();
-	for ( int i=0; i<mCaptures.size(); ++i )
+	for ( int i=0; i<mCaptureTextures.size(); ++i )
 	{
-		pipeline.then( string("capture[")+i+"]", mCaptures[i] );
+		pipeline.then( string("capture[")+toString(i)+"]", mCaptureTextures[i] );
 		if (mInputStage) pipeline.back()->setImageToWorldTransform( mInputStage->mImageToWorld );
 		pipeline.back()->mStyle.mScale = .5f;
 	}
@@ -132,25 +144,27 @@ void ProjectorCalibrateWorld::draw( DrawType drawType )
 {
 	if (!mProjectorStage) return;
 	
-	// TODO: optimize by caching converted GL texture for this pattern; but who cares.
-	
-	if ( mShowPattern >= 0 && mShowPattern < mPatterns.size() )
+	if ( drawType != GameWorld::DrawType::UIPipelineThumb )
 	{
-		bool topDown=true; // ??? (!) I think that Mat from OCV should be true; false only when dealing with UMat (?)
-		auto texture = matToTexture(mPatterns[mShowPattern],topDown);
-
-		if (texture)
+		if ( mShowPattern >= 0 && mShowPattern < mPatternTextures.size() )
 		{
-			// undo the world transform, so we draw in projector image space
-			gl::ScopedViewMatrix matscope;
-			gl::multViewMatrix(mProjectorStage->mImageToWorld);
-
-			gl::color(1,1,1);
-			gl::draw(texture);
+			if (mPatternTextures[mShowPattern])
+			{
+				// undo the world transform, so we draw in projector image space
+				gl::ScopedViewMatrix matscope;
+				gl::multViewMatrix(mProjectorStage->mImageToWorld);
+				
+				if ( drawType == GameWorld::DrawType::Projector ) gl::color(1,1,1);
+				else gl::color(1,1,1,.25f);
+				
+				gl::draw(mPatternTextures[mShowPattern]);
+			}
 		}
 	}
 	
-	if ( mCaptures.size() == mPatterns.size() && mPatterns.size()>0 )
+	if ( mCaptures.size() == mPatterns.size()
+	  && mPatterns.size()>0
+	  && drawType != GameWorld::DrawType::UIPipelineThumb )
 	{
 		// done!
 		Rand rnd(1); // fixed random seed

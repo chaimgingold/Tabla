@@ -198,12 +198,12 @@
 			
 			<Name>2Volca Sample (Drums)</Name>
 			<IconFileName>drumkit.png</IconFileName>
-<!--			<SynthType>MIDI</SynthType>-->
-			<SynthType>Sampler</SynthType>
+			<SynthType>MIDI</SynthType>
+<!--			<SynthType>Sampler</SynthType>-->
 
 			<Port>1</Port>
 			<Channel>0</Channel>
-<!--			<MapNotesToChannels>10</MapNotesToChannels>-->
+			<MapNotesToChannels>10</MapNotesToChannels>
 		</Instrument>
 
 

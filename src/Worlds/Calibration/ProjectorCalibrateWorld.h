@@ -36,6 +36,10 @@ private:
 	cv::Ptr<cv::structured_light::GrayCodePattern> mGenerator;
 	vector<cv::Mat> mPatterns;
 	vector<cv::Mat> mCaptures;
+
+	// optimization
+	vector<gl::TextureRef> mPatternTextures;
+	vector<gl::TextureRef> mCaptureTextures;
 	
 	// 
 	void maybeMakePatterns( ivec2 size );

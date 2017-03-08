@@ -1,18 +1,19 @@
 <ProjectorCalibrateWorld>
 
 	<Verbose>1</Verbose>
-
+	<ShowPatternLength>.25</ShowPatternLength>
+	
 	<!-- cm -->
 	<Vision>
 		<Contours>
-			<ThresholdStyle>Fixed</ThresholdStyle>
+<!--			<ThresholdStyle>Fixed</ThresholdStyle>-->
 <!--			<ThresholdStyle>OtsuClipped</ThresholdStyle>-->
-			<FixedThreshold>220</FixedThreshold>
+<!--			<FixedThreshold>220</FixedThreshold>-->
 			<ContourGetExactMinCircle>	0	</ContourGetExactMinCircle>
-			<ContourMinRadius>			0	</ContourMinRadius>
-			<ContourMinArea>			1	</ContourMinArea>
-			<ContourDPEpsilon>			2	</ContourDPEpsilon>
-			<ContourMinWidth>			0	</ContourMinWidth>
+			<ContourMinRadius>			10	</ContourMinRadius>
+			<ContourMinArea>			10	</ContourMinArea>
+			<ContourDPEpsilon>			10	</ContourDPEpsilon>
+			<ContourMinWidth>			10	</ContourMinWidth>
 		</Contours>
 	</Vision>
 
