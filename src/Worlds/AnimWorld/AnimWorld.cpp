@@ -152,6 +152,8 @@ FrameVec AnimWorld::getFrames(
 	FrameVec frames;
 	if ( !world || world->mImageCV.empty() ) return frames;
 
+	pipeline.beginOrthoGroup();
+	
 	for ( auto c : contours )
 	{
 		if ( c.mIsHole || c.mTreeDepth>0 ) { //|| c.mPolyLine.size()!=4 ) {
@@ -172,8 +174,7 @@ FrameVec AnimWorld::getFrames(
 		
 		pipeline.then(string("Frame ") + frame.mIndex, frame.mImageCV);
 		pipeline.back()->setImageToWorldTransform( frame.mFrameImageToWorld );
-		pipeline.back()->mLayoutHintScale = .5f;
-		pipeline.back()->mLayoutHintOrtho = true;
+		pipeline.back()->mStyle.mScale = .5f;
 		
 		// blank edges
 		if (mBlankEdgePixels>0)
@@ -181,8 +182,7 @@ FrameVec AnimWorld::getFrames(
 			cv::rectangle(frame.mImageCV, cv::Point(0,0), cv::Point(frame.mImageCV.cols-1,frame.mImageCV.rows-1), 255, mBlankEdgePixels );
 			
 			pipeline.then(string("Frame edge blanked") + frame.mIndex, frame.mImageCV);
-			pipeline.back()->mLayoutHintScale = .5f;
-			pipeline.back()->mLayoutHintOrtho = true;
+			pipeline.back()->mStyle.mScale = .5f;
 		}
 		
 		// equalize?
@@ -191,13 +191,15 @@ FrameVec AnimWorld::getFrames(
 			UMat frameContourImageEqualized;
 			equalizeHist(frame.mImageCV, frameContourImageEqualized);
 			pipeline.then(string("Frame equalized ") + frame.mIndex, frameContourImageEqualized);
-			pipeline.back()->mLayoutHintScale = .5f;
-			pipeline.back()->mLayoutHintOrtho = true;
+			pipeline.back()->mStyle.mScale = .5f;
 			frame.mImageCV = frameContourImageEqualized; // use that!
 		}
 
 		frames.push_back(frame);
 	}
+	
+	pipeline.endOrthoGroup();
+	
 	return frames;
 }
 

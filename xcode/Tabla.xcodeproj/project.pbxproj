@@ -302,11 +302,11 @@
 		26CCA3141E089EE3005F7C24 /* PipelineStageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PipelineStageView.h; sourceTree = "<group>"; };
 		26CCA3151E089EE3005F7C24 /* View.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = View.cpp; sourceTree = "<group>"; };
 		26CCA3161E089EE3005F7C24 /* View.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = View.h; sourceTree = "<group>"; };
-		26CCA3171E089EE3005F7C24 /* TablaWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TablaWindow.cpp; sourceTree = "<group>"; };
+		26CCA3171E089EE3005F7C24 /* TablaWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = TablaWindow.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		26CCA3181E089EE3005F7C24 /* TablaWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TablaWindow.h; sourceTree = "<group>"; };
 		26CCA31F1E089F98005F7C24 /* GameLibraryView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GameLibraryView.cpp; sourceTree = "<group>"; };
 		26CCA3201E089F98005F7C24 /* GameLibraryView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameLibraryView.h; sourceTree = "<group>"; };
-		26CCA3241E08AD8E005F7C24 /* AnimWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AnimWorld.cpp; sourceTree = "<group>"; };
+		26CCA3241E08AD8E005F7C24 /* AnimWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = AnimWorld.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		26CCA3251E08AD8E005F7C24 /* AnimWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnimWorld.h; sourceTree = "<group>"; };
 		26D17D8D1E453CF7006B3FB1 /* CaptureProfileMenuView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CaptureProfileMenuView.cpp; sourceTree = "<group>"; };
 		26D17D8E1E453CF7006B3FB1 /* CaptureProfileMenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CaptureProfileMenuView.h; sourceTree = "<group>"; };
@@ -324,7 +324,7 @@
 		26EAE9891E57D6A5001475EA /* VisionInput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VisionInput.h; sourceTree = "<group>"; };
 		26F0E2E61E28AF390083FB22 /* CameraCalibrateWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = CameraCalibrateWorld.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		26F0E2E71E28AF390083FB22 /* CameraCalibrateWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CameraCalibrateWorld.h; sourceTree = "<group>"; };
-		26F0E2E81E28AF390083FB22 /* ProjectorCalibrateWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ProjectorCalibrateWorld.cpp; sourceTree = "<group>"; };
+		26F0E2E81E28AF390083FB22 /* ProjectorCalibrateWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = ProjectorCalibrateWorld.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		26F0E2E91E28AF390083FB22 /* ProjectorCalibrateWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProjectorCalibrateWorld.h; sourceTree = "<group>"; };
 		26F323491DF74D8900EC9559 /* Gamepad_macosx.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Gamepad_macosx.c; path = "../blocks/Cinder-Gamepad/src/Gamepad_macosx.c"; sourceTree = "<group>"; };
 		26F3234A1DF74D8900EC9559 /* Gamepad_private.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Gamepad_private.c; path = "../blocks/Cinder-Gamepad/src/Gamepad_private.c"; sourceTree = "<group>"; };

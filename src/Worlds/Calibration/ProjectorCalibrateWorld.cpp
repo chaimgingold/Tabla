@@ -107,6 +107,25 @@ void ProjectorCalibrateWorld::capture( Pipeline::StageRef input )
 void ProjectorCalibrateWorld::updateVision( const Vision::Output& visionOut, Pipeline& pipeline )
 {
 	mInputStage = visionOut.mPipeline.getStage("undistorted");
+	
+	// log stuff for debug...
+	pipeline.beginOrthoGroup();
+	for ( int i=0; i<mPatterns.size(); ++i )
+	{
+		pipeline.then( string("pattern[")+i+"]", mPatterns[i] );
+		if (mProjectorStage) pipeline.back()->setImageToWorldTransform( mProjectorStage->mImageToWorld );
+		pipeline.back()->mStyle.mScale = .5f;
+	}
+	pipeline.endOrthoGroup();
+
+	pipeline.beginOrthoGroup();
+	for ( int i=0; i<mCaptures.size(); ++i )
+	{
+		pipeline.then( string("capture[")+i+"]", mCaptures[i] );
+		if (mInputStage) pipeline.back()->setImageToWorldTransform( mInputStage->mImageToWorld );
+		pipeline.back()->mStyle.mScale = .5f;
+	}
+	pipeline.endOrthoGroup();
 }
 
 void ProjectorCalibrateWorld::draw( DrawType drawType )
