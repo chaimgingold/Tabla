@@ -693,31 +693,39 @@ void TablaApp::mouseDrag( MouseEvent event )
 void TablaApp::fileDrop( FileDropEvent event )
 {
 	auto files = event.getFiles();
-	if (files.size() > 0) {
-		auto file = files.front();
-		
+	bool didChange = false;
+	
+	for ( auto file : files ) // If >1, then last setCaptureProfile will stick 
+	{
 		LightLink::CaptureProfile* profile = mLightLink.getCaptureProfileForFile(file.string());
 		
 		if ( profile )
 		{
 			mLightLink.setCaptureProfile(profile->mName);
-			lightLinkDidChange();
+			didChange = true;
 		}
 		else
 		{
-			auto surf = make_shared<Surface>( loadImage(file) );
-			// let's verify it's cool, and get the size, but for consistency
-			// we'll let lightLinkDidChange load the image.
-			
-			if (surf)
+			try
 			{
-				LightLink::CaptureProfile cp(file,surf->getSize(),getParams().mDefaultPixelsPerWorldUnit); 
-				mLightLink.mCaptureProfiles[cp.mName] = cp;
-				mLightLink.setCaptureProfile(cp.mName);
-				lightLinkDidChange();
+				auto surf = make_shared<Surface>( loadImage(file) );
+				// let's verify it's cool, and get the size, but for consistency
+				// we'll let lightLinkDidChange load the image.
+			
+				if (surf)
+				{
+					LightLink::CaptureProfile cp(file,surf->getSize(),getParams().mDefaultPixelsPerWorldUnit); 
+					mLightLink.mCaptureProfiles[cp.mName] = cp;
+					mLightLink.setCaptureProfile(cp.mName);
+					didChange = true;
+				}
+			} catch (...) {
+				cout << "Failed to load test image '" << file.string() << "'" << endl; 
 			}
 		}
 	}
+
+	if (didChange) lightLinkDidChange();
 }
 
 void TablaApp::updateDebugFrameCaptureDevicesWithPxPerWorldUnit( float x )
@@ -770,6 +778,7 @@ void TablaApp::update()
 	updateVision();
 	
 	if (mGameWorld) {
+		mGameWorld->setMousePosInWorld(getMousePosInWorld()); // TODO: figure out if it actually contains it...
 		mGameWorld->update();
 		mGameWorld->prepareToDraw();
 	}
@@ -817,7 +826,10 @@ void TablaApp::resize()
 
 vec2 TablaApp::getMousePosInWorld() const
 {
-	TablaWindow *win = getWindow()->getUserData<TablaWindow>();
+	auto win = mUIWindow; //getWindow()->getUserData<TablaWindow>();
+	
+	if (!win) win = mProjectorWin;
+	// TODO: detect which window mouse is in, and return that one
 	
 	const vec2 mouseInWindow   = win->getMousePosInWindow();
 	const vec2 mouseInWorld    = win->getMainImageView()->windowToWorld(mouseInWindow);

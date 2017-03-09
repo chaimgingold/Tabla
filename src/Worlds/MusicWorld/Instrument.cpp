@@ -197,6 +197,21 @@ int Instrument::channelForNote(int note) const {
 	return mChannel;
 }
 
+int Instrument::noteForY( const Score& score, int y ) const
+{
+	if (mMapNotesToChannels && mSynthType != Instrument::SynthType::RobitPokie ) {
+		// Reinterpret octave shift as note shift when using NotesToChannelsMode (and don't go negative)
+		int noteShift = score.mOctave + score.mNumOctaves/2;
+		return y + noteShift;
+	}
+
+	int numNotes = score.mScale.size();
+	int extraOctaveShift = y / numNotes * 12;
+	int degree = y % numNotes;
+	int note = score.mScale[degree];
+
+	return note + extraOctaveShift + score.mRootNote + score.mOctave*12;
+}
 
 bool Instrument::isNoteInFlight( int note ) const
 {
@@ -303,7 +318,7 @@ void Instrument::sendSerialByte(const uint8_t charByte, const uint8_t hiLowByte)
 
 void Instrument::tickArpeggiator()
 {
-	if (arpeggiator.Mode != ArpMode::None) {
+	if (mArpeggiator.Mode != ArpMode::None) {
 
 	}
 }
@@ -397,10 +412,7 @@ void Instrument::updateSynthesis( const vector<Score const*>& scores )
 		
 		default:
 		break;
-	}
-	
-	// retire notes (do this outside of scores to handle instruments that no longer have scores)	
-	updateNoteOffs();
+	}	
 }
 
 void Instrument::updateSynthesisWithVision( const Scores& scores )
@@ -430,7 +442,7 @@ void Instrument::updateNoteSynthesis( const Scores& scores )
 
 			for ( int y=0; y<score->mNotes.size(); ++y )
 			{
-				int note = score->noteForY(this,y);
+				int note = noteForY(*score,y);
 				
 				const ScoreNote* isOn = score->mNotes.isNoteOn(x,y);
 				
@@ -465,6 +477,9 @@ void Instrument::updateNoteSynthesis( const Scores& scores )
 	}
 
 	for( auto n : turnOff ) doNoteOff(n); 
+
+	// retire notes (do this outside of scores to handle instruments that no longer have scores)	
+	updateNoteOffs();
 	
 	// arpeggiate
 	tickArpeggiator();

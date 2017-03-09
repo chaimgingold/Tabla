@@ -107,6 +107,8 @@ Pipeline::StageRef Pipeline::then( string name )
 		// (by default it will be the identity matrix, i think)
 	}
 	
+	s->mStyle.mOrthoGroup = mOrthoGroup;
+	
 	mStages.push_back(s);
 
 	return mStages.back();
@@ -197,4 +199,16 @@ mat4 Pipeline::getCoordSpaceTransform( string from, string to ) const
 	}
 	
 	return t;
+}
+
+void Pipeline::beginOrthoGroup()
+{
+	assert(mOrthoGroup==-1);
+	mOrthoGroup = mNextOrthoGroup++;
+}
+
+void Pipeline::endOrthoGroup()
+{
+	assert(mOrthoGroup>=0);
+	mOrthoGroup=-1;
 }

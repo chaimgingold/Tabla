@@ -119,12 +119,12 @@ void MusicWorld::setParams( XmlTree xml )
 		}
 		else if (instr.mSynthType == Instrument::SynthType::Additive)
 		{
-			instr.mAdditiveSynthID = nextAdditiveSynthID;
+			instr.setAdditiveSynthID( nextAdditiveSynthID );
 			nextAdditiveSynthID++;
 		}
-		instr.mPd = mPd;
-		instr.mOpenSFZ = mOpenSFZ;
-		instr.mPokieRobitPulseTime = mPokieRobitPulseTime;
+		instr.setPd( mPd );
+		instr.setOpenSFZ( mOpenSFZ );
+		instr.setPokieRobitPulseTime( mPokieRobitPulseTime );
 		
 		// store it
 		mInstruments[instr.mName] = std::make_shared<Instrument>(instr);

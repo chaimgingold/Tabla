@@ -13,3 +13,4 @@
 - http://www.musicainformatica.org/topics/upic.php
 - http://daily.redbullmusicacademy.com/2012/08/history-soviet-synth-ans
 - Mann et al. (2009) "The Tactus: a Tangible, Rhythmic Grid Interface Using Found-Objects."
+- Room Alive. http://projection-mapping.org/roomalive-uist/. Jones et al. (2014) RoomAlive: Magical Experiences Enabled by Scalable, Adaptive Projector-Camera Units. UIST.

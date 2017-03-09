@@ -16,13 +16,12 @@
 		- Set thresholding constant in <Vision> to something between 0..255 (-1 or undefined means OTSU).
 		- Put blank paper on the table
 	- Notes on proper solution: If we did thresholding before clipping to the table we'd probably get better results. Or analyze full histogram and manually set the threshold. (Avoid doing 2x clipping transforms of the full image and also the thresholded image--that would be lame.)
-- [ ] Clear pipeline between game worlds...
-	- To repro: play pinball, then switch to anim; cube maps still around...??? Or just the active seletion?
 
 ## Minor Bugs
 - [x] Use Scissor Rect on Pop up menu. Refactor code in PipelineStageView::draw() to be reusable.
 	- [ ] Button is clipped, but not menu.
 - [ ] Rationalize timing for debug file input frame skip. Ideally Vision thread sleep is dynamic, based upon desired FPS--for file and camera--and average/last execution time.
+- [ ] Crash on quit from CoreAudio system
 
 # Game Worlds
 
@@ -45,12 +44,14 @@
 
 ## Music
 - Robit serial connection isn't robust; sometimes need to restart computer to get it to see the arduino.
-- Music instrument character wrangling can be hard. Proper solution probably involves tokens for instruments placed next to scores.
+- [ ] Music instrument character wrangling can be hard. Proper solution probably involves tokens for instruments placed next to scores.
+- [ ] More reliable/robust token detection
 - [ ] Low register of additive synth is hard to hear.
 - [ ] More robust character tracking
 	- [ ] Have a timeout before they jump home
 	- [ ] Do NxM scoring like in Pinball UI tracking
 - [ ] Conflicts between stamp search poly and a score should send stamp home directly (instead of timing out, as it does now).
+- [ ] Overlapping dancing icons need fixed.
 
 ## Pinball
 - [ ] Audio sometimes blows up then drops out; culprit seems to be updateBallSynthesis(). To reproduce, load "pinball 1.png" test image in Pinball and spawn multiple balls (with b key).

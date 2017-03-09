@@ -95,8 +95,6 @@ public:
 	bool isNoteType() const;
 	bool isAvailable() const; // e.g. couldn't connect to device
 	
-	Arpeggiator arpeggiator;
-
 	// colors!
 	ColorA mPlayheadColor;
 	ColorA mScoreColor, mScoreColorDownLines;
@@ -123,11 +121,32 @@ public:
 	MetaParam mMetaParam; // only matters if mSynthType==Meta
 	MetaParamInfo mMetaParamInfo;
 
+public:
+	typedef vector<Score const*> Scores;
+	void updateSynthesis( const Scores& );
+	void updateSynthesisWithVision( const Scores& );
+	void killAllNotes();
+
+	void setPokieRobitPulseTime( float t ) { mPokieRobitPulseTime=t; }
+
+	void setAdditiveSynthID( int id ) { mAdditiveSynthID=id; }
+	void setPd( PureDataNodeRef pd ) { mPd=pd; }
+	void setOpenSFZ( OpenSFZNodeRef sfz ) { mOpenSFZ=sfz; }
+	
+private:
 	int mAdditiveSynthID;
 	PureDataNodeRef mPd;
 	OpenSFZNodeRef mOpenSFZ;
-	// Arpeggiator
-	void tickArpeggiator();
+	
+	// serial (arduino/robits)
+	SerialDeviceRef mSerialDevice;
+
+	void setupSerial();
+	void sendSerialByte(const uint8_t charByte, const uint8_t hiLowByte);
+
+	float mPokieRobitPulseTime=0.01;
+
+	uint8_t serialCharForNote(int note);
 
 	// midi
 	RtMidiOutRef mMidiOut;
@@ -140,33 +159,23 @@ public:
 	int  mMapNotesToChannels=0; // for KORG Volca Sample (0 == off, N>0 == map notes across N channels)
 	int  channelForNote( int note ) const;
 
-	bool isNoteInFlight( int note ) const;
-	void updateNoteOffs();
-	void doNoteOn( int note, float duration ); // start time is now
-	void doNoteOff( int note );
-
-	typedef vector<Score const*> Scores;
-	void updateSynthesis( const Scores& );
-	void updateSynthesisWithVision( const Scores& );
-	void killAllNotes();
-
-	map<NoteNum, tOnNoteInfo> mOnNotes;
-
-
-	// serial (arduino/robits)
-	SerialDeviceRef mSerialDevice;
-
-	void setupSerial();
-	void sendSerialByte(const uint8_t charByte, const uint8_t hiLowByte);
-
-	float mPokieRobitPulseTime=0.01;
-
-	uint8_t serialCharForNote(int note);
-
-private:
+	// update synthesis -- by synth type
 	void updateNoteSynthesis( const Scores& );
 	void updateAdditiveSynthesis( const Scores& ) const;
 	void updateAdditiveSynthesisWithVision( const Scores& ) const;	
+
+	// note managment
+	map<NoteNum, tOnNoteInfo> mOnNotes;
+	Arpeggiator mArpeggiator;
+
+	void doNoteOn( int note, float duration ); // start time is now
+	void doNoteOff( int note );
+
+	int  noteForY( const Score&, int y ) const;
+	bool isNoteInFlight( int note ) const;
+	void updateNoteOffs();
+
+	void tickArpeggiator();
 	
 	// midi convenience methods
 	void sendMidi( RtMidiOutRef, uchar, uchar, uchar );

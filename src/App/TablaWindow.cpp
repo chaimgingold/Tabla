@@ -362,7 +362,7 @@ void TablaWindow::updatePipelineViews()
 	float top = pos.y;
 	
 	ViewRef lastView;
-	bool wasLastViewOrtho=false;
+	Pipeline::StageRef lastStage;
 	
 	auto oldPipelineViews = mPipelineViews;
 	mPipelineViews.clear();
@@ -403,17 +403,19 @@ void TablaWindow::updatePipelineViews()
 		if (view)
 		{
 			// compute size
-			vec2 size = s->mImageSize * ((mApp.getParams().mConfigWindowPipelineWidth * s->mLayoutHintScale) / s->mImageSize.x) ;
+			vec2 size = s->mImageSize * ((mApp.getParams().mConfigWindowPipelineWidth * s->mStyle.mScale) / s->mImageSize.x) ;
 			
 			// too tall?
-			const float kMaxHeight = mApp.getParams().mConfigWindowPipelineWidth*2.f*s->mLayoutHintScale;
+			const float kMaxHeight = mApp.getParams().mConfigWindowPipelineWidth*2.f*s->mStyle.mScale;
 			
 			if (size.y > kMaxHeight) size = s->mImageSize * (kMaxHeight / s->mImageSize.y) ;
 			
 			vec2 usepos = pos;
 			
 			// do ortho layout
-			if (lastView && wasLastViewOrtho && s->mLayoutHintOrtho)
+			if (lastView && lastStage
+			 && lastStage->mStyle.mOrthoGroup >= 0
+			 && lastStage->mStyle.mOrthoGroup == s->mStyle.mOrthoGroup )
 			{
 				usepos = lastView->getFrame().getUpperRight() + vec2(1,0) * mApp.getParams().mConfigWindowPipelineGutter;
 			}
@@ -421,12 +423,12 @@ void TablaWindow::updatePipelineViews()
 			view->setFrame ( Rectf(usepos, usepos + size) );
 			view->setBounds( Rectf(vec2(0,0), s->mImageSize) );
 			
-			lastView = view;
-			wasLastViewOrtho = s->mLayoutHintOrtho;
 			top = max( top, view->getFrame().y2 );
 			
 			// next pos
 			pos = vec2( left, top + mApp.getParams().mConfigWindowPipelineGutter ) ;
+			lastView = view;
+			lastStage = s;
 		}
 	}
 }

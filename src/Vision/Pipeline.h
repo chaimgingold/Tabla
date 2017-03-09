@@ -52,9 +52,13 @@ public:
 		mutable gl::TextureRef	mImageGL;
 		gl::TextureCubeMapRef	mImageCubeMapGL;
 		
-		// layout hints (TODO: move to a separate struct so we can have a parallel CSS kind of thing)
-		float			mLayoutHintScale=1.f;
-		bool			mLayoutHintOrtho=false; // keep laying out in the same row?
+		// layout hints
+		struct Style
+		{
+			float	mScale=1.f;
+			int		mOrthoGroup=-1;
+		};
+		Style mStyle;
 	};
 
 	typedef std::shared_ptr<Stage> StageRef;
@@ -85,8 +89,16 @@ public:
 		// from/to is name of coordinate space.
 		// these can refer to a Stage::mName, or "world"
 	
+	void beginOrthoGroup();
+	void endOrthoGroup();
+	
 private:
 
+	// sticky style state
+	int mOrthoGroup=-1;
+	int mNextOrthoGroup=0;
+	
+	//
 	bool mCaptureAllStageImages = false; // if false, then only extract query stage. true: capture all.
 	set<string> mCaptureStages;
 	

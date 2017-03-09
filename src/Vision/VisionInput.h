@@ -21,7 +21,9 @@ public:
 	void stop();
 	
 	SurfaceRef getFrame();
+	void waitForFrame( chrono::nanoseconds debugFrameSleep );
 	bool isFile() const { return mDebugFrame.get(); }
+	bool isCamera() const { return mCapture.get(); }
 	
 private:
 	void stopCamera();

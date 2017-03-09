@@ -9,6 +9,7 @@
 #ifndef ProjectorCalibrateWorld_hpp
 #define ProjectorCalibrateWorld_hpp
 
+#include "graycodepattern.hpp" // opencv
 #include "GameWorld.h"
 
 class ProjectorCalibrateWorld : public GameWorld
@@ -24,43 +25,44 @@ public:
 	void updateVision( const Vision::Output&, Pipeline& ) override;
 	
 	void draw( DrawType ) override;
-
+	
 private:
 
 	// params
-	
 	bool	mVerbose=true;
-	float	mRectSize = 100.f;
-	float	mHoleSize = 20.f;
-	float	mHoleOffset = 20.f;
-	int     mWaitFrameCount = 60;
-	// all these are in pixels!
-	
-	//
-	void setRegistrationRects();
-	Rectf mProjectRect;
-	Rectf mProjectRectHole;
-	
-	struct Found
-	{
-		int mRect=-1;
-		int mHole=-1;
-		int mCorner=-1;
-		
-		bool isComplete() const {
-			return mRect!=-1 && mHole !=-1 && mCorner != -1;
-		}
-	};
-	Found findRegistrationRect( const ContourVec& ) const;
-	void updateCalibration ( Rectf in, PolyLine2 out, int outStart );
-	// we assume input starts at x1,y1
 
-	Pipeline::StageRef mProjectorStage;
-	ContourVec mContours;
-	ContourVec mFoundContours;
+	// patterns + captures
+	ci::ivec2 mProjectorSize;
+	cv::Ptr<cv::structured_light::GrayCodePattern> mGenerator;
+	vector<cv::Mat> mPatterns;
+	vector<cv::Mat> mCaptures;
+
+	// optimization
+	vector<gl::TextureRef> mPatternTextures;
+	vector<gl::TextureRef> mCaptureTextures;
 	
-	Found mFound;
-	int mWaitFrames=0;
+	// 
+	void maybeMakePatterns( ivec2 size );
+	void showNextPattern();
+	void captureCameraImage( Pipeline::StageRef );
+	
+	bool isPatternCaptureDone() const;
+	bool cameraToProjector( vec2 cam, vec2& proj ) const;
+	void maybeUpdateProjCoords();
+	
+	void maybeDrawMouse() const;
+	void maybeDrawPattern( DrawType ) const;
+	void maybeDrawVizPoints() const;
+	void maybeDrawContours() const;
+	
+	int mShowPattern=-1;
+	float mShowPatternWhen=0.f;
+	float mShowPatternLength=.1f;
+	float mShowPatternFirstDelay=1.f;
+	
+	Pipeline::StageRef mProjectorStage, mInputStage;
+	ContourVec mContours;
+	vec2 mLastCaptureCoords[4];
 };
 
 #endif /* ProjectorCalibrateWorld_hpp */

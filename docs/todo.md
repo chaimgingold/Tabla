@@ -65,8 +65,12 @@
 # Game Worlds
 
 ## Projector Calibration
-- [ ] Use cv::cornerSubPix for more accuracy
-- [ ] Account for situations where centered rect is off the table... (use mouse to position it?)
+- Improve usability
+	- [ ] Show when it is done more clearly
+	- [ ] Continuous feedback when new projector calibration is being set (flash something?)--
+		Show us which points are working/aren't working...
+	- [ ] Don't recompute/save changes until new poly set.
+	- [ ] Sample a bunch of points nearby and smooth out?
 
 ## Music
 - [ ] Easily configurable for different instrument setups.
@@ -79,7 +83,8 @@
 	- [x] Tokens set score instruments
 	- [ ] Draw visual feedback on token (filled pulsing rainbow or something).
 	- [ ] Tokens show their radius of influence
-	- [ ] Multiple instruments per score!
+	- [x] Multiple instruments per score!
+	- [ ] Lower latency for token hiding/showing (implement a per-frame approximation technique)
 - [x] Improve Stamp <-> Score tracking
 	- [x] Remember last seen polygon, to help with interframe tracking. Draw it. To help player see it, and me improve the algorithm. Maybe poly<>poly intersection, or poly<>poly distance, or poly<>poly similar min bounding rect location, size, orientation (look at difference across all three axes--size being most important, location and orientation can change more). So pull up ocv rotated bounding box function so we can easily get to it.
 	- [x] Timeout for stamp going home... show the timer counting down. (visually, somehow). Maybe fill last seen polygon white, with black stamp on it and flicker stamp (like a damaged video game character).  

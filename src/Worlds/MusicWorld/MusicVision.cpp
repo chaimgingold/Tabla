@@ -500,19 +500,7 @@ ScoreVec MusicVision::mergeOldAndNewScores(
 	}
 
 	// 2nd pass eliminate intersecting zombie (anything flagged)
-	auto filterVector = []( ScoreVec& vec, function<bool(const Score&)> iffunc ) -> ScoreVec
-	{
-		ScoreVec out;
-		
-		for( auto &s : vec )
-		{
-			if ( iffunc(s) ) out.push_back(s);
-		}
-		
-		return out;
-	};
-	
-	output = filterVector( output, []( const Score& score ) -> bool
+	output = output.getFiltered( []( const Score& score ) -> bool
 	{
 		return !score.mDoesZombieTouchOtherZombies;
 	});
@@ -532,6 +520,13 @@ ScoreVec MusicVision::getScores(
 
 	// merge with old
 	newScores = mergeOldAndNewScores(oldScores,newScores,contours,stamps.areTokensEnabled());
+	
+	// eliminate ones that intersect tokens
+	// (i think that we pick up tokens as scores before the token matcher has a chance to finish running,
+	// and by the time it does, they become zombies.)
+	newScores = newScores.getFiltered( [tokens]( const Score& s ){
+		return !tokens.doesOverlapToken(s.getPolyLine());
+	});
 	
 	// return
 	return newScores;
@@ -577,8 +572,7 @@ static void doTemporalMatBlend(
 
 			cv::addWeighted( newimg, newWeight, oldimg, oldWeight, 0.f, newimg );
 			pipeline.then( scoreName + " temporally blended", newimg);
-			pipeline.back()->mLayoutHintScale = .5f;
-			pipeline.back()->mLayoutHintOrtho = true;
+			pipeline.back()->mStyle.mScale = .5f;
 		}
 	}
 	else if (verbose) cout << "no-blend " << diff << endl;
@@ -609,8 +603,7 @@ void MusicVision::quantizeImage( Pipeline& pipeline,
 		pipeline.back()->mImageToWorld
 			* glm::scale(vec3(outsize.x / (float)quantizeNumCols, outsize.y / (float)quantizeNumRows, 1))
 		);
-	pipeline.back()->mLayoutHintScale = .5f;
-	pipeline.back()->mLayoutHintOrtho = true;
+	pipeline.back()->mStyle.mScale = .5f;
 
 	// blend
 	if ( doTemporalBlend )
@@ -630,8 +623,7 @@ void MusicVision::quantizeImage( Pipeline& pipeline,
 	}
 
 	pipeline.then( scoreName + " thresholded", thresholded);
-	pipeline.back()->mLayoutHintScale = .5f;
-	pipeline.back()->mLayoutHintOrtho = true;
+	pipeline.back()->mStyle.mScale = .5f;
 
 
 	// output
@@ -678,6 +670,8 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& score
 	if ( !world || world->mImageCV.empty() ) return;
 
 	// for each score...
+	pipeline.beginOrthoGroup();
+	
 	for( int si=0; si<scores.size(); ++si )
 	{
 		Score& s = scores[si];
@@ -704,8 +698,7 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& score
 		
 		pipeline.then( scoreName, s.mImage);
 		pipeline.back()->setImageToWorldTransform( scoreImageToWorld );
-		pipeline.back()->mLayoutHintScale = .5f;
-		pipeline.back()->mLayoutHintOrtho = true;
+		pipeline.back()->mStyle.mScale = .5f;
 
 		// blank out edges
 		if (mBlankEdgePixels>0)
@@ -713,8 +706,7 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& score
 			cv::rectangle(s.mImage, cv::Point(0,0), cv::Point(s.mImage.cols-1,s.mImage.rows-1), 255, mBlankEdgePixels );
 
 			pipeline.then( scoreName + " blanked edges", s.mImage );
-			pipeline.back()->mLayoutHintScale = .5f;
-			pipeline.back()->mLayoutHintOrtho = true;
+			pipeline.back()->mStyle.mScale = .5f;
 		}
 
 		// post-processing
@@ -754,6 +746,8 @@ void MusicVision::updateScoresWithImageData( Pipeline& pipeline, ScoreVec& score
 			s.mTexture = matToTexture(s.mImage,false);
 		}
 	} // for
+	
+	pipeline.endOrthoGroup();
 }
 
 bool MusicVision::isScoreValueHigh( uchar value ) const

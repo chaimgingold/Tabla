@@ -181,7 +181,7 @@ private:
 
 	void setupWindows();
 	void drawContours( bool filled, bool mousePickInfo, bool worldBounds ) const;
-	vec2 getMousePosInWorld() const; // uses current window (ci::getWindow())
+	vec2 getMousePosInWorld() const;
 	string getCommandLineArgValue( string param ) const; // e.g. Tabla -param returnValue
 	
 	float mAVClacker=0.f;

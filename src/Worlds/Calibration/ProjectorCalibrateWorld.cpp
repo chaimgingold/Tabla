@@ -10,15 +10,10 @@
 #include "TablaApp.h" // for config
 #include "ocv.h"
 #include "xml.h"
+#include "cinder/Rand.h"
 
-/*
-Q: Do we need >1 registration hole to fully register this thing? My sense is no, as the projector and camera must always be aligned in terms of clockwise vertex ordering. The only way this could happen is if the projector was somehow under the table and the camera was on top...
-
-Q: TODO: We will probably want to use subpixel precision for the found corner vertices.
-
-Uh: We probably want to use a built-in OpenCV pattern, like the dots that Toby uses. That will be more robust. :P
-
-*/
+using namespace structured_light;
+using namespace ci;
 
 static GameCartridgeSimple sCartridge("ProjectorCalibrateWorld", [](){
 	return std::make_shared<ProjectorCalibrateWorld>();
@@ -31,225 +26,348 @@ ProjectorCalibrateWorld::ProjectorCalibrateWorld()
 void ProjectorCalibrateWorld::setParams( XmlTree xml )
 {
 	getXml(xml, "Verbose", mVerbose );
-	getXml(xml, "RectSize", mRectSize );
-	getXml(xml, "HoleSize", mHoleSize );
-	getXml(xml, "HoleOffset", mHoleOffset );
-	getXml(xml, "WaitFrameCount", mWaitFrameCount );
+	getXml(xml, "ShowPatternLength", mShowPatternLength );
+	getXml(xml, "ShowPatternFirstDelay", mShowPatternFirstDelay );
 }
 
 void ProjectorCalibrateWorld::update()
 {
+	// Make patterns?
+	mProjectorStage = TablaApp::get()->getPipeline().getStage("projector");
+		// this stage is not present during updateVision, so must catch in update.
+	
+	if (mProjectorStage) {
+		// if resolution changes then we start over, so keep testing
+		maybeMakePatterns( ivec2(mProjectorStage->mImageSize) );
+	}
+		
+	// Advance pattern?
+	if ( mShowPattern >=0
+	  && mPatterns.size() > 0
+	  && app::getElapsedSeconds() - mShowPatternWhen > mShowPatternLength )
+	{
+		captureCameraImage(mInputStage);
+		showNextPattern();
+	}
+	
+	//
+	maybeUpdateProjCoords();
+}
+
+void ProjectorCalibrateWorld::maybeUpdateProjCoords()
+{
+	if ( !isPatternCaptureDone() ) return;
+	
+	auto &lightLink = TablaApp::get()->getLightLink();
+	const LightLink::CaptureProfile& captProf = lightLink.getCaptureProfile();
+	LightLink::ProjectorProfile&	 projProf = lightLink.getProjectorProfile();
+	
+	// TODO: See if we are actually on the same profile we thought we were?
+	// (Minor timing bug issue; but not sure how to detect it, so skipping for now.)
+	
+	// changed since last time?
+	int same=0;
+	for( int i=0; i<4; ++i )
+	{
+		if ( mLastCaptureCoords[i] == captProf.mCaptureCoords[i] ) same++;
+	}
+	
+	if (same<4)
+	{
+		vec2 v[4];
+		int  okc=0;
+		
+		for( int i=0; i<4; ++i )
+		{
+			bool k = cameraToProjector( captProf.mCaptureCoords[i], v[i] );
+			
+			if (k) okc++;
+		}
+		
+		if (okc==4)
+		{
+			for( int i=0; i<4; ++i )
+			{
+				if (mVerbose) cout << "Updating projCoord[" << toString(i) << "] = " << v[i]
+					<< "(" << captProf.mCaptureCoords[i] << ")"
+					<< endl;
+				projProf.mProjectorCoords[i] = v[i];
+				mLastCaptureCoords[i] = captProf.mCaptureCoords[i];
+			}
+			
+			// save/update
+			TablaApp::get()->lightLinkDidChange();
+		}
+	} // same
+}
+
+void ProjectorCalibrateWorld::maybeMakePatterns( ivec2 size )
+{
+	if ( size != mProjectorSize )
+	{
+		mProjectorSize = mProjectorStage->mImageSize;
+		mGenerator = GrayCodePattern::create(mProjectorSize.x,mProjectorSize.y);
+		
+		mCaptures.clear();
+		mCaptureTextures.clear();
+		mShowPatternWhen = app::getElapsedSeconds() + mShowPatternFirstDelay;
+		mShowPattern = 0;
+		
+		mGenerator->generate(mPatterns);
+		if (mVerbose) {
+			cout << "Made " << mPatterns.size()
+				<< " patterns @ "
+				 << mProjectorSize.x << ", " << mProjectorSize.y
+				 << endl; 
+		}
+		
+		if (mVerbose) cout << "Starting with pattern " << mShowPattern+1 << " / " << mPatterns.size() << endl;
+
+		// patterns => textures (as optimization)
+		mPatternTextures.resize( mPatterns.size() );
+		for ( int i=0; i<mPatterns.size(); ++i )
+		{
+			const bool topDown=true; // ??? (!) I think that Mat from OCV should be true; false only when dealing with UMat (?)
+
+			mPatternTextures[i] = matToTexture(mPatterns[i],topDown);
+		}
+
+		// stomp last capture coords
+		for( int i=0; i<4; ++i )
+		{
+			mLastCaptureCoords[i] = vec2(0,0);
+		}
+	}
+}
+
+void ProjectorCalibrateWorld::showNextPattern()
+{
+	if (mShowPattern<0)
+	{
+		// already done
+	}
+	else if (mShowPattern >= mPatterns.size()-1)
+	{
+		// done
+		if (mVerbose) cout << "Done showing patterns." << endl;
+		mShowPattern = -1; // draw nothing
+	}
+	else
+	{
+		// advance
+		mShowPatternWhen = app::getElapsedSeconds();
+		mShowPattern = (mShowPattern+1) % mPatterns.size();
+		if (mVerbose) cout << "Advancing to pattern " << mShowPattern+1 << " / " << mPatterns.size() << endl; 
+	}
+}
+
+void ProjectorCalibrateWorld::captureCameraImage( Pipeline::StageRef input )
+{
+	if (!input) {
+		cout << "No input to capture!" << endl;
+	} else {
+		cv::Mat gray;
+		cv::cvtColor(input->mImageCV, gray, CV_BGR2GRAY);
+		mCaptures.push_back(gray);
+		mCaptureTextures.push_back( matToTexture(gray,true) );
+	}
 }
 
 void ProjectorCalibrateWorld::updateVision( const Vision::Output& visionOut, Pipeline& pipeline )
 {
-	mProjectorStage = pipeline.getStage("projector");
+	mInputStage = visionOut.mPipeline.getStage("undistorted");
+	
 	mContours = visionOut.mContours;
-
-	setRegistrationRects();
-	// need to do this 1x after we get mProjectorStage, but projector could change, in theory, so keep doing this...
 	
-	Found f = findRegistrationRect(mContours);
-	
-	if ( f.isComplete() && (!mFound.isComplete() || mWaitFrames-- < 0) )
+	// log stuff for debug...
+	pipeline.beginOrthoGroup();
+	for ( int i=0; i<mPatternTextures.size(); ++i )
 	{
-		mFound = f;
-		mFoundContours = mContours;
-
-		updateCalibration(
-			mProjectRect,
-			mContours[mFound.mRect].mPolyLine,
-			mFound.mHole);
-			
-		mWaitFrames = mWaitFrameCount;
+		pipeline.then( string("pattern[")+toString(i)+"]", mPatternTextures[i] );
+		if (mProjectorStage) pipeline.back()->setImageToWorldTransform( mProjectorStage->mImageToWorld );
+		pipeline.back()->mStyle.mScale = .5f;
 	}
-}
+	pipeline.endOrthoGroup();
 
-void ProjectorCalibrateWorld::updateCalibration ( Rectf in, PolyLine2 out, int outStart )
-{
-	vec2 world[4];
-	vec2 image[4] = { in.getUpperLeft(), in.getLowerLeft(), in.getLowerRight(), in.getUpperRight() };	
-//	vec2 image[4] = { in.getUpperLeft(), in.getUpperRight(), in.getLowerRight(), in.getLowerLeft() };
-
-	for( int i=0; i<4; ++i ) world[(i+2)%4] = out.getPoints()[ (i+outStart)%4 ];
-//	for( int i=0; i<4; ++i ) world[i] = out.getPoints()[ (i+outStart)%4 ];
-
-	// NOTE: To my logic, the proper code SHOULD be the two commented out lines;
-	// But in practice, it is the other two lines of code that actually works... Go figure.
-	// It could be that OpenCV clockwise orientation is reversed from how we think of our rectangles.
-	// That would explain image[] inversion. But the 180 degree off is also puzzling.  
-	
-	// we assume input starts at x1,y1
-	mat4 mat = getOcvPerspectiveTransform(world,image);
-
-	if (mVerbose) cout << mat << endl;
-	
-	if (1)
+	pipeline.beginOrthoGroup();
+	for ( int i=0; i<mCaptureTextures.size(); ++i )
 	{
-		LightLink::ProjectorProfile &prof = TablaApp::get()->getLightLink().getProjectorProfile();
-		
-		for( int i=0; i<4; ++i )
-		{
-			prof.mProjectorCoords[i] = vec2( mat * vec4( prof.mProjectorWorldSpaceCoords[i], 0, 1 ) );
-		}
-		
-		TablaApp::get()->lightLinkDidChange();
-	}	
-}
-
-void ProjectorCalibrateWorld::setRegistrationRects()
-{
-	// define where the registration marks will go
-	if (mProjectorStage)
-	{
-		vec2 c = mProjectorStage->mImageSize/2.f ;
-		vec2 size(mRectSize) ;
-		
-		mProjectRect = Rectf( c - size/2.f, c + size/2.f );
-		
-		vec2 c1 = mProjectRect.getUpperLeft() + vec2(mHoleOffset);
-		mProjectRectHole = Rectf( c1, c1 + vec2(mHoleSize) ); 
-		// starts at x1,y1 -- upper left
+		pipeline.then( string("capture[")+toString(i)+"]", mCaptureTextures[i] );
+		if (mInputStage) pipeline.back()->setImageToWorldTransform( mInputStage->mImageToWorld );
+		pipeline.back()->mStyle.mScale = .5f;
 	}
-}
-
-ProjectorCalibrateWorld::Found
-ProjectorCalibrateWorld::findRegistrationRect( const ContourVec& cs ) const
-{
-	int n=0;
-	Found found;
-	
-	for ( const auto &c : cs )
-	{
-		// find the rect
-		if ( c.mPolyLine.size() == 4 && c.mTreeDepth==0 )
-		{
-			n++;
-			if (n>1) return Found(); // failed; >1 match
-			
-			found.mRect = c.mIndex;
-			
-			// find the hole
-			if ( c.mChild.size()==1 && cs[c.mChild[0]].mPolyLine.size()==4 )
-			{
-				found.mHole = c.mChild[0];
-				
-				vec2 hole = cs[found.mHole].mPolyLine.calcCentroid();
-				
-				// assign hole to a vertex 
-				float bestd=MAXFLOAT;
-				for( int i=0; i<4; ++i )
-				{
-					float d = distance(hole,c.mPolyLine.getPoints()[i]);
-					if (d<bestd)
-					{
-						found.mCorner=i;
-						bestd=d;
-					}					
-				} // for 0..4
-			} // if
-		} // if
-	}
-	
-	return found;
+	pipeline.endOrthoGroup();
 }
 
 void ProjectorCalibrateWorld::draw( DrawType drawType )
 {
-	bool invertPattern = true;
-
 	if (!mProjectorStage) return;
 	
-	// draw registration marks in projector space
+	const bool isUIThumb = (drawType == GameWorld::DrawType::UIPipelineThumb);
+
+	if ( !isUIThumb ) {
+		maybeDrawPattern(drawType);
+//		maybeDrawVizPoints();
+		maybeDrawContours();
+	}
+
+	maybeDrawMouse();
+}
+
+void ProjectorCalibrateWorld::maybeDrawPattern( DrawType drawType ) const
+{
+	if ( mShowPattern >= 0 && mShowPattern < mPatternTextures.size() )
 	{
-		if (invertPattern)
+		if (mPatternTextures[mShowPattern])
 		{
-			gl::color(1,1,1, drawType==DrawType::Projector ? 1.f : .1f );
-			gl::drawSolid(getWorldBoundsPoly());
+			// undo the world transform, so we draw in projector image space
+			gl::ScopedViewMatrix matscope;
+			gl::multViewMatrix(mProjectorStage->mImageToWorld);
+			
+			if ( drawType == GameWorld::DrawType::Projector ) gl::color(1,1,1);
+			else gl::color(1,1,1,.25f); // ...<100% alpha if in config UI
+			
+			gl::draw(mPatternTextures[mShowPattern]);
+		}
+	}
+}
+
+void ProjectorCalibrateWorld::maybeDrawVizPoints() const
+{
+	if ( isPatternCaptureDone() )
+	{
+		// done!
+		Rand rnd(1); // fixed random seed
+		// TODO: optimize by re-rolling loop so that we aren't changing transforms for each point (like it matters)
+		
+		for ( int i=0; i<1000; ++i )
+		{
+			assert( mInputStage );
+			assert( mGenerator );
+			
+			ivec2 cameraPix = mInputStage->mImageSize * vec2( rnd.nextFloat(), rnd.nextFloat() );
+			cameraPix = min( cameraPix, ((ivec2)mInputStage->mImageSize) - ivec2(1,1) ); // clamp it in bounds! 
+			
+			vec2 projPix;
+			
+			bool ok = cameraToProjector( cameraPix, projPix );
+
+			//
+			vec2 cameraPixInWorldSpace = transformPoint( mInputStage->mImageToWorld, cameraPix );
+
+			{
+				// undo the world transform, so we draw in camera space
+				gl::ScopedViewMatrix matscope;
+				gl::multViewMatrix(mInputStage->mImageToWorld);
+				gl::color(1,.2,0);
+				gl::drawSolidCircle( cameraPix, 1.f, 3); // 1px radius
+				
+				// or manual transform
+//				vec2 cameraPixInWorldSpace = transformPoint( mInputStage->mImageToWorld, cameraPix );
+//				gl::color(1,.2,0);
+//				gl::drawSolidCircle(cameraPixInWorldSpace, .5f, 3); // .5cm radius
+			}
+			
+			if (ok)
+			{
+				// undo the world transform, so we draw in projector image space
+				{
+					gl::ScopedViewMatrix matscope;
+					gl::multViewMatrix(mProjectorStage->mImageToWorld);
+					gl::color(0,1,1);
+					gl::drawSolidCircle( projPix, 1.f, 3); // 1px radius
+				}
+
+				// draw a line between the two
+				// (doesn't seem to land where we expect UNLESS projector and camera pixel quads are
+				// fully to the extend of the camera/projector bounds)
+				if (0)
+				{
+					vec2 projPixInWorldSpace = transformPoint( mProjectorStage->mImageToWorld, projPix );
+					gl::color(1,1,1,.5);
+					gl::drawLine( cameraPixInWorldSpace, projPixInWorldSpace );
+				}
+
+				// or manual transform
+//				vec2 projPixInWorldSpace = transformPoint( mProjectorStage->mImageToWorld, fromOcv(projPix) );
+//				gl::color(0,1,1);
+//				gl::drawSolidCircle(projPixInWorldSpace, .5f, 3); // .5cm radius
+			}
+		}
+	}
+}
+
+void ProjectorCalibrateWorld::maybeDrawMouse() const
+{
+	const vec2 loc = getMousePosInWorld();
+	
+	gl::color(1,0,0);
+	gl::drawSolidCircle(loc,2.f);
+
+	if ( isPatternCaptureDone() )
+	{
+		vec2 camPt = transformPoint( mInputStage->mWorldToImage, loc );
+		{
+			// undo the world transform, so we draw in camera space
+			gl::ScopedViewMatrix matscope;
+			gl::multViewMatrix(mInputStage->mImageToWorld);
+			gl::color(1,1,0);
+			gl::drawStrokedCircle(camPt,8.f);
 		}
 		
 		// undo the world transform, so we draw in projector image space
-		gl::ScopedViewMatrix matscope;
-		gl::multViewMatrix(mProjectorStage->mImageToWorld);
-
-		if (0)
+		vec2 projPt;
+		if ( cameraToProjector(camPt,projPt) )
 		{
-			// debug help
-			const auto projprof = TablaApp::get()->getLightLink().getProjectorProfile();
-			const PolyLine2 projcoords( vector<vec2>(
-								projprof.mProjectorCoords,
-								projprof.mProjectorCoords+4) );
-			const vec2 projsize = mProjectorStage->mImageSize;
-
-			gl::color(1,1,1,.25);
-			gl::drawSolidRect( Rectf( vec2(0,0), projsize ) );
-
-			gl::color(.5,1,1,.25);
-			gl::drawSolid(projcoords);
-
-			gl::color(1,1,1);
-			gl::drawLine( vec2(0,0), projsize );
-			gl::drawLine( vec2(projsize.x,0), vec2(0,projsize.y) );
-		}
-		
-		// draw registration marks
-		if (invertPattern)
-		{
-			float alpha = drawType==DrawType::Projector ? 1.f : .25f;
+			gl::ScopedViewMatrix matscope;
+			gl::multViewMatrix(mProjectorStage->mImageToWorld);
 			
-			gl::color(0,0,0,alpha);
-			gl::drawSolidRect(mProjectRect);
-			gl::color(1,1,1,alpha);
-			gl::drawSolidRect(mProjectRectHole);
-		}
-		else
-		{
-			float alpha = drawType==DrawType::Projector ? 1.f : .25f;
-
-			gl::color(1,1,1,alpha);
-			gl::drawSolidRect(mProjectRect);
-			gl::color(0,0,0,alpha);
-			gl::drawSolidRect(mProjectRectHole);
-		}
-		
-		//
-		if ( drawType!=DrawType::Projector )
-		{
-			gl::color(0,1,0);
-			gl::drawSolidCircle(mProjectRect.getUpperLeft(), 5.f);
-		}
-	}
-	
-	// draw any contours, to show quality of registration
-	if (0)
-	{
-		gl::color(0,1,1, drawType==DrawType::Projector ? .25f : .5f );
-		
-		for ( const auto &c : mContours )
-		{
-			if ( c.mPolyLine.size() != 4 ) gl::draw(c.mPolyLine);
-		}
-	}
-	
-	// feedback on registration capture
-	if ( drawType!=DrawType::Projector )
-	{
-		if ( mFound.mRect!=-1 )
-		{
 			gl::color(0,1,1);
-			gl::draw(mFoundContours[mFound.mRect].mPolyLine);
-		}
-		if ( mFound.mHole!=-1 )
-		{
-			gl::color(1,0,0);
-			gl::draw(mFoundContours[mFound.mHole].mPolyLine);
-		}
-		if ( mFound.mCorner!=-1 )
-		{
-			gl::color(1,0,0);
-			gl::drawStrokedCircle(
-				mFoundContours[mFound.mRect].mPolyLine.getPoints()[mFound.mCorner],
-				1.f );
+			gl::drawSolidCircle(projPt,8.f);
 		}
 	}
+}
+
+void ProjectorCalibrateWorld::maybeDrawContours() const
+{
+	if ( isPatternCaptureDone() )
+	{
+		gl::color(0,1,1);
+		
+		for( const auto &c : mContours )
+		{
+			gl::draw(c.mPolyLine);
+		}
+	}
+}
+
+bool ProjectorCalibrateWorld::isPatternCaptureDone() const
+{
+	return mCaptures.size() == mPatterns.size()
+		&& mPatterns.size()>0;
+}
+
+bool ProjectorCalibrateWorld::cameraToProjector( vec2 p, vec2& o ) const
+{
+	if ( !isPatternCaptureDone() ) {
+		return false;
+	}
+	
+	assert( mGenerator );
+	assert( mInputStage );
+
+	cv::Point projPix;
+	
+	const ivec2 ip( roundf(p.x), roundf(p.y) );
+	const ivec2 camsize = mInputStage->mImageSize;
+
+//	p.x = camsize.x - p.x;
+	
+	if ( ip.x<0 || ip.y<0 || ip.x >= camsize.x || ip.y >= camsize.y ) return false;
+	
+	bool ok = mGenerator->getProjPixel( mCaptures, p.x, p.y, projPix );
+	
+	if (ok) o = fromOcv(projPix);
+	
+	return ok;
 }
