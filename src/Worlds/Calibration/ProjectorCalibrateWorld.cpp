@@ -27,6 +27,7 @@ void ProjectorCalibrateWorld::setParams( XmlTree xml )
 {
 	getXml(xml, "Verbose", mVerbose );
 	getXml(xml, "ShowPatternLength", mShowPatternLength );
+	getXml(xml, "ShowPatternFirstDelay", mShowPatternFirstDelay );
 }
 
 void ProjectorCalibrateWorld::update()
@@ -45,9 +46,59 @@ void ProjectorCalibrateWorld::update()
 	  && mPatterns.size() > 0
 	  && app::getElapsedSeconds() - mShowPatternWhen > mShowPatternLength )
 	{
-		capture(mInputStage);
-		nextPattern();
+		captureCameraImage(mInputStage);
+		showNextPattern();
 	}
+	
+	//
+	maybeUpdateProjCoords();
+}
+
+void ProjectorCalibrateWorld::maybeUpdateProjCoords()
+{
+	if ( !isPatternCaptureDone() ) return;
+	
+	auto &lightLink = TablaApp::get()->getLightLink();
+	const LightLink::CaptureProfile& captProf = lightLink.getCaptureProfile();
+	LightLink::ProjectorProfile&	 projProf = lightLink.getProjectorProfile();
+	
+	// TODO: See if we are actually on the same profile we thought we were?
+	// (Minor timing bug issue; but not sure how to detect it, so skipping for now.)
+	
+	// changed since last time?
+	int same=0;
+	for( int i=0; i<4; ++i )
+	{
+		if ( mLastCaptureCoords[i] == captProf.mCaptureCoords[i] ) same++;
+	}
+	
+	if (same<4)
+	{
+		vec2 v[4];
+		int  okc=0;
+		
+		for( int i=0; i<4; ++i )
+		{
+			bool k = cameraToProjector( captProf.mCaptureCoords[i], v[i] );
+			
+			if (k) okc++;
+		}
+		
+		if (okc==4)
+		{
+			for( int i=0; i<4; ++i )
+			{
+				if (mVerbose) cout << "Updating projCoord[" << toString(i) << "] = " << v[i]
+					<< "(" << captProf.mCaptureCoords[i] << ")"
+					<< endl;
+				projProf.mProjectorCoords[i] = v[i];
+				mLastCaptureCoords[i] = captProf.mCaptureCoords[i];
+			}
+			
+			// save/update
+			TablaApp::get()->lightLinkDidChange();
+		}
+	} // same
 }
 
 void ProjectorCalibrateWorld::maybeMakePatterns( ivec2 size )
@@ -59,7 +110,7 @@ void ProjectorCalibrateWorld::maybeMakePatterns( ivec2 size )
 		
 		mCaptures.clear();
 		mCaptureTextures.clear();
-		mShowPatternWhen = app::getElapsedSeconds();
+		mShowPatternWhen = app::getElapsedSeconds() + mShowPatternFirstDelay;
 		mShowPattern = 0;
 		
 		mGenerator->generate(mPatterns);
@@ -80,10 +131,16 @@ void ProjectorCalibrateWorld::maybeMakePatterns( ivec2 size )
 
 			mPatternTextures[i] = matToTexture(mPatterns[i],topDown);
 		}
+
+		// stomp last capture coords
+		for( int i=0; i<4; ++i )
+		{
+			mLastCaptureCoords[i] = vec2(0,0);
+		}
 	}
 }
 
-void ProjectorCalibrateWorld::nextPattern()
+void ProjectorCalibrateWorld::showNextPattern()
 {
 	if (mShowPattern<0)
 	{
@@ -104,7 +161,7 @@ void ProjectorCalibrateWorld::nextPattern()
 	}
 }
 
-void ProjectorCalibrateWorld::capture( Pipeline::StageRef input )
+void ProjectorCalibrateWorld::captureCameraImage( Pipeline::StageRef input )
 {
 	if (!input) {
 		cout << "No input to capture!" << endl;
@@ -119,6 +176,8 @@ void ProjectorCalibrateWorld::capture( Pipeline::StageRef input )
 void ProjectorCalibrateWorld::updateVision( const Vision::Output& visionOut, Pipeline& pipeline )
 {
 	mInputStage = visionOut.mPipeline.getStage("undistorted");
+	
+	mContours = visionOut.mContours;
 	
 	// log stuff for debug...
 	pipeline.beginOrthoGroup();
@@ -144,27 +203,38 @@ void ProjectorCalibrateWorld::draw( DrawType drawType )
 {
 	if (!mProjectorStage) return;
 	
-	if ( drawType != GameWorld::DrawType::UIPipelineThumb )
+	const bool isUIThumb = (drawType == GameWorld::DrawType::UIPipelineThumb);
+
+	if ( !isUIThumb ) {
+		maybeDrawPattern(drawType);
+//		maybeDrawVizPoints();
+		maybeDrawContours();
+	}
+
+	maybeDrawMouse();
+}
+
+void ProjectorCalibrateWorld::maybeDrawPattern( DrawType drawType ) const
+{
+	if ( mShowPattern >= 0 && mShowPattern < mPatternTextures.size() )
 	{
-		if ( mShowPattern >= 0 && mShowPattern < mPatternTextures.size() )
+		if (mPatternTextures[mShowPattern])
 		{
-			if (mPatternTextures[mShowPattern])
-			{
-				// undo the world transform, so we draw in projector image space
-				gl::ScopedViewMatrix matscope;
-				gl::multViewMatrix(mProjectorStage->mImageToWorld);
-				
-				if ( drawType == GameWorld::DrawType::Projector ) gl::color(1,1,1);
-				else gl::color(1,1,1,.25f);
-				
-				gl::draw(mPatternTextures[mShowPattern]);
-			}
+			// undo the world transform, so we draw in projector image space
+			gl::ScopedViewMatrix matscope;
+			gl::multViewMatrix(mProjectorStage->mImageToWorld);
+			
+			if ( drawType == GameWorld::DrawType::Projector ) gl::color(1,1,1);
+			else gl::color(1,1,1,.25f); // ...<100% alpha if in config UI
+			
+			gl::draw(mPatternTextures[mShowPattern]);
 		}
 	}
-	
-	if ( mCaptures.size() == mPatterns.size()
-	  && mPatterns.size()>0
-	  && drawType != GameWorld::DrawType::UIPipelineThumb )
+}
+
+void ProjectorCalibrateWorld::maybeDrawVizPoints() const
+{
+	if ( isPatternCaptureDone() )
 	{
 		// done!
 		Rand rnd(1); // fixed random seed
@@ -178,9 +248,9 @@ void ProjectorCalibrateWorld::draw( DrawType drawType )
 			ivec2 cameraPix = mInputStage->mImageSize * vec2( rnd.nextFloat(), rnd.nextFloat() );
 			cameraPix = min( cameraPix, ((ivec2)mInputStage->mImageSize) - ivec2(1,1) ); // clamp it in bounds! 
 			
-			cv::Point projPix;
+			vec2 projPix;
 			
-			bool ok = mGenerator->getProjPixel( mCaptures, cameraPix.x, cameraPix.y, projPix );
+			bool ok = cameraToProjector( cameraPix, projPix );
 
 			//
 			vec2 cameraPixInWorldSpace = transformPoint( mInputStage->mImageToWorld, cameraPix );
@@ -205,15 +275,18 @@ void ProjectorCalibrateWorld::draw( DrawType drawType )
 					gl::ScopedViewMatrix matscope;
 					gl::multViewMatrix(mProjectorStage->mImageToWorld);
 					gl::color(0,1,1);
-					gl::drawSolidCircle( fromOcv(projPix), 1.f, 3); // 1px radius 
+					gl::drawSolidCircle( projPix, 1.f, 3); // 1px radius
 				}
 
 				// draw a line between the two
 				// (doesn't seem to land where we expect UNLESS projector and camera pixel quads are
 				// fully to the extend of the camera/projector bounds)
-				vec2 projPixInWorldSpace = transformPoint( mProjectorStage->mImageToWorld, fromOcv(projPix) );
-				gl::color(1,1,1,.5);
-				gl::drawLine( cameraPixInWorldSpace, projPixInWorldSpace );
+				if (0)
+				{
+					vec2 projPixInWorldSpace = transformPoint( mProjectorStage->mImageToWorld, projPix );
+					gl::color(1,1,1,.5);
+					gl::drawLine( cameraPixInWorldSpace, projPixInWorldSpace );
+				}
 
 				// or manual transform
 //				vec2 projPixInWorldSpace = transformPoint( mProjectorStage->mImageToWorld, fromOcv(projPix) );
@@ -222,4 +295,79 @@ void ProjectorCalibrateWorld::draw( DrawType drawType )
 			}
 		}
 	}
+}
+
+void ProjectorCalibrateWorld::maybeDrawMouse() const
+{
+	const vec2 loc = getMousePosInWorld();
+	
+	gl::color(1,0,0);
+	gl::drawSolidCircle(loc,2.f);
+
+	if ( isPatternCaptureDone() )
+	{
+		vec2 camPt = transformPoint( mInputStage->mWorldToImage, loc );
+		{
+			// undo the world transform, so we draw in camera space
+			gl::ScopedViewMatrix matscope;
+			gl::multViewMatrix(mInputStage->mImageToWorld);
+			gl::color(1,1,0);
+			gl::drawStrokedCircle(camPt,8.f);
+		}
+		
+		// undo the world transform, so we draw in projector image space
+		vec2 projPt;
+		if ( cameraToProjector(camPt,projPt) )
+		{
+			gl::ScopedViewMatrix matscope;
+			gl::multViewMatrix(mProjectorStage->mImageToWorld);
+			
+			gl::color(0,1,1);
+			gl::drawSolidCircle(projPt,8.f);
+		}
+	}
+}
+
+void ProjectorCalibrateWorld::maybeDrawContours() const
+{
+	if ( isPatternCaptureDone() )
+	{
+		gl::color(0,1,1);
+		
+		for( const auto &c : mContours )
+		{
+			gl::draw(c.mPolyLine);
+		}
+	}
+}
+
+bool ProjectorCalibrateWorld::isPatternCaptureDone() const
+{
+	return mCaptures.size() == mPatterns.size()
+		&& mPatterns.size()>0;
+}
+
+bool ProjectorCalibrateWorld::cameraToProjector( vec2 p, vec2& o ) const
+{
+	if ( !isPatternCaptureDone() ) {
+		return false;
+	}
+	
+	assert( mGenerator );
+	assert( mInputStage );
+
+	cv::Point projPix;
+	
+	const ivec2 ip( roundf(p.x), roundf(p.y) );
+	const ivec2 camsize = mInputStage->mImageSize;
+
+//	p.x = camsize.x - p.x;
+	
+	if ( ip.x<0 || ip.y<0 || ip.x >= camsize.x || ip.y >= camsize.y ) return false;
+	
+	bool ok = mGenerator->getProjPixel( mCaptures, p.x, p.y, projPix );
+	
+	if (ok) o = fromOcv(projPix);
+	
+	return ok;
 }

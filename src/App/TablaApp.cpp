@@ -778,6 +778,7 @@ void TablaApp::update()
 	updateVision();
 	
 	if (mGameWorld) {
+		mGameWorld->setMousePosInWorld(getMousePosInWorld()); // TODO: figure out if it actually contains it...
 		mGameWorld->update();
 		mGameWorld->prepareToDraw();
 	}
@@ -825,7 +826,10 @@ void TablaApp::resize()
 
 vec2 TablaApp::getMousePosInWorld() const
 {
-	TablaWindow *win = getWindow()->getUserData<TablaWindow>();
+	auto win = mUIWindow; //getWindow()->getUserData<TablaWindow>();
+	
+	if (!win) win = mProjectorWin;
+	// TODO: detect which window mouse is in, and return that one
 	
 	const vec2 mouseInWindow   = win->getMousePosInWindow();
 	const vec2 mouseInWorld    = win->getMainImageView()->windowToWorld(mouseInWindow);

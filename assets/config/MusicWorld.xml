@@ -251,7 +251,7 @@
 
 			<Name>6Volca Bass</Name>
 			<IconFileName>keyboard2.png</IconFileName>
-			<SynthType>Sampler</SynthType>
+			<SynthType>MIDI</SynthType>
 
 			<Port>0</Port>
 			<Channel>0</Channel>

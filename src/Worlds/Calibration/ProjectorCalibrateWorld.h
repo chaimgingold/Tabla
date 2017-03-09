@@ -25,7 +25,7 @@ public:
 	void updateVision( const Vision::Output&, Pipeline& ) override;
 	
 	void draw( DrawType ) override;
-
+	
 private:
 
 	// params
@@ -43,14 +43,26 @@ private:
 	
 	// 
 	void maybeMakePatterns( ivec2 size );
-	void nextPattern();
-	void capture( Pipeline::StageRef );
+	void showNextPattern();
+	void captureCameraImage( Pipeline::StageRef );
+	
+	bool isPatternCaptureDone() const;
+	bool cameraToProjector( vec2 cam, vec2& proj ) const;
+	void maybeUpdateProjCoords();
+	
+	void maybeDrawMouse() const;
+	void maybeDrawPattern( DrawType ) const;
+	void maybeDrawVizPoints() const;
+	void maybeDrawContours() const;
 	
 	int mShowPattern=-1;
 	float mShowPatternWhen=0.f;
 	float mShowPatternLength=.1f;
-		
+	float mShowPatternFirstDelay=1.f;
+	
 	Pipeline::StageRef mProjectorStage, mInputStage;
+	ContourVec mContours;
+	vec2 mLastCaptureCoords[4];
 };
 
 #endif /* ProjectorCalibrateWorld_hpp */

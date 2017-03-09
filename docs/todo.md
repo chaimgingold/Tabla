@@ -65,8 +65,12 @@
 # Game Worlds
 
 ## Projector Calibration
-- [ ] Use cv::cornerSubPix for more accuracy
-- [ ] Account for situations where centered rect is off the table... (use mouse to position it?)
+- Improve usability
+	- [ ] Show when it is done more clearly
+	- [ ] Continuous feedback when new projector calibration is being set (flash something?)--
+		Show us which points are working/aren't working...
+	- [ ] Don't recompute/save changes until new poly set.
+	- [ ] Sample a bunch of points nearby and smooth out?
 
 ## Music
 - [ ] Easily configurable for different instrument setups.
