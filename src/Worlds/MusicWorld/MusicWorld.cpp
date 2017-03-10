@@ -9,7 +9,7 @@
 #include "TablaApp.h" // for hotloadable file paths
 #include "MusicWorld.h"
 #include "geom.h"
-#include "cinder/rand.h"
+#include "cinder/Rand.h"
 #include "cinder/CinderMath.h"
 #include "cinder/audio/Context.h"
 #include "cinder/audio/Source.h"

@@ -13,7 +13,7 @@
 #include "glm/glm.hpp"
 #include "PinballParts.h"
 #include "geom.h"
-#include "cinder/rand.h"
+#include "cinder/Rand.h"
 #include "xml.h"
 
 using namespace ci;

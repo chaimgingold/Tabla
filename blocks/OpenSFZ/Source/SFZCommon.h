@@ -18,7 +18,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "Math.h"
+#include <math.h>
 #include "SFZAudioBuffer.h"
 #include "Path.h"
 

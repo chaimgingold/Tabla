@@ -12,7 +12,7 @@
 #include "PinballWorld.h"
 #include "PinballView.h"
 #include "geom.h"
-#include "cinder/rand.h"
+#include "cinder/Rand.h"
 #include "xml.h"
 
 using namespace ci;
