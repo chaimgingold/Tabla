@@ -159,10 +159,10 @@ FrameVec AnimWorld::getFrames(
 		if ( c.mIsHole || c.mTreeDepth>0 ) { //|| c.mPolyLine.size()!=4 ) {
 			continue;
 		}
-
-		
+			
 		Frame frame;
-
+		string frameName = string("[") + toString(frame.mIndex) + "]"; 
+		
 		if ( !mRectFinder.getRectFromPoly(c.mPolyLine,frame.mRectPoly) ) continue;
 
 		frame.mIndex = frames.size();
@@ -172,7 +172,7 @@ FrameVec AnimWorld::getFrames(
 		
 		getSubMatWithQuad( world->mImageCV, frame.mImageCV, frame.mQuad, world->mWorldToImage, frame.mFrameImageToWorld );
 		
-		pipeline.then(string("Frame ") + frame.mIndex, frame.mImageCV);
+		pipeline.then( "Frame"+frameName, frame.mImageCV);
 		pipeline.back()->setImageToWorldTransform( frame.mFrameImageToWorld );
 		pipeline.back()->mStyle.mScale = .5f;
 		
@@ -181,7 +181,7 @@ FrameVec AnimWorld::getFrames(
 		{
 			cv::rectangle(frame.mImageCV, cv::Point(0,0), cv::Point(frame.mImageCV.cols-1,frame.mImageCV.rows-1), 255, mBlankEdgePixels );
 			
-			pipeline.then(string("Frame edge blanked") + frame.mIndex, frame.mImageCV);
+			pipeline.then(string("Frame edge blanked"+frameName) + frame.mIndex, frame.mImageCV);
 			pipeline.back()->mStyle.mScale = .5f;
 		}
 		
