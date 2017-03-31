@@ -18,12 +18,12 @@ PinballInput::PinballInput( PinballWorld& world ) : mWorld(world)
 	mIsFlipperDown[0] = false;
 	mIsFlipperDown[1] = false;	
 	
-	auto button = [this]( unsigned int id, string postfix )
+	auto button = [this]( unsigned int id, bool down )
 	{
 		auto i = mGamepadButtons.find(id);
 		if (i!=mGamepadButtons.end())
 		{			
-			processInputEvent( i->second + postfix );
+			processInputEvent( i->second, down ? 1.f : 0.f );
 		}
 	};
 	
@@ -31,13 +31,23 @@ PinballInput::PinballInput( PinballWorld& world ) : mWorld(world)
 	mGamepadManager.mOnButtonDown = [this,button]( const GamepadManager::Event& event )
 	{
 		cout << "down " << event.mId << endl;
-		button(event.mId,"-down");
+		button(event.mId,true);
 	};
 
 	mGamepadManager.mOnButtonUp = [this,button]( const GamepadManager::Event& event )
 	{
 		cout << "up "  << event.mId << endl;
-		button(event.mId,"-up");
+		button(event.mId,false);
+	};
+	
+	mGamepadManager.mOnAxisMoved = [this]( const GamepadManager::Event& event )
+	{
+		if ( mGamepadVerboseAxes &&
+		    (mGamepadAxes.empty() || mGamepadAxes.find(event.mId) != mGamepadAxes.end() )
+		   )
+		{
+			cout << "axis " << event.mId << ": " << event.mAxisValue << endl;
+		}
 	};
 	
 	// inputs
@@ -60,12 +70,12 @@ PinballInput::PinballInput( PinballWorld& world ) : mWorld(world)
 		}
 	};
 	
-	mInputToFunction["flippers-left-down"]  = [this,flipperChange]() { flipperChange(0,1); };
-	mInputToFunction["flippers-left-up"]    = [this,flipperChange]() { flipperChange(0,0); };
-	mInputToFunction["flippers-right-down"] = [this,flipperChange]() { flipperChange(1,1); };
-	mInputToFunction["flippers-right-up"]   = [this,flipperChange]() { flipperChange(1,0); };
-	mInputToFunction["pause-ball-world-down"]    = [this](){ mPauseBallWorld = !mPauseBallWorld; };
-	mInputToFunction["serve-multiball-down"]     = [this](){ mWorld.serveBallCheat(); }; 
+	mInputToFunction["flippers-left"]    = [this,flipperChange]( float down ) { flipperChange(0,down); };
+	mInputToFunction["flippers-left"]    = [this,flipperChange]( float down ) { flipperChange(0,down); };
+	mInputToFunction["flippers-right"]   = [this,flipperChange]( float down ) { flipperChange(1,down); };
+	mInputToFunction["flippers-right"]   = [this,flipperChange]( float down ) { flipperChange(1,down); };
+	mInputToFunction["pause-ball-world"] = [this]( float down ){ if (down) mPauseBallWorld = !mPauseBallWorld; };
+	mInputToFunction["serve-multiball"]  = [this]( float down ){ if (down) mWorld.serveBallCheat(); };
 }
 
 void PinballInput::setParams( XmlTree xml )
@@ -73,23 +83,32 @@ void PinballInput::setParams( XmlTree xml )
 	const bool kVerbose = false;
 	
 	// gamepad
+	getXml(xml, "GamepadVerboseAxes", mGamepadVerboseAxes);
+	
 	mGamepadButtons.clear();
+	mGamepadAxes.clear();
 	if (xml.hasChild("Gamepad"))
 	{
 		XmlTree keys = xml.getChild("Gamepad");
 		
-		for( auto item = keys.begin("button"); item != keys.end(); ++item )
+		auto read = [keys]( string name, map<unsigned int,string>& mapping )
 		{
-			if (item->hasAttribute("id") && item->hasAttribute("do"))
+			for( auto item = keys.begin(name); item != keys.end(); ++item )
 			{
-				unsigned int id = item->getAttributeValue<unsigned int>("id");
-				string _do = item->getAttributeValue<string>("do");
-				
-				if (kVerbose) cout << id << " -> " << _do << endl;
-				
-				mGamepadButtons[id] = _do;
+				if (item->hasAttribute("id") && item->hasAttribute("do"))
+				{
+					unsigned int id = item->getAttributeValue<unsigned int>("id");
+					string _do = item->getAttributeValue<string>("do");
+					
+					if (kVerbose) cout << id << " -> " << _do << endl;
+					
+					mapping[id] = _do;
+				}
 			}
-		}
+		};
+		
+		read("button",mGamepadButtons);
+		read("axis",  mGamepadAxes);
 	}
 	
 	// keyboard
@@ -120,18 +139,18 @@ void PinballInput::tick()
 	mGamepadManager.tick();
 }
 
-void PinballInput::processInputEvent( string name )
+void PinballInput::processInputEvent( string name, float state )
 {
-	cout << "-> " << name << endl;
+	cout << "-> " << name << " " << state << endl;
 
 	auto j = mInputToFunction.find(name);
 	if (j!=mInputToFunction.end())
 	{
-		j->second();
+		j->second(state);
 	}
 }
 
-void PinballInput::processKeyEvent( KeyEvent event, string suffix )
+void PinballInput::processKeyEvent( KeyEvent event, bool down )
 {
 	char c = event.getChar();
 	
@@ -139,18 +158,18 @@ void PinballInput::processKeyEvent( KeyEvent event, string suffix )
 	
 	if (i!=mKeyToInput.end())
 	{
-		processInputEvent(i->second + suffix);
+		processInputEvent( i->second, down ? 1.f : 0.f );
 	}
 }
 
 void PinballInput::keyDown( KeyEvent event )
 {
-	processKeyEvent(event, "-down");
+	processKeyEvent(event,true);
 }
 
 void PinballInput::keyUp( KeyEvent event )
 {
-	processKeyEvent(event, "-up");
+	processKeyEvent(event,false);
 }
 
 }
