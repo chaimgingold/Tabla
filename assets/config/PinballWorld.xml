@@ -167,14 +167,39 @@
 	<Input>
 	<!-- Controls	-->
 	<!-- TODO... Note manufacturer/model and support multiple profiles; this is for PS4 -->
-		<Gamepad>
-			<button id="4" do="flippers-left"/>
-			<button id="6" do="flippers-left"/>
-			<button id="5" do="flippers-right"/>
-			<button id="7" do="flippers-right"/>
-			<button id="8" do="serve-multiball"/>
-			<button id="9" do="pause-ball-world"/>
-	<!--	13 is big PS4 touch pad	-->
+	<!-- name="" is a placeholder until I parse it and use it -->
+	
+		<GamepadVerboseAxes>0</GamepadVerboseAxes>
+	
+		<Gamepad name="DS4">
+			<button id="0" name="Square" do=""/>
+			<button id="1" name="X" do=""/>
+			<button id="2" name="O" do=""/>
+			<button id="3" name="Triangle" do=""/>
+
+			<button id="4" name="L1" do="flippers-left"/>
+			<button id="6" name="L2" do="flippers-left"/>
+			<button id="5" name="R1" do="flippers-right"/>
+			<button id="7" name="R2" do="flippers-right"/>
+			
+			<button id="8" name="Share"   do="serve-multiball"/>
+			<button id="9" name="Options" do="pause-ball-world"/>
+			
+			<button id="10" name="L" do=""/>
+			<button id="11" name="R" do=""/>
+			
+			<button id="13" name="Touch" do=""/>
+
+			<axis id="0" name="Ly" do=""/>
+			<axis id="1" name="Lx" do=""/>
+			<axis id="2" name="Rx" do=""/>
+			<axis id="3" name="Ry" do="plunger"/>
+			<axis id="4" name="Dx" do=""/>
+			<axis id="5" name="Dy" do=""/>
+
+			<axis id="19" name="TiltX" do=""/>
+
+
 		</Gamepad>
 
 		<Keys>

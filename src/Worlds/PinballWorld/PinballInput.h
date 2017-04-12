@@ -46,16 +46,19 @@ private:
 	
 	// generic
 	void setupControls();
-	map<string,function<void()>> mInputToFunction; // maps input names to code handlers
-	void processInputEvent( string name );
+	map<string,function<void( float state )>> mInputToFunction; // maps input names to code handlers
+	void processInputEvent( string name, float state );
 	
 	// keyboard map
 	map<char,string> mKeyToInput; // maps keystrokes to input names
-	void processKeyEvent( KeyEvent, string suffix );
+	void processKeyEvent( KeyEvent, bool down );
 
 	// game pad
 	GamepadManager mGamepadManager;
 	map<unsigned int,string> mGamepadButtons;
+	map<unsigned int,string> mGamepadAxes;
+	
+	bool mGamepadVerboseAxes=false;
 };
 
 
