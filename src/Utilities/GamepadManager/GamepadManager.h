@@ -49,7 +49,11 @@ public:
 		double mTimestamp=0.f; // none for device attached/removed
 	};
 
-	
+	// devices
+	typedef Gamepad_device Device;
+	typedef std::vector<Device*> DeviceVec;
+	const DeviceVec& getDevices() const { return mDevices; }	
+
 	// your callbacks
 	typedef std::function<void( const Event& )> tEventLambda;
 
@@ -68,6 +72,8 @@ public:
 	void onDeviceRemoved	( Gamepad_device * device );
 
 private:
+	DeviceVec mDevices;
+	
 	unsigned int mIterationsToNextPoll;
 
 };

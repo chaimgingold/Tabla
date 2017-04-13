@@ -113,10 +113,19 @@ void GamepadManager::onAxisMoved		( Gamepad_device * device, unsigned int axisID
 
 void GamepadManager::onDeviceAttached	( Gamepad_device * device )
 {
+	mDevices.push_back(device);
+	
 	if (mOnDeviceAttached) mOnDeviceAttached( Event(device) );
 }
 
 void GamepadManager::onDeviceRemoved	( Gamepad_device * device )
 {
+	mDevices.erase(
+		std::remove_if(
+			mDevices.begin(), 
+			mDevices.end(),
+			[device](Device*d){return d==device;}),
+		mDevices.end());
+	
 	if (mOnDeviceRemoved) mOnDeviceRemoved( Event(device) );
 }

@@ -76,6 +76,7 @@ PinballInput::PinballInput( PinballWorld& world ) : mWorld(world)
 	mInputToFunction["flippers-right"]   = [this,flipperChange]( float down ) { flipperChange(1,down); };
 	mInputToFunction["pause-ball-world"] = [this]( float down ){ if (down) mPauseBallWorld = !mPauseBallWorld; };
 	mInputToFunction["serve-multiball"]  = [this]( float down ){ if (down) mWorld.serveBallCheat(); };
+	mInputToFunction["plunger"] = [this]( float down ){ mIsPlungerKeyDown = down>0.f ? 1 : -1; }; // keyboard not axis
 }
 
 void PinballInput::setParams( XmlTree xml )
@@ -87,6 +88,7 @@ void PinballInput::setParams( XmlTree xml )
 	
 	mGamepadButtons.clear();
 	mGamepadAxes.clear();
+	mAxisIdForAction.clear();
 	if (xml.hasChild("Gamepad"))
 	{
 		XmlTree keys = xml.getChild("Gamepad");
@@ -109,6 +111,10 @@ void PinballInput::setParams( XmlTree xml )
 		
 		read("button",mGamepadButtons);
 		read("axis",  mGamepadAxes);
+		
+		for( auto i : mGamepadAxes ) {
+			mAxisIdForAction[i.second].push_back( i.first );
+		}
 	}
 	
 	// keyboard
@@ -137,6 +143,26 @@ void PinballInput::setParams( XmlTree xml )
 void PinballInput::tick()
 {
 	mGamepadManager.tick();
+	
+	// parse input
+	float plungeraxis = reduceAxisForAction( "plunger", 0.f, []( float v1, float v2 ){
+		return max( v1, v2 );
+	});
+	
+	if ( mIsPlungerKeyDown==0 || fabs(plungeraxis>.25f) )
+	{
+		// gamepad
+		mPlungerState = plungeraxis;
+		mIsPlungerKeyDown=0;
+	}
+	else
+	{
+		// keyboard
+		float k = (1.f / 60.f) * 4.f;
+		if ( mIsPlungerKeyDown>0 ) mPlungerState += k;
+		else mPlungerState -= k;
+		mPlungerState = constrain(mPlungerState, 0.f, 1.f);
+	}
 }
 
 void PinballInput::processInputEvent( string name, float state )
@@ -170,6 +196,19 @@ void PinballInput::keyDown( KeyEvent event )
 void PinballInput::keyUp( KeyEvent event )
 {
 	processKeyEvent(event,false);
+}
+
+float PinballInput::reduceAxisForAction( string actionName, float v, function<float(float,float)> reduce )
+{
+	for( auto gamepad : mGamepadManager.getDevices() )
+	{
+		for( auto id : mAxisIdForAction[actionName] )
+		{
+			v = reduce( v, gamepad->axisStates[id] );
+		}
+	}
+	
+	return v;
 }
 
 }

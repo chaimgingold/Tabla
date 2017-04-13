@@ -190,16 +190,14 @@
 			
 			<button id="13" name="Touch" do=""/>
 
-			<axis id="0" name="Ly" do=""/>
-			<axis id="1" name="Lx" do=""/>
+			<axis id="0" name="Lx" do=""/>
+			<axis id="1" name="Ly" do="plunger"/>
 			<axis id="2" name="Rx" do=""/>
 			<axis id="3" name="Ry" do="plunger"/>
 			<axis id="4" name="Dx" do=""/>
 			<axis id="5" name="Dy" do=""/>
 
 			<axis id="19" name="TiltX" do=""/>
-
-
 		</Gamepad>
 
 		<Keys>
@@ -208,7 +206,8 @@
 			<key char="n" do="flippers-left"/>
 			<key char="l" do="flippers-left"/>
 			<key char="m" do="flippers-right"/>
-			<key char="r" do="flippers-right"/>			
+			<key char="r" do="flippers-right"/>
+			<key char=" " do="plunger"/>			
 		</Keys>
 	</Input>
 	

@@ -36,13 +36,17 @@ public:
 	void keyUp( KeyEvent );
 	bool isFlipperDown( int side ) const { assert(side==0||side==1); return mIsFlipperDown[side]; }
 	bool isPaused() const { return mPauseBallWorld; }
+	float getPlungerState() const { return mPlungerState; }
+	// TODO: Plunger: Add a release trigger/event, with strike force.
 	
 private:
 	PinballWorld& mWorld;
 
-	// are flippers depressed
-	bool mIsFlipperDown[2]; // left, right	
-	bool mPauseBallWorld=false;
+	// parsed input
+	bool  mIsFlipperDown[2]; // left, right: are flippers depressed	
+	bool  mPauseBallWorld=false;
+	int   mIsPlungerKeyDown=0; // -1: up, 0: none, 1: down
+	float mPlungerState=0.f;
 	
 	// generic
 	void setupControls();
@@ -57,6 +61,9 @@ private:
 	GamepadManager mGamepadManager;
 	map<unsigned int,string> mGamepadButtons;
 	map<unsigned int,string> mGamepadAxes;
+	map<string,vector<unsigned int>> mAxisIdForAction;
+	
+	float reduceAxisForAction( string actionName, float v1, function<float(float,float)> reduce );
 	
 	bool mGamepadVerboseAxes=false;
 };
