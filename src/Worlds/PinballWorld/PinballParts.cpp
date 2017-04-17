@@ -534,14 +534,24 @@ Plunger::Plunger( PinballWorld& world, vec2 pin, float radius )
 	, mLoc(pin)
 	, mRadius(radius)
 {
+	calcLaunchGeometry();
 }
 
 void Plunger::draw()
 {
-	gl::color(1,1,1);
+	gl::color( lerp( Color(1,1,1), Color(1,0,0), getWorld().getPlungerState() ) );
 	gl::drawSolidCircle(mLoc, mRadius);
+	
+	gl::color(0,1,1);
+	gl::drawLine(mLoc, mLoc + mLaunchVec * mDistToBack);
+	gl::drawLine(mLoc, mLoc - mLaunchVec * mDistToBack);
 }
 
 void Plunger::tick()
+{
+	cout << "plunger! " << getWorld().getPlungerState() << endl;
+}
+	
+void Plunger::calcLaunchGeometry()
 {
 }

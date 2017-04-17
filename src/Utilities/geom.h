@@ -50,7 +50,7 @@ inline vec2 transformPoint(mat4 transform, vec2 point) {
 
 mat4 getRectMappingAsMatrix( Rectf from, Rectf to );
 
-bool rayIntersectPoly( const PolyLine2& poly, vec2 rayOrigin, vec2 rayVec, float *rayt );
+bool rayIntersectPoly( const PolyLine2& poly, vec2 rayOrigin, vec2 rayVec, float *rayt=0, int* pt1index=0 );
 
 bool getOrientedQuadFromPolyLine( PolyLine2 polyquad, vec2 xVec, vec2 quad[4] ); // returns false if polyquad.size()!=4
 	/* Returns oriented like so:

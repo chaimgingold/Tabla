@@ -124,7 +124,7 @@ mat4 getRectMappingAsMatrix( Rectf from, Rectf to )
 	return m;
 }
 
-bool rayIntersectPoly( const PolyLine2& poly, vec2 rayOrigin, vec2 rayVec, float *rayt )
+bool rayIntersectPoly( const PolyLine2& poly, vec2 rayOrigin, vec2 rayVec, float *rayt, int* pt1index )
 {
 	bool hit=false;
 	int n = poly.isClosed() ? poly.size() : poly.size()-1; 
@@ -144,6 +144,7 @@ bool rayIntersectPoly( const PolyLine2& poly, vec2 rayOrigin, vec2 rayVec, float
 				if (hit) *rayt = min( *rayt, t ); // min of all
 				else *rayt = t; // first
 			}
+			if (pt1index) *pt1index = i;
 			hit=true;
 		}
 	}

@@ -315,22 +315,12 @@ PinballVision::getAdjacentSpace( const Contour* leaf, vec2 loc, const ContourVec
 	auto filter = [&]( const Contour& c ) -> bool
 	{
 		return ctypes[c.mIndex]==ContourType::Space;
-		
-		/*
-		// 1. not self
-		//if ( c.mIsHole && c.contains(loc) ) return false;
-		if ( &c == leaf ) return false; // supposed to be optimized version of c.mIsHole && c.contains(loc)
-		// 2. not other parts
-		else if ( ctypes[c.mIndex]==ContourType::Part ) return false; // could be a part
-		// OK
-		else return true;
-		*/
 	};
 	
-	cs.rayIntersection( loc, mWorld.getRightVec(), &result.mRight, filter );
-	cs.rayIntersection( loc, mWorld.getLeftVec (), &result.mLeft , filter );
-	cs.rayIntersection( loc, mWorld.getUpVec(),    &result.mUp , filter );
-	cs.rayIntersection( loc, mWorld.getDownVec(),  &result.mDown , filter );
+	cs.rayIntersection( loc, mWorld.getRightVec(), &result.mRight, 0, filter );
+	cs.rayIntersection( loc, mWorld.getLeftVec (), &result.mLeft , 0, filter );
+	cs.rayIntersection( loc, mWorld.getUpVec(),    &result.mUp   , 0, filter );
+	cs.rayIntersection( loc, mWorld.getDownVec(),  &result.mDown , 0, filter );
 	
 	// bake in contour width into adjacent space calc
 	result.mLeft  -= result.mWidthLeft;
@@ -459,23 +449,25 @@ PartVec PinballVision::getPartsFromContours( const ContourVector& contours, cons
 
 		if ( c.mIsHole )
 		{
-			// flipper orientation
+			// what part?
 			const bool closeToRight  = adjSpace.mRight < mFlipperDistToEdge;
 			const bool closeToLeft   = adjSpace.mLeft  < mFlipperDistToEdge;
-//			const bool closeToBottom = adjSpace.mDown  < mFlipperDistToEdge;
+			const bool closeToBottom = adjSpace.mDown  < mFlipperDistToEdge;
+			
+			const bool kEnablePlunger = false;
 			
 			if ( closeToRight && !closeToLeft )
 			{
-				add( new Flipper(mWorld, c.mCenter, c.mRadius, PartType::FlipperRight) );
+				add( new Flipper( mWorld, c.mCenter, c.mRadius, PartType::FlipperRight) );
 			}
 			else if ( closeToLeft && !closeToRight )
 			{
-				add( new Flipper(mWorld, c.mCenter, c.mRadius, PartType::FlipperLeft) );
+				add( new Flipper( mWorld, c.mCenter, c.mRadius, PartType::FlipperLeft) );
 			}
-//			else if ( closeToLeft && closeToRight && closeToBottom )
-//			{
-//				 add( new Plunger( *this, c.mCenter, c.mRadius ) );
-//			}
+			else if ( closeToLeft && closeToRight && closeToBottom && kEnablePlunger )
+			{
+				add( new Plunger( mWorld, c.mCenter, c.mRadius ) );
+			}
 			else
 			{
 				add( new Bumper( mWorld, c.mCenter, c.mRadius, adjSpace ) );

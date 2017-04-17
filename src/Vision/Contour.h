@@ -63,7 +63,9 @@ public:
 		return mBoundingRect.contains(point) && mPolyLine.contains(point) ;
 	}
 
-	bool rayIntersection( vec2 rayOrigin, vec2 rayVec, float *rayt=0 ) const; // returns first rayt, if any
+	bool rayIntersection( vec2 rayOrigin, vec2 rayVec, float *rayt=0, int* pt1index=0 ) const;
+	// returns first rayt, if any
+	// and index of first vertex of line hit
 	
 };
 
@@ -132,7 +134,8 @@ public:
 	ContourVec operator+(const ContourVec& rhs) const { ContourVec c = *this; c += rhs; return c; }
 	
 	const Contour* rayIntersection( vec2 rayOrigin, vec2 rayVec,
-		float *rayt=0,
+		float* rayt=0,
+		int*   pt1index=0, // optional index of first vertex of line segment hit
 		Filter = 0 // optional filter function
 		) const;
 	 // returns rayt of first edge hit, if any

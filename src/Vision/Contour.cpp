@@ -9,7 +9,7 @@
 #include "Contour.h"
 #include "geom.h"
 
-bool Contour::rayIntersection( vec2 rayOrigin, vec2 rayVec, float *rayt ) const
+bool Contour::rayIntersection( vec2 rayOrigin, vec2 rayVec, float *rayt, int* pt1index ) const
 {
 	return rayIntersectPoly(mPolyLine, rayOrigin, rayVec, rayt );
 }
@@ -124,7 +124,10 @@ ContourVector& ContourVector::operator+=(const ContourVector& rhs)
 	return *this;
 }
 
-const Contour* ContourVector::rayIntersection( vec2 rayOrigin, vec2 rayVec, float *rayt, Filter filter ) const
+const Contour* ContourVector::rayIntersection(
+	vec2 rayOrigin, vec2 rayVec,
+	float *rayt, int* pt1index,
+	Filter filter ) const
 {
 	float m = MAXFLOAT;
 	const Contour* hit=0;
@@ -134,7 +137,7 @@ const Contour* ContourVector::rayIntersection( vec2 rayOrigin, vec2 rayVec, floa
 		if ( filter && !filter(c) ) continue;
 		
 		float d;
-		if ( c.rayIntersection(rayOrigin,rayVec,&d) && d < m )
+		if ( c.rayIntersection(rayOrigin,rayVec,&d,pt1index) && d < m )
 		{
 			m=d;
 			hit=&c;

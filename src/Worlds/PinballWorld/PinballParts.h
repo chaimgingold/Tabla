@@ -297,6 +297,12 @@ public:
 
 	float mRadius;
 	vec2  mLoc;
+
+private:
+	void calcLaunchGeometry();
+	
+	vec2 mLaunchVec;  // which way to launch?
+	vec2 mDistToBack; // how far away is wall in -mLaunchVec direction? 
 	
 };
 

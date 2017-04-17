@@ -71,7 +71,8 @@ public:
 	
 	float getFlipperState( int side ) const { assert(side==0||side==1); return mFlipperState[side]; }
 	float getFlipperAngularVel( int side ) const; // returns in radians per sim frame
-
+	float getPlungerState() const { return mInput.getPlungerState(); }
+	
 	const PartVec& getParts() const { return mVisionOutput.mParts; }
 	const PinballVision::UIBoxes getUI() const { return mVisionOutput.mUI; }
 	
