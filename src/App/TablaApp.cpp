@@ -275,14 +275,6 @@ void TablaApp::setupWindows()
 		
 		mUIWindow = TablaWindowRef( new TablaWindow(uiWindowRef,true,*this) );
 		
-		// move it out of the way on one screen
-		if ( mProjectorWin->getWindow()->getDisplay() == mUIWindow->getWindow()->getDisplay() )
-		{
-			mUIWindow->getWindow()->setPos(
-				mProjectorWin->getWindow()->getPos()
-				+ ivec2( -mProjectorWin->getWindow()->getWidth()-16,0) ) ;
-		}
-		
 		// save changes (do this AFTER we set it up, so we don't save initial conditions!)
 		mUIWindow->getWindow()->getSignalMove()  .connect( [&]{ this->saveUserSettings(); });
 		mUIWindow->getWindow()->getSignalResize().connect( [&]{ this->saveUserSettings(); });
