@@ -131,12 +131,12 @@ public:
 
 	void setAdditiveSynthID( int id ) { mAdditiveSynthID=id; }
 	void setPd( PureDataNodeRef pd ) { mPd=pd; }
-	void setOpenSFZ( OpenSFZNodeRef sfz ) { mOpenSFZ=sfz; }
 	
 private:
 	int mAdditiveSynthID;
 	PureDataNodeRef mPd;
-	OpenSFZNodeRef mOpenSFZ;
+	
+	OpenSFZNodeRef mOpenSFZNode;
 	
 	// serial (arduino/robits)
 	SerialDeviceRef mSerialDevice;

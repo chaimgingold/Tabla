@@ -13,8 +13,6 @@
 #include "cinder/audio/dsp/Converter.h"
 #include "TablaApp.h"
 
-using namespace ci;
-
 OpenSFZNode::OpenSFZNode(const Format &format): Node{ format } {
 	if (getChannelMode() != ChannelMode::SPECIFIED) {
 		setChannelMode(ChannelMode::SPECIFIED);
@@ -25,26 +23,38 @@ OpenSFZNode::OpenSFZNode(const Format &format): Node{ format } {
 void OpenSFZNode::initialize() {
 	mSynth = new SFZSynth();
 	mSynth->setCurrentPlaybackSampleRate(getSampleRate());
-
-
-	fs::path path = TablaApp::get()->hotloadableAssetPath( fs::path("samples/Virtual-Playing-Orchestra/Strings/harp-sustain.sfz"));
-	SFZSound *testSound = new SFZSound(path.string());
-
-	mSynth->addSound(testSound);
-
-	testSound->loadRegions();
-	testSound->loadSamples();
-
-	testSound->dump();    // print out debug info
 }
 
-void OpenSFZNode::uninitialize() {
+OpenSFZNodeRef OpenSFZNode::initWithSound(fs::path path) {
+	auto ctx = audio::master();
 
+
+	// Create a SoundFont sample player
+	OpenSFZNodeRef sfzNode = ctx->makeNode(new OpenSFZNode( audio::Node::Format().autoEnable() ));
+
+	// Connect to output
+	sfzNode >> audio::master()->getOutput();
+
+
+	fs::path fullpath = TablaApp::get()->hotloadableAssetPath(path);
+	sfzNode->mSound = new SFZSound(fullpath.string());
+	sfzNode->mSound->loadRegions();
+	sfzNode->mSound->loadSamples();
+
+	sfzNode->mSynth->addSound(sfzNode->mSound);
+
+	//	sound->dump();    // print out debug info
+
+	return sfzNode;
+}
+
+
+void OpenSFZNode::uninitialize() {
+	delete mSynth;
+	delete mSound;
 }
 
 void OpenSFZNode::process(audio::Buffer *buffer) {
-	// Audio processing. Call something like this in your audio processing callback loop:
-	// Note: audio buffers should be filled with zeros first
 	size_t numSamples = getFramesPerBlock();
 	SFZAudioBuffer sfzBuffer((int)numSamples,
 						  buffer->getChannel(0),

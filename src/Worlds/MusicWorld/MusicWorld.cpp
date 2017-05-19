@@ -123,7 +123,6 @@ void MusicWorld::setParams( XmlTree xml )
 			nextAdditiveSynthID++;
 		}
 		instr.setPd( mPd );
-		instr.setOpenSFZ( mOpenSFZ );
 		instr.setPokieRobitPulseTime( mPokieRobitPulseTime );
 		
 		// store it
@@ -511,7 +510,6 @@ void MusicWorld::setupSynthesis()
 
 	// Create the synth engine
 	mPd = TablaApp::get()->getPd();
-	mOpenSFZ = TablaApp::get()->getOpenSFZ();
 
 	cout << "loading patch..." << endl;
 

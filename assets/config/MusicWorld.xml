@@ -27,12 +27,19 @@
 
 			
 			<Tokens path="music-icons-black/">
-				<Token name="3Additive" path="additive.png"/>
-				<Token name="0Volca FM" path="board.png"/>
-				<Token name="2Volca Sample (Drums)" path="drumkit.png"/>
-				<Token name="8Volca Keys" path="keyboard.png"/>
-				<Token name="6Volca Bass" path="keyboard2.png"/>
-				<Token name="1RobitPokie" path="robit-pokie.png"/>
+				<Token name="RobitPokie" path="robit-pokie.png"/>
+				<Token name="Additive" path="additive.png"/>
+
+<!--				<Token name="0Volca FM" path="board.png"/>-->
+<!--				<Token name="2Volca Sample (Drums)" path="drumkit.png"/>-->
+<!--				<Token name="8Volca Keys" path="keyboard.png"/>-->
+<!--				<Token name="6Volca Bass" path="keyboard2.png"/>-->
+
+				<Token name="Strings" path="board.png"/>
+				<Token name="Harp" path="drumkit.png"/>
+				<Token name="Brass" path="keyboard.png"/>
+				<Token name="Choir" path="keyboard2.png"/>
+
 				<Token name="Scale" path="scale.png"/>
 				<Token name="Tempo" path="tempo.png"/>
 				<Token name="RootNote" path="transpose.png"/>
@@ -156,6 +163,131 @@
 	<Instruments>
 
 		<Instrument>
+			<PlayheadColor>00FFFF</PlayheadColor>
+			<ScoreColor>993377</ScoreColor>
+			<ScoreColorDownLines>003377</ScoreColorDownLines>
+			<NoteOffColor>FFFFFF</NoteOffColor>
+			<NoteOnColor>00FFFF</NoteOnColor>
+			<IconGradientCenter>.4 .35</IconGradientCenter>
+
+			<Name>Additive</Name>
+			<IconFileName>additive.png</IconFileName>
+			<SynthType>Additive</SynthType>
+
+			<Port>0</Port>
+			<Channel>0</Channel>
+			<MapNotesToChannels>0</MapNotesToChannels>
+		</Instrument>
+
+		<Instrument>
+			<PlayheadColor>00FFFF</PlayheadColor>
+			<ScoreColor>115433</ScoreColor>
+			<ScoreColorDownLines>118888</ScoreColorDownLines>
+			<NoteOffColor>00CCCC</NoteOffColor>
+			<NoteOnColor>FF8800</NoteOnColor>
+			
+			<Name>RobitPokie</Name>
+			<IconFileName>robit-pokie.png</IconFileName>
+			<SynthType>RobitPokie</SynthType>
+			
+			<Port>0</Port>
+			<Channel>0</Channel>
+			<MapNotesToChannels>12</MapNotesToChannels>
+		</Instrument>
+
+<!--	Sampler Instruments	-->
+		<Instrument>
+			<PlayheadColor>FF9900</PlayheadColor>
+			<ScoreColor>112266</ScoreColor>
+			<ScoreColorDownLines>755500</ScoreColorDownLines>
+			<NoteOffColor>B59540</NoteOffColor>
+			<NoteOnColor>00DD85</NoteOnColor>
+			<IconGradientCenter>.5 .2</IconGradientCenter>
+
+			<Name>Harp</Name>
+			<IconFileName>drumkit.png</IconFileName>
+			<SynthType>Sampler</SynthType>
+			<SamplePath>samples/Virtual-Playing-Orchestra/Strings/harp-sustain.sfz</SamplePath>
+
+			<Port>1</Port>
+			<Channel>0</Channel>
+			<MapNotesToChannels>0</MapNotesToChannels>
+		</Instrument>
+
+		<Instrument>
+			<PlayheadColor>00DD85</PlayheadColor>
+			<ScoreColor>332288</ScoreColor>
+			<ScoreColorDownLines>007777</ScoreColorDownLines>
+			<NoteOffColor>009797</NoteOffColor>
+			<NoteOnColor>FF9999</NoteOnColor>
+
+			<Name>Brass</Name>
+			<IconFileName>board.png</IconFileName>
+			<SynthType>Sampler</SynthType>
+			<SamplePath>samples/Virtual-Playing-Orchestra/Brass/french-horn-SEC-sustain.sfz</SamplePath>
+
+			<Port>1</Port>
+			<Channel>1</Channel>
+			<MapNotesToChannels>0</MapNotesToChannels>
+		</Instrument>
+
+		<Instrument>
+			<PlayheadColor>FF8844</PlayheadColor>
+			<ScoreColor>005566</ScoreColor>
+			<ScoreColorDownLines>884400</ScoreColorDownLines>
+			<NoteOffColor>BBBBFF</NoteOffColor>
+			<NoteOnColor>FF8844</NoteOnColor>
+
+			<Name>Strings</Name>
+			<IconFileName>keyboard2.png</IconFileName>
+			<SynthType>Sampler</SynthType>
+			<SamplePath>samples/Virtual-Playing-Orchestra/Strings/cello-SEC-sustain.sfz</SamplePath>
+
+
+			<Port>1</Port>
+			<Channel>1</Channel>
+			<MapNotesToChannels>0</MapNotesToChannels>
+
+		</Instrument>
+
+		<Instrument>
+			<PlayheadColor>BBFF44</PlayheadColor>
+			<ScoreColor>443377</ScoreColor>
+			<ScoreColorDownLines>777799</ScoreColorDownLines>
+			<NoteOffColor>77AA77</NoteOffColor>
+			<NoteOnColor>BBFF44</NoteOnColor>
+
+			<Name>Choir</Name>
+			<IconFileName>keyboard.png</IconFileName>
+			<SynthType>Sampler</SynthType>
+			<SamplePath>samples/Virtual-Playing-Orchestra/Vocals/choir-mixed.sfz</SamplePath>
+
+			<Port>1</Port>
+			<Channel>1</Channel>
+			<MapNotesToChannels>0</MapNotesToChannels>
+		</Instrument>
+
+<!--	Midi Instruments	-->
+<!--
+		<Instrument>
+			<PlayheadColor>FF9900</PlayheadColor>
+			<ScoreColor>112266</ScoreColor>
+			<ScoreColorDownLines>755500</ScoreColorDownLines>
+			<NoteOffColor>B59540</NoteOffColor>
+			<NoteOnColor>00DD85</NoteOnColor>
+			<IconGradientCenter>.5 .2</IconGradientCenter>
+			
+			<Name>2Volca Sample (Drums)</Name>
+			<IconFileName>drumkit.png</IconFileName>
+			<SynthType>MIDI</SynthType>
+			<SynthType>Sampler</SynthType>
+
+			<Port>1</Port>
+			<Channel>0</Channel>
+			<MapNotesToChannels>10</MapNotesToChannels>
+		</Instrument>
+
+		<Instrument>
 			<PlayheadColor>00DD85</PlayheadColor>
 			<ScoreColor>332288</ScoreColor>
 			<ScoreColorDownLines>007777</ScoreColorDownLines>
@@ -170,77 +302,6 @@
 			<Channel>0</Channel>
 			<MapNotesToChannels>0</MapNotesToChannels>
 		</Instrument>
-
-
-		<Instrument>
-			<PlayheadColor>00FFFF</PlayheadColor>
-			<ScoreColor>115433</ScoreColor>
-			<ScoreColorDownLines>118888</ScoreColorDownLines>
-			<NoteOffColor>00CCCC</NoteOffColor>
-			<NoteOnColor>FF8800</NoteOnColor>
-			
-			<Name>1RobitPokie</Name>
-			<IconFileName>robit-pokie.png</IconFileName>
-			<SynthType>RobitPokie</SynthType>
-			
-			<Port>0</Port>
-			<Channel>0</Channel>
-			<MapNotesToChannels>12</MapNotesToChannels>
-		</Instrument>
-
-		<Instrument>
-			<PlayheadColor>FF9900</PlayheadColor>
-			<ScoreColor>112266</ScoreColor>
-			<ScoreColorDownLines>755500</ScoreColorDownLines>
-			<NoteOffColor>B59540</NoteOffColor>
-			<NoteOnColor>00DD85</NoteOnColor>
-			<IconGradientCenter>.5 .2</IconGradientCenter>
-			
-			<Name>2Volca Sample (Drums)</Name>
-			<IconFileName>drumkit.png</IconFileName>
-			<SynthType>MIDI</SynthType>
-<!--			<SynthType>Sampler</SynthType>-->
-
-			<Port>1</Port>
-			<Channel>0</Channel>
-			<MapNotesToChannels>10</MapNotesToChannels>
-		</Instrument>
-
-
-
-		<Instrument>
-			<PlayheadColor>00FFFF</PlayheadColor>
-			<ScoreColor>993377</ScoreColor>
-			<ScoreColorDownLines>003377</ScoreColorDownLines>
-			<NoteOffColor>FFFFFF</NoteOffColor>
-			<NoteOnColor>00FFFF</NoteOnColor>
-			<IconGradientCenter>.4 .35</IconGradientCenter>
-
-			<Name>3Additive</Name>
-			<IconFileName>additive.png</IconFileName>
-			<SynthType>Additive</SynthType>
-
-			<Port>0</Port>
-			<Channel>0</Channel>
-			<MapNotesToChannels>0</MapNotesToChannels>
-		</Instrument>
-
-<!--		<Instrument>-->
-<!--			<PlayheadColor>FF8844</PlayheadColor>-->
-<!--			<ScoreColor>005566</ScoreColor>-->
-<!--			<ScoreColorDownLines>884400</ScoreColorDownLines>-->
-<!--			<NoteOffColor>BBBBFF</NoteOffColor>-->
-<!--			<NoteOnColor>FF8844</NoteOnColor>-->
-<!---->
-<!--			<Name>6Volca Bass</Name>-->
-<!--			<IconFileName>keyboard2.png</IconFileName>-->
-<!--			<SynthType>MIDI</SynthType>-->
-<!---->
-<!--			<Port>3</Port>-->
-<!--			<Channel>0</Channel>-->
-<!--			<MapNotesToChannels>0</MapNotesToChannels>-->
-<!---->
-<!--		</Instrument>-->
 
 		<Instrument>
 			<PlayheadColor>FF8844</PlayheadColor>
@@ -274,7 +335,7 @@
 			<Channel>0</Channel>
 			<MapNotesToChannels>0</MapNotesToChannels>
 		</Instrument>
-
+-->
 		<!-- Meta Param Instruments -->
 
 		<Instrument>

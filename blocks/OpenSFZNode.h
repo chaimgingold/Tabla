@@ -17,6 +17,8 @@
 
 #include "OpenSFZ.h"
 
+using namespace ci;
+
 typedef std::shared_ptr<class OpenSFZNode> OpenSFZNodeRef;
 
 class OpenSFZNode : public ci::audio::Node {
@@ -30,6 +32,9 @@ public:
 	void process(ci::audio::Buffer *buffer) override;
 
 	SFZSynth *mSynth;
+	SFZSound *mSound;
+
+	static OpenSFZNodeRef initWithSound(fs::path path);
 };
 
 #endif /* OpenSFZNode_h */

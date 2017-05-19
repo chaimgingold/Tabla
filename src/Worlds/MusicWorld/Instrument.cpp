@@ -65,6 +65,9 @@ void Instrument::setParams( XmlTree xml )
 			params["Tempo"] = MetaParam::Tempo;
 			auto i = params.find(p);
 			mMetaParam = (i!=params.end()) ? i->second : MetaParam::RootNote ; // default to RootNote
+		} else if ( mSynthType==SynthType::Sampler ) {
+			string p = xml.getChild("SamplePath").getValue();
+			mOpenSFZNode = OpenSFZNode::initWithSound(fs::path(p));
 		}
 	}
 
@@ -277,7 +280,7 @@ void Instrument::doNoteOn( int note, float duration )
 				sendNoteOn( mMidiOut, channel, note, velocity );
 				break;
 			case SynthType::Sampler:
-				mOpenSFZ->mSynth->noteOn(1, note, (float)velocity/127.0);
+				mOpenSFZNode->mSynth->noteOn(1, note, (float)velocity/127.0);
 				break;
 			default:
 				break;
@@ -335,7 +338,7 @@ void Instrument::doNoteOff( int note )
 			sendNoteOff( mMidiOut, channelForNote(note), note);
 			break;
 		case SynthType::Sampler:
-			mOpenSFZ->mSynth->noteOff(1, note, true);
+			mOpenSFZNode->mSynth->noteOff(1, note, true);
 		default:
 			break;
 	}
