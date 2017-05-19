@@ -42,7 +42,7 @@
 
 <!-- General -->
 	<SoundEnabled>1</SoundEnabled>
-	<UpVec>-1 0</UpVec>
+	<DefaultUpVec>-1 0</DefaultUpVec>
 	<Gravity>.05</Gravity>
 	<BallReclaimAreaHeight>4</BallReclaimAreaHeight>
 

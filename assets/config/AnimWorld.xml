@@ -35,7 +35,7 @@
 	</RectFinder>
 	
 	
-	<TimeVec>-1 0</TimeVec>
+	<DefaultTimeVec>-1 0</DefaultTimeVec>
 	<WorldUnitsToSeconds>85</WorldUnitsToSeconds>
 	<MaxFrameDist>20</MaxFrameDist>
 	<MaxScreenToFrameDist>50</MaxScreenToFrameDist>

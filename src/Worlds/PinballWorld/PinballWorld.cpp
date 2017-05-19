@@ -71,13 +71,37 @@ void PinballWorld::setParams( XmlTree xml )
 	getXml(xml, "MaxScreenShake", mMaxScreenShake);
 	
 	// playfield
-	getXml(xml, "UpVec", mUpVec );	
+	getXml(xml, "DefaultUpVec", mDefaultUpVec );	
 	getXml(xml, "Gravity", mGravity );
 	getXml(xml, "BallReclaimAreaHeight", mBallReclaimAreaHeight );
 
 	
 	if ( xml.hasChild("Input") ) {
 		mInput.setParams( xml.getChild("Input") );
+	}
+}
+
+void PinballWorld::initSettings()
+{
+	mUpVec = mDefaultUpVec;
+}
+
+XmlTree PinballWorld::getUserSettings() const
+{
+	XmlTree xml("settings","");
+	
+	xml.push_back( XmlTree("UpVec", vecToString(mUpVec)) );
+	
+	return xml;
+}
+
+void PinballWorld::setUserSettings( XmlTree settingsXml )
+{
+	if ( settingsXml.hasChild("settings") )
+	{
+		XmlTree xml = settingsXml.getChild("settings");
+		
+		getXml(xml, "UpVec", mUpVec );
 	}
 }
 
@@ -494,6 +518,8 @@ void PinballWorld::setOrientationVec ( string name, vec2 value )
 	{
 		mUpVec = value;
 	}
+	
+	setAreUserSettingsDirty();
 }
 
 void PinballWorld::keyDown( KeyEvent event )

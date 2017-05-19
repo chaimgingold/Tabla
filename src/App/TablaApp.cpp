@@ -50,14 +50,24 @@ fs::path TablaApp::getDocsPath() const
 	return getDocumentsDirectory() / kDocumentsDirectoryName ;
 }
 
+fs::path TablaApp::getUserGameSettingsPath() const
+{
+	return getDocsPath() / "game-settings";
+}
+
 fs::path TablaApp::getUserLightLinkFilePath() const
 {
 	return getDocsPath() / "LightLink.xml" ;
 }
 
-fs::path TablaApp::getUserSettingsFilePath() const
+fs::path TablaApp::getUserSettingsFilePathForApp() const
 {
 	return getDocsPath() / "settings.xml" ;
+}
+
+fs::path TablaApp::getUserSettingsFilePathForGame( string game ) const
+{
+	return getUserGameSettingsPath() / (game + ".xml") ;
 }
 
 void TablaApp::setup()
@@ -73,8 +83,9 @@ void TablaApp::setup()
 	// enumerate hardware
 	enumerateDisplaysAndCamerasToConsole();
 	
-	// make docs folder if needed
+	// make docs folders if needed
 	if ( !fs::exists(getDocsPath()) ) fs::create_directory(getDocsPath());
+	if ( !fs::exists(getUserGameSettingsPath()) ) fs::create_directory(getUserGameSettingsPath());
 	
 	// app config
 	mFileWatch.loadXml( hotloadableAssetPath("config") / "app.xml", [this]( XmlTree xml ) {
@@ -101,7 +112,7 @@ void TablaApp::setup()
 	// user settings
 	mPipelineStageSelection = "undistorted"; // default (don't want it in header)
 	
-	mFileWatch.loadXml( getUserSettingsFilePath(), [this]( XmlTree xml )
+	mFileWatch.loadXml( getUserSettingsFilePathForApp(), [this]( XmlTree xml )
 	{
 		if ( xml.hasChild("settings") ) {
 			loadUserSettingsFromXml(xml.getChild("settings"));
@@ -541,20 +552,47 @@ void TablaApp::loadGame( string systemName )
 		cout << "loadGame: " << mGameWorld->getSystemName() << endl;
 		
 		// get config xml
-		fs::path xmlConfigPath = getXmlConfigPathForGame(mGameWorld->getSystemName()) ;
-		
-		mFileWatch.loadXml( xmlConfigPath, [xmlConfigPath,this]( XmlTree xml )
 		{
-			// if we had already loaded this once, we stomp that old lambda and force a reload now.
+			fs::path xmlConfigPath = getXmlConfigPathForGame(mGameWorld->getSystemName()) ;
 			
-			// why conditional?
-			// make sure we aren't hotloading xml from game we aren't running anymore
-			if ( xmlConfigPath == getXmlConfigPathForGame(mGameWorld->getSystemName()) )
+			mFileWatch.loadXml( xmlConfigPath, [xmlConfigPath,this]( XmlTree xml )
 			{
-				// set params from xml
-				setGameWorldXmlParams(xml);
+				// if we had already loaded this once, we stomp that old lambda and force a reload now.
+				
+				// why conditional?
+				// make sure we aren't hotloading xml from game we aren't running anymore
+				if ( xmlConfigPath == getXmlConfigPathForGame(mGameWorld->getSystemName()) )
+				{
+					// set params from xml
+					setGameWorldXmlParams(xml);
+				}
+			});
+		}
+	
+		// get settings xml
+		{
+			fs::path xmlSettingsPath = getUserSettingsFilePathForGame(mGameWorld->getSystemName()) ;
+		
+			// init settings?
+			if ( !fs::exists(xmlSettingsPath) )
+			{
+				mGameWorld->initSettings();
+				mGameWorld->setAreUserSettingsDirty(); // so we save them...
 			}
-		});
+	
+			// load and watch...
+			mFileWatch.loadXml( xmlSettingsPath, [xmlSettingsPath,this]( XmlTree xml )
+			{
+				// if we had already loaded this once, we stomp that old lambda and force a reload now.
+				
+				// why conditional?
+				// make sure we aren't hotloading xml from game we aren't running anymore
+				if ( xmlSettingsPath == getUserSettingsFilePathForGame(mGameWorld->getSystemName()) )
+				{
+					mGameWorld->setUserSettings( xml );
+				}
+			});
+		}
 		
 		// set world bounds
 		mGameWorld->setWorldBoundsPoly( getWorldBoundsPoly() );
@@ -767,6 +805,7 @@ void TablaApp::update()
 		mGameWorld->setMousePosInWorld(getMousePosInWorld()); // TODO: figure out if it actually contains it...
 		mGameWorld->update();
 		mGameWorld->prepareToDraw();
+		maybeSaveGameWorldSettings();
 	}
 	
 	if (mAVClacker>0.f) mAVClacker = max(0.f,mAVClacker-.1f);
@@ -1211,7 +1250,21 @@ XmlTree TablaApp::getUserSettingsXml() const
 void TablaApp::saveUserSettings()
 {
 	XmlTree t = getUserSettingsXml();
-	t.write( writeFile(getUserSettingsFilePath()) );
+	t.write( writeFile(getUserSettingsFilePathForApp()) );
+}
+
+void TablaApp::maybeSaveGameWorldSettings() const
+{
+	if ( mGameWorld && mGameWorld->getAreUserSettingsDirty() )
+	{
+		fs::path path = getUserSettingsFilePathForGame(mGameWorld->getSystemName());
+
+		XmlTree settingsXml = mGameWorld->getUserSettings();
+		
+		settingsXml.write( writeFile(path) );
+		
+		mGameWorld->setAreUserSettingsDirty(false);
+	}
 }
 
 void TablaApp::saveCameraImageToDisk()

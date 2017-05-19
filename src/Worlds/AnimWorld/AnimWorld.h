@@ -94,9 +94,13 @@ public:
 	string getSystemName() const override { return "AnimWorld"; }
 
 	void setParams( XmlTree ) override;
-	void updateVision( const Vision::Output&, Pipeline& ) override;
+
+	void    initSettings() override;
+	XmlTree getUserSettings() const override;
+	void    setUserSettings( XmlTree ) override;
 
 	void update() override;
+	void updateVision( const Vision::Output&, Pipeline& ) override;
 	void draw( DrawType ) override;
 
 	void drawMouseDebugInfo( vec2 ) override;
@@ -122,6 +126,7 @@ private:
 	Rectf getFrameBBoxInLocalSpace( const Frame& ) const;
 	
 	float mAnimTime; // our local animation time, in case we want to pause, etc...
+	vec2 mDefaultTimeVec=vec2(1,0);
 	vec2 mTimeVec=vec2(1,0);
 	float mWorldUnitsToSeconds=10.f;
 	float mAnimLengthQuantizeToSec=.5f;

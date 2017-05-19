@@ -199,8 +199,10 @@ private:
 
 	// paths
 	fs::path getDocsPath() const;
+	fs::path getUserGameSettingsPath() const;
 	fs::path getUserLightLinkFilePath() const;
-	fs::path getUserSettingsFilePath() const;
+	fs::path getUserSettingsFilePathForApp() const;
+	fs::path getUserSettingsFilePathForGame( string ) const;
 	
 	string getOverloadedAssetPath() const; // calculates it (from arguments, env vars)
 	string mOverloadedAssetPath; // => is stored here
@@ -213,7 +215,8 @@ private:
 	void loadUserSettingsFromXml( XmlTree );
 	XmlTree getUserSettingsXml() const;
 	void saveUserSettings();
-
+	void maybeSaveGameWorldSettings() const;
+	
 	// misc
 	void saveCameraImageToDisk();
 

@@ -45,7 +45,7 @@ AnimWorld::AnimWorld()
 
 void AnimWorld::setParams( XmlTree xml )
 {
-	getXml(xml,"TimeVec",mTimeVec);
+	getXml(xml,"DefaultTimeVec",mDefaultTimeVec);
 	getXml(xml,"WorldUnitsToSeconds",mWorldUnitsToSeconds);
 	getXml(xml,"MaxFrameDist",mMaxFrameDist);
 	getXml(xml,"MaxScreenToFrameDist",mMaxScreenToFrameDist);
@@ -63,6 +63,30 @@ void AnimWorld::setParams( XmlTree xml )
 	}	
 }
 
+void AnimWorld::initSettings()
+{
+	mTimeVec = mDefaultTimeVec;
+}
+
+XmlTree AnimWorld::getUserSettings() const
+{
+	XmlTree xml("settings","");
+	
+	xml.push_back( XmlTree("TimeVec", vecToString(mTimeVec)) );
+	
+	return xml;
+}
+
+void AnimWorld::setUserSettings( XmlTree settingsXml )
+{
+	if ( settingsXml.hasChild("settings") )
+	{
+		XmlTree xml = settingsXml.getChild("settings");
+		
+		getXml(xml, "TimeVec", mTimeVec );
+	}
+}
+
 map<string,vec2> AnimWorld::getOrientationVecs() const
 {
 	map<string,vec2> m;
@@ -78,6 +102,8 @@ void AnimWorld::setOrientationVec ( string name, vec2 value )
 	{
 		mTimeVec = value;
 	}
+	
+	setAreUserSettingsDirty();
 }
 
 void AnimWorld::printAnims( const AnimSeqMap& as )

@@ -9,11 +9,6 @@
 #include "LightLink.h"
 #include "xml.h"
 
-static string vecToString( vec2 v )
-{
-	return toString(v.x) + " " + toString(v.y);
-};
-
 static string noNewline( string str )
 {
 	for( auto &c : str ) {

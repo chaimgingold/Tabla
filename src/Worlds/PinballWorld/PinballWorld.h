@@ -29,6 +29,10 @@ public:
 	~PinballWorld();
 
 	void setParams( XmlTree ) override;
+
+	void    initSettings() override;
+	XmlTree getUserSettings() const override;
+	void    setUserSettings( XmlTree ) override;
 	
 	string getSystemName() const override { return "PinballWorld"; }
 
@@ -112,6 +116,8 @@ private:
 	FileWatch mFileWatch;
 		
 	// params
+	vec2  mDefaultUpVec = vec2(0,1);
+
 	vec2  mUpVec = vec2(0,1);
 	float mGravity=0.1f;
 	float mBallReclaimAreaHeight = 10.f;

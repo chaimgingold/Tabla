@@ -206,11 +206,16 @@ inline bool getVec2sFromXml( const XmlTree &xml, string name, vec2 var[], int le
 	else return false;
 }
 
+inline string vecToString( vec2 v )
+{
+	return toString(v.x) + " " + toString(v.y);
+}
+
 inline XmlTree vec2sToXml( string name, vector<vec2> vs )
 {
 	XmlTree xml(name,"");
 	for( auto v : vs ) {
-		xml.push_back( XmlTree("v", toString(v.x) + " " + toString(v.y) ) );
+		xml.push_back( XmlTree("v", vecToString(v) ) );
 	}
 	return xml;
 }
@@ -220,7 +225,7 @@ inline XmlTree vec2sToXml( string name, const vec2* vs, int n )
 	XmlTree xml(name,"");
 	for ( int i=0; i<n; ++i ) {
 		vec2 v = vs[i];
-		xml.push_back( XmlTree("v", toString(v.x) + " " + toString(v.y) ) );
+		xml.push_back( XmlTree("v", vecToString(v) ) );
 	}
 	return xml;
 }

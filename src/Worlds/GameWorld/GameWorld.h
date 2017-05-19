@@ -23,29 +23,44 @@ class GameWorld
 public:
 	virtual ~GameWorld() {} // make sure children can overload destructor
 	
+	
+	// names used for loading associated files and showing to user
 	virtual string getSystemName() const { return "GameWorld"; } // for xml param block name
 	virtual string getUserName() const { return getSystemName(); }
 	
+	
+	// load hard coded configuration/tuning xml data
+	virtual void setParams( XmlTree ){}
+
 	void		   setVisionParams( Vision::Params p ) { mVisionParams=p; }
 	Vision::Params getVisionParams() const { return mVisionParams; }
 	// app automatically loads xml params for GameWorld and sets them.
 	// it then gets them when they are needed.
 	
-	virtual void setParams( XmlTree ){}
-	virtual void updateVision( const Vision::Output&, Pipeline& ){} // probably lower freq than update()
 	
+	// user settings
+	virtual void    initSettings() {} // called if there is no settings file on disk
+	virtual XmlTree getUserSettings() const { return XmlTree(); }
+	virtual void    setUserSettings( XmlTree ) {}
+	// tell system that settings changed so it can save them; (and it can tell us it saved them)
+	void setAreUserSettingsDirty( bool dirty=true ) { mUserSettingsDirty=dirty; }
+	bool getAreUserSettingsDirty() { return mUserSettingsDirty; }
+	
+	// world bounds + orientation
 	void		setWorldBoundsPoly( PolyLine2 ); // only calls didChange if it is different
 	PolyLine2	getWorldBoundsPoly() const { return mWorldBoundsPoly; }
 	virtual void worldBoundsPolyDidChange(){}
-	
-	virtual map<string,vec2> getOrientationVecs() const { return map<string,vec2>(); }
-	virtual void			 setOrientationVec ( string, vec2 ) {}
 	
 	vec2		getRandomPointInWorldBoundsPoly() const; // a little lamely special case;
 	// might be more useful to have something like random point on contour,
 	// and then pick whether you want a hole or not hole.
 	// randomPointOnContour()
 
+	virtual map<string,vec2> getOrientationVecs() const { return map<string,vec2>(); }
+	virtual void			 setOrientationVec ( string, vec2 ) {}
+
+
+	// event handling
 	enum class DrawType
 	{
 		Projector,
@@ -56,6 +71,7 @@ public:
 	
 	virtual void gameWillLoad(){}
 	virtual void update(){} // called each frame
+	virtual void updateVision( const Vision::Output&, Pipeline& ){} // probably lower freq than update()
 	virtual void prepareToDraw() {} // called once per frame, before all draw calls.
 	virtual void draw( DrawType ){} // might be called many times per frame
 
@@ -77,7 +93,7 @@ private:
 	Vision::Params	mVisionParams;
 	PolyLine2		mWorldBoundsPoly;
 	vec2			mMousePosInWorld;
-	
+	bool			mUserSettingsDirty=false;
 };
 typedef std::shared_ptr<GameWorld> GameWorldRef;
 
