@@ -12,6 +12,7 @@
 
 #include "GameLibraryView.h"
 #include "PolyEditView.h"
+#include "VectorEditView.h"
 #include "MainImageView.h"
 #include "CaptureProfileMenuView.h"
 
@@ -49,110 +50,123 @@ TablaWindow::TablaWindow( WindowRef window, bool isUIWindow, TablaApp& app )
 		// lock it into this stage
 		mMainImageView->setPipelineStageName("projector");
 	}
-	
-	// poly editors
+
+	// add ui elements
 	if ( mIsUIWindow )
 	{
-		// TODO:
-		// - colors per poly
-		// - √ set data after editing (lambda?)
-		// - √ specify native coordinate system
+		addPolyEditors();
+		addMenus();
+	}
+}
 
-		auto updateLightLink = []( TablaApp& app )
-		{
-			// for some reason the recursive lambda capture (doing a capture in this function)
-			// causes everything to explode, so just passing in a param.
-			app.lightLinkDidChange();			
-		};
-		
-		// - camera capture coords
-		{
-			mCameraPolyEditView = make_shared<PolyEditView>(
-				PolyEditView(
-					mApp,
-					[this](){ return getPointsAsPoly(mApp.getCaptureProfileForPipeline().mCaptureCoords,4); },
-					"undistorted"
-					)
-				);
-			
-			mCameraPolyEditView->setSetPolyFunc( [&]( const PolyLine2& poly ){
-				setPointsFromPoly( mApp.getLightLink().getCaptureProfile().mCaptureCoords, 4, poly );
-				updateLightLink(mApp);
-			});
-			
-			mCameraPolyEditView->setMainImageView( mMainImageView );
-			mCameraPolyEditView->getEditableInStages().push_back("undistorted");
-			
-			mViews.addView( mCameraPolyEditView );
-		}
+void TablaWindow::addPolyEditors()
+{
+	// TODO:
+	// - colors per poly
+	// - √ set data after editing (lambda?)
+	// - √ specify native coordinate system
 
-		// - projector mapping
-		{
-			// convert to input coords
-			mProjPolyEditView = make_shared<PolyEditView>(
-				PolyEditView(
-					mApp,
-					[&](){ return getPointsAsPoly(mApp.getLightLink().getProjectorProfile().mProjectorCoords,4); },
-					"projector"
-					)
+	auto updateLightLink = []( TablaApp& app )
+	{
+		// for some reason the recursive lambda capture (doing a capture in this function)
+		// causes everything to explode, so just passing in a param.
+		app.lightLinkDidChange();			
+	};
+	
+	// - camera capture coords
+	{
+		mCameraPolyEditView = make_shared<PolyEditView>(
+			PolyEditView(
+				mApp,
+				[this](){ return getPointsAsPoly(mApp.getCaptureProfileForPipeline().mCaptureCoords,4); },
+				"undistorted"
+				)
 			);
-			
-			mProjPolyEditView->setSetPolyFunc( [&]( const PolyLine2& poly ){
-				setPointsFromPoly( mApp.getLightLink().getProjectorProfile().mProjectorCoords, 4, poly );
-				updateLightLink(mApp);
-			});
-			
-			mProjPolyEditView->setMainImageView( mMainImageView );
-			mProjPolyEditView->getEditableInStages().push_back("projector");
-			
-			mViews.addView( mProjPolyEditView );
-		}
 		
-		// - world boundaries
-		// (for both camera + projector)
-		{
-			mWorldBoundsPolyEditView = make_shared<PolyEditView>(
-				PolyEditView(
-					mApp,
-					[&](){ return getPointsAsPoly(mApp.getCaptureProfileForPipeline().mCaptureWorldSpaceCoords,4); },
-					"world-boundaries"
-					)
-			);
-			
-			mWorldBoundsPolyEditView->setSetPolyFunc( [&]( const PolyLine2& poly ){
-				setPointsFromPoly( mApp.getLightLink().getCaptureProfile().mCaptureWorldSpaceCoords  , 4, poly );
-				setPointsFromPoly( mApp.getLightLink().getProjectorProfile().mProjectorWorldSpaceCoords, 4, poly );
-				updateLightLink(mApp);
-			});
-			
-			mWorldBoundsPolyEditView->setMainImageView( mMainImageView );
-			mWorldBoundsPolyEditView->getEditableInStages().push_back("world-boundaries");
-			
-			mWorldBoundsPolyEditView->setConstrainToRect();
+		mCameraPolyEditView->setSetPolyFunc( [&]( const PolyLine2& poly ){
+			setPointsFromPoly( mApp.getLightLink().getCaptureProfile().mCaptureCoords, 4, poly );
+			updateLightLink(mApp);
+		});
+		
+		mCameraPolyEditView->setMainImageView( mMainImageView );
+		mCameraPolyEditView->getEditableInStages().push_back("undistorted");
+		
+		mViews.addView( mCameraPolyEditView );
+	}
+
+	// - projector mapping
+	{
+		// convert to input coords
+		mProjPolyEditView = make_shared<PolyEditView>(
+			PolyEditView(
+				mApp,
+				[&](){ return getPointsAsPoly(mApp.getLightLink().getProjectorProfile().mProjectorCoords,4); },
+				"projector"
+				)
+		);
+		
+		mProjPolyEditView->setSetPolyFunc( [&]( const PolyLine2& poly ){
+			setPointsFromPoly( mApp.getLightLink().getProjectorProfile().mProjectorCoords, 4, poly );
+			updateLightLink(mApp);
+		});
+		
+		mProjPolyEditView->setMainImageView( mMainImageView );
+		mProjPolyEditView->getEditableInStages().push_back("projector");
+		
+		mViews.addView( mProjPolyEditView );
+	}
+	
+	// - world boundaries
+	// (for both camera + projector)
+	{
+		mWorldBoundsPolyEditView = make_shared<PolyEditView>(
+			PolyEditView(
+				mApp,
+				[&](){ return getPointsAsPoly(mApp.getCaptureProfileForPipeline().mCaptureWorldSpaceCoords,4); },
+				"world-boundaries"
+				)
+		);
+		
+		mWorldBoundsPolyEditView->setSetPolyFunc( [&]( const PolyLine2& poly ){
+			setPointsFromPoly( mApp.getLightLink().getCaptureProfile().mCaptureWorldSpaceCoords  , 4, poly );
+			setPointsFromPoly( mApp.getLightLink().getProjectorProfile().mProjectorWorldSpaceCoords, 4, poly );
+			updateLightLink(mApp);
+		});
+		
+		mWorldBoundsPolyEditView->setMainImageView( mMainImageView );
+		mWorldBoundsPolyEditView->getEditableInStages().push_back("world-boundaries");
+		
+		mWorldBoundsPolyEditView->setConstrainToRect();
 //			mWorldBoundsPolyEditView->setConstrainToRectWithAspectRatioOfPipelineStage("undistorted");
 // this aspect ratio code works, except it's conceptually wrong headed! world bounds poly itself is what defines the aspect ratio ("clipped" size depends on world poly; and "undistorted" hasn't been clipped yet. :P). doh.
-			mWorldBoundsPolyEditView->setQuantizeToUnit(1.f);
-			mWorldBoundsPolyEditView->setCanEditVertexMask( vector<bool>{ false, false, true, false } );
-			mWorldBoundsPolyEditView->setDrawSize(true);
-			mWorldBoundsPolyEditView->setDrawPipelineStage("clipped");
-			
-			mViews.addView( mWorldBoundsPolyEditView );
-		}
-	}
-	
-	// menus
-	if ( mIsUIWindow )
-	{
-		// game library widget
-		mGameLibraryView = std::make_shared<GameLibraryView>();
-		mViews.addView( mGameLibraryView );
+		mWorldBoundsPolyEditView->setQuantizeToUnit(1.f);
+		mWorldBoundsPolyEditView->setCanEditVertexMask( vector<bool>{ false, false, true, false } );
+		mWorldBoundsPolyEditView->setDrawSize(true);
+		mWorldBoundsPolyEditView->setDrawPipelineStage("clipped");
 		
-		// capture device
-		mCaptureMenuView = std::make_shared<CaptureProfileMenuView>();
-		mViews.addView( mCaptureMenuView );
-
-		layoutMenus();
+		mViews.addView( mWorldBoundsPolyEditView );
 	}
+}
+
+void TablaWindow::addMenus()
+{
+	// vector configuration ui
+	{
+		mVecEditView = make_shared<VectorEditView>();
+		
+		mViews.addView( mVecEditView );
+	}
+
+	// game library widget
+	mGameLibraryView = std::make_shared<GameLibraryView>();
+	mViews.addView( mGameLibraryView );
+	
+	// capture device
+	mCaptureMenuView = std::make_shared<CaptureProfileMenuView>();
+	mViews.addView( mCaptureMenuView );
+
+	// layout
+	layoutMenus();
 }
 
 void TablaWindow::draw()
@@ -458,6 +472,16 @@ void TablaWindow::layoutMenus()
 	if (mCaptureMenuView)
 	{
 		mCaptureMenuView->layout( Rectf( lowerRight - size*vec2(2.f,1.f), lowerRight ) );
+		
+		lowerRight = mCaptureMenuView->getFrame().getLowerLeft() + vec2(-kGutter.x,0);
+	}
+	
+	if (mVecEditView)
+	{
+		float r = PopUpMenuView::getHeightWhenClosed()/2;
+		
+		mVecEditView->setCenter( lowerRight + vec2(-kGutter.x,-r) );
+		mVecEditView->setRadius(r);
 	}
 }
 

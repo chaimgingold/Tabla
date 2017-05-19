@@ -40,6 +40,9 @@ public:
 	
 	void worldBoundsPolyDidChange() override;
 
+	virtual map<string,vec2> getOrientationVecs() const override;
+	virtual void			 setOrientationVec ( string, vec2 ) override;
+
 	void keyDown( KeyEvent ) override;
 	void keyUp( KeyEvent ) override;
 	void mouseClick( vec2 ) override;

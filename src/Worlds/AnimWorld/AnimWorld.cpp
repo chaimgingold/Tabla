@@ -63,6 +63,23 @@ void AnimWorld::setParams( XmlTree xml )
 	}	
 }
 
+map<string,vec2> AnimWorld::getOrientationVecs() const
+{
+	map<string,vec2> m;
+	
+	m["Time"] = mTimeVec;
+	
+	return m;
+}
+
+void AnimWorld::setOrientationVec ( string name, vec2 value )
+{
+	if ( name=="Time" )
+	{
+		mTimeVec = value;
+	}
+}
+
 void AnimWorld::printAnims( const AnimSeqMap& as )
 {
 	cout << as.size() << " anims:" << endl;

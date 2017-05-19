@@ -31,6 +31,7 @@
 		260AD7BD1E60E8CC0077AEEC /* channel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 260AD7BB1E60E8CC0077AEEC /* channel.cpp */; };
 		26143F001E2356A800EDEE1E /* PinballInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26143EFE1E2356A800EDEE1E /* PinballInput.cpp */; };
 		262A88751DB594B700FE2336 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 262A88741DB594B700FE2336 /* CoreMIDI.framework */; };
+		262F18EE1ECE705600344A33 /* VectorEditView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 262F18EC1ECE705600344A33 /* VectorEditView.cpp */; };
 		262FCDCC1E234CB100FC5D66 /* PinballVision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 262FCDCA1E234CB100FC5D66 /* PinballVision.cpp */; };
 		262FCDCF1E234DDF00FC5D66 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 262FCDCE1E234DDF00FC5D66 /* Images.xcassets */; };
 		26308E611E44113C00DB8371 /* PopUpMenuView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26308E5F1E44113C00DB8371 /* PopUpMenuView.cpp */; };
@@ -236,6 +237,8 @@
 		26143EFE1E2356A800EDEE1E /* PinballInput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PinballInput.cpp; sourceTree = "<group>"; };
 		26143EFF1E2356A800EDEE1E /* PinballInput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PinballInput.h; sourceTree = "<group>"; };
 		262A88741DB594B700FE2336 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
+		262F18EC1ECE705600344A33 /* VectorEditView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VectorEditView.cpp; sourceTree = "<group>"; };
+		262F18ED1ECE705600344A33 /* VectorEditView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VectorEditView.h; sourceTree = "<group>"; };
 		262FCDCA1E234CB100FC5D66 /* PinballVision.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PinballVision.cpp; sourceTree = "<group>"; };
 		262FCDCB1E234CB100FC5D66 /* PinballVision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PinballVision.h; sourceTree = "<group>"; };
 		262FCDCE1E234DDF00FC5D66 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Tabla/Images.xcassets; sourceTree = "<group>"; };
@@ -1041,6 +1044,8 @@
 				26D254031E47078900A07330 /* PolyEditView.h */,
 				26D254061E47081C00A07330 /* MainImageView.cpp */,
 				26D254071E47081C00A07330 /* MainImageView.h */,
+				262F18EC1ECE705600344A33 /* VectorEditView.cpp */,
+				262F18ED1ECE705600344A33 /* VectorEditView.h */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -2736,6 +2741,7 @@
 				7D4B6A1410EE43358255E704 /* b2TimeOfImpact.cpp in Sources */,
 				26CCA31C1E089EE3005F7C24 /* TablaWindow.cpp in Sources */,
 				2673CD5E1E1D791C0036C02D /* PinballView.cpp in Sources */,
+				262F18EE1ECE705600344A33 /* VectorEditView.cpp in Sources */,
 				26308E611E44113C00DB8371 /* PopUpMenuView.cpp in Sources */,
 				36991D11792C4997967FCEC7 /* b2ChainShape.cpp in Sources */,
 				26EAE98A1E57D6A5001475EA /* VisionInput.cpp in Sources */,

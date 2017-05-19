@@ -479,6 +479,23 @@ void PinballWorld::worldBoundsPolyDidChange()
 {
 }
 
+map<string,vec2> PinballWorld::getOrientationVecs() const
+{
+	map<string,vec2> m;
+	
+	m["Up"] = mUpVec;
+	
+	return m;
+}
+
+void PinballWorld::setOrientationVec ( string name, vec2 value )
+{
+	if ( name=="Up" )
+	{
+		mUpVec = value;
+	}
+}
+
 void PinballWorld::keyDown( KeyEvent event )
 {
 	mInput.keyDown(event);

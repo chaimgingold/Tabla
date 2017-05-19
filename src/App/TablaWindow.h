@@ -17,6 +17,7 @@ class GameLibraryView;
 class PolyEditView;
 class MainImageView;
 class CaptureProfileMenuView;
+class VectorEditView;
 
 class TablaWindow {
 public:
@@ -64,6 +65,10 @@ private:
 	std::shared_ptr<PolyEditView> mProjPolyEditView;
 	std::shared_ptr<PolyEditView> mWorldBoundsPolyEditView;
 	
+	std::shared_ptr<VectorEditView> mVecEditView;
+	
+	void addPolyEditors();
+	void addMenus();
 	
 	void layoutMenus();
 	

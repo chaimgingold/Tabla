@@ -38,6 +38,9 @@ public:
 	PolyLine2	getWorldBoundsPoly() const { return mWorldBoundsPoly; }
 	virtual void worldBoundsPolyDidChange(){}
 	
+	virtual map<string,vec2> getOrientationVecs() const { return map<string,vec2>(); }
+	virtual void			 setOrientationVec ( string, vec2 ) {}
+	
 	vec2		getRandomPointInWorldBoundsPoly() const; // a little lamely special case;
 	// might be more useful to have something like random point on contour,
 	// and then pick whether you want a hole or not hole.

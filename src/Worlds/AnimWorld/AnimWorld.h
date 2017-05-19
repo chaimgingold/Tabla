@@ -100,6 +100,9 @@ public:
 	void draw( DrawType ) override;
 
 	void drawMouseDebugInfo( vec2 ) override;
+
+	virtual map<string,vec2> getOrientationVecs() const override;
+	virtual void			 setOrientationVec ( string, vec2 ) override;
 	
 private:
 	vec2 getTimeVec() const { return mTimeVec; } // right
