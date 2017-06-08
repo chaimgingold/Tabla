@@ -910,6 +910,13 @@ void TablaApp::drawWorld( GameWorld::DrawType drawType )
 	{
 		mGameWorld->drawMouseDebugInfo( getMousePosInWorld() );
 	}
+	
+	// dim
+	if ( mSettings.mDimProjection > 0.f && drawType == GameWorld::DrawType::Projector )
+	{
+		gl::color( 0, 0, 0, mSettings.mDimProjection );
+		gl::drawSolid( getWorldBoundsPoly() );
+	}
 }
 
 void TablaApp::drawContours( bool filled, bool mousePickInfo, bool worldBounds ) const
@@ -1183,6 +1190,10 @@ void TablaApp::loadUserSettingsFromXml( XmlTree xml )
 {
 	cout << "loadUserSettingsFromXml." << endl;
 	
+	//
+	mSettings.set(xml);
+	
+	// TODO: move more of this into TablaAppSettings
 	if ( xml.hasChild("GameWorld") )
 	{
 		string name = xml.getChild("GameWorld").getValue();
@@ -1224,8 +1235,10 @@ void TablaApp::loadUserSettingsFromXml( XmlTree xml )
 
 XmlTree TablaApp::getUserSettingsXml() const
 {
-	XmlTree xml("settings","");
+//	XmlTree xml("settings","");
+	XmlTree xml = mSettings.get();
 	
+	// TODO: move more of this into TablaAppSettings
 	if (mGameWorld)
 	{
 		xml.push_back( XmlTree("GameWorld",mGameWorld->getSystemName()) );

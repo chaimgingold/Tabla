@@ -10,7 +10,6 @@
 #define TablaAppParams_hpp
 
 #include "cinder/Xml.h"
-#include "TablaAppParams.h"
 
 using namespace ci;
 using namespace std;

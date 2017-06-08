@@ -407,7 +407,10 @@ void PinballView::draw( GameWorld::DrawType drawType )
 	// world
 	if (m3dEnable && (drawType==GameWorld::DrawType::UIMain || drawType==GameWorld::DrawType::Projector) ) draw3d(drawType);
 	else draw2d(drawType);
-
+	
+	// dim parts selectively, for super bright projectors
+	if ( drawType==GameWorld::DrawType::Projector ) drawBlackMaskForParts();
+	
 	// --- debugging/testing ---
 	
 	// world orientation debug info
@@ -446,6 +449,23 @@ void PinballView::draw( GameWorld::DrawType drawType )
 
 			gl::color(0,1,0);
 			gl::draw(c.mPolyLine);
+		}
+	}
+}
+
+void PinballView::drawBlackMaskForParts()
+{
+	const float blackMask = TablaApp::get()->getSettings().mDimProjectionOnBlack;
+
+	if (blackMask>0.f)
+	{
+		gl::color(0,0,0,blackMask);
+		for ( const auto &c : mWorld.getVisionContours() )
+		{
+			if ( mWorld.getVisionContourType(c)==PinballVision::ContourType::Part )
+			{
+				gl::drawSolid(c.mPolyLine);
+			}
 		}
 	}
 }

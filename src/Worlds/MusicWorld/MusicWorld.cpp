@@ -482,7 +482,9 @@ void MusicWorld::draw( GameWorld::DrawType drawType )
 	{
 		for( const auto &t : mTokens )
 		{
-			if (mStamps.areTokensEnabled()) gl::color(0,1,1,.6);
+			const float blackMask = TablaApp::get()->getSettings().mDimProjectionOnBlack;
+			
+			if (mStamps.areTokensEnabled()) gl::color(0,1,1,.6 * blackMask);
 			else gl::color(1,1,0);
 			gl::drawSolid(t.getPoly());
 

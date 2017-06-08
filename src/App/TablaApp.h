@@ -32,6 +32,7 @@
 #include "Pipeline.h"
 #include "FPS.h"
 #include "TablaAppParams.h"
+#include "TablaAppSettings.h"
 
 #include "PipelineStageView.h"
 #include "TablaWindow.h"
@@ -98,7 +99,8 @@ class TablaApp : public App {
 	OpenSFZNodeRef getOpenSFZ() const { return mOpenSFZ; }
 	gl::TextureFontRef getFont() const { return mTextureFont; }
 	const TablaAppParams& getParams() const { return mParams; }
-
+	const TablaAppSettings& getSettings() const { return mSettings; } 
+	
 	fs::path hotloadableAssetPath( fs::path ) const ; // prepends the appropriate thing...
 	// TODO: move all game assets into their own directories and then make this private
 
@@ -190,7 +192,7 @@ private:
 	FPS mCaptureFPS;
 
 	TablaAppParams mParams; 
-	
+	TablaAppSettings mSettings;
 	
 	
 	// === File Management

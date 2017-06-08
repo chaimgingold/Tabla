@@ -37,6 +37,7 @@
 		26308E611E44113C00DB8371 /* PopUpMenuView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26308E5F1E44113C00DB8371 /* PopUpMenuView.cpp */; };
 		266E2C6E1E495A3C00F92DAE /* MIDIInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 266E2C6C1E495A3C00F92DAE /* MIDIInput.cpp */; };
 		2673CD5E1E1D791C0036C02D /* PinballView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2673CD5C1E1D791C0036C02D /* PinballView.cpp */; };
+		268076761EE9CBB700969E89 /* TablaAppSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268076741EE9CBB700969E89 /* TablaAppSettings.cpp */; };
 		26A451641E54420600BCAC25 /* TablaAppParams.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26A451621E54420600BCAC25 /* TablaAppParams.cpp */; };
 		26CCA2D31E089DE7005F7C24 /* BallWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2B21E089DE7005F7C24 /* BallWorld.cpp */; };
 		26CCA2D51E089DE7005F7C24 /* GameWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2B81E089DE7005F7C24 /* GameWorld.cpp */; };
@@ -248,6 +249,8 @@
 		266E2C6D1E495A3C00F92DAE /* MIDIInput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MIDIInput.h; sourceTree = "<group>"; };
 		2673CD5C1E1D791C0036C02D /* PinballView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PinballView.cpp; sourceTree = "<group>"; };
 		2673CD5D1E1D791C0036C02D /* PinballView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PinballView.h; sourceTree = "<group>"; };
+		268076741EE9CBB700969E89 /* TablaAppSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TablaAppSettings.cpp; sourceTree = "<group>"; };
+		268076751EE9CBB700969E89 /* TablaAppSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TablaAppSettings.h; sourceTree = "<group>"; };
 		26A4515F1E54390F00BCAC25 /* FPS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPS.h; sourceTree = "<group>"; };
 		26A451621E54420600BCAC25 /* TablaAppParams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TablaAppParams.cpp; sourceTree = "<group>"; };
 		26A451631E54420600BCAC25 /* TablaAppParams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TablaAppParams.h; sourceTree = "<group>"; };
@@ -1021,6 +1024,8 @@
 				26CCA3181E089EE3005F7C24 /* TablaWindow.h */,
 				26A451621E54420600BCAC25 /* TablaAppParams.cpp */,
 				26A451631E54420600BCAC25 /* TablaAppParams.h */,
+				268076741EE9CBB700969E89 /* TablaAppSettings.cpp */,
+				268076751EE9CBB700969E89 /* TablaAppSettings.h */,
 				26A4515F1E54390F00BCAC25 /* FPS.h */,
 			);
 			name = App;
@@ -2779,6 +2784,7 @@
 				26CCA2D91E089DE7005F7C24 /* MusicWorld.cpp in Sources */,
 				BF8EA3BC1AE14D83A5112094 /* b2Contact.cpp in Sources */,
 				9E53F22939EC46629ECD511A /* b2ContactSolver.cpp in Sources */,
+				268076761EE9CBB700969E89 /* TablaAppSettings.cpp in Sources */,
 				3F51BFBD57064C0FBBDC06D5 /* b2EdgeAndCircleContact.cpp in Sources */,
 				26D254081E47081C00A07330 /* MainImageView.cpp in Sources */,
 				26CCA2DA1E089DE7005F7C24 /* Score.cpp in Sources */,

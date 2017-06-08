@@ -79,7 +79,9 @@ private:
 	friend class PinballWorld;
 	
 	FileWatch mFileWatch;
-		
+	
+	void drawBlackMaskForParts(); // for super-bright projectors; TODO: generalize in main TablaApp
+	
 	void draw2d( GameWorld::DrawType );
 	
 	void prepare3dScene();
