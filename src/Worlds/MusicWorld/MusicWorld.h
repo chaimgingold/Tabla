@@ -38,10 +38,19 @@ public:
 
 	void cleanup() override;
 
+	// user settings
+	void    initSettings() override;
+	XmlTree getUserSettings() const override;
+	void    setUserSettings( XmlTree ) override;
+
+	virtual map<string,vec2> getOrientationVecs() const override;
+	virtual void			 setOrientationVec ( string, vec2 ) override;
+
 private:
 
-	//
-	vec2  mTimeVec;		// in world space, which way does time flow forward?
+	vec2  mTimeVec=vec2(1,0); // in world space, which way does time flow forward?
+	vec2  mDefaultTimeVec=vec2(1,0);
+
 	int	  mNoteCount=8;
 	Scale mScale;
 	float mRootNote=60;

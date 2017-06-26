@@ -22,6 +22,7 @@
 	- [ ] Button is clipped, but not menu.
 - [ ] Rationalize timing for debug file input frame skip. Ideally Vision thread sleep is dynamic, based upon desired FPS--for file and camera--and average/last execution time.
 - [ ] Crash on quit from CoreAudio system
+- [ ] Music crash in SFZ unit via Core Audio Node system (on quit)
 
 # Game Worlds
 

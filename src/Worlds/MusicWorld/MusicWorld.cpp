@@ -62,7 +62,7 @@ void MusicWorld::setParams( XmlTree xml )
 	mMeasureCounts.clear();
 	mScale.clear();
 
-	getXml(xml,"TimeVec",mTimeVec);
+	getXml(xml,"DefaultTimeVec",mDefaultTimeVec);
 	getXml(xml,"NoteCount",mNoteCount);
 	getXml(xml,"RootNote",mRootNote);
 	getXml(xml,"NumOctaves",mNumOctaves);
@@ -164,6 +164,59 @@ void MusicWorld::setParams( XmlTree xml )
 
 	// kill notes
 	killAllNotes();
+}
+
+void MusicWorld::initSettings()
+{
+	mTimeVec = mDefaultTimeVec;
+}
+
+XmlTree MusicWorld::getUserSettings() const
+{
+	XmlTree xml("settings","");
+	
+	xml.push_back( XmlTree("TimeVec", vecToString(mTimeVec)) );
+	
+	return xml;
+}
+
+void MusicWorld::setUserSettings( XmlTree settingsXml )
+{
+	if ( settingsXml.hasChild("settings") )
+	{
+		XmlTree xml = settingsXml.getChild("settings");
+		
+		getXml(xml, "TimeVec", mTimeVec );
+
+		// push changes
+		// TODO: refactor push logic from setParams and updateScoresWithMetaParams
+		mVision.mTimeVec = mTimeVec;
+		mStamps.setup( mInstruments, getWorldBoundsPoly(), mTimeVec, mRainbowShader );
+	}
+}
+
+map<string,vec2> MusicWorld::getOrientationVecs() const
+{
+	map<string,vec2> m;
+	
+	m["Time"] = mTimeVec;
+	
+	return m;
+}
+
+void MusicWorld::setOrientationVec ( string name, vec2 value )
+{
+	if ( name=="Time" )
+	{
+		mTimeVec = value;
+
+		// push changes
+		// TODO: refactor push logic from setParams and updateScoresWithMetaParams
+		mVision.mTimeVec = mTimeVec;
+		mStamps.setup( mInstruments, getWorldBoundsPoly(), mTimeVec, mRainbowShader );
+	}
+	
+	setAreUserSettingsDirty();
 }
 
 void
