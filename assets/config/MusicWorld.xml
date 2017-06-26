@@ -222,7 +222,7 @@
 			<NoteOnColor>FF9999</NoteOnColor>
 
 			<Name>Brass</Name>
-			<IconFileName>board.png</IconFileName>
+			<IconFileName>keyboard.png</IconFileName>
 			<SynthType>Sampler</SynthType>
 			<SamplePath>samples/Virtual-Playing-Orchestra/Brass/french-horn-SEC-sustain.sfz</SamplePath>
 
@@ -239,7 +239,7 @@
 			<NoteOnColor>FF8844</NoteOnColor>
 
 			<Name>Strings</Name>
-			<IconFileName>keyboard2.png</IconFileName>
+			<IconFileName>board.png</IconFileName>
 			<SynthType>Sampler</SynthType>
 			<SamplePath>samples/Virtual-Playing-Orchestra/Strings/cello-SEC-sustain.sfz</SamplePath>
 
@@ -258,7 +258,7 @@
 			<NoteOnColor>BBFF44</NoteOnColor>
 
 			<Name>Choir</Name>
-			<IconFileName>keyboard.png</IconFileName>
+			<IconFileName>keyboard2.png</IconFileName>
 			<SynthType>Sampler</SynthType>
 			<SamplePath>samples/Virtual-Playing-Orchestra/Vocals/choir-mixed.sfz</SamplePath>
 
