@@ -73,8 +73,9 @@
 	- [ ] Sample a bunch of points nearby and smooth out?
 
 ## Music
-- [ ] Easily configurable for different instrument setups.
-- [ ] Built in software synths
+- [ ] Easily configurable for different instrument setups. Plan: remove Token list section, fold into each instrument definition. Add <Ensemble>, so we can define multiple ensembles (could have priorities so that one that fails to load could then fall back to another), and you choose them from a menu (MIDI, OpenSFZ, Live, etc...). Would be nice to programatically invert the token images for the recognizer, but whatever.
+- [x] Built in software synths
+    - [ ] Drum software synth
 - [ ] Use object color to influence performance/sound of each note.
 - [ ] Add Luke's cool sampling synth!
 - Robits
