@@ -53,57 +53,71 @@
 		<ProjectorProfile>Default</ProjectorProfile>
 
 		<Capture>
+
+			<Profile>
+				<Name>ELP 1920 x 1080 @ 30fps</Name>
+				<DeviceName>USB 2.0 Camera</DeviceName>
+				<FileName/>
+				<CaptureSize>1920 1080</CaptureSize>
+				<CaptureCoords>
+					<v>454.519348 195.581055</v>
+					<v>1382.8407 209.354385</v>
+					<v>1393.8595 703.988586</v>
+					<v>442.123322 706.743164</v>
+				</CaptureCoords>
+				<CaptureWorldSpaceCoords>
+					<v>0 0</v>
+					<v>126 0</v>
+					<v>126 69</v>
+					<v>0 69</v>
+				</CaptureWorldSpaceCoords>
+				<DistCoeffs>[-0.35962537, -0.80946761, 0.067833617, 0.0047525521, 1.4724478]</DistCoeffs>
+				<CameraMatrix>[1631.1213, 0, 857.31335;  0, 1561.5, 297.23669;  0, 0, 1]</CameraMatrix>
+			</Profile>
 			
 			<Profile>
-				<Name>ELP 1280 x 720</Name>
+				<Name>ELP 1280 x 720 @ 60fps</Name>
 				<DeviceName>USB 2.0 Camera</DeviceName>
+				<FileName/>
 				<CaptureSize>1280 720</CaptureSize>
-
-				<CaptureCoords>162.757828 63.472496
-				1185.81116 103.380928
-				1260.2915 670.642029
-				100.930344 647.574097
+				<CaptureCoords>
+					<v>162.757828 63.472496</v>
+					<v>1185.81116 103.380928</v>
+					<v>1260.2915 670.642029</v>
+					<v>100.930344 647.574097</v>
 				</CaptureCoords>
-				
-				<CaptureWorldSpaceCoords>0 0
-				126 0
-				126 69.5
-				0 69.5
+				<CaptureWorldSpaceCoords>
+					<v>0 0</v>
+					<v>126 0</v>
+					<v>126 69.5</v>
+					<v>0 69.5</v>
 				</CaptureWorldSpaceCoords>
-
-				<!-- this calibration is pretty good -->
 				<DistCoeffs>[-0.64873862, 0.16279763, 0.020434588, -0.026295083, 0.87134349]</DistCoeffs>
-				<CameraMatrix>[1606.7295, 0, 656.4892;
-				 0, 1627.5187, 339.53409;
-				 0, 0, 1]
-				 </CameraMatrix>
-			
+				<CameraMatrix>[1606.7295, 0, 656.4892;  0, 1627.5187, 339.53409;  0, 0, 1]</CameraMatrix>
 			</Profile>
-			
+
 			<Profile>
-				<Name>ELP 640 x 480</Name>
+				<Name>ELP 640 x 480 @ 60fps</Name>
 				<DeviceName>USB 2.0 Camera</DeviceName>
+				<FileName/>
 				<CaptureSize>640 480</CaptureSize>
-
-				<CaptureCoords>5.06933975 6.20670891
-				599.746338 6.75599194
-				631.386475 316.545441
-				8.39622116 361.42981
+				<CaptureCoords>
+					<v>5.06933975 6.20670891</v>
+					<v>599.746338 6.75599194</v>
+					<v>631.386475 316.545441</v>
+					<v>8.39622116 361.42981</v>
 				</CaptureCoords>
-			
-				<CaptureWorldSpaceCoords>0 0
-				126 0
-				126 69.5
-				0 69.5
+				<CaptureWorldSpaceCoords>
+					<v>0 0</v>
+					<v>126 0</v>
+					<v>126 69.5</v>
+					<v>0 69.5</v>
 				</CaptureWorldSpaceCoords>
-
-				<!-- this calibration is OK. I monkeyed with it manually a bit, so it could be better. -->
+<!--	I hand noodled this matrix, so it's not great.	-->
 				<DistCoeffs>[-1.05, -4.1999998, 0.0079270257, -0.0037597809, 30.936378]</DistCoeffs>
-				<CameraMatrix>[1072.3177, 0, 314.25284;
-				 0, 1062.8184, 234.11261;
-				 0, 0, 1]</CameraMatrix>
-			 
+				<CameraMatrix>[1072.3177, 0, 314.25284;  0, 1062.8184, 234.11261;  0, 0, 1]</CameraMatrix>
 			</Profile>
+
 			
 		</Capture>
 
