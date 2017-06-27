@@ -184,7 +184,7 @@ vector<AnalyzedToken> TokenMatcher::tokensFromContours( const Pipeline::StageRef
 		// Run keypoint analysis on the cropped image
 		// (creating a copy to avoid issues with UMat->Mat leaving dangling references)
 		Mat imageCopy;
-		tokenContourImage.getMat(ACCESS_READ).copyTo(imageCopy);
+        tokenContourImage.copyTo(imageCopy);
 
 		// Scale the cropped image to match the average library token size,
 		// since AKAZE finds more keypoints in larger images
