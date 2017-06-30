@@ -39,6 +39,7 @@
 		2673CD5E1E1D791C0036C02D /* PinballView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2673CD5C1E1D791C0036C02D /* PinballView.cpp */; };
 		268076761EE9CBB700969E89 /* TablaAppSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268076741EE9CBB700969E89 /* TablaAppSettings.cpp */; };
 		26A451641E54420600BCAC25 /* TablaAppParams.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26A451621E54420600BCAC25 /* TablaAppParams.cpp */; };
+		26AAA1B71F06080900C5DA84 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 26AAA1B61F06080900C5DA84 /* LICENSE */; };
 		26CCA2D31E089DE7005F7C24 /* BallWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2B21E089DE7005F7C24 /* BallWorld.cpp */; };
 		26CCA2D51E089DE7005F7C24 /* GameWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2B81E089DE7005F7C24 /* GameWorld.cpp */; };
 		26CCA2D61E089DE7005F7C24 /* Instrument.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2BB1E089DE7005F7C24 /* Instrument.cpp */; };
@@ -254,6 +255,7 @@
 		26A4515F1E54390F00BCAC25 /* FPS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPS.h; sourceTree = "<group>"; };
 		26A451621E54420600BCAC25 /* TablaAppParams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TablaAppParams.cpp; sourceTree = "<group>"; };
 		26A451631E54420600BCAC25 /* TablaAppParams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TablaAppParams.h; sourceTree = "<group>"; };
+		26AAA1B61F06080900C5DA84 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		26CCA2B21E089DE7005F7C24 /* BallWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BallWorld.cpp; sourceTree = "<group>"; };
 		26CCA2B31E089DE7005F7C24 /* BallWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BallWorld.h; sourceTree = "<group>"; };
 		26CCA2B81E089DE7005F7C24 /* GameWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GameWorld.cpp; sourceTree = "<group>"; };
@@ -1108,6 +1110,7 @@
 		29B97314FDCFA39411CA2CEA /* PaperBounce3 */ = {
 			isa = PBXGroup;
 			children = (
+				26AAA1B61F06080900C5DA84 /* LICENSE */,
 				26CCA30F1E089EE3005F7C24 /* App */,
 				26CCA2B01E089DE7005F7C24 /* Worlds */,
 				26CCA2FC1E089EB8005F7C24 /* Utilities */,
@@ -2704,6 +2707,7 @@
 			files = (
 				262FCDCF1E234DDF00FC5D66 /* Images.xcassets in Resources */,
 				C29A0ACF1DF1FE12008A26A1 /* .gitignore in Resources */,
+				26AAA1B71F06080900C5DA84 /* LICENSE in Resources */,
 				26FA36501D5519DA00C64A00 /* assets in Resources */,
 				C29A0AD01DF1FE12008A26A1 /* CMakeLists.txt in Resources */,
 				C2EC76FD1DA7157F00DB39C8 /* LICENSE.txt in Resources */,
