@@ -11,7 +11,7 @@
 
 using namespace std;
 
-static bool verbose = true;
+static bool verbose = false;
 
 static void onButtonDown(struct Gamepad_device * device, unsigned int buttonID, double timestamp, void * context)
 {
@@ -98,12 +98,12 @@ void GamepadManager::tick()
 
 void GamepadManager::onButtonDown		( Gamepad_device * device, unsigned int buttonID, double timestamp )
 {
-	if (mOnButtonDown) mOnButtonDown( Event(device,buttonID,timestamp) );
+	if (mOnButtonDown) mOnButtonDown( Event(device,EventType::ButtonDown,buttonID,timestamp) );
 }
 
 void GamepadManager::onButtonUp			( Gamepad_device * device, unsigned int buttonID, double timestamp )
 {
-	if (mOnButtonUp) mOnButtonUp( Event(device,buttonID,timestamp) );
+	if (mOnButtonUp) mOnButtonUp( Event(device,EventType::ButtonUp,buttonID,timestamp) );
 }
 
 void GamepadManager::onAxisMoved		( Gamepad_device * device, unsigned int axisID, float value, float lastValue, double timestamp )
@@ -115,7 +115,7 @@ void GamepadManager::onDeviceAttached	( Gamepad_device * device )
 {
 	mDevices.push_back(device);
 	
-	if (mOnDeviceAttached) mOnDeviceAttached( Event(device) );
+	if (mOnDeviceAttached) mOnDeviceAttached( Event(device,EventType::DeviceAttached) );
 }
 
 void GamepadManager::onDeviceRemoved	( Gamepad_device * device )
@@ -127,5 +127,5 @@ void GamepadManager::onDeviceRemoved	( Gamepad_device * device )
 			[device](Device*d){return d==device;}),
 		mDevices.end());
 	
-	if (mOnDeviceRemoved) mOnDeviceRemoved( Event(device) );
+	if (mOnDeviceRemoved) mOnDeviceRemoved( Event(device,EventType::DeviceRemoved) );
 }

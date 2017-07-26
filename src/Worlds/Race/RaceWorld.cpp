@@ -20,7 +20,6 @@ static GameCartridgeSimple sCartridge("RaceWorld", [](){
 RaceWorld::RaceWorld()
 {
 	setupSynthesis();
-	setupGamepadManager();
 }
 
 void RaceWorld::gameWillLoad()
@@ -33,44 +32,34 @@ void RaceWorld::worldBoundsPolyDidChange()
 	// most important thing is to prevent BallWorld from doing its default thing. (makes balls)
 }
 
-void RaceWorld::setupGamepadManager()
+void RaceWorld::gamepadEvent( const GamepadManager::Event& event )
 {
-	auto &gamepadManager = getGamepadManager();
-//	auto &gamepadManager = mGamepadManager;
-
-	gamepadManager.mOnButtonDown = [this]( const GamepadManager::Event& event )
+	switch ( event.mType )
 	{
-		setupGamepad(event.mDevice);
+		case GamepadManager::EventType::ButtonDown:
+		 
+			setupGamepad(event.mDevice);
+			cout << "down " << event.mId << endl;
+			
+			break;
 
-		cout << "down " << event.mId << endl;
-//		button(event.mId,true);
-	};
+		case GamepadManager::EventType::ButtonUp:
+			setupGamepad(event.mDevice);
+			cout << "up "  << event.mId << endl;
+			break;
+			
+		case GamepadManager::EventType::AxisMoved:
+			break;
 
-	gamepadManager.mOnButtonUp = [this]( const GamepadManager::Event& event )
-	{
-		setupGamepad(event.mDevice);
-
-		cout << "up "  << event.mId << endl;
-//		button(event.mId,false);
-	};
-	
-	gamepadManager.mOnAxisMoved = [this]( const GamepadManager::Event& event )
-	{
-		if (0) {
-			cout << "axis " << event.mId << ": " << event.mAxisValue << endl;
-		}
-	};
-
-	gamepadManager.mOnDeviceAttached = [this]( const GamepadManager::Event& event )
-	{
-		cout << "attached "  << event.mDevice << endl;
-	};
-	
-	gamepadManager.mOnDeviceRemoved = [this]( const GamepadManager::Event& event )
-	{
-		cout << "removed "  << event.mDevice << endl;
-		removePlayer(event.mDevice);
-	};
+		case GamepadManager::EventType::DeviceAttached:
+			cout << "attached "  << event.mDevice << endl;
+			break;
+			
+		case GamepadManager::EventType::DeviceRemoved:
+			cout << "removed "  << event.mDevice << endl;
+			removePlayer(event.mDevice);
+			break;
+	}
 }
 
 void RaceWorld::setupGamepad( Gamepad_device* gamepad )
@@ -105,8 +94,6 @@ void RaceWorld::removePlayer( Gamepad_device* gamepad )
 
 void RaceWorld::update()
 {
-	getGamepadManager().tick();
-
 	BallWorld::update(); // also does its sound, which may be an issue
 }
 

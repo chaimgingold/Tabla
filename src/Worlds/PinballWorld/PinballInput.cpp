@@ -17,42 +17,7 @@ PinballInput::PinballInput( PinballWorld& world ) : mWorld(world)
 {
 	mIsFlipperDown[0] = false;
 	mIsFlipperDown[1] = false;	
-	
-	auto button = [this]( unsigned int id, bool down )
-	{
-		auto i = mGamepadButtons.find(id);
-		if (i!=mGamepadButtons.end())
-		{			
-			processInputEvent( i->second, down ? 1.f : 0.f );
-		}
-	};
-	
-		
-	auto &gamepadManager = world.getGamepadManager(); 
-	
-	gamepadManager.mOnButtonDown = [this,button]( const GamepadManager::Event& event )
-	{
-		cout << "down " << event.mId << endl;
-		button(event.mId,true);
-	};
 
-	gamepadManager.mOnButtonUp = [this,button]( const GamepadManager::Event& event )
-	{
-		cout << "up "  << event.mId << endl;
-		button(event.mId,false);
-	};
-	
-	gamepadManager.mOnAxisMoved = [this]( const GamepadManager::Event& event )
-	{
-		if ( mGamepadVerboseAxes &&
-		    (mGamepadAxes.empty() || mGamepadAxes.find(event.mId) != mGamepadAxes.end() )
-		   )
-		{
-			cout << "axis " << event.mId << ": " << event.mAxisValue << endl;
-		}
-	};
-	
-	// inputs
 	auto flipperChange = [this]( int side, int state )
 	{
 		bool oldState = mIsFlipperDown[side]; 
@@ -71,14 +36,52 @@ PinballInput::PinballInput( PinballWorld& world ) : mWorld(world)
 			}
 		}
 	};
-	
+		
 	mInputToFunction["flippers-left"]    = [this,flipperChange]( float down ) { flipperChange(0,down); };
 	mInputToFunction["flippers-left"]    = [this,flipperChange]( float down ) { flipperChange(0,down); };
 	mInputToFunction["flippers-right"]   = [this,flipperChange]( float down ) { flipperChange(1,down); };
 	mInputToFunction["flippers-right"]   = [this,flipperChange]( float down ) { flipperChange(1,down); };
 	mInputToFunction["pause-ball-world"] = [this]( float down ){ if (down) mPauseBallWorld = !mPauseBallWorld; };
 	mInputToFunction["serve-multiball"]  = [this]( float down ){ if (down) mWorld.serveBallCheat(); };
-	mInputToFunction["plunger"] = [this]( float down ){ mIsPlungerKeyDown = down>0.f ? 1 : -1; }; // keyboard not axis
+	mInputToFunction["plunger"] = [this]( float down ){ mIsPlungerKeyDown = down>0.f ? 1 : -1; }; // keyboard not axis	
+}
+
+void PinballInput::gamepadEvent( const GamepadManager::Event& event )
+{
+	auto button = [this]( unsigned int id, bool down )
+	{
+		auto i = mGamepadButtons.find(id);
+		if (i!=mGamepadButtons.end())
+		{			
+			processInputEvent( i->second, down ? 1.f : 0.f );
+		}
+	};
+	
+	switch ( event.mType )
+	{
+		case GamepadManager::EventType::ButtonDown:
+		 
+			cout << "down " << event.mId << endl;
+			button(event.mId,true);
+			
+			break;
+
+		case GamepadManager::EventType::ButtonUp:
+			cout << "up "  << event.mId << endl;
+			button(event.mId,false);
+			break;
+			
+		case GamepadManager::EventType::AxisMoved:
+			if ( mGamepadVerboseAxes &&
+				(mGamepadAxes.empty() || mGamepadAxes.find(event.mId) != mGamepadAxes.end() )
+			   )
+			{
+				cout << "axis " << event.mId << ": " << event.mAxisValue << endl;
+			}
+			break;
+			
+		default:break;
+	}
 }
 
 void PinballInput::setParams( XmlTree xml )
@@ -144,8 +147,6 @@ void PinballInput::setParams( XmlTree xml )
 
 void PinballInput::tick()
 {
-	mWorld.getGamepadManager().tick();
-	
 	// parse input
 	float plungeraxis = reduceAxisForAction( "plunger", 0.f, []( float v1, float v2 ){
 		return max( v1, v2 );

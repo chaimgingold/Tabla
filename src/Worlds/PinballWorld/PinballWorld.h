@@ -50,6 +50,7 @@ public:
 	void keyDown( KeyEvent ) override;
 	void keyUp( KeyEvent ) override;
 	void mouseClick( vec2 ) override;
+	void gamepadEvent( const GamepadManager::Event& ) override;
 
 	PartParams mPartParams;
 	PinballView mView;

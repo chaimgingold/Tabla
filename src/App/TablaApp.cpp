@@ -119,6 +119,9 @@ void TablaApp::setup()
 		}
 	});
 	
+	// gamepad
+	getGamepadManager(); // create manager
+	
 	// load default game, if none loaded (loadUserSettingsFromXml might have done it)
 	if ( !mGameWorld ) loadDefaultGame();
 }
@@ -545,9 +548,6 @@ void TablaApp::loadGame( string systemName )
 		return;
 	}
 	
-	if (mGamepadManager) mGamepadManager->clearCallbacks(); // because game modes point to themselves 
-	// TODO: refactor into event based system
-	 
 	mGameWorld = cart->second->load();
 	
 	if ( mGameWorld )
@@ -803,6 +803,8 @@ void TablaApp::update()
 	mFileWatch.update();
 	
 	updateVision();
+	
+	if (mGamepadManager) mGamepadManager->tick(); // dispatches controller events
 	
 	if (mGameWorld) {
 		mGameWorld->setMousePosInWorld(getMousePosInWorld()); // TODO: figure out if it actually contains it...
@@ -1194,6 +1196,17 @@ GamepadManager& TablaApp::getGamepadManager()
 	if ( !mGamepadManager )
 	{
 		mGamepadManager = std::make_shared<GamepadManager>();
+		
+		// setup events
+		mGamepadManager->mOnButtonDown = 
+		mGamepadManager->mOnButtonUp   =
+		mGamepadManager->mOnAxisMoved  =
+		mGamepadManager->mOnDeviceAttached =
+		mGamepadManager->mOnDeviceRemoved =
+		[this]( const GamepadManager::Event& event )
+		{
+			if (mGameWorld) mGameWorld->gamepadEvent(event);
+		};		
 	}
 	
 	return *( mGamepadManager.get() );

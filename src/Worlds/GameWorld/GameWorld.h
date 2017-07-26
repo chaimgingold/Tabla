@@ -15,9 +15,9 @@
 #include "cinder/PolyLine.h"
 #include "Contour.h"
 #include "Vision.h"
+#include "GamepadManager.h"
 
 class Pipeline;
-class GamepadManager;
 
 class GameWorld
 {
@@ -86,6 +86,8 @@ public:
 	virtual void keyUp( KeyEvent ){}
 	void setMousePosInWorld( vec2 p ) { mMousePosInWorld=p; } // called by app
 
+	// gamepad
+	virtual void gamepadEvent( const GamepadManager::Event& ) {}
 	GamepadManager& getGamepadManager();
 	
 protected:

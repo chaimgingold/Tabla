@@ -25,14 +25,13 @@ public:
 	void worldBoundsPolyDidChange() override;
 	void update() override;
 	void draw( DrawType ) override;
+	void gamepadEvent( const GamepadManager::Event& ) override;
 
 protected:
 
 private:
 	FileWatch mFileWatch;
 
-//	GamepadManager mGamepadManager;
-	
 	class Player
 	{
 	public:
@@ -43,7 +42,6 @@ private:
 	typedef map<GamepadManager::DeviceId,Player> tDeviceToPlayerMap;
 	tDeviceToPlayerMap mPlayers;
 
-	void setupGamepadManager();
 	void setupGamepad( Gamepad_device* ); // idempotent
 	void removePlayer( Gamepad_device* );
 		

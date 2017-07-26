@@ -532,6 +532,11 @@ void PinballWorld::keyUp( KeyEvent event )
 	mInput.keyUp(event);
 }
 
+void PinballWorld::gamepadEvent( const GamepadManager::Event& event )
+{
+	mInput.gamepadEvent(event);
+}
+
 void PinballWorld::mouseClick( vec2 loc )
 {
 }

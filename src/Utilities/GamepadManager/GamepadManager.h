@@ -21,29 +21,42 @@ public:
 	
 	int mDetectNewDevicesPollFreq = 30;
 	
+	enum class EventType
+	{
+		ButtonDown,
+		ButtonUp,
+		AxisMoved,
+		DeviceAttached,
+		DeviceRemoved
+	};
+	
 	class Event
 	{
 	public:
 		// button up/down
-		Event( Gamepad_device* device, unsigned int buttonid, double timestamp )
+		Event( Gamepad_device* device, EventType type, unsigned int buttonid, double timestamp )
 		: mDevice(device)
+		, mType(type)
 		, mId(buttonid)
 		, mTimestamp(timestamp) {}
 
-		// axis move
+		// axis moved
 		Event( Gamepad_device* device, unsigned int axisid, float value, float lastvalue,  double timestamp )
 		: mDevice(device)
+		, mType(EventType::AxisMoved)
 		, mId(axisid)
 		, mAxisValue(value)
 		, mLastAxisValue(lastvalue)
 		, mTimestamp(timestamp) {}
 		
-		// device move
-		Event( Gamepad_device* device )
-		: mDevice(device) {}
+		// device attached/removed
+		Event( Gamepad_device* device, EventType type )
+		: mDevice(device)
+		, mType(type) {}
 		
 		Gamepad_device *mDevice=0;
 		
+		EventType mType;
 		unsigned int mId=0; // button or axis id
 		float  mAxisValue=0.f, mLastAxisValue=0.f; // only for axis events
 		double mTimestamp=0.f; // none for device attached/removed

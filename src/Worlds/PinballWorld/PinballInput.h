@@ -34,6 +34,7 @@ public:
 	void tick();
 	void keyDown( KeyEvent );
 	void keyUp( KeyEvent );
+	void gamepadEvent( const GamepadManager::Event& );
 	bool isFlipperDown( int side ) const { assert(side==0||side==1); return mIsFlipperDown[side]; }
 	bool isPaused() const { return mPauseBallWorld; }
 	float getPlungerState() const { return mPlungerState; }
