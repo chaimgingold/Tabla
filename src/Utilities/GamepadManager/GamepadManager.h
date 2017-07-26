@@ -40,7 +40,7 @@ public:
 		
 		// device move
 		Event( Gamepad_device* device )
-		: mDevice(0) {}
+		: mDevice(device) {}
 		
 		Gamepad_device *mDevice=0;
 		
@@ -51,6 +51,7 @@ public:
 
 	// devices
 	typedef Gamepad_device Device;
+	typedef unsigned int DeviceId;
 	typedef std::vector<Device*> DeviceVec;
 	const DeviceVec& getDevices() const { return mDevices; }	
 
@@ -62,7 +63,16 @@ public:
 	tEventLambda mOnAxisMoved;
 	tEventLambda mOnDeviceAttached;
 	tEventLambda mOnDeviceRemoved;
-	
+
+	void clearCallbacks()
+	{
+		mOnButtonDown = 0;
+		mOnButtonUp = 0;
+		mOnAxisMoved = 0;
+		mOnDeviceAttached = 0;
+		mOnDeviceRemoved = 0;
+	}
+		
 	// internal callbacks -- callbacks from driver into us.
 	// (should be private)
 	void onButtonDown		( Gamepad_device * device, unsigned int buttonID, double timestamp );

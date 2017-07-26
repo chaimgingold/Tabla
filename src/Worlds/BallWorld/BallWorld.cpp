@@ -633,6 +633,11 @@ Ball& BallWorld::newRandomBall ( vec2 loc )
 	return mBalls.back();
 }
 
+void BallWorld::eraseBall( int index )
+{
+	mBalls.erase( mBalls.begin() + index );
+}
+
 /*
 vec2 BallWorld::resolveCollisionWithBalls ( vec2 p, float r, Ball* ignore, float correctionFraction ) const
 {

@@ -39,7 +39,6 @@
 		2673CD5E1E1D791C0036C02D /* PinballView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2673CD5C1E1D791C0036C02D /* PinballView.cpp */; };
 		268076761EE9CBB700969E89 /* TablaAppSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 268076741EE9CBB700969E89 /* TablaAppSettings.cpp */; };
 		26A451641E54420600BCAC25 /* TablaAppParams.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26A451621E54420600BCAC25 /* TablaAppParams.cpp */; };
-		26AAA1B71F06080900C5DA84 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 26AAA1B61F06080900C5DA84 /* LICENSE */; };
 		26CCA2D31E089DE7005F7C24 /* BallWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2B21E089DE7005F7C24 /* BallWorld.cpp */; };
 		26CCA2D51E089DE7005F7C24 /* GameWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2B81E089DE7005F7C24 /* GameWorld.cpp */; };
 		26CCA2D61E089DE7005F7C24 /* Instrument.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26CCA2BB1E089DE7005F7C24 /* Instrument.cpp */; };
@@ -75,6 +74,7 @@
 		26E30EA91E0B4F0600AA9F97 /* ocv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E30EA81E0B4F0600AA9F97 /* ocv.cpp */; };
 		26E30EAE1E0C567100AA9F97 /* QuadTestWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E30EAC1E0C567100AA9F97 /* QuadTestWorld.cpp */; };
 		26E30EB21E0C9A3600AA9F97 /* RectFinder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E30EB01E0C9A3600AA9F97 /* RectFinder.cpp */; };
+		26E811B41F290FCD00BECCC2 /* RaceWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26E811B21F290FCD00BECCC2 /* RaceWorld.cpp */; };
 		26EAE98A1E57D6A5001475EA /* VisionInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26EAE9881E57D6A5001475EA /* VisionInput.cpp */; };
 		26F0E2EA1E28AF390083FB22 /* CameraCalibrateWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26F0E2E61E28AF390083FB22 /* CameraCalibrateWorld.cpp */; };
 		26F0E2EB1E28AF390083FB22 /* ProjectorCalibrateWorld.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26F0E2E81E28AF390083FB22 /* ProjectorCalibrateWorld.cpp */; };
@@ -255,7 +255,6 @@
 		26A4515F1E54390F00BCAC25 /* FPS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPS.h; sourceTree = "<group>"; };
 		26A451621E54420600BCAC25 /* TablaAppParams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TablaAppParams.cpp; sourceTree = "<group>"; };
 		26A451631E54420600BCAC25 /* TablaAppParams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TablaAppParams.h; sourceTree = "<group>"; };
-		26AAA1B61F06080900C5DA84 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		26CCA2B21E089DE7005F7C24 /* BallWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BallWorld.cpp; sourceTree = "<group>"; };
 		26CCA2B31E089DE7005F7C24 /* BallWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BallWorld.h; sourceTree = "<group>"; };
 		26CCA2B81E089DE7005F7C24 /* GameWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GameWorld.cpp; sourceTree = "<group>"; };
@@ -328,6 +327,8 @@
 		26E30EAD1E0C567100AA9F97 /* QuadTestWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QuadTestWorld.h; sourceTree = "<group>"; };
 		26E30EB01E0C9A3600AA9F97 /* RectFinder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RectFinder.cpp; sourceTree = "<group>"; };
 		26E30EB11E0C9A3600AA9F97 /* RectFinder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RectFinder.h; sourceTree = "<group>"; };
+		26E811B21F290FCD00BECCC2 /* RaceWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RaceWorld.cpp; sourceTree = "<group>"; };
+		26E811B31F290FCD00BECCC2 /* RaceWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RaceWorld.h; sourceTree = "<group>"; };
 		26EAE9881E57D6A5001475EA /* VisionInput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VisionInput.cpp; sourceTree = "<group>"; };
 		26EAE9891E57D6A5001475EA /* VisionInput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VisionInput.h; sourceTree = "<group>"; };
 		26F0E2E61E28AF390083FB22 /* CameraCalibrateWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = CameraCalibrateWorld.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
@@ -864,6 +865,7 @@
 				26CCA2CD1E089DE7005F7C24 /* RibbonWorld */,
 				26CCA2D01E089DE7005F7C24 /* TokenWorld */,
 				26E30EAB1E0C567100AA9F97 /* QuadTestWorld */,
+				26E811B11F290FCD00BECCC2 /* Race */,
 			);
 			name = Worlds;
 			path = ../src/Worlds;
@@ -1085,6 +1087,15 @@
 			name = OpenSFZ;
 			sourceTree = "<group>";
 		};
+		26E811B11F290FCD00BECCC2 /* Race */ = {
+			isa = PBXGroup;
+			children = (
+				26E811B21F290FCD00BECCC2 /* RaceWorld.cpp */,
+				26E811B31F290FCD00BECCC2 /* RaceWorld.h */,
+			);
+			path = Race;
+			sourceTree = "<group>";
+		};
 		26F0E2E51E28AF390083FB22 /* Calibration */ = {
 			isa = PBXGroup;
 			children = (
@@ -1110,7 +1121,6 @@
 		29B97314FDCFA39411CA2CEA /* PaperBounce3 */ = {
 			isa = PBXGroup;
 			children = (
-				26AAA1B61F06080900C5DA84 /* LICENSE */,
 				26CCA30F1E089EE3005F7C24 /* App */,
 				26CCA2B01E089DE7005F7C24 /* Worlds */,
 				26CCA2FC1E089EB8005F7C24 /* Utilities */,
@@ -2707,7 +2717,6 @@
 			files = (
 				262FCDCF1E234DDF00FC5D66 /* Images.xcassets in Resources */,
 				C29A0ACF1DF1FE12008A26A1 /* .gitignore in Resources */,
-				26AAA1B71F06080900C5DA84 /* LICENSE in Resources */,
 				26FA36501D5519DA00C64A00 /* assets in Resources */,
 				C29A0AD01DF1FE12008A26A1 /* CMakeLists.txt in Resources */,
 				C2EC76FD1DA7157F00DB39C8 /* LICENSE.txt in Resources */,
@@ -2825,6 +2834,7 @@
 				368A4C049D4240A9A2AB6B0B /* b2RopeJoint.cpp in Sources */,
 				E3E1015154A147BC9674C8ED /* b2WeldJoint.cpp in Sources */,
 				24F2003E479C4BC49D1F7374 /* b2WheelJoint.cpp in Sources */,
+				26E811B41F290FCD00BECCC2 /* RaceWorld.cpp in Sources */,
 				26CCA2D51E089DE7005F7C24 /* GameWorld.cpp in Sources */,
 				260AD7BD1E60E8CC0077AEEC /* channel.cpp in Sources */,
 				07C3702F227C4A08918DBF6E /* b2Rope.cpp in Sources */,

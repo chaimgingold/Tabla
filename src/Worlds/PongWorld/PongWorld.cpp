@@ -47,6 +47,8 @@ void PongWorld::gameWillLoad()
 
 void PongWorld::update()
 {
+	mFileWatch.update();
+	
 	switch (mState)
 	{
 		// start a game?

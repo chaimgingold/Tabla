@@ -1,0 +1,30 @@
+<RaceWorld>
+	<!-- cm -->
+	<BallDefaultRadius>			2 </BallDefaultRadius>
+	<BallDefaultMaxRadius>		2 </BallDefaultMaxRadius>
+	<BallMaxVel>				.5 </BallMaxVel>
+	<BallContourImpactNormalVelImpulse>.1</BallContourImpactNormalVelImpulse>
+	<BallDefaultColor>			00FFFF </BallDefaultColor>
+	<BallDefaultRibbonColor>			CCFFFF </BallDefaultRibbonColor>
+	
+	<Ribbon>
+		<Enabled>0</Enabled>
+		<MaxLength>50</MaxLength>
+		<SampleRate>1</SampleRate>
+		<RadiusScale>.9</RadiusScale>
+		<RadiusExp>.5</RadiusExp>
+		<AlphaScale>.5</AlphaScale>
+		<AlphaExp>.5</AlphaExp>
+	</Ribbon>
+	
+	<!-- cm -->
+	<Vision>
+		<Contours>
+			<ContourMinRadius>			1	</ContourMinRadius>
+			<ContourMinArea>			1	</ContourMinArea>
+			<ContourDPEpsilon>			1	</ContourDPEpsilon>
+			<ContourMinWidth>			2	</ContourMinWidth>
+		</Contours>
+	</Vision>
+
+</RaceWorld>
