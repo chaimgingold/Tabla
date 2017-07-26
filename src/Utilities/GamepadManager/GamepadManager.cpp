@@ -65,6 +65,17 @@ static void onDeviceRemoved(struct Gamepad_device * device, void * context)
     }
 }
 
+const GamepadManager::Device*
+GamepadManager::getDeviceById( DeviceId id ) const
+{
+	for( GamepadManager::Device* d : mDevices )
+	{
+		if ( d->deviceID == id ) return d;
+	}
+	
+	return 0;
+}
+
 GamepadManager::GamepadManager()
 {
 	void* context = this;

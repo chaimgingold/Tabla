@@ -67,7 +67,8 @@ public:
 	typedef unsigned int DeviceId;
 	typedef std::vector<Device*> DeviceVec;
 	const DeviceVec& getDevices() const { return mDevices; }	
-
+	const Device* getDeviceById( DeviceId ) const;
+	
 	// your callbacks
 	typedef std::function<void( const Event& )> tEventLambda;
 

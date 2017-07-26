@@ -77,7 +77,15 @@ void BallWorld::setParams( XmlTree xml )
 	getXml(xml,"Ribbon/AlphaExp",mRibbonAlphaExp);
 	
 	updateBallsWithRibbonParams();
-	setNumBalls(getTargetBallCount());
+	maybeUpdateBallPopulationWithDesiredDensity();
+}
+
+void BallWorld::maybeUpdateBallPopulationWithDesiredDensity()
+{
+	if (mBallDensity >= 0.f)
+	{
+		setNumBalls( getTargetBallCount() );
+	}
 }
 
 void BallWorld::updateBallsWithRibbonParams()
@@ -369,12 +377,12 @@ int BallWorld::getTargetBallCount() const
 
 void BallWorld::worldBoundsPolyDidChange()
 {
-	setNumBalls( getTargetBallCount() );
+	maybeUpdateBallPopulationWithDesiredDensity();
 }
 
 void BallWorld::gameWillLoad()
 {
-	setNumBalls( getTargetBallCount() );
+	maybeUpdateBallPopulationWithDesiredDensity();
 }
 
 void BallWorld::setNumBalls( int n )

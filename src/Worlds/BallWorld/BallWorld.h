@@ -156,9 +156,11 @@ protected:
 	// these functions record collisions. if you override, then make sure you call BallWorld::
 	// if you still want them returned in the collision lists.
 	
+	void maybeUpdateBallPopulationWithDesiredDensity(); // if mBallDensity<0 then ignored
+	
 	// params
 	int		mNumIntegrationSteps	= 1;	
-	float	mBallDensity			= .1;
+	float	mBallDensity			= -1.f; // negative for disable auto ball populate, positive for how much
 	float	mBallDefaultRadius		= 8.f *  .5f ;
 	float	mBallDefaultMaxRadius	= 8.f * 4.f ;
 	float	mBallMaxVel				= 8.f ;

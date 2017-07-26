@@ -37,6 +37,7 @@ private:
 	public:
 		GamepadManager::DeviceId mGamepad=0; // for convenience
 		int mBallIndex=-1;
+		vec2 mFacing=vec2(0,1);
 	};
 	
 	typedef map<GamepadManager::DeviceId,Player> tDeviceToPlayerMap;

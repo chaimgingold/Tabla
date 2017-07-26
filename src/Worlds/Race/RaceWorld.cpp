@@ -68,8 +68,10 @@ void RaceWorld::setupGamepad( Gamepad_device* gamepad )
 	{
 		Player p;
 	
-		newRandomBall( getRandomPointInWorldBoundsPoly() );
-	
+		Ball &ball = newRandomBall( getRandomPointInWorldBoundsPoly() );
+		ball.setVel( vec2(0,0) );
+		ball.mAccel = vec2(0,0);
+		
 		p.mBallIndex = getBalls().size()-1; // assume new one is at the end :)
 		p.mGamepad = gamepad->deviceID;
 		
@@ -94,6 +96,33 @@ void RaceWorld::removePlayer( Gamepad_device* gamepad )
 
 void RaceWorld::update()
 {
+	// friction, accel
+	for( auto &p : mPlayers )
+	{
+		auto &car = p.second; 
+		
+		if (car.mBallIndex!=-1)
+		{
+			Ball &ball = getBalls()[car.mBallIndex];
+			
+			const GamepadManager::Device* gamepad = getGamepadManager().getDeviceById(p.first);
+			if (gamepad)
+			{
+				if (gamepad->buttonStates[0])
+				{
+					ball.mAccel += p.second.mFacing * .05f;
+					// ideally we let the engine rev up and down so this happens smoothly.. (and feels a bit sloppy)
+				}
+				
+				car.mFacing = glm::rotate( car.mFacing, gamepad->axisStates[0] * .08f );
+			}
+			
+//			ball.mAccel = -.001f * ball.getVel();
+			// TODO: do this in a more graceful way
+		}
+	}
+
+	//
 	BallWorld::update(); // also does its sound, which may be an issue
 }
 
@@ -105,6 +134,28 @@ void RaceWorld::draw( DrawType drawType )
 	// Draw world
 	//
 	BallWorld::draw(drawType);
+	
+	for( auto &p : mPlayers )
+	{
+		if (p.second.mBallIndex!=-1)
+		{
+			Ball &ball = getBalls()[p.second.mBallIndex];
+			auto &car = p.second; 
+			
+			gl::color(ball.mColor);
+			gl::drawLine( ball.mLoc, ball.mLoc + ball.mRadius * 2.f * p.second.mFacing );
+			
+			gl::pushModelMatrix();
+			gl::translate( ball.mLoc );
+			gl::multModelMatrix( mat4( mat2( -perp(car.mFacing), car.mFacing ) ) );
+			gl::scale( vec2(ball.mRadius) );
+
+			gl::drawSolidRect( Rectf(-.5,-1,.5,1.5) );
+
+			gl::popModelMatrix();
+			
+		}
+	}
 }
 
 // Synthesis
