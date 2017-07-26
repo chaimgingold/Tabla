@@ -40,6 +40,8 @@
 #include "PureDataNode.h"
 #include "OpenSFZNode.h"
 
+#include "GamepadManager.h"
+
 using namespace ci;
 using namespace ci::app;
 using namespace std;
@@ -104,7 +106,12 @@ class TablaApp : public App {
 	fs::path hotloadableAssetPath( fs::path ) const ; // prepends the appropriate thing...
 	// TODO: move all game assets into their own directories and then make this private
 
-		
+	
+	// utilities for game worlds
+	// TODO: refactor into gamepad event list game modes get passed each frame
+	// But for now, game modes do their own ticking and lambda callback setting
+	GamepadManager& getGamepadManager();
+	
 private:
 	
 	// === Vision System ===
@@ -168,6 +175,9 @@ private:
 	
 	void setupRFIDValueToFunction(); // scans game library and binds loader code to rfid values
 	
+	
+	// === Centralized Gamepad Logic ===
+	std::shared_ptr<GamepadManager> mGamepadManager;
 	
 	
 	// === UI Stuff ===

@@ -58,7 +58,7 @@ private:
 	void processKeyEvent( KeyEvent, bool down );
 
 	// game pad
-	GamepadManager mGamepadManager;
+//	GamepadManager mGamepadManager;
 	map<unsigned int,string> mGamepadButtons;
 	map<unsigned int,string> mGamepadAxes;
 	map<string,vector<unsigned int>> mAxisIdForAction;

@@ -17,6 +17,7 @@
 #include "Vision.h"
 
 class Pipeline;
+class GamepadManager;
 
 class GameWorld
 {
@@ -84,11 +85,13 @@ public:
 	virtual void keyDown( KeyEvent ){}
 	virtual void keyUp( KeyEvent ){}
 	void setMousePosInWorld( vec2 p ) { mMousePosInWorld=p; } // called by app
+
+	GamepadManager& getGamepadManager();
 	
 protected:
 	vec2 getMousePosInWorld() const { return mMousePosInWorld; }
 	fs::path getAssetPath( fs::path ) const; // TODO: make relative to game world asset directory
-
+	
 private:
 	Vision::Params	mVisionParams;
 	PolyLine2		mWorldBoundsPoly;

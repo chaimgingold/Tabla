@@ -11,7 +11,7 @@
 
 using namespace std;
 
-static bool verbose = false;
+static bool verbose = true;
 
 static void onButtonDown(struct Gamepad_device * device, unsigned int buttonID, double timestamp, void * context)
 {

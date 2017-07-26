@@ -35,8 +35,8 @@ void RaceWorld::worldBoundsPolyDidChange()
 
 void RaceWorld::setupGamepadManager()
 {
-//	auto gamepadManager = getGamepadManager(); 	
-	auto gamepadManager = mGamepadManager; 	
+	auto &gamepadManager = getGamepadManager();
+//	auto &gamepadManager = mGamepadManager;
 
 	gamepadManager.mOnButtonDown = [this]( const GamepadManager::Event& event )
 	{
@@ -105,14 +105,9 @@ void RaceWorld::removePlayer( Gamepad_device* gamepad )
 
 void RaceWorld::update()
 {
-	mGamepadManager.tick();
+	getGamepadManager().tick();
 
 	BallWorld::update(); // also does its sound, which may be an issue
-	
-	/*while ( getBalls().size() < 5 )
-	{
-		newRandomBall( getRandomPointInWorldBoundsPoly() );
-	}*/
 }
 
 void RaceWorld::draw( DrawType drawType )

@@ -545,6 +545,9 @@ void TablaApp::loadGame( string systemName )
 		return;
 	}
 	
+	if (mGamepadManager) mGamepadManager->clearCallbacks(); // because game modes point to themselves 
+	// TODO: refactor into event based system
+	 
 	mGameWorld = cart->second->load();
 	
 	if ( mGameWorld )
@@ -1184,6 +1187,16 @@ bool TablaApp::parseKeyboardString( string str )
 	}
 
 	return handled;
+}
+
+GamepadManager& TablaApp::getGamepadManager()
+{
+	if ( !mGamepadManager )
+	{
+		mGamepadManager = std::make_shared<GamepadManager>();
+	}
+	
+	return *( mGamepadManager.get() );
 }
 
 void TablaApp::loadUserSettingsFromXml( XmlTree xml )

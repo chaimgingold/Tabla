@@ -19,6 +19,11 @@ fs::path GameWorld::getAssetPath( fs::path p ) const
 	return TablaApp::get()->hotloadableAssetPath(p);
 }
 
+GamepadManager& GameWorld::getGamepadManager()
+{
+	return TablaApp::get()->getGamepadManager();
+}
+
 void GameWorld::setWorldBoundsPoly( PolyLine2 p )
 {
 	bool diff=false;

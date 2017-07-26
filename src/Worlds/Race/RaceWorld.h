@@ -31,7 +31,7 @@ protected:
 private:
 	FileWatch mFileWatch;
 
-	GamepadManager mGamepadManager;
+//	GamepadManager mGamepadManager;
 	
 	class Player
 	{

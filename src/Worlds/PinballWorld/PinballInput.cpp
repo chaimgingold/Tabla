@@ -27,20 +27,22 @@ PinballInput::PinballInput( PinballWorld& world ) : mWorld(world)
 		}
 	};
 	
+		
+	auto &gamepadManager = world.getGamepadManager(); 
 	
-	mGamepadManager.mOnButtonDown = [this,button]( const GamepadManager::Event& event )
+	gamepadManager.mOnButtonDown = [this,button]( const GamepadManager::Event& event )
 	{
 		cout << "down " << event.mId << endl;
 		button(event.mId,true);
 	};
 
-	mGamepadManager.mOnButtonUp = [this,button]( const GamepadManager::Event& event )
+	gamepadManager.mOnButtonUp = [this,button]( const GamepadManager::Event& event )
 	{
 		cout << "up "  << event.mId << endl;
 		button(event.mId,false);
 	};
 	
-	mGamepadManager.mOnAxisMoved = [this]( const GamepadManager::Event& event )
+	gamepadManager.mOnAxisMoved = [this]( const GamepadManager::Event& event )
 	{
 		if ( mGamepadVerboseAxes &&
 		    (mGamepadAxes.empty() || mGamepadAxes.find(event.mId) != mGamepadAxes.end() )
@@ -142,7 +144,7 @@ void PinballInput::setParams( XmlTree xml )
 
 void PinballInput::tick()
 {
-	mGamepadManager.tick();
+	mWorld.getGamepadManager().tick();
 	
 	// parse input
 	float plungeraxis = reduceAxisForAction( "plunger", 0.f, []( float v1, float v2 ){
@@ -200,7 +202,7 @@ void PinballInput::keyUp( KeyEvent event )
 
 float PinballInput::reduceAxisForAction( string actionName, float v, function<float(float,float)> reduce )
 {
-	for( auto gamepad : mGamepadManager.getDevices() )
+	for( auto gamepad : mWorld.getGamepadManager().getDevices() )
 	{
 		for( auto id : mAxisIdForAction[actionName] )
 		{
