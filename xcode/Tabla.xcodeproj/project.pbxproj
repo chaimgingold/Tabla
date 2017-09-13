@@ -30,8 +30,8 @@
 		2603D16E1E625952002E4188 /* GetCaptureDeviceFormats.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2603D16D1E625952002E4188 /* GetCaptureDeviceFormats.mm */; };
 		260AD7BD1E60E8CC0077AEEC /* channel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 260AD7BB1E60E8CC0077AEEC /* channel.cpp */; };
 		26143F001E2356A800EDEE1E /* PinballInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26143EFE1E2356A800EDEE1E /* PinballInput.cpp */; };
-		2618599D1F69D014007BBC09 /* LICENSE.md in Sources */ = {isa = PBXBuildFile; fileRef = 2618599B1F69D014007BBC09 /* LICENSE.md */; };
-		2618599E1F69D014007BBC09 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 2618599C1F69D014007BBC09 /* README.md */; };
+		261859A31F69EC94007BBC09 /* LICENSE.md in Sources */ = {isa = PBXBuildFile; fileRef = 261859A11F69EC94007BBC09 /* LICENSE.md */; };
+		261859A41F69EC94007BBC09 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 261859A21F69EC94007BBC09 /* README.md */; };
 		262A88751DB594B700FE2336 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 262A88741DB594B700FE2336 /* CoreMIDI.framework */; };
 		262F18EE1ECE705600344A33 /* VectorEditView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 262F18EC1ECE705600344A33 /* VectorEditView.cpp */; };
 		262FCDCC1E234CB100FC5D66 /* PinballVision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 262FCDCA1E234CB100FC5D66 /* PinballVision.cpp */; };
@@ -240,8 +240,8 @@
 		260AD7BC1E60E8CC0077AEEC /* channel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = channel.h; sourceTree = "<group>"; };
 		26143EFE1E2356A800EDEE1E /* PinballInput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PinballInput.cpp; sourceTree = "<group>"; };
 		26143EFF1E2356A800EDEE1E /* PinballInput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PinballInput.h; sourceTree = "<group>"; };
-		2618599B1F69D014007BBC09 /* LICENSE.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = LICENSE.md; sourceTree = "<group>"; };
-		2618599C1F69D014007BBC09 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		261859A11F69EC94007BBC09 /* LICENSE.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = LICENSE.md; path = ../LICENSE.md; sourceTree = "<group>"; };
+		261859A21F69EC94007BBC09 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		262A88741DB594B700FE2336 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
 		262F18EC1ECE705600344A33 /* VectorEditView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VectorEditView.cpp; sourceTree = "<group>"; };
 		262F18ED1ECE705600344A33 /* VectorEditView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VectorEditView.h; sourceTree = "<group>"; };
@@ -1135,8 +1135,8 @@
 				01B97315FEAEA392516A2CEA /* Blocks */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
-				2618599B1F69D014007BBC09 /* LICENSE.md */,
-				2618599C1F69D014007BBC09 /* README.md */,
+				261859A11F69EC94007BBC09 /* LICENSE.md */,
+				261859A21F69EC94007BBC09 /* README.md */,
 			);
 			name = PaperBounce3;
 			sourceTree = "<group>";
@@ -2790,7 +2790,7 @@
 				79D90302F4CB4826B60D2A4D /* b2Fixture.cpp in Sources */,
 				8E2F70EF3C5D4609A2286FD3 /* b2Island.cpp in Sources */,
 				26D254041E47078900A07330 /* PolyEditView.cpp in Sources */,
-				2618599E1F69D014007BBC09 /* README.md in Sources */,
+				261859A41F69EC94007BBC09 /* README.md in Sources */,
 				93B67C671E2D48FA99301AE1 /* b2World.cpp in Sources */,
 				C2C874941DDBB2D40067E07D /* serial.cc in Sources */,
 				26CCA3191E089EE3005F7C24 /* TablaApp.cpp in Sources */,
@@ -2803,7 +2803,7 @@
 				065D029E5180471999C3E354 /* b2CircleContact.cpp in Sources */,
 				26CCA2D91E089DE7005F7C24 /* MusicWorld.cpp in Sources */,
 				BF8EA3BC1AE14D83A5112094 /* b2Contact.cpp in Sources */,
-				2618599D1F69D014007BBC09 /* LICENSE.md in Sources */,
+				261859A31F69EC94007BBC09 /* LICENSE.md in Sources */,
 				9E53F22939EC46629ECD511A /* b2ContactSolver.cpp in Sources */,
 				268076761EE9CBB700969E89 /* TablaAppSettings.cpp in Sources */,
 				3F51BFBD57064C0FBBDC06D5 /* b2EdgeAndCircleContact.cpp in Sources */,
