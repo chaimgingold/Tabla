@@ -126,10 +126,10 @@ ContourVec ContourVision::findContours( const Pipeline::StageRef input, Pipeline
 	}
 	
 	// contour detect
-	vector<vector<cv::Point> > contours;
+	vector<vector<cv::Point> > contoursi;
 	vector<cv::Vec4i> hierarchy;
 	
-	cv::findContours( thresholded, contours, hierarchy, cv::RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+	cv::findContours( thresholded, contoursi, hierarchy, cv::RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
 	
 	// transform contours to world space...
 	// ideally we'd transform them in place, BUT since they are stored as integers
@@ -137,20 +137,36 @@ ContourVec ContourVision::findContours( const Pipeline::StageRef input, Pipeline
 	// SO we need to keep the scaling ratio in mind as we go...
 	// also IDEALLY we'd use the transform matrix above and not just a single scaling factor,
 	// but this works.
+
+	// convert to 2f and scale
+	vector< vector<cv::Point2f> > contours;
+	
+	for( auto c : contoursi )
+	{
+		vector<cv::Point2f> nc(c.size());
+		
+		for ( size_t i=0; i<nc.size(); ++i )
+		{
+			nc[i] = c[i]; // convert
+			nc[i] *= contourPixelToWorld; // scale
+		}
+		
+		contours.push_back(nc);
+	}
 	
 	// filter and process contours into our format
 	map<int,int> ocvContourIdxToMyContourIdx ;
 	
 	for( int i=0; i<contours.size(); ++i )
 	{
-		const auto &c = contours[i] ;
+		const auto & c = contours[i] ;
 		
-		float		area = cv::contourArea(c) * contourPixelToWorld ;
+		float		area = cv::contourArea(c);
 		
 		cv::RotatedRect ocvMinRotatedRect = minAreaRect(c) ;
 		Contour::tRotatedRect minRotatedRect;
-		minRotatedRect.mCenter = fromOcv(ocvMinRotatedRect.center) * contourPixelToWorld;
-		minRotatedRect.mSize   = vec2(ocvMinRotatedRect.size.width,ocvMinRotatedRect.size.height) * contourPixelToWorld;
+		minRotatedRect.mCenter = fromOcv(ocvMinRotatedRect.center);
+		minRotatedRect.mSize   = vec2(ocvMinRotatedRect.size.width,ocvMinRotatedRect.size.height);
 		minRotatedRect.mAngle  = ocvMinRotatedRect.angle;
 		const float minWidth = (float)(min( minRotatedRect.mSize.x, minRotatedRect.mSize.y ));
 		const float maxWidth = (float)(max( minRotatedRect.mSize.x, minRotatedRect.mSize.y ));
@@ -161,8 +177,7 @@ ContourVec ContourVision::findContours( const Pipeline::StageRef input, Pipeline
 			if (mParams.mContourGetExactMinCircle) {
 				cv::Point2f ocvcenter;
 				cv::minEnclosingCircle( c, ocvcenter, radius ) ;
-				center  = fromOcv(ocvcenter) * contourPixelToWorld;
-				radius *= contourPixelToWorld;
+				center  = fromOcv(ocvcenter);
 			} else {
 				center = minRotatedRect.mCenter;
 				radius = maxWidth/2.f;
@@ -173,17 +188,14 @@ ContourVec ContourVision::findContours( const Pipeline::StageRef input, Pipeline
 				area     > mParams.mContourMinArea   &&
 				minWidth > mParams.mContourMinWidth )
 		{
-			auto addContour = [&]( const vector<cv::Point>& c )
+			auto addContour = [&]( const vector<cv::Point2f>& c )
 			{
 				Contour myc ;
 				
 				myc.mPolyLine = PolyLine2( fromOcv(c) );
 				myc.mPolyLine.setClosed();
 
-				// scale polyline to world space (from pixel space)
-				for( auto &p : myc.mPolyLine.getPoints() ) p *= contourPixelToWorld ;
-
-				myc.mPerimeter = cv::arcLength(c,true) * contourPixelToWorld;
+				myc.mPerimeter = cv::arcLength(c,true);
 				myc.mRadius = radius ;
 				myc.mCenter = center ;
 				myc.mArea   = area ;
@@ -213,7 +225,7 @@ ContourVec ContourVision::findContours( const Pipeline::StageRef input, Pipeline
 			if ( mParams.mContourDPEpsilon > 0 )
 			{
 				// simplify
-				vector<cv::Point> approx ;
+				vector<cv::Point2f> approx ;
 				
 				cv::approxPolyDP( c, approx, mParams.mContourDPEpsilon, true ) ;
 				
