@@ -451,6 +451,30 @@ int BallWorld::getBallIndex( const Ball& b ) const
 	return i;
 }
 
+const map<int,int> BallWorld::getBallsByUserID() const
+{
+	map<int,int> r;
+	
+	for( size_t i=0; i<mBalls.size(); ++i )
+	{
+		r[ mBalls[i].mUserID ] = (int)i;
+	}
+	
+	return r;
+}
+
+const map<int,vector<int>> BallWorld::getBallsByUserType() const
+{
+	map<int,vector<int>> r;
+	
+	for( size_t i=0; i<mBalls.size(); ++i )
+	{
+		r[ mBalls[i].mUserType ].push_back( (int)i );
+	}
+	
+	return r;
+}
+
 void BallWorld::onBallBallCollide			( const Ball& a, const Ball& b )
 {
 	mBallBallCollisions.push_back( BallBallCollision(getBallIndex(a),getBallIndex(b)));

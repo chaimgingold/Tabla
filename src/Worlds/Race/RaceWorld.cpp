@@ -19,8 +19,19 @@ static GameCartridgeSimple sCartridge("RaceWorld", [](){
 
 RaceWorld::RaceWorld()
 {
-	setupSynthesis();
+	randSeed( clock() );
 	
+	setupSynthesis();
+
+	// default goal
+	mTuning.mGoalBall.mUserType = BallGoal;
+	mTuning.mGoalBall.mColor  = Color::hex(0xF5BF30);
+	mTuning.mGoalBall.mRadius = 1.5f;
+	mTuning.mGoalBall.mRibbonColor = mTuning.mGoalBall.mColor;
+	mTuning.mGoalBall.mCollideWithContours = true; 
+	mTuning.mGoalBall.setVel( vec2(0,0) );
+	mTuning.mGoalBall.mAccel = vec2(0,0);
+		
 	// load ship
 	{
 		fs::path path = TablaApp::get()->hotloadableAssetPath( fs::path(getSystemName()) / "ship.png" );
@@ -88,14 +99,19 @@ void RaceWorld::setupGamepad( Gamepad_device* gamepad )
 		Player p;
 	
 		Ball &ball = newRandomBall( getRandomPointInWorldBoundsPoly() );
+		ball.mUserType = BallPlayer;
+		ball.mUserID   = mNextPlayerId;
 		ball.mCollideWithContours = true;
 		ball.setVel( vec2(0,0) );
 		ball.mAccel = vec2(0,0);
 		
 		p.mBallIndex = getBalls().size()-1; // assume new one is at the end :)
+		p.mBallUserId = mNextPlayerId;
 		p.mGamepad = gamepad->deviceID;
 		
 		mPlayers[gamepad->deviceID] = p;
+		
+		mNextPlayerId++;
 	}
 }
 
@@ -108,9 +124,22 @@ void RaceWorld::removePlayer( Gamepad_device* gamepad )
 		if (it->second.mBallIndex != -1)
 		{
 			eraseBall(it->second.mBallIndex);
+			remapBallIndices();
 		}
 		
 		mPlayers.erase(it);
+	}
+}
+
+void RaceWorld::remapBallIndices()
+{
+	auto u = getBallsByUserID();
+	
+	for( auto p : mPlayers )
+	{
+		auto i = u.find(p.second.mBallUserId);
+	
+		p.second.mBallIndex = (i==u.end()) ? -1 : i->second;
 	}
 }
 
@@ -132,10 +161,14 @@ void RaceWorld::tickPlayer( Player& p )
 			ball.mAccel += p.mFacing * .05f;
 			// ideally we let the engine rev up and down so this happens smoothly.. (and feels a bit sloppy)
 		}
-		else
+//		else
 		{
 			// "friction"
-			ball.mAccel = min(ball.getVel(),-.001f) * ball.getVel();
+			float v = length( ball.getVel() );
+			if ( v > 0.f )
+			{
+				ball.mAccel += -min(v,.01f) * normalize(ball.getVel());
+			}
 			// TODO: do this in a more graceful way
 		}
 		
@@ -181,14 +214,118 @@ void RaceWorld::drawPlayer( const Player& p ) const
 
 void RaceWorld::update()
 {
-	// friction, accel
+	// players
 	for( auto &p : mPlayers )
 	{
 		tickPlayer(p.second);
 	}
 
+	// goal
+	tickGoalSpawn();
+
+	// collisions
+	handleCollisions();
+
 	//
 	BallWorld::update(); // also does its sound, which may be an issue
+}
+
+void RaceWorld::tickGoalSpawn()
+{
+	mGoalCount=0;
+	
+	auto t = getBallsByUserType();
+	auto i = t.find(BallGoal); 
+	if ( i != t.end() ) mGoalCount = i->second.size();
+	
+	if ( mGoalCount==0 )
+	{
+		if ( mGoalBillSpawnWaitTicks == -1 ) {
+			 mGoalBillSpawnWaitTicks = mTuning.mGoalBillSpawnWaitTicks;
+		}
+		
+		if ( mGoalBillSpawnWaitTicks > 0 ) {
+			 mGoalBillSpawnWaitTicks--;
+		}
+		
+		if ( mGoalBillSpawnWaitTicks==0 )
+		{
+			// new goal!
+			int n = 1;
+			
+			for( int i=0; i<mTuning.mMultigoalMax; ++i )
+			{
+				if (randInt()%mTuning.mMultigoalOdds==0) {
+					n++;	
+				}
+			}
+			
+			for ( int i=0; i<n; ++i )
+			{
+				Ball& b = newRandomBall( getRandomPointInWorldBoundsPoly() );
+				
+				b = mTuning.mGoalBall;
+				b.mHistory.set_capacity( getRibbonMaxLength() );
+				
+				b.setLoc( getRandomPointInWorldBoundsPoly() );				
+				b.setVel( randVec2() * randFloat() * .1f );
+				
+				mGoalCount++;
+			}
+	
+			mGoalBillSpawnWaitTicks = -1;
+		}
+	}
+}
+
+void RaceWorld::handleCollisions()
+{
+	auto bbc = getBallBallCollisions();
+	auto balls = getBalls();
+	
+	vector<int> removeGoals;
+	
+	for( BallBallCollision c : bbc )
+	{
+		// make sure player is in slot 0
+		if ( balls[c.mBallIndex[1]].mUserType == BallPlayer )
+		{
+			swap( c.mBallIndex[0], c.mBallIndex[1] );
+		}
+		
+		// 0 isa player 
+		if ( balls[c.mBallIndex[0]].mUserType == BallPlayer )
+		{
+			if ( balls[c.mBallIndex[1]].mUserType == BallGoal )
+			{
+				removeGoals.push_back(c.mBallIndex[1]);
+				
+				// score it
+				Player* p = getPlayerByBallIndex( c.mBallIndex[0] );
+				if (p) p->mScore++;
+			}
+		}
+	}
+	
+	// remove stuff
+	for ( auto g : removeGoals ) {
+		eraseBall(g);
+	}
+	
+	if ( !removeGoals.empty() ) {
+		remapBallIndices();
+	}
+}
+
+RaceWorld::Player*
+RaceWorld::getPlayerByBallIndex( int bi )
+{
+	for ( auto &i : mPlayers )
+	{
+		if ( i.second.mBallIndex==bi ) return &(i.second);
+	}
+	
+	return 0;
 }
 
 void RaceWorld::draw( DrawType drawType )

@@ -54,6 +54,10 @@ public:
 	
 	boost::circular_buffer<vec2> mHistory;
 	
+	// User data that BallWorld doesn't use
+	int   mUserType	= 0;
+	int   mUserID	= 0;
+	
 private:
 	float	mMass = 1.f ; // let's start by doing the right thing.
 
@@ -100,6 +104,9 @@ public:
 	
 	vector<Ball>& getBalls() { return mBalls; }
 	const vector<Ball>& getBalls() const { return mBalls; }
+	const map<int,int> getBallsByUserID() const;
+	const map<int,vector<int>> getBallsByUserType() const;
+
 	vec2 getDenoisedBallVel( const Ball& ) const; // tries to use mHistory if it's there, otherwise just mVel
 	
 	ContourVector& getContours() { return mContours; }
