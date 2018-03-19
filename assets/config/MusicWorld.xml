@@ -30,15 +30,15 @@
 				<Token name="RobitPokie" path="robit-pokie.png"/>
 				<Token name="Additive" path="additive.png"/>
 
-<!--				<Token name="0Volca FM" path="board.png"/>-->
-<!--				<Token name="2Volca Sample (Drums)" path="drumkit.png"/>-->
-<!--				<Token name="8Volca Keys" path="keyboard.png"/>-->
-<!--				<Token name="6Volca Bass" path="keyboard2.png"/>-->
+				<Token name="0Volca FM" path="board.png"/>
+				<Token name="2Volca Sample (Drums)" path="drumkit.png"/>
+				<Token name="8Volca Keys" path="keyboard.png"/>
+				<Token name="6Volca Bass" path="keyboard2.png"/>
 
-				<Token name="Strings" path="board.png"/>
-				<Token name="Harp" path="drumkit.png"/>
-				<Token name="Brass" path="keyboard.png"/>
-				<Token name="Choir" path="keyboard2.png"/>
+<!--				<Token name="Strings" path="board.png"/>-->
+<!--				<Token name="Harp" path="drumkit.png"/>-->
+<!--				<Token name="Brass" path="keyboard.png"/>-->
+<!--				<Token name="Choir" path="keyboard2.png"/>-->
 
 				<Token name="Scale" path="scale.png"/>
 				<Token name="Tempo" path="tempo.png"/>
@@ -196,6 +196,7 @@
 		</Instrument>
 
 <!--	Sampler Instruments	-->
+<!--	
 		<Instrument>
 			<PlayheadColor>FF9900</PlayheadColor>
 			<ScoreColor>112266</ScoreColor>
@@ -266,9 +267,9 @@
 			<Channel>1</Channel>
 			<MapNotesToChannels>0</MapNotesToChannels>
 		</Instrument>
-
+-->
 <!--	Midi Instruments	-->
-<!--
+
 		<Instrument>
 			<PlayheadColor>FF9900</PlayheadColor>
 			<ScoreColor>112266</ScoreColor>
@@ -335,7 +336,7 @@
 			<Channel>0</Channel>
 			<MapNotesToChannels>0</MapNotesToChannels>
 		</Instrument>
--->
+
 		<!-- Meta Param Instruments -->
 
 		<Instrument>

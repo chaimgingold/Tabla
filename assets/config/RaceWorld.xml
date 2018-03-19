@@ -20,10 +20,10 @@
 	<!-- cm -->
 	<Vision>
 		<Contours>
-			<ContourMinRadius>			1	</ContourMinRadius>
-			<ContourMinArea>			1	</ContourMinArea>
-			<ContourDPEpsilon>			1	</ContourDPEpsilon>
-			<ContourMinWidth>			2	</ContourMinWidth>
+			<ContourMinRadius>			.25	</ContourMinRadius>
+			<ContourMinArea>			.25	</ContourMinArea>
+			<ContourDPEpsilon>			.5	</ContourDPEpsilon>
+			<ContourMinWidth>			.25	</ContourMinWidth>
 		</Contours>
 	</Vision>
 

@@ -30,8 +30,6 @@
 		2603D16E1E625952002E4188 /* GetCaptureDeviceFormats.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2603D16D1E625952002E4188 /* GetCaptureDeviceFormats.mm */; };
 		260AD7BD1E60E8CC0077AEEC /* channel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 260AD7BB1E60E8CC0077AEEC /* channel.cpp */; };
 		26143F001E2356A800EDEE1E /* PinballInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26143EFE1E2356A800EDEE1E /* PinballInput.cpp */; };
-		261859A31F69EC94007BBC09 /* LICENSE.md in Sources */ = {isa = PBXBuildFile; fileRef = 261859A11F69EC94007BBC09 /* LICENSE.md */; };
-		261859A41F69EC94007BBC09 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 261859A21F69EC94007BBC09 /* README.md */; };
 		262A88751DB594B700FE2336 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 262A88741DB594B700FE2336 /* CoreMIDI.framework */; };
 		262F18EE1ECE705600344A33 /* VectorEditView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 262F18EC1ECE705600344A33 /* VectorEditView.cpp */; };
 		262FCDCC1E234CB100FC5D66 /* PinballVision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 262FCDCA1E234CB100FC5D66 /* PinballVision.cpp */; };
@@ -2662,6 +2660,12 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0810;
+				TargetAttributes = {
+					8D1107260486CEB800E47090 = {
+						DevelopmentTeam = L8PBKMRR82;
+						ProvisioningStyle = Manual;
+					};
+				};
 			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Tabla" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -2790,7 +2794,6 @@
 				79D90302F4CB4826B60D2A4D /* b2Fixture.cpp in Sources */,
 				8E2F70EF3C5D4609A2286FD3 /* b2Island.cpp in Sources */,
 				26D254041E47078900A07330 /* PolyEditView.cpp in Sources */,
-				261859A41F69EC94007BBC09 /* README.md in Sources */,
 				93B67C671E2D48FA99301AE1 /* b2World.cpp in Sources */,
 				C2C874941DDBB2D40067E07D /* serial.cc in Sources */,
 				26CCA3191E089EE3005F7C24 /* TablaApp.cpp in Sources */,
@@ -2803,7 +2806,6 @@
 				065D029E5180471999C3E354 /* b2CircleContact.cpp in Sources */,
 				26CCA2D91E089DE7005F7C24 /* MusicWorld.cpp in Sources */,
 				BF8EA3BC1AE14D83A5112094 /* b2Contact.cpp in Sources */,
-				261859A31F69EC94007BBC09 /* LICENSE.md in Sources */,
 				9E53F22939EC46629ECD511A /* b2ContactSolver.cpp in Sources */,
 				268076761EE9CBB700969E89 /* TablaAppSettings.cpp in Sources */,
 				3F51BFBD57064C0FBBDC06D5 /* b2EdgeAndCircleContact.cpp in Sources */,
@@ -2865,9 +2867,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = L8PBKMRR82;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -2891,6 +2896,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.libcinder.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = Tabla;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SYMROOT = ./build;
 				USER_HEADER_SEARCH_PATHS = "\"$(CINDER_PATH)/include\" ../include ../blocks/OpenCV3-Contrib/include/** ../blocks/OpenCV3/include ../src/** ../blocks/OpenSFZ/Include";
 				WRAPPER_EXTENSION = app;
@@ -2901,9 +2907,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = L8PBKMRR82;
 				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
@@ -2928,6 +2937,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.libcinder.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = Tabla;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRIP_INSTALLED_PRODUCT = YES;
 				SYMROOT = ./build;
 				USER_HEADER_SEARCH_PATHS = "\"$(CINDER_PATH)/include\" ../include ../blocks/OpenCV3-Contrib/include/** ../blocks/OpenCV3/include ../src/** ../blocks/OpenSFZ/Include";

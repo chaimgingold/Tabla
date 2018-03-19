@@ -28,7 +28,7 @@
 			<ContourMinRadius>			.5	</ContourMinRadius>
 			<ContourMinArea>			1	</ContourMinArea>
 			<ContourDPEpsilon>			1	</ContourDPEpsilon>
-			<ContourMinWidth>			1	</ContourMinWidth>
+			<ContourMinWidth>			.1	</ContourMinWidth>
 		</Contours>
 	</Vision>
 

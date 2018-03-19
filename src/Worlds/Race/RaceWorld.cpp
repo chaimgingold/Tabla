@@ -69,6 +69,7 @@ void RaceWorld::setupGamepad( Gamepad_device* gamepad )
 		Player p;
 	
 		Ball &ball = newRandomBall( getRandomPointInWorldBoundsPoly() );
+		ball.mCollideWithContours = true;
 		ball.setVel( vec2(0,0) );
 		ball.mAccel = vec2(0,0);
 		
