@@ -20,6 +20,25 @@ static GameCartridgeSimple sCartridge("RaceWorld", [](){
 RaceWorld::RaceWorld()
 {
 	setupSynthesis();
+	
+	// load ship
+	{
+		fs::path path = TablaApp::get()->hotloadableAssetPath( fs::path(getSystemName()) / "ship.png" );
+
+		mFileWatch.load( path, [this]( fs::path path )
+		{
+			// load the texture
+			gl::Texture::Format format;
+			format.loadTopDown(false);
+			format.mipmap(true);
+			mShip = gl::Texture2d::create( loadImage(path), format );
+			
+			mShipScale = 1.f;
+			if (mShip) {
+				mShipScale = 2.f / max( mShip->getWidth(), mShip->getHeight() );
+			}
+		});
+	}
 }
 
 void RaceWorld::gameWillLoad()
@@ -95,32 +114,77 @@ void RaceWorld::removePlayer( Gamepad_device* gamepad )
 	}
 }
 
+void RaceWorld::tickPlayer( Player& p )
+{
+	// get ball
+	// (and ensure ball still here)
+	if (p.mBallIndex == -1) return;
+	
+	Ball &ball = getBalls()[p.mBallIndex];
+	
+	// get gamepad
+	const GamepadManager::Device* gamepad = getGamepadManager().getDeviceById(p.mGamepad);
+	if (gamepad)
+	{
+		// accel
+		if (gamepad->buttonStates[0])
+		{
+			ball.mAccel += p.mFacing * .05f;
+			// ideally we let the engine rev up and down so this happens smoothly.. (and feels a bit sloppy)
+		}
+		else
+		{
+			// "friction"
+			ball.mAccel = min(ball.getVel(),-.001f) * ball.getVel();
+			// TODO: do this in a more graceful way
+		}
+		
+		// rotate
+		p.mFacing = glm::rotate( p.mFacing, gamepad->axisStates[0] * .08f );
+	}
+}
+
+void RaceWorld::drawPlayer( const Player& p ) const
+{
+	if (p.mBallIndex==-1) return;	
+	const Ball &ball = getBalls()[p.mBallIndex];
+	
+	if ( mTuning.mShipDrawDebug || !mShip )
+	{
+		gl::color(ball.mColor);
+		gl::drawLine( ball.mLoc, ball.mLoc + ball.mRadius * 2.f * p.mFacing );
+		
+		gl::pushModelMatrix();
+		gl::translate( ball.mLoc );
+		gl::multModelMatrix( mat4( mat2( -perp(p.mFacing), p.mFacing ) ) );
+		gl::scale( vec2(ball.mRadius) );
+
+		gl::drawSolidRect( Rectf(-.5,-1,.5,1.5) );
+
+		gl::popModelMatrix();
+	}
+
+	if (mShip)
+	{
+		gl::pushModelMatrix();
+
+		gl::translate( ball.mLoc );
+		gl::multModelMatrix( mat4( mat2( -perp(p.mFacing), -p.mFacing ) ) );
+		gl::scale( vec2(ball.mRadius) * mShipScale );
+
+		gl::color(1,1,1,1);
+		gl::draw( mShip, -mShip->getSize() / 2 );
+
+		gl::popModelMatrix();
+	}
+}
+
 void RaceWorld::update()
 {
 	// friction, accel
 	for( auto &p : mPlayers )
 	{
-		auto &car = p.second; 
-		
-		if (car.mBallIndex!=-1)
-		{
-			Ball &ball = getBalls()[car.mBallIndex];
-			
-			const GamepadManager::Device* gamepad = getGamepadManager().getDeviceById(p.first);
-			if (gamepad)
-			{
-				if (gamepad->buttonStates[0])
-				{
-					ball.mAccel += p.second.mFacing * .05f;
-					// ideally we let the engine rev up and down so this happens smoothly.. (and feels a bit sloppy)
-				}
-				
-				car.mFacing = glm::rotate( car.mFacing, gamepad->axisStates[0] * .08f );
-			}
-			
-//			ball.mAccel = -.001f * ball.getVel();
-			// TODO: do this in a more graceful way
-		}
+		tickPlayer(p.second);
 	}
 
 	//
@@ -138,24 +202,7 @@ void RaceWorld::draw( DrawType drawType )
 	
 	for( auto &p : mPlayers )
 	{
-		if (p.second.mBallIndex!=-1)
-		{
-			Ball &ball = getBalls()[p.second.mBallIndex];
-			auto &car = p.second; 
-			
-			gl::color(ball.mColor);
-			gl::drawLine( ball.mLoc, ball.mLoc + ball.mRadius * 2.f * p.second.mFacing );
-			
-			gl::pushModelMatrix();
-			gl::translate( ball.mLoc );
-			gl::multModelMatrix( mat4( mat2( -perp(car.mFacing), car.mFacing ) ) );
-			gl::scale( vec2(ball.mRadius) );
-
-			gl::drawSolidRect( Rectf(-.5,-1,.5,1.5) );
-
-			gl::popModelMatrix();
-			
-		}
+		drawPlayer(p.second);
 	}
 }
 

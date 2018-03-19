@@ -8,7 +8,7 @@
 	<BallDefaultRibbonColor>			CCFFFF </BallDefaultRibbonColor>
 	
 	<Ribbon>
-		<Enabled>0</Enabled>
+		<Enabled>1</Enabled>
 		<MaxLength>50</MaxLength>
 		<SampleRate>1</SampleRate>
 		<RadiusScale>.9</RadiusScale>

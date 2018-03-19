@@ -32,20 +32,37 @@ protected:
 private:
 	FileWatch mFileWatch;
 
+	class Tuning
+	{
+	public:
+		bool  mShipDrawDebug = false;
+	}
+	mTuning;
+	
 	class Player
 	{
 	public:
 		GamepadManager::DeviceId mGamepad=0; // for convenience
-		int mBallIndex=-1;
-		vec2 mFacing=vec2(0,1);
+		int		mBallIndex=-1;
+		vec2	mFacing=vec2(0,1);
+		
+		// graphics
+//		ci::gl::TextureRef mImage;
 	};
 	
 	typedef map<GamepadManager::DeviceId,Player> tDeviceToPlayerMap;
 	tDeviceToPlayerMap mPlayers;
 
+	void tickPlayer( Player& );
+	void drawPlayer( const Player& ) const;
+	
 	void setupGamepad( Gamepad_device* ); // idempotent
 	void removePlayer( Gamepad_device* );
-		
+	
+	//
+	ci::gl::TextureRef	mShip;
+	float				mShipScale=1.f;
+	
 	// synthesis
 	cipd::PureDataNodeRef	mPd;	// synth engine
 	cipd::PatchRef			mPatch;			// pong patch
