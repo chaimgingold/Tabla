@@ -42,7 +42,7 @@ void SFZReader::read(const Path& file)
 
 	read((const char*) buffer, (unsigned int)length);
     
-    delete buffer;
+    delete[] buffer;
 }
 
 

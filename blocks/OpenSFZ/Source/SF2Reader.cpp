@@ -228,7 +228,7 @@ SFZAudioBuffer* SF2Reader::readSamples(
 		//	return NULL;
 		//	}
     }
-	delete buffer;
+	delete[] buffer;
 
 	if (progressVar)
 		*progressVar = 1.0;

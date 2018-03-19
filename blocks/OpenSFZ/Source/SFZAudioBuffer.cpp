@@ -16,7 +16,7 @@ SFZAudioBuffer::SFZAudioBuffer(const int numChannels_, const unsigned long numSa
     
     numSamples = numSamples_;
     
-    if(numSamples < 0 || numSamples > 158760000)
+    if( numSamples < 0 || numSamples > 158760000)
     {
         owned = false;
         channels[0] = 0;

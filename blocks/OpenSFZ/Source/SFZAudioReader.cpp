@@ -247,7 +247,7 @@ int32_t SFZAudioReader::parseSMPLChunk(ifstream &f, long dataLength)
     
     
     
-
+	return 1;
 }
 
 
