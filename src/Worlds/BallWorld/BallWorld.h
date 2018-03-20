@@ -36,7 +36,7 @@ public:
 	ColorAf mColor ;
 	ColorAf mRibbonColor=ColorAf(0,0,0,0) ;
 	
-	void setLoc( vec2 l ) { mLoc=mLastLoc=l; }
+	void setLoc( vec2 l ) { vec2 v=getVel(); mLoc=l; setVel(v); }
 	void setVel( vec2 v ) { mLastLoc = mLoc - v ; }
 	vec2 getVel() const { return mLoc - mLastLoc ; }
 	

@@ -67,6 +67,8 @@ void RaceWorld::setParams( XmlTree xml )
 		XmlTree t = xml.getChild("Tuning");
 		
 		getXml(t,"ShipDrawDebug",			mTuning.mShipDrawDebug);
+		getXml(t,"AxisDeadZone",			mTuning.mAxisDeadZone);
+		
 		getXml(t,"GoalBall/SpawnWaitTicks",	mTuning.mGoalBallSpawnWaitTicks);
 		getXml(t,"GoalBall/Color",			mTuning.mGoalBall.mColor);
 		getXml(t,"GoalBall/Radius",			mTuning.mGoalBall.mRadius);
@@ -145,7 +147,8 @@ void RaceWorld::setupPlayer( Gamepad_device* gamepad )
 		{
 			Player p;
 			p.mBallIndex = -1;
-			p.mGamepad = gamepad->deviceID;	
+			p.mGamepad   = gamepad->deviceID;
+			p.mFacing    = randVec2();
 			mPlayers[gamepad->deviceID] = p;
 			
 			getPlayerByGamepad(gamepad->deviceID);
@@ -225,8 +228,10 @@ void RaceWorld::makeBullet( Player& p )
 	b.mRadius		= mTuning.mShotRadius;
 	b.mCollideWithContours = true;
 	
-	b.setLoc( pb.mLoc + p.mFacing * (pb.mRadius + b.mRadius + mTuning.mShotDistance /*+ mTuning.mShotVel*2.f*/) );				
-	b.setVel( p.mFacing * mTuning.mShotVel );
+	vec2 v = p.mFacing;
+	
+	b.setLoc( pb.mLoc + v * (pb.mRadius + b.mRadius + mTuning.mShotDistance) );
+	b.setVel( v * mTuning.mShotVel );
 
 	auto ballData = make_shared<BallData>();
 	ballData->mType		= BallData::Type::Shot;
@@ -296,8 +301,10 @@ void RaceWorld::tickPlayer( Player& p )
 	
 	// rotate
 	if (gamepad) {
-		p.mFacing = glm::rotate( p.mFacing, gamepad->axisStates[0] * mTuning.mPlayerTurnSpeedScale );
-		FX("turn",false);
+		if ( fabs(gamepad->axisStates[0]) > mTuning.mAxisDeadZone ) {
+			p.mFacing = glm::rotate( p.mFacing, gamepad->axisStates[0] * mTuning.mPlayerTurnSpeedScale );
+			FX("turn",false);
+		}
 	}
 }
 
@@ -338,20 +345,20 @@ void RaceWorld::drawPlayer( const Player& p ) const
 
 void RaceWorld::update()
 {
-	// players
+	// players (controls)
 	for( auto &p : mPlayers )
 	{
 		tickPlayer(p.second);
 	}
 
-	// goal
-	tickGoalSpawn();
+	// physics
+	BallWorld::update(); // also does its sound, which may be an issue
 
-	// collisions
+	// handle collisions (right after physics!)
 	handleCollisions();
 
-	//
-	BallWorld::update(); // also does its sound, which may be an issue
+	// goal spawn
+	tickGoalSpawn();
 }
 
 void RaceWorld::tickGoalSpawn()

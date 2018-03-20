@@ -30,6 +30,7 @@
 	<Tuning>
 		
 		<ShipDrawDebug>0</ShipDrawDebug>
+		<AxisDeadZone>.2</AxisDeadZone>
 		
 		<GoalBall>
 			<SpawnWaitTicks>180</SpawnWaitTicks>
@@ -40,8 +41,8 @@
 
 		<Shot>
 			<Radius>.5</Radius>
-			<Vel>5</Vel>
-			<Distance>1</Distance>
+			<Vel>.5</Vel>
+			<Distance>4</Distance>
 			<Color>FF00ED</Color>
 			<RibbonColor>FFE700</RibbonColor>
 		</Shot>

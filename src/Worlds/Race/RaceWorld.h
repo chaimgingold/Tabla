@@ -37,6 +37,8 @@ private:
 	{
 	public:
 		bool	mShipDrawDebug				= false;
+		float	mAxisDeadZone				= .2f;
+		
 		int		mGoalBallSpawnWaitTicks		= 60 * 3;
 		Ball	mGoalBall;
 		float	mGoalBallSpawnMaxVel		= .1f;
