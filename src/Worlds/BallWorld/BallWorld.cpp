@@ -646,6 +646,21 @@ void BallWorld::eraseBall( int index )
 	mBalls.erase( mBalls.begin() + index );
 }
 
+void BallWorld::eraseBalls( std::set<size_t> indices )
+{
+	auto bs = mBalls;
+	
+	mBalls.clear();
+	
+	for ( size_t i=0; i<bs.size(); ++i )
+	{
+		if ( indices.find(i) == indices.end() )
+		{
+			mBalls.push_back(bs[i]);
+		}
+	}
+}
+
 /*
 vec2 BallWorld::resolveCollisionWithBalls ( vec2 p, float r, Ball* ignore, float correctionFraction ) const
 {

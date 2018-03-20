@@ -38,13 +38,22 @@
 			<SpawnMaxVel>.1</SpawnMaxVel>			
 		</GoalBall>
 
+		<Shot>
+			<Radius>.5</Radius>
+			<Vel>5</Vel>
+			<Distance>1</Distance>
+			<Color>FF00ED</Color>
+			<RibbonColor>FFE700</RibbonColor>
+		</Shot>
+		
 		<MultigoalOdds>8</MultigoalOdds>
 		<MultigoalMax>4</MultigoalMax>
 		<PlayerTurnSpeedScale>.1</PlayerTurnSpeedScale>
 		<PlayerAccelSpeedScale>.05</PlayerAccelSpeedScale>
 		<PlayerFriction>.01</PlayerFriction>
-		<PlayerCollideFrictionCoeff>.5</PlayerCollideFrictionCoeff>
-
+		<PlayerCollideFrictionCoeff>.1</PlayerCollideFrictionCoeff>
+		<PlayerFireIntervalTicks>10</PlayerFireIntervalTicks>
+		
 	</Tuning>
 	
 </RaceWorld>

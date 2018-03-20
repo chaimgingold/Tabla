@@ -86,7 +86,8 @@ public:
 	
 	Ball& newRandomBall( vec2 loc ); // returns it, too, if you want to modify it.
 	void clearBalls() { mBalls.clear(); }
-	void eraseBall( int index );
+	void eraseBall ( int index );
+	void eraseBalls( std::set<size_t> indices );
 	
 	float getBallDefaultRadius() const { return mBallDefaultRadius ; }
 	int   getTargetBallCount() const;

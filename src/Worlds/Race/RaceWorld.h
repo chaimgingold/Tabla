@@ -41,15 +41,28 @@ private:
 		Ball	mGoalBall;
 		float	mGoalBallSpawnMaxVel		= .1f;
 		
+		float	mShotRadius					= .5f;
+		float	mShotVel					= 5.f;
+		float	mShotDistance				= 1.f;
+		ColorA	mShotColor, mRibbonColor;
+		
 		int		mMultigoalOdds				= 8; 
 		int		mMultigoalMax				= 4; 
 		
 		float	mPlayerTurnSpeedScale		= .08f;
 		float	mPlayerAccelSpeedScale		= .05f;
 		float	mPlayerFriction				= .01f;
+		int		mPlayerFireIntervalTicks	= 20;
 		
 		float	mPlayerCollideFrictionCoeff	= .1f;
 		
+		class Controls
+		{
+		public:
+			vector<unsigned int> mFire  = {4,5}; // DS4 L,R
+			vector<unsigned int> mAccel = {0,1,2}; // DS4 Square, X, O
+		};
+		Controls mControls;
 	}
 	mTuning;
 	
@@ -61,7 +74,9 @@ private:
 		vec2	mFacing=vec2(0,1);
 		int		mScore=0;
 		int		mBallIndex=-1;
-			
+		
+		int		mFireWait=0;
+		
 		// graphics
 //		ci::gl::TextureRef mImage;
 	};
@@ -98,13 +113,14 @@ private:
 	void tickPlayer( Player& );
 	void drawPlayer( const Player& ) const;
 	
-	void setupGamepad( Gamepad_device* ); // idempotent
+	void setupPlayer ( Gamepad_device* ); // idempotent
 	void removePlayer( Gamepad_device* );
 	
 	void remapBallIndices();
 	
 	void tickGoalSpawn();
 	void handleCollisions();
+	void makeBullet( Player& );
 	
 	//
 	ci::gl::TextureRef	mShip;
@@ -112,8 +128,6 @@ private:
 	
 	int					mGoalCount=0;
 	int					mGoalBallSpawnWaitTicks=-1;
-	
-	int					mNextPlayerId=1;
 	
 	
 	// synthesis

@@ -17,6 +17,12 @@ static GameCartridgeSimple sCartridge("RaceWorld", [](){
 	return std::make_shared<RaceWorld>();
 });
 
+void FX( const char* comment=0, bool print=true )
+{
+	if (comment&&print) cout << comment << endl;
+	// placeholder for particle, sound fx.
+}
+
 RaceWorld::RaceWorld()
 {
 	randSeed( clock() );
@@ -65,6 +71,12 @@ void RaceWorld::setParams( XmlTree xml )
 		getXml(t,"GoalBall/Color",			mTuning.mGoalBall.mColor);
 		getXml(t,"GoalBall/Radius",			mTuning.mGoalBall.mRadius);
 		getXml(t,"GoalBall/SpawnMaxVel",	mTuning.mGoalBallSpawnMaxVel);
+
+		getXml(t,"Shot/Color",				mTuning.mShotColor);
+		getXml(t,"Shot/RibbonColor",		mTuning.mRibbonColor);
+		getXml(t,"Shot/Radius",				mTuning.mShotRadius);
+		getXml(t,"Shot/Vel",				mTuning.mShotVel);
+		getXml(t,"Shot/Distance",			mTuning.mShotDistance);
 		
 		getXml(t,"MultigoalOdds", 			mTuning.mMultigoalOdds );
 		getXml(t,"MultigoalMax",			mTuning.mMultigoalMax );
@@ -73,6 +85,7 @@ void RaceWorld::setParams( XmlTree xml )
 		getXml(t,"PlayerAccelSpeedScale",	mTuning.mPlayerAccelSpeedScale );
 		getXml(t,"PlayerFriction",			mTuning.mPlayerFriction );
 		getXml(t,"PlayerCollideFrictionCoeff", mTuning.mPlayerCollideFrictionCoeff );
+		getXml(t,"PlayerFireIntervalTicks",	mTuning.mPlayerFireIntervalTicks );
 		
 		mTuning.mGoalBall.mRibbonColor = mTuning.mGoalBall.mColor;
 	}	
@@ -94,14 +107,15 @@ void RaceWorld::gamepadEvent( const GamepadManager::Event& event )
 	{
 		case GamepadManager::EventType::ButtonDown:
 		 
-			setupGamepad(event.mDevice);
+			setupPlayer(event.mDevice);
 			cout << "down " << event.mId << endl;
-			
+			FX("button down");
 			break;
 
 		case GamepadManager::EventType::ButtonUp:
-			setupGamepad(event.mDevice);
+			setupPlayer(event.mDevice);
 			cout << "up "  << event.mId << endl;
+			FX("button up");
 			break;
 			
 		case GamepadManager::EventType::AxisMoved:
@@ -109,36 +123,51 @@ void RaceWorld::gamepadEvent( const GamepadManager::Event& event )
 
 		case GamepadManager::EventType::DeviceAttached:
 			cout << "attached "  << event.mDevice << endl;
+			FX("gamepad attach");
 			break;
 			
 		case GamepadManager::EventType::DeviceRemoved:
 			cout << "removed "  << event.mDevice << endl;
 			removePlayer(event.mDevice);
+			FX("gamepad detach");
 			break;
 	}
 }
 
-void RaceWorld::setupGamepad( Gamepad_device* gamepad )
+void RaceWorld::setupPlayer( Gamepad_device* gamepad )
 {
-	if ( gamepad && mPlayers.find(gamepad->deviceID) == mPlayers.end() )
-	{	
-		Ball &ball = newRandomBall( getRandomPointInWorldBoundsPoly() );
-		ball.mCollideWithContours = true;
-		ball.setVel( vec2(0,0) );
-		ball.mAccel = vec2(0,0);
+	if ( gamepad )
+	{
+		Player* player = getPlayerByGamepad(gamepad->deviceID);
+		
+		// make player	
+		if ( !player )
+		{
+			Player p;
+			p.mBallIndex = -1;
+			p.mGamepad = gamepad->deviceID;	
+			mPlayers[gamepad->deviceID] = p;
+			
+			getPlayerByGamepad(gamepad->deviceID);
+		}
+		
+		// make ship
+		if ( player && player->mBallIndex == -1 )
+		{
+			FX("player spawn");
 
-		Player p;
-		p.mBallIndex = getBalls().size()-1; // assume new one is at the end :)
-		p.mGamepad = gamepad->deviceID;
-		
-		mPlayers[gamepad->deviceID] = p;
-		
-		mNextPlayerId++;
-		
-		auto ballData = make_shared<BallData>();
-		ballData->mGamepad = p.mGamepad;
-		ballData->mType = BallData::Type::Player;
-		ball.mUserData = ballData;
+			Ball &ball = newRandomBall( getRandomPointInWorldBoundsPoly() );
+			ball.mCollideWithContours = true;
+			ball.setVel( vec2(0,0) );
+			ball.mAccel = vec2(0,0);
+
+			auto ballData = make_shared<BallData>();
+			ballData->mGamepad = player->mGamepad;
+			ballData->mType = BallData::Type::Player;
+			ball.mUserData = ballData;
+			
+			player->mBallIndex = getBalls().size()-1; // last ball we added is it
+		}
 	}
 }
 
@@ -168,7 +197,9 @@ void RaceWorld::remapBallIndices()
 	}
 	
 	// link
-	for( const Ball &b : getBalls() )
+	const vector<Ball>& balls = getBalls();
+	
+	for( const Ball &b : balls )
 	{
 		auto bd = getBallData(b);
 		
@@ -180,8 +211,44 @@ void RaceWorld::remapBallIndices()
 	}
 }
 
+void RaceWorld::makeBullet( Player& p )
+{
+	FX("shoot");
+	if (p.mBallIndex == -1) return;
+	
+	const Ball& pb = getBalls()[p.mBallIndex];
+	
+	Ball& b = newRandomBall( getRandomPointInWorldBoundsPoly() );
+	
+	b.mColor		= mTuning.mShotColor;
+	b.mRibbonColor	= mTuning.mRibbonColor;
+	b.mRadius		= mTuning.mShotRadius;
+	b.mCollideWithContours = true;
+	
+	b.setLoc( pb.mLoc + p.mFacing * (pb.mRadius + b.mRadius + mTuning.mShotDistance /*+ mTuning.mShotVel*2.f*/) );				
+	b.setVel( p.mFacing * mTuning.mShotVel );
+
+	auto ballData = make_shared<BallData>();
+	ballData->mType		= BallData::Type::Shot;
+	ballData->mGamepad	= p.mGamepad;
+	b.mUserData = ballData;	
+}
+
 void RaceWorld::tickPlayer( Player& p )
 {
+	auto button = []( const GamepadManager::Device* d, const vector<unsigned int>& btn ) -> bool
+	{
+		if (d) {
+			for( auto b : btn ) {
+				if ( b < d->numButtons && d->buttonStates[b] ) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	};
+	
 	// get ball
 	// (and ensure ball still here)
 	if (p.mBallIndex == -1) return;
@@ -190,31 +257,47 @@ void RaceWorld::tickPlayer( Player& p )
 	
 	// get gamepad
 	const GamepadManager::Device* gamepad = getGamepadManager().getDeviceById(p.mGamepad);
-	if (gamepad)
-	{
-		// accel
-		if (gamepad->buttonStates[0])
-		{
-			ball.mAccel += p.mFacing * mTuning.mPlayerAccelSpeedScale;
-			// ideally we let the engine rev up and down so this happens smoothly.. (and feels a bit sloppy)
-		}
 
-		// "friction"
+	// accel
+	if ( button(gamepad,mTuning.mControls.mAccel) )
+	{
+		FX("accel",false);
+		ball.mAccel += p.mFacing * mTuning.mPlayerAccelSpeedScale;
+		// ideally we let the engine rev up and down so this happens smoothly.. (and feels a bit sloppy)
+	}
+
+	// shoot
+	if ( p.mFireWait > 0 ) p.mFireWait--; // cool off
+	
+	if ( button(gamepad,mTuning.mControls.mFire) )
+	{
+		if ( p.mFireWait <= 0 )
 		{
-			float v = length( ball.getVel() );
-			
-			float f = mTuning.mPlayerFriction;
-			f += length(ball.mSquash) * mTuning.mPlayerCollideFrictionCoeff;
-			
-			if ( v > 0.f )
-			{
-				ball.mAccel += -min(v,f) * normalize(ball.getVel());
-			}
-			// TODO: do this in a more graceful way
+			// fire!
+			makeBullet(p);
+			p.mFireWait = mTuning.mPlayerFireIntervalTicks;
 		}
+		else FX("can't fire; cool off",false);
+	}
+	
+	// "friction"
+	{
+		float v = length( ball.getVel() );
 		
-		// rotate
+		float f = mTuning.mPlayerFriction;
+		f += length(ball.mSquash) * mTuning.mPlayerCollideFrictionCoeff;
+		
+		if ( v > 0.f )
+		{
+			ball.mAccel += -min(v,f) * normalize(ball.getVel());
+		}
+		// TODO: do this in a more graceful way
+	}
+	
+	// rotate
+	if (gamepad) {
 		p.mFacing = glm::rotate( p.mFacing, gamepad->axisStates[0] * mTuning.mPlayerTurnSpeedScale );
+		FX("turn",false);
 	}
 }
 
@@ -295,6 +378,7 @@ void RaceWorld::tickGoalSpawn()
 		
 		if ( mGoalBallSpawnWaitTicks==0 )
 		{
+			FX("goal spawn");
 			// new goal!
 			int n = 1;
 			
@@ -329,47 +413,109 @@ void RaceWorld::tickGoalSpawn()
 
 void RaceWorld::handleCollisions()
 {
-	auto bbc = getBallBallCollisions();
-	auto balls = getBalls();
+	const vector<Ball>& balls = getBalls();
+	set<size_t> removeBall;	
 	
-	vector<int> removeGoals;
-	
-	for( BallBallCollision c : bbc )
+	// ball-world and ball-contour collisions
 	{
-		BallData *d[2] = {
-			getBallData( getBalls()[ c.mBallIndex[0] ] ),
-			getBallData( getBalls()[ c.mBallIndex[1] ] )
-		};
-		if ( !d[0] || !d[1] ) continue;
+		auto bwc = getBallWorldCollisions();
+		auto bcc = getBallContourCollisions();
 		
-		// make sure player is in slot 0
-		if ( d[1]->mType == BallData::Type::Player )
+		auto test = [&balls,&removeBall]( int i )
 		{
-			swap( c.mBallIndex[0], c.mBallIndex[1] );
-			swap( d[0], d[1] );
-		}
-		
-		// 0 isa player 
-		if ( d[0]->mType == BallData::Type::Player )
-		{
-			// hit a goal
-			if ( d[1]->mType == BallData::Type::Goal )
+			auto bd = getBallData( balls[i] );
+			
+			// shot hit wall/world
+			if (bd && bd->mType == BallData::Type::Shot )
 			{
-				removeGoals.push_back(c.mBallIndex[1]);
-				
-				// score it
-				Player* p = getPlayerByGamepad( d[0]->mGamepad );
-				if (p) p->mScore++;
+				// DINK!
+				removeBall.insert(i);
+				FX("shot hit world/wall");
+			}			
+		};
+		
+		for( auto c : bcc ) test(c.mBallIndex);
+		for( auto c : bwc ) test(c.mBallIndex);
+	}
+	
+	// ball-ball collisions
+	{
+		auto bbc = getBallBallCollisions();
+		
+		for( BallBallCollision c : bbc )
+		{
+			BallData *d[2] = {
+				getBallData( getBalls()[ c.mBallIndex[0] ] ),
+				getBallData( getBalls()[ c.mBallIndex[1] ] )
+			};
+			if ( !d[0] || !d[1] ) continue; // hit a UFO (ie no ball data)
+			
+			// make sure player is in slot 0
+			if ( d[1]->mType == BallData::Type::Player )
+			{
+				swap( c.mBallIndex[0], c.mBallIndex[1] );
+				swap( d[0], d[1] );
+			}
+			
+			// Player hits X
+			// 0 isa player 
+			if ( d[0]->mType == BallData::Type::Player )
+			{
+				switch( d[1]->mType )
+				{
+					// goal
+					case BallData::Type::Goal:
+					{
+						removeBall.insert(c.mBallIndex[1]);
+						
+						// score it
+						Player* p = getPlayerByGamepad( d[0]->mGamepad );
+						if (p) p->mScore++;
+						FX("get goal");
+					}
+					break;
+					
+					// bullet
+					case BallData::Type::Shot:
+					{
+						// no self-kill
+						if ( d[0]->mGamepad != d[1]->mGamepad )
+						{
+							// kaboom
+							removeBall.insert(c.mBallIndex[1]); // shot
+							removeBall.insert(c.mBallIndex[0]); // player
+							FX("player die");
+							
+							// update player
+							Player* p = getPlayerByBallIndex( c.mBallIndex[0] );
+							if (p)
+							{
+								p->mBallIndex = -1;
+							}
+							
+							// TODO: spawn coins for score * multiplier
+						}
+					}
+					break;
+
+					// player
+					case BallData::Type::Player:
+					{
+						// sound???
+						FX("player hit player");
+					}
+					break;
+									
+					default:break;
+				}
 			}
 		}
 	}
-	
+		
 	// remove stuff
-	for ( auto g : removeGoals ) {
-		eraseBall(g);
-	}
+	eraseBalls(removeBall);
 	
-	if ( !removeGoals.empty() ) {
+	if ( !removeBall.empty() ) {
 		remapBallIndices();
 	}
 }
