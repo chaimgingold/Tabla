@@ -24,7 +24,6 @@ RaceWorld::RaceWorld()
 	setupSynthesis();
 
 	// default goal
-	mTuning.mGoalBall.mUserType = BallGoal;
 	mTuning.mGoalBall.mColor  = Color::hex(0xF5BF30);
 	mTuning.mGoalBall.mRadius = 1.5f;
 	mTuning.mGoalBall.mRibbonColor = mTuning.mGoalBall.mColor;
@@ -50,6 +49,33 @@ RaceWorld::RaceWorld()
 			}
 		});
 	}
+}
+
+
+void RaceWorld::setParams( XmlTree xml )
+{
+	BallWorld::setParams(xml);
+	
+	if (xml.hasChild("Tuning"))
+	{
+		XmlTree t = xml.getChild("Tuning");
+		
+		getXml(t,"ShipDrawDebug",			mTuning.mShipDrawDebug);
+		getXml(t,"GoalBall/SpawnWaitTicks",	mTuning.mGoalBallSpawnWaitTicks);
+		getXml(t,"GoalBall/Color",			mTuning.mGoalBall.mColor);
+		getXml(t,"GoalBall/Radius",			mTuning.mGoalBall.mRadius);
+		getXml(t,"GoalBall/SpawnMaxVel",	mTuning.mGoalBallSpawnMaxVel);
+		
+		getXml(t,"MultigoalOdds", 			mTuning.mMultigoalOdds );
+		getXml(t,"MultigoalMax",			mTuning.mMultigoalMax );
+		
+		getXml(t,"PlayerTurnSpeedScale",	mTuning.mPlayerTurnSpeedScale );
+		getXml(t,"PlayerAccelSpeedScale",	mTuning.mPlayerAccelSpeedScale );
+		getXml(t,"PlayerFriction",			mTuning.mPlayerFriction );
+		getXml(t,"PlayerCollideFrictionCoeff", mTuning.mPlayerCollideFrictionCoeff );
+		
+		mTuning.mGoalBall.mRibbonColor = mTuning.mGoalBall.mColor;
+	}	
 }
 
 void RaceWorld::gameWillLoad()
@@ -95,23 +121,24 @@ void RaceWorld::gamepadEvent( const GamepadManager::Event& event )
 void RaceWorld::setupGamepad( Gamepad_device* gamepad )
 {
 	if ( gamepad && mPlayers.find(gamepad->deviceID) == mPlayers.end() )
-	{
-		Player p;
-	
+	{	
 		Ball &ball = newRandomBall( getRandomPointInWorldBoundsPoly() );
-		ball.mUserType = BallPlayer;
-		ball.mUserID   = mNextPlayerId;
 		ball.mCollideWithContours = true;
 		ball.setVel( vec2(0,0) );
 		ball.mAccel = vec2(0,0);
-		
+
+		Player p;
 		p.mBallIndex = getBalls().size()-1; // assume new one is at the end :)
-		p.mBallUserId = mNextPlayerId;
 		p.mGamepad = gamepad->deviceID;
 		
 		mPlayers[gamepad->deviceID] = p;
 		
 		mNextPlayerId++;
+		
+		auto ballData = make_shared<BallData>();
+		ballData->mGamepad = p.mGamepad;
+		ballData->mType = BallData::Type::Player;
+		ball.mUserData = ballData;
 	}
 }
 
@@ -124,22 +151,32 @@ void RaceWorld::removePlayer( Gamepad_device* gamepad )
 		if (it->second.mBallIndex != -1)
 		{
 			eraseBall(it->second.mBallIndex);
-			remapBallIndices();
 		}
 		
 		mPlayers.erase(it);
 	}
+
+	remapBallIndices();
 }
 
 void RaceWorld::remapBallIndices()
 {
-	auto u = getBallsByUserID();
-	
+	// clear
 	for( auto p : mPlayers )
 	{
-		auto i = u.find(p.second.mBallUserId);
+		p.second.mBallIndex = -1;
+	}
 	
-		p.second.mBallIndex = (i==u.end()) ? -1 : i->second;
+	// link
+	for( const Ball &b : getBalls() )
+	{
+		auto bd = getBallData(b);
+		
+		if (bd && bd->mType == BallData::Type::Player)
+		{
+			auto p = getPlayerByGamepad(bd->mGamepad);
+			if (p) p->mBallIndex = getBallIndex(b);
+		}
 	}
 }
 
@@ -158,22 +195,26 @@ void RaceWorld::tickPlayer( Player& p )
 		// accel
 		if (gamepad->buttonStates[0])
 		{
-			ball.mAccel += p.mFacing * .05f;
+			ball.mAccel += p.mFacing * mTuning.mPlayerAccelSpeedScale;
 			// ideally we let the engine rev up and down so this happens smoothly.. (and feels a bit sloppy)
 		}
-//		else
+
+		// "friction"
 		{
-			// "friction"
 			float v = length( ball.getVel() );
+			
+			float f = mTuning.mPlayerFriction;
+			f += length(ball.mSquash) * mTuning.mPlayerCollideFrictionCoeff;
+			
 			if ( v > 0.f )
 			{
-				ball.mAccel += -min(v,.01f) * normalize(ball.getVel());
+				ball.mAccel += -min(v,f) * normalize(ball.getVel());
 			}
 			// TODO: do this in a more graceful way
 		}
 		
 		// rotate
-		p.mFacing = glm::rotate( p.mFacing, gamepad->axisStates[0] * .08f );
+		p.mFacing = glm::rotate( p.mFacing, gamepad->axisStates[0] * mTuning.mPlayerTurnSpeedScale );
 	}
 }
 
@@ -234,21 +275,25 @@ void RaceWorld::tickGoalSpawn()
 {
 	mGoalCount=0;
 	
-	auto t = getBallsByUserType();
-	auto i = t.find(BallGoal); 
-	if ( i != t.end() ) mGoalCount = i->second.size();
+	for ( auto b : getBalls() )
+	{
+		BallData* d = getBallData(b);
+		if ( d && d->mType == BallData::Type::Goal ) {
+			mGoalCount++;
+		}
+	}
 	
 	if ( mGoalCount==0 )
 	{
-		if ( mGoalBillSpawnWaitTicks == -1 ) {
-			 mGoalBillSpawnWaitTicks = mTuning.mGoalBillSpawnWaitTicks;
+		if ( mGoalBallSpawnWaitTicks == -1 ) {
+			 mGoalBallSpawnWaitTicks = mTuning.mGoalBallSpawnWaitTicks;
 		}
 		
-		if ( mGoalBillSpawnWaitTicks > 0 ) {
-			 mGoalBillSpawnWaitTicks--;
+		if ( mGoalBallSpawnWaitTicks > 0 ) {
+			 mGoalBallSpawnWaitTicks--;
 		}
 		
-		if ( mGoalBillSpawnWaitTicks==0 )
+		if ( mGoalBallSpawnWaitTicks==0 )
 		{
 			// new goal!
 			int n = 1;
@@ -268,12 +313,16 @@ void RaceWorld::tickGoalSpawn()
 				b.mHistory.set_capacity( getRibbonMaxLength() );
 				
 				b.setLoc( getRandomPointInWorldBoundsPoly() );				
-				b.setVel( randVec2() * randFloat() * .1f );
+				b.setVel( randVec2() * randFloat() * mTuning.mGoalBallSpawnMaxVel );
+
+				auto ballData = make_shared<BallData>();
+				ballData->mType = BallData::Type::Goal;
+				b.mUserData = ballData;
 				
 				mGoalCount++;
 			}
 	
-			mGoalBillSpawnWaitTicks = -1;
+			mGoalBallSpawnWaitTicks = -1;
 		}
 	}
 }
@@ -287,21 +336,29 @@ void RaceWorld::handleCollisions()
 	
 	for( BallBallCollision c : bbc )
 	{
+		BallData *d[2] = {
+			getBallData( getBalls()[ c.mBallIndex[0] ] ),
+			getBallData( getBalls()[ c.mBallIndex[1] ] )
+		};
+		if ( !d[0] || !d[1] ) continue;
+		
 		// make sure player is in slot 0
-		if ( balls[c.mBallIndex[1]].mUserType == BallPlayer )
+		if ( d[1]->mType == BallData::Type::Player )
 		{
 			swap( c.mBallIndex[0], c.mBallIndex[1] );
+			swap( d[0], d[1] );
 		}
 		
 		// 0 isa player 
-		if ( balls[c.mBallIndex[0]].mUserType == BallPlayer )
+		if ( d[0]->mType == BallData::Type::Player )
 		{
-			if ( balls[c.mBallIndex[1]].mUserType == BallGoal )
+			// hit a goal
+			if ( d[1]->mType == BallData::Type::Goal )
 			{
 				removeGoals.push_back(c.mBallIndex[1]);
 				
 				// score it
-				Player* p = getPlayerByBallIndex( c.mBallIndex[0] );
+				Player* p = getPlayerByGamepad( d[0]->mGamepad );
 				if (p) p->mScore++;
 			}
 		}
@@ -320,12 +377,18 @@ void RaceWorld::handleCollisions()
 RaceWorld::Player*
 RaceWorld::getPlayerByBallIndex( int bi )
 {
-	for ( auto &i : mPlayers )
-	{
-		if ( i.second.mBallIndex==bi ) return &(i.second);
-	}
+	auto bd = getBallData( getBalls()[bi] );
 	
-	return 0;
+	if (bd) return getPlayerByGamepad( bd->mGamepad );
+	else return 0;
+}
+
+RaceWorld::Player*
+RaceWorld::getPlayerByGamepad( GamepadManager::DeviceId id )
+{
+	auto i = mPlayers.find(id);
+	if ( i == mPlayers.end() ) return 0;
+	else return &(i->second);
 }
 
 void RaceWorld::draw( DrawType drawType )

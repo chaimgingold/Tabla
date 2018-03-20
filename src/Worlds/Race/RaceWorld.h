@@ -20,6 +20,7 @@ public:
 	~RaceWorld();
 	
 	string getSystemName() const override { return "RaceWorld"; }
+	void setParams( XmlTree ) override;
 
 	void gameWillLoad() override;
 	void worldBoundsPolyDidChange() override;
@@ -32,22 +33,23 @@ protected:
 private:
 	FileWatch mFileWatch;
 	
-	// Ball.mUserType
-	enum {
-		BallGoal,
-		BallPlayer,
-		BallShot
-	};
-		
 	class Tuning
 	{
 	public:
 		bool	mShipDrawDebug				= false;
-		int		mGoalBillSpawnWaitTicks		= 60 * 3;
+		int		mGoalBallSpawnWaitTicks		= 60 * 3;
 		Ball	mGoalBall;
+		float	mGoalBallSpawnMaxVel		= .1f;
 		
 		int		mMultigoalOdds				= 8; 
 		int		mMultigoalMax				= 4; 
+		
+		float	mPlayerTurnSpeedScale		= .08f;
+		float	mPlayerAccelSpeedScale		= .05f;
+		float	mPlayerFriction				= .01f;
+		
+		float	mPlayerCollideFrictionCoeff	= .1f;
+		
 	}
 	mTuning;
 	
@@ -55,19 +57,43 @@ private:
 	{
 	public:
 		GamepadManager::DeviceId mGamepad=0; // for convenience
-		int		mBallUserId=0;
-		int		mBallIndex=-1;
+		
 		vec2	mFacing=vec2(0,1);
 		int		mScore=0;
-		
+		int		mBallIndex=-1;
+			
 		// graphics
 //		ci::gl::TextureRef mImage;
 	};
+
+	class BallData : public Ball::UserData
+	{
+	public:
 	
+		~BallData() override {}
+		
+		enum class Type
+		{
+			Goal,
+			Player,
+			Shot,
+			Unknown
+		};
+		
+		Type						mType = Type::Unknown;
+		GamepadManager::DeviceId	mGamepad=0;
+		
+	};
+	
+	static BallData* getBallData( const Ball& b ) {
+		return std::dynamic_pointer_cast<BallData>(b.mUserData).get();
+	}
+		
 	typedef map<GamepadManager::DeviceId,Player> tDeviceToPlayerMap;
 	tDeviceToPlayerMap mPlayers;
 
 	Player* getPlayerByBallIndex( int );
+	Player* getPlayerByGamepad  ( GamepadManager::DeviceId );
 	
 	void tickPlayer( Player& );
 	void drawPlayer( const Player& ) const;
@@ -85,7 +111,7 @@ private:
 	float				mShipScale=1.f;
 	
 	int					mGoalCount=0;
-	int					mGoalBillSpawnWaitTicks=-1;
+	int					mGoalBallSpawnWaitTicks=-1;
 	
 	int					mNextPlayerId=1;
 	
