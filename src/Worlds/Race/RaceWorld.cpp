@@ -222,6 +222,7 @@ void RaceWorld::makeBullet( Player& p )
 	const Ball& pb = getBalls()[p.mBallIndex];
 	
 	Ball& b = newRandomBall( getRandomPointInWorldBoundsPoly() );
+	// TODO: stop using newRandomBall. it's makin us crazy with stoopid bugs. 
 	
 	b.mColor		= mTuning.mShotColor;
 	b.mRibbonColor	= mTuning.mRibbonColor;
@@ -231,7 +232,8 @@ void RaceWorld::makeBullet( Player& p )
 	vec2 v = p.mFacing;
 	
 	b.setLoc( pb.mLoc + v * (pb.mRadius + b.mRadius + mTuning.mShotDistance) );
-	b.setVel( v * mTuning.mShotVel );
+	b.setVel( vec2(0.f) );
+	b.mAccel = v * mTuning.mShotVel;
 
 	auto ballData = make_shared<BallData>();
 	ballData->mType		= BallData::Type::Shot;

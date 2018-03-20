@@ -42,7 +42,7 @@
 		<Shot>
 			<Radius>.5</Radius>
 			<Vel>.5</Vel>
-			<Distance>4</Distance>
+			<Distance>1</Distance>
 			<Color>FF00ED</Color>
 			<RibbonColor>FFE700</RibbonColor>
 		</Shot>
