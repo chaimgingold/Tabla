@@ -355,6 +355,7 @@ void RaceWorld::tickPlayer( Player& p )
 
 			float f = mTuning.mPlayerFriction;
 			f += length(ball.mSquash) * mTuning.mPlayerCollideFrictionCoeff;
+			f  = max(0.f,f); // DON'T ASK. Kludge for f becoming -inf and blowing everything up.
 
 			if ( v > 0.f )
 			{
