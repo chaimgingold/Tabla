@@ -36,7 +36,7 @@
 			<SpawnWaitTicks>180</SpawnWaitTicks>
 			<Color>F5BF30</Color>
 			<Radius>1.5</Radius>
-			<SpawnMaxVel>.1</SpawnMaxVel>			
+			<SpawnMaxVel>.1</SpawnMaxVel>
 		</GoalBall>
 
 		<Shot>
@@ -55,6 +55,8 @@
 		<PlayerCollideFrictionCoeff>.1</PlayerCollideFrictionCoeff>
 		<PlayerFireIntervalTicks>10</PlayerFireIntervalTicks>
 		<PlayerRespawnWaitTicks>120</PlayerRespawnWaitTicks>
+		<PlayerDieSpawnGoalToScoreFrac>.7</PlayerDieSpawnGoalToScoreFrac>
+		<PlayerScoreNotchRadius>.5</PlayerScoreNotchRadius>
 		
 	</Tuning>
 

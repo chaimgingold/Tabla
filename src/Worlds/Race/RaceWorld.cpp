@@ -29,14 +29,6 @@ RaceWorld::RaceWorld()
 	
 	setupSynthesis();
 
-	// default goal
-	mTuning.mGoalBall.mColor  = Color::hex(0xF5BF30);
-	mTuning.mGoalBall.mRadius = 1.5f;
-	mTuning.mGoalBall.mRibbonColor = mTuning.mGoalBall.mColor;
-	mTuning.mGoalBall.mCollideWithContours = true; 
-	mTuning.mGoalBall.setVel( vec2(0,0) );
-	mTuning.mGoalBall.mAccel = vec2(0,0);
-		
 	// load ship
 	{
 		fs::path path = TablaApp::get()->hotloadableAssetPath( fs::path(getSystemName()) / "ship.png" );
@@ -70,8 +62,8 @@ void RaceWorld::setParams( XmlTree xml )
 		getXml(t,"AxisDeadZone",			mTuning.mAxisDeadZone);
 		
 		getXml(t,"GoalBall/SpawnWaitTicks",	mTuning.mGoalBallSpawnWaitTicks);
-		getXml(t,"GoalBall/Color",			mTuning.mGoalBall.mColor);
-		getXml(t,"GoalBall/Radius",			mTuning.mGoalBall.mRadius);
+		getXml(t,"GoalBall/Color",			mTuning.mGoalBallColor);
+		getXml(t,"GoalBall/Radius",			mTuning.mGoalBallRadius);
 		getXml(t,"GoalBall/SpawnMaxVel",	mTuning.mGoalBallSpawnMaxVel);
 
 		getXml(t,"Shot/Radius",				mTuning.mShotRadius);
@@ -88,8 +80,8 @@ void RaceWorld::setParams( XmlTree xml )
 		getXml(t,"PlayerCollideFrictionCoeff", mTuning.mPlayerCollideFrictionCoeff );
 		getXml(t,"PlayerFireIntervalTicks",	mTuning.mPlayerFireIntervalTicks );
 		getXml(t,"PlayerRespawnWaitTicks",	mTuning.mPlayerRespawnWaitTicks );
-		
-		mTuning.mGoalBall.mRibbonColor = mTuning.mGoalBall.mColor;
+		getXml(t,"PlayerDieSpawnGoalToScoreFrac", mTuning.mPlayerDieSpawnGoalToScoreFrac );
+		getXml(t,"PlayerScoreNotchRadius",	mTuning.mPlayerScoreNotchRadius );
 	}
 	
 	mPlayerColors.clear();
@@ -385,35 +377,58 @@ void RaceWorld::drawPlayer( const Player& p ) const
 {
 	if (p.mBallIndex==-1) return;	
 	const Ball &ball = getBalls()[p.mBallIndex];
+
+	gl::pushModelMatrix();
+
+	gl::translate( ball.mLoc );
+	gl::multModelMatrix( mat4( mat2( -perp(p.mFacing), -p.mFacing ) ) );
+
 	
 	if ( mTuning.mShipDrawDebug || !mShip )
 	{
 		gl::color(ball.mColor);
 		gl::drawLine( ball.mLoc, ball.mLoc + ball.mRadius * 2.f * p.mFacing );
 		
-		gl::pushModelMatrix();
-		gl::translate( ball.mLoc );
-		gl::multModelMatrix( mat4( mat2( -perp(p.mFacing), p.mFacing ) ) );
+		gl::ScopedModelMatrix smm;
 		gl::scale( vec2(ball.mRadius) );
 
 		gl::drawSolidRect( Rectf(-.5,-1,.5,1.5) );
-
-		gl::popModelMatrix();
 	}
 
 	if (mShip)
 	{
-		gl::pushModelMatrix();
-
-		gl::translate( ball.mLoc );
-		gl::multModelMatrix( mat4( mat2( -perp(p.mFacing), -p.mFacing ) ) );
+		gl::ScopedModelMatrix smm;
 		gl::scale( vec2(ball.mRadius) * mShipScale );
 
 		gl::color(1,1,1,1);
 		gl::draw( mShip, -mShip->getSize() / 2 );
-
-		gl::popModelMatrix();
 	}
+	
+			
+	// score
+	if (p.mScore>0)
+	{
+		gl::color( mTuning.mGoalBallColor );
+
+		float step = 1.f / (float)(max(1,p.mScore-1)) ;		
+		
+		float w = min( ball.mRadius * 2.f, mTuning.mPlayerScoreNotchRadius*(float)(p.mScore-1)*3.f ) ;
+		
+		vec2 e[2] =
+		{
+			vec2( -w/2, ball.mRadius * 1.5f ),
+			vec2(  w/2, ball.mRadius * 1.5f )
+		};
+		
+		for( int i=0; i<p.mScore; ++i )
+		{
+			vec2 c = lerp( e[0], e[1], (float)i * step );
+			
+			gl::drawSolidCircle( c, min( (float)step*2.f, mTuning.mPlayerScoreNotchRadius) );
+		}			
+	}
+
+	gl::popModelMatrix();
 }
 
 void RaceWorld::update()
@@ -469,26 +484,35 @@ void RaceWorld::tickGoalSpawn()
 				}
 			}
 			
-			for ( int i=0; i<n; ++i )
-			{
-				Ball& b = newRandomBall( getRandomPointInWorldBoundsPoly() );
-				
-				b = mTuning.mGoalBall;
-				b.mHistory.set_capacity( getRibbonMaxLength() );
-				
-				b.setLoc( getRandomPointInWorldBoundsPoly() );				
-				b.setVel( randVec2() * randFloat() * mTuning.mGoalBallSpawnMaxVel );
-
-				auto ballData = make_shared<BallData>();
-				ballData->mType = BallData::Type::Goal;
-				b.mUserData = ballData;
-				
-				mGoalCount++;
+			for ( int i=0; i<n; ++i ) {
+				spawnGoal();
 			}
 	
 			mGoalBallSpawnWaitTicks = -1;
 		}
 	}
+}
+
+Ball& RaceWorld::spawnGoal()
+{
+	Ball b;
+	
+	b.mColor  = mTuning.mGoalBallColor;
+	b.mRibbonColor = mTuning.mGoalBallColor;
+	b.mRadius = mTuning.mGoalBallRadius;
+	b.mHistory.set_capacity( getRibbonMaxLength() );
+	b.mCollideWithContours = true;
+	b.setLoc( getRandomPointInWorldBoundsPoly() );				
+	b.setVel( randVec2() * randFloat() * mTuning.mGoalBallSpawnMaxVel );
+
+	auto ballData = make_shared<BallData>();
+	ballData->mType = BallData::Type::Goal;
+	b.mUserData = ballData;
+	getBalls().push_back(b);
+	
+	mGoalCount++;
+	
+	return getBalls().back();
 }
 
 void RaceWorld::handleCollisions()
@@ -541,6 +565,8 @@ void RaceWorld::handleCollisions()
 			// 0 isa player 
 			if ( d[0]->mType == BallData::Type::Player )
 			{
+				Player* p = getPlayerByGamepad( d[0]->mGamepad );
+
 				switch( d[1]->mType )
 				{
 					// goal
@@ -549,7 +575,6 @@ void RaceWorld::handleCollisions()
 						removeBall.insert(c.mBallIndex[1]);
 						
 						// score it
-						Player* p = getPlayerByGamepad( d[0]->mGamepad );
 						if (p) p->mScore++;
 						FX("get goal");
 					}
@@ -567,14 +592,24 @@ void RaceWorld::handleCollisions()
 							FX("player die");
 							
 							// update player
-							Player* p = getPlayerByBallIndex( c.mBallIndex[0] );
 							if (p)
 							{
+								const Ball& pb = getBalls()[p->mBallIndex]; 
+								
 								p->mBallIndex = -1;
 								p->mSpawnWait = mTuning.mPlayerRespawnWaitTicks;
+								
+								int spawnGoals = roundf( (float)p->mScore * mTuning.mPlayerDieSpawnGoalToScoreFrac );
+								spawnGoals = max( 1, spawnGoals );
+								
+								p->mScore = 0;
+
+								for( int i=0; i<spawnGoals; ++i )
+								{
+									Ball& b = spawnGoal();
+									b.setLoc( pb.mLoc + randVec2() * pb.mRadius );
+								}
 							}
-							
-							// TODO: spawn coins for score * multiplier
 						}
 					}
 					break;
@@ -589,7 +624,7 @@ void RaceWorld::handleCollisions()
 									
 					default:break;
 				}
-			}
+			} // player hits X
 		}
 	}
 		

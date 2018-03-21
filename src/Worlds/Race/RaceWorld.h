@@ -51,8 +51,9 @@ private:
 		bool	mShipDrawDebug				= false;
 		float	mAxisDeadZone				= .2f;
 		
+		float	mGoalBallRadius				= 1.5f;
+		ColorA  mGoalBallColor;
 		int		mGoalBallSpawnWaitTicks		= 60 * 3;
-		Ball	mGoalBall;
 		float	mGoalBallSpawnMaxVel		= .1f;
 		
 		float	mShotRadius					= .5f;
@@ -69,6 +70,8 @@ private:
 		float	mPlayerFriction				= .01f;
 		int		mPlayerFireIntervalTicks	= 20;
 		int		mPlayerRespawnWaitTicks		= 30;
+		float	mPlayerDieSpawnGoalToScoreFrac = .5f;
+		float	mPlayerScoreNotchRadius		= .1f;
 		
 		float	mPlayerCollideFrictionCoeff	= .1f;
 		
@@ -137,7 +140,8 @@ private:
 	
 	void remapBallIndices();
 	
-	void tickGoalSpawn();
+	void tickGoalSpawn(); // maybe makes N 
+	Ball& spawnGoal(); // makes 1
 	void handleCollisions();
 	void makeBullet( Player& );
 	
