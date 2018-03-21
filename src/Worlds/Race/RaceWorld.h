@@ -33,6 +33,18 @@ protected:
 private:
 	FileWatch mFileWatch;
 	
+	struct PlayerColor
+	{
+		ColorA	mShip;
+		ColorA	mShipRibbon;
+		ColorA	mShot;
+		ColorA	mShotRibbon;
+	};
+	vector<PlayerColor> mPlayerColors;
+	vector<int>			mPlayerColorsUsed; // how many players using this color scheme?
+	int  assignNewPlayerColor();
+	void freePlayerColor(int);
+	
 	class Tuning
 	{
 	public:
@@ -51,6 +63,7 @@ private:
 		int		mMultigoalOdds				= 8; 
 		int		mMultigoalMax				= 4; 
 		
+		float	mPlayerRadius				= 2.f;
 		float	mPlayerTurnSpeedScale		= .08f;
 		float	mPlayerAccelSpeedScale		= .05f;
 		float	mPlayerFriction				= .01f;
@@ -78,6 +91,8 @@ private:
 		int		mBallIndex=-1;
 		
 		int		mFireWait=0;
+		
+		int		mColorScheme=0;
 		
 		// graphics
 //		ci::gl::TextureRef mImage;

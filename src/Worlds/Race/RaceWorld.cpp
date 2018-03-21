@@ -74,8 +74,6 @@ void RaceWorld::setParams( XmlTree xml )
 		getXml(t,"GoalBall/Radius",			mTuning.mGoalBall.mRadius);
 		getXml(t,"GoalBall/SpawnMaxVel",	mTuning.mGoalBallSpawnMaxVel);
 
-		getXml(t,"Shot/Color",				mTuning.mShotColor);
-		getXml(t,"Shot/RibbonColor",		mTuning.mRibbonColor);
 		getXml(t,"Shot/Radius",				mTuning.mShotRadius);
 		getXml(t,"Shot/Vel",				mTuning.mShotVel);
 		getXml(t,"Shot/Distance",			mTuning.mShotDistance);
@@ -83,6 +81,7 @@ void RaceWorld::setParams( XmlTree xml )
 		getXml(t,"MultigoalOdds", 			mTuning.mMultigoalOdds );
 		getXml(t,"MultigoalMax",			mTuning.mMultigoalMax );
 		
+		getXml(t,"PlayerRadius",	mTuning.mPlayerRadius );
 		getXml(t,"PlayerTurnSpeedScale",	mTuning.mPlayerTurnSpeedScale );
 		getXml(t,"PlayerAccelSpeedScale",	mTuning.mPlayerAccelSpeedScale );
 		getXml(t,"PlayerFriction",			mTuning.mPlayerFriction );
@@ -90,7 +89,25 @@ void RaceWorld::setParams( XmlTree xml )
 		getXml(t,"PlayerFireIntervalTicks",	mTuning.mPlayerFireIntervalTicks );
 		
 		mTuning.mGoalBall.mRibbonColor = mTuning.mGoalBall.mColor;
-	}	
+	}
+	
+	mPlayerColors.clear();
+	mPlayerColorsUsed.clear();
+	for ( auto i = xml.begin("PlayerColors/p"); i != xml.end(); ++i )
+	{
+		PlayerColor p;
+		getXml( *i, "Ship",		 p.mShip );
+		getXml( *i, "ShipRibbon",p.mShipRibbon );
+		getXml( *i, "Shot",		 p.mShot );
+		getXml( *i, "ShotRibbon", p.mShotRibbon );
+		mPlayerColors.push_back(p);
+	}
+	if (mPlayerColors.size()==0) {
+		// ensure >0
+		PlayerColor p;
+		mPlayerColors.push_back(p);
+	}
+	mPlayerColorsUsed.resize(mPlayerColors.size(),0);
 }
 
 void RaceWorld::gameWillLoad()
@@ -136,6 +153,34 @@ void RaceWorld::gamepadEvent( const GamepadManager::Event& event )
 	}
 }
 
+int RaceWorld::assignNewPlayerColor()
+{
+	assert( !mPlayerColorsUsed.empty() );
+	
+	int p=-1;
+	
+	for( int i=0; i<mPlayerColors.size(); ++i )
+	{
+		if ( mPlayerColorsUsed[i] == 0 ) {
+			p = i;
+			break;
+		}
+	}
+	
+	if (p==-1) {
+		p = randInt() % mPlayerColors.size();
+	}
+	
+	mPlayerColorsUsed[p]++;
+	
+	return p;
+}
+
+void RaceWorld::freePlayerColor(int i)
+{
+	mPlayerColorsUsed[i]--;
+}
+
 void RaceWorld::setupPlayer( Gamepad_device* gamepad )
 {
 	if ( gamepad )
@@ -149,6 +194,7 @@ void RaceWorld::setupPlayer( Gamepad_device* gamepad )
 			p.mBallIndex = -1;
 			p.mGamepad   = gamepad->deviceID;
 			p.mFacing    = randVec2();
+			p.mColorScheme = assignNewPlayerColor();
 			mPlayers[gamepad->deviceID] = p;
 			
 			getPlayerByGamepad(gamepad->deviceID);
@@ -159,16 +205,26 @@ void RaceWorld::setupPlayer( Gamepad_device* gamepad )
 		{
 			FX("player spawn");
 
-			Ball &ball = newRandomBall( getRandomPointInWorldBoundsPoly() );
+			Ball ball;
+			PlayerColor pc = mPlayerColors[ player->mColorScheme ];
+			
+			ball.mRadius = mTuning.mPlayerRadius;
+			ball.setMass( M_PI * powf(ball.mRadius,3.f) ) ;						
 			ball.mCollideWithContours = true;
+			ball.mHistory.set_capacity(getRibbonMaxLength());
+
+			ball.setLoc( getRandomPointInWorldBoundsPoly() );
 			ball.setVel( vec2(0,0) );
 			ball.mAccel = vec2(0,0);
-
+			ball.mColor = pc.mShip;
+			ball.mRibbonColor = pc.mShipRibbon;
+			
 			auto ballData = make_shared<BallData>();
 			ballData->mGamepad = player->mGamepad;
 			ballData->mType = BallData::Type::Player;
 			ball.mUserData = ballData;
-			
+
+			getBalls().push_back(ball);
 			player->mBallIndex = getBalls().size()-1; // last ball we added is it
 		}
 	}
@@ -180,11 +236,13 @@ void RaceWorld::removePlayer( Gamepad_device* gamepad )
 	
 	if ( it != mPlayers.end() )
 	{
-		if (it->second.mBallIndex != -1)
-		{
-			eraseBall(it->second.mBallIndex);
+		Player &p = it->second;
+		
+		if (p.mBallIndex != -1) {
+			eraseBall(p.mBallIndex);
 		}
 		
+		freePlayerColor(p.mColorScheme);
 		mPlayers.erase(it);
 	}
 
@@ -220,14 +278,16 @@ void RaceWorld::makeBullet( Player& p )
 	if (p.mBallIndex == -1) return;
 	
 	const Ball& pb = getBalls()[p.mBallIndex];
+	PlayerColor pc = mPlayerColors[ p.mColorScheme ];
 	
-	Ball& b = newRandomBall( getRandomPointInWorldBoundsPoly() );
-	// TODO: stop using newRandomBall. it's makin us crazy with stoopid bugs. 
-	
-	b.mColor		= mTuning.mShotColor;
-	b.mRibbonColor	= mTuning.mRibbonColor;
+	Ball b;
+
+	b.mColor		= pc.mShot;
+	b.mRibbonColor	= pc.mShotRibbon;
 	b.mRadius		= mTuning.mShotRadius;
+	b.setMass( M_PI * powf(b.mRadius,3.f) ) ;						
 	b.mCollideWithContours = true;
+	b.mHistory.set_capacity(getRibbonMaxLength());
 	
 	vec2 v = p.mFacing;
 	
@@ -238,7 +298,9 @@ void RaceWorld::makeBullet( Player& p )
 	auto ballData = make_shared<BallData>();
 	ballData->mType		= BallData::Type::Shot;
 	ballData->mGamepad	= p.mGamepad;
-	b.mUserData = ballData;	
+	b.mUserData = ballData;
+	
+	getBalls().push_back(b);
 }
 
 void RaceWorld::tickPlayer( Player& p )

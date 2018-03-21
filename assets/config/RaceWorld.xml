@@ -43,12 +43,12 @@
 			<Radius>.5</Radius>
 			<Vel>.5</Vel>
 			<Distance>1</Distance>
-			<Color>FF00ED</Color>
-			<RibbonColor>FFE700</RibbonColor>
 		</Shot>
 		
 		<MultigoalOdds>8</MultigoalOdds>
 		<MultigoalMax>4</MultigoalMax>
+		
+		<PlayerRadius>2</PlayerRadius>
 		<PlayerTurnSpeedScale>.1</PlayerTurnSpeedScale>
 		<PlayerAccelSpeedScale>.05</PlayerAccelSpeedScale>
 		<PlayerFriction>.01</PlayerFriction>
@@ -56,5 +56,33 @@
 		<PlayerFireIntervalTicks>10</PlayerFireIntervalTicks>
 		
 	</Tuning>
+
+	<PlayerColors>
+		<p>
+			<Ship>D66EC3</Ship>
+			<ShipRibbon>FFCCDD</ShipRibbon>
+			<Shot>FF00ED</Shot>
+			<ShotRibbon>FFE700</ShotRibbon>
+		</p>
+		<p>
+			<Ship>27BCDB</Ship>
+			<ShipRibbon>CCFFFF</ShipRibbon>
+			<Shot>0049FF</Shot>
+			<ShotRibbon>F8FF00</ShotRibbon>
+		</p>
+		<p>
+			<Ship>27DB4E</Ship>
+			<ShipRibbon>CCFFCD</ShipRibbon>
+			<Shot>0CB310</Shot>
+			<ShotRibbon>B9FF00</ShotRibbon>
+		</p>
+		<p>
+			<Ship>DB4027</Ship>
+			<ShipRibbon>FFAEAE</ShipRibbon>
+			<Shot>B30C6F</Shot>
+			<ShotRibbon>FFCBEF</ShotRibbon>
+		</p>
+	</PlayerColors>
+		
 	
 </RaceWorld>
