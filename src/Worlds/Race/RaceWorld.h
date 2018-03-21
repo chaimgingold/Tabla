@@ -158,7 +158,7 @@ private:
 	cipd::PatchRef			mPatch;			// pong patch
 	
 	void setupSynthesis() override;
-	void updateSynthesis() override {};
+	void updateSynthesis() override;
 };
 
 #endif /* RaceWorld_hpp */

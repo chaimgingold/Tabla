@@ -26,7 +26,7 @@ void FX( const char* comment=0, bool print=true )
 RaceWorld::RaceWorld()
 {
 	randSeed( clock() );
-	
+
 	setupSynthesis();
 
 	// load ship
@@ -40,7 +40,7 @@ RaceWorld::RaceWorld()
 			format.loadTopDown(false);
 			format.mipmap(true);
 			mShip = gl::Texture2d::create( loadImage(path), format );
-			
+
 			mShipScale = 1.f;
 			if (mShip) {
 				mShipScale = 2.f / max( mShip->getWidth(), mShip->getHeight() );
@@ -53,14 +53,14 @@ RaceWorld::RaceWorld()
 void RaceWorld::setParams( XmlTree xml )
 {
 	BallWorld::setParams(xml);
-	
+
 	if (xml.hasChild("Tuning"))
 	{
 		XmlTree t = xml.getChild("Tuning");
-		
+
 		getXml(t,"ShipDrawDebug",			mTuning.mShipDrawDebug);
 		getXml(t,"AxisDeadZone",			mTuning.mAxisDeadZone);
-		
+
 		getXml(t,"GoalBall/SpawnWaitTicks",	mTuning.mGoalBallSpawnWaitTicks);
 		getXml(t,"GoalBall/Color",			mTuning.mGoalBallColor);
 		getXml(t,"GoalBall/Radius",			mTuning.mGoalBallRadius);
@@ -69,10 +69,10 @@ void RaceWorld::setParams( XmlTree xml )
 		getXml(t,"Shot/Radius",				mTuning.mShotRadius);
 		getXml(t,"Shot/Vel",				mTuning.mShotVel);
 		getXml(t,"Shot/Distance",			mTuning.mShotDistance);
-		
+
 		getXml(t,"MultigoalOdds", 			mTuning.mMultigoalOdds );
 		getXml(t,"MultigoalMax",			mTuning.mMultigoalMax );
-		
+
 		getXml(t,"PlayerRadius",	mTuning.mPlayerRadius );
 		getXml(t,"PlayerTurnSpeedScale",	mTuning.mPlayerTurnSpeedScale );
 		getXml(t,"PlayerAccelSpeedScale",	mTuning.mPlayerAccelSpeedScale );
@@ -83,7 +83,7 @@ void RaceWorld::setParams( XmlTree xml )
 		getXml(t,"PlayerDieSpawnGoalToScoreFrac", mTuning.mPlayerDieSpawnGoalToScoreFrac );
 		getXml(t,"PlayerScoreNotchRadius",	mTuning.mPlayerScoreNotchRadius );
 	}
-	
+
 	mPlayerColors.clear();
 	mPlayerColorsUsed.clear();
 	for ( auto i = xml.begin("PlayerColors/p"); i != xml.end(); ++i )
@@ -118,7 +118,7 @@ void RaceWorld::gamepadEvent( const GamepadManager::Event& event )
 	switch ( event.mType )
 	{
 		case GamepadManager::EventType::ButtonDown:
-		 
+
 			setupPlayer(event.mDevice);
 			cout << "down " << event.mId << endl;
 			FX("button down");
@@ -129,7 +129,7 @@ void RaceWorld::gamepadEvent( const GamepadManager::Event& event )
 			cout << "up "  << event.mId << endl;
 			FX("button up");
 			break;
-			
+
 		case GamepadManager::EventType::AxisMoved:
 			break;
 
@@ -137,7 +137,7 @@ void RaceWorld::gamepadEvent( const GamepadManager::Event& event )
 			cout << "attached "  << event.mDevice << endl;
 			FX("gamepad attach");
 			break;
-			
+
 		case GamepadManager::EventType::DeviceRemoved:
 			cout << "removed "  << event.mDevice << endl;
 			removePlayer(event.mDevice);
@@ -149,9 +149,9 @@ void RaceWorld::gamepadEvent( const GamepadManager::Event& event )
 int RaceWorld::assignNewPlayerColor()
 {
 	assert( !mPlayerColorsUsed.empty() );
-	
+
 	int p=-1;
-	
+
 	for( int i=0; i<mPlayerColors.size(); ++i )
 	{
 		if ( mPlayerColorsUsed[i] == 0 ) {
@@ -159,13 +159,13 @@ int RaceWorld::assignNewPlayerColor()
 			break;
 		}
 	}
-	
+
 	if (p==-1) {
 		p = randInt() % mPlayerColors.size();
 	}
-	
+
 	mPlayerColorsUsed[p]++;
-	
+
 	return p;
 }
 
@@ -179,8 +179,8 @@ void RaceWorld::setupPlayer( Gamepad_device* gamepad )
 	if ( gamepad )
 	{
 		Player* player = getPlayerByGamepad(gamepad->deviceID);
-		
-		// make player	
+
+		// make player
 		if ( !player )
 		{
 			Player p;
@@ -189,10 +189,10 @@ void RaceWorld::setupPlayer( Gamepad_device* gamepad )
 			p.mFacing    = randVec2();
 			p.mColorScheme = assignNewPlayerColor();
 			mPlayers[gamepad->deviceID] = p;
-			
+
 			getPlayerByGamepad(gamepad->deviceID);
 		}
-		
+
 		// make ship
 		if ( player
 		  && player->mBallIndex == -1
@@ -203,9 +203,9 @@ void RaceWorld::setupPlayer( Gamepad_device* gamepad )
 
 			Ball ball;
 			PlayerColor pc = mPlayerColors[ player->mColorScheme ];
-			
+
 			ball.mRadius = mTuning.mPlayerRadius;
-			ball.setMass( M_PI * powf(ball.mRadius,3.f) ) ;						
+			ball.setMass( M_PI * powf(ball.mRadius,3.f) ) ;
 			ball.mCollideWithContours = true;
 			ball.mHistory.set_capacity(getRibbonMaxLength());
 
@@ -214,7 +214,7 @@ void RaceWorld::setupPlayer( Gamepad_device* gamepad )
 			ball.mAccel = vec2(0,0);
 			ball.mColor = pc.mShip;
 			ball.mRibbonColor = pc.mShipRibbon;
-			
+
 			auto ballData = make_shared<BallData>();
 			ballData->mGamepad = player->mGamepad;
 			ballData->mType = BallData::Type::Player;
@@ -229,15 +229,15 @@ void RaceWorld::setupPlayer( Gamepad_device* gamepad )
 void RaceWorld::removePlayer( Gamepad_device* gamepad )
 {
 	auto it = mPlayers.find(gamepad->deviceID);
-	
+
 	if ( it != mPlayers.end() )
 	{
 		Player &p = it->second;
-		
+
 		if (p.mBallIndex != -1) {
 			eraseBall(p.mBallIndex);
 		}
-		
+
 		freePlayerColor(p.mColorScheme);
 		mPlayers.erase(it);
 	}
@@ -252,14 +252,14 @@ void RaceWorld::remapBallIndices()
 	{
 		p.second.mBallIndex = -1;
 	}
-	
+
 	// link
 	const vector<Ball>& balls = getBalls();
-	
+
 	for( const Ball &b : balls )
 	{
 		auto bd = getBallData(b);
-		
+
 		if (bd && bd->mType == BallData::Type::Player)
 		{
 			auto p = getPlayerByGamepad(bd->mGamepad);
@@ -272,21 +272,21 @@ void RaceWorld::makeBullet( Player& p )
 {
 	FX("shoot");
 	if (p.mBallIndex == -1) return;
-	
+
 	const Ball& pb = getBalls()[p.mBallIndex];
 	PlayerColor pc = mPlayerColors[ p.mColorScheme ];
-	
+
 	Ball b;
 
 	b.mColor		= pc.mShot;
 	b.mRibbonColor	= pc.mShotRibbon;
 	b.mRadius		= mTuning.mShotRadius;
-	b.setMass( M_PI * powf(b.mRadius,3.f) ) ;						
+	b.setMass( M_PI * powf(b.mRadius,3.f) ) ;
 	b.mCollideWithContours = true;
 	b.mHistory.set_capacity(getRibbonMaxLength());
-	
+
 	vec2 v = p.mFacing;
-	
+
 	b.setLoc( pb.mLoc + v * (pb.mRadius + b.mRadius + mTuning.mShotDistance) );
 	b.setVel( vec2(0.f) );
 	b.mAccel = v * mTuning.mShotVel;
@@ -295,7 +295,7 @@ void RaceWorld::makeBullet( Player& p )
 	ballData->mType		= BallData::Type::Shot;
 	ballData->mGamepad	= p.mGamepad;
 	b.mUserData = ballData;
-	
+
 	getBalls().push_back(b);
 }
 
@@ -310,10 +310,10 @@ void RaceWorld::tickPlayer( Player& p )
 				}
 			}
 		}
-		
+
 		return false;
 	};
-	
+
 	if (p.mBallIndex == -1)
 	{
 		// dead
@@ -323,7 +323,7 @@ void RaceWorld::tickPlayer( Player& p )
 	{
 		// alive
 		Ball &ball = getBalls()[p.mBallIndex];
-		
+
 		// get gamepad
 		const GamepadManager::Device* gamepad = getGamepadManager().getDeviceById(p.mGamepad);
 
@@ -337,7 +337,7 @@ void RaceWorld::tickPlayer( Player& p )
 
 		// shoot
 		if ( p.mFireWait > 0 ) p.mFireWait--; // cool off
-		
+
 		if ( button(gamepad,mTuning.mControls.mFire) )
 		{
 			if ( p.mFireWait <= 0 )
@@ -348,21 +348,21 @@ void RaceWorld::tickPlayer( Player& p )
 			}
 			else FX("can't fire; cool off",false);
 		}
-		
+
 		// "friction"
 		{
 			float v = length( ball.getVel() );
-			
+
 			float f = mTuning.mPlayerFriction;
 			f += length(ball.mSquash) * mTuning.mPlayerCollideFrictionCoeff;
-			
+
 			if ( v > 0.f )
 			{
 				ball.mAccel += -min(v,f) * normalize(ball.getVel());
 			}
 			// TODO: do this in a more graceful way
 		}
-		
+
 		// rotate
 		if (gamepad) {
 			if ( fabs(gamepad->axisStates[0]) > mTuning.mAxisDeadZone ) {
@@ -375,7 +375,7 @@ void RaceWorld::tickPlayer( Player& p )
 
 void RaceWorld::drawPlayer( const Player& p ) const
 {
-	if (p.mBallIndex==-1) return;	
+	if (p.mBallIndex==-1) return;
 	const Ball &ball = getBalls()[p.mBallIndex];
 
 	gl::pushModelMatrix();
@@ -383,12 +383,12 @@ void RaceWorld::drawPlayer( const Player& p ) const
 	gl::translate( ball.mLoc );
 	gl::multModelMatrix( mat4( mat2( -perp(p.mFacing), -p.mFacing ) ) );
 
-	
+
 	if ( mTuning.mShipDrawDebug || !mShip )
 	{
 		gl::color(ball.mColor);
 		gl::drawLine( ball.mLoc, ball.mLoc + ball.mRadius * 2.f * p.mFacing );
-		
+
 		gl::ScopedModelMatrix smm;
 		gl::scale( vec2(ball.mRadius) );
 
@@ -403,32 +403,56 @@ void RaceWorld::drawPlayer( const Player& p ) const
 		gl::color(1,1,1,1);
 		gl::draw( mShip, -mShip->getSize() / 2 );
 	}
-	
-			
+
+
 	// score
 	if (p.mScore>0)
 	{
 		gl::color( mTuning.mGoalBallColor );
 
-		float step = 1.f / (float)(max(1,p.mScore-1)) ;		
-		
+		float step = 1.f / (float)(max(1,p.mScore-1)) ;
+
 		float w = min( ball.mRadius * 2.f, mTuning.mPlayerScoreNotchRadius*(float)(p.mScore-1)*3.f ) ;
-		
+
 		vec2 e[2] =
 		{
 			vec2( -w/2, ball.mRadius * 1.5f ),
 			vec2(  w/2, ball.mRadius * 1.5f )
 		};
-		
+
 		for( int i=0; i<p.mScore; ++i )
 		{
 			vec2 c = lerp( e[0], e[1], (float)i * step );
-			
+
 			gl::drawSolidCircle( c, min( (float)step*2.f, mTuning.mPlayerScoreNotchRadius) );
-		}			
+		}
 	}
 
 	gl::popModelMatrix();
+}
+
+void RaceWorld::updateSynthesis() {
+	vector<Ball>& balls = getBalls();
+
+	auto ballVels = pd::List();
+
+	// Send no velocities when paused to keep balls silent
+	//	bool shouldSynthesizeBalls = !isPaused();
+	bool shouldSynthesizeBalls = true;
+	if (!shouldSynthesizeBalls) {
+		mPd->sendList("ship-velocities", ballVels );
+		return;
+	}
+
+	for( Ball &b : balls )
+	{
+		BallData* d = getBallData(b);
+		if ( d && d->mType == BallData::Type::Player ) {
+			ballVels.addFloat(length(getDenoisedBallVel(b)));
+		}
+	}
+
+	mPd->sendList("ship-velocities", ballVels );
 }
 
 void RaceWorld::update()
@@ -452,7 +476,7 @@ void RaceWorld::update()
 void RaceWorld::tickGoalSpawn()
 {
 	mGoalCount=0;
-	
+
 	for ( auto b : getBalls() )
 	{
 		BallData* d = getBallData(b);
@@ -460,34 +484,34 @@ void RaceWorld::tickGoalSpawn()
 			mGoalCount++;
 		}
 	}
-	
+
 	if ( mGoalCount==0 )
 	{
 		if ( mGoalBallSpawnWaitTicks == -1 ) {
 			 mGoalBallSpawnWaitTicks = mTuning.mGoalBallSpawnWaitTicks;
 		}
-		
+
 		if ( mGoalBallSpawnWaitTicks > 0 ) {
 			 mGoalBallSpawnWaitTicks--;
 		}
-		
+
 		if ( mGoalBallSpawnWaitTicks==0 )
 		{
 			FX("goal spawn");
 			// new goal!
 			int n = 1;
-			
+
 			for( int i=0; i<mTuning.mMultigoalMax; ++i )
 			{
 				if (randInt()%mTuning.mMultigoalOdds==0) {
-					n++;	
+					n++;
 				}
 			}
-			
+
 			for ( int i=0; i<n; ++i ) {
 				spawnGoal();
 			}
-	
+
 			mGoalBallSpawnWaitTicks = -1;
 		}
 	}
@@ -496,56 +520,56 @@ void RaceWorld::tickGoalSpawn()
 Ball& RaceWorld::spawnGoal()
 {
 	Ball b;
-	
+
 	b.mColor  = mTuning.mGoalBallColor;
 	b.mRibbonColor = mTuning.mGoalBallColor;
 	b.mRadius = mTuning.mGoalBallRadius;
 	b.mHistory.set_capacity( getRibbonMaxLength() );
 	b.mCollideWithContours = true;
-	b.setLoc( getRandomPointInWorldBoundsPoly() );				
+	b.setLoc( getRandomPointInWorldBoundsPoly() );
 	b.setVel( randVec2() * randFloat() * mTuning.mGoalBallSpawnMaxVel );
 
 	auto ballData = make_shared<BallData>();
 	ballData->mType = BallData::Type::Goal;
 	b.mUserData = ballData;
 	getBalls().push_back(b);
-	
+
 	mGoalCount++;
-	
+
 	return getBalls().back();
 }
 
 void RaceWorld::handleCollisions()
 {
 	const vector<Ball>& balls = getBalls();
-	set<size_t> removeBall;	
-	
+	set<size_t> removeBall;
+
 	// ball-world and ball-contour collisions
 	{
 		auto bwc = getBallWorldCollisions();
 		auto bcc = getBallContourCollisions();
-		
+
 		auto test = [&balls,&removeBall]( int i )
 		{
 			auto bd = getBallData( balls[i] );
-			
+
 			// shot hit wall/world
 			if (bd && bd->mType == BallData::Type::Shot )
 			{
 				// DINK!
 				removeBall.insert(i);
 				FX("shot hit world/wall");
-			}			
+			}
 		};
-		
+
 		for( auto c : bcc ) test(c.mBallIndex);
 		for( auto c : bwc ) test(c.mBallIndex);
 	}
-	
+
 	// ball-ball collisions
 	{
 		auto bbc = getBallBallCollisions();
-		
+
 		for( BallBallCollision c : bbc )
 		{
 			BallData *d[2] = {
@@ -553,16 +577,16 @@ void RaceWorld::handleCollisions()
 				getBallData( getBalls()[ c.mBallIndex[1] ] )
 			};
 			if ( !d[0] || !d[1] ) continue; // hit a UFO (ie no ball data)
-			
+
 			// make sure player is in slot 0
 			if ( d[1]->mType == BallData::Type::Player )
 			{
 				swap( c.mBallIndex[0], c.mBallIndex[1] );
 				swap( d[0], d[1] );
 			}
-			
+
 			// Player hits X
-			// 0 isa player 
+			// 0 isa player
 			if ( d[0]->mType == BallData::Type::Player )
 			{
 				Player* p = getPlayerByGamepad( d[0]->mGamepad );
@@ -573,13 +597,13 @@ void RaceWorld::handleCollisions()
 					case BallData::Type::Goal:
 					{
 						removeBall.insert(c.mBallIndex[1]);
-						
+
 						// score it
 						if (p) p->mScore++;
 						FX("get goal");
 					}
 					break;
-					
+
 					// bullet
 					case BallData::Type::Shot:
 					{
@@ -590,18 +614,18 @@ void RaceWorld::handleCollisions()
 							removeBall.insert(c.mBallIndex[1]); // shot
 							removeBall.insert(c.mBallIndex[0]); // player
 							FX("player die");
-							
+
 							// update player
 							if (p)
 							{
-								const Ball& pb = getBalls()[p->mBallIndex]; 
-								
+								const Ball& pb = getBalls()[p->mBallIndex];
+
 								p->mBallIndex = -1;
 								p->mSpawnWait = mTuning.mPlayerRespawnWaitTicks;
-								
+
 								int spawnGoals = roundf( (float)p->mScore * mTuning.mPlayerDieSpawnGoalToScoreFrac );
 								spawnGoals = max( 1, spawnGoals );
-								
+
 								p->mScore = 0;
 
 								for( int i=0; i<spawnGoals; ++i )
@@ -621,16 +645,16 @@ void RaceWorld::handleCollisions()
 						FX("player hit player");
 					}
 					break;
-									
+
 					default:break;
 				}
 			} // player hits X
 		}
 	}
-		
+
 	// remove stuff
 	eraseBalls(removeBall);
-	
+
 	if ( !removeBall.empty() ) {
 		remapBallIndices();
 	}
@@ -640,7 +664,7 @@ RaceWorld::Player*
 RaceWorld::getPlayerByBallIndex( int bi )
 {
 	auto bd = getBallData( getBalls()[bi] );
-	
+
 	if (bd) return getPlayerByGamepad( bd->mGamepad );
 	else return 0;
 }
@@ -656,12 +680,12 @@ RaceWorld::getPlayerByGamepad( GamepadManager::DeviceId id )
 void RaceWorld::draw( DrawType drawType )
 {
 	mFileWatch.update();
-	
+
 	//
 	// Draw world
 	//
 	BallWorld::draw(drawType);
-	
+
 	for( auto &p : mPlayers )
 	{
 		drawPlayer(p.second);
@@ -677,16 +701,16 @@ void RaceWorld::setupSynthesis()
 	auto app = TablaApp::get();
 	std::vector<fs::path> paths =
 	{
-		app->hotloadableAssetPath("synths/RaceWorld/pong-world.pd"),
-		app->hotloadableAssetPath("synths/RaceWorld/pong-voice.pd"),
-		app->hotloadableAssetPath("synths/RaceWorld/score-voice.pd")
+		app->hotloadableAssetPath("synths/RaceWorld/race-world.pd"),
+		app->hotloadableAssetPath("synths/RaceWorld/fm-voice-2.pd"),
+		app->hotloadableAssetPath("synths/RaceWorld/spaceship-engine.pd"),
 	};
 
 	// Register file-watchers for all the major pd patch components
 	mFileWatch.load( paths, [this,app]()
 					{
 						// Reload the root patch
-						auto rootPatch = app->hotloadableAssetPath("synths/RaceWorld/pong-world.pd");
+						auto rootPatch = app->hotloadableAssetPath("synths/RaceWorld/race-world.pd");
 						mPd->closePatch(mPatch);
 						mPatch = mPd->loadPatch( DataSourcePath::create(rootPatch) ).get();
 					});
