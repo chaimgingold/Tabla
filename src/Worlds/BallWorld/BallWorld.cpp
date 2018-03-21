@@ -513,8 +513,10 @@ void BallWorld::updatePhysics()
 		// accelerate
 		for( auto &b : mBalls )
 		{
-			b.mLoc += (b.mAccel * (float)steps) * delta*delta ;
-			b.mAccel = vec2(0,0) ;
+			if (!b.mPausePhysics) {
+				b.mLoc += (b.mAccel * (float)steps) * delta*delta ;
+				b.mAccel = vec2(0,0) ;
+			}
 		}
 
 		// ball <> contour collisions
@@ -532,11 +534,14 @@ void BallWorld::updatePhysics()
 			
 			for( auto &b : mBalls )
 			{
-				vec2 v = b.getVel() ;
-				
-				if ( length(v) > maxVel )
+				if (b.mCapVelocity)
 				{
-					b.setVel( normalize(v) * maxVel ) ;
+					vec2 v = b.getVel() ;
+					
+					if ( length(v) > maxVel )
+					{
+						b.setVel( normalize(v) * maxVel ) ;
+					}
 				}
 			}
 		}
@@ -544,9 +549,11 @@ void BallWorld::updatePhysics()
 		// inertia
 		for( auto &b : mBalls )
 		{
-			vec2 vel = b.getVel() ; // rewriting mLastLoc will stomp vel, so get it first
-			b.mLastLoc = b.mLoc ;
-			b.mLoc += vel ;
+			if (!b.mPausePhysics) {
+				vec2 vel = b.getVel() ; // rewriting mLastLoc will stomp vel, so get it first
+				b.mLastLoc = b.mLoc ;
+				b.mLoc += vel ;
+			}
 		}
 	}
 
@@ -692,93 +699,99 @@ void BallWorld::resolveBallCollisions()
 	if ( mBalls.size()==0 ) return ; // wtf, i have some stupid logic error below...
 	
 	for( size_t i=0  ; i<mBalls.size()-1; i++ )
-	for( size_t j=i+1; j<mBalls.size()  ; j++ )
 	{
 		auto &a = mBalls[i] ;
-		auto &b = mBalls[j] ;
+		if ( !a.mCollisionMask ) continue;
 		
-		float d  = glm::distance(a.mLoc,b.mLoc) ;
-		float rs = a.mRadius + b.mRadius ;
-		
-		if ( d < rs )
+		for( size_t j=i+1; j<mBalls.size()  ; j++ )
 		{
-			vec2 a2b ;
+			auto &b = mBalls[j] ;
 			
-			if (d==0.f) a2b = Rand::randVec2() ; // oops on top of one another; pick random direction
-			else a2b = glm::normalize( b.mLoc - a.mLoc ) ;
+			if ( !(a.mCollisionMask & b.mCollisionMask) ) continue;
 			
-			float overlap = rs - d ;
+			float d  = glm::distance(a.mLoc,b.mLoc) ;
+			float rs = a.mRadius + b.mRadius ;
 			
-			// get velocities
-			const vec2 avel = a.getVel() ;
-			const vec2 bvel = b.getVel() ;
-			
-			// get masses
-			const float ma = a.getMass() ;
-			const float mb = b.getMass() ;
-
-			const float amass_frac = ma / (ma+mb) ; // a's % of total mass
-			const float bmass_frac = 1.f - amass_frac ; // b's % of total mass
-			
-			// correct position (proportional to masses)
-			b.mLoc +=  a2b * overlap * amass_frac ;
-			a.mLoc += -a2b * overlap * bmass_frac ;
-			
-			// get velocities along collision axis (a2b)
-			const float avelp = dot( avel, a2b ) ;
-			const float bvelp = dot( bvel, a2b ) ;
-			
-			// ...computations for new velocities
-			float avelp_new ;
-			float bvelp_new ;
-			
-			if (0)
+			if ( d < rs )
 			{
-				// swap velocities along axis of collision
-				// (old way)
-				avelp_new = bvelp ;
-				bvelp_new = avelp ;
-			}
-			else
-			{
-				// new way:
-				// - do relative mass interactions
-				// - can dial elasticity
+				vec2 a2b ;
 				
-				float cr = 1.f ; // 0..1
-					// coefficient of restitution:
-					// 0 is elastic
-					// 1 is inelastic
-					// https://en.wikipedia.org/wiki/Inelastic_collision
+				if (d==0.f) a2b = Rand::randVec2() ; // oops on top of one another; pick random direction
+				else a2b = glm::normalize( b.mLoc - a.mLoc ) ;
 				
-				avelp_new = (cr * mb * (bvelp - avelp) + ma*avelp + mb*bvelp) / (ma+mb) ;
-				bvelp_new = (cr * ma * (avelp - bvelp) + ma*avelp + mb*bvelp) / (ma+mb) ;
-					// we'll let the compiler simplify that
-					// (though if we cache inverse mass we can plug that in directly;
-					// uh... i'm blanking on the algebra for this. whatev.)
+				float overlap = rs - d ;
+				
+				// get velocities
+				const vec2 avel = a.getVel() ;
+				const vec2 bvel = b.getVel() ;
+				
+				// get masses
+				const float ma = a.getMass() ;
+				const float mb = b.getMass() ;
+
+				const float amass_frac = ma / (ma+mb) ; // a's % of total mass
+				const float bmass_frac = 1.f - amass_frac ; // b's % of total mass
+				
+				// correct position (proportional to masses)
+				b.mLoc +=  a2b * overlap * amass_frac ;
+				a.mLoc += -a2b * overlap * bmass_frac ;
+				
+				// get velocities along collision axis (a2b)
+				const float avelp = dot( avel, a2b ) ;
+				const float bvelp = dot( bvel, a2b ) ;
+				
+				// ...computations for new velocities
+				float avelp_new ;
+				float bvelp_new ;
+				
+				if (0)
+				{
+					// swap velocities along axis of collision
+					// (old way)
+					avelp_new = bvelp ;
+					bvelp_new = avelp ;
+				}
+				else
+				{
+					// new way:
+					// - do relative mass interactions
+					// - can dial elasticity
+					
+					float cr = 1.f ; // 0..1
+						// coefficient of restitution:
+						// 0 is elastic
+						// 1 is inelastic
+						// https://en.wikipedia.org/wiki/Inelastic_collision
+					
+					avelp_new = (cr * mb * (bvelp - avelp) + ma*avelp + mb*bvelp) / (ma+mb) ;
+					bvelp_new = (cr * ma * (avelp - bvelp) + ma*avelp + mb*bvelp) / (ma+mb) ;
+						// we'll let the compiler simplify that
+						// (though if we cache inverse mass we can plug that in directly;
+						// uh... i'm blanking on the algebra for this. whatev.)
+				}
+				
+				// compute new velocities
+				const vec2 avel_new = avel + a2b * ( avelp_new - avelp ) ;
+				const vec2 bvel_new = bvel + a2b * ( bvelp_new - bvelp ) ;
+				
+				// set velocities
+				a.setVel(avel_new) ;
+				b.setVel(bvel_new) ;
+
+				// squash it
+	//			a.noteSquashImpact( -a2b * overlap * bmass_frac ) ;
+	//			b.noteSquashImpact(  a2b * overlap * amass_frac ) ;
+
+				a.noteSquashImpact( avel_new - avel ) ;
+				b.noteSquashImpact( bvel_new - bvel ) ;
+					// *cough* just undoing some of the comptuation i did earlier. compiler can figure this out,
+					// but the point is that we just want the velocities along the axis of collision.
+				
+				// note it
+				onBallBallCollide(a,b);
 			}
-			
-			// compute new velocities
-			const vec2 avel_new = avel + a2b * ( avelp_new - avelp ) ;
-			const vec2 bvel_new = bvel + a2b * ( bvelp_new - bvelp ) ;
-			
-			// set velocities
-			a.setVel(avel_new) ;
-			b.setVel(bvel_new) ;
-
-			// squash it
-//			a.noteSquashImpact( -a2b * overlap * bmass_frac ) ;
-//			b.noteSquashImpact(  a2b * overlap * amass_frac ) ;
-
-			a.noteSquashImpact( avel_new - avel ) ;
-			b.noteSquashImpact( bvel_new - bvel ) ;
-				// *cough* just undoing some of the comptuation i did earlier. compiler can figure this out,
-				// but the point is that we just want the velocities along the axis of collision.
-			
-			// note it
-			onBallBallCollide(a,b);
-		}
-	}
+		} // for j
+	} // for i
 }
 
 vec2 BallWorld::unlapEdge( vec2 p, float r, const Contour& poly, const Ball* b )

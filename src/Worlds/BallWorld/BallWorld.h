@@ -28,6 +28,12 @@ using namespace std;
 class Ball {
 	
 public:
+	Ball() {
+		mCollideWithContours	= 1;
+		mPausePhysics			= 0;
+		mCapVelocity			= 1;
+	}
+	
 	vec2 mLoc ;
 	vec2 mLastLoc ;
 	vec2 mAccel ;
@@ -50,11 +56,18 @@ public:
 	}
 
 	vec2  mSquash ; // direction and magnitude
-	bool  mCollideWithContours=true; // false: collide with inverse contours
 	
+	// flags
+	unsigned int mCollideWithContours : 1; //=1 by default; if 0, collide with inverse contours
+	unsigned int mPausePhysics		  : 1; //=0 by default
+	unsigned int mCapVelocity		  : 1; //=1 by default
+	uint32_t	 mCollisionMask				= 1; // what to collide against?
+	
+	// history (for ribbons)
 	boost::circular_buffer<vec2> mHistory;
 	
-	// User data that BallWorld doesn't use
+	// User data
+	// (BallWorld doesn't use it)
 	class UserData {
   	  public:
 		virtual ~UserData() {}

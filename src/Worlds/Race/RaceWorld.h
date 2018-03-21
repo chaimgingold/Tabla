@@ -75,6 +75,8 @@ private:
 		
 		float	mPlayerCollideFrictionCoeff	= .1f;
 		
+		float	mPfxFadeStep				= .1f;
+		
 		class Controls
 		{
 		public:
@@ -98,6 +100,7 @@ private:
 		int		mSpawnWait=0;
 		
 		int		mColorScheme=0;
+		float	mTurn=0.f;
 		
 		// graphics
 //		ci::gl::TextureRef mImage;
@@ -120,6 +123,7 @@ private:
 		Type						mType = Type::Unknown;
 		GamepadManager::DeviceId	mGamepad=0;
 		
+		bool mFadeOut = false;
 	};
 	
 	static BallData* getBallData( const Ball& b ) {
@@ -145,6 +149,9 @@ private:
 	void handleCollisions();
 	void makeBullet( Player& );
 	
+	void tickPfx();
+	void makePfx( vec2 loc, float r, ColorA c, vec2 vel, bool ribbon );
+	
 	//
 	ci::gl::TextureRef	mShip;
 	float				mShipScale=1.f;
@@ -159,6 +166,10 @@ private:
 	
 	void setupSynthesis() override;
 	void updateSynthesis() override;
+
+	// debug helpers
+	void nanScan();
+	void dumpCore();
 };
 
 #endif /* RaceWorld_hpp */

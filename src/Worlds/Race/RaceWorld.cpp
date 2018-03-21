@@ -13,6 +13,8 @@
 #include "cinder/audio/Source.h"
 #include "TablaApp.h"
 
+const static bool kNanScan = false;
+
 static GameCartridgeSimple sCartridge("RaceWorld", [](){
 	return std::make_shared<RaceWorld>();
 });
@@ -82,8 +84,10 @@ void RaceWorld::setParams( XmlTree xml )
 		getXml(t,"PlayerRespawnWaitTicks",	mTuning.mPlayerRespawnWaitTicks );
 		getXml(t,"PlayerDieSpawnGoalToScoreFrac", mTuning.mPlayerDieSpawnGoalToScoreFrac );
 		getXml(t,"PlayerScoreNotchRadius",	mTuning.mPlayerScoreNotchRadius );
-	}
 
+		getXml(t,"Pfx/FadeStep", mTuning.mPfxFadeStep );
+	}
+	
 	mPlayerColors.clear();
 	mPlayerColorsUsed.clear();
 	for ( auto i = xml.begin("PlayerColors/p"); i != xml.end(); ++i )
@@ -201,15 +205,18 @@ void RaceWorld::setupPlayer( Gamepad_device* gamepad )
 		{
 			FX("player spawn");
 
+			vec2 loc = getRandomPointInWorldBoundsPoly();
+			
+			makePfx( loc, 1.f, ColorA(0,1,1,1), vec2(0.f), true );
+			
 			Ball ball;
 			PlayerColor pc = mPlayerColors[ player->mColorScheme ];
 
 			ball.mRadius = mTuning.mPlayerRadius;
 			ball.setMass( M_PI * powf(ball.mRadius,3.f) ) ;
-			ball.mCollideWithContours = true;
 			ball.mHistory.set_capacity(getRibbonMaxLength());
 
-			ball.setLoc( getRandomPointInWorldBoundsPoly() );
+			ball.setLoc( loc );
 			ball.setVel( vec2(0,0) );
 			ball.mAccel = vec2(0,0);
 			ball.mColor = pc.mShip;
@@ -282,7 +289,6 @@ void RaceWorld::makeBullet( Player& p )
 	b.mRibbonColor	= pc.mShotRibbon;
 	b.mRadius		= mTuning.mShotRadius;
 	b.setMass( M_PI * powf(b.mRadius,3.f) ) ;
-	b.mCollideWithContours = true;
 	b.mHistory.set_capacity(getRibbonMaxLength());
 
 	vec2 v = p.mFacing;
@@ -295,7 +301,56 @@ void RaceWorld::makeBullet( Player& p )
 	ballData->mType		= BallData::Type::Shot;
 	ballData->mGamepad	= p.mGamepad;
 	b.mUserData = ballData;
+	
+	getBalls().push_back(b);
+}
 
+void RaceWorld::tickPfx()
+{
+	set<size_t> removeBall;	
+	
+	for ( int i=0; i<getBalls().size(); ++i )
+	{
+		Ball &b = getBalls()[i];
+		auto bd = getBallData(b);
+		
+		if (bd && bd->mFadeOut)
+		{
+			b.mColor.a		 -= mTuning.mPfxFadeStep;
+			b.mRibbonColor.a -= mTuning.mPfxFadeStep;
+			
+			b.mRibbonColor.a = max( 0.f, b.mRibbonColor.a );
+			
+			if ( b.mColor.a <= 0.f ) {
+				removeBall.insert(i);
+			}
+		}
+	}	
+
+	eraseBalls(removeBall);
+	
+	if ( !removeBall.empty() ) {
+		remapBallIndices();
+	}
+}
+
+void RaceWorld::makePfx( vec2 loc, float r, ColorA c, vec2 vel, bool ribbon )
+{
+	Ball b;
+	
+	b.setLoc(loc);
+	b.mRadius = r;
+	b.mColor = c;
+	b.mRibbonColor = c;
+	b.setVel(vel);
+	b.mCollisionMask=0;
+	
+	auto ud = make_shared<BallData>();
+	ud->mFadeOut = true;
+	b.mUserData = ud;
+	
+	if (ribbon) b.mHistory.set_capacity(getRibbonMaxLength());
+	
 	getBalls().push_back(b);
 }
 
@@ -365,9 +420,11 @@ void RaceWorld::tickPlayer( Player& p )
 		}
 
 		// rotate
+		p.mTurn = 0.f;
 		if (gamepad) {
 			if ( fabs(gamepad->axisStates[0]) > mTuning.mAxisDeadZone ) {
-				p.mFacing = glm::rotate( p.mFacing, gamepad->axisStates[0] * mTuning.mPlayerTurnSpeedScale );
+				p.mTurn = gamepad->axisStates[0] * mTuning.mPlayerTurnSpeedScale;
+				p.mFacing = glm::rotate( p.mFacing, p.mTurn );
 				FX("turn",false);
 			}
 		}
@@ -448,8 +505,12 @@ void RaceWorld::updateSynthesis() {
 	for( Ball &b : balls )
 	{
 		BallData* d = getBallData(b);
-		if ( d && d->mType == BallData::Type::Player ) {
-			ballVels.addFloat(length(getDenoisedBallVel(b)));
+		if ( d && d->mType == BallData::Type::Player )
+		{
+			float t=0.f;
+			Player* p = getPlayerByGamepad(d->mGamepad);
+			if (p) t = fabs(p->mTurn) * 1.f;
+			ballVels.addFloat(length(getDenoisedBallVel(b))-t);
 		}
 	}
 
@@ -458,20 +519,29 @@ void RaceWorld::updateSynthesis() {
 
 void RaceWorld::update()
 {
+	nanScan();
+
+	tickPfx();
+	nanScan();
+	
 	// players (controls)
 	for( auto &p : mPlayers )
 	{
 		tickPlayer(p.second);
 	}
+	nanScan();
 
 	// physics
 	BallWorld::update(); // also does its sound, which may be an issue
+	nanScan();
 
 	// handle collisions (right after physics!)
 	handleCollisions();
+	nanScan();
 
 	// goal spawn
 	tickGoalSpawn();
+	nanScan();
 }
 
 void RaceWorld::tickGoalSpawn()
@@ -526,7 +596,6 @@ Ball& RaceWorld::spawnGoal()
 	b.mRibbonColor = mTuning.mGoalBallColor;
 	b.mRadius = mTuning.mGoalBallRadius;
 	b.mHistory.set_capacity( getRibbonMaxLength() );
-	b.mCollideWithContours = true;
 	b.setLoc( getRandomPointInWorldBoundsPoly() );
 	b.setVel( randVec2() * randFloat() * mTuning.mGoalBallSpawnMaxVel );
 
@@ -549,8 +618,8 @@ void RaceWorld::handleCollisions()
 	{
 		auto bwc = getBallWorldCollisions();
 		auto bcc = getBallContourCollisions();
-
-		auto test = [&balls,&removeBall]( int i )
+		
+		auto test = [this,&balls,&removeBall]( int i )
 		{
 			auto bd = getBallData( balls[i] );
 
@@ -558,7 +627,15 @@ void RaceWorld::handleCollisions()
 			if (bd && bd->mType == BallData::Type::Shot )
 			{
 				// DINK!
-				removeBall.insert(i);
+				if ((1)) {
+					removeBall.insert(i);
+				} else {
+					Ball& shot = getBalls()[i];
+					shot.mPausePhysics  = 1;
+					shot.mCollisionMask = 0;
+					bd->mFadeOut = true;
+				}
+
 				FX("shot hit world/wall");
 			}
 		};
@@ -585,6 +662,8 @@ void RaceWorld::handleCollisions()
 				swap( c.mBallIndex[0], c.mBallIndex[1] );
 				swap( d[0], d[1] );
 			}
+			
+			assert( c.mBallIndex[0] != c.mBallIndex[1] );
 
 			// Player hits X
 			// 0 isa player
@@ -611,8 +690,15 @@ void RaceWorld::handleCollisions()
 						// no self-kill
 						if ( d[0]->mGamepad != d[1]->mGamepad )
 						{
+							// decay shot
+							Ball& shot = getBalls()[c.mBallIndex[1]];
+							shot.mPausePhysics  = 1;
+							shot.mCollisionMask = 0;
+							d[1]->mFadeOut = true;
+							
 							// kaboom
-							removeBall.insert(c.mBallIndex[1]); // shot
+							//removeBall.insert(c.mBallIndex[1]); // shot
+							
 							removeBall.insert(c.mBallIndex[0]); // player
 							FX("player die");
 
@@ -690,6 +776,46 @@ void RaceWorld::draw( DrawType drawType )
 	for( auto &p : mPlayers )
 	{
 		drawPlayer(p.second);
+	}
+}
+
+void RaceWorld::nanScan()
+{
+	if (!kNanScan) return;
+	
+	for( auto b : getBalls() )
+	{
+		if ( isnan(b.mAccel.x) ) {
+			cout << "nan" << b.mAccel << endl;
+		}
+
+		if ( isnan(b.mLoc.x) ) {
+			cout << "nan" << b.mLoc << endl;
+		}
+
+		if ( isnan(b.mLastLoc.x) ) {
+			cout << "nan" << b.mLastLoc << endl;
+		}
+	}
+}
+
+void RaceWorld::dumpCore()
+{
+	for ( auto pi : mPlayers )
+	{
+		const Player &p = pi.second;
+		
+		cout << "Player" << endl;
+		cout << "\tmFacing = " << p.mFacing << endl;
+		cout << "\tmScore  = " << p.mScore << endl;
+		cout << "\tmBallIndex = " << p.mBallIndex << endl;
+	}
+
+	for ( int i=0; i<getBalls().size(); ++i )
+	{
+		const Ball& b = getBalls()[i]; 
+		
+		cout << "Ball[" << i << "]: loc=" << b.mLoc << ", vel=" << b.getVel() << endl;
 	}
 }
 
