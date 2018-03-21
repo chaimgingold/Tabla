@@ -68,6 +68,7 @@ private:
 		float	mPlayerAccelSpeedScale		= .05f;
 		float	mPlayerFriction				= .01f;
 		int		mPlayerFireIntervalTicks	= 20;
+		int		mPlayerRespawnWaitTicks		= 30;
 		
 		float	mPlayerCollideFrictionCoeff	= .1f;
 		
@@ -91,6 +92,7 @@ private:
 		int		mBallIndex=-1;
 		
 		int		mFireWait=0;
+		int		mSpawnWait=0;
 		
 		int		mColorScheme=0;
 		

@@ -54,6 +54,7 @@
 		<PlayerFriction>.01</PlayerFriction>
 		<PlayerCollideFrictionCoeff>.1</PlayerCollideFrictionCoeff>
 		<PlayerFireIntervalTicks>10</PlayerFireIntervalTicks>
+		<PlayerRespawnWaitTicks>120</PlayerRespawnWaitTicks>
 		
 	</Tuning>
 

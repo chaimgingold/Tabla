@@ -87,6 +87,7 @@ void RaceWorld::setParams( XmlTree xml )
 		getXml(t,"PlayerFriction",			mTuning.mPlayerFriction );
 		getXml(t,"PlayerCollideFrictionCoeff", mTuning.mPlayerCollideFrictionCoeff );
 		getXml(t,"PlayerFireIntervalTicks",	mTuning.mPlayerFireIntervalTicks );
+		getXml(t,"PlayerRespawnWaitTicks",	mTuning.mPlayerRespawnWaitTicks );
 		
 		mTuning.mGoalBall.mRibbonColor = mTuning.mGoalBall.mColor;
 	}
@@ -201,7 +202,10 @@ void RaceWorld::setupPlayer( Gamepad_device* gamepad )
 		}
 		
 		// make ship
-		if ( player && player->mBallIndex == -1 )
+		if ( player
+		  && player->mBallIndex == -1
+		  && player->mSpawnWait <= 0
+		   )
 		{
 			FX("player spawn");
 
@@ -318,56 +322,61 @@ void RaceWorld::tickPlayer( Player& p )
 		return false;
 	};
 	
-	// get ball
-	// (and ensure ball still here)
-	if (p.mBallIndex == -1) return;
-	
-	Ball &ball = getBalls()[p.mBallIndex];
-	
-	// get gamepad
-	const GamepadManager::Device* gamepad = getGamepadManager().getDeviceById(p.mGamepad);
-
-	// accel
-	if ( button(gamepad,mTuning.mControls.mAccel) )
+	if (p.mBallIndex == -1)
 	{
-		FX("accel",false);
-		ball.mAccel += p.mFacing * mTuning.mPlayerAccelSpeedScale;
-		// ideally we let the engine rev up and down so this happens smoothly.. (and feels a bit sloppy)
+		// dead
+		if ( p.mSpawnWait > 0 ) p.mSpawnWait--;
 	}
-
-	// shoot
-	if ( p.mFireWait > 0 ) p.mFireWait--; // cool off
-	
-	if ( button(gamepad,mTuning.mControls.mFire) )
+	else
 	{
-		if ( p.mFireWait <= 0 )
-		{
-			// fire!
-			makeBullet(p);
-			p.mFireWait = mTuning.mPlayerFireIntervalTicks;
-		}
-		else FX("can't fire; cool off",false);
-	}
-	
-	// "friction"
-	{
-		float v = length( ball.getVel() );
+		// alive
+		Ball &ball = getBalls()[p.mBallIndex];
 		
-		float f = mTuning.mPlayerFriction;
-		f += length(ball.mSquash) * mTuning.mPlayerCollideFrictionCoeff;
-		
-		if ( v > 0.f )
+		// get gamepad
+		const GamepadManager::Device* gamepad = getGamepadManager().getDeviceById(p.mGamepad);
+
+		// accel
+		if ( button(gamepad,mTuning.mControls.mAccel) )
 		{
-			ball.mAccel += -min(v,f) * normalize(ball.getVel());
+			FX("accel",false);
+			ball.mAccel += p.mFacing * mTuning.mPlayerAccelSpeedScale;
+			// ideally we let the engine rev up and down so this happens smoothly.. (and feels a bit sloppy)
 		}
-		// TODO: do this in a more graceful way
-	}
-	
-	// rotate
-	if (gamepad) {
-		if ( fabs(gamepad->axisStates[0]) > mTuning.mAxisDeadZone ) {
-			p.mFacing = glm::rotate( p.mFacing, gamepad->axisStates[0] * mTuning.mPlayerTurnSpeedScale );
-			FX("turn",false);
+
+		// shoot
+		if ( p.mFireWait > 0 ) p.mFireWait--; // cool off
+		
+		if ( button(gamepad,mTuning.mControls.mFire) )
+		{
+			if ( p.mFireWait <= 0 )
+			{
+				// fire!
+				makeBullet(p);
+				p.mFireWait = mTuning.mPlayerFireIntervalTicks;
+			}
+			else FX("can't fire; cool off",false);
+		}
+		
+		// "friction"
+		{
+			float v = length( ball.getVel() );
+			
+			float f = mTuning.mPlayerFriction;
+			f += length(ball.mSquash) * mTuning.mPlayerCollideFrictionCoeff;
+			
+			if ( v > 0.f )
+			{
+				ball.mAccel += -min(v,f) * normalize(ball.getVel());
+			}
+			// TODO: do this in a more graceful way
+		}
+		
+		// rotate
+		if (gamepad) {
+			if ( fabs(gamepad->axisStates[0]) > mTuning.mAxisDeadZone ) {
+				p.mFacing = glm::rotate( p.mFacing, gamepad->axisStates[0] * mTuning.mPlayerTurnSpeedScale );
+				FX("turn",false);
+			}
 		}
 	}
 }
@@ -562,6 +571,7 @@ void RaceWorld::handleCollisions()
 							if (p)
 							{
 								p->mBallIndex = -1;
+								p->mSpawnWait = mTuning.mPlayerRespawnWaitTicks;
 							}
 							
 							// TODO: spawn coins for score * multiplier
