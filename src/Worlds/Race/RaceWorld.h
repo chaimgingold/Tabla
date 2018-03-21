@@ -100,6 +100,7 @@ private:
 		int		mSpawnWait=0;
 		
 		int		mColorScheme=0;
+		float	mTurn=0.f;
 		
 		// graphics
 //		ci::gl::TextureRef mImage;
@@ -164,7 +165,7 @@ private:
 	cipd::PatchRef			mPatch;			// pong patch
 	
 	void setupSynthesis() override;
-	void updateSynthesis() override {};
+	void updateSynthesis() override;
 
 	// debug helpers
 	void nanScan();
