@@ -278,6 +278,9 @@ void RaceWorld::remapBallIndices()
 void RaceWorld::makeBullet( Player& p )
 {
 	FX("shoot");
+	// Trigger LASER SOUND
+	mPd->sendFloat("ship-laser", p.mColorScheme );
+
 	if (p.mBallIndex == -1) return;
 
 	const Ball& pb = getBalls()[p.mBallIndex];
@@ -377,8 +380,6 @@ void RaceWorld::tickPlayer( Player& p )
 	else
 	{
 		// alive
-		Ball &ball = getBalls()[p.mBallIndex];
-
 		// get gamepad
 		const GamepadManager::Device* gamepad = getGamepadManager().getDeviceById(p.mGamepad);
 
@@ -386,7 +387,7 @@ void RaceWorld::tickPlayer( Player& p )
 		if ( button(gamepad,mTuning.mControls.mAccel) )
 		{
 			FX("accel",false);
-			ball.mAccel += p.mFacing * mTuning.mPlayerAccelSpeedScale;
+			getBalls()[p.mBallIndex].mAccel += p.mFacing * mTuning.mPlayerAccelSpeedScale;
 			// ideally we let the engine rev up and down so this happens smoothly.. (and feels a bit sloppy)
 		}
 
@@ -409,12 +410,11 @@ void RaceWorld::tickPlayer( Player& p )
 			float v = length( ball.getVel() );
 
 			float f = mTuning.mPlayerFriction;
-			f += length(ball.mSquash) * mTuning.mPlayerCollideFrictionCoeff;
-			f  = max(0.f,f); // DON'T ASK. Kludge for f becoming -inf and blowing everything up.
+			f += length(getBalls()[p.mBallIndex].mSquash) * mTuning.mPlayerCollideFrictionCoeff;
 
 			if ( v > 0.f )
 			{
-				ball.mAccel += -min(v,f) * normalize(ball.getVel());
+				getBalls()[p.mBallIndex].mAccel += -min(v,f) * normalize(ball.getVel());
 			}
 			// TODO: do this in a more graceful way
 		}
