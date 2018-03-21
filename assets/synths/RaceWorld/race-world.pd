@@ -1,4 +1,4 @@
-#N canvas 1230 22 450 300 10;
+#N canvas 980 34 450 300 10;
 #X obj 118 221 rev3~ 100 90 3000 20;
 #X obj 98 188 catch~ fm-voice;
 #X obj 91 268 dac~;
