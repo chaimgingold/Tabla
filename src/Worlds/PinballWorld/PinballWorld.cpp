@@ -329,7 +329,7 @@ void PinballWorld::serveBall()
 	
 	Ball& ball = newRandomBall(loc);
 	
-	ball.mCollideWithContours = true;
+	ball.mCollideWithContours = 1;
 	ball.mColor = mBallDefaultColor; // no random colors that are set entirely in code, i think. :P
 	
 	sendGameEvent(GameEvent::ServeBall);

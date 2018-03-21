@@ -53,10 +53,14 @@
 		<PlayerAccelSpeedScale>.05</PlayerAccelSpeedScale>
 		<PlayerFriction>.01</PlayerFriction>
 		<PlayerCollideFrictionCoeff>.1</PlayerCollideFrictionCoeff>
-		<PlayerFireIntervalTicks>10</PlayerFireIntervalTicks>
+		<PlayerFireIntervalTicks>30</PlayerFireIntervalTicks>
 		<PlayerRespawnWaitTicks>120</PlayerRespawnWaitTicks>
-		<PlayerDieSpawnGoalToScoreFrac>.7</PlayerDieSpawnGoalToScoreFrac>
+		<PlayerDieSpawnGoalToScoreFrac>.5</PlayerDieSpawnGoalToScoreFrac>
 		<PlayerScoreNotchRadius>.5</PlayerScoreNotchRadius>
+		
+		<Pfx>
+			<FadeStep>.05</FadeStep>
+		</Pfx>
 		
 	</Tuning>
 

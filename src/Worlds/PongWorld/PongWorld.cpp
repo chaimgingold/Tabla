@@ -231,7 +231,7 @@ void PongWorld::serve()
 	ball.mRadius = 2.f;
 	ball.setMass( M_PI * powf(ball.mRadius,3.f) ) ;
 	
-	ball.mCollideWithContours = false;
+	ball.mCollideWithContours = 0;
 	
 	ball.setVel( Rand::randVec2() * ball.mRadius/2.f ) ;
 	
