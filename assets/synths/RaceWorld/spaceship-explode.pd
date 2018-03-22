@@ -1,0 +1,49 @@
+#N canvas 53 214 1250 674 10;
+#X obj 371 511 s~ \$0freq;
+#X obj 371 478 mtof~;
+#X obj 27 491 *~ 0.1;
+#X obj 290 341 s \$0trigger;
+#X obj 27 426 +~;
+#X obj 371 445 +~;
+#X obj 437 457 osc~ 7;
+#X obj 437 490 *~ 0.1;
+#X obj 27 289 fm-op-2 /2 \$0;
+#X obj 137 155 fm-op-2 /3 \$0;
+#X text 133 321 <- modulate me;
+#X obj 370 273 +;
+#X obj 801 17 sssad-gui \$0;
+#X obj 370 306 t b a b;
+#X obj 368 34 inlet;
+#X obj 27 15 fm-op-2 /0 \$0;
+#X msg 801 125 \; \$1-SSSAD /1/e 0 \; \$1-SSSAD /1/d 329.114 \; \$1-SSSAD
+/1/a 113.924 \; \$1-SSSAD /1/m 3037.97 \; \$1-SSSAD /1/r 1 \; \$1-SSSAD
+/0/d 594.937 \; \$1-SSSAD /0/r 5 \; \$1-SSSAD /3/e 0 \; \$1-SSSAD /3/d
+759.494 \; \$1-SSSAD /3/a 63.2911 \; \$1-SSSAD /3/r 0 \; \$1-SSSAD
+/2/e 0 \; \$1-SSSAD /2/d 658.228 \; \$1-SSSAD /2/a 392.405 \; \$1-SSSAD
+/2/m 2974.68 \; \$1-SSSAD /2/r 0 \; \$1-SSSAD_ADMIN set \;;
+#X obj 27 152 fm-op-2 /1 \$0;
+#X obj 913 49 loadbang;
+#X obj 913 78 \$0;
+#X obj 371 415 + 0;
+#X obj 370 219 + 48;
+#X obj 28 548 throw~ explode;
+#X connect 1 0 0 0;
+#X connect 2 0 22 0;
+#X connect 4 0 2 0;
+#X connect 5 0 1 0;
+#X connect 6 0 7 0;
+#X connect 7 0 5 1;
+#X connect 8 0 4 0;
+#X connect 9 0 8 0;
+#X connect 11 0 13 0;
+#X connect 12 0 16 0;
+#X connect 13 0 3 0;
+#X connect 13 1 20 0;
+#X connect 14 0 21 0;
+#X connect 15 0 4 1;
+#X connect 15 0 17 0;
+#X connect 17 0 8 0;
+#X connect 18 0 19 0;
+#X connect 19 0 16 0;
+#X connect 20 0 5 0;
+#X connect 21 0 11 0;
