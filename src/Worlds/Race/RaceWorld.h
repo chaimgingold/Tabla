@@ -79,6 +79,8 @@ private:
 		ColorA	mPfxCollideDustColor;
 		float	mPfxFadeStep				= .1f;
 		
+		float	mAttractAnimLength			= 3.f;
+		
 		class Controls
 		{
 		public:
@@ -126,6 +128,8 @@ private:
 		GamepadManager::DeviceId	mGamepad=0;
 		
 		bool mFadeOut = false;
+		
+		float mAttractAnim=1.f; // goes 0 .. 1
 	};
 	
 	static BallData* getBallData( const Ball& b ) {
@@ -145,6 +149,9 @@ private:
 	void removePlayer( Gamepad_device* );
 	
 	void remapBallIndices();
+	
+	void updateBallData();
+	void drawBallData() const; // fade in animations
 	
 	void tickGoalSpawn(); // maybe makes N 
 	void spawnGoal( vec2 ); // makes 1

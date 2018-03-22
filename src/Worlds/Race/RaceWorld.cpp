@@ -75,6 +75,8 @@ void RaceWorld::setParams( XmlTree xml )
 		getXml(t,"MultigoalOdds", 			mTuning.mMultigoalOdds );
 		getXml(t,"MultigoalMax",			mTuning.mMultigoalMax );
 
+		getXml(t,"AttractAnimLength",		mTuning.mAttractAnimLength );
+		
 		getXml(t,"PlayerRadius",	mTuning.mPlayerRadius );
 		getXml(t,"PlayerTurnSpeedScale",	mTuning.mPlayerTurnSpeedScale );
 		getXml(t,"PlayerAccelSpeedScale",	mTuning.mPlayerAccelSpeedScale );
@@ -224,6 +226,7 @@ void RaceWorld::setupPlayer( Gamepad_device* gamepad )
 			auto ballData = make_shared<BallData>();
 			ballData->mGamepad = player->mGamepad;
 			ballData->mType = BallData::Type::Player;
+			ballData->mAttractAnim = 0.f;
 			ball.mUserData = ballData;
 
 			getBalls().push_back(ball);
@@ -471,21 +474,38 @@ void RaceWorld::drawPlayer( const Player& p ) const
 	{
 		gl::color( mTuning.mGoalBallColor );
 
-		float step = 1.f / (float)(max(1,p.mScore-1)) ;
-
-		float w = min( ball.mRadius * 2.f, mTuning.mPlayerScoreNotchRadius*(float)(p.mScore-1)*3.f ) ;
-
-		vec2 e[2] =
+		if ((1))
 		{
-			vec2( -w/2, ball.mRadius * 1.5f ),
-			vec2(  w/2, ball.mRadius * 1.5f )
-		};
+			gl::color( mTuning.mGoalBallColor );
 
-		for( int i=0; i<p.mScore; ++i )
-		{
-			vec2 c = lerp( e[0], e[1], (float)i * step );
+			float rb = ball.mRadius + .2f;
+			float rs = .3f ;
+			
+			for( int i=0; i<p.mScore; ++i )
+			{
+				float dt = (sin( ((float)i / 5.f) + app::getElapsedSeconds() * 2.f ) + 1.f)/2.f;
+				
+				gl::drawStrokedCircle( vec2(0.f), rb + rs * (float)i + dt * .25f );
+			}
+		}
+		else
+		{	
+			float step = 1.f / (float)(max(1,p.mScore-1)) ;
 
-			gl::drawSolidCircle( c, min( (float)step*2.f, mTuning.mPlayerScoreNotchRadius) );
+			float w = min( ball.mRadius * 2.f, mTuning.mPlayerScoreNotchRadius*(float)(p.mScore-1)*3.f ) ;
+
+			vec2 e[2] =
+			{
+				vec2( -w/2, ball.mRadius * 1.5f ),
+				vec2(  w/2, ball.mRadius * 1.5f )
+			};
+
+			for( int i=0; i<p.mScore; ++i )
+			{
+				vec2 c = lerp( e[0], e[1], (float)i * step );
+
+				gl::drawSolidCircle( c, min( (float)step*2.f, mTuning.mPlayerScoreNotchRadius) );
+			}
 		}
 	}
 
@@ -547,6 +567,8 @@ void RaceWorld::update()
 	// goal spawn
 	tickGoalSpawn();
 	nanScan();
+	
+	updateBallData();
 }
 
 void RaceWorld::tickGoalSpawn()
@@ -622,6 +644,7 @@ void RaceWorld::spawnGoal( vec2 loc )
 
 	auto ballData = make_shared<BallData>();
 	ballData->mType = BallData::Type::Goal;
+	ballData->mAttractAnim = 0.f;
 	b.mUserData = ballData;
 	getBalls().push_back(b);
 
@@ -661,7 +684,7 @@ void RaceWorld::handleCollisions()
 						for( int i=0; i<10; ++i )
 						{
 							makePfx(pt,
-									mTuning.mPfxCollideDustRadius,
+									mTuning.mPfxCollideDustRadius * randFloat(1.f,3.f),
 									lerp( mTuning.mPfxCollideDustColor, balls[i].mColor, randFloat() ),
 									balls[i].getVel() * .01f + randVec2() * .2f,
 									true );
@@ -681,7 +704,7 @@ void RaceWorld::handleCollisions()
 				case BallData::Type::Player:
 				{
 					makePfx(pt,
-							mTuning.mPfxCollideDustRadius,
+							mTuning.mPfxCollideDustRadius * randFloat(1.f,2.5f),
 							mTuning.mPfxCollideDustColor,
 							balls[i].getVel() * .01f + randVec2() * .1f,
 							false );
@@ -693,7 +716,7 @@ void RaceWorld::handleCollisions()
 					for( int i=0; i<10; ++i )
 					{
 						makePfx(pt,
-								mTuning.mPfxCollideDustRadius,
+								mTuning.mPfxCollideDustRadius * randFloat(1.f,2.f),
 								mTuning.mPfxCollideDustColor,
 								balls[i].getVel() * .01f + randVec2() * .3f,
 								false );
@@ -807,7 +830,7 @@ void RaceWorld::handleCollisions()
 							{
 								makePfx(pb.mLoc,
 										mTuning.mPfxCollideDustRadius * randFloat(2.f,8.f),
-										lerp( pb.mColor, ColorA(0,0,0,1), randFloat()*randFloat() ),
+										lerp( pb.mColor, ColorA(1,1,1,1), randFloat()*randFloat() ),
 										randVec2() * randFloat(.3f,2.f),
 										true );
 							}	
@@ -882,9 +905,47 @@ void RaceWorld::draw( DrawType drawType )
 	//
 	BallWorld::draw(drawType);
 
-	for( auto &p : mPlayers )
-	{
+	for( auto &p : mPlayers ) {
 		drawPlayer(p.second);
+	}
+	
+	drawBallData();
+}
+
+void RaceWorld::updateBallData()
+{
+	for( auto &b : getBalls() )
+	{
+		auto bd = getBallData(b);
+		if (!bd) continue;
+
+		cout << mTuning.mAttractAnimLength << endl;
+		bd->mAttractAnim += 1.f / (60.f * mTuning.mAttractAnimLength);
+	}
+}
+
+void RaceWorld::drawBallData() const
+{
+	for( auto &b : getBalls() )
+	{
+		auto bd = getBallData(b);
+		if (!bd) continue;
+		if ( bd->mAttractAnim >= 1.f ) continue;
+		
+		ColorA c = b.mColor;
+		c.a *= sqrtf(1.f - bd->mAttractAnim);
+		gl::color(c);
+
+		bool isPlayer = bd->mType == BallData::Type::Player;
+		int n = isPlayer ? 10 : 5 ;
+		
+		for( int i=0; i<n; ++i )
+		{
+			float r = b.mRadius * 3.f + (float)i * 2.f;
+			r = lerp( r, b.mRadius + (float)i * .5f, bd->mAttractAnim );
+			
+			gl::drawStrokedCircle( b.mLoc, r );
+		}
 	}
 }
 
