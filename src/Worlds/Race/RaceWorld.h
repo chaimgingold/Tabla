@@ -147,7 +147,7 @@ private:
 	void remapBallIndices();
 	
 	void tickGoalSpawn(); // maybe makes N 
-	Ball& spawnGoal(); // makes 1
+	void spawnGoal( vec2 ); // makes 1
 	void handleCollisions();
 	void makeBullet( Player& );
 	

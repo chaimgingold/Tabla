@@ -585,7 +585,7 @@ void RaceWorld::tickGoalSpawn()
 			}
 
 			for ( int i=0; i<n; ++i ) {
-				spawnGoal();
+				spawnGoal( getRandomPointInWorldBoundsPoly() );
 			}
 
 			mGoalBallSpawnWaitTicks = -1;
@@ -593,15 +593,31 @@ void RaceWorld::tickGoalSpawn()
 	}
 }
 
-Ball& RaceWorld::spawnGoal()
+void RaceWorld::spawnGoal( vec2 loc )
 {
+	// pfx
+	const float pr = mTuning.mGoalBallRadius * 2.f; 
+	
+	for( int i=0; i<10; ++i )
+	{
+		vec2  v = randVec2();
+		
+		makePfx(loc + pr * v,
+				mTuning.mGoalBallRadius * randFloat(.5f,.8f),
+				lerp( mTuning.mGoalBallColor, ColorA(1,1,1,1), randFloat() ),
+				-v * .1f,
+				true );
+	}	
+
+	
+	//
 	Ball b;
 
 	b.mColor  = mTuning.mGoalBallColor;
 	b.mRibbonColor = mTuning.mGoalBallColor;
 	b.mRadius = mTuning.mGoalBallRadius;
 	b.mHistory.set_capacity( getRibbonMaxLength() );
-	b.setLoc( getRandomPointInWorldBoundsPoly() );
+	b.setLoc( loc );
 	b.setVel( randVec2() * randFloat() * mTuning.mGoalBallSpawnMaxVel );
 
 	auto ballData = make_shared<BallData>();
@@ -610,8 +626,6 @@ Ball& RaceWorld::spawnGoal()
 	getBalls().push_back(b);
 
 	mGoalCount++;
-
-	return getBalls().back();
 }
 
 void RaceWorld::handleCollisions()
@@ -758,8 +772,8 @@ void RaceWorld::handleCollisions()
 						for( int i=0; i<10; ++i )
 						{
 							makePfx(g.mLoc,
-									g.mRadius * randFloat(.8f,1.2f),
-									g.mColor,
+									g.mRadius * randFloat(.5f,1.8f),
+									lerp( g.mColor, ColorA(1,1,1,1), randFloat() ),
 									randVec2() * randFloat(.2f,.5f),
 									true );
 						}	
@@ -792,8 +806,8 @@ void RaceWorld::handleCollisions()
 							{
 								makePfx(pb.mLoc,
 										mTuning.mPfxCollideDustRadius * randFloat(2.f,8.f),
-										lerp( pb.mColor, ColorA(1,1,1,1), randFloat() ),
-										randVec2() * randFloat(.3f,1.f),
+										lerp( pb.mColor, ColorA(0,0,0,1), randFloat()*randFloat() ),
+										randVec2() * randFloat(.3f,2.f),
 										true );
 							}	
 
@@ -812,8 +826,7 @@ void RaceWorld::handleCollisions()
 
 								for( int i=0; i<spawnGoals; ++i )
 								{
-									Ball& b  = spawnGoal();
-									b.setLoc( pb.mLoc + randVec2() * pb.mRadius );
+									spawnGoal( pb.mLoc + randVec2() * pb.mRadius );
 								}
 							}
 						}
