@@ -767,6 +767,7 @@ void RaceWorld::handleCollisions()
 						// score it
 						if (p) p->mScore++;
 						FX("get goal");
+						mPd->sendFloat("ship-goal", p->mScore);
 						
 						// pfx it
 						for( int i=0; i<10; ++i )
