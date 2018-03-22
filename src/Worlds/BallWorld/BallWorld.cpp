@@ -573,6 +573,8 @@ void BallWorld::resolveBallContourCollisions()
 {
 	for( auto &b : mBalls )
 	{
+		if (!b.mCollisionMask) continue;
+		
 		vec2 oldVel = b.getVel() ;
 		vec2 oldLoc = b.mLoc ;
 		
