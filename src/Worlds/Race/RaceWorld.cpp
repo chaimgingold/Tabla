@@ -718,6 +718,7 @@ void RaceWorld::handleCollisions()
 						// score it
 						if (p) p->mScore++;
 						FX("get goal");
+						mPd->sendFloat("ship-goal", p->mScore);
 					}
 					break;
 
