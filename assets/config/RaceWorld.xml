@@ -60,6 +60,8 @@
 		
 		<Pfx>
 			<FadeStep>.05</FadeStep>
+			<CollideDustColor>FFFFFF</CollideDustColor>
+			<CollideDustRadius>.5</CollideDustRadius>
 		</Pfx>
 		
 	</Tuning>

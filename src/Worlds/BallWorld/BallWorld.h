@@ -138,16 +138,24 @@ public:
 	
 	struct BallContourCollision {
 	public:
-		BallContourCollision( int a=-1, int b=-1 ) { mBallIndex=a; mContourIndex=b; }
+		BallContourCollision( int a, int b, vec2 pt )
+			: mBallIndex(a)
+			, mContourIndex(b)
+			, mPt(pt) {}
+
+		BallContourCollision() : BallContourCollision(-1,-1,vec2(0.f)){} 
+
 		int mBallIndex;
 		int mContourIndex;
+		vec2 mPt;
 	};
 	typedef vector<BallContourCollision> BallContourCollisionVec;
 
 	struct BallWorldCollision {
 	public:
-		BallWorldCollision( int a=-1 ) { mBallIndex=a; }
+		BallWorldCollision( int a=-1, vec2 pt=vec2(0.f) ) { mBallIndex=a; mPt=pt; }
 		int mBallIndex;
+		vec2 mPt;
 	};
 	typedef vector<BallWorldCollision> BallWorldCollisionVec;
 
@@ -174,8 +182,8 @@ protected:
 	int getBallIndex( const Ball& b ) const;
 	
 	virtual void onBallBallCollide			( const Ball&, const Ball& );
-	virtual void onBallContourCollide		( const Ball&, const Contour& );
-	virtual void onBallWorldBoundaryCollide	( const Ball& );
+	virtual void onBallContourCollide		( const Ball&, const Contour&, vec2 );
+	virtual void onBallWorldBoundaryCollide	( const Ball&, vec2 );
 	// these functions record collisions. if you override, then make sure you call BallWorld::
 	// if you still want them returned in the collision lists.
 	

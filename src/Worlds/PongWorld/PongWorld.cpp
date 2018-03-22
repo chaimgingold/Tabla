@@ -179,18 +179,17 @@ void PongWorld::stateDidChange( GameState old, GameState newState )
 
 void PongWorld::onBallBallCollide   ( const Ball&, const Ball& )
 {
-
 	if (0) cout << "ball ball collide" << endl;
 }
 
-void PongWorld::onBallContourCollide( const Ball&, const Contour& )
+void PongWorld::onBallContourCollide( const Ball&, const Contour&, vec2 pt )
 {
 	mPd->sendBang("hit-object");
 
 	if (0) cout << "ball contour collide" << endl;
 }
 
-void PongWorld::onBallWorldBoundaryCollide	( const Ball& b )
+void PongWorld::onBallWorldBoundaryCollide	( const Ball& b, vec2 pt )
 {
 	mPd->sendBang("hit-wall");
 

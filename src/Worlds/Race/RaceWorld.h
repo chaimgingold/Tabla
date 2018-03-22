@@ -75,6 +75,8 @@ private:
 		
 		float	mPlayerCollideFrictionCoeff	= .1f;
 		
+		float	mPfxCollideDustRadius		= .5f;
+		ColorA	mPfxCollideDustColor;
 		float	mPfxFadeStep				= .1f;
 		
 		class Controls

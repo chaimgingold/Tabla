@@ -28,8 +28,8 @@ public:
 
 protected:
 	virtual void onBallBallCollide   ( const Ball&, const Ball& ) override;
-	virtual void onBallContourCollide( const Ball&, const Contour& ) override;
-	virtual void onBallWorldBoundaryCollide	( const Ball& ) override;
+	virtual void onBallContourCollide( const Ball&, const Contour&, vec2 pt ) override;
+	virtual void onBallWorldBoundaryCollide	( const Ball&, vec2 pt ) override;
 
 private:
 	FileWatch mFileWatch;

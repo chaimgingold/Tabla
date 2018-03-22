@@ -456,14 +456,16 @@ void BallWorld::onBallBallCollide			( const Ball& a, const Ball& b )
 	mBallBallCollisions.push_back( BallBallCollision(getBallIndex(a),getBallIndex(b)));
 }
 
-void BallWorld::onBallContourCollide		( const Ball& a, const Contour& b )
+void BallWorld::onBallContourCollide		( const Ball& a, const Contour& b, vec2 pt )
 {
-	mBallContourCollisions.push_back( BallContourCollision(getBallIndex(a),mContours.getIndex(b)));
+	mBallContourCollisions.push_back(
+		BallContourCollision( getBallIndex(a), mContours.getIndex(b), pt )
+		);
 }
 
-void BallWorld::onBallWorldBoundaryCollide	( const Ball& a )
+void BallWorld::onBallWorldBoundaryCollide	( const Ball& a, vec2 pt )
 {
-	mBallWorldCollisions.push_back( BallWorldCollision(getBallIndex(a)));
+	mBallWorldCollisions.push_back( BallWorldCollision(getBallIndex(a),pt) );
 }
 
 void BallWorld::scaleBallVelsForIntegrationSteps( int oldSteps, int newSteps )
@@ -802,7 +804,7 @@ vec2 BallWorld::unlapEdge( vec2 p, float r, const Contour& poly, const Ball* b )
 
 	if ( dist < r )
 	{
-		if (b) onBallContourCollide( *b, poly );
+		if (b) onBallContourCollide( *b, poly, x );
 		
 		return glm::normalize( p - x ) * r + x ;
 	}
@@ -820,7 +822,7 @@ vec2 BallWorld::unlapHoles( vec2 p, float r, ContourKind kind, const Ball* b )
 	if ( nearestHole && dist < r && !nearestHole->mPolyLine.contains(p) )
 		// ensure we aren't actually in this hole or that would be bad...
 	{
-		if (b) onBallContourCollide( *b, *nearestHole );
+		if (b) onBallContourCollide( *b, *nearestHole, x );
 
 		return glm::normalize( p - x ) * r + x ;
 	}
@@ -854,7 +856,7 @@ vec2 BallWorld::resolveCollisionWithContours ( vec2 point, float radius, const B
 			// push us out of this hole
 			vec2 x = closestPointOnPoly(point, in->mPolyLine) ;
 
-			if (b) onBallContourCollide( *b, *in );
+			if (b) onBallContourCollide( *b, *in, x );
 			
 			return glm::normalize( x - point ) * radius + x ;
 		}
@@ -873,7 +875,7 @@ vec2 BallWorld::resolveCollisionWithContours ( vec2 point, float radius, const B
 		
 		if ( nearest )
 		{
-			if (b) onBallContourCollide( *b, *nearest );
+			if (b) onBallContourCollide( *b, *nearest, x );
 			
 			return glm::normalize( x - point ) * radius + x ;
 		}
@@ -921,7 +923,7 @@ vec2 BallWorld::resolveCollisionWithInverseContours ( vec2 point, float radius, 
 			point = glm::normalize( x1 - point ) * radius + x1 ;
 			
 			// note
-			if (b) onBallContourCollide(*b, pushOut ? *in : *interiorHole );
+			if (b) onBallContourCollide(*b, pushOut ? *in : *interiorHole, x1 );
 		}
 		else
 		{
@@ -951,7 +953,7 @@ vec2 BallWorld::resolveCollisionWithInverseContours ( vec2 point, float radius, 
 		{
 			point = glm::normalize( point - x ) * radius + x ;
 			
-			if (b) onBallContourCollide(*b,*nearest);
+			if (b) onBallContourCollide(*b,*nearest,x);
 		}
 		
 		// make sure we are inside the world (not floating away)
@@ -965,14 +967,14 @@ vec2 BallWorld::resolveCollisionWithInverseContours ( vec2 point, float radius, 
 				{
 					point = glm::normalize( point - x1 ) * radius + x1 ;
 				
-					if (b) onBallWorldBoundaryCollide(*b);
+					if (b) onBallWorldBoundaryCollide(*b,x1);
 				}
 			}
 			else
 			{
 				point = glm::normalize( x1 - point ) * radius + x1 ;
 				
-				if (b) onBallWorldBoundaryCollide(*b);
+				if (b) onBallWorldBoundaryCollide(*b,point);
 			}
 		}
 	}
@@ -1015,7 +1017,7 @@ void BallWorld::drawMouseDebugInfo( vec2 mouseInWorld )
 }
 
 // Synthesis
-void onBallBallCollide			( const Ball&, const Ball& )
+/*void onBallBallCollide			( const Ball&, const Ball& )
 {
 
 }
@@ -1026,7 +1028,7 @@ void onBallContourCollide		( const Ball&, const Contour& )
 void onBallWorldBoundaryCollide	( const Ball& )
 {
 
-}
+}*/
 
 
 void BallWorld::setupSynthesis()

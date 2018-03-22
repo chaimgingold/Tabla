@@ -85,6 +85,9 @@ void RaceWorld::setParams( XmlTree xml )
 		getXml(t,"PlayerDieSpawnGoalToScoreFrac", mTuning.mPlayerDieSpawnGoalToScoreFrac );
 		getXml(t,"PlayerScoreNotchRadius",	mTuning.mPlayerScoreNotchRadius );
 
+		getXml(t,"Pfx/CollideDustRadius", mTuning.mPfxCollideDustRadius );
+		getXml(t,"Pfx/CollideDustColor",  mTuning.mPfxCollideDustColor  );
+
 		getXml(t,"Pfx/FadeStep", mTuning.mPfxFadeStep );
 	}
 	
@@ -205,10 +208,6 @@ void RaceWorld::setupPlayer( Gamepad_device* gamepad )
 		{
 			FX("player spawn");
 
-			vec2 loc = getRandomPointInWorldBoundsPoly();
-			
-			makePfx( loc, 1.f, ColorA(0,1,1,1), vec2(0.f), true );
-			
 			Ball ball;
 			PlayerColor pc = mPlayerColors[ player->mColorScheme ];
 
@@ -216,7 +215,7 @@ void RaceWorld::setupPlayer( Gamepad_device* gamepad )
 			ball.setMass( M_PI * powf(ball.mRadius,3.f) ) ;
 			ball.mHistory.set_capacity(getRibbonMaxLength());
 
-			ball.setLoc( loc );
+			ball.setLoc( getRandomPointInWorldBoundsPoly() );
 			ball.setVel( vec2(0,0) );
 			ball.mAccel = vec2(0,0);
 			ball.mColor = pc.mShip;
@@ -280,7 +279,8 @@ void RaceWorld::makeBullet( Player& p )
 	FX("shoot");
 	if (p.mBallIndex == -1) return;
 
-	const Ball& pb = getBalls()[p.mBallIndex];
+	vec2 playerLoc     = getBalls()[p.mBallIndex].mLoc;
+	float playerRadius = getBalls()[p.mBallIndex].mRadius;
 	PlayerColor pc = mPlayerColors[ p.mColorScheme ];
 
 	Ball b;
@@ -293,7 +293,7 @@ void RaceWorld::makeBullet( Player& p )
 
 	vec2 v = p.mFacing;
 
-	b.setLoc( pb.mLoc + v * (pb.mRadius + b.mRadius + mTuning.mShotDistance) );
+	b.setLoc( playerLoc + v * (playerRadius + b.mRadius + mTuning.mShotDistance) );
 	b.setVel( vec2(0.f) );
 	b.mAccel = v * mTuning.mShotVel;
 
@@ -377,8 +377,6 @@ void RaceWorld::tickPlayer( Player& p )
 	else
 	{
 		// alive
-		Ball &ball = getBalls()[p.mBallIndex];
-
 		// get gamepad
 		const GamepadManager::Device* gamepad = getGamepadManager().getDeviceById(p.mGamepad);
 
@@ -386,7 +384,7 @@ void RaceWorld::tickPlayer( Player& p )
 		if ( button(gamepad,mTuning.mControls.mAccel) )
 		{
 			FX("accel",false);
-			ball.mAccel += p.mFacing * mTuning.mPlayerAccelSpeedScale;
+			getBalls()[p.mBallIndex].mAccel += p.mFacing * mTuning.mPlayerAccelSpeedScale;
 			// ideally we let the engine rev up and down so this happens smoothly.. (and feels a bit sloppy)
 		}
 
@@ -406,12 +404,14 @@ void RaceWorld::tickPlayer( Player& p )
 
 		// "friction"
 		{
+			auto &ball = getBalls()[p.mBallIndex];
+
 			float v = length( ball.getVel() );
 
 			float f = mTuning.mPlayerFriction;
 			f += length(ball.mSquash) * mTuning.mPlayerCollideFrictionCoeff;
-			f  = max(0.f,f); // DON'T ASK. Kludge for f becoming -inf and blowing everything up.
-
+			f = max(0.f,f); // DON'T ASK. workaround for a buf causing f=-inf
+			
 			if ( v > 0.f )
 			{
 				ball.mAccel += -min(v,f) * normalize(ball.getVel());
@@ -619,29 +619,62 @@ void RaceWorld::handleCollisions()
 		auto bwc = getBallWorldCollisions();
 		auto bcc = getBallContourCollisions();
 		
-		auto test = [this,&balls,&removeBall]( int i )
+		auto test = [this,&balls,&removeBall]( int i, vec2 pt )
 		{
 			auto bd = getBallData( balls[i] );
-
+			if (!bd) return;
+			
 			// shot hit wall/world
-			if (bd && bd->mType == BallData::Type::Shot )
+			switch( bd->mType )
 			{
-				// DINK!
-				if ((1)) {
-					removeBall.insert(i);
-				} else {
-					Ball& shot = getBalls()[i];
-					shot.mPausePhysics  = 1;
-					shot.mCollisionMask = 0;
-					bd->mFadeOut = true;
-				}
+				case BallData::Type::Shot:
+				{
+					// DINK!
+					if ((1)) {
+						removeBall.insert(i);
+						
+						makePfx(balls[i].mLoc,
+								balls[i].mRadius * 2.f,
+								lerp( balls[i].mColor, ColorA(1,1,1,1), .5f ),
+								balls[i].getVel() * .01f + randVec2() * .01f,
+								false );
+								
+						for( int i=0; i<10; ++i )
+						{
+							makePfx(pt,
+									mTuning.mPfxCollideDustRadius,
+									mTuning.mPfxCollideDustColor,
+									balls[i].getVel() * .01f + randVec2() * .1f,
+									false );
+						}
+						
+					} else {
+						Ball& shot = getBalls()[i];
+						shot.mPausePhysics  = 1;
+						shot.mCollisionMask = 0;
+						bd->mFadeOut = true;
+					}
 
-				FX("shot hit world/wall");
+					FX("shot hit world/wall");
+				}
+				break;
+				
+				case BallData::Type::Player:
+				{
+					makePfx(pt,
+							mTuning.mPfxCollideDustRadius,
+							mTuning.mPfxCollideDustColor,
+							balls[i].getVel() * .01f + randVec2() * .1f,
+							false );
+				}
+				break;
+				
+				default:break;
 			}
 		};
 
-		for( auto c : bcc ) test(c.mBallIndex);
-		for( auto c : bwc ) test(c.mBallIndex);
+		for( auto c : bcc ) test(c.mBallIndex,c.mPt);
+		for( auto c : bwc ) test(c.mBallIndex,c.mPt);
 	}
 
 	// ball-ball collisions
@@ -667,6 +700,7 @@ void RaceWorld::handleCollisions()
 
 			// Player hits X
 			// 0 isa player
+			// 1 isa X
 			if ( d[0]->mType == BallData::Type::Player )
 			{
 				Player* p = getPlayerByGamepad( d[0]->mGamepad );
@@ -691,9 +725,8 @@ void RaceWorld::handleCollisions()
 						if ( d[0]->mGamepad != d[1]->mGamepad )
 						{
 							// decay shot
-							Ball& shot = getBalls()[c.mBallIndex[1]];
-							shot.mPausePhysics  = 1;
-							shot.mCollisionMask = 0;
+							getBalls()[c.mBallIndex[1]].mPausePhysics  = 1;
+							getBalls()[c.mBallIndex[1]].mCollisionMask = 0;
 							d[1]->mFadeOut = true;
 							
 							// kaboom
@@ -705,8 +738,7 @@ void RaceWorld::handleCollisions()
 							// update player
 							if (p)
 							{
-								const Ball& pb = getBalls()[p->mBallIndex];
-
+								Ball pb = getBalls()[p->mBallIndex];
 								p->mBallIndex = -1;
 								p->mSpawnWait = mTuning.mPlayerRespawnWaitTicks;
 
@@ -717,7 +749,7 @@ void RaceWorld::handleCollisions()
 
 								for( int i=0; i<spawnGoals; ++i )
 								{
-									Ball& b = spawnGoal();
+									Ball& b  = spawnGoal();
 									b.setLoc( pb.mLoc + randVec2() * pb.mRadius );
 								}
 							}
