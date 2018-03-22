@@ -1,4 +1,4 @@
-#N canvas 53 214 1250 674 10;
+#N canvas 200 210 1250 674 10;
 #X obj 371 511 s~ \$0freq;
 #X obj 371 478 mtof~;
 #X obj 27 491 *~ 0.1;
@@ -20,13 +20,20 @@
 /0/d 594.937 \; \$1-SSSAD /0/r 5 \; \$1-SSSAD /3/e 0 \; \$1-SSSAD /3/d
 759.494 \; \$1-SSSAD /3/a 63.2911 \; \$1-SSSAD /3/r 0 \; \$1-SSSAD
 /2/e 0 \; \$1-SSSAD /2/d 658.228 \; \$1-SSSAD /2/a 392.405 \; \$1-SSSAD
-/2/m 0 \; \$1-SSSAD /2/r 0 \; \$1-SSSAD_ADMIN set \;;
+/2/m 0 \; \$1-SSSAD /2/r 4 \; \$1-SSSAD_ADMIN set \;;
 #X obj 27 152 fm-op-2 /1 \$0;
 #X obj 913 49 loadbang;
 #X obj 913 78 \$0;
 #X obj 371 415 + 0;
 #X obj 28 548 throw~ explode;
 #X obj 370 219 + 60;
+#X msg 801 375 \; \$1-SSSAD /1/e 0 \; \$1-SSSAD /1/d 329.114 \; \$1-SSSAD
+/1/a 113.924 \; \$1-SSSAD /1/m 3037.97 \; \$1-SSSAD /1/r 1 \; \$1-SSSAD
+/0/d 594.937 \; \$1-SSSAD /0/r 5 \; \$1-SSSAD /3/e 0 \; \$1-SSSAD /3/d
+759.494 \; \$1-SSSAD /3/a 63.2911 \; \$1-SSSAD /3/r 0 \; \$1-SSSAD
+/2/e 0 \; \$1-SSSAD /2/d 658.228 \; \$1-SSSAD /2/a 392.405 \; \$1-SSSAD
+/2/m 0 \; \$1-SSSAD /2/r 0 \; \$1-SSSAD_ADMIN set \;;
+#X text 952 451 long tail;
 #X connect 1 0 0 0;
 #X connect 2 0 21 0;
 #X connect 4 0 2 0;
