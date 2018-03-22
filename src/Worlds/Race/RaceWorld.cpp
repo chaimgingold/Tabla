@@ -921,7 +921,6 @@ void RaceWorld::updateBallData()
 		auto bd = getBallData(b);
 		if (!bd) continue;
 
-		cout << mTuning.mAttractAnimLength << endl;
 		bd->mAttractAnim += 1.f / (60.f * mTuning.mAttractAnimLength);
 	}
 }
