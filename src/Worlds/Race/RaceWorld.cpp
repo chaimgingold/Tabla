@@ -277,6 +277,9 @@ void RaceWorld::remapBallIndices()
 void RaceWorld::makeBullet( Player& p )
 {
 	FX("shoot");
+	// Trigger LASER SOUND
+	mPd->sendFloat("ship-laser", p.mColorScheme );
+
 	if (p.mBallIndex == -1) return;
 
 	vec2 playerLoc     = getBalls()[p.mBallIndex].mLoc;
@@ -409,12 +412,12 @@ void RaceWorld::tickPlayer( Player& p )
 			float v = length( ball.getVel() );
 
 			float f = mTuning.mPlayerFriction;
-			f += length(ball.mSquash) * mTuning.mPlayerCollideFrictionCoeff;
+			f += length(getBalls()[p.mBallIndex].mSquash) * mTuning.mPlayerCollideFrictionCoeff;
 			f = max(0.f,f); // DON'T ASK. workaround for a buf causing f=-inf
 			
 			if ( v > 0.f )
 			{
-				ball.mAccel += -min(v,f) * normalize(ball.getVel());
+				getBalls()[p.mBallIndex].mAccel += -min(v,f) * normalize(ball.getVel());
 			}
 			// TODO: do this in a more graceful way
 		}
