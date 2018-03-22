@@ -19,6 +19,7 @@
 #X msg 287 340 adddollsym 1-SSSAD_ADMIN \, add set;
 #X obj 289 109 t b a b;
 #X obj 310 230 route persist;
+#X obj 289 31 inlet;
 #X connect 0 0 8 0;
 #X connect 1 0 15 0;
 #X connect 2 0 9 0;
@@ -37,4 +38,5 @@
 #X connect 15 1 12 0;
 #X connect 15 2 3 0;
 #X connect 16 0 7 0;
+#X connect 17 0 1 0;
 #X coords 0 -1 1 1 85 60 1 100 100;

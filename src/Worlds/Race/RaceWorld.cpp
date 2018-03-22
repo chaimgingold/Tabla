@@ -207,6 +207,7 @@ void RaceWorld::setupPlayer( Gamepad_device* gamepad )
 		   )
 		{
 			FX("player spawn");
+			mPd->sendBang("ship-spawn");
 
 			Ball ball;
 			PlayerColor pc = mPlayerColors[ player->mColorScheme ];
@@ -574,6 +575,7 @@ void RaceWorld::tickGoalSpawn()
 		if ( mGoalBallSpawnWaitTicks==0 )
 		{
 			FX("goal spawn");
+			mPd->sendBang("goal-spawn");
 			// new goal!
 			int n = 1;
 
@@ -763,7 +765,7 @@ void RaceWorld::handleCollisions()
 									g.mColor,
 									randVec2() * randFloat(.2f,.5f),
 									true );
-						}	
+						}
 					}
 					break;
 
