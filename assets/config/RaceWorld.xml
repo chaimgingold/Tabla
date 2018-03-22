@@ -91,6 +91,32 @@
 			<Shot>B30C6F</Shot>
 			<ShotRibbon>FFCBEF</ShotRibbon>
 		</p>
+
+<!-- repeats for now -->
+		<p>
+			<Ship>D66	EC3</Ship>
+			<ShipRibbon>FFCCDD</ShipRibbon>
+			<Shot>FF00ED</Shot>
+			<ShotRibbon>FFE700</ShotRibbon>
+		</p>
+		<p>
+			<Ship>27BCDB</Ship>
+			<ShipRibbon>CCFFFF</ShipRibbon>
+			<Shot>0049FF</Shot>
+			<ShotRibbon>F8FF00</ShotRibbon>
+		</p>
+		<p>
+			<Ship>27DB4E</Ship>
+			<ShipRibbon>CCFFCD</ShipRibbon>
+			<Shot>0CB310</Shot>
+			<ShotRibbon>B9FF00</ShotRibbon>
+		</p>
+		<p>
+			<Ship>DB4027</Ship>
+			<ShipRibbon>FFAEAE</ShipRibbon>
+			<Shot>B30C6F</Shot>
+			<ShotRibbon>FFCBEF</ShotRibbon>
+		</p>
 	</PlayerColors>
 		
 	

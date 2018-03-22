@@ -522,6 +522,8 @@ void RaceWorld::updateSynthesis() {
 
 void RaceWorld::update()
 {
+	mFileWatch.update();
+
 	nanScan();
 
 	tickPfx();
@@ -627,7 +629,7 @@ void RaceWorld::handleCollisions()
 			auto bd = getBallData( balls[i] );
 			if (!bd) return;
 			
-			// shot hit wall/world
+			// hit wall/world
 			switch( bd->mType )
 			{
 				case BallData::Type::Shot:
@@ -646,9 +648,9 @@ void RaceWorld::handleCollisions()
 						{
 							makePfx(pt,
 									mTuning.mPfxCollideDustRadius,
-									mTuning.mPfxCollideDustColor,
-									balls[i].getVel() * .01f + randVec2() * .1f,
-									false );
+									lerp( mTuning.mPfxCollideDustColor, balls[i].mColor, randFloat() ),
+									balls[i].getVel() * .01f + randVec2() * .2f,
+									true );
 						}
 						
 					} else {
@@ -661,7 +663,7 @@ void RaceWorld::handleCollisions()
 					FX("shot hit world/wall");
 				}
 				break;
-				
+
 				case BallData::Type::Player:
 				{
 					makePfx(pt,
@@ -669,6 +671,19 @@ void RaceWorld::handleCollisions()
 							mTuning.mPfxCollideDustColor,
 							balls[i].getVel() * .01f + randVec2() * .1f,
 							false );
+				}
+				break;
+				
+				case BallData::Type::Goal:
+				{
+					for( int i=0; i<10; ++i )
+					{
+						makePfx(pt,
+								mTuning.mPfxCollideDustRadius,
+								mTuning.mPfxCollideDustColor,
+								balls[i].getVel() * .01f + randVec2() * .3f,
+								false );
+					}					
 				}
 				break;
 				
@@ -701,6 +716,25 @@ void RaceWorld::handleCollisions()
 			
 			assert( c.mBallIndex[0] != c.mBallIndex[1] );
 
+			
+			{
+				vec2 pt = lerp(
+					getBalls()[ c.mBallIndex[0] ].mLoc,
+					getBalls()[ c.mBallIndex[1] ].mLoc,
+					.5f ); // TODO: have ballworld tell us!
+					
+				for( int i=0; i<10; ++i )
+				{
+					makePfx(pt,
+							mTuning.mPfxCollideDustRadius,
+							mTuning.mPfxCollideDustColor,
+							  balls[c.mBallIndex[0]].getVel() * .1f
+							+ balls[c.mBallIndex[1]].getVel() * .1f
+							+ randVec2() * .3f,
+							false );
+				}					
+			}
+			
 			// Player hits X
 			// 0 isa player
 			// 1 isa X
@@ -713,11 +747,22 @@ void RaceWorld::handleCollisions()
 					// goal
 					case BallData::Type::Goal:
 					{
+						Ball g = getBalls()[c.mBallIndex[1]];
 						removeBall.insert(c.mBallIndex[1]);
 
 						// score it
 						if (p) p->mScore++;
 						FX("get goal");
+						
+						// pfx it
+						for( int i=0; i<10; ++i )
+						{
+							makePfx(g.mLoc,
+									g.mRadius * randFloat(.8f,1.2f),
+									g.mColor,
+									randVec2() * randFloat(.2f,.5f),
+									true );
+						}	
 					}
 					break;
 
@@ -735,9 +780,23 @@ void RaceWorld::handleCollisions()
 							// kaboom
 							//removeBall.insert(c.mBallIndex[1]); // shot
 							
+							// 
 							removeBall.insert(c.mBallIndex[0]); // player
 							FX("player die");
 
+							// pfx
+							Ball pb = getBalls()[c.mBallIndex[0]];
+							
+							for( int i=0; i<10; ++i )
+							{
+								makePfx(pb.mLoc,
+										mTuning.mPfxCollideDustRadius * randFloat(2.f,8.f),
+										lerp( pb.mColor, ColorA(1,1,1,1), randFloat() ),
+										randVec2() * randFloat(.3f,1.f),
+										true );
+							}	
+
+							
 							// update player
 							if (p)
 							{
@@ -801,7 +860,7 @@ RaceWorld::getPlayerByGamepad( GamepadManager::DeviceId id )
 
 void RaceWorld::draw( DrawType drawType )
 {
-	mFileWatch.update();
+//	gl::ScopedBlend blendScp( GL_SRC_ALPHA, GL_ONE );
 
 	//
 	// Draw world

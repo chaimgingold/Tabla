@@ -29,7 +29,7 @@ class Ball {
 	
 public:
 	Ball() {
-		mCollideWithContours	= 1;
+		mCollideWithContours	= 1; // in white/black?
 		mPausePhysics			= 0;
 		mCapVelocity			= 1;
 	}
@@ -61,7 +61,7 @@ public:
 	unsigned int mCollideWithContours : 1; //=1 by default; if 0, collide with inverse contours
 	unsigned int mPausePhysics		  : 1; //=0 by default
 	unsigned int mCapVelocity		  : 1; //=1 by default
-	uint32_t	 mCollisionMask				= 1; // what to collide against?
+	uint32_t	 mCollisionMask				= 1; // what to collide against? (0 means nothing, not even the world/contours)
 	
 	// history (for ribbons)
 	boost::circular_buffer<vec2> mHistory;
