@@ -1,4 +1,4 @@
-#N canvas -227 53 1246 753 10;
+#N canvas 0 53 1246 753 10;
 #X msg 272 86 1000;
 #X obj 162 90 + 40;
 #X obj 252 8 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
@@ -130,7 +130,7 @@
 #X text 815 39 each ship has different pitch range;
 #X obj 661 161 *;
 #X obj 661 183 +;
-#X obj 266 715 throw~ engine-voice;
+#X obj 266 715 throw~ engine;
 #X connect 0 0 3 0;
 #X connect 1 0 4 0;
 #X connect 2 0 97 0;

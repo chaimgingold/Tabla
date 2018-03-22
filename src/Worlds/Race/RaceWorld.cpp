@@ -736,6 +736,7 @@ void RaceWorld::handleCollisions()
 							//removeBall.insert(c.mBallIndex[1]); // shot
 							
 							removeBall.insert(c.mBallIndex[0]); // player
+							mPd->sendBang("ship-explode");
 							FX("player die");
 
 							// update player
