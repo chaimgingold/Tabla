@@ -84,8 +84,10 @@ private:
 		class Controls
 		{
 		public:
-			vector<unsigned int> mFire  = {4,5}; // DS4 L,R
-			vector<unsigned int> mAccel = {0,1,2}; // DS4 Square, X, O
+//			vector<unsigned int> mFire  = {4,5}; // DS4 L,R
+//			vector<unsigned int> mAccel = {0,1,2}; // DS4 Square, X, O
+			vector<unsigned int> mFire  = {13,14}; // DS4 L,R
+			vector<unsigned int> mAccel = {16,17,18,19}; // Xbox 360
 		};
 		Controls mControls;
 	}

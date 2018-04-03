@@ -3,7 +3,7 @@
 	<BallDefaultRadius>			2 </BallDefaultRadius>
 	<BallDefaultMaxRadius>		2 </BallDefaultMaxRadius>
 	<BallMaxVel>				.5 </BallMaxVel>
-	<BallContourImpactNormalVelImpulse>.01</BallContourImpactNormalVelImpulse>
+	<BallContourImpactNormalVelImpulse>.0</BallContourImpactNormalVelImpulse>
 	<BallDefaultColor>			00FFFF </BallDefaultColor>
 	<BallDefaultRibbonColor>			CCFFFF </BallDefaultRibbonColor>
 	
@@ -20,8 +20,8 @@
 	<!-- cm -->
 	<Vision>
 		<Contours>
-			<ContourMinRadius>			.25	</ContourMinRadius>
-			<ContourMinArea>			.25	</ContourMinArea>
+			<ContourMinRadius>			.5	</ContourMinRadius>
+			<ContourMinArea>			.5	</ContourMinArea>
 			<ContourDPEpsilon>			.5	</ContourDPEpsilon>
 			<ContourMinWidth>			.25	</ContourMinWidth>
 		</Contours>
@@ -53,7 +53,7 @@
 		<PlayerRadius>2</PlayerRadius>
 		<PlayerTurnSpeedScale>.1</PlayerTurnSpeedScale>
 		<PlayerAccelSpeedScale>.05</PlayerAccelSpeedScale>
-		<PlayerFriction>.01</PlayerFriction>
+		<PlayerFriction>.005</PlayerFriction>
 		<PlayerCollideFrictionCoeff>.1</PlayerCollideFrictionCoeff>
 		<PlayerFireIntervalTicks>30</PlayerFireIntervalTicks>
 		<PlayerRespawnWaitTicks>120</PlayerRespawnWaitTicks>
