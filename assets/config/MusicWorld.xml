@@ -101,7 +101,7 @@
 	
 	<!-- Graphics/UI Layout -->
 	<Stamps>
-		<EnableTokens>1</EnableTokens>
+		<EnableTokens>0</EnableTokens>
 		<IconWidth>5</IconWidth>
 		<PaletteGutter>1</PaletteGutter>
 		<DoCircleLayout>0</DoCircleLayout>

@@ -36,7 +36,7 @@
 	
 	
 	<DefaultTimeVec>-1 0</DefaultTimeVec>
-	<WorldUnitsToSeconds>85</WorldUnitsToSeconds>
+	<WorldUnitsToSeconds>45</WorldUnitsToSeconds>
 	<MaxFrameDist>20</MaxFrameDist>
 	<MaxScreenToFrameDist>50</MaxScreenToFrameDist>
 	<DebugDrawTopology>0</DebugDrawTopology>
